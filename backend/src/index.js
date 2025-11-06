@@ -4,6 +4,8 @@ const helmet = require('helmet');
 const morgan = require('morgan');
 require('dotenv').config();
 
+const authRoutes = require('./routes/auth');
+
 const app = express();
 
 // ============================================
@@ -58,6 +60,9 @@ app.get('/api/version', (req, res) => {
     environment: process.env.NODE_ENV,
   });
 });
+
+// Authentication routes
+app.use('/api/auth', authRoutes);
 
 // 404 handler
 app.use((req, res) => {
