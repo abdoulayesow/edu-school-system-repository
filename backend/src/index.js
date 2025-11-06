@@ -5,6 +5,9 @@ const morgan = require('morgan');
 require('dotenv').config();
 
 const authRoutes = require('./routes/auth');
+const schoolRoutes = require('./routes/schools');
+const userRoutes = require('./routes/users');
+const studentRoutes = require('./routes/students');
 
 const app = express();
 
@@ -61,8 +64,11 @@ app.get('/api/version', (req, res) => {
   });
 });
 
-// Authentication routes
+// API Routes
 app.use('/api/auth', authRoutes);
+app.use('/api/schools', schoolRoutes);
+app.use('/api/users', userRoutes);
+app.use('/api/students', studentRoutes);
 
 // 404 handler
 app.use((req, res) => {
