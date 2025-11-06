@@ -1,9 +1,56 @@
+import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import MainLayout from '../components/MainLayout';
+import { schoolAPI, studentAPI, classAPI, userAPI } from '../services/api';
+
+interface DashboardStats {
+  schools: number;
+  students: number;
+  classes: number;
+  teachers: number;
+}
 
 const DashboardPage: React.FC = () => {
   const { user } = useAuth();
+  const [stats, setStats] = useState<DashboardStats>({ schools: 0, students: 0, classes: 0, teachers: 0 });
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    if (user?.schoolId) {
+      fetchDashboardStats();
+    }
+  }, [user?.schoolId]);
+
+  const fetchDashboardStats = async () => {
+    try {
+      setLoading(true);
+      if (!user?.schoolId) {
+        return;
+      }
+
+      const [schoolsRes, studentsRes, classesRes, usersRes] = await Promise.all([
+        schoolAPI.list(1, 100),
+        studentAPI.list(user.schoolId, 1),
+        classAPI.list(user.schoolId, 1),
+        userAPI.list(user.schoolId, 1),
+      ]);
+
+      const teachers = usersRes.data.data?.filter((u: any) => u.role === 'teacher' || u.role === 'Teacher').length || 0;
+
+      setStats({
+        schools: schoolsRes.data.data?.length || 0,
+        students: studentsRes.data.data?.length || 0,
+        classes: classesRes.data.data?.length || 0,
+        teachers: teachers,
+      });
+    } catch (error) {
+      // Silently fail and show 0 values
+      console.error('Failed to fetch dashboard stats:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <MainLayout>
@@ -61,12 +108,16 @@ const DashboardPage: React.FC = () => {
       {/* Quick Stats */}
       <div className="mt-12 bg-white rounded-lg shadow p-6">
         <h3 className="text-xl font-bold text-gray-900 mb-4">Quick Stats</h3>
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          <StatBox label="Schools" value="5" />
-          <StatBox label="Students" value="250" />
-          <StatBox label="Classes" value="15" />
-          <StatBox label="Teachers" value="30" />
-        </div>
+        {loading ? (
+          <p className="text-gray-600">Loading stats...</p>
+        ) : (
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <StatBox label="Schools" value={stats.schools.toString()} />
+            <StatBox label="Students" value={stats.students.toString()} />
+            <StatBox label="Classes" value={stats.classes.toString()} />
+            <StatBox label="Teachers" value={stats.teachers.toString()} />
+          </div>
+        )}
       </div>
     </MainLayout>
   );

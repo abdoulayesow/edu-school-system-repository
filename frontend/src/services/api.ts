@@ -91,4 +91,23 @@ export const invoiceAPI = {
     api.get('/invoices/reports/summary', { params: { schoolId } }),
 };
 
+export const subjectAPI = {
+  list: (schoolId: string, page = 1) =>
+    api.get('/subjects', { params: { schoolId, page } }),
+  get: (id: string) => api.get(`/subjects/${id}`),
+  create: (data: any) => api.post('/subjects', data),
+  update: (id: string, data: any) => api.put(`/subjects/${id}`, data),
+  delete: (id: string) => api.delete(`/subjects/${id}`),
+};
+
+export const timetableAPI = {
+  list: (classId?: string, page = 1) =>
+    api.get('/timetable', { params: { classId, page } }),
+  getByClass: (classId: string) =>
+    api.get('/timetable', { params: { classId } }),
+  create: (data: any) => api.post('/timetable', data),
+  update: (id: string, data: any) => api.put(`/timetable/${id}`, data),
+  delete: (id: string) => api.delete(`/timetable/${id}`),
+};
+
 export default api;

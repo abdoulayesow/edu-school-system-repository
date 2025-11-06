@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import MainLayout from '../components/MainLayout';
 import { studentAPI } from '../services/api';
+import { useAuth } from '../context/AuthContext';
 
 interface Student {
   id: string;
@@ -11,18 +12,25 @@ interface Student {
 }
 
 const StudentsPage: React.FC = () => {
+  const { user } = useAuth();
   const [students, setStudents] = useState<Student[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
   useEffect(() => {
-    fetchStudents();
-  }, []);
+    if (user?.schoolId) {
+      fetchStudents();
+    }
+  }, [user?.schoolId]);
 
   const fetchStudents = async () => {
     try {
       setLoading(true);
-      const response = await studentAPI.list('school-id', 1);
+      if (!user?.schoolId) {
+        setError('School ID not available');
+        return;
+      }
+      const response = await studentAPI.list(user.schoolId, 1);
       setStudents(response.data.data || []);
     } catch (err: any) {
       setError(err.response?.data?.message || 'Failed to fetch students');

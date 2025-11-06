@@ -3,7 +3,11 @@
     "allow": [
       "Bash(npm run db:seed:*)",
       "Bash(curl:*)",
-      "Bash(psql:*)"
+      "Bash(psql:*)",
+      "Bash(npm run build:*)",
+      "Bash(npm install:*)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)"
     ],
     "deny": [],
     "ask": []
