@@ -39,7 +39,7 @@ async function seedDatabase() {
 
     const schoolId = uuidv4();
     await client.query(
-      'INSERT INTO schools (id, name, email, phone, country, city, subscription_plan) VALUES (?, ?, ?, ?, ?, ?, ?)',
+      'INSERT INTO schools (id, name, email, phone, country, city, subscription_plan) VALUES ($1, $2, $3, $4, $5, $6, $7)',
       [schoolId, 'Friasoft Test School', 'contact@friasoft-test.com', '+224 622 123 456', 'Guinea', 'Conakry', 'Premium']
     );
     console.log('  ✅ Created test school');
@@ -50,39 +50,43 @@ async function seedDatabase() {
     const accountantId = uuidv4();
 
     await client.query(
-      'INSERT INTO users (id, school_id, email, password_hash, first_name, last_name, role, is_verified) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
+      'INSERT INTO users (id, school_id, email, password_hash, first_name, last_name, role, is_verified) VALUES ($1, $2, $3, $4, $5, $6, $7, $8)',
       [adminId, schoolId, 'admin@friasoft-test.com', hashedPassword, 'Admin', 'User', 'admin', true]
     );
     console.log('  ✅ Created admin user (admin@friasoft-test.com / password123)');
 
     await client.query(
-      'INSERT INTO users (id, school_id, email, password_hash, first_name, last_name, role, is_verified) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
+      'INSERT INTO users (id, school_id, email, password_hash, first_name, last_name, role, is_verified) VALUES ($1, $2, $3, $4, $5, $6, $7, $8)',
       [teacherId, schoolId, 'teacher@friasoft-test.com', hashedPassword, 'John', 'Teacher', 'teacher', true]
     );
     console.log('  ✅ Created teacher user (teacher@friasoft-test.com / password123)');
 
     await client.query(
-      'INSERT INTO users (id, school_id, email, password_hash, first_name, last_name, role, is_verified) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
+      'INSERT INTO users (id, school_id, email, password_hash, first_name, last_name, role, is_verified) VALUES ($1, $2, $3, $4, $5, $6, $7, $8)',
       [accountantId, schoolId, 'accountant@friasoft-test.com', hashedPassword, 'Jane', 'Accountant', 'accountant', true]
     );
     console.log('  ✅ Created accountant user (accountant@friasoft-test.com / password123)');
 
     const classId = uuidv4();
     await client.query(
-      'INSERT INTO classes (id, school_id, name, grade_level, teacher_id, capacity) VALUES (?, ?, ?, ?, ?, ?)',
+      'INSERT INTO classes (id, school_id, name, grade_level, teacher_id, capacity) VALUES ($1, $2, $3, $4, $5, $6)',
       [classId, schoolId, 'Form 1A', 1, teacherId, 30]
     );
     console.log('  ✅ Created test class (Form 1A)');
 
     const subjectIds = [];
-    const subjects = ['Mathematics', 'English', 'Science', 'History'];
-    const codes = ['MATH', 'ENG', 'SCI', 'HIST'];
-    for (let i = 0; i < subjects.length; i++) {
+    const subjects = [
+      {name: 'Mathematics', code: 'MATH'},
+      {name: 'English', code: 'ENG'},
+      {name: 'Science', code: 'SCI'},
+      {name: 'History', code: 'HIST'}
+    ];
+    for (const subject of subjects) {
       const subjectId = uuidv4();
       subjectIds.push(subjectId);
       await client.query(
-        'INSERT INTO subjects (id, school_id, name, code) VALUES (?, ?, ?, ?)',
-        [subjectId, schoolId, subjects[i], codes[i]]
+        'INSERT INTO subjects (id, school_id, name, code) VALUES ($1, $2, $3, $4)',
+        [subjectId, schoolId, subject.name, subject.code]
       );
     }
     console.log(`  ✅ Created ${subjects.length} test subjects`);
@@ -97,7 +101,7 @@ async function seedDatabase() {
       const studentId = uuidv4();
       studentIds.push(studentId);
       await client.query(
-        'INSERT INTO students (id, school_id, first_name, last_name, email, gender, enrollment_date) VALUES (?, ?, ?, ?, ?, ?, ?)',
+        'INSERT INTO students (id, school_id, first_name, last_name, email, gender, enrollment_date) VALUES ($1, $2, $3, $4, $5, $6, $7)',
         [studentId, schoolId, student.firstName, student.lastName, student.email, student.gender, new Date().toISOString().split('T')[0]]
       );
     }
@@ -105,7 +109,7 @@ async function seedDatabase() {
 
     for (const studentId of studentIds) {
       await client.query(
-        'INSERT INTO class_students (id, class_id, student_id, enrollment_status) VALUES (?, ?, ?, ?)',
+        'INSERT INTO class_students (id, class_id, student_id, enrollment_status) VALUES ($1, $2, $3, $4)',
         [uuidv4(), classId, studentId, 'active']
       );
     }
@@ -118,7 +122,7 @@ async function seedDatabase() {
         const score = scores[i];
         const gradeLetter = getGradeLetter(score);
         await client.query(
-          'INSERT INTO grades (id, school_id, student_id, subject_id, class_id, teacher_id, score, grade_letter, term, academic_year) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
+          'INSERT INTO grades (id, school_id, student_id, subject_id, class_id, teacher_id, score, grade_letter, term, academic_year) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)',
           [uuidv4(), schoolId, studentId, subjectIds[i], classId, teacherId, score, gradeLetter, 'Term 1', '2024-2025']
         );
         gradeCount++;
@@ -130,7 +134,7 @@ async function seedDatabase() {
     for (const studentId of studentIds) {
       const invoiceNumber = 'INV-' + schoolId.substring(0, 8) + '-2024-' + (invoiceCount + 1);
       await client.query(
-        'INSERT INTO invoices (id, school_id, student_id, invoice_number, description, amount, due_date, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
+        'INSERT INTO invoices (id, school_id, student_id, invoice_number, description, amount, due_date, status) VALUES ($1, $2, $3, $4, $5, $6, $7, $8)',
         [uuidv4(), schoolId, studentId, invoiceNumber, 'School fees for Term 1', 500000, new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0], 'sent']
       );
       invoiceCount++;

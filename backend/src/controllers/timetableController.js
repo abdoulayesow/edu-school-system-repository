@@ -108,16 +108,16 @@ async function getClassTimetable(req, res) {
       dataParams.push(dayOfWeek);
     }
 
-    dataQuery += ' ORDER BY CASE timetable.day_of_week
-                            WHEN \'Monday\' THEN 1
-                            WHEN \'Tuesday\' THEN 2
-                            WHEN \'Wednesday\' THEN 3
-                            WHEN \'Thursday\' THEN 4
-                            WHEN \'Friday\' THEN 5
-                            WHEN \'Saturday\' THEN 6
-                            WHEN \'Sunday\' THEN 7
+    dataQuery += ` ORDER BY CASE timetable.day_of_week
+                            WHEN 'Monday' THEN 1
+                            WHEN 'Tuesday' THEN 2
+                            WHEN 'Wednesday' THEN 3
+                            WHEN 'Thursday' THEN 4
+                            WHEN 'Friday' THEN 5
+                            WHEN 'Saturday' THEN 6
+                            WHEN 'Sunday' THEN 7
                           END, timetable.start_time
-                  LIMIT $' + (dataParams.length + 1) + ' OFFSET $' + (dataParams.length + 2);
+                  LIMIT $${dataParams.length + 1} OFFSET $${dataParams.length + 2}`;
     dataParams.push(pageSize, offset);
 
     const result = await client.query(dataQuery, dataParams);
