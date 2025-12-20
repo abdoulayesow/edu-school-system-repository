@@ -4,6 +4,7 @@ import { Inter } from "next/font/google"
 import { Analytics } from "@vercel/analytics/next"
 import "./globals.css"
 import { Navigation } from "@/components/navigation"
+import { I18nProvider } from "@/components/i18n-provider"
 
 const inter = Inter({
   subsets: ["latin"],
@@ -12,8 +13,8 @@ const inter = Inter({
 })
 
 export const metadata: Metadata = {
-  title: "School Management System",
-  description: "Comprehensive school management platform for African educational institutions",
+  title: "Système de Gestion Scolaire | School Management System",
+  description: "Plateforme complète de gestion scolaire pour les établissements éducatifs africains | Comprehensive school management platform for African educational institutions",
   generator: "v0.app",
   icons: {
     icon: [
@@ -49,10 +50,12 @@ export default function RootLayout({
   children: React.ReactNode
 }>) {
   return (
-    <html lang="en">
+    <html lang="fr" suppressHydrationWarning>
       <body className={`${inter.className} font-sans antialiased`}>
-        <Navigation />
-        <main className="lg:pt-16">{children}</main>
+        <I18nProvider>
+          <Navigation />
+          <main className="lg:pt-16">{children}</main>
+        </I18nProvider>
         <Analytics />
       </body>
     </html>

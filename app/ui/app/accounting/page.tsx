@@ -117,9 +117,9 @@ export default function AccountingPage() {
     .reduce((sum, p) => sum + p.amount, 0)
 
   return (
-    <div className="min-h-screen bg-background pt-20 lg:pt-20">
-      <main className="container mx-auto px-4 py-8">
-        <div className="mb-8">
+    <div className="min-h-screen bg-background pt-4 lg:pt-4">
+      <main className="container mx-auto px-4 py-4">
+        <div className="mb-4">
           <h1 className="text-3xl font-bold text-foreground mb-2">Centre de Contrôle Financier</h1>
           <p className="text-muted-foreground">Gérer les paiements, validations et réconciliations - Ibrahima Bah</p>
         </div>

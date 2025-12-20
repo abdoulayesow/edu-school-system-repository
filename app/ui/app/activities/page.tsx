@@ -15,8 +15,10 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog"
 import { BookOpen, Users, Plus, Search, AlertCircle } from "lucide-react"
+import { useI18n } from "@/components/i18n-provider"
 
 export default function ActivitiesPage() {
+  const { t } = useI18n()
   const [searchQuery, setSearchQuery] = useState("")
   const [openAssignStudent, setOpenAssignStudent] = useState(false)
   const [selectedActivity, setSelectedActivity] = useState<string | null>(null)
@@ -24,7 +26,7 @@ export default function ActivitiesPage() {
   const activities = [
     {
       id: 1,
-      name: "Club d'Anglais",
+      name: t.activities.englishClub,
       type: "extracurricular",
       teacher: "Amadou Diallo",
       enrolled: 24,
@@ -32,7 +34,7 @@ export default function ActivitiesPage() {
     },
     {
       id: 2,
-      name: "Mathématiques Avancées",
+      name: t.activities.advancedMath,
       type: "curricular",
       teacher: "Fatoumata Sow",
       enrolled: 28,
@@ -40,7 +42,7 @@ export default function ActivitiesPage() {
     },
     {
       id: 3,
-      name: "Football",
+      name: t.activities.football,
       type: "extracurricular",
       teacher: "Ibrahim Conte",
       enrolled: 32,
@@ -48,7 +50,7 @@ export default function ActivitiesPage() {
     },
     {
       id: 4,
-      name: "Sciences Physiques",
+      name: t.activities.physics,
       type: "curricular",
       teacher: "Mariama Bah",
       enrolled: 26,
@@ -56,7 +58,7 @@ export default function ActivitiesPage() {
     },
     {
       id: 5,
-      name: "Club de Lecture",
+      name: t.activities.readingClub,
       type: "extracurricular",
       teacher: "Aissata Camara",
       enrolled: 18,
@@ -64,7 +66,7 @@ export default function ActivitiesPage() {
     },
     {
       id: 6,
-      name: "Informatique",
+      name: t.activities.computerScience,
       type: "curricular",
       teacher: "Oumar Sylla",
       enrolled: 22,
@@ -79,18 +81,18 @@ export default function ActivitiesPage() {
   ]
 
   return (
-    <div className="min-h-screen bg-background pt-20 lg:pt-20">
-      <main className="container mx-auto px-4 py-8">
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-foreground mb-2">Gestion des Activités</h1>
-          <p className="text-muted-foreground">Gérer les activités scolaires et extrascolaires</p>
+    <div className="min-h-screen bg-background pt-4 lg:pt-4">
+      <main className="container mx-auto px-4 py-4">
+        <div className="mb-4">
+          <h1 className="text-3xl font-bold text-foreground mb-2">{t.activities.title}</h1>
+          <p className="text-muted-foreground">{t.activities.subtitle}</p>
         </div>
 
         <Tabs defaultValue="all" className="space-y-6">
           <TabsList>
-            <TabsTrigger value="all">Toutes</TabsTrigger>
-            <TabsTrigger value="curricular">Scolaires</TabsTrigger>
-            <TabsTrigger value="extracurricular">Extrascolaires</TabsTrigger>
+            <TabsTrigger value="all">{t.activities.tabAll}</TabsTrigger>
+            <TabsTrigger value="curricular">{t.activities.tabAcademic}</TabsTrigger>
+            <TabsTrigger value="extracurricular">{t.activities.tabExtra}</TabsTrigger>
           </TabsList>
 
           <TabsContent value="all" className="space-y-4">
@@ -108,18 +110,18 @@ export default function ActivitiesPage() {
                         <CardTitle className="text-lg">{activity.name}</CardTitle>
                       </div>
                       <Badge variant={activity.type === "curricular" ? "default" : "secondary"} className="text-xs">
-                        {activity.type === "curricular" ? "Scolaire" : "Extra"}
+                        {activity.type === "curricular" ? t.activities.academic : t.activities.extra}
                       </Badge>
                     </div>
                     <CardDescription className="space-y-1">
                       <div className="flex items-center gap-2 text-sm">
-                        <span className="text-muted-foreground">Enseignant:</span>
+                        <span className="text-muted-foreground">{t.common.teacher}:</span>
                         <span className="font-medium text-foreground">{activity.teacher}</span>
                       </div>
                       <div className="flex items-center gap-2 text-sm">
                         <Users className="h-3 w-3 text-muted-foreground" />
                         <span>
-                          {activity.enrolled}/{activity.capacity} étudiants
+                          {activity.enrolled}/{activity.capacity} {t.common.students}
                         </span>
                       </div>
                     </CardDescription>
@@ -136,18 +138,18 @@ export default function ActivitiesPage() {
                           onClick={() => setSelectedActivity(activity.name)}
                         >
                           <Plus className="h-4 w-4 mr-2" />
-                          Assigner un Étudiant
+                          {t.activities.assignStudent}
                         </Button>
                       </DialogTrigger>
                       <DialogContent>
                         <DialogHeader>
-                          <DialogTitle>Assigner un Étudiant</DialogTitle>
-                          <DialogDescription>Recherchez et ajoutez un étudiant à {activity.name}</DialogDescription>
+                          <DialogTitle>{t.activities.assignStudentTitle}</DialogTitle>
+                          <DialogDescription>{t.activities.searchAndAdd} {activity.name}</DialogDescription>
                         </DialogHeader>
                         <div className="space-y-4 py-4">
                           <div className="relative">
                             <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-                            <Input placeholder="Rechercher un étudiant par nom ou ID..." className="pl-10" />
+                            <Input placeholder={t.activities.searchStudentPlaceholder} className="pl-10" />
                           </div>
 
                           <div className="space-y-2 max-h-[300px] overflow-y-auto">
@@ -164,9 +166,9 @@ export default function ActivitiesPage() {
                                 </div>
                                 <div className="flex items-center gap-2">
                                   {student.paymentStatus === "overdue" && (
-                                    <AlertCircle className="h-4 w-4 text-warning" title="Paiements en retard" />
+                                    <AlertCircle className="h-4 w-4 text-warning" title={t.activities.overduePayments} />
                                   )}
-                                  <Button size="sm">Ajouter</Button>
+                                  <Button size="sm">{t.common.add}</Button>
                                 </div>
                               </div>
                             ))}
@@ -193,18 +195,18 @@ export default function ActivitiesPage() {
                           <CardTitle className="text-lg">{activity.name}</CardTitle>
                         </div>
                         <Badge variant="default" className="text-xs">
-                          Scolaire
+                          {t.activities.academic}
                         </Badge>
                       </div>
                       <CardDescription className="space-y-1">
                         <div className="flex items-center gap-2 text-sm">
-                          <span className="text-muted-foreground">Enseignant:</span>
+                          <span className="text-muted-foreground">{t.common.teacher}:</span>
                           <span className="font-medium text-foreground">{activity.teacher}</span>
                         </div>
                         <div className="flex items-center gap-2 text-sm">
                           <Users className="h-3 w-3 text-muted-foreground" />
                           <span>
-                            {activity.enrolled}/{activity.capacity} étudiants
+                            {activity.enrolled}/{activity.capacity} {t.common.students}
                           </span>
                         </div>
                       </CardDescription>
@@ -212,7 +214,7 @@ export default function ActivitiesPage() {
                     <CardContent>
                       <Button variant="outline" className="w-full bg-transparent">
                         <Plus className="h-4 w-4 mr-2" />
-                        Assigner un Étudiant
+                        {t.activities.assignStudent}
                       </Button>
                     </CardContent>
                   </Card>
@@ -233,18 +235,18 @@ export default function ActivitiesPage() {
                           <CardTitle className="text-lg">{activity.name}</CardTitle>
                         </div>
                         <Badge variant="secondary" className="text-xs">
-                          Extra
+                          {t.activities.extra}
                         </Badge>
                       </div>
                       <CardDescription className="space-y-1">
                         <div className="flex items-center gap-2 text-sm">
-                          <span className="text-muted-foreground">Enseignant:</span>
+                          <span className="text-muted-foreground">{t.common.teacher}:</span>
                           <span className="font-medium text-foreground">{activity.teacher}</span>
                         </div>
                         <div className="flex items-center gap-2 text-sm">
                           <Users className="h-3 w-3 text-muted-foreground" />
                           <span>
-                            {activity.enrolled}/{activity.capacity} étudiants
+                            {activity.enrolled}/{activity.capacity} {t.common.students}
                           </span>
                         </div>
                       </CardDescription>
@@ -252,7 +254,7 @@ export default function ActivitiesPage() {
                     <CardContent>
                       <Button variant="outline" className="w-full bg-transparent">
                         <Plus className="h-4 w-4 mr-2" />
-                        Assigner un Étudiant
+                        {t.activities.assignStudent}
                       </Button>
                     </CardContent>
                   </Card>
