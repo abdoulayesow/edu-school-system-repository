@@ -20,6 +20,11 @@
     *   **Modals:** Used for focused tasks like "New Enrollment" or "Record Payment" to avoid navigating away from the main screen.
     *   **Status Tags/Pills:** Use colored pills to indicate status clearly (e.g., Green for "Validated", Amber for "Pending", Red for "Rejected").
 
+## 1.1. Technical & AI Directives
+*   **AI Model:** All generative AI features, such as report summaries or data analysis helpers, should be implemented using API calls to Google's **`gemini-3-flash`** model.
+*   **Framework:** The web application should be built using Next.js and React.
+*   **UI Components:** Use `shadcn/ui` for all UI components to ensure consistency and a modern look.
+
 ## 2. Role-Based Dashboards & Workflows
 
 ### 2.1 Ousmane (School Director) - The Oversight Dashboard
