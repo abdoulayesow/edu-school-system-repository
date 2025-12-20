@@ -6,6 +6,7 @@ import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Calendar, Clock, BookOpen, User, MapPin, Plus, Download, Edit } from "lucide-react"
+import { useI18n, interpolate } from "@/components/i18n-provider"
 
 interface ScheduleEntry {
   time: string
@@ -23,6 +24,7 @@ interface ClassInfo {
 }
 
 export default function ClassesPage() {
+  const { t } = useI18n()
   const [selectedClass, setSelectedClass] = useState("6eme-a")
   const [selectedDay, setSelectedDay] = useState("lundi")
 
@@ -36,26 +38,26 @@ export default function ClassesPage() {
 
   const schedule: Record<string, ScheduleEntry[]> = {
     lundi: [
-      { time: "08:00 - 09:00", subject: "Mathématiques", teacher: "M. Diallo", room: "Salle 201", class: "6ème A" },
-      { time: "09:00 - 10:00", subject: "Français", teacher: "Mme Camara", room: "Salle 102", class: "6ème A" },
-      { time: "10:30 - 11:30", subject: "Sciences", teacher: "M. Barry", room: "Lab 1", class: "6ème A" },
+      { time: "08:00 - 09:00", subject: t.grades.subjects.mathematics, teacher: "M. Diallo", room: "Salle 201", class: "6ème A" },
+      { time: "09:00 - 10:00", subject: t.grades.subjects.french, teacher: "Mme Camara", room: "Salle 102", class: "6ème A" },
+      { time: "10:30 - 11:30", subject: t.grades.subjects.sciences, teacher: "M. Barry", room: "Lab 1", class: "6ème A" },
       { time: "11:30 - 12:30", subject: "Histoire-Géo", teacher: "Mme Sow", room: "Salle 105", class: "6ème A" },
-      { time: "14:00 - 15:00", subject: "Anglais", teacher: "M. Keita", room: "Salle 203", class: "6ème A" },
+      { time: "14:00 - 15:00", subject: t.grades.subjects.english, teacher: "M. Keita", room: "Salle 203", class: "6ème A" },
       { time: "15:00 - 16:00", subject: "Sport", teacher: "M. Touré", room: "Gymnase", class: "6ème A" },
     ],
     mardi: [
-      { time: "08:00 - 09:00", subject: "Français", teacher: "Mme Camara", room: "Salle 102", class: "6ème A" },
-      { time: "09:00 - 10:00", subject: "Mathématiques", teacher: "M. Diallo", room: "Salle 201", class: "6ème A" },
-      { time: "10:30 - 11:30", subject: "Anglais", teacher: "M. Keita", room: "Salle 203", class: "6ème A" },
-      { time: "11:30 - 12:30", subject: "Sciences", teacher: "M. Barry", room: "Lab 1", class: "6ème A" },
+      { time: "08:00 - 09:00", subject: t.grades.subjects.french, teacher: "Mme Camara", room: "Salle 102", class: "6ème A" },
+      { time: "09:00 - 10:00", subject: t.grades.subjects.mathematics, teacher: "M. Diallo", room: "Salle 201", class: "6ème A" },
+      { time: "10:30 - 11:30", subject: t.grades.subjects.english, teacher: "M. Keita", room: "Salle 203", class: "6ème A" },
+      { time: "11:30 - 12:30", subject: t.grades.subjects.sciences, teacher: "M. Barry", room: "Lab 1", class: "6ème A" },
       { time: "14:00 - 15:00", subject: "Arts", teacher: "Mme Diallo", room: "Atelier", class: "6ème A" },
       { time: "15:00 - 16:00", subject: "Informatique", teacher: "M. Sow", room: "Salle Info", class: "6ème A" },
     ],
     mercredi: [
-      { time: "08:00 - 09:00", subject: "Mathématiques", teacher: "M. Diallo", room: "Salle 201", class: "6ème A" },
+      { time: "08:00 - 09:00", subject: t.grades.subjects.mathematics, teacher: "M. Diallo", room: "Salle 201", class: "6ème A" },
       { time: "09:00 - 10:00", subject: "Histoire-Géo", teacher: "Mme Sow", room: "Salle 105", class: "6ème A" },
-      { time: "10:30 - 11:30", subject: "Sciences", teacher: "M. Barry", room: "Lab 1", class: "6ème A" },
-      { time: "11:30 - 12:30", subject: "Français", teacher: "Mme Camara", room: "Salle 102", class: "6ème A" },
+      { time: "10:30 - 11:30", subject: t.grades.subjects.sciences, teacher: "M. Barry", room: "Lab 1", class: "6ème A" },
+      { time: "11:30 - 12:30", subject: t.grades.subjects.french, teacher: "Mme Camara", room: "Salle 102", class: "6ème A" },
     ],
   }
 
@@ -68,17 +70,17 @@ export default function ClassesPage() {
         <div className="container mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-2xl font-bold text-foreground">Emploi du Temps</h1>
-              <p className="text-sm text-muted-foreground">Gestion des horaires et classes</p>
+              <h1 className="text-2xl font-bold text-foreground">{t.classes.title}</h1>
+              <p className="text-sm text-muted-foreground">{t.classes.subtitle}</p>
             </div>
             <div className="flex items-center gap-3">
               <Button variant="outline">
                 <Download className="size-4 mr-2" />
-                Exporter PDF
+                {t.classes.exportPdf}
               </Button>
               <Button>
                 <Plus className="size-4 mr-2" />
-                Ajouter un Cours
+                {t.classes.addCourse}
               </Button>
             </div>
           </div>
@@ -92,8 +94,8 @@ export default function ClassesPage() {
           <div className="lg:col-span-2 space-y-4">
             <Card>
               <CardHeader>
-                <CardTitle className="text-base">Classes</CardTitle>
-                <CardDescription>Sélectionner une classe</CardDescription>
+                <CardTitle className="text-base">{t.classes.classes}</CardTitle>
+                <CardDescription>{t.grades.selectClass}</CardDescription>
               </CardHeader>
               <CardContent className="space-y-2">
                 {classes.map((classInfo) => (
@@ -120,19 +122,19 @@ export default function ClassesPage() {
 
             <Card>
               <CardHeader>
-                <CardTitle className="text-base">Statistiques</CardTitle>
+                <CardTitle className="text-base">{t.classes.statistics}</CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="flex items-center justify-between">
-                  <span className="text-sm text-muted-foreground">Total Classes</span>
+                  <span className="text-sm text-muted-foreground">{t.classes.totalClasses}</span>
                   <span className="text-xl font-bold">{classes.length}</span>
                 </div>
                 <div className="flex items-center justify-between">
-                  <span className="text-sm text-muted-foreground">Total Étudiants</span>
+                  <span className="text-sm text-muted-foreground">{t.classes.totalStudents}</span>
                   <span className="text-xl font-bold">{classes.reduce((sum, c) => sum + c.students, 0)}</span>
                 </div>
                 <div className="flex items-center justify-between">
-                  <span className="text-sm text-muted-foreground">Cours Aujourd'hui</span>
+                  <span className="text-sm text-muted-foreground">{t.classes.coursesToday}</span>
                   <span className="text-xl font-bold text-primary">24</span>
                 </div>
               </CardContent>
@@ -148,14 +150,14 @@ export default function ClassesPage() {
                   <Calendar className="size-5 text-muted-foreground" />
                   <Select value={selectedDay} onValueChange={setSelectedDay}>
                     <SelectTrigger className="w-full">
-                      <SelectValue placeholder="Sélectionner un jour" />
+                      <SelectValue placeholder={t.classes.selectDay} />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="lundi">Lundi</SelectItem>
-                      <SelectItem value="mardi">Mardi</SelectItem>
-                      <SelectItem value="mercredi">Mercredi</SelectItem>
-                      <SelectItem value="jeudi">Jeudi</SelectItem>
-                      <SelectItem value="vendredi">Vendredi</SelectItem>
+                      <SelectItem value="lundi">{t.classes.days.monday}</SelectItem>
+                      <SelectItem value="mardi">{t.classes.days.tuesday}</SelectItem>
+                      <SelectItem value="mercredi">{t.classes.days.wednesday}</SelectItem>
+                      <SelectItem value="jeudi">{t.classes.days.thursday}</SelectItem>
+                      <SelectItem value="vendredi">{t.classes.days.friday}</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
@@ -165,7 +167,7 @@ export default function ClassesPage() {
             {/* Schedule Grid */}
             <Card>
               <CardHeader>
-                <CardTitle>Emploi du Temps - {selectedDay.charAt(0).toUpperCase() + selectedDay.slice(1)}</CardTitle>
+                <CardTitle>{interpolate(t.classes.scheduleForDay, { day: t.classes.days[selectedDay as keyof typeof t.classes.days] })}</CardTitle>
                 <CardDescription>6ème A - M. Diallo</CardDescription>
               </CardHeader>
               <CardContent className="space-y-3">
@@ -207,7 +209,7 @@ export default function ClassesPage() {
                 ) : (
                   <div className="text-center py-12">
                     <BookOpen className="size-12 text-muted-foreground mx-auto mb-4" />
-                    <p className="text-muted-foreground">Aucun cours prévu pour ce jour</p>
+                    <p className="text-muted-foreground">{t.classes.noCoursesForDay}</p>
                   </div>
                 )}
               </CardContent>

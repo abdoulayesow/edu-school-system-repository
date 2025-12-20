@@ -27,7 +27,7 @@ export const fr = {
     date: "Date",
     amount: "Montant",
     students: "étudiants",
-    student: "étudiant",
+    student: "Étudiant",
     teacher: "Enseignant",
     level: "Niveau",
     online: "En ligne",
@@ -35,6 +35,7 @@ export const fr = {
     onlineSynced: "En ligne - Synchronisé",
     offlineMode: "Mode hors ligne",
     menu: "Menu",
+    select: "Sélectionner",
   },
 
   // Navigation
@@ -92,6 +93,7 @@ export const fr = {
   dashboard: {
     title: "Tableau de Bord du Directeur",
     greeting: "Bonjour",
+    greetingWithName: "Bonjour, {name}",
     
     // Summary cards
     totalEnrollment: "Inscription Totale",
@@ -143,6 +145,14 @@ export const fr = {
     extraActivities: "Activités Extra",
     canteen: "Cantine",
     transport: "Transport",
+    
+    reasons: {
+      familySituation: "Situation familiale difficile - demande 20% réduction",
+      schoolTransfer: "Transfert d'une autre école - documents en règle",
+      billingError: "Erreur de facturation - double paiement",
+      paymentSpread: "Étalement sur 3 mois demandé",
+      clubChange: "Changement de club sportif",
+    },
   },
 
   // Enrollments
@@ -238,6 +248,7 @@ export const fr = {
   accounting: {
     title: "Centre de Contrôle Financier",
     subtitle: "Gérer les paiements, validations et réconciliations",
+    subtitleWithName: "Gérer les paiements, validations et réconciliations - {personName}",
 
     // Tabs
     tabPayments: "Enregistrement de Paiements",
@@ -248,6 +259,7 @@ export const fr = {
     paymentTransactions: "Transactions de Paiement",
     registerAndValidate: "Enregistrer et valider les paiements des étudiants",
     recordPayment: "Enregistrer un Paiement",
+    savePayment: "Enregistrer le Paiement",
 
     // Payment status
     unvalidated: "Non Validé",
@@ -277,6 +289,7 @@ export const fr = {
     supportingDocument: "Document Justificatif (Scan/Capture)",
     supportingDocumentHint: "Requis: Reçu Mobile Money, capture d'écran, ou document scanné",
     notes: "Notes",
+    notesOptional: "Notes (Optionnel)",
     notesPlaceholder: "Informations supplémentaires...",
 
     // Reconciliation tab
@@ -419,8 +432,62 @@ export const fr = {
   // Users
   users: {
     title: "Gestion des Utilisateurs",
-    subtitle: "Gérer les comptes utilisateurs et les rôles",
-    allUsers: "Tous les Utilisateurs",
+    subtitle: "Inviter et gérer les utilisateurs du système",
+    inviteUser: "Inviter un Utilisateur",
+    inviteUserDescription: "Envoyez une invitation par e-mail pour ajouter un nouvel utilisateur au système.",
+    userEmailPlaceholder: "utilisateur@email.gn",
+    selectRole: "Sélectionner un rôle",
+    permissionsForRole: "Permissions pour {role}",
+    selectRoleToSeePermissions: "Sélectionnez un rôle pour voir les permissions",
+    sendInvitation: "Envoyer l'Invitation",
+    filterByRole: "Filtrer par rôle",
+    allRoles: "Tous les rôles",
+    userList: "Liste des Utilisateurs",
+    usersFound: "{count} utilisateur(s) trouvé(s)",
+    lastActivity: "Dernière Activité",
+    neverConnected: "Jamais connecté",
+    active: "Actif",
+    invited: "Invité",
+    inactive: "Inactif",
+    sendEmail: "Envoyer un Email",
+    editPermissions: "Modifier les Permissions",
+    resendInvitation: "Renvoyer l'Invitation",
+    revokeAccess: "Révoquer l'Accès",
+    parent: "Parent",
+    permissions: {
+      director: {
+        p1: "Accès complet au système",
+        p2: "Gestion des utilisateurs",
+        p3: "Rapports et statistiques",
+      },
+      teacher: {
+        p1: "Saisie des notes",
+        p2: "Gestion des présences",
+        p3: "Voir les classes assignées",
+      },
+      accountant: {
+        p1: "Création de factures",
+        p2: "Suivi des paiements",
+        p3: "Rapports financiers",
+      },
+      parent: {
+        p1: "Voir les notes des enfants",
+        p2: "Payer les factures",
+        p3: "Recevoir les notifications",
+      },
+      student: {
+        p1: "Voir ses propres notes",
+        p2: "Consulter l'emploi du temps",
+        p3: "Recevoir les notifications",
+      }
+    },
+    userCounts: {
+      directors: "Directeurs",
+      teachers: "Enseignants",
+      accountants: "Comptables",
+      parents: "Parents",
+      students: "Étudiants",
+    },
     addUser: "Ajouter un Utilisateur",
     searchPlaceholder: "Rechercher par nom, email...",
     
@@ -435,6 +502,66 @@ export const fr = {
     secretary: "Secrétaire",
     accountant: "Comptable",
     teacher: "Enseignant",
+  },
+
+  // Grades
+  grades: {
+    title: "Gestion des Notes",
+    subtitle: "Prof. {teacherName} - {subjectName}",
+    saveChanges: "Sauvegarder ({count})",
+    subject: "Matière",
+    period: "Période",
+    selectClass: "Sélectionner une classe",
+    selectSubject: "Sélectionner une matière",
+    selectPeriod: "Sélectionner une période",
+    classAverage: "Moyenne de Classe",
+    onNStudents: "Sur {count} étudiants",
+    top3Students: "Top 3 Étudiants",
+    needsAttention: "Besoin d'Attention",
+    studentsBelow10: "Étudiants avec note < 10",
+    pendingChanges: "{count} notes en attente de sauvegarde",
+    clickToSave: "- Cliquez sur Sauvegarder pour enregistrer vos modifications",
+    gradeEntry: "Saisie des Notes",
+    gradeEntryDescription: "Entrez les notes sur 20. Les modifications sont sauvegardées en temps réel.",
+    previousGrade: "Note Précédente",
+    currentGrade: "Note Actuelle",
+    trend: "Tendance",
+    synced: "Synchronisé",
+    pending: "En attente",
+    subjects: {
+      mathematics: "Mathématiques",
+      french: "Français",
+      english: "Anglais",
+      sciences: "Sciences",
+    },
+    terms: {
+      term1: "Trimestre 1",
+      term2: "Trimestre 2",
+      term3: "Trimestre 3",
+    },
+  },
+
+  // Classes
+  classes: {
+    title: "Emploi du Temps",
+    subtitle: "Gestion des horaires et classes",
+    exportPdf: "Exporter PDF",
+    addCourse: "Ajouter un Cours",
+    classes: "Classes",
+    statistics: "Statistiques",
+    totalClasses: "Total Classes",
+    totalStudents: "Total Étudiants",
+    coursesToday: "Cours Aujourd'hui",
+    selectDay: "Sélectionner un jour",
+    scheduleForDay: "Emploi du Temps - {day}",
+    noCoursesForDay: "Aucun cours prévu pour ce jour",
+    days: {
+      monday: "Lundi",
+      tuesday: "Mardi",
+      wednesday: "Mercredi",
+      thursday: "Jeudi",
+      friday: "Vendredi",
+    },
   },
 
   // Levels

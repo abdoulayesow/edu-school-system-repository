@@ -27,7 +27,7 @@ export const en = {
     date: "Date",
     amount: "Amount",
     students: "students",
-    student: "student",
+    student: "Student",
     teacher: "Teacher",
     level: "Level",
     online: "Online",
@@ -35,6 +35,7 @@ export const en = {
     onlineSynced: "Online - Synced",
     offlineMode: "Offline Mode",
     menu: "Menu",
+    select: "Select",
   },
 
   // Navigation
@@ -92,6 +93,7 @@ export const en = {
   dashboard: {
     title: "Director's Dashboard",
     greeting: "Hello",
+    greetingWithName: "Hello, {name}",
     
     // Summary cards
     totalEnrollment: "Total Enrollment",
@@ -143,6 +145,14 @@ export const en = {
     extraActivities: "Extra Activities",
     canteen: "Canteen",
     transport: "Transport",
+    
+    reasons: {
+      familySituation: "Difficult family situation - 20% discount requested",
+      schoolTransfer: "Transfer from another school - documents in order",
+      billingError: "Billing error - double payment",
+      paymentSpread: "Payment spread over 3 months requested",
+      clubChange: "Change of sports club",
+    },
   },
 
   // Enrollments
@@ -238,6 +248,7 @@ export const en = {
   accounting: {
     title: "Financial Control Center",
     subtitle: "Manage payments, validations, and reconciliations",
+    subtitleWithName: "Manage payments, validations, and reconciliations - {personName}",
 
     // Tabs
     tabPayments: "Payment Recording",
@@ -248,6 +259,7 @@ export const en = {
     paymentTransactions: "Payment Transactions",
     registerAndValidate: "Register and validate student payments",
     recordPayment: "Record Payment",
+    savePayment: "Save Payment",
 
     // Payment status
     unvalidated: "Unvalidated",
@@ -277,6 +289,7 @@ export const en = {
     supportingDocument: "Supporting Document (Scan/Capture)",
     supportingDocumentHint: "Required: Mobile Money receipt, screenshot, or scanned document",
     notes: "Notes",
+    notesOptional: "Notes (Optional)",
     notesPlaceholder: "Additional information...",
 
     // Reconciliation tab
@@ -419,8 +432,62 @@ export const en = {
   // Users
   users: {
     title: "User Management",
-    subtitle: "Manage user accounts and roles",
-    allUsers: "All Users",
+    subtitle: "Invite and manage system users",
+    inviteUser: "Invite User",
+    inviteUserDescription: "Send an email invitation to add a new user to the system.",
+    userEmailPlaceholder: "user@email.gn",
+    selectRole: "Select a role",
+    permissionsForRole: "Permissions for {role}",
+    selectRoleToSeePermissions: "Select a role to see permissions",
+    sendInvitation: "Send Invitation",
+    filterByRole: "Filter by role",
+    allRoles: "All roles",
+    userList: "User List",
+    usersFound: "{count} user(s) found",
+    lastActivity: "Last Activity",
+    neverConnected: "Never connected",
+    active: "Active",
+    invited: "Invited",
+    inactive: "Inactive",
+    sendEmail: "Send Email",
+    editPermissions: "Edit Permissions",
+    resendInvitation: "Resend Invitation",
+    revokeAccess: "Revoke Access",
+    parent: "Parent",
+    permissions: {
+      director: {
+        p1: "Full access to the system",
+        p2: "User management",
+        p3: "Reports and statistics",
+      },
+      teacher: {
+        p1: "Grade entry",
+        p2: "Attendance management",
+        p3: "View assigned classes",
+      },
+      accountant: {
+        p1: "Invoice creation",
+        p2: "Payment tracking",
+        p3: "Financial reports",
+      },
+      parent: {
+        p1: "View children's grades",
+        p2: "Pay invoices",
+        p3: "Receive notifications",
+      },
+      student: {
+        p1: "View own grades",
+        p2: "Consult schedule",
+        p3: "Receive notifications",
+      }
+    },
+    userCounts: {
+      directors: "Directors",
+      teachers: "Teachers",
+      accountants: "Accountants",
+      parents: "Parents",
+      students: "Students",
+    },
     addUser: "Add User",
     searchPlaceholder: "Search by name, email...",
     
@@ -435,6 +502,66 @@ export const en = {
     secretary: "Secretary",
     accountant: "Accountant",
     teacher: "Teacher",
+  },
+
+  // Grades
+  grades: {
+    title: "Grade Management",
+    subtitle: "Prof. {teacherName} - {subjectName}",
+    saveChanges: "Save ({count})",
+    subject: "Subject",
+    period: "Period",
+    selectClass: "Select a class",
+    selectSubject: "Select a subject",
+    selectPeriod: "Select a period",
+    classAverage: "Class Average",
+    onNStudents: "On {count} students",
+    top3Students: "Top 3 Students",
+    needsAttention: "Needs Attention",
+    studentsBelow10: "Students with grade < 10",
+    pendingChanges: "{count} grades pending save",
+    clickToSave: "- Click Save to record your changes",
+    gradeEntry: "Grade Entry",
+    gradeEntryDescription: "Enter grades out of 20. Changes are saved in real-time.",
+    previousGrade: "Previous Grade",
+    currentGrade: "Current Grade",
+    trend: "Trend",
+    synced: "Synced",
+    pending: "Pending",
+    subjects: {
+      mathematics: "Mathematics",
+      french: "French",
+      english: "English",
+      sciences: "Sciences",
+    },
+    terms: {
+      term1: "Term 1",
+      term2: "Term 2",
+      term3: "Term 3",
+    },
+  },
+
+  // Classes
+  classes: {
+    title: "Timetable",
+    subtitle: "Manage schedules and classes",
+    exportPdf: "Export PDF",
+    addCourse: "Add Course",
+    classes: "Classes",
+    statistics: "Statistics",
+    totalClasses: "Total Classes",
+    totalStudents: "Total Students",
+    coursesToday: "Courses Today",
+    selectDay: "Select a day",
+    scheduleForDay: "Timetable - {day}",
+    noCoursesForDay: "No courses scheduled for this day",
+    days: {
+      monday: "Monday",
+      tuesday: "Tuesday",
+      wednesday: "Wednesday",
+      thursday: "Thursday",
+      friday: "Friday",
+    },
   },
 
   // Levels

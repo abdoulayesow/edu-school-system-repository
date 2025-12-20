@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button"
 import { ChartContainer, ChartTooltip, ChartTooltipContent, type ChartConfig } from "@/components/ui/chart"
 import { Users, DollarSign, AlertTriangle, TrendingUp, FileText, CheckCircle2, Clock, BarChart3 } from "lucide-react"
 import { Bar, BarChart, Pie, PieChart, Cell, CartesianGrid, XAxis, YAxis } from "recharts"
-import { useI18n } from "@/components/i18n-provider"
+import { useI18n, interpolate } from "@/components/i18n-provider"
 
 export default function DirectorDashboard() {
   const { t } = useI18n()
@@ -34,7 +34,7 @@ export default function DirectorDashboard() {
       student: "Fatoumata Diallo",
       submittedBy: "Ibrahima Bah",
       date: "2024-12-18",
-      reason: "Situation familiale difficile - demande 20% réduction",
+      reason: t.dashboard.reasons.familySituation,
       amount: "150,000 GNF",
     },
     {
@@ -43,7 +43,7 @@ export default function DirectorDashboard() {
       student: "Mamadou Sylla",
       submittedBy: "Mariama Camara",
       date: "2024-12-17",
-      reason: "Transfert d'une autre école - documents en règle",
+      reason: t.dashboard.reasons.schoolTransfer,
       amount: null,
     },
     {
@@ -52,7 +52,7 @@ export default function DirectorDashboard() {
       student: "Aminata Touré",
       submittedBy: "Ibrahima Bah",
       date: "2024-12-17",
-      reason: "Erreur de facturation - double paiement",
+      reason: t.dashboard.reasons.billingError,
       amount: "200,000 GNF",
     },
     {
@@ -61,7 +61,7 @@ export default function DirectorDashboard() {
       student: "Oumar Keita",
       submittedBy: "Ibrahima Bah",
       date: "2024-12-16",
-      reason: "Étalement sur 3 mois demandé",
+      reason: t.dashboard.reasons.paymentSpread,
       amount: "450,000 GNF",
     },
     {
@@ -70,7 +70,7 @@ export default function DirectorDashboard() {
       student: "Aissata Conte",
       submittedBy: "Mariama Camara",
       date: "2024-12-16",
-      reason: "Changement de club sportif",
+      reason: t.dashboard.reasons.clubChange,
       amount: null,
     },
   ]
@@ -79,31 +79,31 @@ export default function DirectorDashboard() {
     {
       action: t.dashboard.financialPeriodClosed,
       user: "Ibrahima Bah",
-      time: "Il y a 2 heures",
+      time: interpolate(t.dashboard.hoursAgo, { hours: 2 }),
       type: "success",
     },
     {
-      action: "Inscription en Masse Traitée (23 étudiants)",
+      action: interpolate(t.dashboard.bulkEnrollmentProcessed, { count: 23 }),
       user: "Mariama Camara",
-      time: "Il y a 4 heures",
+      time: interpolate(t.dashboard.hoursAgo, { hours: 4 }),
       type: "info",
     },
     {
       action: t.dashboard.academicReportGenerated,
       user: "Fatoumata Diallo",
-      time: "Il y a 5 heures",
+      time: interpolate(t.dashboard.hoursAgo, { hours: 5 }),
       type: "info",
     },
     {
       action: t.dashboard.bankDiscrepancyFlagged,
       user: "Ibrahima Bah",
-      time: "Hier à 16:30",
+      time: interpolate(t.dashboard.yesterdayAt, { time: "16:30" }),
       type: "warning",
     },
     {
-      action: "Validation de 12 Paiements",
+      action: interpolate(t.dashboard.paymentValidation, { count: 12 }),
       user: "Ibrahima Bah",
-      time: "Hier à 14:20",
+      time: interpolate(t.dashboard.yesterdayAt, { time: "14:20" }),
       type: "success",
     },
   ]
@@ -120,7 +120,7 @@ export default function DirectorDashboard() {
       <main className="container mx-auto px-4 py-4">
         <div className="mb-4">
           <h1 className="text-3xl font-bold text-foreground mb-2">{t.dashboard.title}</h1>
-          <p className="text-muted-foreground">{t.dashboard.greeting}, Ousmane Sylla</p>
+          <p className="text-muted-foreground">{interpolate(t.dashboard.greetingWithName, { name: "Ousmane Sylla" })}</p>
         </div>
 
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4 mb-8">
@@ -291,7 +291,7 @@ export default function DirectorDashboard() {
             <CardContent>
               <ChartContainer config={{
                 value: {
-                  label: "Revenu",
+                  label: t.dashboard.revenue,
                   color: "hsl(var(--chart-1))" // Default color for single value
                 }
               }} className="h-[300px] flex items-center justify-center">
