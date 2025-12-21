@@ -5,8 +5,10 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { CheckCircle2, XCircle, AlertCircle, BookOpen, Users } from "lucide-react"
+import { useI18n } from "@/components/i18n-provider"
 
 export default function AttendancePage() {
+  const { t } = useI18n()
   const [selectedActivity, setSelectedActivity] = useState<string | null>(null)
   const [attendance, setAttendance] = useState<Record<string, "present" | "absent" | "excused">>({})
 
@@ -90,11 +92,11 @@ export default function AttendancePage() {
   const getAttendanceLabel = (status: "present" | "absent" | "excused") => {
     switch (status) {
       case "present":
-        return "Présent"
+        return t.attendance.statusPresent
       case "absent":
-        return "Absent"
+        return t.attendance.statusAbsent
       case "excused":
-        return "Excusé"
+        return t.attendance.statusExcused
     }
   }
 
@@ -103,17 +105,17 @@ export default function AttendancePage() {
   const excusedCount = Object.values(attendance).filter((s) => s === "excused").length
 
   return (
-    <div className="min-h-screen bg-background pt-20 lg:pt-20">
-      <main className="container mx-auto px-4 py-8 max-w-4xl">
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-foreground mb-2">Prise de Présence</h1>
-          <p className="text-muted-foreground">Bienvenue, Amadou Diallo</p>
+    <div className="min-h-screen bg-background pt-4 lg:pt-4">
+      <main className="container mx-auto px-4 py-4 max-w-4xl">
+        <div className="mb-4">
+          <h1 className="text-3xl font-bold text-foreground mb-2">{t.attendance.title}</h1>
+          <p className="text-muted-foreground">{t.attendance.welcome}, Amadou Diallo</p>
         </div>
 
         {!selectedActivity ? (
           /* Activity List View */
           <div className="space-y-4">
-            <h2 className="text-xl font-semibold text-foreground mb-4">Activités d'Aujourd'hui</h2>
+            <h2 className="text-xl font-semibold text-foreground mb-4">{t.attendance.todaysActivities}</h2>
             {todayActivities.map((activity) => (
               <Card
                 key={activity.id}
@@ -137,12 +139,12 @@ export default function AttendancePage() {
                         <div className="flex items-center gap-3 mt-1">
                           <p className="text-sm text-muted-foreground">{activity.time}</p>
                           <Badge variant="outline" className="text-xs">
-                            {activity.enrolled} étudiants
+                            {activity.enrolled} {t.common.students}
                           </Badge>
                         </div>
                       </div>
                     </div>
-                    <Button>Prendre Présence</Button>
+                    <Button>{t.attendance.takeAttendance}</Button>
                   </div>
                 </CardContent>
               </Card>
@@ -156,10 +158,10 @@ export default function AttendancePage() {
                 <div className="flex items-center justify-between">
                   <div>
                     <CardTitle>{todayActivities.find((a) => a.id === selectedActivity)?.name || "Activity"}</CardTitle>
-                    <CardDescription>Tapez sur un étudiant pour changer le statut de présence</CardDescription>
+                    <CardDescription>{t.attendance.tapToChange}</CardDescription>
                   </div>
                   <Button variant="outline" onClick={() => setSelectedActivity(null)} className="bg-transparent">
-                    Retour
+                    {t.common.back}
                   </Button>
                 </div>
               </CardHeader>
@@ -171,21 +173,21 @@ export default function AttendancePage() {
                 <CardContent className="pt-6 text-center">
                   <CheckCircle2 className="h-8 w-8 text-success mx-auto mb-2" />
                   <p className="text-2xl font-bold text-foreground">{presentCount}</p>
-                  <p className="text-sm text-muted-foreground">Présents</p>
+                  <p className="text-sm text-muted-foreground">{t.attendance.present}</p>
                 </CardContent>
               </Card>
               <Card>
                 <CardContent className="pt-6 text-center">
                   <XCircle className="h-8 w-8 text-destructive mx-auto mb-2" />
                   <p className="text-2xl font-bold text-foreground">{absentCount}</p>
-                  <p className="text-sm text-muted-foreground">Absents</p>
+                  <p className="text-sm text-muted-foreground">{t.attendance.absent}</p>
                 </CardContent>
               </Card>
               <Card>
                 <CardContent className="pt-6 text-center">
                   <AlertCircle className="h-8 w-8 text-warning mx-auto mb-2" />
                   <p className="text-2xl font-bold text-foreground">{excusedCount}</p>
-                  <p className="text-sm text-muted-foreground">Excusés</p>
+                  <p className="text-sm text-muted-foreground">{t.attendance.excused}</p>
                 </CardContent>
               </Card>
             </div>
@@ -193,8 +195,8 @@ export default function AttendancePage() {
             {/* Student List */}
             <Card>
               <CardHeader>
-                <CardTitle>Liste des Étudiants</CardTitle>
-                <CardDescription>Tous les étudiants sont marqués présents par défaut</CardDescription>
+                <CardTitle>{t.attendance.studentList}</CardTitle>
+                <CardDescription>{t.attendance.allMarkedPresent}</CardDescription>
               </CardHeader>
               <CardContent>
                 <div className="space-y-3">
@@ -224,7 +226,7 @@ export default function AttendancePage() {
                               <p className="text-sm text-muted-foreground">{getAttendanceLabel(status)}</p>
                               {student.paymentStatus === "overdue" && (
                                 <Badge variant="outline" className="text-xs text-destructive border-destructive">
-                                  Paiement en retard
+                                  {t.attendance.overduePayment}
                                 </Badge>
                               )}
                             </div>
@@ -241,18 +243,18 @@ export default function AttendancePage() {
             {/* Submit Button */}
             <Button size="lg" className="w-full h-14 text-lg">
               <CheckCircle2 className="h-5 w-5 mr-2" />
-              Soumettre la Présence
+              {t.attendance.submitAttendance}
             </Button>
 
             {/* Instructions */}
             <Card className="border-primary/30 bg-primary/5">
               <CardContent className="pt-6">
-                <h3 className="font-semibold text-foreground mb-2">Instructions</h3>
+                <h3 className="font-semibold text-foreground mb-2">{t.attendance.instructions}</h3>
                 <ul className="space-y-1 text-sm text-muted-foreground">
-                  <li>• Tapez sur un étudiant pour changer son statut</li>
-                  <li>• Présent (vert) → Absent (rouge) → Excusé (orange) → Présent</li>
-                  <li>• Les étudiants avec paiements en retard sont marqués d'un badge</li>
-                  <li>• Cliquez sur "Soumettre" pour enregistrer la présence</li>
+                  <li>• {t.attendance.instruction1}</li>
+                  <li>• {t.attendance.instruction2}</li>
+                  <li>• {t.attendance.instruction3}</li>
+                  <li>• {t.attendance.instruction4}</li>
                 </ul>
               </CardContent>
             </Card>

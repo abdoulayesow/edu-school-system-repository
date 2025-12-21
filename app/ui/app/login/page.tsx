@@ -9,10 +9,12 @@ import { Label } from "@/components/ui/label"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Checkbox } from "@/components/ui/checkbox"
 import { WifiOff, Wifi } from "lucide-react"
+import { useI18n } from "@/components/i18n-provider"
+import { LanguageSwitcher } from "@/components/language-switcher"
 
 export default function LoginPage() {
+  const { t } = useI18n()
   const [isOnline, setIsOnline] = useState(true)
-  const [language, setLanguage] = useState<"fr" | "en">("fr")
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
   const [rememberMe, setRememberMe] = useState(false)
@@ -22,37 +24,6 @@ export default function LoginPage() {
     // TODO: Implement authentication logic
     console.log("[v0] Login attempt:", { email, isOnline })
   }
-
-  const text = {
-    fr: {
-      title: "Système de Gestion Scolaire",
-      subtitle: "Connectez-vous à votre compte",
-      email: "Adresse e-mail",
-      emailPlaceholder: "votre.email@ecole.gn",
-      password: "Mot de passe",
-      passwordPlaceholder: "Entrez votre mot de passe",
-      rememberMe: "Se souvenir de moi",
-      login: "Se connecter",
-      online: "Connecté",
-      offline: "Mode hors ligne",
-      footer: "Pour les écoles africaines, par les africains",
-    },
-    en: {
-      title: "School Management System",
-      subtitle: "Sign in to your account",
-      email: "Email address",
-      emailPlaceholder: "your.email@school.gn",
-      password: "Password",
-      passwordPlaceholder: "Enter your password",
-      rememberMe: "Remember me",
-      login: "Sign in",
-      online: "Connected",
-      offline: "Working offline",
-      footer: "For African schools, by Africans",
-    },
-  }
-
-  const t = text[language]
 
   return (
     <div className="min-h-screen flex flex-col bg-gradient-to-br from-background via-background to-muted">
@@ -65,12 +36,12 @@ export default function LoginPage() {
         {isOnline ? (
           <>
             <Wifi className="size-4" />
-            <span>{t.online}</span>
+            <span>{t.login.connected}</span>
           </>
         ) : (
           <>
             <WifiOff className="size-4" />
-            <span>{t.offline}</span>
+            <span>{t.login.workingOffline}</span>
           </>
         )}
       </div>
@@ -90,37 +61,18 @@ export default function LoginPage() {
                 />
               </svg>
             </div>
-            <h1 className="text-3xl font-bold text-foreground">{t.title}</h1>
-            <p className="text-muted-foreground">{t.subtitle}</p>
+            <h1 className="text-3xl font-bold text-foreground">{t.login.title}</h1>
+            <p className="text-muted-foreground">{t.login.subtitle}</p>
           </div>
 
           {/* Login Card */}
           <Card>
             <CardHeader>
-              <CardTitle>{t.login}</CardTitle>
+              <CardTitle>{t.login.signIn}</CardTitle>
               <CardDescription>
                 {/* Language Selector */}
                 <div className="flex gap-2 mt-2">
-                  <button
-                    onClick={() => setLanguage("fr")}
-                    className={`px-3 py-1 rounded-md text-sm font-medium transition-colors ${
-                      language === "fr"
-                        ? "bg-primary text-primary-foreground"
-                        : "bg-muted text-muted-foreground hover:bg-muted/80"
-                    }`}
-                  >
-                    Français
-                  </button>
-                  <button
-                    onClick={() => setLanguage("en")}
-                    className={`px-3 py-1 rounded-md text-sm font-medium transition-colors ${
-                      language === "en"
-                        ? "bg-primary text-primary-foreground"
-                        : "bg-muted text-muted-foreground hover:bg-muted/80"
-                    }`}
-                  >
-                    English
-                  </button>
+                  <LanguageSwitcher />
                 </div>
               </CardDescription>
             </CardHeader>
@@ -128,11 +80,11 @@ export default function LoginPage() {
               <form onSubmit={handleLogin} className="space-y-4">
                 {/* Email Field */}
                 <div className="space-y-2">
-                  <Label htmlFor="email">{t.email}</Label>
+                  <Label htmlFor="email">{t.login.email}</Label>
                   <Input
                     id="email"
                     type="email"
-                    placeholder={t.emailPlaceholder}
+                    placeholder={t.login.emailPlaceholder}
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     required
@@ -142,11 +94,11 @@ export default function LoginPage() {
 
                 {/* Password Field */}
                 <div className="space-y-2">
-                  <Label htmlFor="password">{t.password}</Label>
+                  <Label htmlFor="password">{t.login.password}</Label>
                   <Input
                     id="password"
                     type="password"
-                    placeholder={t.passwordPlaceholder}
+                    placeholder={t.login.passwordPlaceholder}
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     required
@@ -162,13 +114,13 @@ export default function LoginPage() {
                     onCheckedChange={(checked) => setRememberMe(checked as boolean)}
                   />
                   <Label htmlFor="remember" className="text-sm font-normal cursor-pointer">
-                    {t.rememberMe}
+                    {t.login.rememberMe}
                   </Label>
                 </div>
 
                 {/* Submit Button */}
                 <Button type="submit" className="w-full h-10" size="lg">
-                  {t.login}
+                  {t.login.signIn}
                 </Button>
               </form>
 
@@ -178,14 +130,14 @@ export default function LoginPage() {
                   onClick={() => setIsOnline(!isOnline)}
                   className="text-sm text-muted-foreground hover:text-foreground transition-colors"
                 >
-                  {isOnline ? "Simuler mode hors ligne" : "Simuler mode en ligne"}
+                  {isOnline ? t.login.simulateOffline : t.login.simulateOnline}
                 </button>
               </div>
             </CardContent>
           </Card>
 
           {/* Footer */}
-          <p className="text-center text-sm text-muted-foreground italic">{t.footer}</p>
+          <p className="text-center text-sm text-muted-foreground italic">{t.login.tagline}</p>
         </div>
       </div>
     </div>

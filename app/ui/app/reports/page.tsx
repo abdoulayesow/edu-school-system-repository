@@ -8,8 +8,10 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { ChartContainer, ChartTooltip, ChartTooltipContent, type ChartConfig } from "@/components/ui/chart"
 import { BookOpen, Users, TrendingDown, BarChart3, Calendar } from "lucide-react"
 import { Line, LineChart, CartesianGrid, XAxis, YAxis, Bar, BarChart } from "recharts"
+import { useI18n } from "@/components/i18n-provider"
 
 export default function ReportsPage() {
+  const { t } = useI18n()
   const [selectedTeacher, setSelectedTeacher] = useState<string>("all")
   const [selectedGrade, setSelectedGrade] = useState<string>("all")
 
@@ -82,10 +84,10 @@ export default function ReportsPage() {
   ]
 
   const lowParticipationStudents = [
-    { name: "Oumar Keita", grade: "12ème", activities: 3, attendance: 45, reason: "Fréquence faible" },
-    { name: "Aissata Conte", grade: "10ème", activities: 4, attendance: 52, reason: "Absences répétées" },
-    { name: "Mamadou Sylla", grade: "11ème", activities: 2, attendance: 38, reason: "Très faible participation" },
-    { name: "Aminata Touré", grade: "9ème", activities: 3, attendance: 58, reason: "Besoin de suivi" },
+    { name: "Oumar Keita", grade: "12ème", activities: 3, attendance: 45, reason: t.reports.lowFrequency },
+    { name: "Aissata Conte", grade: "10ème", activities: 4, attendance: 52, reason: t.reports.repeatedAbsences },
+    { name: "Mamadou Sylla", grade: "11ème", activities: 2, attendance: 38, reason: t.reports.veryLowParticipation },
+    { name: "Aminata Touré", grade: "9ème", activities: 3, attendance: 58, reason: t.reports.needsFollowup },
   ]
 
   const teachers = ["Amadou Diallo", "Fatoumata Sow", "Ibrahim Conte", "Mariama Bah", "Oumar Sylla"]
@@ -99,30 +101,30 @@ export default function ReportsPage() {
 
   const chartConfig = {
     rate: {
-      label: "Taux (%)",
+      label: t.reports.ratePercent,
       color: "hsl(var(--primary))",
     },
   } satisfies ChartConfig
 
   const attendanceChartConfig = {
     attendance: {
-      label: "Présence",
+      label: t.nav.attendance,
       color: "hsl(var(--success))",
     },
   } satisfies ChartConfig
 
   return (
-    <div className="min-h-screen bg-background pt-20 lg:pt-20">
-      <main className="container mx-auto px-4 py-8">
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-foreground mb-2">Rapports Académiques</h1>
-          <p className="text-muted-foreground">Supervision des activités et participation - Fatoumata Diallo</p>
+    <div className="min-h-screen bg-background pt-4 lg:pt-4">
+      <main className="container mx-auto px-4 py-4">
+        <div className="mb-4">
+          <h1 className="text-3xl font-bold text-foreground mb-2">{t.reports.title}</h1>
+          <p className="text-muted-foreground">{t.reports.subtitle} - Fatoumata Diallo</p>
         </div>
 
         <Tabs defaultValue="overview" className="space-y-6">
           <TabsList>
-            <TabsTrigger value="overview">Vue d'Ensemble</TabsTrigger>
-            <TabsTrigger value="participation">Rapports de Participation</TabsTrigger>
+            <TabsTrigger value="overview">{t.reports.tabOverview}</TabsTrigger>
+            <TabsTrigger value="participation">{t.reports.tabParticipation}</TabsTrigger>
           </TabsList>
 
           {/* Activity Overview Tab */}
@@ -131,52 +133,52 @@ export default function ReportsPage() {
             <div className="grid gap-4 md:grid-cols-4">
               <Card>
                 <CardHeader className="flex flex-row items-center justify-between pb-2">
-                  <CardTitle className="text-sm font-medium text-muted-foreground">Total Activités</CardTitle>
+                  <CardTitle className="text-sm font-medium text-muted-foreground">{t.reports.totalActivities}</CardTitle>
                   <BookOpen className="h-5 w-5 text-primary" />
                 </CardHeader>
                 <CardContent>
                   <div className="text-3xl font-bold text-foreground">{activities.length}</div>
                   <p className="text-xs text-muted-foreground mt-1">
-                    {activities.filter((a) => a.type === "curricular").length} scolaires •{" "}
-                    {activities.filter((a) => a.type === "extracurricular").length} extra
+                    {activities.filter((a) => a.type === "curricular").length} {t.reports.academicActivities} •{" "}
+                    {activities.filter((a) => a.type === "extracurricular").length} {t.reports.extraActivities}
                   </p>
                 </CardContent>
               </Card>
 
               <Card>
                 <CardHeader className="flex flex-row items-center justify-between pb-2">
-                  <CardTitle className="text-sm font-medium text-muted-foreground">Étudiants Inscrits</CardTitle>
+                  <CardTitle className="text-sm font-medium text-muted-foreground">{t.reports.enrolledStudents}</CardTitle>
                   <Users className="h-5 w-5 text-accent" />
                 </CardHeader>
                 <CardContent>
                   <div className="text-3xl font-bold text-foreground">
                     {activities.reduce((sum, a) => sum + a.enrolled, 0)}
                   </div>
-                  <p className="text-xs text-muted-foreground mt-1">Total d'inscriptions</p>
+                  <p className="text-xs text-muted-foreground mt-1">{t.reports.totalEnrollments}</p>
                 </CardContent>
               </Card>
 
               <Card>
                 <CardHeader className="flex flex-row items-center justify-between pb-2">
-                  <CardTitle className="text-sm font-medium text-muted-foreground">Taux de Présence Moyen</CardTitle>
+                  <CardTitle className="text-sm font-medium text-muted-foreground">{t.reports.averageAttendance}</CardTitle>
                   <BarChart3 className="h-5 w-5 text-success" />
                 </CardHeader>
                 <CardContent>
                   <div className="text-3xl font-bold text-foreground">
                     {Math.round(activities.reduce((sum, a) => sum + a.avgAttendance, 0) / activities.length)}%
                   </div>
-                  <p className="text-xs text-success mt-1">Performance satisfaisante</p>
+                  <p className="text-xs text-success mt-1">{t.reports.satisfactoryPerformance}</p>
                 </CardContent>
               </Card>
 
               <Card>
                 <CardHeader className="flex flex-row items-center justify-between pb-2">
-                  <CardTitle className="text-sm font-medium text-muted-foreground">Étudiants à Risque</CardTitle>
+                  <CardTitle className="text-sm font-medium text-muted-foreground">{t.reports.atRiskStudents}</CardTitle>
                   <TrendingDown className="h-5 w-5 text-destructive" />
                 </CardHeader>
                 <CardContent>
                   <div className="text-3xl font-bold text-destructive">{lowParticipationStudents.length}</div>
-                  <p className="text-xs text-muted-foreground mt-1">Faible participation</p>
+                  <p className="text-xs text-muted-foreground mt-1">{t.reports.lowParticipation}</p>
                 </CardContent>
               </Card>
             </div>
@@ -188,10 +190,10 @@ export default function ReportsPage() {
                   <div className="flex-1">
                     <Select value={selectedTeacher} onValueChange={setSelectedTeacher}>
                       <SelectTrigger>
-                        <SelectValue placeholder="Tous les enseignants" />
+                        <SelectValue placeholder={t.reports.allTeachers} />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="all">Tous les enseignants</SelectItem>
+                        <SelectItem value="all">{t.reports.allTeachers}</SelectItem>
                         {teachers.map((teacher) => (
                           <SelectItem key={teacher} value={teacher}>
                             {teacher}
@@ -203,10 +205,10 @@ export default function ReportsPage() {
                   <div className="flex-1">
                     <Select value={selectedGrade} onValueChange={setSelectedGrade}>
                       <SelectTrigger>
-                        <SelectValue placeholder="Tous les niveaux" />
+                        <SelectValue placeholder={t.reports.allLevels} />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="all">Tous les niveaux</SelectItem>
+                        <SelectItem value="all">{t.reports.allLevels}</SelectItem>
                         {grades.map((grade) => (
                           <SelectItem key={grade} value={grade}>
                             {grade}
@@ -222,10 +224,9 @@ export default function ReportsPage() {
             {/* Activities List */}
             <Card>
               <CardHeader>
-                <CardTitle>Toutes les Activités</CardTitle>
+                <CardTitle>{t.reports.allActivities}</CardTitle>
                 <CardDescription>
-                  {filteredActivities.length} activité{filteredActivities.length !== 1 ? "s" : ""} affichée
-                  {filteredActivities.length !== 1 ? "s" : ""}
+                  {filteredActivities.length} {t.reports.activitiesShown}
                 </CardDescription>
               </CardHeader>
               <CardContent>
@@ -252,21 +253,21 @@ export default function ReportsPage() {
                               variant={activity.type === "curricular" ? "default" : "secondary"}
                               className="text-xs"
                             >
-                              {activity.type === "curricular" ? "Scolaire" : "Extra"}
+                              {activity.type === "curricular" ? t.activities.academic : t.activities.extra}
                             </Badge>
                           </div>
                           <div className="flex items-center gap-4 text-sm text-muted-foreground">
-                            <span>Enseignant: {activity.teacher}</span>
+                            <span>{t.common.teacher}: {activity.teacher}</span>
                             <span>•</span>
-                            <span>Niveau: {activity.grade}</span>
+                            <span>{t.common.level}: {activity.grade}</span>
                             <span>•</span>
-                            <span>{activity.enrolled} étudiants</span>
+                            <span>{activity.enrolled} {t.common.students}</span>
                           </div>
                         </div>
                       </div>
                       <div className="text-right">
                         <p className="text-2xl font-bold text-foreground">{activity.avgAttendance}%</p>
-                        <p className="text-xs text-muted-foreground">Présence moyenne</p>
+                        <p className="text-xs text-muted-foreground">{t.reports.averageAttendanceRate}</p>
                       </div>
                     </div>
                   ))}
@@ -284,18 +285,18 @@ export default function ReportsPage() {
                   <div>
                     <CardTitle className="flex items-center gap-2">
                       <Calendar className="h-5 w-5 text-primary" />
-                      Tendance de Présence
+                      {t.reports.attendanceTrend}
                     </CardTitle>
-                    <CardDescription>Taux de présence hebdomadaire pour le Club d'Anglais</CardDescription>
+                    <CardDescription>{t.reports.weeklyAttendanceRate} {t.activities.englishClub}</CardDescription>
                   </div>
                   <Select defaultValue="english-club">
                     <SelectTrigger className="w-[200px]">
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="english-club">Club d'Anglais</SelectItem>
-                      <SelectItem value="math">Mathématiques</SelectItem>
-                      <SelectItem value="football">Football</SelectItem>
+                      <SelectItem value="english-club">{t.activities.englishClub}</SelectItem>
+                      <SelectItem value="math">{t.activities.advancedMath}</SelectItem>
+                      <SelectItem value="football">{t.activities.football}</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
@@ -325,10 +326,10 @@ export default function ReportsPage() {
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <TrendingDown className="h-5 w-5 text-warning" />
-                  Étudiants avec Faible Participation
+                  {t.reports.lowParticipationStudents}
                 </CardTitle>
                 <CardDescription>
-                  Étudiants nécessitant un suivi pour faible taux de participation ({"<"}60%)
+                  {t.reports.studentsNeedingFollowup}
                 </CardDescription>
               </CardHeader>
               <CardContent>
@@ -341,14 +342,14 @@ export default function ReportsPage() {
                           <Badge variant="outline">{student.grade}</Badge>
                         </div>
                         <div className="flex items-center gap-4 text-sm text-muted-foreground">
-                          <span>{student.activities} activités inscrites</span>
+                          <span>{student.activities} {t.reports.activitiesEnrolled}</span>
                           <span>•</span>
                           <span className="text-warning">{student.reason}</span>
                         </div>
                       </div>
                       <div className="text-right">
                         <p className="text-2xl font-bold text-warning">{student.attendance}%</p>
-                        <p className="text-xs text-muted-foreground">Présence</p>
+                        <p className="text-xs text-muted-foreground">{t.nav.attendance}</p>
                       </div>
                     </div>
                   ))}
@@ -361,9 +362,9 @@ export default function ReportsPage() {
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <BarChart3 className="h-5 w-5 text-success" />
-                  Présence par Activité
+                  {t.reports.attendanceByActivity}
                 </CardTitle>
-                <CardDescription>Comparaison des taux de présence entre activités</CardDescription>
+                <CardDescription>{t.reports.attendanceComparison}</CardDescription>
               </CardHeader>
               <CardContent>
                 <ChartContainer config={attendanceChartConfig}>

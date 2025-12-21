@@ -6,8 +6,10 @@ import { Button } from "@/components/ui/button"
 import { ChartContainer, ChartTooltip, ChartTooltipContent, type ChartConfig } from "@/components/ui/chart"
 import { Users, DollarSign, AlertTriangle, TrendingUp, FileText, CheckCircle2, Clock, BarChart3 } from "lucide-react"
 import { Bar, BarChart, Pie, PieChart, Cell, CartesianGrid, XAxis, YAxis } from "recharts"
+import { useI18n, interpolate } from "@/components/i18n-provider"
 
 export default function DirectorDashboard() {
+  const { t } = useI18n()
   const enrollmentData = [
     { grade: "6ème", count: 95 },
     { grade: "7ème", count: 102 },
@@ -19,155 +21,155 @@ export default function DirectorDashboard() {
   ]
 
   const revenueData = [
-    { category: "Scolarité", value: 45000000, color: "hsl(var(--chart-1))" },
-    { category: "Activités Extra", value: 12000000, color: "hsl(var(--chart-2))" },
-    { category: "Cantine", value: 8500000, color: "hsl(var(--chart-3))" },
-    { category: "Transport", value: 6200000, color: "hsl(var(--chart-4))" },
+    { category: t.dashboard.tuition, value: 45000000, color: "hsl(var(--chart-1))" },
+    { category: t.dashboard.extraActivities, value: 12000000, color: "hsl(var(--chart-2))" },
+    { category: t.dashboard.canteen, value: 8500000, color: "hsl(var(--chart-3))" },
+    { category: t.dashboard.transport, value: 6200000, color: "hsl(var(--chart-4))" },
   ]
 
   const pendingApprovals = [
     {
       id: 1,
-      type: "Remise de Paiement",
+      type: t.dashboard.paymentDiscount,
       student: "Fatoumata Diallo",
-      submittedBy: "Ibrahima Bah (Comptable)",
+      submittedBy: "Ibrahima Bah",
       date: "2024-12-18",
-      reason: "Situation familiale difficile - demande 20% réduction",
+      reason: t.dashboard.reasons.familySituation,
       amount: "150,000 GNF",
     },
     {
       id: 2,
-      type: "Inscription Tardive",
+      type: t.dashboard.lateEnrollment,
       student: "Mamadou Sylla",
-      submittedBy: "Mariama Camara (Secrétaire)",
+      submittedBy: "Mariama Camara",
       date: "2024-12-17",
-      reason: "Transfert d'une autre école - documents en règle",
+      reason: t.dashboard.reasons.schoolTransfer,
       amount: null,
     },
     {
       id: 3,
-      type: "Annulation de Frais",
+      type: t.dashboard.feeWaiver,
       student: "Aminata Touré",
-      submittedBy: "Ibrahima Bah (Comptable)",
+      submittedBy: "Ibrahima Bah",
       date: "2024-12-17",
-      reason: "Erreur de facturation - double paiement",
+      reason: t.dashboard.reasons.billingError,
       amount: "200,000 GNF",
     },
     {
       id: 4,
-      type: "Plan de Paiement",
+      type: t.dashboard.paymentPlan,
       student: "Oumar Keita",
-      submittedBy: "Ibrahima Bah (Comptable)",
+      submittedBy: "Ibrahima Bah",
       date: "2024-12-16",
-      reason: "Étalement sur 3 mois demandé",
+      reason: t.dashboard.reasons.paymentSpread,
       amount: "450,000 GNF",
     },
     {
       id: 5,
-      type: "Modification d'Activité",
+      type: t.dashboard.activityModification,
       student: "Aissata Conte",
-      submittedBy: "Mariama Camara (Secrétaire)",
+      submittedBy: "Mariama Camara",
       date: "2024-12-16",
-      reason: "Changement de club sportif",
+      reason: t.dashboard.reasons.clubChange,
       amount: null,
     },
   ]
 
   const recentActivity = [
     {
-      action: "Période Financière Clôturée",
+      action: t.dashboard.financialPeriodClosed,
       user: "Ibrahima Bah",
-      time: "Il y a 2 heures",
+      time: interpolate(t.dashboard.hoursAgo, { hours: 2 }),
       type: "success",
     },
     {
-      action: "Inscription en Masse Traitée (23 étudiants)",
+      action: interpolate(t.dashboard.bulkEnrollmentProcessed, { count: 23 }),
       user: "Mariama Camara",
-      time: "Il y a 4 heures",
+      time: interpolate(t.dashboard.hoursAgo, { hours: 4 }),
       type: "info",
     },
     {
-      action: "Rapport Académique Généré",
+      action: t.dashboard.academicReportGenerated,
       user: "Fatoumata Diallo",
-      time: "Il y a 5 heures",
+      time: interpolate(t.dashboard.hoursAgo, { hours: 5 }),
       type: "info",
     },
     {
-      action: "Discordance Bancaire Signalée",
+      action: t.dashboard.bankDiscrepancyFlagged,
       user: "Ibrahima Bah",
-      time: "Hier à 16:30",
+      time: interpolate(t.dashboard.yesterdayAt, { time: "16:30" }),
       type: "warning",
     },
     {
-      action: "Validation de 12 Paiements",
+      action: interpolate(t.dashboard.paymentValidation, { count: 12 }),
       user: "Ibrahima Bah",
-      time: "Hier à 14:20",
+      time: interpolate(t.dashboard.yesterdayAt, { time: "14:20" }),
       type: "success",
     },
   ]
 
   const chartConfig = {
     count: {
-      label: "Étudiants",
+      label: t.common.students,
       color: "hsl(var(--primary))",
     },
   } satisfies ChartConfig
 
   return (
-    <div className="min-h-screen bg-background pt-20 lg:pt-20">
-      <main className="container mx-auto px-4 py-8">
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-foreground mb-2">Tableau de Bord du Directeur</h1>
-          <p className="text-muted-foreground">Bonjour, Ousmane Sylla</p>
+    <div className="min-h-screen bg-background pt-4 lg:pt-4">
+      <main className="container mx-auto px-4 py-4">
+        <div className="mb-4">
+          <h1 className="text-3xl font-bold text-foreground mb-2">{t.dashboard.title}</h1>
+          <p className="text-muted-foreground">{interpolate(t.dashboard.greetingWithName, { name: "Ousmane Sylla" })}</p>
         </div>
 
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4 mb-8">
           <Card>
             <CardHeader className="flex flex-row items-center justify-between pb-2">
-              <CardTitle className="text-sm font-medium text-muted-foreground">Inscription Totale</CardTitle>
+              <CardTitle className="text-sm font-medium text-muted-foreground">{t.dashboard.totalEnrollment}</CardTitle>
               <Users className="h-5 w-5 text-primary" />
             </CardHeader>
             <CardContent>
               <div className="text-3xl font-bold text-foreground">615</div>
               <p className="text-xs text-success flex items-center gap-1 mt-1">
                 <TrendingUp className="h-3 w-3" />
-                <span>+5% vs mois dernier</span>
+                <span>+5% {t.dashboard.vsLastMonth}</span>
               </p>
             </CardContent>
           </Card>
 
           <Card>
             <CardHeader className="flex flex-row items-center justify-between pb-2">
-              <CardTitle className="text-sm font-medium text-muted-foreground">Revenu (Cette Période)</CardTitle>
+              <CardTitle className="text-sm font-medium text-muted-foreground">{t.dashboard.revenue}</CardTitle>
               <DollarSign className="h-5 w-5 text-success" />
             </CardHeader>
             <CardContent>
               <div className="text-3xl font-bold text-foreground">71.7M GNF</div>
-              <p className="text-xs text-muted-foreground mt-1">En attente: 8.2M GNF</p>
+              <p className="text-xs text-muted-foreground mt-1">{t.dashboard.pending}: 8.2M GNF</p>
             </CardContent>
           </Card>
 
           <Card className="border-warning/50 bg-warning/5">
             <CardHeader className="flex flex-row items-center justify-between pb-2">
-              <CardTitle className="text-sm font-medium text-warning">Approbations en Attente</CardTitle>
+              <CardTitle className="text-sm font-medium text-warning">{t.dashboard.pendingApprovals}</CardTitle>
               <AlertTriangle className="h-5 w-5 text-warning" />
             </CardHeader>
             <CardContent>
               <div className="text-3xl font-bold text-warning">5</div>
               <Button variant="link" className="p-0 h-auto text-xs text-warning hover:text-warning/80 mt-1">
-                Voir les exceptions →
+                {t.dashboard.viewExceptions}
               </Button>
             </CardContent>
           </Card>
 
           <Card className="border-destructive/50 bg-destructive/5">
             <CardHeader className="flex flex-row items-center justify-between pb-2">
-              <CardTitle className="text-sm font-medium text-destructive">Drapeaux de Réconciliation</CardTitle>
+              <CardTitle className="text-sm font-medium text-destructive">{t.dashboard.reconciliationFlags}</CardTitle>
               <AlertTriangle className="h-5 w-5 text-destructive" />
             </CardHeader>
             <CardContent>
               <div className="text-3xl font-bold text-destructive">2</div>
-              <p className="text-xs text-destructive/80 mt-1">Nécessite attention</p>
+              <p className="text-xs text-destructive/80 mt-1">{t.dashboard.needsAttention}</p>
             </CardContent>
           </Card>
         </div>
@@ -177,9 +179,9 @@ export default function DirectorDashboard() {
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Clock className="h-5 w-5 text-warning" />
-                Tickets d'Exception en Attente
+                {t.dashboard.pendingExceptionTickets}
               </CardTitle>
-              <CardDescription>Demandes nécessitant votre approbation</CardDescription>
+              <CardDescription>{t.dashboard.requestsNeedingApproval}</CardDescription>
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
@@ -197,7 +199,7 @@ export default function DirectorDashboard() {
                       <p className="text-sm font-medium text-foreground">{approval.student}</p>
                       <p className="text-xs text-muted-foreground">{approval.reason}</p>
                       <div className="flex items-center gap-2 text-xs text-muted-foreground pt-1">
-                        <span>Par: {approval.submittedBy}</span>
+                        <span>{t.dashboard.by}: {approval.submittedBy}</span>
                         <span>•</span>
                         <span>{approval.date}</span>
                       </div>
@@ -205,10 +207,10 @@ export default function DirectorDashboard() {
                     <div className="flex flex-col gap-2 ml-4">
                       <Button size="sm" className="h-8">
                         <CheckCircle2 className="h-3 w-3 mr-1" />
-                        Approuver
+                        {t.dashboard.approve}
                       </Button>
                       <Button size="sm" variant="outline" className="h-8 bg-transparent">
-                        Réviser
+                        {t.dashboard.review}
                       </Button>
                     </div>
                   </div>
@@ -221,9 +223,9 @@ export default function DirectorDashboard() {
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <FileText className="h-5 w-5 text-primary" />
-                Activité Récente
+                {t.dashboard.recentActivity}
               </CardTitle>
-              <CardDescription>Événements importants et actions du système</CardDescription>
+              <CardDescription>{t.dashboard.importantEvents}</CardDescription>
             </CardHeader>
             <CardContent>
               <div className="space-y-3">
@@ -250,7 +252,7 @@ export default function DirectorDashboard() {
                 ))}
               </div>
               <Button variant="link" className="w-full mt-4">
-                Voir tout l'historique
+                {t.dashboard.viewAllHistory}
               </Button>
             </CardContent>
           </Card>
@@ -261,9 +263,9 @@ export default function DirectorDashboard() {
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <BarChart3 className="h-5 w-5 text-primary" />
-                Inscriptions par Niveau
+                {t.dashboard.enrollmentByLevel}
               </CardTitle>
-              <CardDescription>Répartition des étudiants par classe</CardDescription>
+              <CardDescription>{t.dashboard.studentDistribution}</CardDescription>
             </CardHeader>
             <CardContent>
               <ChartContainer config={chartConfig}>
@@ -282,14 +284,14 @@ export default function DirectorDashboard() {
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <DollarSign className="h-5 w-5 text-success" />
-                Revenu par Catégorie
+                {t.dashboard.revenueByCategory}
               </CardTitle>
-              <CardDescription>Distribution des revenus par type</CardDescription>
+              <CardDescription>{t.dashboard.revenueDistribution}</CardDescription>
             </CardHeader>
             <CardContent>
               <ChartContainer config={{
                 value: {
-                  label: "Revenu",
+                  label: t.dashboard.revenue,
                   color: "hsl(var(--chart-1))" // Default color for single value
                 }
               }} className="h-[300px] flex items-center justify-center">
@@ -316,7 +318,7 @@ export default function DirectorDashboard() {
                 </PieChart>
               </ChartContainer>
               <Button variant="link" className="w-full mt-4">
-                Voir tous les rapports
+                {t.dashboard.viewAllReports}
               </Button>
             </CardContent>
           </Card>

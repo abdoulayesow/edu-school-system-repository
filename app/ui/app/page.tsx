@@ -1,3 +1,5 @@
+"use client"
+
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { Card, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
@@ -13,49 +15,52 @@ import {
   Shield,
   Wifi,
 } from "lucide-react"
+import { useI18n } from "@/components/i18n-provider"
 
 export default function HomePage() {
+  const { t } = useI18n()
+
   const pages = [
     {
-      name: "Dashboard",
+      name: t.nav.dashboard,
       href: "/dashboard",
       icon: LayoutDashboard,
-      description: "Director's oversight view with KPIs, pending approvals, and action items",
+      description: t.home.dashboardDesc,
       color: "primary",
     },
     {
-      name: "Enrollments",
+      name: t.nav.enrollments,
       href: "/enrollments",
       icon: Users,
-      description: "Manage student enrollments, registration, and profile information",
+      description: t.home.enrollmentsDesc,
       color: "secondary",
     },
     {
-      name: "Activities",
+      name: t.nav.activities,
       href: "/activities",
       icon: BookOpen,
-      description: "Organize classes, clubs, and extracurricular activities",
+      description: t.home.activitiesDesc,
       color: "accent",
     },
     {
-      name: "Accounting",
+      name: t.nav.accounting,
       href: "/accounting",
       icon: Receipt,
-      description: "Track payments, reconciliations, and financial control with full traceability",
+      description: t.home.accountingDesc,
       color: "success",
     },
     {
-      name: "Attendance",
+      name: t.nav.attendance,
       href: "/attendance",
       icon: ClipboardCheck,
-      description: "Mobile-first attendance tracking with quick tap-to-mark interface",
+      description: t.home.attendanceDesc,
       color: "primary",
     },
     {
-      name: "Reports",
+      name: t.nav.reports,
       href: "/reports",
       icon: BarChart3,
-      description: "Academic oversight and participation analytics for data-driven decisions",
+      description: t.home.reportsDesc,
       color: "accent",
     },
   ]
@@ -63,42 +68,41 @@ export default function HomePage() {
   const features = [
     {
       icon: Wifi,
-      title: "Offline-First Design",
-      description: "Work seamlessly even with limited connectivity. All data syncs automatically when online.",
+      title: t.home.offlineFirstTitle,
+      description: t.home.offlineFirstDesc,
     },
     {
       icon: Shield,
-      title: "Security & Traceability",
-      description: "Every action is logged with transaction IDs and supporting documentation for full accountability.",
+      title: t.home.securityTitle,
+      description: t.home.securityDesc,
     },
     {
       icon: CheckCircle2,
-      title: "Role-Based Access",
-      description: "Tailored interfaces for directors, secretaries, accountants, teachers, and academic directors.",
+      title: t.home.roleBasedTitle,
+      description: t.home.roleBasedDesc,
     },
   ]
 
   return (
     <div className="min-h-screen bg-background">
       {/* Hero Section */}
-      <section className="relative bg-secondary px-6 py-24 text-secondary-foreground">
-        <div className="mx-auto max-w-6xl pt-12 lg:pt-0">
+      <section className="relative bg-secondary px-6 py-12 text-secondary-foreground">
+        <div className="mx-auto max-w-6xl">
           <div className="flex items-center gap-4 mb-6">
             <img src="/logo.png" alt="GSPN Logo" className="h-16 w-16 rounded-full" />
             <div>
-              <h1 className="text-5xl font-bold text-balance">Groupe Scolaire GSN N'Diolou</h1>
-              <p className="text-lg text-secondary-foreground/80 mt-2">Management System</p>
+              <h1 className="text-5xl font-bold text-balance">{t.home.schoolName}</h1>
+              <p className="text-lg text-secondary-foreground/80 mt-2">{t.home.managementSystem}</p>
             </div>
           </div>
-          <p className="text-2xl text-secondary-foreground/90 max-w-3xl text-pretty leading-relaxed mt-8">
-            A comprehensive school management platform built for excellence, security, and traceability in African
-            education.
+          <p className="text-xl text-secondary-foreground/90 max-w-3xl text-pretty leading-relaxed mt-4">
+            {t.home.heroDescription}
           </p>
-          <div className="mt-10 flex flex-wrap gap-4">
+          <div className="mt-6 flex flex-wrap gap-4">
             <Button asChild size="lg" className="bg-primary text-primary-foreground hover:bg-primary/90">
               <Link href="/dashboard">
                 <LayoutDashboard className="mr-2 h-5 w-5" />
-                Go to Dashboard
+                {t.home.goToDashboard}
               </Link>
             </Button>
             <Button
@@ -109,7 +113,7 @@ export default function HomePage() {
             >
               <Link href="/login">
                 <GraduationCap className="mr-2 h-5 w-5" />
-                Login
+                {t.nav.login}
               </Link>
             </Button>
           </div>
@@ -117,12 +121,12 @@ export default function HomePage() {
       </section>
 
       {/* Pages Overview */}
-      <section className="px-6 py-20">
+      <section className="px-6 py-10">
         <div className="mx-auto max-w-6xl">
-          <div className="text-center mb-16">
-            <h2 className="text-4xl font-bold mb-4 text-balance">Explore the System</h2>
-            <p className="text-xl text-muted-foreground max-w-2xl mx-auto text-pretty leading-relaxed">
-              Navigate to different sections of the platform designed for specific roles and workflows
+          <div className="text-center mb-8">
+            <h2 className="text-3xl font-bold mb-2 text-balance">{t.home.exploreSystem}</h2>
+            <p className="text-lg text-muted-foreground max-w-2xl mx-auto text-pretty leading-relaxed">
+              {t.home.exploreDescription}
             </p>
           </div>
 
@@ -130,7 +134,7 @@ export default function HomePage() {
             {pages.map((page) => {
               const Icon = page.icon
               return (
-                <Link key={page.name} href={page.href} className="group">
+                <Link key={page.href} href={page.href} className="group">
                   <Card className="h-full hover:shadow-lg transition-all duration-200 hover:border-primary/50">
                     <CardHeader>
                       <div className="flex items-center gap-3 mb-3">
@@ -170,12 +174,12 @@ export default function HomePage() {
       </section>
 
       {/* Features Section */}
-      <section className="px-6 py-20 bg-muted/30">
+      <section className="px-6 py-10 bg-muted/30">
         <div className="mx-auto max-w-6xl">
-          <div className="text-center mb-16">
-            <h2 className="text-4xl font-bold mb-4 text-balance">Built for African Schools</h2>
-            <p className="text-xl text-muted-foreground max-w-2xl mx-auto text-pretty leading-relaxed">
-              Designed with the unique needs of West African educational institutions in mind
+          <div className="text-center mb-8">
+            <h2 className="text-3xl font-bold mb-2 text-balance">{t.home.builtForAfricanSchools}</h2>
+            <p className="text-lg text-muted-foreground max-w-2xl mx-auto text-pretty leading-relaxed">
+              {t.home.featuresDescription}
             </p>
           </div>
 
@@ -199,23 +203,23 @@ export default function HomePage() {
       </section>
 
       {/* CTA Section */}
-      <section className="px-6 py-20">
+      <section className="px-6 py-10">
         <div className="mx-auto max-w-4xl text-center">
-          <h2 className="text-4xl font-bold mb-6 text-balance">Ready to Get Started?</h2>
-          <p className="text-xl text-muted-foreground mb-10 text-pretty leading-relaxed">
-            Access the platform and start managing your school with confidence
+          <h2 className="text-3xl font-bold mb-3 text-balance">{t.home.readyToStart}</h2>
+          <p className="text-lg text-muted-foreground mb-6 text-pretty leading-relaxed">
+            {t.home.ctaDescription}
           </p>
           <div className="flex flex-wrap gap-4 justify-center">
             <Button asChild size="lg" className="bg-primary text-primary-foreground hover:bg-primary/90">
               <Link href="/dashboard">
                 <LayoutDashboard className="mr-2 h-5 w-5" />
-                Open Dashboard
+                {t.home.openDashboard}
               </Link>
             </Button>
             <Button asChild size="lg" variant="outline">
               <Link href="/enrollments">
                 <Users className="mr-2 h-5 w-5" />
-                Manage Enrollments
+                {t.home.manageEnrollments}
               </Link>
             </Button>
           </div>
@@ -223,30 +227,30 @@ export default function HomePage() {
       </section>
 
       {/* Footer */}
-      <footer className="border-t bg-secondary px-6 py-12 text-secondary-foreground">
+      <footer className="border-t bg-secondary px-6 py-8 text-secondary-foreground">
         <div className="mx-auto max-w-6xl">
           <div className="flex flex-col md:flex-row justify-between items-center gap-6">
             <div className="flex items-center gap-3">
               <img src="/logo.png" alt="GSPN Logo" className="h-10 w-10 rounded-full" />
               <div>
-                <p className="font-bold">Groupe Scolaire GSN N'Diolou</p>
-                <p className="text-sm text-secondary-foreground/70">Excellence in Education</p>
+                <p className="font-bold">{t.home.schoolName}</p>
+                <p className="text-sm text-secondary-foreground/70">{t.home.excellenceInEducation}</p>
               </div>
             </div>
             <div className="flex gap-6 text-sm">
               <Link href="/dashboard" className="hover:text-primary transition-colors">
-                Dashboard
+                {t.nav.dashboard}
               </Link>
               <Link href="/login" className="hover:text-primary transition-colors">
-                Login
+                {t.nav.login}
               </Link>
               <Link href="/users" className="hover:text-primary transition-colors">
-                Users
+                {t.nav.users}
               </Link>
             </div>
           </div>
-          <div className="mt-8 pt-8 border-t border-secondary-foreground/10 text-center text-sm text-secondary-foreground/60">
-            <p>© 2025 GSPN Management System. Built with excellence for African education.</p>
+          <div className="mt-6 pt-6 border-t border-secondary-foreground/10 text-center text-sm text-secondary-foreground/60">
+            <p>{t.home.footerCopyright}</p>
           </div>
         </div>
       </footer>

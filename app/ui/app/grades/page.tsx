@@ -9,6 +9,7 @@ import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Save, TrendingUp, TrendingDown, Trophy, AlertTriangle, CheckCircle2, Clock } from "lucide-react"
+import { useI18n, interpolate } from "@/components/i18n-provider"
 
 interface Student {
   id: string
@@ -19,6 +20,7 @@ interface Student {
 }
 
 export default function GradesPage() {
+  const { t } = useI18n()
   const [pendingChanges, setPendingChanges] = useState(3)
   const [selectedClass, setSelectedClass] = useState("6eme-A")
   const [selectedSubject, setSelectedSubject] = useState("mathematiques")
@@ -66,12 +68,12 @@ export default function GradesPage() {
       <main className="container mx-auto px-4 py-8">
         <div className="mb-8 flex items-center justify-between">
           <div>
-            <h1 className="text-3xl font-bold text-foreground mb-2">Gestion des Notes</h1>
-            <p className="text-muted-foreground">Prof. Amara - Mathématiques</p>
+            <h1 className="text-3xl font-bold text-foreground mb-2">{t.grades.title}</h1>
+            <p className="text-muted-foreground">{interpolate(t.grades.subtitle, { teacherName: "Amara", subjectName: t.grades.subjects.mathematics })}</p>
           </div>
           <Button onClick={handleSaveAll} disabled={pendingChanges === 0}>
             <Save className="size-4 mr-2" />
-            Sauvegarder ({pendingChanges})
+            {interpolate(t.grades.saveChanges, { count: pendingChanges })}
           </Button>
         </div>
 
@@ -81,10 +83,10 @@ export default function GradesPage() {
             <CardContent className="pt-6">
               <div className="grid gap-4 md:grid-cols-3">
                 <div className="space-y-2">
-                  <Label htmlFor="class">Classe</Label>
+                  <Label htmlFor="class">{t.common.level}</Label>
                   <Select value={selectedClass} onValueChange={setSelectedClass}>
                     <SelectTrigger id="class">
-                      <SelectValue placeholder="Sélectionner une classe" />
+                      <SelectValue placeholder={t.grades.selectClass} />
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="6eme-A">6ème A</SelectItem>
@@ -95,29 +97,29 @@ export default function GradesPage() {
                   </Select>
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="subject">Matière</Label>
+                  <Label htmlFor="subject">{t.grades.subject}</Label>
                   <Select value={selectedSubject} onValueChange={setSelectedSubject}>
                     <SelectTrigger id="subject">
-                      <SelectValue placeholder="Sélectionner une matière" />
+                      <SelectValue placeholder={t.grades.selectSubject} />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="mathematiques">Mathématiques</SelectItem>
-                      <SelectItem value="francais">Français</SelectItem>
-                      <SelectItem value="anglais">Anglais</SelectItem>
-                      <SelectItem value="sciences">Sciences</SelectItem>
+                      <SelectItem value="mathematiques">{t.grades.subjects.mathematics}</SelectItem>
+                      <SelectItem value="francais">{t.grades.subjects.french}</SelectItem>
+                      <SelectItem value="anglais">{t.grades.subjects.english}</SelectItem>
+                      <SelectItem value="sciences">{t.grades.subjects.sciences}</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="term">Période</Label>
+                  <Label htmlFor="term">{t.grades.period}</Label>
                   <Select value={selectedTerm} onValueChange={setSelectedTerm}>
                     <SelectTrigger id="term">
-                      <SelectValue placeholder="Sélectionner une période" />
+                      <SelectValue placeholder={t.grades.selectPeriod} />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="trimestre-1">Trimestre 1</SelectItem>
-                      <SelectItem value="trimestre-2">Trimestre 2</SelectItem>
-                      <SelectItem value="trimestre-3">Trimestre 3</SelectItem>
+                      <SelectItem value="trimestre-1">{t.grades.terms.term1}</SelectItem>
+                      <SelectItem value="trimestre-2">{t.grades.terms.term2}</SelectItem>
+                      <SelectItem value="trimestre-3">{t.grades.terms.term3}</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
@@ -129,11 +131,11 @@ export default function GradesPage() {
           <div className="grid gap-4 md:grid-cols-3">
             <Card>
               <CardHeader className="pb-3">
-                <CardTitle className="text-sm font-medium text-muted-foreground">Moyenne de Classe</CardTitle>
+                <CardTitle className="text-sm font-medium text-muted-foreground">{t.grades.classAverage}</CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="text-3xl font-bold text-foreground">{classAverage.toFixed(1)}/20</div>
-                <p className="text-xs text-muted-foreground mt-1">Sur {students.length} étudiants</p>
+                <p className="text-xs text-muted-foreground mt-1">{interpolate(t.grades.onNStudents, { count: students.length })}</p>
               </CardContent>
             </Card>
 
@@ -141,7 +143,7 @@ export default function GradesPage() {
               <CardHeader className="pb-3">
                 <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
                   <Trophy className="size-4 text-accent" />
-                  Top 3 Étudiants
+                  {t.grades.top3Students}
                 </CardTitle>
               </CardHeader>
               <CardContent>
@@ -164,12 +166,12 @@ export default function GradesPage() {
               <CardHeader className="pb-3">
                 <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
                   <AlertTriangle className="size-4 text-warning" />
-                  Besoin d'Attention
+                  {t.grades.needsAttention}
                 </CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="text-3xl font-bold text-warning">{needsAttention.length}</div>
-                <p className="text-xs text-muted-foreground mt-1">Étudiants avec note {"<"} 10</p>
+                <p className="text-xs text-muted-foreground mt-1">{t.grades.studentsBelow10}</p>
               </CardContent>
             </Card>
           </div>
@@ -179,9 +181,9 @@ export default function GradesPage() {
               <CardContent className="py-3">
                 <div className="flex items-center gap-2 text-sm">
                   <Clock className="size-4 text-warning" />
-                  <span className="font-medium text-warning">{pendingChanges} notes en attente de sauvegarde</span>
+                  <span className="font-medium text-warning">{interpolate(t.grades.pendingChanges, { count: pendingChanges })}</span>
                   <span className="text-muted-foreground">
-                    - Cliquez sur Sauvegarder pour enregistrer vos modifications
+                    {t.grades.clickToSave}
                   </span>
                 </div>
               </CardContent>
@@ -191,20 +193,20 @@ export default function GradesPage() {
           {/* Grade Entry Table */}
           <Card>
             <CardHeader>
-              <CardTitle>Saisie des Notes</CardTitle>
+              <CardTitle>{t.grades.gradeEntry}</CardTitle>
               <CardDescription>
-                Entrez les notes sur 20. Les modifications sont sauvegardées en temps réel.
+                {t.grades.gradeEntryDescription}
               </CardDescription>
             </CardHeader>
             <CardContent>
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead>Étudiant</TableHead>
-                    <TableHead className="text-center">Note Précédente</TableHead>
-                    <TableHead className="text-center">Note Actuelle</TableHead>
-                    <TableHead className="text-center">Tendance</TableHead>
-                    <TableHead className="text-center">Statut</TableHead>
+                    <TableHead>{t.common.student}</TableHead>
+                    <TableHead className="text-center">{t.grades.previousGrade}</TableHead>
+                    <TableHead className="text-center">{t.grades.currentGrade}</TableHead>
+                    <TableHead className="text-center">{t.grades.trend}</TableHead>
+                    <TableHead className="text-center">{t.common.status}</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -237,13 +239,13 @@ export default function GradesPage() {
                         {student.status === "synced" && (
                           <Badge variant="outline" className="text-success border-success">
                             <CheckCircle2 className="size-3 mr-1" />
-                            Synchronisé
+                            {t.grades.synced}
                           </Badge>
                         )}
                         {student.status === "pending" && (
                           <Badge variant="outline" className="text-warning border-warning">
                             <Clock className="size-3 mr-1" />
-                            En attente
+                            {t.grades.pending}
                           </Badge>
                         )}
                       </TableCell>

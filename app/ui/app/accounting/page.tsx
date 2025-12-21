@@ -19,8 +19,10 @@ import {
 } from "@/components/ui/dialog"
 import { Plus, Upload, CheckCircle2, Clock, AlertCircle, DollarSign, Link2, Flag, Lock } from "lucide-react"
 import { Checkbox } from "@/components/ui/checkbox"
+import { useI18n, interpolate } from "@/components/i18n-provider"
 
 export default function AccountingPage() {
+  const { t } = useI18n()
   const [openRecordPayment, setOpenRecordPayment] = useState(false)
   const [selectedPayments, setSelectedPayments] = useState<string[]>([])
   const [selectedDeposit, setSelectedDeposit] = useState<string | null>(null)
@@ -90,21 +92,21 @@ export default function AccountingPage() {
         return (
           <Badge variant="outline" className="text-warning border-warning">
             <Clock className="h-3 w-3 mr-1" />
-            Non Validé
+            {t.accounting.unvalidated}
           </Badge>
         )
       case "validated":
         return (
           <Badge variant="outline" className="text-primary border-primary">
             <CheckCircle2 className="h-3 w-3 mr-1" />
-            Validé
+            {t.accounting.validated}
           </Badge>
         )
       case "reconciled":
         return (
           <Badge className="bg-success text-success-foreground">
             <CheckCircle2 className="h-3 w-3 mr-1" />
-            Réconcilié
+            {t.accounting.reconciled}
           </Badge>
         )
       default:
@@ -117,18 +119,18 @@ export default function AccountingPage() {
     .reduce((sum, p) => sum + p.amount, 0)
 
   return (
-    <div className="min-h-screen bg-background pt-20 lg:pt-20">
-      <main className="container mx-auto px-4 py-8">
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-foreground mb-2">Centre de Contrôle Financier</h1>
-          <p className="text-muted-foreground">Gérer les paiements, validations et réconciliations - Ibrahima Bah</p>
+    <div className="min-h-screen bg-background pt-4 lg:pt-4">
+      <main className="container mx-auto px-4 py-4">
+        <div className="mb-4">
+          <h1 className="text-3xl font-bold text-foreground mb-2">{t.accounting.title}</h1>
+          <p className="text-muted-foreground">{interpolate(t.accounting.subtitleWithName, { personName: "Ibrahima Bah" })}</p>
         </div>
 
         <Tabs defaultValue="payments" className="space-y-6">
           <TabsList>
-            <TabsTrigger value="payments">Enregistrement de Paiements</TabsTrigger>
-            <TabsTrigger value="reconciliation">Réconciliation</TabsTrigger>
-            <TabsTrigger value="period-close">Clôture de Période</TabsTrigger>
+            <TabsTrigger value="payments">{t.accounting.tabPayments}</TabsTrigger>
+            <TabsTrigger value="reconciliation">{t.accounting.tabReconciliation}</TabsTrigger>
+            <TabsTrigger value="period-close">{t.accounting.tabPeriodClose}</TabsTrigger>
           </TabsList>
 
           {/* Payment Recording Screen */}
@@ -137,29 +139,29 @@ export default function AccountingPage() {
               <CardHeader>
                 <div className="flex items-center justify-between">
                   <div>
-                    <CardTitle>Transactions de Paiement</CardTitle>
-                    <CardDescription>Enregistrer et valider les paiements des étudiants</CardDescription>
+                    <CardTitle>{t.accounting.paymentTransactions}</CardTitle>
+                    <CardDescription>{t.accounting.registerAndValidate}</CardDescription>
                   </div>
                   <Dialog open={openRecordPayment} onOpenChange={setOpenRecordPayment}>
                     <DialogTrigger asChild>
                       <Button>
                         <Plus className="h-4 w-4 mr-2" />
-                        Enregistrer un Paiement
+                        {t.accounting.recordPayment}
                       </Button>
                     </DialogTrigger>
                     <DialogContent className="max-w-2xl">
                       <DialogHeader>
-                        <DialogTitle>Enregistrer un Nouveau Paiement</DialogTitle>
+                        <DialogTitle>{t.accounting.recordNewPayment}</DialogTitle>
                         <DialogDescription>
-                          Tous les champs sont obligatoires. Un document justificatif est requis.
+                          {t.accounting.allFieldsRequired}
                         </DialogDescription>
                       </DialogHeader>
                       <div className="space-y-4 py-4">
                         <div className="space-y-2">
-                          <Label htmlFor="student">Étudiant *</Label>
+                          <Label htmlFor="student">{t.common.student} *</Label>
                           <Select>
                             <SelectTrigger id="student">
-                              <SelectValue placeholder="Rechercher un étudiant..." />
+                              <SelectValue placeholder={t.accounting.searchStudent} />
                             </SelectTrigger>
                             <SelectContent>
                               <SelectItem value="stu1">Fatoumata Diallo - STU001</SelectItem>
@@ -171,34 +173,34 @@ export default function AccountingPage() {
 
                         <div className="grid grid-cols-2 gap-4">
                           <div className="space-y-2">
-                            <Label htmlFor="amount">Montant (GNF) *</Label>
+                            <Label htmlFor="amount">{t.accounting.amountGNF} *</Label>
                             <Input id="amount" type="number" placeholder="800000" />
                           </div>
                           <div className="space-y-2">
-                            <Label htmlFor="paymentType">Type de Paiement *</Label>
+                            <Label htmlFor="paymentType">{t.accounting.paymentType} *</Label>
                             <Select>
                               <SelectTrigger id="paymentType">
-                                <SelectValue placeholder="Sélectionner" />
+                                <SelectValue placeholder={t.common.select} />
                               </SelectTrigger>
                               <SelectContent>
-                                <SelectItem value="cash">Espèces (Cash)</SelectItem>
-                                <SelectItem value="mobile">Mobile Money (Orange/MTN)</SelectItem>
-                                <SelectItem value="bank">Virement Bancaire</SelectItem>
+                                <SelectItem value="cash">{t.accounting.cash}</SelectItem>
+                                <SelectItem value="mobile">{t.accounting.mobileMoney}</SelectItem>
+                                <SelectItem value="bank">{t.accounting.bankTransfer}</SelectItem>
                               </SelectContent>
                             </Select>
                           </div>
                         </div>
 
                         <div className="space-y-2">
-                          <Label htmlFor="reference">Référence de Document Justificatif *</Label>
-                          <Input id="reference" placeholder="Ex: OM-2024-123 ou CASH-2024-045" />
+                          <Label htmlFor="reference">{t.accounting.documentReference} *</Label>
+                          <Input id="reference" placeholder={t.accounting.documentReferencePlaceholder} />
                           <p className="text-xs text-muted-foreground">
-                            Référence du reçu Mobile Money, numéro de reçu cash, ou référence bancaire
+                            {t.accounting.documentReferenceHint}
                           </p>
                         </div>
 
                         <div className="space-y-2">
-                          <Label htmlFor="document">Document Justificatif (Scan/Capture) *</Label>
+                          <Label htmlFor="document">{t.accounting.supportingDocument} *</Label>
                           <div className="flex items-center gap-2">
                             <Input id="document" type="file" accept=".pdf,.jpg,.jpeg,.png" className="flex-1" />
                             <Button variant="outline" size="icon" className="bg-transparent shrink-0">
@@ -207,13 +209,13 @@ export default function AccountingPage() {
                           </div>
                           <p className="text-xs text-destructive flex items-center gap-1">
                             <AlertCircle className="h-3 w-3" />
-                            Requis: Reçu Mobile Money, capture d'écran, ou document scanné
+                            {t.accounting.supportingDocumentHint}
                           </p>
                         </div>
 
                         <div className="space-y-2">
-                          <Label htmlFor="notes">Notes (Optionnel)</Label>
-                          <Input id="notes" placeholder="Informations supplémentaires..." />
+                          <Label htmlFor="notes">{t.accounting.notesOptional}</Label>
+                          <Input id="notes" placeholder={t.accounting.notesPlaceholder} />
                         </div>
 
                         <div className="flex justify-end gap-3 pt-4">
@@ -222,9 +224,9 @@ export default function AccountingPage() {
                             onClick={() => setOpenRecordPayment(false)}
                             className="bg-transparent"
                           >
-                            Annuler
+                            {t.common.cancel}
                           </Button>
-                          <Button onClick={() => setOpenRecordPayment(false)}>Enregistrer le Paiement</Button>
+                          <Button onClick={() => setOpenRecordPayment(false)}>{t.accounting.savePayment}</Button>
                         </div>
                       </div>
                     </DialogContent>
@@ -236,14 +238,14 @@ export default function AccountingPage() {
                   <Table>
                     <TableHeader>
                       <TableRow>
-                        <TableHead>ID Transaction</TableHead>
-                        <TableHead>Étudiant</TableHead>
-                        <TableHead className="text-right">Montant</TableHead>
-                        <TableHead>Méthode</TableHead>
-                        <TableHead>Date</TableHead>
-                        <TableHead>Statut</TableHead>
-                        <TableHead>Référence</TableHead>
-                        <TableHead className="text-right">Actions</TableHead>
+                        <TableHead>{t.accounting.transactionId}</TableHead>
+                        <TableHead>{t.common.student}</TableHead>
+                        <TableHead className="text-right">{t.common.amount}</TableHead>
+                        <TableHead>{t.accounting.method}</TableHead>
+                        <TableHead>{t.common.date}</TableHead>
+                        <TableHead>{t.common.status}</TableHead>
+                        <TableHead>{t.accounting.reference}</TableHead>
+                        <TableHead className="text-right">{t.common.actions}</TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
@@ -260,13 +262,13 @@ export default function AccountingPage() {
                             {txn.status === "unvalidated" && (
                               <Button size="sm" variant="outline" className="bg-transparent">
                                 <CheckCircle2 className="h-3 w-3 mr-1" />
-                                Valider
+                                {t.accounting.validate}
                               </Button>
                             )}
                             {txn.status === "validated" && (
-                              <span className="text-xs text-muted-foreground">Prêt pour réconciliation</span>
+                              <span className="text-xs text-muted-foreground">{t.accounting.readyForReconciliation}</span>
                             )}
-                            {txn.status === "reconciled" && <span className="text-xs text-success">Complété</span>}
+                            {txn.status === "reconciled" && <span className="text-xs text-success">{t.accounting.completed}</span>}
                           </TableCell>
                         </TableRow>
                       ))}
@@ -285,9 +287,9 @@ export default function AccountingPage() {
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
                     <CheckCircle2 className="h-5 w-5 text-primary" />
-                    Paiements Validés
+                    {t.accounting.validatedPayments}
                   </CardTitle>
-                  <CardDescription>Sélectionner les paiements à réconcilier</CardDescription>
+                  <CardDescription>{t.accounting.selectPaymentsToReconcile}</CardDescription>
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-3">
@@ -324,7 +326,7 @@ export default function AccountingPage() {
                   </div>
                   {selectedPayments.length > 0 && (
                     <div className="mt-4 p-4 rounded-lg bg-primary/10 border border-primary/30">
-                      <p className="text-sm text-muted-foreground">Total Sélectionné</p>
+                      <p className="text-sm text-muted-foreground">{t.accounting.totalSelected}</p>
                       <p className="text-2xl font-bold text-primary">{selectedTotal.toLocaleString()} GNF</p>
                     </div>
                   )}
@@ -336,9 +338,9 @@ export default function AccountingPage() {
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
                     <DollarSign className="h-5 w-5 text-success" />
-                    Dépôts Bancaires
+                    {t.accounting.bankDeposits}
                   </CardTitle>
-                  <CardDescription>Sélectionner le dépôt correspondant</CardDescription>
+                  <CardDescription>{t.accounting.selectMatchingDeposit}</CardDescription>
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-3">
@@ -372,15 +374,15 @@ export default function AccountingPage() {
               <CardContent className="pt-6">
                 <div className="flex items-center justify-between">
                   <div className="space-y-1">
-                    <p className="text-sm font-medium text-muted-foreground">Comparaison</p>
+                    <p className="text-sm font-medium text-muted-foreground">{t.accounting.comparison}</p>
                     <div className="flex items-center gap-4">
                       <div>
-                        <p className="text-xs text-muted-foreground">Paiements Sélectionnés</p>
+                        <p className="text-xs text-muted-foreground">{t.accounting.selectedPayments}</p>
                         <p className="text-lg font-bold text-foreground">{selectedTotal.toLocaleString()} GNF</p>
                       </div>
-                      <div className="text-muted-foreground">vs</div>
+                      <div className="text-muted-foreground">{t.accounting.vs}</div>
                       <div>
-                        <p className="text-xs text-muted-foreground">Dépôt Bancaire</p>
+                        <p className="text-xs text-muted-foreground">{t.accounting.bankDeposit}</p>
                         <p className="text-lg font-bold text-foreground">
                           {selectedDeposit
                             ? bankDeposits.find((d) => d.id === selectedDeposit)?.amount.toLocaleString()
@@ -394,7 +396,7 @@ export default function AccountingPage() {
                       selectedTotal !== (bankDeposits.find((d) => d.id === selectedDeposit)?.amount || 0) && (
                         <p className="text-xs text-warning flex items-center gap-1 mt-2">
                           <AlertCircle className="h-3 w-3" />
-                          Discordance détectée - Vérifier avant de réconcilier
+                          {t.accounting.discrepancyDetected}
                         </p>
                       )}
                   </div>
@@ -405,7 +407,7 @@ export default function AccountingPage() {
                       className="bg-transparent"
                     >
                       <Flag className="h-4 w-4 mr-2" />
-                      Signaler Discordance
+                      {t.accounting.flagDiscrepancy}
                     </Button>
                     <Button
                       disabled={
@@ -415,7 +417,7 @@ export default function AccountingPage() {
                       }
                     >
                       <Link2 className="h-4 w-4 mr-2" />
-                      Réconcilier
+                      {t.accounting.reconcile}
                     </Button>
                   </div>
                 </div>
@@ -427,8 +429,8 @@ export default function AccountingPage() {
           <TabsContent value="period-close" className="space-y-6">
             <Card>
               <CardHeader>
-                <CardTitle>Assistant de Clôture de Période</CardTitle>
-                <CardDescription>Fermer la période financière actuelle et générer le rapport final</CardDescription>
+                <CardTitle>{t.accounting.periodCloseWizard}</CardTitle>
+                <CardDescription>{t.accounting.closeCurrentPeriod}</CardDescription>
               </CardHeader>
               <CardContent className="space-y-6">
                 {/* Step 1: Pre-Close Checklist */}
@@ -437,39 +439,39 @@ export default function AccountingPage() {
                     <div className="flex items-center justify-center h-8 w-8 rounded-full bg-primary text-primary-foreground font-bold text-sm">
                       1
                     </div>
-                    <h3 className="text-lg font-semibold">Vérification Pré-Clôture</h3>
+                    <h3 className="text-lg font-semibold">{t.accounting.preCloseVerification}</h3>
                   </div>
                   <div className="ml-10 space-y-3">
                     <div className="flex items-center justify-between p-4 rounded-lg border bg-card">
                       <div className="flex items-center gap-3">
                         <CheckCircle2 className="h-5 w-5 text-success" />
                         <div>
-                          <p className="font-medium text-foreground">Tous les paiements validés</p>
-                          <p className="text-sm text-muted-foreground">0 paiements non validés</p>
+                          <p className="font-medium text-foreground">{t.accounting.allPaymentsValidated}</p>
+                          <p className="text-sm text-muted-foreground">{interpolate(t.accounting.unvalidatedPayments, { count: 0 })}</p>
                         </div>
                       </div>
-                      <Badge className="bg-success text-success-foreground">Complété</Badge>
+                      <Badge className="bg-success text-success-foreground">{t.accounting.completed}</Badge>
                     </div>
                     <div className="flex items-center justify-between p-4 rounded-lg border bg-card">
                       <div className="flex items-center gap-3">
                         <CheckCircle2 className="h-5 w-5 text-success" />
                         <div>
-                          <p className="font-medium text-foreground">Toutes les réconciliations effectuées</p>
-                          <p className="text-sm text-muted-foreground">0 réconciliations en attente</p>
+                          <p className="font-medium text-foreground">{t.accounting.allReconciliationsDone}</p>
+                          <p className="text-sm text-muted-foreground">{interpolate(t.accounting.pendingReconciliations, { count: 0 })}</p>
                         </div>
                       </div>
-                      <Badge className="bg-success text-success-foreground">Complété</Badge>
+                      <Badge className="bg-success text-success-foreground">{t.accounting.completed}</Badge>
                     </div>
                     <div className="flex items-center justify-between p-4 rounded-lg border border-warning/50 bg-warning/5">
                       <div className="flex items-center gap-3">
                         <AlertCircle className="h-5 w-5 text-warning" />
                         <div>
-                          <p className="font-medium text-foreground">Discordances résolues</p>
-                          <p className="text-sm text-warning">2 discordances nécessitent attention</p>
+                          <p className="font-medium text-foreground">{t.accounting.discrepanciesResolved}</p>
+                          <p className="text-sm text-warning">{interpolate(t.accounting.discrepanciesNeedAttention, { count: 2 })}</p>
                         </div>
                       </div>
                       <Button variant="outline" size="sm" className="bg-transparent">
-                        Réviser
+                        {t.dashboard.review}
                       </Button>
                     </div>
                   </div>
@@ -481,11 +483,11 @@ export default function AccountingPage() {
                     <div className="flex items-center justify-center h-8 w-8 rounded-full bg-muted text-muted-foreground font-bold text-sm">
                       2
                     </div>
-                    <h3 className="text-lg font-semibold text-muted-foreground">Révision du Résumé</h3>
+                    <h3 className="text-lg font-semibold text-muted-foreground">{t.accounting.summaryReview}</h3>
                   </div>
                   <div className="ml-10">
                     <p className="text-sm text-muted-foreground">
-                      Disponible après résolution de toutes les vérifications pré-clôture
+                      {t.accounting.availableAfterPreClose}
                     </p>
                   </div>
                 </div>
@@ -496,7 +498,7 @@ export default function AccountingPage() {
                     <div className="flex items-center justify-center h-8 w-8 rounded-full bg-muted text-muted-foreground font-bold text-sm">
                       3
                     </div>
-                    <h3 className="text-lg font-semibold text-muted-foreground">Clôturer la Période</h3>
+                    <h3 className="text-lg font-semibold text-muted-foreground">{t.accounting.closePeriod}</h3>
                   </div>
                   <div className="ml-10">
                     <Card className="border-destructive/30 bg-destructive/5">
@@ -504,14 +506,13 @@ export default function AccountingPage() {
                         <div className="flex items-start gap-3">
                           <Lock className="h-5 w-5 text-destructive mt-0.5" />
                           <div className="flex-1">
-                            <p className="font-medium text-foreground mb-1">Action Irréversible</p>
+                            <p className="font-medium text-foreground mb-1">{t.accounting.irreversibleAction}</p>
                             <p className="text-sm text-muted-foreground mb-4">
-                              La clôture de période verrouille toutes les transactions et empêche toute modification
-                              ultérieure. Assurez-vous que toutes les vérifications sont complètes.
+                              {t.accounting.closePeriodWarning}
                             </p>
                             <Button disabled variant="destructive">
                               <Lock className="h-4 w-4 mr-2" />
-                              Clôturer la Période Financière
+                              {t.accounting.closeFinancialPeriod}
                             </Button>
                           </div>
                         </div>

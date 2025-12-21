@@ -26,6 +26,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
+import { useI18n, interpolate } from "@/components/i18n-provider"
 
 interface UserData {
   id: string
@@ -37,6 +38,7 @@ interface UserData {
 }
 
 export default function UsersPage() {
+  const { t } = useI18n()
   const [searchQuery, setSearchQuery] = useState("")
   const [roleFilter, setRoleFilter] = useState<string>("all")
   const [isInviteDialogOpen, setIsInviteDialogOpen] = useState(false)
@@ -112,27 +114,27 @@ export default function UsersPage() {
   const getRoleBadge = (role: UserData["role"]) => {
     const roleConfig = {
       director: {
-        label: "Directeur",
+        label: t.users.director,
         icon: Shield,
         className: "bg-primary/10 text-primary border-primary/30",
       },
       teacher: {
-        label: "Enseignant",
+        label: t.users.teacher,
         icon: GraduationCap,
         className: "bg-accent/10 text-accent border-accent/30",
       },
       accountant: {
-        label: "Comptable",
+        label: t.users.accountant,
         icon: Calculator,
         className: "bg-success/10 text-success border-success/30",
       },
       parent: {
-        label: "Parent",
+        label: t.users.parent,
         icon: User,
         className: "bg-secondary/50 text-secondary-foreground border-secondary",
       },
       student: {
-        label: "Étudiant",
+        label: t.common.student,
         icon: Users,
         className: "bg-muted text-muted-foreground border-border",
       },
@@ -154,19 +156,19 @@ export default function UsersPage() {
       case "active":
         return (
           <Badge variant="outline" className="text-success border-success">
-            Actif
+            {t.users.active}
           </Badge>
         )
       case "invited":
         return (
           <Badge variant="outline" className="text-warning border-warning">
-            Invité
+            {t.users.invited}
           </Badge>
         )
       case "inactive":
         return (
           <Badge variant="outline" className="text-muted-foreground border-muted-foreground">
-            Inactif
+            {t.users.inactive}
           </Badge>
         )
     }
@@ -195,96 +197,96 @@ export default function UsersPage() {
         <div className="container mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-2xl font-bold text-foreground">Gestion des Utilisateurs</h1>
-              <p className="text-sm text-muted-foreground">Inviter et gérer les utilisateurs du système</p>
+              <h1 className="text-2xl font-bold text-foreground">{t.users.title}</h1>
+              <p className="text-sm text-muted-foreground">{t.users.subtitle}</p>
             </div>
             <Dialog open={isInviteDialogOpen} onOpenChange={setIsInviteDialogOpen}>
               <DialogTrigger asChild>
                 <Button>
                   <Plus className="size-4 mr-2" />
-                  Inviter un Utilisateur
+                  {t.users.inviteUser}
                 </Button>
               </DialogTrigger>
               <DialogContent>
                 <DialogHeader>
-                  <DialogTitle>Inviter un Utilisateur</DialogTitle>
+                  <DialogTitle>{t.users.inviteUser}</DialogTitle>
                   <DialogDescription>
-                    Envoyez une invitation par e-mail pour ajouter un nouvel utilisateur au système.
+                    {t.users.inviteUserDescription}
                   </DialogDescription>
                 </DialogHeader>
                 <div className="space-y-4 py-4">
                   <div className="space-y-2">
-                    <Label htmlFor="invite-email">Adresse e-mail</Label>
+                    <Label htmlFor="invite-email">{t.login.email}</Label>
                     <Input
                       id="invite-email"
                       type="email"
-                      placeholder="utilisateur@email.gn"
+                      placeholder={t.users.userEmailPlaceholder}
                       value={inviteEmail}
                       onChange={(e) => setInviteEmail(e.target.value)}
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="invite-role">Rôle</Label>
-                    <Select value={inviteRole} onValueChange={setInviteRole}>
+                    <Label htmlFor="invite-role">{t.users.role}</Label>
+                    <Select value={inviteRole} onValueChange={(value) => setInviteRole(value as UserData['role'])}>
                       <SelectTrigger id="invite-role">
-                        <SelectValue placeholder="Sélectionner un rôle" />
+                        <SelectValue placeholder={t.users.selectRole} />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="director">Directeur</SelectItem>
-                        <SelectItem value="teacher">Enseignant</SelectItem>
-                        <SelectItem value="accountant">Comptable</SelectItem>
-                        <SelectItem value="parent">Parent</SelectItem>
-                        <SelectItem value="student">Étudiant</SelectItem>
+                        <SelectItem value="director">{t.users.director}</SelectItem>
+                        <SelectItem value="teacher">{t.users.teacher}</SelectItem>
+                        <SelectItem value="accountant">{t.users.accountant}</SelectItem>
+                        <SelectItem value="parent">{t.users.parent}</SelectItem>
+                        <SelectItem value="student">{t.common.student}</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
                   <div className="rounded-lg bg-muted p-3 text-sm text-muted-foreground">
-                    <p className="font-medium mb-1">Permissions pour {inviteRole || "ce rôle"}:</p>
+                    <p className="font-medium mb-1">{interpolate(t.users.permissionsForRole, { role: inviteRole || t.users.role.toLowerCase() })}:</p>
                     {inviteRole === "director" && (
                       <ul className="list-disc list-inside space-y-1">
-                        <li>Accès complet au système</li>
-                        <li>Gestion des utilisateurs</li>
-                        <li>Rapports et statistiques</li>
+                        <li>{t.users.permissions.director.p1}</li>
+                        <li>{t.users.permissions.director.p2}</li>
+                        <li>{t.users.permissions.director.p3}</li>
                       </ul>
                     )}
                     {inviteRole === "teacher" && (
                       <ul className="list-disc list-inside space-y-1">
-                        <li>Saisie des notes</li>
-                        <li>Gestion des présences</li>
-                        <li>Voir les classes assignées</li>
+                        <li>{t.users.permissions.teacher.p1}</li>
+                        <li>{t.users.permissions.teacher.p2}</li>
+                        <li>{t.users.permissions.teacher.p3}</li>
                       </ul>
                     )}
                     {inviteRole === "accountant" && (
                       <ul className="list-disc list-inside space-y-1">
-                        <li>Création de factures</li>
-                        <li>Suivi des paiements</li>
-                        <li>Rapports financiers</li>
+                        <li>{t.users.permissions.accountant.p1}</li>
+                        <li>{t.users.permissions.accountant.p2}</li>
+                        <li>{t.users.permissions.accountant.p3}</li>
                       </ul>
                     )}
                     {inviteRole === "parent" && (
                       <ul className="list-disc list-inside space-y-1">
-                        <li>Voir les notes des enfants</li>
-                        <li>Payer les factures</li>
-                        <li>Recevoir les notifications</li>
+                        <li>{t.users.permissions.parent.p1}</li>
+                        <li>{t.users.permissions.parent.p2}</li>
+                        <li>{t.users.permissions.parent.p3}</li>
                       </ul>
                     )}
                     {inviteRole === "student" && (
                       <ul className="list-disc list-inside space-y-1">
-                        <li>Voir ses propres notes</li>
-                        <li>Consulter l'emploi du temps</li>
-                        <li>Recevoir les notifications</li>
+                        <li>{t.users.permissions.student.p1}</li>
+                        <li>{t.users.permissions.student.p2}</li>
+                        <li>{t.users.permissions.student.p3}</li>
                       </ul>
                     )}
-                    {!inviteRole && <p>Sélectionnez un rôle pour voir les permissions</p>}
+                    {!inviteRole && <p>{t.users.selectRoleToSeePermissions}</p>}
                   </div>
                 </div>
                 <DialogFooter>
                   <Button variant="outline" onClick={() => setIsInviteDialogOpen(false)}>
-                    Annuler
+                    {t.common.cancel}
                   </Button>
                   <Button onClick={handleInviteUser} disabled={!inviteEmail || !inviteRole}>
                     <Mail className="size-4 mr-2" />
-                    Envoyer l'Invitation
+                    {t.users.sendInvitation}
                   </Button>
                 </DialogFooter>
               </DialogContent>
@@ -302,7 +304,7 @@ export default function UsersPage() {
               <CardHeader className="pb-3">
                 <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
                   <Shield className="size-4 text-primary" />
-                  Directeurs
+                  {t.users.userCounts.directors}
                 </CardTitle>
               </CardHeader>
               <CardContent>
@@ -314,7 +316,7 @@ export default function UsersPage() {
               <CardHeader className="pb-3">
                 <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
                   <GraduationCap className="size-4 text-accent" />
-                  Enseignants
+                  {t.users.userCounts.teachers}
                 </CardTitle>
               </CardHeader>
               <CardContent>
@@ -326,7 +328,7 @@ export default function UsersPage() {
               <CardHeader className="pb-3">
                 <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
                   <Calculator className="size-4 text-success" />
-                  Comptables
+                  {t.users.userCounts.accountants}
                 </CardTitle>
               </CardHeader>
               <CardContent>
@@ -338,7 +340,7 @@ export default function UsersPage() {
               <CardHeader className="pb-3">
                 <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
                   <User className="size-4" />
-                  Parents
+                  {t.users.userCounts.parents}
                 </CardTitle>
               </CardHeader>
               <CardContent>
@@ -350,7 +352,7 @@ export default function UsersPage() {
               <CardHeader className="pb-3">
                 <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
                   <Users className="size-4" />
-                  Étudiants
+                  {t.users.userCounts.students}
                 </CardTitle>
               </CardHeader>
               <CardContent>
@@ -366,7 +368,7 @@ export default function UsersPage() {
                 <div className="relative flex-1">
                   <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground" />
                   <Input
-                    placeholder="Rechercher par nom ou email..."
+                    placeholder={t.users.searchPlaceholder}
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
                     className="pl-9"
@@ -374,15 +376,15 @@ export default function UsersPage() {
                 </div>
                 <Select value={roleFilter} onValueChange={setRoleFilter}>
                   <SelectTrigger className="w-full sm:w-[200px]">
-                    <SelectValue placeholder="Filtrer par rôle" />
+                    <SelectValue placeholder={t.users.filterByRole} />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="all">Tous les rôles</SelectItem>
-                    <SelectItem value="director">Directeur</SelectItem>
-                    <SelectItem value="teacher">Enseignant</SelectItem>
-                    <SelectItem value="accountant">Comptable</SelectItem>
-                    <SelectItem value="parent">Parent</SelectItem>
-                    <SelectItem value="student">Étudiant</SelectItem>
+                    <SelectItem value="all">{t.users.allRoles}</SelectItem>
+                    <SelectItem value="director">{t.users.director}</SelectItem>
+                    <SelectItem value="teacher">{t.users.teacher}</SelectItem>
+                    <SelectItem value="accountant">{t.users.accountant}</SelectItem>
+                    <SelectItem value="parent">{t.users.parent}</SelectItem>
+                    <SelectItem value="student">{t.common.student}</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -392,22 +394,21 @@ export default function UsersPage() {
           {/* Users Table */}
           <Card>
             <CardHeader>
-              <CardTitle>Liste des Utilisateurs</CardTitle>
+              <CardTitle>{t.users.userList}</CardTitle>
               <CardDescription>
-                {filteredUsers.length} utilisateur{filteredUsers.length !== 1 ? "s" : ""} trouvé
-                {filteredUsers.length !== 1 ? "s" : ""}
+                {interpolate(t.users.usersFound, { count: filteredUsers.length })}
               </CardDescription>
             </CardHeader>
             <CardContent>
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead>Nom</TableHead>
-                    <TableHead>Email</TableHead>
-                    <TableHead>Rôle</TableHead>
-                    <TableHead>Statut</TableHead>
-                    <TableHead>Dernière Activité</TableHead>
-                    <TableHead className="text-right">Actions</TableHead>
+                    <TableHead>{t.users.name}</TableHead>
+                    <TableHead>{t.login.email}</TableHead>
+                    <TableHead>{t.users.role}</TableHead>
+                    <TableHead>{t.common.status}</TableHead>
+                    <TableHead>{t.users.lastActivity}</TableHead>
+                    <TableHead className="text-right">{t.common.actions}</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -418,7 +419,7 @@ export default function UsersPage() {
                       <TableCell>{getRoleBadge(user.role)}</TableCell>
                       <TableCell>{getStatusBadge(user.status)}</TableCell>
                       <TableCell className="text-muted-foreground text-sm">
-                        {user.lastActive || "Jamais connecté"}
+                        {user.lastActive || t.users.neverConnected}
                       </TableCell>
                       <TableCell className="text-right">
                         <DropdownMenu>
@@ -428,26 +429,26 @@ export default function UsersPage() {
                             </Button>
                           </DropdownMenuTrigger>
                           <DropdownMenuContent align="end">
-                            <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                            <DropdownMenuLabel>{t.common.actions}</DropdownMenuLabel>
                             <DropdownMenuSeparator />
                             <DropdownMenuItem>
                               <Mail className="size-4 mr-2" />
-                              Envoyer un Email
+                              {t.users.sendEmail}
                             </DropdownMenuItem>
                             <DropdownMenuItem>
                               <Shield className="size-4 mr-2" />
-                              Modifier les Permissions
+                              {t.users.editPermissions}
                             </DropdownMenuItem>
                             {user.status === "invited" && (
                               <DropdownMenuItem>
                                 <Mail className="size-4 mr-2" />
-                                Renvoyer l'Invitation
+                                {t.users.resendInvitation}
                               </DropdownMenuItem>
                             )}
                             <DropdownMenuSeparator />
                             <DropdownMenuItem className="text-destructive">
                               <UserX className="size-4 mr-2" />
-                              Révoquer l'Accès
+                              {t.users.revokeAccess}
                             </DropdownMenuItem>
                           </DropdownMenuContent>
                         </DropdownMenu>
