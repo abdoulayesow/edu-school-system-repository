@@ -8,19 +8,12 @@ import { Menu, X, Wifi, WifiOff } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { mainNavigation, bottomNavigation } from "@/lib/nav-links"
-import { sampleUsers } from "@/db/sample-data"
 import { useI18n } from "@/components/i18n-provider"
 import { LanguageSwitcher } from "@/components/language-switcher"
+import { signIn, signOut, useSession } from "next-auth/react"
 
-// Simulate a logged-in user. We will replace this with a real auth hook later.
-const currentUser = sampleUsers[0] // Ousmane Diop, Director
-
-const visibleMainNavigation = mainNavigation.filter((item) =>
-  item.roles.includes(currentUser.role),
-)
-const visibleBottomNavigation = bottomNavigation.filter((item) =>
-  item.roles.includes(currentUser.role),
-)
+const visibleMainNavigation = mainNavigation
+const visibleBottomNavigation = bottomNavigation
 
 // Map nav link names to translation keys
 const navTranslationKeys: Record<string, keyof typeof import('@/lib/i18n').fr.nav> = {
@@ -39,6 +32,7 @@ export function Navigation() {
   const [isOnline, setIsOnline] = useState(true)
   const pathname = usePathname()
   const { t } = useI18n()
+  const { data: session } = useSession()
 
   // Helper to get translated nav name
   const getNavName = (name: string) => {
@@ -111,12 +105,18 @@ export function Navigation() {
             {/* User Profile */}
             <div className="flex items-center gap-3">
               <Avatar className="h-9 w-9">
-                <AvatarImage src={currentUser.avatar_url} alt={`${currentUser.first_name} ${currentUser.last_name}`} />
-                <AvatarFallback>{currentUser.first_name[0]}{currentUser.last_name[0]}</AvatarFallback>
+                <AvatarImage src={session?.user?.image ?? ""} alt={session?.user?.name ?? ""} />
+                <AvatarFallback>
+                  {(session?.user?.name?.[0] ?? "U").toUpperCase()}
+                </AvatarFallback>
               </Avatar>
               <div className="text-sm">
-                <p className="font-semibold text-primary-foreground">{currentUser.first_name} {currentUser.last_name}</p>
-                <p className="text-primary-foreground/70 capitalize">{currentUser.role}</p>
+                <p className="font-semibold text-primary-foreground">
+                  {session?.user?.name ?? "Guest"}
+                </p>
+                <p className="text-primary-foreground/70 capitalize">
+                  {(session?.user as any)?.role ?? ""}
+                </p>
               </div>
             </div>
           </div>
@@ -126,7 +126,7 @@ export function Navigation() {
       {/* Mobile Sidebar Navigation */}
       <aside
         className={cn(
-          "fixed left-0 top-0 z-40 h-screen w-64 bg-secondary text-secondary-foreground transition-transform duration-300 ease-in-out lg:hidden",
+          "fixed left-0 top-0 z-40 h-screen w-64 bg-secondary/80 text-secondary-foreground transition-transform duration-300 ease-in-out lg:hidden glassmorphism",
           isOpen ? "translate-x-0" : "-translate-x-full",
         )}
       >
@@ -135,12 +135,16 @@ export function Navigation() {
           <div className="border-b border-secondary-foreground/10 p-4">
             <div className="flex items-center gap-3">
                <Avatar className="h-10 w-10">
-                <AvatarImage src={currentUser.avatar_url} alt={`${currentUser.first_name} ${currentUser.last_name}`} />
-                <AvatarFallback>{currentUser.first_name[0]}{currentUser.last_name[0]}</AvatarFallback>
+                <AvatarImage src={session?.user?.image ?? ""} alt={session?.user?.name ?? ""} />
+                <AvatarFallback>
+                  {(session?.user?.name?.[0] ?? "U").toUpperCase()}
+                </AvatarFallback>
               </Avatar>
               <div>
-                <h2 className="font-bold text-md">{currentUser.first_name} {currentUser.last_name}</h2>
-                <p className="text-xs text-secondary-foreground/70 capitalize">{currentUser.role}</p>
+                <h2 className="font-bold text-md">{session?.user?.name ?? "Guest"}</h2>
+                <p className="text-xs text-secondary-foreground/70 capitalize">
+                  {(session?.user as any)?.role ?? ""}
+                </p>
               </div>
             </div>
           </div>
@@ -222,12 +226,21 @@ export function Navigation() {
 
           {/* Footer */}
           <div className="border-t border-secondary-foreground/10 p-4">
-              <Link
-                href="/login"
-                className="flex items-center justify-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors text-secondary-foreground/80 hover:bg-secondary-foreground/10 hover:text-secondary-foreground"
-              >
-                <span>Logout</span>
-              </Link>
+              {session ? (
+                <button
+                  onClick={() => signOut({ callbackUrl: "/login" })}
+                  className="flex w-full items-center justify-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors text-secondary-foreground/80 hover:bg-secondary-foreground/10 hover:text-secondary-foreground"
+                >
+                  <span>Logout</span>
+                </button>
+              ) : (
+                <button
+                  onClick={() => signIn()}
+                  className="flex w-full items-center justify-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors text-secondary-foreground/80 hover:bg-secondary-foreground/10 hover:text-secondary-foreground"
+                >
+                  <span>Login</span>
+                </button>
+              )}
           </div>
         </div>
       </aside>

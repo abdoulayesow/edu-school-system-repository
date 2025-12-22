@@ -8,7 +8,17 @@ import {
   BarChart3,
   LogIn,
 } from "lucide-react";
-import type { UserRole } from "../../../db/schema";
+// TODO: Replace with real RBAC roles once the domain model is finalized.
+export type UserRole =
+  | "director"
+  | "academic_director"
+  | "secretary"
+  | "accountant"
+  | "teacher"
+  | "parent"
+  | "student"
+
+
 
 export interface NavLink {
   name: string;
