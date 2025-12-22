@@ -1,0 +1,12 @@
+{
+  "name": "@app/api",
+  "private": true,
+  "type": "module",
+  "dependencies": {
+    "bcrypt": "^6.0.0"
+  },
+  "devDependencies": {
+    "@types/bcrypt": "^6.0.0",
+    "typescript": "^5"
+  }
+}

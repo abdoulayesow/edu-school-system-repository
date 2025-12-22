@@ -1,8 +1,8 @@
 // app/ui/app/api/profile/route.ts
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
-import { prisma } from "@/lib/prisma";
 import { NextResponse } from "next/server";
+import { updateProfile } from "@api/profile/updateProfile";
 
 export async function PATCH(request: Request) {
   try {
@@ -17,37 +17,13 @@ export async function PATCH(request: Request) {
 
     const { name, dateOfBirth, phone, street, city, state, zip, country } = body;
 
-    // Update user information
-    const updatedUser = await prisma.user.update({
-      where: { id: userId },
-      data: {
-        name: name,
-        dateOfBirth: dateOfBirth ? new Date(dateOfBirth) : null,
-        phone: phone,
-      },
+    const updatedUser = await updateProfile({
+      userId,
+      name,
+      dateOfBirth,
+      phone,
+      address: { street, city, state, zip, country },
     });
-
-    // Update or create address information
-    if (street || city || state || zip || country) {
-      await prisma.address.upsert({
-        where: { userId: userId },
-        update: {
-          street: street,
-          city: city,
-          state: state,
-          zip: zip,
-          country: country,
-        },
-        create: {
-          userId: userId,
-          street: street,
-          city: city,
-          state: state,
-          zip: zip,
-          country: country,
-        },
-      });
-    }
 
     return NextResponse.json({ message: "Profile updated successfully", user: updatedUser });
   } catch (error) {

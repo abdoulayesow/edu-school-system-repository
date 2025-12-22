@@ -166,7 +166,10 @@ export default function ActivitiesPage() {
                                 </div>
                                 <div className="flex items-center gap-2">
                                   {student.paymentStatus === "overdue" && (
-                                    <AlertCircle className="h-4 w-4 text-warning" title={t.activities.overduePayments} />
+                                    <AlertCircle
+                                      className="h-4 w-4 text-warning"
+                                      aria-label={t.activities.overduePayments}
+                                    />
                                   )}
                                   <Button size="sm">{t.common.add}</Button>
                                 </div>

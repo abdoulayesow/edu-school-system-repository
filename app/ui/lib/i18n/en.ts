@@ -1,5 +1,7 @@
 // English translations
-export const en = {
+import type { TranslationKeys } from "./fr";
+
+export const en: TranslationKeys = {
   // Common
   common: {
     search: "Search",
@@ -29,6 +31,7 @@ export const en = {
     students: "students",
     student: "Student",
     teacher: "Teacher",
+    user: "User",
     level: "Level",
     online: "Online",
     offline: "Offline",
@@ -108,6 +111,10 @@ export const en = {
     // Exception tickets
     pendingExceptionTickets: "Pending Exception Tickets",
     requestsNeedingApproval: "Requests needing your approval",
+    requestType: "Request type",
+    student: "Student",
+    details: "Details",
+    actions: "Actions",
     approve: "Approve",
     review: "Review",
     by: "By",

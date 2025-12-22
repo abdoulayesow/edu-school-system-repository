@@ -115,7 +115,7 @@ export function Navigation() {
                   {session?.user?.name ?? "Guest"}
                 </p>
                 <p className="text-primary-foreground/70 capitalize">
-                  {(session?.user as any)?.role ?? ""}
+                  {session?.user?.role ?? ""}
                 </p>
               </div>
             </div>
@@ -143,7 +143,7 @@ export function Navigation() {
               <div>
                 <h2 className="font-bold text-md">{session?.user?.name ?? "Guest"}</h2>
                 <p className="text-xs text-secondary-foreground/70 capitalize">
-                  {(session?.user as any)?.role ?? ""}
+                  {session?.user?.role ?? ""}
                 </p>
               </div>
             </div>

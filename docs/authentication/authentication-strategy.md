@@ -40,13 +40,14 @@ We will support multiple authentication methods to provide a flexible user exper
 
 ### 3. Session Management
 
-Our session management strategy will prioritize security by avoiding common vulnerabilities like Cross-Site Scripting (XSS).
+The current implementation uses **JWT sessions** (`strategy: "jwt"`).
 
-**3.1. Session Strategy: Database Sessions with JWT**
+**Why JWT in this repo?**
+- NextAuth middleware runs before your route handlers and can enforce authentication/RBAC.
+- With JWT sessions, middleware can read role/id from the token without a DB lookup.
 
-*   We will use the **"database" session strategy** provided by NextAuth.js, which is the most robust and secure option.
-*   A session ID is stored in a **secure, HTTP-only cookie**. This cookie is inaccessible to client-side JavaScript, mitigating XSS attacks.
-*   The session ID points to the session data stored in our database. This allows for easy session invalidation on the server side (e.g., on logout or for security events).
+**Tradeoffs / future option**
+- You can switch to database sessions later if you want easy server-side invalidation of sessions, but you’ll need to consider how middleware enforces RBAC (DB access isn’t available in edge runtime without careful setup).
 
 **3.2. Token Refreshing and Expiration**
 

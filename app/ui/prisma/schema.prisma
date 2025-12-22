@@ -1,6 +1,3 @@
-// NOTE: This file mirrors app/db/prisma/schema.prisma.
-// It exists so Prisma can generate the client within the Next.js (app/ui) workspace.
-
 // This is your Prisma schema file,
 // learn more about it in the docs: https://pris.ly/d/prisma-schema
 
@@ -13,6 +10,23 @@ generator client {
   provider = "prisma-client-js"
 }
 
+enum Role {
+  user
+  director
+  academic_director
+  secretary
+  accountant
+  teacher
+  parent
+  student
+}
+
+enum UserStatus {
+  invited
+  active
+  inactive
+}
+
 model User {
   id            String    @id @default(cuid())
   name          String?
@@ -22,7 +36,8 @@ model User {
   passwordHash  String?
   dateOfBirth   DateTime?
   phone         String?
-  role          String    @default("USER")
+  role          Role       @default(user)
+  status        UserStatus @default(active)
   accounts      Account[]
   sessions      Session[]
   address       Address?

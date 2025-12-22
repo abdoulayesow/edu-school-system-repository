@@ -40,6 +40,9 @@ DATABASE_URL="your_neon_pooled_connection_string"  # required at runtime by Pris
 GOOGLE_CLIENT_ID="your_google_client_id"
 GOOGLE_CLIENT_SECRET="your_google_client_secret"
 NEXTAUTH_SECRET="your_generated_secret"
+ADMIN_EMAILS="abdoulaye.sow.1989@gmail.com,abdoulaye.sow.co@gmail.com"  # bootstrap initial admins (comma-separated)
+# Recommended in production:
+# NEXTAUTH_URL="https://yourdomain.com"
 ```
 
 **How to Get The Values:**
@@ -50,8 +53,12 @@ NEXTAUTH_SECRET="your_generated_secret"
     2.  Create a new project.
     3.  Go to "APIs & Services" -> "Credentials".
     4.  Create an "OAuth client ID" for a "Web application".
-    5.  Add `http://localhost:3000` to "Authorized JavaScript origins".
-    6.  Add `http://localhost:3000/api/auth/callback/google` to "Authorized redirect URIs".
+    5.  Add `http://localhost:8000` to "Authorized JavaScript origins".
+    6.  Add `http://localhost:8000/api/auth/callback/google` to "Authorized redirect URIs".
+
+    **Production (Vercel):** also add your deployed URL (Vercel domain or custom domain) to both lists, e.g.
+    - JavaScript origin: `https://YOUR-VERCEL-DOMAIN.vercel.app`
+    - Redirect URI: `https://YOUR-VERCEL-DOMAIN.vercel.app/api/auth/callback/google`
     7.  Copy the Client ID and Client Secret.
 *   **`NEXTAUTH_SECRET`**:
     *   Run the following command in your terminal to generate a secure secret:
@@ -73,8 +80,8 @@ NEXTAUTH_SECRET="your_generated_secret"
 2.  **Sync Database Schema:**
     *   Run the following command from the root of the project to apply the schema to your Neon database:
         ```bash
-        npx prisma db push --schema=app/ui/prisma/schema.prisma
-        cd app/ui && npx prisma generate --schema=prisma/schema.prisma
+        npx prisma db push --config=app/db/prisma.config.ts
+        npm --prefix app/ui run prisma:generate
         ```
 
 3.  **Start the Development Server:**
@@ -100,17 +107,22 @@ NEXTAUTH_SECRET="your_generated_secret"
 To test this, you first need to create a user in the database with a hashed password.
 
 1.  **Create a User:**
-    *   Use a tool like `curl` or an API client (like Postman or Insomnia) to send a `POST` request to the registration endpoint.
-    *   **Endpoint:** `http://localhost:8000/api/register`
-    *   **Method:** `POST`
-    *   **Body (JSON):**
-        ```json
-        {
-          "name": "Your Name",
-          "email": "your.email@example.com",
-          "password": "your-strong-password"
-        }
-        ```
+    *   Users **cannot self-register**.
+
+To create/invite users for testing, use the **director-only** admin endpoint:
+- **Endpoint:** `http://localhost:8000/api/admin/users`
+- **Method:** `POST`
+- **Body (JSON) examples:**
+
+Invite-only (Google sign-in after invite):
+```json
+{ "email": "teacher1@example.com", "role": "teacher", "status": "invited" }
+```
+
+Credentials user (email/password login):
+```json
+{ "email": "staff1@example.com", "role": "teacher", "password": "your-strong-password" }
+```
 
 2.  **Log In:**
     *   Once the user is created, go to the `/login` page.

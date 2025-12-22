@@ -32,7 +32,15 @@ interface UserData {
   id: string
   name: string
   email: string
-  role: "director" | "teacher" | "accountant" | "parent" | "student"
+  role:
+    | "user"
+    | "director"
+    | "academic_director"
+    | "secretary"
+    | "teacher"
+    | "accountant"
+    | "parent"
+    | "student"
   status: "active" | "invited" | "inactive"
   lastActive?: string
 }
@@ -45,7 +53,7 @@ export default function UsersPage() {
   const [inviteEmail, setInviteEmail] = useState("")
   const [inviteRole, setInviteRole] = useState<string>("")
 
-  const users: UserData[] = [
+  const [users, setUsers] = useState<UserData[]>([
     {
       id: "1",
       name: "Moussa Diallo",
@@ -101,7 +109,8 @@ export default function UsersPage() {
       status: "inactive",
       lastActive: "Il y a 2 mois",
     },
-  ]
+  ])
+
 
   const filteredUsers = users.filter((user) => {
     const matchesSearch =
@@ -112,11 +121,26 @@ export default function UsersPage() {
   })
 
   const getRoleBadge = (role: UserData["role"]) => {
-    const roleConfig = {
+    const roleConfig: Record<UserData["role"], { label: string; icon: any; className: string }> = {
+      user: {
+        label: t.common.user,
+        icon: User,
+        className: "bg-muted/50 text-foreground border-border",
+      },
       director: {
         label: t.users.director,
         icon: Shield,
         className: "bg-primary/10 text-primary border-primary/30",
+      },
+      academic_director: {
+        label: t.users.academicDirector ?? "Academic Director",
+        icon: Shield,
+        className: "bg-primary/10 text-primary border-primary/30",
+      },
+      secretary: {
+        label: t.users.secretary ?? "Secretary",
+        icon: User,
+        className: "bg-secondary/40 text-secondary-foreground border-secondary",
       },
       teacher: {
         label: t.users.teacher,
@@ -174,12 +198,43 @@ export default function UsersPage() {
     }
   }
 
-  const handleInviteUser = () => {
-    // TODO: Implement invite logic
-    console.log("[v0] Inviting user:", { email: inviteEmail, role: inviteRole })
-    setIsInviteDialogOpen(false)
-    setInviteEmail("")
-    setInviteRole("")
+  const handleInviteUser = async () => {
+    const email = inviteEmail.trim().toLowerCase()
+    const role = inviteRole
+
+    if (!email || !role) return
+
+    try {
+      const res = await fetch("/api/admin/users", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, role, status: "invited" }),
+      })
+
+      if (!res.ok) {
+        const data = await res.json().catch(() => null)
+        const message = data?.message || `Invite failed (${res.status})`
+        console.error(message)
+        return
+      }
+
+      const created = (await res.json()) as { id: string; email: string; name?: string | null; role: UserData["role"]; status: UserData["status"] }
+
+      // Optimistically add the invited user to the table.
+      setUsers((prev) => [{
+        id: created.id,
+        name: created.name ?? "",
+        email: created.email,
+        role: created.role,
+        status: created.status,
+      }, ...prev])
+
+      setIsInviteDialogOpen(false)
+      setInviteEmail("")
+      setInviteRole("")
+    } catch (err) {
+      console.error("Invite failed", err)
+    }
   }
 
   const userCounts = {

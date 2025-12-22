@@ -10,6 +10,7 @@ import {
 } from "lucide-react";
 // TODO: Replace with real RBAC roles once the domain model is finalized.
 export type UserRole =
+  | "user"
   | "director"
   | "academic_director"
   | "secretary"
@@ -77,6 +78,6 @@ export const bottomNavigation: NavLink[] = [
     name: "Login", 
     href: "/login", 
     icon: LogIn,
-    roles: ["director", "academic_director", "secretary", "accountant", "teacher"] // Everyone can see login
+    roles: ["user", "director", "academic_director", "secretary", "accountant", "teacher", "parent", "student"] // Everyone can see login
   },
 ];

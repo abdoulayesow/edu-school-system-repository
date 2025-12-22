@@ -29,6 +29,7 @@ export const fr = {
     students: "étudiants",
     student: "Étudiant",
     teacher: "Enseignant",
+    user: "Utilisateur",
     level: "Niveau",
     online: "En ligne",
     offline: "Hors ligne",
@@ -108,9 +109,13 @@ export const fr = {
     // Exception tickets
     pendingExceptionTickets: "Tickets d'Exception en Attente",
     requestsNeedingApproval: "Demandes nécessitant votre approbation",
+    requestType: "Type de demande",
+    student: "Étudiant",
+    details: "Détails",
+    actions: "Actions",
     approve: "Approuver",
     review: "Réviser",
-    by: "Par",
+    by: "Par", 
 
     // Exception types
     paymentDiscount: "Remise de Paiement",
@@ -579,4 +584,12 @@ export const fr = {
   },
 } as const;
 
-export type TranslationKeys = typeof fr;
+type TranslationTree = { [key: string]: string | TranslationTree };
+
+type WidenStrings<T> = T extends string
+  ? string
+  : T extends Record<string, any>
+    ? { [K in keyof T]: WidenStrings<T[K]> }
+    : T;
+
+export type TranslationKeys = WidenStrings<typeof fr>;

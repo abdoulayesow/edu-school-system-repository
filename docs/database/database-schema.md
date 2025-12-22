@@ -1,11 +1,18 @@
-# Database Schema - GSPN School Management System
+# Database Schema - School Management System
+
+> Note: This repository currently uses **Prisma + Postgres (Neon)** for its runtime database.
+> The **source of truth** for the database schema is the Prisma schema file:
+> - `app/ui/prisma/schema.prisma`
+>
+> Some sections below (Drizzle/Turso/offline-first schema) were part of earlier planning and may be obsolete for the current implementation.
+
 
 | **Document Info** | |
 |-------------------|---|
 | **Product** | GSPN School Management System |
 | **Version** | 1.0 |
 | **Date** | December 19, 2025 |
-| **Database** | Turso (libSQL/SQLite) |
+| **Database** | Postgres (Neon) via Prisma |
 
 ---
 
@@ -13,10 +20,11 @@
 
 This document contains the complete database schema for the GSPN School Management System. The schema is designed for:
 
-- **SQLite compatibility** (Turso/libSQL)
-- **Offline-first sync** (version tracking, soft deletes)
-- **Full audit trail** (all changes logged)
-- **Role-based access** (users with roles)
+- Current runtime DB: **Postgres (Neon)**
+- ORM: **Prisma**
+- Core auth tables: **NextAuth + PrismaAdapter** (`User`, `Account`, `Session`, `VerificationToken`)
+
+> Note: The large “offline-first / Drizzle / Turso” sections below are historical design notes and may not reflect the current runtime schema.
 
 ---
 
