@@ -4,7 +4,9 @@
       "Bash(npm --prefix app/ui run dev)",
       "Bash(npx tsx:*)",
       "Bash(npx prisma db execute --stdin --config=app/db/prisma.config.ts <<'EOF'\nSELECT * FROM \"Account\";\nEOF)",
-      "Bash(npx prisma db execute:*)"
+      "Bash(npx prisma db execute:*)",
+      "Bash(cat:*)",
+      "Bash(npm run dev:*)"
     ]
   }
 }

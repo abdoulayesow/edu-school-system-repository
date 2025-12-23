@@ -134,7 +134,12 @@ export const authOptions: NextAuthOptions = {
       console.log("🔍 signIn: dbUser found:", dbUser ? `${dbUser.email} (status: ${dbUser.status})` : "null")
 
       if (!dbUser) {
-        console.error("❌ signIn: User not found in database")
+        // Allow admin emails to proceed (createUser will handle creation)
+        if (ADMIN_EMAILS.includes(email)) {
+          console.log("✅ signIn: Admin email not in DB, allowing createUser to run")
+          return true
+        }
+        console.error("❌ signIn: User not found in database and not an admin email")
         return false
       }
 

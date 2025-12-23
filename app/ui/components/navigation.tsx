@@ -42,12 +42,14 @@ export function Navigation() {
 
   return (
     <>
-      {/* Mobile Menu Button */}
-      <div className="fixed top-4 left-4 z-50 lg:hidden">
-        <Button size="icon" variant="outline" onClick={() => setIsOpen(!isOpen)} className="bg-background shadow-lg">
-          {isOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
-        </Button>
-      </div>
+      {/* Mobile Sidebar Navigation - Only show when logged in */}
+      {session && (
+        <div className="fixed top-4 left-4 z-50 lg:hidden">
+          <Button size="icon" variant="outline" onClick={() => setIsOpen(!isOpen)} className="bg-background shadow-lg">
+            {isOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+          </Button>
+        </div>
+      )}
 
       {/* Horizontal Navigation Bar - Desktop Only */}
       <nav className="hidden lg:flex fixed top-0 left-0 right-0 z-40 bg-primary border-b border-primary-foreground/10 h-16 items-center">
@@ -61,75 +63,103 @@ export function Navigation() {
             </div>
           </Link>
 
-          {/* Main Links */}
-          <div className="flex items-center gap-2">
-            {visibleMainNavigation.map((item) => {
-              const isActive = pathname.startsWith(item.href)
-              const Icon = item.icon
-              return (
-                <Link
-                  key={item.name}
-                  href={item.href}
-                  className={cn(
-                    "flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium transition-colors",
-                    isActive
-                      ? "bg-primary-foreground text-primary shadow-sm"
-                      : "text-primary-foreground/80 hover:bg-primary-foreground/10 hover:text-primary-foreground",
-                  )}
-                >
-                  <Icon className="h-4 w-4" />
-                  <span>{getNavName(item.name)}</span>
-                </Link>
-              )
-            })}
-          </div>
+          {/* Main Links - Only show when logged in */}
+          {session && (
+            <div className="flex items-center gap-2">
+              {visibleMainNavigation.map((item) => {
+                const isActive = pathname.startsWith(item.href)
+                const Icon = item.icon
+                return (
+                  <Link
+                    key={item.name}
+                    href={item.href}
+                    className={cn(
+                      "flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium transition-colors",
+                      isActive
+                        ? "bg-primary-foreground text-primary shadow-sm"
+                        : "text-primary-foreground/80 hover:bg-primary-foreground/10 hover:text-primary-foreground",
+                    )}
+                  >
+                    <Icon className="h-4 w-4" />
+                    <span>{getNavName(item.name)}</span>
+                  </Link>
+                )
+              })}
+            </div>
+          )}
 
           {/* Right Section */}
           <div className="flex items-center gap-4">
-            {/* Language Switcher */}
+            {/* Language Switcher - Always visible */}
             <LanguageSwitcher variant="nav" />
-            
-            <button
-              onClick={() => setIsOnline(!isOnline)}
-              className={cn(
-                "flex items-center gap-2 rounded-lg px-3 py-1.5 text-xs font-medium transition-colors",
-                isOnline
-                  ? "bg-success/90 text-success-foreground hover:bg-success"
-                  : "bg-warning/90 text-warning-foreground hover:bg-warning",
-              )}
-            >
-              {isOnline ? <Wifi className="h-3 w-3" /> : <WifiOff className="h-3 w-3" />}
-              <span>{isOnline ? t.common.online : t.common.offline}</span>
-            </button>
-            
-            {/* User Profile */}
-            <div className="flex items-center gap-3">
-              <Avatar className="h-9 w-9">
-                <AvatarImage src={session?.user?.image ?? ""} alt={session?.user?.name ?? ""} />
-                <AvatarFallback>
-                  {(session?.user?.name?.[0] ?? "U").toUpperCase()}
-                </AvatarFallback>
-              </Avatar>
-              <div className="text-sm">
-                <p className="font-semibold text-primary-foreground">
-                  {session?.user?.name ?? "Guest"}
-                </p>
-                <p className="text-primary-foreground/70 capitalize">
-                  {session?.user?.role ?? ""}
-                </p>
-              </div>
-            </div>
+
+            {/* Online/Offline Toggle - Only show when logged in */}
+            {session && (
+              <button
+                onClick={() => setIsOnline(!isOnline)}
+                className={cn(
+                  "flex items-center gap-2 rounded-lg px-3 py-1.5 text-xs font-medium transition-colors",
+                  isOnline
+                    ? "bg-success/90 text-success-foreground hover:bg-success"
+                    : "bg-warning/90 text-warning-foreground hover:bg-warning",
+                )}
+              >
+                {isOnline ? <Wifi className="h-3 w-3" /> : <WifiOff className="h-3 w-3" />}
+                <span>{isOnline ? t.common.online : t.common.offline}</span>
+              </button>
+            )}
+
+            {/* User Profile & Sign Out - Only show when logged in */}
+            {session && (
+              <>
+                <div className="flex items-center gap-3">
+                  <Avatar className="h-9 w-9">
+                    <AvatarImage src={session?.user?.image ?? ""} alt={session?.user?.name ?? ""} />
+                    <AvatarFallback>
+                      {(session?.user?.name?.[0] ?? "U").toUpperCase()}
+                    </AvatarFallback>
+                  </Avatar>
+                  <div className="text-sm">
+                    <p className="font-semibold text-primary-foreground">
+                      {session?.user?.name ?? "Guest"}
+                    </p>
+                    <p className="text-primary-foreground/70 capitalize">
+                      {session?.user?.role ?? ""}
+                    </p>
+                  </div>
+                </div>
+
+                {/* Sign Out Button */}
+                <button
+                  onClick={() => signOut({ callbackUrl: "/login" })}
+                  className="flex items-center gap-2 rounded-lg px-3 py-1.5 text-sm font-medium transition-colors text-primary-foreground/80 hover:bg-primary-foreground/10 hover:text-primary-foreground"
+                >
+                  <span>{t.nav.signOut}</span>
+                </button>
+              </>
+            )}
+
+            {/* Sign In Button - Show when logged out */}
+            {!session && (
+              <button
+                onClick={() => signIn()}
+                className="flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium transition-colors bg-primary-foreground text-primary hover:bg-primary-foreground/90"
+              >
+                <span>{t.nav.login}</span>
+              </button>
+            )}
           </div>
         </div>
       </nav>
 
-      {/* Mobile Sidebar Navigation */}
-      <aside
-        className={cn(
-          "fixed left-0 top-0 z-40 h-screen w-64 bg-secondary/80 text-secondary-foreground transition-transform duration-300 ease-in-out lg:hidden glassmorphism",
-          isOpen ? "translate-x-0" : "-translate-x-full",
-        )}
-      >
+      {/* Mobile Sidebar */}
+      {session && (
+        <aside
+          className={cn(
+            "fixed left-0 top-0 z-40 h-screen w-64 bg-secondary/80 text-secondary-foreground transition-transform duration-300 ease-in-out lg:hidden glassmorphism",
+            isOpen ? "translate-x-0" : "-translate-x-full",
+          )}
+        >
         <div className="flex h-full flex-col">
           {/* Header */}
           <div className="border-b border-secondary-foreground/10 p-4">
@@ -231,22 +261,23 @@ export function Navigation() {
                   onClick={() => signOut({ callbackUrl: "/login" })}
                   className="flex w-full items-center justify-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors text-secondary-foreground/80 hover:bg-secondary-foreground/10 hover:text-secondary-foreground"
                 >
-                  <span>Logout</span>
+                  <span>{t.nav.signOut}</span>
                 </button>
               ) : (
                 <button
                   onClick={() => signIn()}
                   className="flex w-full items-center justify-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors text-secondary-foreground/80 hover:bg-secondary-foreground/10 hover:text-secondary-foreground"
                 >
-                  <span>Login</span>
+                  <span>{t.nav.login}</span>
                 </button>
               )}
           </div>
         </div>
-      </aside>
+        </aside>
+      )}
 
       {/* Overlay for mobile */}
-      {isOpen && <div className="fixed inset-0 z-30 bg-black/50 lg:hidden" onClick={() => setIsOpen(false)} />}
+      {session && isOpen && <div className="fixed inset-0 z-30 bg-black/50 lg:hidden" onClick={() => setIsOpen(false)} />}
     </>
   )
 }

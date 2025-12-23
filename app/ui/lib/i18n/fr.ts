@@ -49,6 +49,7 @@ export const fr = {
     reports: "Rapports",
     users: "Utilisateurs",
     login: "Connexion",
+    signOut: "Déconnexion",
     managementSystem: "Système de Gestion",
   },
 

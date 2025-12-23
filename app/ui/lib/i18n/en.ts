@@ -51,6 +51,7 @@ export const en: TranslationKeys = {
     reports: "Reports",
     users: "Users",
     login: "Login",
+    signOut: "Sign Out",
     managementSystem: "Management System",
   },
 
