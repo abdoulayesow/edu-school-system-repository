@@ -10,7 +10,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Badge } from "@/components/ui/badge"
 import { useEnrollmentWizard } from "../wizard-context"
 import { useI18n } from "@/components/i18n-provider"
-import { calculatePaymentCoverage } from "@/lib/enrollment/calculations"
+import { calculatePaymentSchedules } from "@/lib/enrollment/calculations"
 import { Banknote, Smartphone, Upload, Check, SkipForward, Info } from "lucide-react"
 import { cn } from "@/lib/utils"
 
@@ -32,9 +32,36 @@ export function StepPaymentTransaction() {
   }
 
   // Calculate coverage based on payment amount
-  const totalTuition = data.adjustedTuitionFee || data.originalTuitionFee
+  const totalTuition = data.adjustedTuitionFee || data.originalTuitionFee || 0
   const paymentAmount = data.paymentAmount || 0
-  const coverage = calculatePaymentCoverage(paymentAmount, totalTuition)
+
+  // Calculate simple coverage for new enrollment (no existing payments)
+  // Use current school year start (September 1st)
+  const currentYear = new Date().getFullYear()
+  const schoolYearStart = new Date().getMonth() >= 8
+    ? new Date(currentYear, 8, 1)  // Sep 1 of current year
+    : new Date(currentYear - 1, 8, 1)  // Sep 1 of previous year
+  const schedules = totalTuition > 0 ? calculatePaymentSchedules(totalTuition, schoolYearStart) : []
+  const percentPaid = totalTuition > 0 ? (paymentAmount / totalTuition) * 100 : 0
+  const remainingBalance = Math.max(0, totalTuition - paymentAmount)
+
+  // Calculate which months are covered based on payment amount
+  const coveredMonths: string[] = []
+  let remainingPayment = paymentAmount
+  for (const schedule of schedules) {
+    if (remainingPayment >= schedule.amount) {
+      coveredMonths.push(...schedule.months)
+      remainingPayment -= schedule.amount
+    } else if (remainingPayment > 0) {
+      // Partial coverage of this schedule - add proportional months
+      const coverageRatio = remainingPayment / schedule.amount
+      const monthsToAdd = Math.ceil(schedule.months.length * coverageRatio)
+      coveredMonths.push(...schedule.months.slice(0, monthsToAdd))
+      remainingPayment = 0
+    }
+  }
+
+  const coverage = { percentPaid, coveredMonths, remainingBalance }
 
   // Handle payment method change
   const handleMethodChange = (method: "cash" | "orange_money") => {

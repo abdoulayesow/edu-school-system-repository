@@ -1,11 +1,12 @@
 "use client"
 
+import { useEffect, useState, Suspense, lazy } from "react"
+import dynamic from "next/dynamic"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { ChartContainer, ChartTooltip, ChartTooltipContent, type ChartConfig } from "@/components/ui/chart"
-import { Users, DollarSign, AlertTriangle, TrendingUp, FileText, CheckCircle2, Clock, BarChart3 } from "lucide-react"
-import { Bar, BarChart, Pie, PieChart, Cell, CartesianGrid, XAxis, YAxis } from "recharts"
+import { Users, DollarSign, AlertTriangle, TrendingUp, FileText, CheckCircle2, Clock, BarChart3, Loader2 } from "lucide-react"
 import { useI18n, interpolate } from "@/components/i18n-provider"
 import {
   Table,
@@ -16,9 +17,43 @@ import {
   TableRow,
 } from "@/components/ui/table"
 
+// Lazy load heavy chart components
+const BarChart = dynamic(() => import("recharts").then(mod => ({ default: mod.BarChart })), { ssr: false })
+const Bar = dynamic(() => import("recharts").then(mod => ({ default: mod.Bar })), { ssr: false })
+const PieChart = dynamic(() => import("recharts").then(mod => ({ default: mod.PieChart })), { ssr: false })
+const Pie = dynamic(() => import("recharts").then(mod => ({ default: mod.Pie })), { ssr: false })
+const Cell = dynamic(() => import("recharts").then(mod => ({ default: mod.Cell })), { ssr: false })
+const CartesianGrid = dynamic(() => import("recharts").then(mod => ({ default: mod.CartesianGrid })), { ssr: false })
+const XAxis = dynamic(() => import("recharts").then(mod => ({ default: mod.XAxis })), { ssr: false })
+const YAxis = dynamic(() => import("recharts").then(mod => ({ default: mod.YAxis })), { ssr: false })
+
+// Chart loading skeleton
+function ChartSkeleton() {
+  return (
+    <div className="h-[300px] flex items-center justify-center">
+      <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+    </div>
+  )
+}
 
 export default function DirectorDashboard() {
   const { t } = useI18n()
+  const [chartsLoaded, setChartsLoaded] = useState(false)
+
+  // Initialize sync manager after dashboard mounts (deferred from app startup)
+  useEffect(() => {
+    // Defer sync manager initialization to avoid blocking initial render
+    const timer = setTimeout(() => {
+      import("@/lib/sync/manager").then(({ syncManager }) => {
+        syncManager.initialize()
+      })
+    }, 1000) // Wait 1 second after mount
+
+    // Mark charts as ready to render
+    setChartsLoaded(true)
+
+    return () => clearTimeout(timer)
+  }, [])
   const enrollmentData = [
     { grade: "6ème", count: 95 },
     { grade: "7ème", count: 102 },

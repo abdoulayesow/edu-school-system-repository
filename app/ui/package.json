@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "build": "next build --webpack",
-    "dev": "next dev --webpack --port 8000",
+    "dev": "next dev --turbopack --port 8000",
     "lint": "eslint .",
     "start": "next start --port 8000",
     "prisma:generate": "node scripts/prisma-generate.cjs"

@@ -14,7 +14,7 @@ const nextConfig = {
     // Allows importing server-only code from outside of the Next.js project root.
     externalDir: true,
   },
-  turbopack: {},
+  // Webpack config only used for production builds (turbopack used for dev)
   webpack: (config) => {
     config.resolve.alias = {
       ...(config.resolve.alias ?? {}),
@@ -24,6 +24,7 @@ const nextConfig = {
     return config
   },
   typescript: {
+    // TODO: Fix TypeScript errors and set to false
     ignoreBuildErrors: true,
   },
   images: {

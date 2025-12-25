@@ -10,7 +10,9 @@
       "Bash(npx prisma migrate dev:*)",
       "Bash(npx prisma db push:*)",
       "Bash(npm install:*)",
-      "Bash(npx prisma:*)"
+      "Bash(npx prisma:*)",
+      "Bash(dir:*)",
+      "Bash(grep:*)"
     ]
   }
 }

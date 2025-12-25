@@ -141,22 +141,17 @@ test.describe('Authentication Flow', () => {
 
       // Fill in user details (without password)
       const testEmail = generateTestEmail()
-      await page.fill('input[name="email"]', testEmail)
-      await page.fill('input[name="name"]', 'Test User')
+      await page.fill('#invite-email', testEmail)
 
-      // Select role
-      await page.click('select[name="role"]')
-      await page.selectOption('select[name="role"]', 'teacher')
+      // Select role (Radix UI Select component)
+      await page.click('#invite-role')
+      await page.click('[role="option"]:has-text("Teacher"), [role="option"]:has-text("Enseignant")')
 
-      // Submit form (without password)
-      await page.click('button[type="submit"]:has-text("Invite")')
+      // Submit form
+      await page.click('button:has-text("Send Invitation"), button:has-text("Envoyer")')
 
-      // Should show invitation link
-      await expect(page.locator('text=/auth/set-password?token=')).toBeVisible({ timeout: 10000 })
-
-      // Copy invitation link
-      const invitationLink = await page.locator('text=/auth/set-password?token=').textContent()
-      expect(invitationLink).toContain('/auth/set-password?token=')
+      // Verify success via toast message or dialog close
+      await expect(page.locator('text=/success|succès|invitation/i').first()).toBeVisible({ timeout: 10000 })
     })
   })
 

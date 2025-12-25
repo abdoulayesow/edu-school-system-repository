@@ -1,6 +1,6 @@
 "use client"
 
-import { EnrollmentWizard } from "@/components/enrollment"
+import { EnrollmentWizard } from "@/components/enrollment/enrollment-wizard"
 import { useI18n } from "@/components/i18n-provider"
 import { ArrowLeft } from "lucide-react"
 import Link from "next/link"

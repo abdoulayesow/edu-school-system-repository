@@ -467,7 +467,6 @@ class SyncManager {
 
 export const syncManager = new SyncManager()
 
-// Auto-initialize when module loads (client-side only)
-if (typeof window !== "undefined") {
-  syncManager.initialize()
-}
+// NOTE: syncManager.initialize() should be called explicitly when needed
+// (e.g., after user logs in or when dashboard mounts)
+// This prevents blocking the initial page load with connectivity checks

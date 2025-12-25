@@ -1,6 +1,6 @@
 "use client"
 
-import { signIn } from "next-auth/react"
+import { signIn, useSession } from "next-auth/react"
 import { Button } from "@/components/ui/button"
 import {
   Card,
@@ -12,8 +12,8 @@ import {
 } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { useSearchParams } from "next/navigation"
-import { Suspense, useState } from "react"
+import { useSearchParams, useRouter } from "next/navigation"
+import { Suspense, useState, useEffect } from "react"
 import { useI18n } from "@/components/i18n-provider"
 import {
   WifiOff,
@@ -53,6 +53,24 @@ function LoginInner() {
   const [error, setError] = useState<string | null>(null)
   const searchParams = useSearchParams()
   const callbackUrl = searchParams.get("callbackUrl") || "/dashboard"
+  const { status } = useSession()
+  const router = useRouter()
+
+  // Redirect authenticated users to dashboard
+  useEffect(() => {
+    if (status === 'authenticated') {
+      router.push(callbackUrl)
+    }
+  }, [status, router, callbackUrl])
+
+  // Show loading spinner while checking session
+  if (status === 'loading') {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background">
+        <Loader2 className="w-8 h-8 animate-spin text-primary" />
+      </div>
+    )
+  }
 
   const handleCredentialsLogin = async (e: React.FormEvent) => {
     e.preventDefault()
