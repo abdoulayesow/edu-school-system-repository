@@ -47,8 +47,9 @@ test.describe('Navigation - Desktop', () => {
       await page.goto('/dashboard')
       await page.waitForLoadState('networkidle')
 
-      // Find and click user menu trigger - look for button with avatar
-      const userMenuButton = page.locator('button:has([class*="avatar"]), header button').last()
+      // Find and click user menu trigger
+      const userMenuButton = page.locator('[data-testid="user-dropdown-trigger"]').first()
+      await userMenuButton.waitFor({ state: 'visible', timeout: 5000 })
       await userMenuButton.click()
 
       // Wait for dropdown to appear
@@ -61,7 +62,8 @@ test.describe('Navigation - Desktop', () => {
       await page.waitForLoadState('networkidle')
 
       // Open dropdown
-      const userMenuButton = page.locator('button:has([class*="avatar"]), header button').last()
+      const userMenuButton = page.locator('[data-testid="user-dropdown-trigger"]').first()
+      await userMenuButton.waitFor({ state: 'visible', timeout: 5000 })
       await userMenuButton.click()
 
       // Wait for dropdown
@@ -74,15 +76,16 @@ test.describe('Navigation - Desktop', () => {
       await page.waitForLoadState('networkidle')
 
       // Open dropdown
-      const userMenuButton = page.locator('button:has([class*="avatar"]), header button').last()
+      const userMenuButton = page.locator('[data-testid="user-dropdown-trigger"]').first()
+      await userMenuButton.waitFor({ state: 'visible', timeout: 5000 })
       await userMenuButton.click()
 
       // Wait for dropdown
       const dropdown = page.locator('[role="menu"]').first()
       await dropdown.waitFor({ state: 'visible', timeout: 3000 })
 
-      // Click Profile link
-      await dropdown.locator('text=/profile/i').first().click()
+      // Click Profile link (use href selector for reliability)
+      await dropdown.locator('a[href="/profile"]').first().click()
 
       // Should navigate to /profile
       await page.waitForURL(/\/profile/, { timeout: 5000 })
@@ -93,7 +96,8 @@ test.describe('Navigation - Desktop', () => {
       await page.waitForLoadState('networkidle')
 
       // Open dropdown
-      const userMenuButton = page.locator('button:has([class*="avatar"]), header button').last()
+      const userMenuButton = page.locator('[data-testid="user-dropdown-trigger"]').first()
+      await userMenuButton.waitFor({ state: 'visible', timeout: 5000 })
       await userMenuButton.click()
 
       // Wait for dropdown
@@ -110,7 +114,8 @@ test.describe('Navigation - Desktop', () => {
       await page.waitForLoadState('networkidle')
 
       // Open dropdown
-      const userMenuButton = page.locator('button:has([class*="avatar"]), header button').last()
+      const userMenuButton = page.locator('[data-testid="user-dropdown-trigger"]').first()
+      await userMenuButton.waitFor({ state: 'visible', timeout: 5000 })
       await userMenuButton.click()
 
       // Wait for dropdown
@@ -132,7 +137,8 @@ test.describe('Navigation - Desktop', () => {
       const initialScroll = await page.evaluate(() => window.scrollY)
 
       // Open dropdown
-      const userMenuButton = page.locator('button:has([class*="avatar"]), header button').last()
+      const userMenuButton = page.locator('[data-testid="user-dropdown-trigger"]').first()
+      await userMenuButton.waitFor({ state: 'visible', timeout: 5000 })
       await userMenuButton.click()
 
       // Wait for dropdown animation
@@ -162,15 +168,21 @@ test.describe('Navigation - Desktop', () => {
 
     test('should navigate to different pages via nav links', async ({ page }) => {
       await page.goto('/dashboard')
+      await page.waitForLoadState('networkidle')
 
-      // Try to click Users link
-      const usersLink = page.locator('nav, aside').locator('text=/users/i').first()
-      await usersLink.click().catch(() => {
-        // If link not found, just verify we can navigate via direct URL
-      })
+      // Try to click Users link (handle EN/FR: Users/Utilisateurs)
+      const usersLink = page.locator('nav, aside').locator('a[href="/users"]').first()
+      const isVisible = await usersLink.isVisible({ timeout: 3000 }).catch(() => false)
 
-      // Should be able to navigate to users or stay on dashboard
-      await page.waitForURL(/\/(users|dashboard)/, { timeout: 5000 })
+      if (isVisible) {
+        await usersLink.click()
+        // Should navigate to users page
+        await page.waitForURL(/\/users/, { timeout: 5000 })
+      } else {
+        // If link not visible in nav, navigate directly
+        await page.goto('/users')
+        await page.waitForURL(/\/users/, { timeout: 5000 })
+      }
     })
   })
 

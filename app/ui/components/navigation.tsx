@@ -129,7 +129,7 @@ export function Navigation() {
             {session && (
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <button className="flex items-center gap-3 rounded-lg px-3 py-2 transition-colors hover:bg-primary-foreground/10">
+                  <button data-testid="user-dropdown-trigger" className="flex items-center gap-3 rounded-lg px-3 py-2 transition-colors hover:bg-primary-foreground/10">
                     <Avatar className="h-9 w-9">
                       <AvatarImage src={session?.user?.image ?? ""} alt={session?.user?.name ?? ""} />
                       <AvatarFallback>

@@ -327,16 +327,19 @@ test.describe('Profile Page', () => {
   test.describe('Navigation Integration', () => {
     test('should navigate to profile from user dropdown', async ({ page }) => {
       await page.goto('/dashboard')
+      await page.waitForLoadState('networkidle')
 
       // Open user dropdown
-      await page.locator('header button').last().click().catch(() => {})
+      const userMenuButton = page.locator('[data-testid="user-dropdown-trigger"]').first()
+      await userMenuButton.waitFor({ state: 'visible', timeout: 5000 })
+      await userMenuButton.click()
 
       // Wait for dropdown to be visible
-      const dropdown = page.locator('[role="menu"]')
-      await expect(dropdown).toBeVisible({ timeout: 3000 }).catch(() => {})
+      const dropdown = page.locator('[role="menu"]').first()
+      await dropdown.waitFor({ state: 'visible', timeout: 3000 })
 
-      // Click Profile link
-      await dropdown.locator('text=/profile/i').first().click()
+      // Click Profile link (use href selector for reliability)
+      await dropdown.locator('a[href="/profile"]').first().click()
 
       // Should navigate to profile page
       await page.waitForURL(/\/profile/, { timeout: 5000 })

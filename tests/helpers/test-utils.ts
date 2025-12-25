@@ -60,22 +60,18 @@ export async function logout(page: Page) {
   // Click on user avatar/dropdown trigger
   const dropdownTrigger = page.locator('[data-testid="user-dropdown-trigger"]').first()
 
-  // If no test ID, try finding by role and name
-  if (!(await dropdownTrigger.isVisible())) {
-    // Desktop: Look for button with avatar
-    await page.locator('button:has([class*="avatar"])').first().click()
-  } else {
-    await dropdownTrigger.click()
-  }
+  // Wait for the dropdown trigger to be visible and click it
+  await dropdownTrigger.waitFor({ state: 'visible', timeout: 10000 })
+  await dropdownTrigger.click()
 
-  // Wait for dropdown to be visible (replaced waitForTimeout)
-  await expect(page.locator('[role="menu"]')).toBeVisible({ timeout: 2000 })
+  // Wait for dropdown to be visible
+  await expect(page.locator('[role="menu"]').first()).toBeVisible({ timeout: 3000 })
 
   // Click Sign Out button
-  await page.click('text=Sign Out')
+  await page.locator('[role="menu"]').first().locator('text=/sign out|déconnexion/i').first().click()
 
   // Wait for redirect to login
-  await page.waitForURL('/login', { timeout: 10000 })
+  await page.waitForURL(/\/login/, { timeout: 10000 })
 }
 
 /**
