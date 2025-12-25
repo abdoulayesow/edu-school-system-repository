@@ -3,8 +3,6 @@
 import type React from "react"
 import { Inter, Poppins } from "next/font/google"
 import { Analytics } from "@vercel/analytics/next"
-import { AnimatePresence, motion } from "framer-motion"
-import { usePathname } from "next/navigation"
 import { SessionProvider } from "next-auth/react"
 import "./globals.css"
 import { Navigation } from "@/components/navigation"
@@ -24,22 +22,16 @@ const poppins = Poppins({
   variable: "--font-poppins",
 })
 
-// Metadata and viewport can remain in a server component part of the file if needed,
-// but for simplicity with client-side hooks, we assume this is all client-rendered.
-// For a production app, you might split this into a client and server component.
-
 export default function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode
 }>) {
-  const pathname = usePathname()
-
   return (
-    <html lang="fr" suppressHydrationWarning>
+    <html lang="fr" suppressHydrationWarning className="overflow-y-scroll">
       <head>
         <title>
-          GSN | Système de Gestion Scolaire | School Management System
+          GSPN | Système de Gestion Scolaire | School Management System
         </title>
         <meta
           name="description"
@@ -58,6 +50,11 @@ export default function RootLayout({
         />
         <link rel="icon" href="/icon.svg" type="image/svg+xml" />
         <link rel="apple-touch-icon" href="/apple-icon.png" />
+        <link rel="manifest" href="/manifest.json" />
+        <meta name="mobile-web-app-capable" content="yes" />
+        <meta name="apple-mobile-web-app-capable" content="yes" />
+        <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+        <meta name="apple-mobile-web-app-title" content="GSPN" />
         <meta
           name="viewport"
           content="width=device-width, initial-scale=1"
@@ -79,18 +76,9 @@ export default function RootLayout({
         <SessionProvider>
           <I18nProvider>
             <Navigation />
-            <AnimatePresence mode="wait">
-              <motion.main
-                key={pathname}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -20 }}
-                transition={{ duration: 0.3 }}
-                className="lg:pt-16"
-              >
-                {children}
-              </motion.main>
-            </AnimatePresence>
+            <main className="lg:pt-16">
+              {children}
+            </main>
           </I18nProvider>
         </SessionProvider>
         <Analytics />

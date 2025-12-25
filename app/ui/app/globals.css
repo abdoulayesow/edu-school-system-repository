@@ -4,7 +4,7 @@
 @custom-variant dark (&:is(.dark *));
 
 :root {
-  /* GSN N'Diolou Logo Colors - Maroon, Gold, Black */
+  /* GSPN N'Diolou Logo Colors - Maroon, Gold, Black */
   --background: oklch(0.98 0.01 20);
   --foreground: oklch(0.15 0.02 20);
 
@@ -14,7 +14,7 @@
   --popover: oklch(1 0 0);
   --popover-foreground: oklch(0.15 0.02 20);
 
-  /* Primary: Rich Maroon/Burgundy #8B2332 - GSN red from logo */
+  /* Primary: Rich Maroon/Burgundy #8B2332 - GSPN red from logo */
   --primary: oklch(0.42 0.14 15);
   --primary-foreground: oklch(0.98 0.01 20);
 

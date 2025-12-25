@@ -6,7 +6,11 @@
       "Bash(npx prisma db execute --stdin --config=app/db/prisma.config.ts <<'EOF'\nSELECT * FROM \"Account\";\nEOF)",
       "Bash(npx prisma db execute:*)",
       "Bash(cat:*)",
-      "Bash(npm run dev:*)"
+      "Bash(npm run dev:*)",
+      "Bash(npx prisma migrate dev:*)",
+      "Bash(npx prisma db push:*)",
+      "Bash(npm install:*)",
+      "Bash(npx prisma:*)"
     ]
   }
 }

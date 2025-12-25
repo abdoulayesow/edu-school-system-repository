@@ -45,8 +45,15 @@ export async function POST(req: Request) {
     if (result.error === "USER_EXISTS") {
       return NextResponse.json({ message: "User already exists" }, { status: 409 })
     }
-    return NextResponse.json({ message: "Unable to create user" }, { status: 400 })
+    return NextResponse.json({ message: result.error || "Unable to create user" }, { status: 400 })
   }
 
-  return NextResponse.json(result.user, { status: 201 })
+  // Include invitation link if token was generated
+  const response: any = { ...result.user }
+  if (result.invitationToken) {
+    const baseUrl = process.env.NEXTAUTH_URL || "http://localhost:3000"
+    response.invitationLink = `${baseUrl}/auth/set-password?token=${result.invitationToken}`
+  }
+
+  return NextResponse.json(response, { status: 201 })
 }

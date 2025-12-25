@@ -2,6 +2,7 @@ import bcrypt from "bcrypt"
 
 import { prisma } from "@db/prisma"
 import { normalizeRole, type AppRole } from "@/lib/rbac"
+import { createPasswordResetToken } from "@/lib/auth/tokens"
 
 // Password strength validation
 function validatePassword(password: string): { valid: boolean; error?: string } {
@@ -68,5 +69,11 @@ export async function createUser(input: CreateUserInput) {
     },
   })
 
-  return { ok: true as const, user }
+  // Generate invitation token if user was created without password
+  let invitationToken: string | undefined
+  if (!input.password && status === "invited") {
+    invitationToken = await createPasswordResetToken(user.id)
+  }
+
+  return { ok: true as const, user, invitationToken }
 }

@@ -116,6 +116,12 @@ export const authOptions: NextAuthOptions = {
   session: {
     // JWT sessions allow NextAuth middleware to enforce auth/RBAC without DB access.
     strategy: "jwt",
+    // Extended expiry for offline-first support (7 days)
+    maxAge: 7 * 24 * 60 * 60, // 7 days
+  },
+  jwt: {
+    // Extended JWT expiry for offline access
+    maxAge: 7 * 24 * 60 * 60, // 7 days
   },
   callbacks: {
     async signIn({ user }) {

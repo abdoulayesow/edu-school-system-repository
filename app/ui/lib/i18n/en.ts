@@ -53,11 +53,13 @@ export const en: TranslationKeys = {
     login: "Login",
     signOut: "Sign Out",
     managementSystem: "Management System",
+    profile: "Profile",
+    myAccount: "My Account",
   },
 
   // Homepage
   home: {
-    schoolName: "Groupe Scolaire GSN N'Diolou",
+    schoolName: "Groupe Scolaire GSPN N'Diolou",
     managementSystem: "Management System",
     heroDescription: "A comprehensive school management platform built for excellence, security, and traceability in African education.",
     goToDashboard: "Go to Dashboard",
@@ -435,6 +437,34 @@ export const en: TranslationKeys = {
     tagline: "For African schools, by Africans",
     simulateOffline: "Simulate offline mode",
     simulateOnline: "Simulate online mode",
+    // Enhanced login page
+    schoolName: "Groupe Scolaire Prive de Nongo",
+    schoolTagline: "Excellence in Education",
+    welcomeTitle: "Welcome to the School Management System",
+    welcomeSubtitle: "A comprehensive platform for managing enrollments, attendance, accounting, and more.",
+    signInTitle: "Sign In",
+    signInSubtitle: "Access the School Management System",
+    signInButton: "Sign In",
+    forgotPassword: "Forgot password?",
+    orContinueWith: "Or continue with",
+    signInWithGoogle: "Sign in with Google",
+    invalidCredentials: "Invalid email or password",
+    loginError: "An error occurred. Please try again.",
+    // Feature cards
+    featureOffline: "Offline Mode",
+    featureOfflineDesc: "Work without internet. Data syncs automatically when online.",
+    featureOfflineShort: "Works Offline",
+    featureEnrollment: "Student Enrollment",
+    featureEnrollmentDesc: "Easy 6-step enrollment wizard with payment tracking.",
+    featureEnrollmentShort: "Easy Enrollment",
+    featureAccounting: "Financial Control",
+    featureAccountingDesc: "Full payment tracking with receipts and reconciliation.",
+    featureAccountingShort: "Payment Tracking",
+    featureAttendance: "Attendance",
+    featureAttendanceDesc: "Mobile-first attendance tracking with reports.",
+    featureAttendanceShort: "Attendance",
+    securityNote: "Secure and trusted by schools across Guinea",
+    footerText: "© 2025 GSPN. All rights reserved.",
   },
 
   // Users
@@ -584,5 +614,173 @@ export const en: TranslationKeys = {
     "5eme": "7th Grade",
     "4eme": "8th Grade",
     "3eme": "9th Grade",
+  },
+
+  // Enrollment Wizard
+  enrollmentWizard: {
+    // Main
+    title: "Student Enrollment",
+    subtitle: "Enrollment process for the school year",
+
+    // Steps
+    step1: "Grade Selection",
+    step2: "Student Information",
+    step3: "Payment Schedule",
+    step4: "Payment",
+    step5: "Review",
+    step6: "Confirmation",
+
+    // Step 1 - Grade Selection
+    selectGrade: "Select Grade",
+    selectGradeDescription: "Choose the grade level for enrollment",
+    schoolYear: "School Year",
+    todayDate: "Today's Date",
+    elementary: "Elementary",
+    college: "College",
+    highSchool: "High School",
+    studentsEnrolled: "{count} students enrolled",
+    yearlyTuition: "Yearly Tuition",
+    perYear: "/year",
+
+    // Step 2 - Student Info
+    studentInfo: "Student Information",
+    newStudent: "New Student",
+    returningStudent: "Returning Student",
+    searchStudent: "Search by student number, name, or date of birth",
+    noStudentFound: "No student found",
+    selectThisStudent: "Select this student",
+
+    // Personal info
+    personalInfo: "Personal Information",
+    firstName: "First Name",
+    lastName: "Last Name",
+    dateOfBirth: "Date of Birth",
+    gender: "Gender",
+    male: "Male",
+    female: "Female",
+    phone: "Phone",
+    email: "Email",
+    photo: "Photo",
+    birthCertificate: "Birth Certificate",
+    uploadPhoto: "Upload Photo",
+    uploadDocument: "Upload Document",
+
+    // Parent info
+    parentInfo: "Parent Information",
+    fatherInfo: "Father's Information",
+    motherInfo: "Mother's Information",
+    fatherName: "Father's Name",
+    motherName: "Mother's Name",
+    fatherPhone: "Father's Phone",
+    motherPhone: "Mother's Phone",
+    fatherEmail: "Father's Email",
+    motherEmail: "Mother's Email",
+    address: "Address",
+
+    // Notes
+    additionalNotes: "Additional Notes",
+    addNote: "Add Note",
+    noteTitle: "Title",
+    noteContent: "Content",
+    removeNote: "Remove",
+
+    // Step 3 - Payment Breakdown
+    paymentBreakdown: "Payment Schedule",
+    totalYearlyAmount: "Total Yearly Amount",
+    schedule1: "Schedule 1",
+    schedule2: "Schedule 2",
+    schedule3: "Schedule 3",
+    schedule1Months: "September + October + May",
+    schedule2Months: "November + December + January",
+    schedule3Months: "February + March + April",
+    dueBy: "Due by",
+    adjustAmount: "Adjust Amount",
+    adjustmentReason: "Adjustment Reason",
+    requiresApproval: "This adjustment requires director approval",
+    originalAmount: "Original Amount",
+    adjustedAmount: "Adjusted Amount",
+
+    // Step 4 - Payment Transaction
+    paymentTransaction: "Record Payment",
+    paymentOptional: "Payment is optional at this step",
+    skipPayment: "Pay Later",
+    makePayment: "Make Payment",
+    paymentMethod: "Payment Method",
+    cash: "Cash",
+    orangeMoney: "Orange Money",
+    amount: "Amount",
+    receiptNumber: "Receipt Number",
+    transactionRef: "Transaction Reference",
+    uploadReceipt: "Upload Receipt",
+    receiptRequired: "Receipt is required",
+    paymentCoverage: "Payment Coverage",
+    monthsCovered: "Months Covered",
+    percentPaid: "Percent Paid",
+
+    // Step 5 - Review
+    reviewEnrollment: "Review Enrollment",
+    reviewDescription: "Review all information before submitting",
+    editSection: "Edit",
+    gradeInfo: "Grade Information",
+    studentDetails: "Student Details",
+    parentDetails: "Parent Details",
+    paymentDetails: "Payment Details",
+    notesSection: "Notes",
+
+    // Step 6 - Confirmation
+    enrollmentComplete: "Enrollment Submitted!",
+    enrollmentNumber: "Enrollment Number",
+    studentNumber: "Student Number",
+    downloadPdf: "Download PDF",
+    downloadingPdf: "Generating PDF...",
+    pdfDownloadError: "Failed to download PDF. Please try again.",
+    printDocument: "Print",
+    statusSubmitted: "Submitted - Pending Review",
+    statusReviewRequired: "Director Review Required",
+    autoApproveIn: "Auto-approval in {days} days",
+
+    // Status badges
+    statusDraft: "Draft",
+    statusApproved: "Approved",
+    statusRejected: "Rejected",
+    statusCancelled: "Cancelled",
+
+    // Draft management
+    draftSaved: "Draft saved",
+    draftRecovered: "Draft recovered from {date}",
+    draftExpires: "Draft expires in {days} days",
+    continueDraft: "Continue Draft",
+    discardDraft: "Discard Draft",
+
+    // Validation errors
+    selectGradeRequired: "Please select a grade",
+    firstNameRequired: "First name is required",
+    lastNameRequired: "Last name is required",
+    parentRequired: "At least one parent name is required",
+    phoneRequired: "At least one phone number is required",
+    receiptNumberRequired: "Receipt number is required",
+
+    // Actions
+    saveAndContinue: "Save and Continue",
+    saveDraft: "Save Draft",
+    submitEnrollment: "Submit Enrollment",
+    goBack: "Go Back",
+  },
+
+  // Grade names (Guinea format)
+  gradeNames: {
+    "1ere": "1st Year",
+    "2eme": "2nd Year",
+    "3eme": "3rd Year",
+    "4eme": "4th Year",
+    "5eme": "5th Year",
+    "6eme": "6th Year",
+    "7eme": "7th Year",
+    "8eme": "8th Year",
+    "9eme": "9th Year",
+    "10eme": "10th Year",
+    "11eme": "11th Year",
+    "12eme": "12th Year",
+    terminal: "Terminal",
   },
 } as const;

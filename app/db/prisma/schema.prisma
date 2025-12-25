@@ -41,6 +41,16 @@ model User {
   accounts      Account[]
   sessions      Session[]
   address       Address?
+  passwordResetTokens  PasswordResetToken[]
+  recordedAttendance   Attendance[]
+  teachingClasses      Class[]
+
+  // Enrollment relations
+  createdEnrollments   Enrollment[]     @relation("EnrollmentCreator")
+  approvedEnrollments  Enrollment[]     @relation("EnrollmentApprover")
+  recordedPayments     Payment[]        @relation("PaymentRecorder")
+  confirmedPayments    Payment[]        @relation("PaymentConfirmer")
+  enrollmentNotes      EnrollmentNote[]
 }
 
 model Address {
@@ -87,4 +97,312 @@ model VerificationToken {
   expires    DateTime
 
   @@unique([identifier, token])
+}
+
+model PasswordResetToken {
+  id        String   @id @default(cuid())
+  userId    String
+  token     String   @unique
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([token])
+}
+
+// ============================================================================
+// School Year & Enrollment System
+// ============================================================================
+
+enum SchoolLevel {
+  elementary    // Primaire (Grades 1-6)
+  college       // College (Grades 7-10)
+  high_school   // Lycee (Grades 11-12 + Terminal)
+}
+
+enum EnrollmentStatus {
+  draft              // In-progress enrollment
+  submitted          // Submitted, awaiting auto-approval
+  review_required    // Needs director review (amount changed)
+  approved           // Fully approved
+  rejected           // Rejected by director
+  cancelled          // Cancelled by user
+}
+
+enum PaymentMethod {
+  cash
+  orange_money
+}
+
+enum PaymentStatus {
+  pending
+  confirmed
+  failed
+}
+
+model SchoolYear {
+  id              String       @id @default(cuid())
+  name            String       // "2025 - 2026"
+  startDate       DateTime     // September 1, 2025
+  endDate         DateTime     // June 30, 2026
+  enrollmentStart DateTime     // July 1, 2025
+  enrollmentEnd   DateTime     // June 15, 2026
+  isActive        Boolean      @default(false)
+  syncVersion     Int          @default(0)
+  createdAt       DateTime     @default(now())
+  updatedAt       DateTime     @updatedAt
+
+  grades          Grade[]
+  enrollments     Enrollment[]
+
+  @@index([isActive])
+  @@index([startDate])
+}
+
+model Grade {
+  id            String      @id @default(cuid())
+  name          String      // "7eme Annee"
+  level         SchoolLevel
+  order         Int         // 1-13 for sorting
+  tuitionFee    Int         // Annual fee in GNF
+  schoolYearId  String
+  syncVersion   Int         @default(0)
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+
+  schoolYear    SchoolYear  @relation(fields: [schoolYearId], references: [id], onDelete: Cascade)
+  enrollments   Enrollment[]
+
+  @@unique([schoolYearId, order])
+  @@index([schoolYearId])
+  @@index([level])
+  @@index([order])
+}
+
+model Enrollment {
+  id                  String           @id @default(cuid())
+  enrollmentNumber    String?          @unique // ENR-2025-00001
+  studentId           String?          // For returning students
+  schoolYearId        String
+  gradeId             String
+
+  // Student info (denormalized for new students)
+  firstName           String
+  lastName            String
+  dateOfBirth         DateTime?
+  gender              String?          // "male" | "female"
+  phone               String?
+  email               String?
+  photoUrl            String?
+  birthCertificateUrl String?
+
+  // Parent info
+  fatherName          String?
+  fatherPhone         String?
+  fatherEmail         String?
+  motherName          String?
+  motherPhone         String?
+  motherEmail         String?
+  address             String?
+
+  // Financial
+  originalTuitionFee  Int              // Original fee from Grade
+  adjustedTuitionFee  Int?             // If different from original (requires approval)
+  adjustmentReason    String?          // Why fee was adjusted
+
+  // Status tracking
+  status              EnrollmentStatus @default(draft)
+  currentStep         Int              @default(1) // 1-6 wizard step
+  isReturningStudent  Boolean          @default(false)
+  draftExpiresAt      DateTime?        // 10 days from last update
+  submittedAt         DateTime?
+  approvedAt          DateTime?
+  approvedBy          String?          // User ID who approved
+  autoApproveAt       DateTime?        // 3 days after submission
+
+  // Sync & audit
+  createdBy           String           // User ID who created
+  syncVersion         Int              @default(0)
+  createdAt           DateTime         @default(now())
+  updatedAt           DateTime         @updatedAt
+
+  // Relations
+  schoolYear          SchoolYear       @relation(fields: [schoolYearId], references: [id])
+  grade               Grade            @relation(fields: [gradeId], references: [id])
+  student             Student?         @relation(fields: [studentId], references: [id])
+  creator             User             @relation("EnrollmentCreator", fields: [createdBy], references: [id])
+  approver            User?            @relation("EnrollmentApprover", fields: [approvedBy], references: [id])
+  paymentSchedules    PaymentSchedule[]
+  payments            Payment[]
+  notes               EnrollmentNote[]
+
+  @@index([status, schoolYearId])
+  @@index([schoolYearId])
+  @@index([gradeId])
+  @@index([studentId])
+  @@index([createdBy])
+  @@index([draftExpiresAt])
+  @@index([updatedAt])
+}
+
+model PaymentSchedule {
+  id              String     @id @default(cuid())
+  enrollmentId    String
+  scheduleNumber  Int        // 1, 2, or 3
+  amount          Int        // Amount in GNF
+  months          String[]   // ["September", "October", "May"]
+  dueDate         DateTime
+  isPaid          Boolean    @default(false)
+  paidAt          DateTime?
+  syncVersion     Int        @default(0)
+  createdAt       DateTime   @default(now())
+  updatedAt       DateTime   @updatedAt
+
+  enrollment      Enrollment @relation(fields: [enrollmentId], references: [id], onDelete: Cascade)
+  payments        Payment[]
+
+  @@unique([enrollmentId, scheduleNumber])
+  @@index([enrollmentId])
+  @@index([dueDate])
+}
+
+model Payment {
+  id                  String          @id @default(cuid())
+  enrollmentId        String
+  paymentScheduleId   String?
+  amount              Int             // Amount in GNF
+  method              PaymentMethod
+  status              PaymentStatus   @default(pending)
+
+  // Transaction details
+  receiptNumber       String          // Required: CASH-2025-XXXXX or OM-2025-XXXXX
+  transactionRef      String?         // Orange Money transaction ID
+  receiptImageUrl     String?         // Uploaded receipt image
+
+  // Recording info
+  recordedBy          String          // User ID
+  recordedAt          DateTime        @default(now())
+  confirmedBy         String?         // User ID
+  confirmedAt         DateTime?
+  notes               String?
+
+  syncVersion         Int             @default(0)
+  createdAt           DateTime        @default(now())
+  updatedAt           DateTime        @updatedAt
+
+  enrollment          Enrollment      @relation(fields: [enrollmentId], references: [id], onDelete: Cascade)
+  paymentSchedule     PaymentSchedule? @relation(fields: [paymentScheduleId], references: [id])
+  recorder            User            @relation("PaymentRecorder", fields: [recordedBy], references: [id])
+  confirmer           User?           @relation("PaymentConfirmer", fields: [confirmedBy], references: [id])
+
+  @@index([enrollmentId])
+  @@index([paymentScheduleId])
+  @@index([status])
+  @@index([recordedBy])
+  @@index([recordedAt])
+}
+
+model EnrollmentNote {
+  id            String     @id @default(cuid())
+  enrollmentId  String
+  title         String
+  content       String
+  createdBy     String     // User ID
+  syncVersion   Int        @default(0)
+  createdAt     DateTime   @default(now())
+  updatedAt     DateTime   @updatedAt
+
+  enrollment    Enrollment @relation(fields: [enrollmentId], references: [id], onDelete: Cascade)
+  author        User       @relation(fields: [createdBy], references: [id])
+
+  @@index([enrollmentId])
+  @@index([createdBy])
+}
+
+// ============================================================================
+// Student Management (Offline-First Priority)
+// ============================================================================
+
+enum StudentStatus {
+  active
+  inactive
+  graduated
+  transferred
+  suspended
+}
+
+enum AttendanceStatus {
+  present
+  absent
+  late
+  excused
+}
+
+model Student {
+  id             String        @id @default(cuid())
+  studentNumber  String?       @unique // STU-00001
+  firstName      String
+  lastName       String
+  email          String?
+  dateOfBirth    DateTime?
+  guardianName   String?
+  guardianPhone  String?
+  guardianEmail  String?
+  grade          String?
+  classId        String?
+  status         StudentStatus @default(active)
+  enrollmentDate DateTime      @default(now())
+  syncVersion    Int           @default(0)
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+
+  attendance     Attendance[]
+  class          Class?        @relation(fields: [classId], references: [id])
+  enrollments    Enrollment[]
+
+  @@index([status])
+  @@index([classId])
+  @@index([grade])
+  @@index([updatedAt])
+  @@index([studentNumber])
+  @@index([firstName, lastName])
+}
+
+model Attendance {
+  id          String           @id @default(cuid())
+  studentId   String
+  date        DateTime         @db.Date
+  status      AttendanceStatus
+  notes       String?
+  recordedBy  String
+  syncVersion Int              @default(0)
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @updatedAt
+
+  student     Student          @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  recorder    User             @relation(fields: [recordedBy], references: [id])
+
+  @@unique([studentId, date])
+  @@index([studentId])
+  @@index([date])
+  @@index([recordedBy])
+  @@index([updatedAt])
+}
+
+model Class {
+  id        String    @id @default(cuid())
+  name      String
+  grade     String?
+  teacherId String?
+  year      Int
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  students  Student[]
+  teacher   User?     @relation(fields: [teacherId], references: [id])
+
+  @@index([teacherId])
+  @@index([year])
 }

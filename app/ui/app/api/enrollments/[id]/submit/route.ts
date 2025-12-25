@@ -1,0 +1,198 @@
+import { NextRequest, NextResponse } from "next/server"
+import { requireSession } from "@/lib/authz"
+import { prisma } from "@/lib/prisma"
+import { calculatePaymentSchedules } from "@/lib/enrollment/calculations"
+
+interface RouteParams {
+  params: Promise<{ id: string }>
+}
+
+/**
+ * POST /api/enrollments/[id]/submit
+ * Submit an enrollment for approval
+ * Creates payment schedules and sets auto-approval date
+ */
+export async function POST(req: NextRequest, { params }: RouteParams) {
+  const { session, error } = await requireSession()
+  if (error) return error
+
+  const { id } = await params
+
+  try {
+    const enrollment = await prisma.enrollment.findUnique({
+      where: { id },
+      include: {
+        grade: true,
+        schoolYear: true,
+      },
+    })
+
+    if (!enrollment) {
+      return NextResponse.json(
+        { message: "Enrollment not found" },
+        { status: 404 }
+      )
+    }
+
+    // Only allow submitting drafts
+    if (enrollment.status !== "draft") {
+      return NextResponse.json(
+        { message: "Enrollment has already been submitted" },
+        { status: 400 }
+      )
+    }
+
+    // Only the creator can submit
+    if (enrollment.createdBy !== session.user.id) {
+      return NextResponse.json(
+        { message: "Cannot submit this enrollment" },
+        { status: 403 }
+      )
+    }
+
+    // Validate required fields
+    const errors: string[] = []
+    if (!enrollment.firstName) errors.push("First name is required")
+    if (!enrollment.lastName) errors.push("Last name is required")
+    if (!enrollment.fatherName && !enrollment.motherName) {
+      errors.push("At least one parent name is required")
+    }
+    if (!enrollment.phone && !enrollment.fatherPhone && !enrollment.motherPhone) {
+      errors.push("At least one phone number is required")
+    }
+
+    if (errors.length > 0) {
+      return NextResponse.json(
+        { message: "Validation failed", errors },
+        { status: 400 }
+      )
+    }
+
+    // Determine status based on whether fee was adjusted
+    const requiresReview = enrollment.adjustedTuitionFee !== null &&
+      enrollment.adjustedTuitionFee !== enrollment.originalTuitionFee
+
+    const newStatus = requiresReview ? "review_required" : "submitted"
+
+    // Calculate auto-approval date (3 days from now) if not requiring review
+    const autoApproveAt = requiresReview
+      ? null
+      : new Date(Date.now() + 3 * 24 * 60 * 60 * 1000)
+
+    // Calculate payment schedules
+    const tuitionFee = enrollment.adjustedTuitionFee || enrollment.originalTuitionFee
+    const schedules = calculatePaymentSchedules(
+      tuitionFee,
+      enrollment.schoolYear.startDate
+    )
+
+    // Generate student number if this is a new student
+    let studentNumber: string | undefined
+    if (!enrollment.studentId) {
+      studentNumber = await generateStudentNumber()
+    }
+
+    // Use transaction to update enrollment and create schedules
+    const updated = await prisma.$transaction(async (tx) => {
+      // Create or update student record if new student
+      let studentId = enrollment.studentId
+      if (!studentId) {
+        const student = await tx.student.create({
+          data: {
+            studentNumber,
+            firstName: enrollment.firstName,
+            lastName: enrollment.lastName,
+            email: enrollment.email,
+            dateOfBirth: enrollment.dateOfBirth,
+            guardianName: enrollment.fatherName || enrollment.motherName,
+            guardianPhone: enrollment.fatherPhone || enrollment.motherPhone,
+            guardianEmail: enrollment.fatherEmail || enrollment.motherEmail,
+            status: "active",
+          },
+        })
+        studentId = student.id
+      }
+
+      // Update enrollment
+      const updatedEnrollment = await tx.enrollment.update({
+        where: { id },
+        data: {
+          status: newStatus,
+          studentId,
+          submittedAt: new Date(),
+          autoApproveAt,
+          draftExpiresAt: null, // Clear draft expiration
+        },
+        include: {
+          grade: true,
+          schoolYear: true,
+          student: true,
+        },
+      })
+
+      // Create payment schedules
+      for (const schedule of schedules) {
+        await tx.paymentSchedule.create({
+          data: {
+            enrollmentId: id,
+            scheduleNumber: schedule.scheduleNumber,
+            amount: schedule.amount,
+            months: schedule.months,
+            dueDate: schedule.dueDate,
+          },
+        })
+      }
+
+      return updatedEnrollment
+    })
+
+    // Get the complete enrollment with payment schedules
+    const complete = await prisma.enrollment.findUnique({
+      where: { id },
+      include: {
+        grade: true,
+        schoolYear: true,
+        student: true,
+        paymentSchedules: {
+          orderBy: { scheduleNumber: "asc" },
+        },
+      },
+    })
+
+    return NextResponse.json({
+      ...complete,
+      studentNumber: complete?.student?.studentNumber,
+    })
+  } catch (err) {
+    console.error("Error submitting enrollment:", err)
+    return NextResponse.json(
+      { message: "Failed to submit enrollment" },
+      { status: 500 }
+    )
+  }
+}
+
+/**
+ * Generate unique student number: STU-XXXXX
+ */
+async function generateStudentNumber(): Promise<string> {
+  const prefix = "STU-"
+
+  // Get the last student number
+  const lastStudent = await prisma.student.findFirst({
+    where: {
+      studentNumber: { startsWith: prefix },
+    },
+    orderBy: { studentNumber: "desc" },
+  })
+
+  let nextNumber = 1
+  if (lastStudent?.studentNumber) {
+    const lastNumber = parseInt(lastStudent.studentNumber.split("-")[1], 10)
+    if (!isNaN(lastNumber)) {
+      nextNumber = lastNumber + 1
+    }
+  }
+
+  return `${prefix}${nextNumber.toString().padStart(5, "0")}`
+}

@@ -1,4 +1,11 @@
 **/node_modules/**
 **/.next/**
 
+# Playwright
+playwright-report/
+playwright/.auth/
+!playwright/.auth/.gitkeep
+
 acli.exe
+test-results/
+nul

@@ -51,11 +51,13 @@ export const fr = {
     login: "Connexion",
     signOut: "Déconnexion",
     managementSystem: "Système de Gestion",
+    profile: "Profil",
+    myAccount: "Mon Compte",
   },
 
   // Homepage
   home: {
-    schoolName: "Groupe Scolaire GSN N'Diolou",
+    schoolName: "Groupe Scolaire GSPN N'Diolou",
     managementSystem: "Système de Gestion",
     heroDescription: "Une plateforme complète de gestion scolaire construite pour l'excellence, la sécurité et la traçabilité dans l'éducation africaine.",
     goToDashboard: "Aller au Tableau de Bord",
@@ -433,6 +435,34 @@ export const fr = {
     tagline: "Pour les écoles africaines, par les africains",
     simulateOffline: "Simuler mode hors ligne",
     simulateOnline: "Simuler mode en ligne",
+    // Page de connexion améliorée
+    schoolName: "Groupe Scolaire Privé de Nongo",
+    schoolTagline: "L'Excellence dans l'Éducation",
+    welcomeTitle: "Bienvenue sur le Système de Gestion Scolaire",
+    welcomeSubtitle: "Une plateforme complète pour gérer les inscriptions, la présence, la comptabilité et plus encore.",
+    signInTitle: "Connexion",
+    signInSubtitle: "Accéder au Système de Gestion Scolaire",
+    signInButton: "Se Connecter",
+    forgotPassword: "Mot de passe oublié?",
+    orContinueWith: "Ou continuer avec",
+    signInWithGoogle: "Se connecter avec Google",
+    invalidCredentials: "Email ou mot de passe invalide",
+    loginError: "Une erreur s'est produite. Veuillez réessayer.",
+    // Cartes de fonctionnalités
+    featureOffline: "Mode Hors Ligne",
+    featureOfflineDesc: "Travaillez sans internet. Les données se synchronisent automatiquement.",
+    featureOfflineShort: "Fonctionne Hors Ligne",
+    featureEnrollment: "Inscription des Élèves",
+    featureEnrollmentDesc: "Assistant d'inscription en 6 étapes avec suivi des paiements.",
+    featureEnrollmentShort: "Inscription Facile",
+    featureAccounting: "Contrôle Financier",
+    featureAccountingDesc: "Suivi complet des paiements avec reçus et réconciliation.",
+    featureAccountingShort: "Suivi des Paiements",
+    featureAttendance: "Présence",
+    featureAttendanceDesc: "Suivi de présence mobile avec rapports.",
+    featureAttendanceShort: "Présence",
+    securityNote: "Sécurisé et approuvé par les écoles à travers la Guinée",
+    footerText: "© 2025 GSPN. Tous droits réservés.",
   },
 
   // Users
@@ -582,6 +612,174 @@ export const fr = {
     "5eme": "5ème",
     "4eme": "4ème",
     "3eme": "3ème",
+  },
+
+  // Enrollment Wizard
+  enrollmentWizard: {
+    // Main
+    title: "Inscription d'Étudiant",
+    subtitle: "Processus d'inscription pour l'année scolaire",
+
+    // Steps
+    step1: "Sélection de Classe",
+    step2: "Information Étudiant",
+    step3: "Échéancier de Paiement",
+    step4: "Paiement",
+    step5: "Révision",
+    step6: "Confirmation",
+
+    // Step 1 - Grade Selection
+    selectGrade: "Sélectionner la Classe",
+    selectGradeDescription: "Choisissez le niveau scolaire pour l'inscription",
+    schoolYear: "Année Scolaire",
+    todayDate: "Date d'aujourd'hui",
+    elementary: "Primaire",
+    college: "Collège",
+    highSchool: "Lycée",
+    studentsEnrolled: "{count} étudiants inscrits",
+    yearlyTuition: "Frais Annuels",
+    perYear: "/an",
+
+    // Step 2 - Student Info
+    studentInfo: "Information de l'Étudiant",
+    newStudent: "Nouvel Étudiant",
+    returningStudent: "Étudiant Existant",
+    searchStudent: "Rechercher par numéro, nom ou date de naissance",
+    noStudentFound: "Aucun étudiant trouvé",
+    selectThisStudent: "Sélectionner cet étudiant",
+
+    // Personal info
+    personalInfo: "Informations Personnelles",
+    firstName: "Prénom",
+    lastName: "Nom",
+    dateOfBirth: "Date de Naissance",
+    gender: "Genre",
+    male: "Masculin",
+    female: "Féminin",
+    phone: "Téléphone",
+    email: "Email",
+    photo: "Photo",
+    birthCertificate: "Extrait de Naissance",
+    uploadPhoto: "Télécharger une Photo",
+    uploadDocument: "Télécharger le Document",
+
+    // Parent info
+    parentInfo: "Information des Parents",
+    fatherInfo: "Informations du Père",
+    motherInfo: "Informations de la Mère",
+    fatherName: "Nom du Père",
+    motherName: "Nom de la Mère",
+    fatherPhone: "Téléphone du Père",
+    motherPhone: "Téléphone de la Mère",
+    fatherEmail: "Email du Père",
+    motherEmail: "Email de la Mère",
+    address: "Adresse",
+
+    // Notes
+    additionalNotes: "Notes Additionnelles",
+    addNote: "Ajouter une Note",
+    noteTitle: "Titre",
+    noteContent: "Contenu",
+    removeNote: "Supprimer",
+
+    // Step 3 - Payment Breakdown
+    paymentBreakdown: "Échéancier de Paiement",
+    totalYearlyAmount: "Montant Total Annuel",
+    schedule1: "Échéance 1",
+    schedule2: "Échéance 2",
+    schedule3: "Échéance 3",
+    schedule1Months: "Septembre + Octobre + Mai",
+    schedule2Months: "Novembre + Décembre + Janvier",
+    schedule3Months: "Février + Mars + Avril",
+    dueBy: "Échéance le",
+    adjustAmount: "Modifier le Montant",
+    adjustmentReason: "Raison de la Modification",
+    requiresApproval: "Cette modification nécessite une approbation du directeur",
+    originalAmount: "Montant Original",
+    adjustedAmount: "Montant Modifié",
+
+    // Step 4 - Payment Transaction
+    paymentTransaction: "Enregistrer un Paiement",
+    paymentOptional: "Le paiement est optionnel à cette étape",
+    skipPayment: "Payer Plus Tard",
+    makePayment: "Effectuer un Paiement",
+    paymentMethod: "Mode de Paiement",
+    cash: "Espèces",
+    orangeMoney: "Orange Money",
+    amount: "Montant",
+    receiptNumber: "Numéro de Reçu",
+    transactionRef: "Référence de Transaction",
+    uploadReceipt: "Télécharger le Reçu",
+    receiptRequired: "Le reçu est obligatoire",
+    paymentCoverage: "Couverture du Paiement",
+    monthsCovered: "Mois Couverts",
+    percentPaid: "Pourcentage Payé",
+
+    // Step 5 - Review
+    reviewEnrollment: "Réviser l'Inscription",
+    reviewDescription: "Vérifiez toutes les informations avant de soumettre",
+    editSection: "Modifier",
+    gradeInfo: "Information de Classe",
+    studentDetails: "Détails de l'Étudiant",
+    parentDetails: "Détails des Parents",
+    paymentDetails: "Détails de Paiement",
+    notesSection: "Notes",
+
+    // Step 6 - Confirmation
+    enrollmentComplete: "Inscription Soumise!",
+    enrollmentNumber: "Numéro d'Inscription",
+    studentNumber: "Numéro d'Étudiant",
+    downloadPdf: "Télécharger le PDF",
+    downloadingPdf: "Génération du PDF...",
+    pdfDownloadError: "Échec du téléchargement du PDF. Veuillez réessayer.",
+    printDocument: "Imprimer",
+    statusSubmitted: "Soumise - En Attente de Révision",
+    statusReviewRequired: "Révision Requise par le Directeur",
+    autoApproveIn: "Approbation automatique dans {days} jours",
+
+    // Status badges
+    statusDraft: "Brouillon",
+    statusApproved: "Approuvée",
+    statusRejected: "Rejetée",
+    statusCancelled: "Annulée",
+
+    // Draft management
+    draftSaved: "Brouillon enregistré",
+    draftRecovered: "Brouillon récupéré du {date}",
+    draftExpires: "Le brouillon expire dans {days} jours",
+    continueDraft: "Continuer le Brouillon",
+    discardDraft: "Supprimer le Brouillon",
+
+    // Validation errors
+    selectGradeRequired: "Veuillez sélectionner une classe",
+    firstNameRequired: "Le prénom est obligatoire",
+    lastNameRequired: "Le nom est obligatoire",
+    parentRequired: "Au moins un nom de parent est obligatoire",
+    phoneRequired: "Au moins un numéro de téléphone est obligatoire",
+    receiptNumberRequired: "Le numéro de reçu est obligatoire",
+
+    // Actions
+    saveAndContinue: "Enregistrer et Continuer",
+    saveDraft: "Enregistrer le Brouillon",
+    submitEnrollment: "Soumettre l'Inscription",
+    goBack: "Retour",
+  },
+
+  // Grade names (Guinea format)
+  gradeNames: {
+    "1ere": "1ère Année",
+    "2eme": "2ème Année",
+    "3eme": "3ème Année",
+    "4eme": "4ème Année",
+    "5eme": "5ème Année",
+    "6eme": "6ème Année",
+    "7eme": "7ème Année",
+    "8eme": "8ème Année",
+    "9eme": "9ème Année",
+    "10eme": "10ème Année",
+    "11eme": "11ème Année",
+    "12eme": "12ème Année",
+    terminal: "Terminale",
   },
 } as const;
 

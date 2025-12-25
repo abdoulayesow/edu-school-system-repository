@@ -298,6 +298,19 @@ pnpm test -- -u
 # 5. Prisma format check (formatting validation)
 ```
 
+### Prisma v7 Configuration
+
+This project uses **Prisma v7** with the PostgreSQL driver adapter:
+
+| Component | Location |
+|-----------|----------|
+| Schema | `app/db/prisma/schema.prisma` |
+| Config | `app/db/prisma.config.ts` |
+| Migrations | `app/db/prisma/migrations/` |
+| Client | `app/db/prisma.ts` |
+
+**Note:** CI commands run from `app/db`, not `app/ui`, because the Prisma configuration file (`prisma.config.ts`) is located there.
+
 **Failure Causes:**
 - Invalid Prisma syntax
 - Unmatched curly braces
@@ -319,17 +332,17 @@ model User {
 
 **Fix Commands:**
 ```bash
-# Validate schema
-cd app/ui && pnpm prisma validate
+# Validate schema (run from app/db for Prisma v7)
+cd app/db && pnpm prisma validate
 
 # Auto-format schema
-cd app/ui && pnpm prisma format
+cd app/db && pnpm prisma format
 
 # Check pending migrations
-cd app/ui && pnpm prisma migrate status
+cd app/db && pnpm prisma migrate status
 
 # View schema in Prisma Studio
-cd app/ui && pnpm prisma studio
+cd app/db && pnpm prisma studio
 ```
 
 **Schema Rules:**

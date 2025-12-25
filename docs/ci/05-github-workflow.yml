@@ -47,7 +47,7 @@ jobs:
         run: pnpm exec prettier --check .
 
       - name: Prisma - Format check
-        run: cd app/ui && pnpm prisma format --check
+        run: cd app/db && pnpm prisma format --check
 
   # ============================================================================
   # JOB 2: TYPECHECK - TypeScript compilation
@@ -253,13 +253,13 @@ jobs:
         run: pnpm install --frozen-lockfile
 
       - name: Validate Prisma schema
-        run: cd app/ui && pnpm prisma validate
+        run: cd app/db && pnpm prisma validate
 
       - name: Format check Prisma schema
-        run: cd app/ui && pnpm prisma format --check
+        run: cd app/db && pnpm prisma format --check
 
       - name: Check for migration drift
-        run: cd app/ui && pnpm prisma migrate status || echo "⚠️ Database not initialized (expected in CI)"
+        run: cd app/db && pnpm prisma migrate status || echo "⚠️ Database not initialized (expected in CI)"
         continue-on-error: true
 
   # ============================================================================

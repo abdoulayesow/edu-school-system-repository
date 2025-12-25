@@ -4,13 +4,22 @@ import { useState } from "react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { cn } from "@/lib/utils"
-import { Menu, X, Wifi, WifiOff } from "lucide-react"
+import { Menu, X, User, LogOut } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
 import { mainNavigation, bottomNavigation } from "@/lib/nav-links"
 import { useI18n } from "@/components/i18n-provider"
 import { LanguageSwitcher } from "@/components/language-switcher"
 import { signIn, signOut, useSession } from "next-auth/react"
+import { OfflineIndicator } from "@/components/offline-indicator"
 
 const visibleMainNavigation = mainNavigation
 const visibleBottomNavigation = bottomNavigation
@@ -29,10 +38,30 @@ const navTranslationKeys: Record<string, keyof typeof import('@/lib/i18n').fr.na
 
 export function Navigation() {
   const [isOpen, setIsOpen] = useState(false)
-  const [isOnline, setIsOnline] = useState(true)
   const pathname = usePathname()
   const { t } = useI18n()
   const { data: session } = useSession()
+
+  // Show minimal navigation on login page (logo + language switcher only)
+  if (pathname === '/login') {
+    return (
+      <nav className="hidden lg:flex fixed top-0 left-0 right-0 z-40 bg-primary border-b border-primary-foreground/10 h-16 items-center">
+        <div className="container mx-auto px-4 flex items-center justify-between">
+          {/* Logo */}
+          <Link href="/" className="flex items-center gap-3">
+            <img src="/logo.png" alt="GSPN" className="h-10 w-10 rounded-full" />
+            <div>
+              <h2 className="font-bold text-base text-primary-foreground">GSPN</h2>
+              <p className="text-xs text-primary-foreground/70">{t.nav.managementSystem}</p>
+            </div>
+          </Link>
+
+          {/* Language Switcher Only */}
+          <LanguageSwitcher variant="nav" />
+        </div>
+      </nav>
+    )
+  }
 
   // Helper to get translated nav name
   const getNavName = (name: string) => {
@@ -93,50 +122,57 @@ export function Navigation() {
             {/* Language Switcher - Always visible */}
             <LanguageSwitcher variant="nav" />
 
-            {/* Online/Offline Toggle - Only show when logged in */}
-            {session && (
-              <button
-                onClick={() => setIsOnline(!isOnline)}
-                className={cn(
-                  "flex items-center gap-2 rounded-lg px-3 py-1.5 text-xs font-medium transition-colors",
-                  isOnline
-                    ? "bg-success/90 text-success-foreground hover:bg-success"
-                    : "bg-warning/90 text-warning-foreground hover:bg-warning",
-                )}
-              >
-                {isOnline ? <Wifi className="h-3 w-3" /> : <WifiOff className="h-3 w-3" />}
-                <span>{isOnline ? t.common.online : t.common.offline}</span>
-              </button>
-            )}
+            {/* Offline/Sync Indicator - Only show when logged in */}
+            {session && <OfflineIndicator showLabel size="sm" />}
 
-            {/* User Profile & Sign Out - Only show when logged in */}
+            {/* User Profile Dropdown - Only show when logged in */}
             {session && (
-              <>
-                <div className="flex items-center gap-3">
-                  <Avatar className="h-9 w-9">
-                    <AvatarImage src={session?.user?.image ?? ""} alt={session?.user?.name ?? ""} />
-                    <AvatarFallback>
-                      {(session?.user?.name?.[0] ?? "U").toUpperCase()}
-                    </AvatarFallback>
-                  </Avatar>
-                  <div className="text-sm">
-                    <p className="font-semibold text-primary-foreground">
-                      {session?.user?.name ?? "Guest"}
-                    </p>
-                    <p className="text-primary-foreground/70 capitalize">
-                      {session?.user?.role ?? ""}
-                    </p>
-                  </div>
-                </div>
-
-                {/* Sign Out Button */}
-                <button
-                  onClick={() => signOut({ callbackUrl: "/login" })}
-                  className="flex items-center gap-2 rounded-lg px-3 py-1.5 text-sm font-medium transition-colors text-primary-foreground/80 hover:bg-primary-foreground/10 hover:text-primary-foreground"
-                >
-                  <span>{t.nav.signOut}</span>
-                </button>
-              </>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <button className="flex items-center gap-3 rounded-lg px-3 py-2 transition-colors hover:bg-primary-foreground/10">
+                    <Avatar className="h-9 w-9">
+                      <AvatarImage src={session?.user?.image ?? ""} alt={session?.user?.name ?? ""} />
+                      <AvatarFallback>
+                        {(session?.user?.name?.[0] ?? "U").toUpperCase()}
+                      </AvatarFallback>
+                    </Avatar>
+                    <div className="text-sm text-left">
+                      <p className="font-semibold text-primary-foreground">
+                        {session?.user?.name ?? "Guest"}
+                      </p>
+                      <p className="text-primary-foreground/70 capitalize text-xs">
+                        {session?.user?.role ?? ""}
+                      </p>
+                    </div>
+                  </button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-56" sideOffset={8}>
+                  <DropdownMenuLabel>
+                    <div className="flex flex-col space-y-1">
+                      <p className="text-sm font-medium leading-none">{session?.user?.name ?? "Guest"}</p>
+                      <p className="text-xs leading-none text-muted-foreground capitalize">
+                        {session?.user?.role ?? ""}
+                      </p>
+                    </div>
+                  </DropdownMenuLabel>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem asChild>
+                    <Link href="/profile" className="cursor-pointer">
+                      <User className="mr-2 h-4 w-4" />
+                      <span>{t.nav.profile}</span>
+                    </Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem
+                    variant="destructive"
+                    onClick={() => signOut({ callbackUrl: "/login" })}
+                    className="cursor-pointer"
+                  >
+                    <LogOut className="mr-2 h-4 w-4" />
+                    <span>{t.nav.signOut}</span>
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
             )}
 
             {/* Sign In Button - Show when logged out */}
@@ -181,18 +217,7 @@ export function Navigation() {
 
           {/* Online/Offline Status */}
           <div className="px-4 py-3 border-b border-secondary-foreground/10">
-            <button
-              onClick={() => setIsOnline(!isOnline)}
-              className={cn(
-                "flex w-full items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium transition-colors",
-                isOnline
-                  ? "bg-success/10 text-success hover:bg-success/20"
-                  : "bg-destructive/10 text-destructive hover:bg-destructive/20",
-              )}
-            >
-              {isOnline ? <Wifi className="h-4 w-4" /> : <WifiOff className="h-4 w-4" />}
-              <span>{isOnline ? t.common.onlineSynced : t.common.offlineMode}</span>
-            </button>
+            <OfflineIndicator showLabel size="sm" />
           </div>
 
           {/* Language Switcher - Mobile */}
@@ -256,21 +281,34 @@ export function Navigation() {
 
           {/* Footer */}
           <div className="border-t border-secondary-foreground/10 p-4">
-              {session ? (
-                <button
-                  onClick={() => signOut({ callbackUrl: "/login" })}
-                  className="flex w-full items-center justify-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors text-secondary-foreground/80 hover:bg-secondary-foreground/10 hover:text-secondary-foreground"
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <button className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors text-secondary-foreground/80 hover:bg-secondary-foreground/10 hover:text-secondary-foreground">
+                  <User className="h-4 w-4" />
+                  <span>{t.nav.myAccount}</span>
+                </button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent side="top" align="start" className="w-56" sideOffset={8}>
+                <DropdownMenuItem asChild>
+                  <Link href="/profile" className="cursor-pointer" onClick={() => setIsOpen(false)}>
+                    <User className="mr-2 h-4 w-4" />
+                    <span>{t.nav.profile}</span>
+                  </Link>
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem
+                  variant="destructive"
+                  onClick={() => {
+                    setIsOpen(false)
+                    signOut({ callbackUrl: "/login" })
+                  }}
+                  className="cursor-pointer"
                 >
+                  <LogOut className="mr-2 h-4 w-4" />
                   <span>{t.nav.signOut}</span>
-                </button>
-              ) : (
-                <button
-                  onClick={() => signIn()}
-                  className="flex w-full items-center justify-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors text-secondary-foreground/80 hover:bg-secondary-foreground/10 hover:text-secondary-foreground"
-                >
-                  <span>{t.nav.login}</span>
-                </button>
-              )}
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
         </div>
         </aside>

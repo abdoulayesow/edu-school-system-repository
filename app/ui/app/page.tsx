@@ -1,6 +1,9 @@
 "use client"
 
 import Link from "next/link"
+import { useSession } from "next-auth/react"
+import { useRouter } from "next/navigation"
+import { useEffect, useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Card, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import {
@@ -19,6 +22,28 @@ import { useI18n } from "@/components/i18n-provider"
 
 export default function HomePage() {
   const { t } = useI18n()
+  const { data: session, status } = useSession()
+  const router = useRouter()
+  const [isRedirecting, setIsRedirecting] = useState(false)
+
+  useEffect(() => {
+    if (status === 'authenticated' && session) {
+      setIsRedirecting(true)
+      router.push('/dashboard')
+    }
+  }, [status, session, router])
+
+  // Show loading state during redirect or session loading
+  if (status === 'loading' || isRedirecting) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
+          <p className="text-muted-foreground">{t.common.loading}</p>
+        </div>
+      </div>
+    )
+  }
 
   const pages = [
     {

@@ -6,7 +6,18 @@
     "app/api",
     "app/db"
   ],
+  "scripts": {
+    "db:seed": "npx tsx app/db/prisma/seed.ts",
+    "db:seed:test-user": "npx tsx tests/helpers/seed-test-user.ts",
+    "test:e2e": "playwright test",
+    "test:e2e:ui": "playwright test --ui",
+    "test:e2e:headed": "playwright test --headed",
+    "test:e2e:setup": "npx tsx tests/helpers/seed-test-user.ts",
+    "test:e2e:report": "playwright show-report"
+  },
   "devDependencies": {
-    "prisma": "^7.2.0"
+    "@playwright/test": "^1.57.0",
+    "prisma": "^7.2.0",
+    "tsx": "^4.21.0"
   }
 }
