@@ -63,6 +63,7 @@
     ".turbo",
     "node_modules",
     "coverage",
+    "design-ux",
     "**/*.generated.ts"
   ],
   "overrides": [
