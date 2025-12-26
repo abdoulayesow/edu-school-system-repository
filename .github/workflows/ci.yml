@@ -36,10 +36,6 @@ jobs:
         run: cd app/ui && npm run lint
         continue-on-error: true
 
-      - name: ESLint - design-ux
-        run: cd design-ux && npm run lint
-        continue-on-error: true
-
       - name: Prettier - Check formatting
         run: npx prettier --check .
         continue-on-error: true
@@ -71,11 +67,6 @@ jobs:
 
       - name: TypeScript - Check app/ui
         run: cd app/ui && npm run typecheck
-        continue-on-error: true
-
-      - name: TypeScript - Check design-ux
-        run: cd design-ux && npm run typecheck
-        continue-on-error: true
 
   # ============================================================================
   # JOB 3: SECURITY - Dependency audit + vulnerability scanning
@@ -112,13 +103,9 @@ jobs:
   # JOB 4: BUILD - Next.js production builds
   # ============================================================================
   build:
-    name: Build Projects
+    name: Build app/ui
     runs-on: ubuntu-latest
     timeout-minutes: 20
-    strategy:
-      matrix:
-        workspace: [app/ui, design-ux]
-        node-version: ['20']
 
     steps:
       - name: Checkout code
@@ -127,14 +114,14 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: ${{ matrix.node-version }}
+          node-version: ${{ env.NODE_VERSION }}
           cache: 'npm'
 
       - name: Install dependencies
         run: npm ci
 
-      - name: Build ${{ matrix.workspace }}
-        run: cd ${{ matrix.workspace }} && npm run build
+      - name: Build app/ui
+        run: cd app/ui && npm run build
         env:
           NEXTAUTH_SECRET: test-secret-key-for-ci-only
           NEXTAUTH_URL: http://localhost:3000
@@ -142,20 +129,19 @@ jobs:
 
       - name: Check build output
         run: |
-          if [ -d "${{ matrix.workspace }}/.next" ]; then
+          if [ -d "app/ui/.next" ]; then
             echo "✅ Build output verified"
-            du -sh ${{ matrix.workspace }}/.next
+            du -sh app/ui/.next
           else
             echo "❌ Build output not found"
             exit 1
           fi
 
       - name: Upload build artifacts
-        if: matrix.workspace == 'app/ui'
         uses: actions/upload-artifact@v4
         with:
-          name: build-${{ matrix.workspace }}
-          path: ${{ matrix.workspace }}/.next
+          name: build-app-ui
+          path: app/ui/.next
           retention-days: 1
 
   # ============================================================================
@@ -188,9 +174,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: coverage-reports
-          path: |
-            app/ui/coverage
-            design-ux/coverage
+          path: app/ui/coverage
           retention-days: 5
 
   # ============================================================================
