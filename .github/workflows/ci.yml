@@ -123,8 +123,8 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Rebuild native modules for Linux
-        run: cd app/ui && npm rebuild lightningcss
+      - name: Install Linux native modules
+        run: cd app/ui && npm install lightningcss-linux-x64-gnu --no-save
 
       - name: Generate Prisma Client
         run: cd app/db && npx prisma generate
