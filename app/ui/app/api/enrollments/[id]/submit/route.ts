@@ -89,7 +89,7 @@ export async function POST(req: NextRequest, { params }: RouteParams) {
     // Generate student number if this is a new student
     let studentNumber: string | undefined
     if (!enrollment.studentId) {
-      studentNumber = await generateStudentNumber()
+      studentNumber = await generateStudentNumber(enrollment.dateOfBirth)
     }
 
     // Use transaction to update enrollment and create schedules
@@ -173,26 +173,41 @@ export async function POST(req: NextRequest, { params }: RouteParams) {
 }
 
 /**
- * Generate unique student number: STU-XXXXX
+ * Generate unique student number: STD-YYYY-DDMMYYYY-XXXX
+ * where YYYY is current year, DDMMYYYY is student's birthday, XXXX is sequence
  */
-async function generateStudentNumber(): Promise<string> {
-  const prefix = "STU-"
+async function generateStudentNumber(dateOfBirth: Date | null): Promise<string> {
+  const year = new Date().getFullYear()
 
-  // Get the last student number
+  // Format birthday as DDMMYYYY, use default if not provided
+  let birthdayStr = "00000000"
+  if (dateOfBirth) {
+    const day = dateOfBirth.getDate().toString().padStart(2, "0")
+    const month = (dateOfBirth.getMonth() + 1).toString().padStart(2, "0")
+    const birthYear = dateOfBirth.getFullYear().toString()
+    birthdayStr = `${day}${month}${birthYear}`
+  }
+
+  const prefix = `STD-${year}-${birthdayStr}-`
+
+  // Get the last student number for this year
+  const yearPrefix = `STD-${year}-`
   const lastStudent = await prisma.student.findFirst({
     where: {
-      studentNumber: { startsWith: prefix },
+      studentNumber: { startsWith: yearPrefix },
     },
     orderBy: { studentNumber: "desc" },
   })
 
   let nextNumber = 1
   if (lastStudent?.studentNumber) {
-    const lastNumber = parseInt(lastStudent.studentNumber.split("-")[1], 10)
+    // Extract the last segment after the final dash
+    const parts = lastStudent.studentNumber.split("-")
+    const lastNumber = parseInt(parts[parts.length - 1], 10)
     if (!isNaN(lastNumber)) {
       nextNumber = lastNumber + 1
     }
   }
 
-  return `${prefix}${nextNumber.toString().padStart(5, "0")}`
+  return `${prefix}${nextNumber.toString().padStart(4, "0")}`
 }

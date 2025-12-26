@@ -4,7 +4,7 @@ import { useState } from "react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { cn } from "@/lib/utils"
-import { Menu, X, User, LogOut } from "lucide-react"
+import { Menu, X, User, LogOut, ChevronDown } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import {
@@ -128,11 +128,14 @@ export function Navigation() {
             {/* User Profile Dropdown - Only show when logged in */}
             {session && (
               <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <button data-testid="user-dropdown-trigger" className="flex items-center gap-3 rounded-lg px-3 py-2 transition-colors hover:bg-primary-foreground/10">
-                    <Avatar className="h-9 w-9">
+                <DropdownMenuTrigger asChild className="group">
+                  <button
+                    data-testid="user-dropdown-trigger"
+                    className="flex items-center gap-3 rounded-lg px-3 py-2 cursor-pointer transition-all duration-200 hover:bg-primary-foreground/20 focus:outline-none focus:ring-2 focus:ring-primary-foreground/30 focus:ring-offset-2 focus:ring-offset-primary border border-transparent hover:border-primary-foreground/20"
+                  >
+                    <Avatar className="h-9 w-9 ring-2 ring-primary-foreground/20">
                       <AvatarImage src={session?.user?.image ?? ""} alt={session?.user?.name ?? ""} />
-                      <AvatarFallback>
+                      <AvatarFallback className="bg-primary-foreground/20 text-primary-foreground">
                         {(session?.user?.name?.[0] ?? "U").toUpperCase()}
                       </AvatarFallback>
                     </Avatar>
@@ -144,9 +147,10 @@ export function Navigation() {
                         {session?.user?.role ?? ""}
                       </p>
                     </div>
+                    <ChevronDown className="h-4 w-4 text-primary-foreground/70 transition-transform duration-200 group-data-[state=open]:rotate-180" />
                   </button>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="w-56" sideOffset={8}>
+                <DropdownMenuContent align="end" className="w-56 shadow-lg border border-border/50" sideOffset={12}>
                   <DropdownMenuLabel>
                     <div className="flex flex-col space-y-1">
                       <p className="text-sm font-medium leading-none">{session?.user?.name ?? "Guest"}</p>

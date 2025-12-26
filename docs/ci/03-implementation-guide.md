@@ -45,13 +45,13 @@ Create `.eslintrc.json` in repository root:
 **Dependencies to Add:**
 ```bash
 cd app/ui
-pnpm add -D eslint @eslint/js typescript-eslint eslint-config-next eslint-config-prettier
-pnpm add -D eslint-plugin-react eslint-plugin-react-hooks eslint-plugin-import
+npm install -D eslint @eslint/js typescript-eslint eslint-config-next eslint-config-prettier
+npm install -D eslint-plugin-react eslint-plugin-react-hooks eslint-plugin-import
 
 cd ../..
 cd design-ux
-pnpm add -D eslint @eslint/js typescript-eslint eslint-config-next eslint-config-prettier
-pnpm add -D eslint-plugin-react eslint-plugin-react-hooks eslint-plugin-import
+npm install -D eslint @eslint/js typescript-eslint eslint-config-next eslint-config-prettier
+npm install -D eslint-plugin-react eslint-plugin-react-hooks eslint-plugin-import
 ```
 
 ---
@@ -91,11 +91,11 @@ package-lock.json
 **Dependencies to Add:**
 ```bash
 cd app/ui
-pnpm add -D prettier prettier-plugin-tailwindcss
+npm install -D prettier prettier-plugin-tailwindcss
 
 cd ../..
 cd design-ux
-pnpm add -D prettier prettier-plugin-tailwindcss
+npm install -D prettier prettier-plugin-tailwindcss
 ```
 
 ---
@@ -215,11 +215,11 @@ act -j lint
 
 ```bash
 cd app/ui
-pnpm add -D vitest @vitest/ui @vitest/coverage-v8 happy-dom
+npm install -D vitest @vitest/ui @vitest/coverage-v8 happy-dom @testing-library/react @testing-library/jest-dom @vitejs/plugin-react
 
 cd ../..
 cd design-ux
-pnpm add -D vitest @vitest/ui @vitest/coverage-v8 happy-dom
+npm install -D vitest @vitest/ui @vitest/coverage-v8 happy-dom
 ```
 
 ### Step 3.2: Create Vitest Configuration
@@ -300,9 +300,9 @@ describe('Auth Utils', () => {
 ### Step 4.1: Install Playwright
 
 ```bash
-cd app/ui
-pnpm add -D @playwright/test
-pnpm exec playwright install
+# At root level (already installed)
+npm install -D @playwright/test
+npx playwright install
 ```
 
 ### Step 4.2: Create Playwright Configuration
@@ -340,7 +340,7 @@ export default defineConfig({
   ],
 
   webServer: {
-    command: 'pnpm dev',
+    command: 'npm run dev',
     url: 'http://localhost:8000',
     reuseExistingServer: !process.env.CI,
   },
@@ -472,25 +472,25 @@ Run locally to verify everything passes:
 
 ```bash
 # Install dependencies
-pnpm install
+npm install
 
 # Lint
-pnpm lint
+npm run lint
 
 # Format check
-pnpm format:check
+npm run format:check
 
 # Type check
-pnpm typecheck
+npm run typecheck
 
 # Build
-pnpm build
+npm run build
 
 # Run tests
-pnpm test:run
+npm run test:run
 
 # Database validate
-cd app/ui && pnpm db:validate
+npm run db:validate
 ```
 
 All commands should succeed before pushing.
@@ -501,17 +501,11 @@ All commands should succeed before pushing.
 
 ### Common Issues
 
-**Issue:** "pnpm: command not found"
-```bash
-# Install pnpm globally
-npm install -g pnpm@9
-```
-
 **Issue:** "Module not found" errors after config changes
 ```bash
 # Clear cache and reinstall
-rm -rf node_modules pnpm-lock.yaml
-pnpm install
+rm -rf node_modules package-lock.json
+npm install
 ```
 
 **Issue:** Prettier and ESLint conflicts
@@ -523,7 +517,7 @@ pnpm install
 **Issue:** Build fails with "out of memory"
 ```bash
 # Increase Node heap size
-NODE_OPTIONS=--max-old-space-size=4096 pnpm build
+NODE_OPTIONS=--max-old-space-size=4096 npm run build
 ```
 
 **Issue:** Tests timeout
@@ -541,12 +535,12 @@ test: {
 The CI pipeline is successfully implemented when:
 
 1. ✅ All config files pass syntax validation
-2. ✅ `pnpm lint` passes with zero warnings
-3. ✅ `pnpm typecheck` shows zero errors
-4. ✅ `pnpm build` completes successfully for both workspaces
+2. ✅ `npm run lint` passes with zero warnings
+3. ✅ `npm run typecheck` shows zero errors
+4. ✅ `npm run build` completes successfully for both workspaces
 5. ✅ At least 5 passing unit tests
 6. ✅ At least 2 passing E2E tests
-7. ✅ `pnpm audit` shows no high/critical vulnerabilities
+7. ✅ `npm audit` shows no high/critical vulnerabilities
 8. ✅ GitHub Actions workflow runs successfully on PR
 9. ✅ Branch protection rules block merge if checks fail
 10. ✅ Team members follow CI feedback and fix failures

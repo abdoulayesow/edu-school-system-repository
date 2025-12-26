@@ -49,25 +49,33 @@ class SyncManager {
   private listeners: Set<SyncEventCallback> = new Set()
   private syncInterval: ReturnType<typeof setInterval> | null = null
   private isSyncing = false
+  private initialized = false
+
+  constructor() {
+    // Attach online/offline listeners immediately at construction
+    // This ensures we always track online status correctly
+    if (typeof window !== "undefined") {
+      window.addEventListener("online", this.handleOnline)
+      window.addEventListener("offline", this.handleOffline)
+    }
+  }
 
   // ============================================================================
   // Initialization
   // ============================================================================
 
   async initialize(): Promise<void> {
-    // Update online status
-    if (typeof window !== "undefined") {
-      window.addEventListener("online", this.handleOnline)
-      window.addEventListener("offline", this.handleOffline)
+    // Prevent double initialization
+    if (this.initialized) return
+    this.initialized = true
 
-      // Listen for service worker sync messages
-      if ("serviceWorker" in navigator) {
-        navigator.serviceWorker.addEventListener("message", (event) => {
-          if (event.data?.type === "SYNC_REQUESTED") {
-            this.sync()
-          }
-        })
-      }
+    // Listen for service worker sync messages
+    if (typeof window !== "undefined" && "serviceWorker" in navigator) {
+      navigator.serviceWorker.addEventListener("message", (event) => {
+        if (event.data?.type === "SYNC_REQUESTED") {
+          this.sync()
+        }
+      })
     }
 
     // Update pending count

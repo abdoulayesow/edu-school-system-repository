@@ -1,14 +1,23 @@
 "use client"
 
 import { useState } from "react"
+import dynamic from "next/dynamic"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { ChartContainer, ChartTooltip, ChartTooltipContent, type ChartConfig } from "@/components/ui/chart"
 import { BookOpen, Users, TrendingDown, BarChart3, Calendar } from "lucide-react"
-import { Line, LineChart, CartesianGrid, XAxis, YAxis, Bar, BarChart } from "recharts"
 import { useI18n } from "@/components/i18n-provider"
+
+// Lazy load recharts components to improve initial compile time
+const LineChart = dynamic(() => import("recharts").then(mod => ({ default: mod.LineChart })), { ssr: false })
+const Line = dynamic(() => import("recharts").then(mod => ({ default: mod.Line })), { ssr: false })
+const BarChart = dynamic(() => import("recharts").then(mod => ({ default: mod.BarChart })), { ssr: false })
+const Bar = dynamic(() => import("recharts").then(mod => ({ default: mod.Bar })), { ssr: false })
+const CartesianGrid = dynamic(() => import("recharts").then(mod => ({ default: mod.CartesianGrid })), { ssr: false })
+const XAxis = dynamic(() => import("recharts").then(mod => ({ default: mod.XAxis })), { ssr: false })
+const YAxis = dynamic(() => import("recharts").then(mod => ({ default: mod.YAxis })), { ssr: false })
 
 export default function ReportsPage() {
   const { t } = useI18n()

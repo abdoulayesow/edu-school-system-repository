@@ -150,8 +150,8 @@ export async function POST(req: NextRequest) {
       )
     }
 
-    // Generate enrollment number
-    const enrollmentNumber = await generateEnrollmentNumber()
+    // Generate enrollment number with grade level
+    const enrollmentNumber = await generateEnrollmentNumber(grade.level)
 
     // Set draft expiration (10 days from now)
     const draftExpiresAt = new Date()
@@ -221,13 +221,15 @@ export async function POST(req: NextRequest) {
 }
 
 /**
- * Generate unique enrollment number: ENR-YYYY-XXXXX
+ * Generate unique enrollment number: ENR-YYYY-GG-XXXXX
+ * where GG is the grade level (e.g., 06 for 6ème)
  */
-async function generateEnrollmentNumber(): Promise<string> {
+async function generateEnrollmentNumber(gradeLevel: number): Promise<string> {
   const year = new Date().getFullYear()
-  const prefix = `ENR-${year}-`
+  const gradeCode = gradeLevel.toString().padStart(2, "0")
+  const prefix = `ENR-${year}-${gradeCode}-`
 
-  // Get the last enrollment number for this year
+  // Get the last enrollment number for this year and grade
   const lastEnrollment = await prisma.enrollment.findFirst({
     where: {
       enrollmentNumber: { startsWith: prefix },
@@ -237,7 +239,9 @@ async function generateEnrollmentNumber(): Promise<string> {
 
   let nextNumber = 1
   if (lastEnrollment?.enrollmentNumber) {
-    const lastNumber = parseInt(lastEnrollment.enrollmentNumber.split("-")[2], 10)
+    // Extract the last segment after the final dash
+    const parts = lastEnrollment.enrollmentNumber.split("-")
+    const lastNumber = parseInt(parts[parts.length - 1], 10)
     if (!isNaN(lastNumber)) {
       nextNumber = lastNumber + 1
     }

@@ -765,6 +765,11 @@ export const en: TranslationKeys = {
     saveDraft: "Save Draft",
     submitEnrollment: "Submit Enrollment",
     goBack: "Go Back",
+
+    // Confirmation page
+    enrollmentSummary: "Enrollment Summary",
+    backToEnrollments: "Back to Enrollments",
+    startNewEnrollment: "Start New Enrollment",
   },
 
   // Grade names (Guinea format)

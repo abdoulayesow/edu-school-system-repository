@@ -114,11 +114,12 @@ export async function waitForErrorToast(page: Page) {
 export async function clearSession(page: Page) {
   // Clear cookies first (doesn't require a page to be loaded)
   await page.context().clearCookies()
-  
+
   // Navigate to a page first before trying to clear storage
   // (otherwise we get SecurityError on about:blank)
   try {
-    await page.goto('http://localhost:8000/login', { waitUntil: 'commit' })
+    // Use relative URL - Playwright will use the baseURL from config
+    await page.goto('/login', { waitUntil: 'commit' })
     await page.evaluate(() => {
       localStorage.clear()
       sessionStorage.clear()

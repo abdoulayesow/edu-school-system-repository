@@ -65,6 +65,10 @@ test.describe('Offline Indicator', () => {
   })
 
   test('should show pending badge when items are waiting to sync', async ({ page }) => {
+    // Wait for page to be fully stable before IndexedDB operations
+    await page.waitForLoadState('networkidle')
+    await page.waitForTimeout(500)
+
     // Add a student directly to IndexedDB to simulate offline creation
     const studentData = generateTestStudent('Pending')
     await addStudentViaIndexedDB(page, studentData)
@@ -322,6 +326,10 @@ test.describe('IndexedDB Operations', () => {
   })
 
   test('should clear IndexedDB successfully', async ({ page }) => {
+    // Wait for page to be fully stable before IndexedDB operations
+    await page.waitForLoadState('networkidle')
+    await page.waitForTimeout(500)
+
     // Add some data first
     const studentData = generateTestStudent('Clear')
     await addStudentViaIndexedDB(page, studentData)

@@ -142,98 +142,119 @@ export async function clearIndexedDB(page: Page): Promise<void> {
 
 /**
  * Add a student directly to IndexedDB (simulating offline creation)
+ * Creates the database and stores if they don't exist.
  */
 export async function addStudentViaIndexedDB(
   page: Page,
   data: Partial<Omit<LocalStudent, 'id' | 'syncStatus' | 'localUpdatedAt' | 'version'>>
 ): Promise<string> {
   return page.evaluate(async (studentData) => {
+    const id = `local_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`
+
+    const student = {
+      id,
+      firstName: studentData.firstName || 'Test',
+      lastName: studentData.lastName || 'Student',
+      email: studentData.email,
+      status: studentData.status || 'active',
+      enrollmentDate: studentData.enrollmentDate || new Date().toISOString(),
+      grade: studentData.grade,
+      classId: studentData.classId,
+      syncStatus: 'pending',
+      localUpdatedAt: Date.now(),
+      version: 1,
+    }
+
+    const syncQueueItem = {
+      operation: 'CREATE',
+      entity: 'student',
+      entityId: id,
+      payload: studentData,
+      createdAt: Date.now(),
+      attempts: 0,
+      status: 'pending',
+    }
+
+    // Helper function to add data to an open database
+    function addToDatabase(db: IDBDatabase): Promise<string> {
+      return new Promise((resolve, reject) => {
+        try {
+          const transaction = db.transaction(['students', 'syncQueue'], 'readwrite')
+
+          transaction.onerror = () => {
+            reject(new Error(`Transaction error: ${transaction.error?.message || 'Unknown error'}`))
+          }
+
+          transaction.oncomplete = () => {
+            db.close()
+            resolve(id)
+          }
+
+          const studentsStore = transaction.objectStore('students')
+          const syncQueueStore = transaction.objectStore('syncQueue')
+
+          const studentRequest = studentsStore.add(student)
+          studentRequest.onerror = () => {
+            reject(new Error(`Failed to add student: ${studentRequest.error?.message || 'Unknown error'}`))
+          }
+
+          const queueRequest = syncQueueStore.add(syncQueueItem)
+          queueRequest.onerror = () => {
+            reject(new Error(`Failed to add to sync queue: ${queueRequest.error?.message || 'Unknown error'}`))
+          }
+        } catch (err) {
+          db.close()
+          reject(err)
+        }
+      })
+    }
+
+    // Open database and check for stores, use a high version to ensure upgrade works
     return new Promise<string>((resolve, reject) => {
-      // Open without version first to get current version
-      const openRequest = indexedDB.open('GSPNOfflineDB')
-      
-      openRequest.onerror = () => {
-        // If open fails, use version 20 (latest from DB schema)
-        const request = indexedDB.open('GSPNOfflineDB', 20)
+      // First, get the current database version
+      const checkRequest = indexedDB.open('GSPNOfflineDB')
 
-        request.onupgradeneeded = (event) => {
-          const db = (event.target as IDBOpenDBRequest).result
-          // Create stores if they don't exist
-          if (!db.objectStoreNames.contains('students')) {
-            db.createObjectStore('students', { keyPath: 'id' })
-          }
-          if (!db.objectStoreNames.contains('syncQueue')) {
-            db.createObjectStore('syncQueue', { keyPath: 'id', autoIncrement: true })
-          }
-        }
-
-        request.onerror = () => reject(request.error)
-        request.onsuccess = processRequest
+      checkRequest.onerror = () => {
+        reject(new Error(`Failed to open database: ${checkRequest.error?.message || 'Unknown error'}`))
       }
-      
-      openRequest.onsuccess = () => {
-        const existingDb = openRequest.result
-        const currentVersion = existingDb.version
-        existingDb.close()
-        
-        // Now open with current version (not lower)
-        const request = indexedDB.open('GSPNOfflineDB', currentVersion)
 
-        request.onupgradeneeded = (event) => {
-          const db = (event.target as IDBOpenDBRequest).result
-          // Create stores if they don't exist
-          if (!db.objectStoreNames.contains('students')) {
-            db.createObjectStore('students', { keyPath: 'id' })
+      checkRequest.onsuccess = () => {
+        const checkDb = checkRequest.result
+        const currentVersion = checkDb.version
+        const hasStores = checkDb.objectStoreNames.contains('students') && checkDb.objectStoreNames.contains('syncQueue')
+        checkDb.close()
+
+        if (hasStores) {
+          // Stores exist, open normally and add data
+          const openRequest = indexedDB.open('GSPNOfflineDB')
+          openRequest.onerror = () => reject(new Error(`Failed to open database: ${openRequest.error?.message || 'Unknown error'}`))
+          openRequest.onsuccess = () => addToDatabase(openRequest.result).then(resolve).catch(reject)
+        } else {
+          // Stores don't exist, upgrade to create them
+          // Use currentVersion + 1, but ensure it's at least 100 to avoid conflicts with Dexie
+          const newVersion = Math.max(currentVersion + 1, 100)
+
+          const upgradeRequest = indexedDB.open('GSPNOfflineDB', newVersion)
+
+          upgradeRequest.onerror = () => {
+            reject(new Error(`Failed to upgrade database: ${upgradeRequest.error?.message || 'Unknown error'}`))
           }
-          if (!db.objectStoreNames.contains('syncQueue')) {
-            db.createObjectStore('syncQueue', { keyPath: 'id', autoIncrement: true })
+
+          upgradeRequest.onupgradeneeded = (event) => {
+            const upgradeDb = (event.target as IDBOpenDBRequest).result
+            // Create stores if they don't exist
+            if (!upgradeDb.objectStoreNames.contains('students')) {
+              upgradeDb.createObjectStore('students', { keyPath: 'id' })
+            }
+            if (!upgradeDb.objectStoreNames.contains('syncQueue')) {
+              upgradeDb.createObjectStore('syncQueue', { keyPath: 'id', autoIncrement: true })
+            }
+          }
+
+          upgradeRequest.onsuccess = () => {
+            addToDatabase(upgradeRequest.result).then(resolve).catch(reject)
           }
         }
-
-        request.onerror = () => reject(request.error)
-        request.onsuccess = processRequest
-      }
-      
-      function processRequest() {
-        const request = (event as any).target as IDBOpenDBRequest
-        const db = request.result
-        const id = `local_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`
-
-        const student = {
-          id,
-          firstName: studentData.firstName || 'Test',
-          lastName: studentData.lastName || 'Student',
-          email: studentData.email,
-          status: studentData.status || 'active',
-          enrollmentDate: studentData.enrollmentDate || new Date().toISOString(),
-          grade: studentData.grade,
-          classId: studentData.classId,
-          syncStatus: 'pending',
-          localUpdatedAt: Date.now(),
-          version: 1,
-        }
-
-        const syncQueueItem = {
-          operation: 'CREATE',
-          entity: 'student',
-          entityId: id,
-          payload: studentData,
-          createdAt: Date.now(),
-          attempts: 0,
-          status: 'pending',
-        }
-
-        // Use a transaction to add both records
-        const transaction = db.transaction(['students', 'syncQueue'], 'readwrite')
-
-        transaction.onerror = () => reject(transaction.error)
-        transaction.oncomplete = () => resolve(id)
-
-        const studentsStore = transaction.objectStore('students')
-        const syncQueueStore = transaction.objectStore('syncQueue')
-
-        studentsStore.add(student)
-        syncQueueStore.add(syncQueueItem)
       }
     })
   }, data)
@@ -340,7 +361,25 @@ export async function waitForAppInitialization(page: Page): Promise<void> {
   await indicator.waitFor({ state: 'attached', timeout: 10000 }).catch(() => {
     // If indicator is not found, app might still be initialized
   })
-  
+
   // Give the app time to initialize stores
   await page.waitForLoadState('networkidle')
+
+  // Wait for IndexedDB to be ready by checking if the database exists
+  await page.evaluate(async () => {
+    return new Promise<void>((resolve) => {
+      const request = indexedDB.open('GSPNOfflineDB')
+      request.onsuccess = () => {
+        const db = request.result
+        db.close()
+        resolve()
+      }
+      request.onerror = () => {
+        // Database doesn't exist yet, that's okay
+        resolve()
+      }
+      // Set a timeout in case the database never opens
+      setTimeout(resolve, 2000)
+    })
+  })
 }

@@ -763,6 +763,11 @@ export const fr = {
     saveDraft: "Enregistrer le Brouillon",
     submitEnrollment: "Soumettre l'Inscription",
     goBack: "Retour",
+
+    // Confirmation page
+    enrollmentSummary: "Résumé de l'inscription",
+    backToEnrollments: "Retour aux inscriptions",
+    startNewEnrollment: "Nouvelle inscription",
   },
 
   // Grade names (Guinea format)

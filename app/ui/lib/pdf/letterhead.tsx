@@ -42,16 +42,16 @@ export function Letterhead({ schoolYear, documentDate }: LetterheadProps) {
       {/* Center: School info */}
       <View style={styles.schoolInfo}>
         <Text style={styles.schoolName}>
-          Groupe Scolaire Prive de Nongo
+          Groupe Scolaire Prive N&apos;Dioulou
         </Text>
         <Text style={styles.schoolNameAr}>
           GSPN - Etablissement Prive d&apos;Enseignement
         </Text>
         <Text style={styles.schoolAddress}>
-          Nongo, Commune de Ratoma, Conakry, Republique de Guinee
+          Quartier de Tata, Ville Labe - Guinee
         </Text>
         <Text style={styles.schoolContact}>
-          Tel: +224 621 00 00 00 | Email: contact@gspn-guinee.com
+          Email: groupescolaireprivendioloulabe@gmail.com
         </Text>
       </View>
 

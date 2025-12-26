@@ -124,10 +124,10 @@ enum SchoolLevel {
 
 enum EnrollmentStatus {
   draft              // In-progress enrollment
-  submitted          // Submitted, awaiting auto-approval
-  review_required    // Needs director review (amount changed)
-  approved           // Fully approved
-  rejected           // Rejected by director
+  submitted          // Submitted, awaiting auto-approval (3 days)
+  needs_review       // Needs director review (payment amount changed)
+  completed          // Approved and finalized
+  rejected           // Rejected by director (returned for changes)
   cancelled          // Cancelled by user
 }
 
@@ -222,6 +222,11 @@ model Enrollment {
   approvedBy          String?          // User ID who approved
   autoApproveAt       DateTime?        // 3 days after submission
 
+  // Status change tracking (for completed/rejected/cancelled)
+  statusComment       String?          // Required comment when completing/rejecting/cancelling
+  statusChangedAt     DateTime?        // When status was last changed
+  statusChangedBy     String?          // User ID who changed status
+
   // Sync & audit
   createdBy           String           // User ID who created
   syncVersion         Int              @default(0)
@@ -234,6 +239,7 @@ model Enrollment {
   student             Student?         @relation(fields: [studentId], references: [id])
   creator             User             @relation("EnrollmentCreator", fields: [createdBy], references: [id])
   approver            User?            @relation("EnrollmentApprover", fields: [approvedBy], references: [id])
+  statusChanger       User?            @relation("EnrollmentStatusChanger", fields: [statusChangedBy], references: [id])
   paymentSchedules    PaymentSchedule[]
   payments            Payment[]
   notes               EnrollmentNote[]

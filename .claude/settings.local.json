@@ -12,7 +12,8 @@
       "Bash(npm install:*)",
       "Bash(npx prisma:*)",
       "Bash(dir:*)",
-      "Bash(grep:*)"
+      "Bash(grep:*)",
+      "Bash(npx playwright test:*)"
     ]
   }
 }

@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
@@ -20,7 +20,7 @@ import {
 import Link from "next/link"
 
 export function StepConfirmation() {
-  const { t, currentLocale } = useI18n()
+  const { t, locale } = useI18n()
   const { state } = useEnrollmentWizard()
   const { data, enrollmentId } = state
   const [isDownloading, setIsDownloading] = useState(false)
@@ -41,7 +41,7 @@ export function StepConfirmation() {
     setDownloadError(null)
 
     try {
-      const lang = currentLocale === "fr" ? "fr" : "en"
+      const lang = locale === "fr" ? "fr" : "en"
       const response = await fetch(`/api/enrollments/${enrollmentId}/pdf?lang=${lang}`)
 
       if (!response.ok) {
@@ -143,7 +143,7 @@ export function StepConfirmation() {
       {/* Summary */}
       <Card>
         <CardHeader>
-          <CardTitle className="text-base">Enrollment Summary</CardTitle>
+          <CardTitle className="text-base">{t.enrollmentWizard.enrollmentSummary}</CardTitle>
         </CardHeader>
         <CardContent className="space-y-3">
           <div className="flex items-center justify-between">
@@ -210,13 +210,13 @@ export function StepConfirmation() {
         <Button variant="ghost" asChild className="gap-2">
           <Link href="/enrollments">
             <Home className="h-4 w-4" />
-            Back to Enrollments
+            {t.enrollmentWizard.backToEnrollments}
           </Link>
         </Button>
         <Button variant="outline" asChild className="gap-2 bg-transparent">
           <Link href="/enrollments/new">
             <ArrowRight className="h-4 w-4" />
-            Start New Enrollment
+            {t.enrollmentWizard.startNewEnrollment}
           </Link>
         </Button>
       </div>
