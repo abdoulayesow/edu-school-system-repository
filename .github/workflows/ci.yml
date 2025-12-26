@@ -106,7 +106,6 @@ jobs:
         env:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
         continue-on-error: true
-        if: ${{ secrets.SNYK_TOKEN != '' }}
 
   # ============================================================================
   # JOB 4: BUILD - Next.js production builds
