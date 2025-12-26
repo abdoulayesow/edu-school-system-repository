@@ -17,15 +17,15 @@ import {
   TableRow,
 } from "@/components/ui/table"
 
-// Lazy load heavy chart components
-const BarChart = dynamic(() => import("recharts").then(mod => ({ default: mod.BarChart })), { ssr: false })
-const Bar = dynamic(() => import("recharts").then(mod => ({ default: mod.Bar })), { ssr: false })
-const PieChart = dynamic(() => import("recharts").then(mod => ({ default: mod.PieChart })), { ssr: false })
-const Pie = dynamic(() => import("recharts").then(mod => ({ default: mod.Pie })), { ssr: false })
-const Cell = dynamic(() => import("recharts").then(mod => ({ default: mod.Cell })), { ssr: false })
-const CartesianGrid = dynamic(() => import("recharts").then(mod => ({ default: mod.CartesianGrid })), { ssr: false })
-const XAxis = dynamic(() => import("recharts").then(mod => ({ default: mod.XAxis })), { ssr: false })
-const YAxis = dynamic(() => import("recharts").then(mod => ({ default: mod.YAxis })), { ssr: false })
+// Lazy load heavy chart components (type assertions needed due to recharts defaultProps)
+const BarChart = dynamic(() => import("recharts").then(mod => mod.BarChart) as never, { ssr: false }) as typeof import("recharts").BarChart
+const Bar = dynamic(() => import("recharts").then(mod => mod.Bar) as never, { ssr: false }) as typeof import("recharts").Bar
+const PieChart = dynamic(() => import("recharts").then(mod => mod.PieChart) as never, { ssr: false }) as typeof import("recharts").PieChart
+const Pie = dynamic(() => import("recharts").then(mod => mod.Pie) as never, { ssr: false }) as typeof import("recharts").Pie
+const Cell = dynamic(() => import("recharts").then(mod => mod.Cell) as never, { ssr: false }) as typeof import("recharts").Cell
+const CartesianGrid = dynamic(() => import("recharts").then(mod => mod.CartesianGrid) as never, { ssr: false }) as typeof import("recharts").CartesianGrid
+const XAxis = dynamic(() => import("recharts").then(mod => mod.XAxis) as never, { ssr: false }) as typeof import("recharts").XAxis
+const YAxis = dynamic(() => import("recharts").then(mod => mod.YAxis) as never, { ssr: false }) as typeof import("recharts").YAxis
 
 // Chart loading skeleton
 function ChartSkeleton() {

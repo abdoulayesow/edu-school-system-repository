@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useCallback } from "react"
+import { useState, useCallback, useEffect } from "react"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Button } from "@/components/ui/button"
@@ -16,7 +16,7 @@ import {
 } from "@/components/ui/select"
 import { useEnrollmentWizard } from "../wizard-context"
 import { useI18n } from "@/components/i18n-provider"
-import { Search, Plus, X, User, UserCheck } from "lucide-react"
+import { Search, Plus, X, User, UserCheck, Users, Loader2 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { useDebouncedCallback } from "use-debounce"
 
@@ -36,6 +36,24 @@ interface SearchResult {
   }
 }
 
+interface SuggestedStudent {
+  id: string
+  enrollmentId: string
+  studentNumber: string
+  firstName: string
+  lastName: string
+  dateOfBirth?: string
+  lastGrade: string
+  lastEnrollmentYear: string
+  fatherName?: string
+  fatherPhone?: string
+  motherName?: string
+  motherPhone?: string
+  email?: string
+  phone?: string
+  address?: string
+}
+
 export function StepStudentInfo() {
   const { t } = useI18n()
   const { state, updateData } = useEnrollmentWizard()
@@ -44,6 +62,35 @@ export function StepStudentInfo() {
   const [searchQuery, setSearchQuery] = useState("")
   const [searchResults, setSearchResults] = useState<SearchResult[]>([])
   const [isSearching, setIsSearching] = useState(false)
+  const [suggestedStudents, setSuggestedStudents] = useState<SuggestedStudent[]>([])
+  const [isLoadingSuggestions, setIsLoadingSuggestions] = useState(false)
+
+  // Fetch suggested students when grade is selected and returning student is chosen
+  useEffect(() => {
+    async function fetchSuggestedStudents() {
+      if (!data.gradeId || !data.isReturningStudent) {
+        setSuggestedStudents([])
+        return
+      }
+
+      setIsLoadingSuggestions(true)
+      try {
+        const response = await fetch(
+          `/api/enrollments/suggested-students?gradeId=${encodeURIComponent(data.gradeId)}&limit=10`
+        )
+        if (response.ok) {
+          const students = await response.json()
+          setSuggestedStudents(students)
+        }
+      } catch (error) {
+        console.error("Error fetching suggested students:", error)
+      } finally {
+        setIsLoadingSuggestions(false)
+      }
+    }
+
+    fetchSuggestedStudents()
+  }, [data.gradeId, data.isReturningStudent])
 
   // Debounced search function
   const debouncedSearch = useDebouncedCallback(async (query: string) => {
@@ -74,7 +121,7 @@ export function StepStudentInfo() {
     debouncedSearch(value)
   }
 
-  // Handle student selection
+  // Handle student selection from search
   const handleSelectStudent = (student: SearchResult) => {
     updateData({
       isReturningStudent: true,
@@ -85,6 +132,26 @@ export function StepStudentInfo() {
       dateOfBirth: student.dateOfBirth,
       fatherName: student.guardianName,
       fatherPhone: student.guardianPhone,
+    })
+    setSearchQuery("")
+    setSearchResults([])
+  }
+
+  // Handle selection of a suggested student
+  const handleSelectSuggestedStudent = (student: SuggestedStudent) => {
+    updateData({
+      isReturningStudent: true,
+      studentId: student.id,
+      firstName: student.firstName,
+      lastName: student.lastName,
+      email: student.email || undefined,
+      dateOfBirth: student.dateOfBirth,
+      phone: student.phone || undefined,
+      fatherName: student.fatherName || undefined,
+      fatherPhone: student.fatherPhone || undefined,
+      motherName: student.motherName || undefined,
+      motherPhone: student.motherPhone || undefined,
+      address: student.address || undefined,
     })
     setSearchQuery("")
     setSearchResults([])
@@ -157,54 +224,126 @@ export function StepStudentInfo() {
         </RadioGroup>
       </div>
 
-      {/* Student Search (for returning students) */}
+      {/* Suggested Students & Search (for returning students) */}
       {data.isReturningStudent && (
-        <div className="space-y-2">
-          <Label>{t.enrollmentWizard.searchStudent}</Label>
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-            <Input
-              placeholder={t.enrollmentWizard.searchStudent}
-              value={searchQuery}
-              onChange={(e) => handleSearchChange(e.target.value)}
-              className="pl-10"
-            />
-          </div>
+        <div className="space-y-4">
+          {/* Suggested Students Section */}
+          {data.gradeId && (
+            <div className="space-y-3">
+              <div className="flex items-center gap-2">
+                <Users className="h-4 w-4 text-muted-foreground" />
+                <Label>{t.enrollmentWizard.suggestedStudents}</Label>
+              </div>
+              <p className="text-sm text-muted-foreground">
+                {t.enrollmentWizard.suggestedStudentsDescription}
+              </p>
 
-          {/* Search Results */}
-          {searchResults.length > 0 && (
-            <div className="border rounded-lg divide-y">
-              {searchResults.map((student) => (
-                <button
-                  key={student.id}
-                  type="button"
-                  onClick={() => handleSelectStudent(student)}
-                  className="w-full p-3 text-left hover:bg-muted/50 transition-colors"
-                >
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="font-medium">{student.fullName}</p>
-                      <p className="text-sm text-muted-foreground">
-                        {student.studentNumber}
-                        {student.lastEnrollment && (
-                          <> • {student.lastEnrollment.gradeName}</>
+              {isLoadingSuggestions && (
+                <div className="flex items-center justify-center py-4">
+                  <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
+                </div>
+              )}
+
+              {!isLoadingSuggestions && suggestedStudents.length > 0 && (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                  {suggestedStudents.map((student) => (
+                    <button
+                      key={student.id}
+                      type="button"
+                      onClick={() => handleSelectSuggestedStudent(student)}
+                      className={cn(
+                        "p-3 text-left border rounded-lg hover:border-primary hover:bg-primary/5 transition-colors",
+                        data.studentId === student.id && "border-primary bg-primary/5"
+                      )}
+                    >
+                      <div className="flex items-start justify-between">
+                        <div>
+                          <p className="font-medium">
+                            {student.firstName} {student.lastName}
+                          </p>
+                          <p className="text-xs text-muted-foreground">
+                            {student.studentNumber}
+                          </p>
+                          <p className="text-xs text-muted-foreground mt-1">
+                            {t.enrollmentWizard.fromPreviousGrade}: {student.lastGrade}
+                          </p>
+                        </div>
+                        {data.studentId === student.id && (
+                          <UserCheck className="h-4 w-4 text-primary" />
                         )}
-                      </p>
-                    </div>
-                    <span className="text-sm text-primary">
-                      {t.enrollmentWizard.selectThisStudent}
-                    </span>
-                  </div>
-                </button>
-              ))}
+                      </div>
+                    </button>
+                  ))}
+                </div>
+              )}
+
+              {!isLoadingSuggestions && suggestedStudents.length === 0 && (
+                <p className="text-sm text-muted-foreground text-center py-2 border rounded-lg bg-muted/30">
+                  {t.enrollmentWizard.noSuggestedStudents}
+                </p>
+              )}
             </div>
           )}
 
-          {searchQuery.length >= 2 && searchResults.length === 0 && !isSearching && (
-            <p className="text-sm text-muted-foreground text-center py-2">
-              {t.enrollmentWizard.noStudentFound}
-            </p>
+          {/* Divider */}
+          {data.gradeId && (
+            <div className="flex items-center gap-4 py-2">
+              <div className="flex-1 border-t" />
+              <span className="text-xs text-muted-foreground uppercase">
+                {t.enrollmentWizard.orSearchManually}
+              </span>
+              <div className="flex-1 border-t" />
+            </div>
           )}
+
+          {/* Search Input */}
+          <div className="space-y-2">
+            <Label>{t.enrollmentWizard.searchStudent}</Label>
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+              <Input
+                placeholder={t.enrollmentWizard.searchStudent}
+                value={searchQuery}
+                onChange={(e) => handleSearchChange(e.target.value)}
+                className="pl-10"
+              />
+            </div>
+
+            {/* Search Results */}
+            {searchResults.length > 0 && (
+              <div className="border rounded-lg divide-y">
+                {searchResults.map((student) => (
+                  <button
+                    key={student.id}
+                    type="button"
+                    onClick={() => handleSelectStudent(student)}
+                    className="w-full p-3 text-left hover:bg-muted/50 transition-colors"
+                  >
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="font-medium">{student.fullName}</p>
+                        <p className="text-sm text-muted-foreground">
+                          {student.studentNumber}
+                          {student.lastEnrollment && (
+                            <> • {student.lastEnrollment.gradeName}</>
+                          )}
+                        </p>
+                      </div>
+                      <span className="text-sm text-primary">
+                        {t.enrollmentWizard.selectThisStudent}
+                      </span>
+                    </div>
+                  </button>
+                ))}
+              </div>
+            )}
+
+            {searchQuery.length >= 2 && searchResults.length === 0 && !isSearching && (
+              <p className="text-sm text-muted-foreground text-center py-2">
+                {t.enrollmentWizard.noStudentFound}
+              </p>
+            )}
+          </div>
         </div>
       )}
 

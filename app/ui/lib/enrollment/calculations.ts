@@ -47,8 +47,8 @@ export function calculatePaymentSchedules(
     {
       scheduleNumber: 1 as PaymentScheduleNumber,
       amount: perSchedule,
-      months: PAYMENT_SCHEDULE_CONFIG[1].months,
-      monthsFr: PAYMENT_SCHEDULE_CONFIG[1].monthsFr,
+      months: [...PAYMENT_SCHEDULE_CONFIG[1].months],
+      monthsFr: [...PAYMENT_SCHEDULE_CONFIG[1].monthsFr],
       description: PAYMENT_SCHEDULE_CONFIG[1].description,
       descriptionFr: PAYMENT_SCHEDULE_CONFIG[1].descriptionFr,
       dueDate: new Date(year, 8, 1), // September 1
@@ -56,8 +56,8 @@ export function calculatePaymentSchedules(
     {
       scheduleNumber: 2 as PaymentScheduleNumber,
       amount: perSchedule,
-      months: PAYMENT_SCHEDULE_CONFIG[2].months,
-      monthsFr: PAYMENT_SCHEDULE_CONFIG[2].monthsFr,
+      months: [...PAYMENT_SCHEDULE_CONFIG[2].months],
+      monthsFr: [...PAYMENT_SCHEDULE_CONFIG[2].monthsFr],
       description: PAYMENT_SCHEDULE_CONFIG[2].description,
       descriptionFr: PAYMENT_SCHEDULE_CONFIG[2].descriptionFr,
       dueDate: new Date(year, 10, 1), // November 1
@@ -65,8 +65,8 @@ export function calculatePaymentSchedules(
     {
       scheduleNumber: 3 as PaymentScheduleNumber,
       amount: remainder,
-      months: PAYMENT_SCHEDULE_CONFIG[3].months,
-      monthsFr: PAYMENT_SCHEDULE_CONFIG[3].monthsFr,
+      months: [...PAYMENT_SCHEDULE_CONFIG[3].months],
+      monthsFr: [...PAYMENT_SCHEDULE_CONFIG[3].monthsFr],
       description: PAYMENT_SCHEDULE_CONFIG[3].description,
       descriptionFr: PAYMENT_SCHEDULE_CONFIG[3].descriptionFr,
       dueDate: new Date(nextYear, 1, 1), // February 1

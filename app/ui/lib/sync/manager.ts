@@ -369,7 +369,8 @@ class SyncManager {
       switch (change.operation) {
         case "created":
         case "updated":
-          await table.put({
+          // Type assertion needed as table type varies based on entity
+          await (table as unknown as { put: (data: Record<string, unknown>) => Promise<unknown> }).put({
             ...change.data,
             id: change.id,
             serverId: change.id,

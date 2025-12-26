@@ -272,7 +272,7 @@ Submits a draft enrollment for approval. Creates payment schedules.
 
 ---
 
-### Approve Enrollment
+### Complete (Approve) Enrollment
 
 ```http
 POST /api/enrollments/:id/approve
@@ -280,14 +280,29 @@ POST /api/enrollments/:id/approve
 
 **Authorization:** Director only
 
+Completes an enrollment that is in `submitted` or `needs_review` status.
+
+**Request Body:**
+
+```json
+{
+  "comment": "All documents verified, enrollment approved."
+}
+```
+
+> **Note:** A comment is required when completing an enrollment.
+
 **Response:**
 
 ```json
 {
   "id": "uuid",
-  "status": "approved",
+  "status": "completed",
   "approvedAt": "2025-12-24T11:00:00.000Z",
-  "approvedBy": "director-user-id"
+  "approvedBy": "director-user-id",
+  "statusComment": "All documents verified, enrollment approved.",
+  "statusChangedAt": "2025-12-24T11:00:00.000Z",
+  "statusChangedBy": "director-user-id"
 }
 ```
 
@@ -301,20 +316,61 @@ DELETE /api/enrollments/:id/approve
 
 **Authorization:** Director only
 
+Rejects an enrollment that is in `submitted` or `needs_review` status.
+
 **Request Body:**
 
 ```json
 {
-  "reason": "Incomplete documentation"
+  "reason": "Incomplete documentation - missing birth certificate"
 }
 ```
+
+> **Note:** A reason is required when rejecting an enrollment.
 
 **Response:**
 
 ```json
 {
   "id": "uuid",
-  "status": "rejected"
+  "status": "rejected",
+  "statusComment": "Incomplete documentation - missing birth certificate",
+  "statusChangedAt": "2025-12-24T11:00:00.000Z",
+  "statusChangedBy": "director-user-id"
+}
+```
+
+---
+
+### Cancel Enrollment
+
+```http
+POST /api/enrollments/:id/cancel
+```
+
+**Authorization:** Creator or Director
+
+Cancels a draft enrollment.
+
+**Request Body:**
+
+```json
+{
+  "reason": "Student enrolled at another school"
+}
+```
+
+> **Note:** A reason is required when cancelling an enrollment.
+
+**Response:**
+
+```json
+{
+  "id": "uuid",
+  "status": "cancelled",
+  "statusComment": "Student enrolled at another school",
+  "statusChangedAt": "2025-12-24T11:00:00.000Z",
+  "statusChangedBy": "user-id"
 }
 ```
 
@@ -469,6 +525,59 @@ GET /api/enrollments/search-student?q=:query
   ]
 }
 ```
+
+---
+
+### Get Suggested Students
+
+```http
+GET /api/enrollments/suggested-students?gradeId=:gradeId
+```
+
+Returns students who were enrolled in the **previous grade** during the **previous school year** and are eligible to return.
+
+**Query Parameters:**
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `gradeId` | string | ID of the grade being enrolled into |
+| `limit` | number | Max results (default: 20) |
+
+**Logic:**
+1. Gets the current grade's order (e.g., Grade 4 = order 4)
+2. Finds the previous grade (order - 1 = Grade 3)
+3. Gets the previous school year
+4. Finds students with `completed` enrollments from that grade/year
+5. Excludes students already enrolled this year
+
+**Response:**
+
+```json
+[
+  {
+    "id": "student-uuid",
+    "enrollmentId": "enrollment-uuid",
+    "studentNumber": "STU-00001",
+    "firstName": "Mamadou",
+    "lastName": "Diallo",
+    "dateOfBirth": "2010-05-15T00:00:00.000Z",
+    "lastGrade": "3ème Année",
+    "lastEnrollmentYear": "2024 - 2025",
+    "fatherName": "Ibrahim Diallo",
+    "fatherPhone": "+224622000000",
+    "motherName": "Fatoumata Diallo",
+    "motherPhone": "+224623000000",
+    "email": null,
+    "phone": "+224621000000",
+    "address": "Nongo, Ratoma"
+  }
+]
+```
+
+**Notes:**
+- Returns empty array if current grade is Grade 1 (no previous grade)
+- Returns empty array if no previous school year exists
+- Pre-fills parent information for faster enrollment
 
 ---
 

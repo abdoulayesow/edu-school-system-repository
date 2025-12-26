@@ -13,8 +13,8 @@ export type SchoolLevel = "elementary" | "college" | "high_school"
 export type EnrollmentStatus =
   | "draft"
   | "submitted"
-  | "review_required"
-  | "approved"
+  | "needs_review"
+  | "completed"
   | "rejected"
   | "cancelled"
 
@@ -98,6 +98,11 @@ export interface Enrollment {
   approvedAt?: Date
   approvedBy?: string
   autoApproveAt?: Date
+
+  // Status change tracking (for completed/rejected/cancelled)
+  statusComment?: string
+  statusChangedAt?: Date
+  statusChangedBy?: string
 
   // Audit
   createdBy: string
@@ -193,6 +198,71 @@ export interface WizardState {
   canGoBack: boolean
   canGoNext: boolean
   isSubmitting: boolean
+}
+
+// Wizard data structure for enrollment wizard context
+export interface EnrollmentWizardData {
+  // Step 1 - Grade Selection
+  schoolYearId: string
+  gradeId: string
+  gradeName: string
+  level: SchoolLevel
+  tuitionFee: number
+
+  // Step 2 - Student Info
+  isReturningStudent: boolean
+  studentId?: string
+  firstName: string
+  lastName: string
+  dateOfBirth?: string
+  gender?: Gender
+  phone?: string
+  email?: string
+  photoUrl?: string
+  birthCertificateUrl?: string
+  fatherName?: string
+  fatherPhone?: string
+  fatherEmail?: string
+  motherName?: string
+  motherPhone?: string
+  motherEmail?: string
+  address?: string
+  notes: Array<{ title: string; content: string }>
+
+  // Step 3 - Payment Breakdown
+  originalTuitionFee: number
+  adjustedTuitionFee?: number
+  adjustmentReason?: string
+  paymentSchedules: Array<{
+    scheduleNumber: number
+    amount: number
+    months: string[]
+    dueDate: string
+  }>
+
+  // Step 4 - Payment Transaction
+  paymentMade: boolean
+  paymentAmount?: number
+  paymentMethod?: PaymentMethod
+  receiptNumber?: string
+  transactionRef?: string
+  receiptImageUrl?: string
+
+  // Step 6 - Confirmation (populated after submission)
+  enrollmentId?: string
+  enrollmentNumber?: string
+  studentNumber?: string
+}
+
+// Wizard state for enrollment wizard context
+export interface EnrollmentWizardState {
+  currentStep: number
+  completedSteps: number[]
+  data: EnrollmentWizardData
+  isDirty: boolean
+  isSubmitting: boolean
+  enrollmentId?: string
+  error?: string
 }
 
 // ============================================================================

@@ -733,15 +733,25 @@ export const fr = {
     downloadingPdf: "Génération du PDF...",
     pdfDownloadError: "Échec du téléchargement du PDF. Veuillez réessayer.",
     printDocument: "Imprimer",
-    statusSubmitted: "Soumise - En Attente de Révision",
+    statusSubmittedPendingReview: "Soumise - En Attente de Révision",
     statusReviewRequired: "Révision Requise par le Directeur",
     autoApproveIn: "Approbation automatique dans {days} jours",
 
     // Status badges
     statusDraft: "Brouillon",
+    statusSubmitted: "Soumise",
+    statusNeedsReview: "En attente de validation",
+    statusCompleted: "Terminée",
     statusApproved: "Approuvée",
     statusRejected: "Rejetée",
     statusCancelled: "Annulée",
+
+    // Suggested students
+    suggestedStudents: "Étudiants Suggérés",
+    suggestedStudentsDescription: "Étudiants de la classe précédente qui peuvent être réinscrits",
+    fromPreviousGrade: "Classe précédente",
+    noSuggestedStudents: "Aucun étudiant suggéré disponible",
+    orSearchManually: "ou rechercher manuellement",
 
     // Draft management
     draftSaved: "Brouillon enregistré",

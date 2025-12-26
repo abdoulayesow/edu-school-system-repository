@@ -21,7 +21,7 @@ export async function GET() {
               select: {
                 enrollments: {
                   where: {
-                    status: { in: ["submitted", "approved"] },
+                    status: { in: ["submitted", "completed"] },
                   },
                 },
               },

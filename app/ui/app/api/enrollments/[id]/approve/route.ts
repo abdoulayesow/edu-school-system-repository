@@ -28,20 +28,35 @@ export async function POST(req: NextRequest, { params }: RouteParams) {
       )
     }
 
-    // Only allow approving submitted or review_required enrollments
-    if (!["submitted", "review_required"].includes(enrollment.status)) {
+    // Only allow approving submitted or needs_review enrollments
+    if (!["submitted", "needs_review"].includes(enrollment.status)) {
       return NextResponse.json(
         { message: "Enrollment cannot be approved in current status" },
         { status: 400 }
       )
     }
 
+    // Get the comment from the request body (required for completion)
+    const body = await req.json().catch(() => ({}))
+    const comment = body.comment
+
+    if (!comment || typeof comment !== "string" || comment.trim() === "") {
+      return NextResponse.json(
+        { message: "A comment is required when completing an enrollment" },
+        { status: 400 }
+      )
+    }
+
+    const now = new Date()
     const updated = await prisma.enrollment.update({
       where: { id },
       data: {
-        status: "approved",
-        approvedAt: new Date(),
+        status: "completed",
+        approvedAt: now,
         approvedBy: session.user.id,
+        statusChangedAt: now,
+        statusChangedBy: session.user.id,
+        statusComment: comment.trim(),
         autoApproveAt: null, // Clear auto-approval since manually approved
       },
       include: {
@@ -89,10 +104,18 @@ export async function DELETE(req: NextRequest, { params }: RouteParams) {
       )
     }
 
-    // Only allow rejecting submitted or review_required enrollments
-    if (!["submitted", "review_required"].includes(enrollment.status)) {
+    // Only allow rejecting submitted or needs_review enrollments
+    if (!["submitted", "needs_review"].includes(enrollment.status)) {
       return NextResponse.json(
         { message: "Enrollment cannot be rejected in current status" },
+        { status: 400 }
+      )
+    }
+
+    // A reason/comment is required for rejection
+    if (!reason || reason.trim() === "" || reason === "No reason provided") {
+      return NextResponse.json(
+        { message: "A reason is required when rejecting an enrollment" },
         { status: 400 }
       )
     }
@@ -107,10 +130,14 @@ export async function DELETE(req: NextRequest, { params }: RouteParams) {
       },
     })
 
+    const now = new Date()
     const updated = await prisma.enrollment.update({
       where: { id },
       data: {
         status: "rejected",
+        statusChangedAt: now,
+        statusChangedBy: session.user.id,
+        statusComment: reason.trim(),
         autoApproveAt: null,
       },
       include: {

@@ -35,7 +35,14 @@ export function StepPaymentBreakdown() {
   // Update schedules in state when calculated
   useEffect(() => {
     if (schedules.length > 0) {
-      updateData({ paymentSchedules: schedules })
+      // Convert Date objects to ISO strings for storage
+      const schedulesWithStringDates = schedules.map(s => ({
+        scheduleNumber: s.scheduleNumber,
+        amount: s.amount,
+        months: s.months,
+        dueDate: s.dueDate.toISOString(),
+      }))
+      updateData({ paymentSchedules: schedulesWithStringDates })
     }
   }, [schedules, updateData])
 

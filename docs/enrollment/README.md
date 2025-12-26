@@ -62,8 +62,11 @@ The enrollment system allows school staff to:
 ### Approval Workflow
 
 - Standard enrollments: Auto-approved after 3 days
-- Adjusted tuition: Requires director approval
-- Status tracking: draft → submitted → approved/rejected
+- Adjusted tuition: Requires director review (`needs_review` status)
+- Status tracking: draft → submitted → completed/rejected
+- **Required comments**: Completing, rejecting, and cancelling enrollments require a comment
+
+See [Enrollment Statuses](./enrollment-statuses.md) for detailed status definitions.
 
 ---
 
@@ -199,12 +202,14 @@ See [api-reference.md](./api-reference.md) for detailed API documentation.
 | `/api/enrollments/[id]` | PUT | Update enrollment |
 | `/api/enrollments/[id]` | DELETE | Delete draft enrollment |
 | `/api/enrollments/[id]/submit` | POST | Submit for approval |
-| `/api/enrollments/[id]/approve` | POST | Approve enrollment |
-| `/api/enrollments/[id]/approve` | DELETE | Reject enrollment |
+| `/api/enrollments/[id]/approve` | POST | Complete enrollment (requires comment) |
+| `/api/enrollments/[id]/approve` | DELETE | Reject enrollment (requires reason) |
+| `/api/enrollments/[id]/cancel` | POST | Cancel enrollment (requires reason) |
 | `/api/enrollments/[id]/payments` | GET/POST | Manage payments |
 | `/api/enrollments/[id]/notes` | GET/POST | Manage notes |
 | `/api/enrollments/[id]/pdf` | GET | Generate PDF |
 | `/api/enrollments/search-student` | GET | Search returning students |
+| `/api/enrollments/suggested-students` | GET | Get suggested students from previous grade |
 
 ---
 
@@ -279,6 +284,7 @@ Key translation sections:
 
 ## Related Documentation
 
-- [API Reference](./api-reference.md)
-- [Database Schema](./database-schema.md)
-- [Payment Calculations](./payment-calculations.md)
+- [API Reference](./api-reference.md) - Complete API documentation
+- [Enrollment Statuses](./enrollment-statuses.md) - Status definitions and workflow
+- [Database Schema](./database-schema.md) - Data model documentation
+- [Payment Calculations](./payment-calculations.md) - Payment schedule logic

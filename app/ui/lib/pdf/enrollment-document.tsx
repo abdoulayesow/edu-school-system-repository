@@ -40,8 +40,8 @@ function getStatusDisplay(status: EnrollmentStatus, language: "en" | "fr"): { la
   const statusMap: Record<EnrollmentStatus, { en: string; fr: string; color: string }> = {
     draft: { en: "Draft", fr: "Brouillon", color: colors.secondary },
     submitted: { en: "Submitted", fr: "Soumis", color: colors.warning },
-    review_required: { en: "Review Required", fr: "Revision requise", color: colors.warning },
-    approved: { en: "Approved", fr: "Approuve", color: colors.success },
+    needs_review: { en: "Needs Review", fr: "En attente de validation", color: colors.warning },
+    completed: { en: "Completed", fr: "Termine", color: colors.success },
     rejected: { en: "Rejected", fr: "Rejete", color: colors.danger },
     cancelled: { en: "Cancelled", fr: "Annule", color: colors.danger },
   }

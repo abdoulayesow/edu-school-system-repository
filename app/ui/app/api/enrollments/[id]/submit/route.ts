@@ -72,7 +72,7 @@ export async function POST(req: NextRequest, { params }: RouteParams) {
     const requiresReview = enrollment.adjustedTuitionFee !== null &&
       enrollment.adjustedTuitionFee !== enrollment.originalTuitionFee
 
-    const newStatus = requiresReview ? "review_required" : "submitted"
+    const newStatus = requiresReview ? "needs_review" : "submitted"
 
     // Calculate auto-approval date (3 days from now) if not requiring review
     const autoApproveAt = requiresReview

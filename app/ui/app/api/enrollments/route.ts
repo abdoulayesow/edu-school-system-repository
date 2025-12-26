@@ -150,8 +150,8 @@ export async function POST(req: NextRequest) {
       )
     }
 
-    // Generate enrollment number with grade level
-    const enrollmentNumber = await generateEnrollmentNumber(grade.level)
+    // Generate enrollment number with grade order (numeric grade level)
+    const enrollmentNumber = await generateEnrollmentNumber(grade.order)
 
     // Set draft expiration (10 days from now)
     const draftExpiresAt = new Date()

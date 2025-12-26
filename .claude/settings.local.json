@@ -13,7 +13,8 @@
       "Bash(npx prisma:*)",
       "Bash(dir:*)",
       "Bash(grep:*)",
-      "Bash(npx playwright test:*)"
+      "Bash(npx playwright test:*)",
+      "Bash(npx prisma validate:*)"
     ]
   }
 }

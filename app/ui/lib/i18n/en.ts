@@ -735,15 +735,25 @@ export const en: TranslationKeys = {
     downloadingPdf: "Generating PDF...",
     pdfDownloadError: "Failed to download PDF. Please try again.",
     printDocument: "Print",
-    statusSubmitted: "Submitted - Pending Review",
+    statusSubmittedPendingReview: "Submitted - Pending Review",
     statusReviewRequired: "Director Review Required",
     autoApproveIn: "Auto-approval in {days} days",
 
     // Status badges
     statusDraft: "Draft",
+    statusSubmitted: "Submitted",
+    statusNeedsReview: "Needs Review",
+    statusCompleted: "Completed",
     statusApproved: "Approved",
     statusRejected: "Rejected",
     statusCancelled: "Cancelled",
+
+    // Suggested students
+    suggestedStudents: "Suggested Students",
+    suggestedStudentsDescription: "Students from the previous grade who can be re-enrolled",
+    fromPreviousGrade: "Previous grade",
+    noSuggestedStudents: "No suggested students available",
+    orSearchManually: "or search manually",
 
     // Draft management
     draftSaved: "Draft saved",

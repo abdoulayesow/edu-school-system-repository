@@ -81,7 +81,7 @@ export async function POST(req: NextRequest, { params }: RouteParams) {
     }
 
     // Only allow payments for submitted or approved enrollments
-    if (!["submitted", "review_required", "approved"].includes(enrollment.status)) {
+    if (!["submitted", "needs_review", "completed"].includes(enrollment.status)) {
       return NextResponse.json(
         { message: "Cannot record payment for enrollment in current status" },
         { status: 400 }

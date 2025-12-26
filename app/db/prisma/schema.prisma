@@ -48,6 +48,7 @@ model User {
   // Enrollment relations
   createdEnrollments   Enrollment[]     @relation("EnrollmentCreator")
   approvedEnrollments  Enrollment[]     @relation("EnrollmentApprover")
+  statusChangedEnrollments Enrollment[] @relation("EnrollmentStatusChanger")
   recordedPayments     Payment[]        @relation("PaymentRecorder")
   confirmedPayments    Payment[]        @relation("PaymentConfirmer")
   enrollmentNotes      EnrollmentNote[]
@@ -251,6 +252,7 @@ model Enrollment {
   @@index([createdBy])
   @@index([draftExpiresAt])
   @@index([updatedAt])
+  @@index([statusChangedBy])
 }
 
 model PaymentSchedule {

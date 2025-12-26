@@ -7,19 +7,21 @@ export default defineConfig({
   test: {
     globals: true,
     environment: 'happy-dom',
-    setupFiles: ['./vitest.setup.ts'],
+    setupFiles: ['./vitest.setup.tsx'],
     coverage: {
       provider: 'v8',
       reporter: ['text', 'json', 'html', 'lcov'],
       reportOnFailure: true,
-      lines: 70,
-      functions: 70,
-      branches: 65,
-      statements: 70,
+      thresholds: {
+        lines: 70,
+        functions: 70,
+        branches: 65,
+        statements: 70,
+      },
       exclude: [
         'node_modules/',
         '.next/',
-        'vitest.setup.ts',
+        'vitest.setup.tsx',
         '**/*.test.ts',
         '**/*.test.tsx',
         '**/*.spec.ts',

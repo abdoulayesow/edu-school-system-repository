@@ -1,5 +1,6 @@
 import NextAuth, { type NextAuthOptions } from "next-auth"
 import { PrismaAdapter } from "@next-auth/prisma-adapter"
+import type { AdapterUser } from "next-auth/adapters"
 import GoogleProvider from "next-auth/providers/google"
 import CredentialsProvider from "next-auth/providers/credentials"
 import bcrypt from "bcrypt"
@@ -34,7 +35,7 @@ const baseAdapter = PrismaAdapter(prisma)
 export const authOptions: NextAuthOptions = {
   adapter: {
     ...baseAdapter,
-    async createUser(data) {
+    async createUser(data: Omit<AdapterUser, "id">): Promise<AdapterUser> {
       const email = (data.email ?? "").trim().toLowerCase()
       console.log("🔍 createUser called with email:", email)
       console.log("🔍 ADMIN_EMAILS:", ADMIN_EMAILS)
@@ -51,7 +52,7 @@ export const authOptions: NextAuthOptions = {
       const existing = await prisma.user.findUnique({ where: { email } })
       if (existing) {
         console.log("✅ User already exists, returning:", existing.email)
-        return existing
+        return { ...existing, email: existing.email ?? email } as AdapterUser
       }
 
       // Allow bootstrapping initial admins via env.
@@ -68,7 +69,7 @@ export const authOptions: NextAuthOptions = {
           },
         })
         console.log("✅ Admin user created:", newUser.email, "role:", newUser.role, "status:", newUser.status)
-        return newUser
+        return { ...newUser, email } as AdapterUser
       }
 
       // Everyone else must be invited first (pre-created in DB).

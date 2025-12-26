@@ -1,3 +1,4 @@
+/// <reference lib="webworker" />
 import { defaultCache } from "@serwist/next/worker"
 import {
   Serwist,
@@ -9,13 +10,19 @@ import {
   type SerwistGlobalConfig,
 } from "serwist"
 
+// Service Worker type declarations
+interface SyncEvent extends Event {
+  tag: string
+  waitUntil(promise: Promise<unknown>): void
+}
+
 declare global {
   interface WorkerGlobalScope extends SerwistGlobalConfig {
     __SW_MANIFEST: (PrecacheEntry | string)[]
   }
 }
 
-declare const self: ServiceWorkerGlobalScope
+declare const self: ServiceWorkerGlobalScope & typeof globalThis & { __SW_MANIFEST: (PrecacheEntry | string)[] }
 
 const serwist = new Serwist({
   precacheEntries: self.__SW_MANIFEST,
@@ -93,9 +100,10 @@ const serwist = new Serwist({
 })
 
 // Background sync for offline operations
-self.addEventListener("sync", (event: SyncEvent) => {
-  if (event.tag === "offline-sync") {
-    event.waitUntil(syncOfflineOperations())
+self.addEventListener("sync", (event) => {
+  const syncEvent = event as SyncEvent
+  if (syncEvent.tag === "offline-sync") {
+    syncEvent.waitUntil(syncOfflineOperations())
   }
 })
 
