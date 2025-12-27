@@ -14,7 +14,11 @@
       "Bash(dir:*)",
       "Bash(grep:*)",
       "Bash(npx playwright test:*)",
-      "Bash(npx prisma validate:*)"
+      "Bash(npx prisma validate:*)",
+      "Bash(gh run view:*)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(git push:*)"
     ]
   }
 }
