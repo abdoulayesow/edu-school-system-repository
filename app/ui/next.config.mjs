@@ -14,6 +14,8 @@ const nextConfig = {
     // Allows importing server-only code from outside of the Next.js project root.
     externalDir: true,
   },
+  // Fix workspace root warning for Vercel - points to monorepo root
+  outputFileTracingRoot: path.join(process.cwd(), "../../"),
   // Webpack config only used for production builds (turbopack used for dev)
   webpack: (config) => {
     config.resolve.alias = {
