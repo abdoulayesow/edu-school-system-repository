@@ -26,8 +26,31 @@ export async function loginAsDirector(page: Page) {
   await page.fill('input[id="password"]', TEST_USERS.director.password)
   await page.click('button[type="submit"]')
 
-  // Wait for redirect to dashboard - more robust with regex and longer timeout
-  await page.waitForURL(/\/dashboard/, { timeout: 15000 })
+  // Poll for session establishment (matches global-setup.ts pattern)
+  let attempts = 0
+  const maxAttempts = 20 // 10 seconds total
+
+  while (attempts < maxAttempts) {
+    await page.waitForTimeout(500)
+    const currentUrl = page.url()
+
+    if (currentUrl.includes('/dashboard')) {
+      return
+    }
+
+    // Check session endpoint
+    const response = await page.request.get('/api/auth/session')
+    const session = await response.json()
+    if (session?.user?.email) {
+      await page.goto('/dashboard')
+      await page.waitForLoadState('networkidle')
+      return
+    }
+
+    attempts++
+  }
+
+  throw new Error('Login timed out - session not established')
 }
 
 /**

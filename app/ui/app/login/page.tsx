@@ -88,7 +88,7 @@ function LoginInner() {
       if (result?.error) {
         setError(t.login?.invalidCredentials || "Invalid email or password")
       } else if (result?.ok) {
-        window.location.href = callbackUrl
+        router.push(callbackUrl)
       }
     } catch (err) {
       setError(t.login?.loginError || "An error occurred. Please try again.")

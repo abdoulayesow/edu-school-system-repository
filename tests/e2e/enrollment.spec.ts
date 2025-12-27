@@ -1,11 +1,7 @@
 import { test, expect } from '@playwright/test'
-import { loginAsDirector, clearSession } from '../helpers/test-utils'
 
 test.describe('Enrollment Management', () => {
-  test.beforeEach(async ({ page }) => {
-    await clearSession(page)
-    await loginAsDirector(page)
-  })
+  // No beforeEach login needed - tests use storageState from playwright.config.ts
 
   test.describe('Enrollment List', () => {
     test('should display enrollment list page', async ({ page }) => {
