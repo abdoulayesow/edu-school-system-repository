@@ -1,7 +1,7 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
-  "buildCommand": "FIX_NATIVE_MODULES_BUILD=1 node scripts/fix-native-modules.js && npm run build",
-  "installCommand": "npm ci --prefer-offline",
+  "buildCommand": "npm run build",
+  "installCommand": "npm install",
   "framework": "nextjs",
   "env": {
     "NODE_OPTIONS": "--max-old-space-size=6144"
