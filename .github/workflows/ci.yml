@@ -121,29 +121,50 @@ jobs:
           cache: 'npm'
 
       - name: Install dependencies
-        run: npm install --include=optional
+        run: npm ci
 
-      - name: Install and link platform-specific binaries
+      - name: Rebuild native modules for Linux
         run: |
-          echo "=== Installing lightningcss-linux-x64-gnu ==="
-          cd app/ui
-          npm install --no-save lightningcss-linux-x64-gnu @tailwindcss/oxide-linux-x64-gnu
+          echo "=== Rebuilding native modules for Linux ==="
+          npm rebuild lightningcss || true
           
-          echo "=== Finding where packages were installed ==="
-          find . -name "lightningcss-linux-x64-gnu" -type d 2>/dev/null || echo "Not found in current dir"
-          find ../../ -name "lightningcss-linux-x64-gnu" -type d 2>/dev/null | head -5 || echo "Not found in parent"
+          # Check if binary exists in expected locations
+          echo "=== Checking for lightningcss binary ==="
+          FOUND_BINARY=""
           
-          echo "=== Checking if it's in root node_modules ==="
-          if [ -d "../../node_modules/lightningcss-linux-x64-gnu" ]; then
-            echo "Found in root node_modules, copying from there"
-            find ../../node_modules/lightningcss-linux-x64-gnu -name "*.node" -exec cp {} node_modules/ \;
-          elif [ -d "node_modules/lightningcss-linux-x64-gnu" ]; then
-            echo "Found in app/ui/node_modules, copying from there"
-            find node_modules/lightningcss-linux-x64-gnu -name "*.node" -exec cp {} node_modules/ \;
+          # Check root node_modules
+          if find node_modules/lightningcss -name "*.node" -type f 2>/dev/null | grep -q .; then
+            echo "✅ Binary found in root node_modules/lightningcss"
+            FOUND_BINARY="yes"
           fi
           
-          echo "=== Verifying .node file in node_modules ==="
-          ls -la node_modules/*.node || echo "No .node files found"
+          # Check app/ui node_modules
+          if find app/ui/node_modules/lightningcss -name "*.node" -type f 2>/dev/null | grep -q .; then
+            echo "✅ Binary found in app/ui/node_modules/lightningcss"
+            FOUND_BINARY="yes"
+          fi
+          
+          # If not found, install platform package directly
+          if [ -z "$FOUND_BINARY" ]; then
+            echo "⚠️ Binary not found after rebuild, installing platform package..."
+            npm install lightningcss-linux-x64-gnu --no-save
+            
+            # Find and copy the binary to the correct location
+            BINARY=$(find node_modules -name "lightningcss.linux-x64-gnu.node" -type f 2>/dev/null | head -1)
+            if [ -n "$BINARY" ]; then
+              echo "Found binary at: $BINARY"
+              # Copy to both possible locations
+              cp "$BINARY" node_modules/lightningcss/ 2>/dev/null && echo "✅ Copied to node_modules/lightningcss/"
+              mkdir -p app/ui/node_modules/lightningcss
+              cp "$BINARY" app/ui/node_modules/lightningcss/ 2>/dev/null && echo "✅ Copied to app/ui/node_modules/lightningcss/"
+            else
+              echo "❌ Could not find platform binary"
+            fi
+          fi
+          
+          echo "=== Final verification ==="
+          find node_modules -name "lightningcss.linux-x64-gnu.node" -type f 2>/dev/null || echo "No binary in node_modules"
+          find app/ui/node_modules -name "lightningcss.linux-x64-gnu.node" -type f 2>/dev/null || echo "No binary in app/ui/node_modules"
 
       - name: Generate Prisma Client
         run: cd app/db && npx prisma generate
