@@ -125,38 +125,36 @@ jobs:
 
       - name: Fix lightningcss native module for Linux
         run: |
-          echo "=== Fixing lightningcss native module for Linux ==="
+          echo "=== Fixing lightningcss for Linux platform ==="
           
-          # The binary needs to be at: app/ui/node_modules/lightningcss/lightningcss.linux-x64-gnu.node
-          # Install the platform package directly in app/ui
+          # Delete the problematic package and reinstall fresh
           cd app/ui
-          npm install lightningcss-linux-x64-gnu --no-save
+          rm -rf node_modules/lightningcss
           
-          # Find where the binary was installed
-          echo "=== Looking for the binary ==="
-          find . -name "lightningcss.linux-x64-gnu.node" -type f 2>/dev/null
-          find ../../node_modules -name "lightningcss.linux-x64-gnu.node" -type f 2>/dev/null
+          # Install lightningcss fresh (will get correct platform binary)
+          npm install lightningcss@latest --no-save --force
           
-          # Copy from lightningcss-linux-x64-gnu package to lightningcss package
-          BINARY=""
-          if [ -f "node_modules/lightningcss-linux-x64-gnu/lightningcss.linux-x64-gnu.node" ]; then
-            BINARY="node_modules/lightningcss-linux-x64-gnu/lightningcss.linux-x64-gnu.node"
-          elif [ -f "../../node_modules/lightningcss-linux-x64-gnu/lightningcss.linux-x64-gnu.node" ]; then
-            BINARY="../../node_modules/lightningcss-linux-x64-gnu/lightningcss.linux-x64-gnu.node"
+          echo "=== Checking what was installed ==="
+          ls -la node_modules/lightningcss/
+          ls -la node_modules/lightningcss/*.node 2>/dev/null || echo "No .node in root"
+          
+          # If still no binary, download it directly
+          if [ ! -f "node_modules/lightningcss/lightningcss.linux-x64-gnu.node" ]; then
+            echo "=== Downloading binary directly ==="
+            cd node_modules/lightningcss
+            npm pack lightningcss-linux-x64-gnu --json 2>/dev/null | grep -q "filename" && \
+              tar -xzf lightningcss-linux-x64-gnu-*.tgz --strip-components=1 package/lightningcss.linux-x64-gnu.node 2>/dev/null || true
+            
+            # Alternative: use curl to download from unpkg
+            if [ ! -f "lightningcss.linux-x64-gnu.node" ]; then
+              LCSS_VERSION=$(node -p "require('./package.json').version")
+              echo "Downloading lightningcss-linux-x64-gnu@$LCSS_VERSION from npm"
+              curl -sL "https://registry.npmjs.org/lightningcss-linux-x64-gnu/-/lightningcss-linux-x64-gnu-${LCSS_VERSION}.tgz" | tar -xz --strip-components=1 package/lightningcss.linux-x64-gnu.node 2>/dev/null || echo "curl download failed"
+            fi
           fi
           
-          if [ -n "$BINARY" ]; then
-            echo "Found binary at: $BINARY"
-            cp "$BINARY" node_modules/lightningcss/
-            echo "✅ Copied to app/ui/node_modules/lightningcss/"
-            ls -la node_modules/lightningcss/*.node
-          else
-            echo "❌ Binary not found in expected locations"
-            echo "Trying alternative: reinstall lightningcss with platform detection"
-            rm -rf node_modules/lightningcss
-            npm install lightningcss --no-save
-            ls -la node_modules/lightningcss/*.node 2>/dev/null || echo "Still no binary"
-          fi
+          echo "=== Final check ==="
+          ls -la node_modules/lightningcss/*.node 2>/dev/null && echo "✅ Binary found!" || echo "❌ No binary"
 
       - name: Generate Prisma Client
         run: cd app/db && npx prisma generate
