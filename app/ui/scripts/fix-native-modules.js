@@ -31,13 +31,22 @@ if (process.env.VERCEL && isPostInstall) {
 
 console.log('[fix-native-modules] Detected Linux platform, fixing native modules...');
 
-const modulesToFix = ['lightningcss', '@tailwindcss/oxide'];
+// Include all CSS-related packages to prevent npm from removing dependencies
+// when installing native modules (npm tree reconciliation can remove packages)
+const modulesToFix = [
+  'lightningcss',
+  '@tailwindcss/oxide',
+  '@tailwindcss/postcss',
+  'tailwindcss',
+  'postcss'
+];
 
 // Reinstall modules to get correct platform binaries
 // npm rebuild doesn't help when binaries are missing from package-lock.json
 try {
   console.log(`[fix-native-modules] Installing: ${modulesToFix.join(', ')}`);
-  execSync(`npm install ${modulesToFix.join(' ')} --no-save`, {
+  // Use --legacy-peer-deps to minimize tree changes
+  execSync(`npm install ${modulesToFix.join(' ')} --no-save --legacy-peer-deps`, {
     stdio: 'inherit',
     cwd: path.join(__dirname, '..'),
     env: { ...process.env, NODE_OPTIONS: '--max-old-space-size=4096' }
