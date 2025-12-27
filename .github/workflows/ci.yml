@@ -125,13 +125,21 @@ jobs:
 
       - name: Fix native modules for Linux
         run: |
-          # Install platform-specific native binaries directly
           cd app/ui
+          # Install platform-specific binary packages
           npm install lightningcss-linux-x64-gnu @tailwindcss/oxide-linux-x64-gnu --save-optional
-          # Verify binary exists
-          ls -la node_modules/lightningcss/ || true
-          ls -la node_modules/lightningcss/*.node 2>/dev/null || echo "Checking alternate location..."
-          ls -la node_modules/lightningcss-linux-x64-gnu/*.node 2>/dev/null || true
+          
+          # Copy binary to where lightningcss expects it
+          cp node_modules/lightningcss-linux-x64-gnu/lightningcss.linux-x64-gnu.node node_modules/lightningcss/
+          
+          # Copy oxide binary if needed
+          if [ -d "node_modules/@tailwindcss/oxide-linux-x64-gnu" ]; then
+            mkdir -p node_modules/@tailwindcss/oxide
+            cp node_modules/@tailwindcss/oxide-linux-x64-gnu/*.node node_modules/@tailwindcss/oxide/ 2>/dev/null || true
+          fi
+          
+          # Verify
+          ls -la node_modules/lightningcss/*.node
 
       - name: Generate Prisma Client
         run: cd app/db && npx prisma generate
@@ -270,13 +278,21 @@ jobs:
 
       - name: Fix native modules for Linux
         run: |
-          # Install platform-specific native binaries directly
           cd app/ui
+          # Install platform-specific binary packages
           npm install lightningcss-linux-x64-gnu @tailwindcss/oxide-linux-x64-gnu --save-optional
-          # Verify binary exists
-          ls -la node_modules/lightningcss/ || true
-          ls -la node_modules/lightningcss/*.node 2>/dev/null || echo "Checking alternate location..."
-          ls -la node_modules/lightningcss-linux-x64-gnu/*.node 2>/dev/null || true
+          
+          # Copy binary to where lightningcss expects it
+          cp node_modules/lightningcss-linux-x64-gnu/lightningcss.linux-x64-gnu.node node_modules/lightningcss/
+          
+          # Copy oxide binary if needed
+          if [ -d "node_modules/@tailwindcss/oxide-linux-x64-gnu" ]; then
+            mkdir -p node_modules/@tailwindcss/oxide
+            cp node_modules/@tailwindcss/oxide-linux-x64-gnu/*.node node_modules/@tailwindcss/oxide/ 2>/dev/null || true
+          fi
+          
+          # Verify
+          ls -la node_modules/lightningcss/*.node
 
       - name: Install Playwright browsers
         run: npx playwright install --with-deps
