@@ -23,10 +23,11 @@ const TEST_USER = {
  * All authenticated tests reuse this session, eliminating repeated logins.
  */
 async function globalSetup(config: FullConfig) {
-  // Skip authentication in CI without database
-  if (process.env.CI && !process.env.DATABASE_URL) {
-    console.log('⚠ CI environment without DATABASE_URL - skipping E2E authentication setup')
-    console.log('  E2E tests requiring authentication will be skipped')
+  // Skip authentication in CI - no database available for E2E tests
+  // Set E2E_ENABLE_AUTH=true to force authentication in CI (requires DATABASE_URL)
+  if (process.env.CI && process.env.E2E_ENABLE_AUTH !== 'true') {
+    console.log('⚠ CI environment detected - skipping E2E authentication setup')
+    console.log('  Set E2E_ENABLE_AUTH=true to enable authentication in CI')
     
     // Create empty auth state so tests can check for it
     const authDir = path.join(process.cwd(), 'playwright', '.auth')
