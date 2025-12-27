@@ -126,16 +126,25 @@ jobs:
       - name: Fix native modules for Linux
         run: |
           cd app/ui
+          
           # Install platform-specific binary packages
           npm install lightningcss-linux-x64-gnu @tailwindcss/oxide-linux-x64-gnu --save-optional
           
-          # Copy binary to where lightningcss expects it
-          cp node_modules/lightningcss-linux-x64-gnu/lightningcss.linux-x64-gnu.node node_modules/lightningcss/
+          # Find and copy the lightningcss binary
+          echo "=== Searching for lightningcss binary ==="
+          find . -name "lightningcss.linux-x64-gnu.node" 2>/dev/null || true
+          find ../.. -name "lightningcss.linux-x64-gnu.node" 2>/dev/null | head -5 || true
           
-          # Copy oxide binary if needed
-          if [ -d "node_modules/@tailwindcss/oxide-linux-x64-gnu" ]; then
-            mkdir -p node_modules/@tailwindcss/oxide
-            cp node_modules/@tailwindcss/oxide-linux-x64-gnu/*.node node_modules/@tailwindcss/oxide/ 2>/dev/null || true
+          # Try copying from various possible locations
+          BINARY_PATH=$(find ../.. -name "lightningcss.linux-x64-gnu.node" 2>/dev/null | head -1)
+          if [ -n "$BINARY_PATH" ]; then
+            echo "Found binary at: $BINARY_PATH"
+            cp "$BINARY_PATH" node_modules/lightningcss/
+          else
+            echo "Binary not found, downloading directly..."
+            cd node_modules/lightningcss
+            curl -sL "https://registry.npmjs.org/lightningcss-linux-x64-gnu/-/lightningcss-linux-x64-gnu-1.30.2.tgz" | tar -xz --strip-components=1 package/lightningcss.linux-x64-gnu.node
+            cd ../..
           fi
           
           # Verify
@@ -279,16 +288,25 @@ jobs:
       - name: Fix native modules for Linux
         run: |
           cd app/ui
+          
           # Install platform-specific binary packages
           npm install lightningcss-linux-x64-gnu @tailwindcss/oxide-linux-x64-gnu --save-optional
           
-          # Copy binary to where lightningcss expects it
-          cp node_modules/lightningcss-linux-x64-gnu/lightningcss.linux-x64-gnu.node node_modules/lightningcss/
+          # Find and copy the lightningcss binary
+          echo "=== Searching for lightningcss binary ==="
+          find . -name "lightningcss.linux-x64-gnu.node" 2>/dev/null || true
+          find ../.. -name "lightningcss.linux-x64-gnu.node" 2>/dev/null | head -5 || true
           
-          # Copy oxide binary if needed
-          if [ -d "node_modules/@tailwindcss/oxide-linux-x64-gnu" ]; then
-            mkdir -p node_modules/@tailwindcss/oxide
-            cp node_modules/@tailwindcss/oxide-linux-x64-gnu/*.node node_modules/@tailwindcss/oxide/ 2>/dev/null || true
+          # Try copying from various possible locations
+          BINARY_PATH=$(find ../.. -name "lightningcss.linux-x64-gnu.node" 2>/dev/null | head -1)
+          if [ -n "$BINARY_PATH" ]; then
+            echo "Found binary at: $BINARY_PATH"
+            cp "$BINARY_PATH" node_modules/lightningcss/
+          else
+            echo "Binary not found, downloading directly..."
+            cd node_modules/lightningcss
+            curl -sL "https://registry.npmjs.org/lightningcss-linux-x64-gnu/-/lightningcss-linux-x64-gnu-1.30.2.tgz" | tar -xz --strip-components=1 package/lightningcss.linux-x64-gnu.node
+            cd ../..
           fi
           
           # Verify
