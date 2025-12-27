@@ -123,48 +123,40 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Rebuild native modules for Linux
+      - name: Fix lightningcss native module for Linux
         run: |
-          echo "=== Rebuilding native modules for Linux ==="
-          npm rebuild lightningcss || true
+          echo "=== Fixing lightningcss native module for Linux ==="
           
-          # Check if binary exists in expected locations
-          echo "=== Checking for lightningcss binary ==="
-          FOUND_BINARY=""
+          # The binary needs to be at: app/ui/node_modules/lightningcss/lightningcss.linux-x64-gnu.node
+          # Install the platform package directly in app/ui
+          cd app/ui
+          npm install lightningcss-linux-x64-gnu --no-save
           
-          # Check root node_modules
-          if find node_modules/lightningcss -name "*.node" -type f 2>/dev/null | grep -q .; then
-            echo "✅ Binary found in root node_modules/lightningcss"
-            FOUND_BINARY="yes"
+          # Find where the binary was installed
+          echo "=== Looking for the binary ==="
+          find . -name "lightningcss.linux-x64-gnu.node" -type f 2>/dev/null
+          find ../../node_modules -name "lightningcss.linux-x64-gnu.node" -type f 2>/dev/null
+          
+          # Copy from lightningcss-linux-x64-gnu package to lightningcss package
+          BINARY=""
+          if [ -f "node_modules/lightningcss-linux-x64-gnu/lightningcss.linux-x64-gnu.node" ]; then
+            BINARY="node_modules/lightningcss-linux-x64-gnu/lightningcss.linux-x64-gnu.node"
+          elif [ -f "../../node_modules/lightningcss-linux-x64-gnu/lightningcss.linux-x64-gnu.node" ]; then
+            BINARY="../../node_modules/lightningcss-linux-x64-gnu/lightningcss.linux-x64-gnu.node"
           fi
           
-          # Check app/ui node_modules
-          if find app/ui/node_modules/lightningcss -name "*.node" -type f 2>/dev/null | grep -q .; then
-            echo "✅ Binary found in app/ui/node_modules/lightningcss"
-            FOUND_BINARY="yes"
+          if [ -n "$BINARY" ]; then
+            echo "Found binary at: $BINARY"
+            cp "$BINARY" node_modules/lightningcss/
+            echo "✅ Copied to app/ui/node_modules/lightningcss/"
+            ls -la node_modules/lightningcss/*.node
+          else
+            echo "❌ Binary not found in expected locations"
+            echo "Trying alternative: reinstall lightningcss with platform detection"
+            rm -rf node_modules/lightningcss
+            npm install lightningcss --no-save
+            ls -la node_modules/lightningcss/*.node 2>/dev/null || echo "Still no binary"
           fi
-          
-          # If not found, install platform package directly
-          if [ -z "$FOUND_BINARY" ]; then
-            echo "⚠️ Binary not found after rebuild, installing platform package..."
-            npm install lightningcss-linux-x64-gnu --no-save
-            
-            # Find and copy the binary to the correct location
-            BINARY=$(find node_modules -name "lightningcss.linux-x64-gnu.node" -type f 2>/dev/null | head -1)
-            if [ -n "$BINARY" ]; then
-              echo "Found binary at: $BINARY"
-              # Copy to both possible locations
-              cp "$BINARY" node_modules/lightningcss/ 2>/dev/null && echo "✅ Copied to node_modules/lightningcss/"
-              mkdir -p app/ui/node_modules/lightningcss
-              cp "$BINARY" app/ui/node_modules/lightningcss/ 2>/dev/null && echo "✅ Copied to app/ui/node_modules/lightningcss/"
-            else
-              echo "❌ Could not find platform binary"
-            fi
-          fi
-          
-          echo "=== Final verification ==="
-          find node_modules -name "lightningcss.linux-x64-gnu.node" -type f 2>/dev/null || echo "No binary in node_modules"
-          find app/ui/node_modules -name "lightningcss.linux-x64-gnu.node" -type f 2>/dev/null || echo "No binary in app/ui/node_modules"
 
       - name: Generate Prisma Client
         run: cd app/db && npx prisma generate
