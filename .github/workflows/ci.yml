@@ -125,10 +125,17 @@ jobs:
 
       - name: Install platform-specific native binaries
         run: |
-          # Install Linux-specific native binaries in app/ui workspace
-          cd app/ui && npm install --no-save \
-            lightningcss-linux-x64-gnu \
-            @tailwindcss/oxide-linux-x64-gnu
+          # Install Linux-specific native binaries and manually link them
+          cd app/ui
+          npm install --no-save lightningcss-linux-x64-gnu @tailwindcss/oxide-linux-x64-gnu
+          # Copy the native binary to where lightningcss expects it
+          if [ -f node_modules/lightningcss-linux-x64-gnu/lightningcss.linux-x64-gnu.node ]; then
+            cp node_modules/lightningcss-linux-x64-gnu/lightningcss.linux-x64-gnu.node node_modules/
+          fi
+          # Same for oxide
+          if [ -f node_modules/@tailwindcss/oxide-linux-x64-gnu/index.node ]; then
+            cp node_modules/@tailwindcss/oxide-linux-x64-gnu/index.node node_modules/@tailwindcss/
+          fi
 
       - name: Generate Prisma Client
         run: cd app/db && npx prisma generate
