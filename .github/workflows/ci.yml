@@ -123,18 +123,21 @@ jobs:
       - name: Install dependencies
         run: npm install --include=optional
 
-      - name: Debug - Check lightningcss installation
+      - name: Install and link platform-specific binaries
         run: |
-          echo "=== Checking lightningcss installation ==="
-          ls -la app/ui/node_modules/ | grep lightning || echo "No lightningcss packages found"
-          if [ -d "app/ui/node_modules/lightningcss-linux-x64-gnu" ]; then
-            echo "✓ lightningcss-linux-x64-gnu is installed"
-            ls -la app/ui/node_modules/lightningcss-linux-x64-gnu/
-          else
-            echo "✗ lightningcss-linux-x64-gnu is NOT installed"
-            echo "Installing it now..."
-            cd app/ui && npm install --no-save lightningcss-linux-x64-gnu
-          fi
+          echo "=== Installing lightningcss-linux-x64-gnu ==="
+          cd app/ui
+          npm install --no-save lightningcss-linux-x64-gnu @tailwindcss/oxide-linux-x64-gnu
+          
+          echo "=== Contents of lightningcss-linux-x64-gnu package ==="
+          ls -la node_modules/lightningcss-linux-x64-gnu/
+          
+          echo "=== Copying .node file to expected location ==="
+          # Find and copy the .node file
+          find node_modules/lightningcss-linux-x64-gnu -name "*.node" -exec cp {} node_modules/ \;
+          
+          echo "=== Verifying .node file in node_modules ==="
+          ls -la node_modules/*.node || echo "No .node files found"
 
       - name: Generate Prisma Client
         run: cd app/db && npx prisma generate
