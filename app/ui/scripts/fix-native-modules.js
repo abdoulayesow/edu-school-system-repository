@@ -21,45 +21,31 @@ if (platform !== 'linux') {
   process.exit(0);
 }
 
-// Skip on Vercel - they handle platform-specific binaries correctly
-// Running npm commands during postinstall causes OOM on Vercel's 8GB build machines
-if (process.env.VERCEL) {
-  console.log('[fix-native-modules] Skipping on Vercel (native binaries installed correctly)');
+// On Vercel, skip during postinstall - will run in build command instead
+// Running npm install during postinstall causes OOM, but after install completes it's fine
+const isPostInstall = !process.env.FIX_NATIVE_MODULES_BUILD;
+if (process.env.VERCEL && isPostInstall) {
+  console.log('[fix-native-modules] Skipping during postinstall on Vercel (will run in build)');
   process.exit(0);
 }
 
-console.log('[fix-native-modules] Detected Linux platform, rebuilding native modules...');
+console.log('[fix-native-modules] Detected Linux platform, fixing native modules...');
 
 const modulesToFix = ['lightningcss', '@tailwindcss/oxide'];
-const modulesToRebuild = [];
 
-// Check which modules exist and need rebuilding
-for (const moduleName of modulesToFix) {
-  const modulePath = path.join(__dirname, '..', 'node_modules', moduleName);
-  if (fs.existsSync(modulePath)) {
-    modulesToRebuild.push(moduleName);
-  } else {
-    console.log(`[fix-native-modules] ${moduleName} not found, skipping`);
-  }
-}
-
-if (modulesToRebuild.length === 0) {
-  console.log('[fix-native-modules] No modules to rebuild');
-  process.exit(0);
-}
-
-// Rebuild all modules in a single command (more memory efficient)
+// Reinstall modules to get correct platform binaries
+// npm rebuild doesn't help when binaries are missing from package-lock.json
 try {
-  console.log(`[fix-native-modules] Rebuilding: ${modulesToRebuild.join(', ')}`);
-  execSync(`npm rebuild ${modulesToRebuild.join(' ')}`, {
+  console.log(`[fix-native-modules] Installing: ${modulesToFix.join(', ')}`);
+  execSync(`npm install ${modulesToFix.join(' ')} --no-save`, {
     stdio: 'inherit',
     cwd: path.join(__dirname, '..'),
     env: { ...process.env, NODE_OPTIONS: '--max-old-space-size=4096' }
   });
-  console.log('[fix-native-modules] ✓ Rebuild completed successfully');
+  console.log('[fix-native-modules] ✓ Native modules installed successfully');
 } catch (error) {
-  console.error('[fix-native-modules] ✗ Rebuild failed:', error.message);
-  // Don't exit with error - the build might still work
+  console.error('[fix-native-modules] ✗ Install failed:', error.message);
+  process.exit(1);
 }
 
 console.log('[fix-native-modules] Done');
