@@ -12,16 +12,21 @@ const ADMIN_EMAILS = (process.env.ADMIN_EMAILS ?? "")
   .map((e) => e.trim().toLowerCase())
   .filter(Boolean)
 
-// Validate required environment variables at startup
-const requiredEnvVars = {
-  NEXTAUTH_SECRET: process.env.NEXTAUTH_SECRET,
-  GOOGLE_CLIENT_ID: process.env.GOOGLE_CLIENT_ID,
-  GOOGLE_CLIENT_SECRET: process.env.GOOGLE_CLIENT_SECRET,
-} as const
+// Skip validation during CI builds to allow Next.js to compile
+const isCIBuild = process.env.NEXT_PUBLIC_ENVIRONMENT === 'ci' || process.env.CI === 'true'
 
-for (const [key, value] of Object.entries(requiredEnvVars)) {
-  if (!value || value.trim() === "") {
-    throw new Error(`Missing required environment variable: ${key}`)
+if (!isCIBuild) {
+  // Validate required environment variables at startup
+  const requiredEnvVars = {
+    NEXTAUTH_SECRET: process.env.NEXTAUTH_SECRET,
+    GOOGLE_CLIENT_ID: process.env.GOOGLE_CLIENT_ID,
+    GOOGLE_CLIENT_SECRET: process.env.GOOGLE_CLIENT_SECRET,
+  } as const
+
+  for (const [key, value] of Object.entries(requiredEnvVars)) {
+    if (!value || value.trim() === "") {
+      throw new Error(`Missing required environment variable: ${key}`)
+    }
   }
 }
 
