@@ -125,8 +125,8 @@ jobs:
 
       - name: Install platform-specific native binaries
         run: |
-          # Install Linux-specific native binaries explicitly
-          npm install --no-save \
+          # Install Linux-specific native binaries in app/ui workspace
+          cd app/ui && npm install --no-save \
             lightningcss-linux-x64-gnu \
             @tailwindcss/oxide-linux-x64-gnu
 
