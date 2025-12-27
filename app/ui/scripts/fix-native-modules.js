@@ -40,13 +40,22 @@ const linuxBinaries = [
 
 try {
   console.log(`[fix-native-modules] Installing Linux binaries: ${linuxBinaries.join(', ')}`);
-  // Use --no-save --ignore-scripts to minimize side effects
+  // Install binaries (this may remove some packages due to npm tree reconciliation)
   execSync(`npm install ${linuxBinaries.join(' ')} --no-save --ignore-scripts`, {
     stdio: 'inherit',
     cwd: path.join(__dirname, '..'),
     env: { ...process.env, NODE_OPTIONS: '--max-old-space-size=4096' }
   });
-  console.log('[fix-native-modules] ✓ Linux binaries installed successfully');
+  console.log('[fix-native-modules] ✓ Linux binaries installed');
+
+  // Reinstall all dependencies to restore any packages that were removed
+  console.log('[fix-native-modules] Restoring dependencies...');
+  execSync(`npm install --ignore-scripts --prefer-offline`, {
+    stdio: 'inherit',
+    cwd: path.join(__dirname, '..'),
+    env: { ...process.env, NODE_OPTIONS: '--max-old-space-size=4096' }
+  });
+  console.log('[fix-native-modules] ✓ Dependencies restored');
 } catch (error) {
   console.error('[fix-native-modules] ✗ Install failed:', error.message);
   process.exit(1);
