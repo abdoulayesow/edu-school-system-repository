@@ -125,7 +125,8 @@ jobs:
 
       - name: Fix native modules for Linux
         run: |
-          # Remove platform-specific native modules and reinstall
+          # Remove platform-specific native modules and reinstall in app/ui
+          cd app/ui
           rm -rf node_modules/lightningcss node_modules/@tailwindcss/oxide
           npm install lightningcss @tailwindcss/oxide
 
@@ -266,7 +267,8 @@ jobs:
 
       - name: Fix native modules for Linux
         run: |
-          # Remove platform-specific native modules and reinstall
+          # Remove platform-specific native modules and reinstall in app/ui
+          cd app/ui
           rm -rf node_modules/lightningcss node_modules/@tailwindcss/oxide
           npm install lightningcss @tailwindcss/oxide
 
