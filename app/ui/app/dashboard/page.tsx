@@ -1,15 +1,59 @@
 "use client"
 
+import { useEffect, useState, Suspense, lazy } from "react"
+import dynamic from "next/dynamic"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { ChartContainer, ChartTooltip, ChartTooltipContent, type ChartConfig } from "@/components/ui/chart"
-import { Users, DollarSign, AlertTriangle, TrendingUp, FileText, CheckCircle2, Clock, BarChart3 } from "lucide-react"
-import { Bar, BarChart, Pie, PieChart, Cell, CartesianGrid, XAxis, YAxis } from "recharts"
+import { Users, DollarSign, AlertTriangle, TrendingUp, FileText, CheckCircle2, Clock, BarChart3, Loader2 } from "lucide-react"
 import { useI18n, interpolate } from "@/components/i18n-provider"
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table"
+
+// Lazy load heavy chart components (type assertions needed due to recharts defaultProps)
+const BarChart = dynamic(() => import("recharts").then(mod => mod.BarChart) as never, { ssr: false }) as typeof import("recharts").BarChart
+const Bar = dynamic(() => import("recharts").then(mod => mod.Bar) as never, { ssr: false }) as typeof import("recharts").Bar
+const PieChart = dynamic(() => import("recharts").then(mod => mod.PieChart) as never, { ssr: false }) as typeof import("recharts").PieChart
+const Pie = dynamic(() => import("recharts").then(mod => mod.Pie) as never, { ssr: false }) as typeof import("recharts").Pie
+const Cell = dynamic(() => import("recharts").then(mod => mod.Cell) as never, { ssr: false }) as typeof import("recharts").Cell
+const CartesianGrid = dynamic(() => import("recharts").then(mod => mod.CartesianGrid) as never, { ssr: false }) as typeof import("recharts").CartesianGrid
+const XAxis = dynamic(() => import("recharts").then(mod => mod.XAxis) as never, { ssr: false }) as typeof import("recharts").XAxis
+const YAxis = dynamic(() => import("recharts").then(mod => mod.YAxis) as never, { ssr: false }) as typeof import("recharts").YAxis
+
+// Chart loading skeleton
+function ChartSkeleton() {
+  return (
+    <div className="h-[300px] flex items-center justify-center">
+      <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+    </div>
+  )
+}
 
 export default function DirectorDashboard() {
   const { t } = useI18n()
+  const [chartsLoaded, setChartsLoaded] = useState(false)
+
+  // Initialize sync manager after dashboard mounts (deferred from app startup)
+  useEffect(() => {
+    // Defer sync manager initialization to avoid blocking initial render
+    const timer = setTimeout(() => {
+      import("@/lib/sync/manager").then(({ syncManager }) => {
+        syncManager.initialize()
+      })
+    }, 1000) // Wait 1 second after mount
+
+    // Mark charts as ready to render
+    setChartsLoaded(true)
+
+    return () => clearTimeout(timer)
+  }, [])
   const enrollmentData = [
     { grade: "6ème", count: 95 },
     { grade: "7ème", count: 102 },
@@ -184,38 +228,56 @@ export default function DirectorDashboard() {
               <CardDescription>{t.dashboard.requestsNeedingApproval}</CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="space-y-4">
-                {pendingApprovals.slice(0, 5).map((approval) => (
-                  <div key={approval.id} className="flex items-start justify-between p-4 rounded-lg border bg-card">
-                    <div className="space-y-1 flex-1">
-                      <div className="flex items-center gap-2">
-                        <Badge variant="outline" className="text-xs">
-                          {approval.type}
-                        </Badge>
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>{t.dashboard.requestType}</TableHead>
+                    <TableHead>{t.dashboard.student}</TableHead>
+                    <TableHead>{t.dashboard.details}</TableHead>
+                    <TableHead className="text-right">{t.dashboard.actions}</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {pendingApprovals.map((approval) => (
+                    <TableRow key={approval.id}>
+                      <TableCell>
+                        <Badge variant="outline">{approval.type}</Badge>
+                      </TableCell>
+                      <TableCell>
+                        <div className="font-medium">{approval.student}</div>
+                        <div className="text-xs text-muted-foreground">
+                          {t.dashboard.by}: {approval.submittedBy}
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <div className="text-sm text-foreground">
+                          {approval.reason}
+                        </div>
                         {approval.amount && (
-                          <span className="text-sm font-semibold text-foreground">{approval.amount}</span>
+                          <div className="text-sm font-semibold text-foreground mt-1">
+                            {approval.amount}
+                          </div>
                         )}
-                      </div>
-                      <p className="text-sm font-medium text-foreground">{approval.student}</p>
-                      <p className="text-xs text-muted-foreground">{approval.reason}</p>
-                      <div className="flex items-center gap-2 text-xs text-muted-foreground pt-1">
-                        <span>{t.dashboard.by}: {approval.submittedBy}</span>
-                        <span>•</span>
-                        <span>{approval.date}</span>
-                      </div>
-                    </div>
-                    <div className="flex flex-col gap-2 ml-4">
-                      <Button size="sm" className="h-8">
-                        <CheckCircle2 className="h-3 w-3 mr-1" />
-                        {t.dashboard.approve}
-                      </Button>
-                      <Button size="sm" variant="outline" className="h-8 bg-transparent">
-                        {t.dashboard.review}
-                      </Button>
-                    </div>
-                  </div>
-                ))}
-              </div>
+                      </TableCell>
+                      <TableCell className="text-right">
+                        <div className="flex justify-end gap-2">
+                          <Button size="sm" className="h-8">
+                            <CheckCircle2 className="h-3 w-3 mr-1" />
+                            {t.dashboard.approve}
+                          </Button>
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            className="h-8 bg-transparent"
+                          >
+                            {t.dashboard.review}
+                          </Button>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
             </CardContent>
           </Card>
 

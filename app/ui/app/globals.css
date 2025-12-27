@@ -4,7 +4,7 @@
 @custom-variant dark (&:is(.dark *));
 
 :root {
-  /* GSN N'Diolou Logo Colors - Maroon, Gold, Black */
+  /* GSPN N'Diolou Logo Colors - Maroon, Gold, Black */
   --background: oklch(0.98 0.01 20);
   --foreground: oklch(0.15 0.02 20);
 
@@ -14,7 +14,7 @@
   --popover: oklch(1 0 0);
   --popover-foreground: oklch(0.15 0.02 20);
 
-  /* Primary: Rich Maroon/Burgundy #8B2332 - GSN red from logo */
+  /* Primary: Rich Maroon/Burgundy #8B2332 - GSPN red from logo */
   --primary: oklch(0.42 0.14 15);
   --primary-foreground: oklch(0.98 0.01 20);
 
@@ -121,6 +121,8 @@
   /* Using Inter for high legibility and professionalism */
   --font-sans: "Inter", "Inter Fallback", system-ui, -apple-system, sans-serif;
   --font-mono: "Geist Mono", "Geist Mono Fallback", monospace;
+  --font-heading: "Poppins", "Inter Fallback", system-ui, -apple-system,
+    sans-serif;
 
   --color-background: var(--background);
   --color-foreground: var(--foreground);
@@ -167,8 +169,61 @@
 @layer base {
   * {
     @apply border-border outline-ring/50;
+    transition: all 0.2s ease-in-out;
   }
   body {
     @apply bg-background text-foreground;
   }
+
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6,
+  .text-heading {
+    @apply font-heading font-semibold text-foreground;
+  }
+  h1 {
+    @apply text-3xl;
+  }
+  h2 {
+    @apply text-2xl;
+  }
+  h3 {
+    @apply text-xl;
+  }
+  h4 {
+    @apply text-lg;
+  }
+
+  /* Softer Input Focus */
+  input:focus,
+  textarea:focus {
+    box-shadow: 0 0 0 3px oklch(var(--primary) / 0.3);
+  }
+
+  /* Advanced Button Effects */
+  [data-slot="button"] {
+    transition: transform 0.1s ease-in-out;
+  }
+  [data-slot="button"]:hover {
+    transform: scale(1.02);
+  }
+  [data-slot="button"]:active {
+    transform: scale(0.98);
+  }
+}
+
+/* Glassmorphism for Sidebars and Modals */
+.glassmorphism {
+  background-color: oklch(var(--sidebar) / 0.8);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-right: 1px solid oklch(var(--sidebar-border) / 0.5);
+}
+
+.dark .glassmorphism {
+  background-color: oklch(var(--sidebar) / 0.6);
+  border-right: 1px solid oklch(var(--sidebar-border) / 0.4);
 }

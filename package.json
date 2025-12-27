@@ -1,0 +1,33 @@
+{
+  "name": "edu-school-system-repository",
+  "private": true,
+  "workspaces": [
+    "app/ui",
+    "app/api",
+    "app/db"
+  ],
+  "scripts": {
+    "lint": "npm run lint --workspace=app/ui && npm run lint --workspace=design-ux",
+    "lint:fix": "npm run lint:fix --workspace=app/ui && npm run lint:fix --workspace=design-ux",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "typecheck": "npm run typecheck --workspace=app/ui && npm run typecheck --workspace=design-ux",
+    "build": "npm run build --workspace=app/ui && npm run build --workspace=design-ux",
+    "test": "npm run test --workspace=app/ui",
+    "test:run": "npm run test:run --workspace=app/ui",
+    "db:seed": "npx tsx app/db/prisma/seed.ts",
+    "db:seed:test-user": "npx tsx tests/helpers/seed-test-user.ts",
+    "db:validate": "cd app/db && npx prisma validate",
+    "db:format": "cd app/db && npx prisma format",
+    "test:e2e": "playwright test",
+    "test:e2e:ui": "playwright test --ui",
+    "test:e2e:headed": "playwright test --headed",
+    "test:e2e:setup": "npx tsx tests/helpers/seed-test-user.ts",
+    "test:e2e:report": "playwright show-report"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.57.0",
+    "prisma": "^7.2.0",
+    "tsx": "^4.21.0"
+  }
+}
