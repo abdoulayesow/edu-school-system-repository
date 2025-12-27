@@ -68,6 +68,7 @@ Please make the sure the database has the required sample data for me to perform
 - Don't forget to use the translation mechanism
 - When creating or update french translation, make sure to only capitalize the first word
 - Make sure the database has the data needed to support testing this 
+- The database table structure should evolve to havcez a person table with role relations with students, teachers, users. In the future we might have more use for it. 
 - Make sure to use great ux design approaches
 - If possible, enable the dark mode view (right now, only like mode by default)  
 
