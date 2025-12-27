@@ -121,13 +121,27 @@ jobs:
           cache: 'npm'
 
       - name: Install dependencies
-        run: npm install
+        run: npm ci
 
-      - name: Fix native binaries for Linux
+      - name: Fix native modules for Linux
         run: |
-          # Remove platform-specific native modules and reinstall
-          rm -rf node_modules/lightningcss node_modules/@tailwindcss/oxide
-          npm install lightningcss @tailwindcss/oxide
+          cd app/ui
+          
+          # Download lightningcss binary directly
+          echo "=== Downloading lightningcss binary ==="
+          curl -sL "https://registry.npmjs.org/lightningcss-linux-x64-gnu/-/lightningcss-linux-x64-gnu-1.30.2.tgz" | tar -xz
+          cp package/lightningcss.linux-x64-gnu.node node_modules/lightningcss/
+          rm -rf package
+          
+          # Download tailwindcss oxide binary directly
+          echo "=== Downloading tailwindcss oxide binary ==="
+          curl -sL "https://registry.npmjs.org/@tailwindcss/oxide-linux-x64-gnu/-/oxide-linux-x64-gnu-4.1.10.tgz" | tar -xz
+          cp package/*.node node_modules/@tailwindcss/oxide/
+          rm -rf package
+          
+          # Verify
+          ls -la node_modules/lightningcss/*.node
+          ls -la node_modules/@tailwindcss/oxide/*.node
 
       - name: Generate Prisma Client
         run: cd app/db && npx prisma generate
@@ -263,6 +277,29 @@ jobs:
 
       - name: Install dependencies
         run: npm ci
+
+      - name: Fix native modules for Linux
+        run: |
+          cd app/ui
+          
+          # Download lightningcss binary directly
+          echo "=== Downloading lightningcss binary ==="
+          curl -sL "https://registry.npmjs.org/lightningcss-linux-x64-gnu/-/lightningcss-linux-x64-gnu-1.30.2.tgz" | tar -xz
+          cp package/lightningcss.linux-x64-gnu.node node_modules/lightningcss/
+          rm -rf package
+          
+          # Download tailwindcss oxide binary directly
+          echo "=== Downloading tailwindcss oxide binary ==="
+          curl -sL "https://registry.npmjs.org/@tailwindcss/oxide-linux-x64-gnu/-/oxide-linux-x64-gnu-4.1.10.tgz" | tar -xz
+          cp package/*.node node_modules/@tailwindcss/oxide/
+          rm -rf package
+          
+          # Verify
+          ls -la node_modules/lightningcss/*.node
+          ls -la node_modules/@tailwindcss/oxide/*.node
+
+      - name: Generate Prisma Client
+        run: cd app/db && npx prisma generate
 
       - name: Install Playwright browsers
         run: npx playwright install --with-deps

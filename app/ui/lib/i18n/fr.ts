@@ -33,7 +33,7 @@ export const fr = {
     level: "Niveau",
     online: "En ligne",
     offline: "Hors ligne",
-    onlineSynced: "En ligne - Synchronisé",
+    onlineSynced: "En ligne - synchronisé",
     offlineMode: "Mode hors ligne",
     menu: "Menu",
     select: "Sélectionner",
@@ -41,7 +41,7 @@ export const fr = {
 
   // Navigation
   nav: {
-    dashboard: "Tableau de Bord",
+    dashboard: "Tableau de bord",
     enrollments: "Inscriptions",
     activities: "Activités",
     accounting: "Comptabilité",
@@ -50,18 +50,18 @@ export const fr = {
     users: "Utilisateurs",
     login: "Connexion",
     signOut: "Déconnexion",
-    managementSystem: "Système de Gestion",
+    managementSystem: "Système de gestion",
     profile: "Profil",
-    myAccount: "Mon Compte",
+    myAccount: "Mon compte",
   },
 
   // Homepage
   home: {
     schoolName: "Groupe Scolaire GSPN N'Diolou",
-    managementSystem: "Système de Gestion",
+    managementSystem: "Système de gestion",
     heroDescription: "Une plateforme complète de gestion scolaire construite pour l'excellence, la sécurité et la traçabilité dans l'éducation africaine.",
-    goToDashboard: "Aller au Tableau de Bord",
-    exploreSystem: "Explorer le Système",
+    goToDashboard: "Aller au tableau de bord",
+    exploreSystem: "Explorer le système",
     exploreDescription: "Naviguez vers les différentes sections de la plateforme conçues pour des rôles et flux de travail spécifiques",
     
     // Page descriptions
@@ -73,44 +73,44 @@ export const fr = {
     reportsDesc: "Supervision académique et analyses de participation pour des décisions basées sur les données",
 
     // Features section
-    builtForAfricanSchools: "Conçu pour les Écoles Africaines",
+    builtForAfricanSchools: "Conçu pour les écoles africaines",
     featuresDescription: "Conçu avec les besoins uniques des établissements d'enseignement ouest-africains à l'esprit",
-    offlineFirstTitle: "Conception Hors-ligne d'Abord",
+    offlineFirstTitle: "Conception hors-ligne d'abord",
     offlineFirstDesc: "Travaillez sans interruption même avec une connectivité limitée. Toutes les données se synchronisent automatiquement en ligne.",
-    securityTitle: "Sécurité et Traçabilité",
+    securityTitle: "Sécurité et traçabilité",
     securityDesc: "Chaque action est enregistrée avec des IDs de transaction et documents justificatifs pour une responsabilité totale.",
-    roleBasedTitle: "Accès Basé sur les Rôles",
+    roleBasedTitle: "Accès basé sur les rôles",
     roleBasedDesc: "Interfaces adaptées pour directeurs, secrétaires, comptables, enseignants et directeurs académiques.",
 
     // CTA section
-    readyToStart: "Prêt à Commencer?",
+    readyToStart: "Prêt à commencer?",
     ctaDescription: "Accédez à la plateforme et commencez à gérer votre école en toute confiance",
-    openDashboard: "Ouvrir le Tableau de Bord",
-    manageEnrollments: "Gérer les Inscriptions",
+    openDashboard: "Ouvrir le tableau de bord",
+    manageEnrollments: "Gérer les inscriptions",
 
     // Footer
-    excellenceInEducation: "Excellence dans l'Éducation",
-    footerCopyright: "© 2025 Système de Gestion GSPN. Construit avec excellence pour l'éducation africaine.",
+    excellenceInEducation: "Excellence dans l'éducation",
+    footerCopyright: "© 2025 Système de gestion GSPN. Construit avec excellence pour l'éducation africaine.",
   },
 
   // Dashboard
   dashboard: {
-    title: "Tableau de Bord du Directeur",
+    title: "Tableau de bord du directeur",
     greeting: "Bonjour",
     greetingWithName: "Bonjour, {name}",
     
     // Summary cards
-    totalEnrollment: "Inscription Totale",
+    totalEnrollment: "Inscription totale",
     vsLastMonth: "vs mois dernier",
-    revenue: "Revenu (Cette Période)",
+    revenue: "Revenu (cette période)",
     pending: "En attente",
-    pendingApprovals: "Approbations en Attente",
+    pendingApprovals: "Approbations en attente",
     viewExceptions: "Voir les exceptions →",
-    reconciliationFlags: "Drapeaux de Réconciliation",
+    reconciliationFlags: "Drapeaux de réconciliation",
     needsAttention: "Nécessite attention",
 
     // Exception tickets
-    pendingExceptionTickets: "Tickets d'Exception en Attente",
+    pendingExceptionTickets: "Tickets d'exception en attente",
     requestsNeedingApproval: "Demandes nécessitant votre approbation",
     requestType: "Type de demande",
     student: "Étudiant",
@@ -121,30 +121,30 @@ export const fr = {
     by: "Par", 
 
     // Exception types
-    paymentDiscount: "Remise de Paiement",
-    lateEnrollment: "Inscription Tardive",
-    feeWaiver: "Annulation de Frais",
-    paymentPlan: "Plan de Paiement",
-    activityModification: "Modification d'Activité",
+    paymentDiscount: "Remise de paiement",
+    lateEnrollment: "Inscription tardive",
+    feeWaiver: "Annulation de frais",
+    paymentPlan: "Plan de paiement",
+    activityModification: "Modification d'activité",
 
     // Recent activity
-    recentActivity: "Activité Récente",
+    recentActivity: "Activité récente",
     importantEvents: "Événements importants et actions du système",
     viewAllHistory: "Voir tout l'historique",
     hoursAgo: "Il y a {hours} heures",
     yesterdayAt: "Hier à {time}",
 
     // Activity actions
-    financialPeriodClosed: "Période Financière Clôturée",
-    bulkEnrollmentProcessed: "Inscription en Masse Traitée ({count} étudiants)",
-    academicReportGenerated: "Rapport Académique Généré",
-    bankDiscrepancyFlagged: "Discordance Bancaire Signalée",
-    paymentValidation: "Validation de {count} Paiements",
+    financialPeriodClosed: "Période financière clôturée",
+    bulkEnrollmentProcessed: "Inscription en masse traitée ({count} étudiants)",
+    academicReportGenerated: "Rapport académique généré",
+    bankDiscrepancyFlagged: "Discordance bancaire signalée",
+    paymentValidation: "Validation de {count} paiements",
 
     // Charts
-    enrollmentByLevel: "Inscriptions par Niveau",
+    enrollmentByLevel: "Inscriptions par niveau",
     studentDistribution: "Répartition des étudiants par classe",
-    revenueByCategory: "Revenu par Catégorie",
+    revenueByCategory: "Revenu par catégorie",
     revenueDistribution: "Distribution des revenus par type",
     viewAllReports: "Voir tous les rapports",
 
@@ -165,47 +165,47 @@ export const fr = {
 
   // Enrollments
   enrollments: {
-    title: "Gestion des Inscriptions",
+    title: "Gestion des inscriptions",
     subtitle: "Gérer les inscriptions et profils des étudiants",
-    allStudents: "Tous les Étudiants",
+    allStudents: "Tous les étudiants",
     studentsEnrolled: "{count} étudiants inscrits",
-    newEnrollment: "Nouvelle Inscription",
+    newEnrollment: "Nouvelle inscription",
     searchPlaceholder: "Rechercher par nom, ID étudiant...",
 
     // Table headers
-    studentId: "ID Étudiant",
-    fullName: "Nom Complet",
-    enrollmentDate: "Date d'Inscription",
-    paymentStatus: "Statut de Paiement",
+    studentId: "ID étudiant",
+    fullName: "Nom complet",
+    enrollmentDate: "Date d'inscription",
+    paymentStatus: "Statut de paiement",
 
     // Payment status
     paid: "Payé",
-    pendingPayment: "En Attente",
-    overdue: "En Retard",
+    pendingPayment: "En attente",
+    overdue: "En retard",
 
     // New enrollment dialog
-    newStudentEnrollment: "Nouvelle Inscription d'Étudiant",
+    newStudentEnrollment: "Nouvelle inscription d'étudiant",
     fillStudentInfo: "Remplissez les informations de l'étudiant pour créer une nouvelle inscription",
 
     // Personal info
-    personalInfo: "Informations Personnelles",
+    personalInfo: "Informations personnelles",
     firstName: "Prénom",
     firstNamePlaceholder: "Prénom de l'étudiant",
     lastName: "Nom",
     lastNamePlaceholder: "Nom de famille",
-    dateOfBirth: "Date de Naissance",
+    dateOfBirth: "Date de naissance",
     gender: "Genre",
     selectGender: "Sélectionner",
     male: "Masculin",
     female: "Féminin",
 
     // Academic info
-    academicInfo: "Informations Académiques",
+    academicInfo: "Informations académiques",
     selectLevel: "Sélectionner le niveau",
 
     // Guardian info
-    guardianInfo: "Informations du Tuteur",
-    guardianName: "Nom Complet du Tuteur",
+    guardianInfo: "Informations du tuteur",
+    guardianName: "Nom complet du tuteur",
     guardianNamePlaceholder: "Nom du parent/tuteur",
     phone: "Téléphone",
     email: "Email",
@@ -213,16 +213,16 @@ export const fr = {
 
     // Documents
     documents: "Documents",
-    birthCertificate: "Acte de Naissance",
+    birthCertificate: "Acte de naissance",
     fileUploadHint: "PDF, JPG ou PNG - Max 5MB",
 
     // Buttons
-    createEnrollment: "Créer l'Inscription",
+    createEnrollment: "Créer l'inscription",
   },
 
   // Activities
   activities: {
-    title: "Gestion des Activités",
+    title: "Gestion des activités",
     subtitle: "Gérer les activités scolaires et extrascolaires",
     
     // Tabs
@@ -235,111 +235,111 @@ export const fr = {
     extra: "Extra",
 
     // Card info
-    assignStudent: "Assigner un Étudiant",
+    assignStudent: "Assigner un étudiant",
 
     // Assign dialog
-    assignStudentTitle: "Assigner un Étudiant",
+    assignStudentTitle: "Assigner un étudiant",
     searchAndAdd: "Recherchez et ajoutez un étudiant à",
     searchStudentPlaceholder: "Rechercher un étudiant par nom ou ID...",
     overduePayments: "Paiements en retard",
 
     // Activity names
-    englishClub: "Club d'Anglais",
-    advancedMath: "Mathématiques Avancées",
+    englishClub: "Club d'anglais",
+    advancedMath: "Mathématiques avancées",
     football: "Football",
-    physics: "Sciences Physiques",
-    readingClub: "Club de Lecture",
+    physics: "Sciences physiques",
+    readingClub: "Club de lecture",
     computerScience: "Informatique",
   },
 
   // Accounting
   accounting: {
-    title: "Centre de Contrôle Financier",
+    title: "Centre de contrôle financier",
     subtitle: "Gérer les paiements, validations et réconciliations",
     subtitleWithName: "Gérer les paiements, validations et réconciliations - {personName}",
 
     // Tabs
-    tabPayments: "Enregistrement de Paiements",
+    tabPayments: "Enregistrement de paiements",
     tabReconciliation: "Réconciliation",
-    tabPeriodClose: "Clôture de Période",
+    tabPeriodClose: "Clôture de période",
 
     // Payments section
-    paymentTransactions: "Transactions de Paiement",
+    paymentTransactions: "Transactions de paiement",
     registerAndValidate: "Enregistrer et valider les paiements des étudiants",
-    recordPayment: "Enregistrer un Paiement",
-    savePayment: "Enregistrer le Paiement",
+    recordPayment: "Enregistrer un paiement",
+    savePayment: "Enregistrer le paiement",
 
     // Payment status
-    unvalidated: "Non Validé",
+    unvalidated: "Non validé",
     validated: "Validé",
     reconciled: "Réconcilié",
     readyForReconciliation: "Prêt pour réconciliation",
     completed: "Complété",
 
     // Table headers
-    transactionId: "ID Transaction",
+    transactionId: "ID transaction",
     method: "Méthode",
     reference: "Référence",
     validate: "Valider",
 
     // Record payment dialog
-    recordNewPayment: "Enregistrer un Nouveau Paiement",
+    recordNewPayment: "Enregistrer un nouveau paiement",
     allFieldsRequired: "Tous les champs sont obligatoires. Un document justificatif est requis.",
     searchStudent: "Rechercher un étudiant...",
     amountGNF: "Montant (GNF)",
-    paymentType: "Type de Paiement",
+    paymentType: "Type de paiement",
     cash: "Espèces (Cash)",
     mobileMoney: "Mobile Money (Orange/MTN)",
-    bankTransfer: "Virement Bancaire",
-    documentReference: "Référence de Document Justificatif",
+    bankTransfer: "Virement bancaire",
+    documentReference: "Référence de document justificatif",
     documentReferencePlaceholder: "Ex: OM-2024-123 ou CASH-2024-045",
     documentReferenceHint: "Référence du reçu Mobile Money, numéro de reçu cash, ou référence bancaire",
-    supportingDocument: "Document Justificatif (Scan/Capture)",
+    supportingDocument: "Document justificatif (Scan/Capture)",
     supportingDocumentHint: "Requis: Reçu Mobile Money, capture d'écran, ou document scanné",
     notes: "Notes",
-    notesOptional: "Notes (Optionnel)",
+    notesOptional: "Notes (optionnel)",
     notesPlaceholder: "Informations supplémentaires...",
 
     // Reconciliation tab
-    validatedPayments: "Paiements Validés",
+    validatedPayments: "Paiements validés",
     selectPaymentsToReconcile: "Sélectionner les paiements à réconcilier",
-    totalSelected: "Total Sélectionné",
-    bankDeposits: "Dépôts Bancaires",
+    totalSelected: "Total sélectionné",
+    bankDeposits: "Dépôts bancaires",
     selectMatchingDeposit: "Sélectionner le dépôt correspondant",
     comparison: "Comparaison",
-    selectedPayments: "Paiements Sélectionnés",
+    selectedPayments: "Paiements sélectionnés",
     vs: "vs",
-    bankDeposit: "Dépôt Bancaire",
+    bankDeposit: "Dépôt bancaire",
     discrepancyDetected: "Discordance détectée - Vérifier avant de réconcilier",
-    flagDiscrepancy: "Signaler Discordance",
+    flagDiscrepancy: "Signaler discordance",
     reconcile: "Réconcilier",
 
     // Period close tab
-    periodCloseWizard: "Assistant de Clôture de Période",
+    periodCloseWizard: "Assistant de clôture de période",
     closeCurrentPeriod: "Fermer la période financière actuelle et générer le rapport final",
-    preCloseVerification: "Vérification Pré-Clôture",
+    preCloseVerification: "Vérification pré-clôture",
     allPaymentsValidated: "Tous les paiements validés",
     unvalidatedPayments: "{count} paiements non validés",
     allReconciliationsDone: "Toutes les réconciliations effectuées",
     pendingReconciliations: "{count} réconciliations en attente",
     discrepanciesResolved: "Discordances résolues",
     discrepanciesNeedAttention: "{count} discordances nécessitent attention",
-    summaryReview: "Révision du Résumé",
+    summaryReview: "Révision du résumé",
     availableAfterPreClose: "Disponible après résolution de toutes les vérifications pré-clôture",
-    closePeriod: "Clôturer la Période",
-    irreversibleAction: "Action Irréversible",
+    closePeriod: "Clôturer la période",
+    irreversibleAction: "Action irréversible",
     closePeriodWarning: "La clôture de période verrouille toutes les transactions et empêche toute modification ultérieure. Assurez-vous que toutes les vérifications sont complètes.",
-    closeFinancialPeriod: "Clôturer la Période Financière",
+    closeFinancialPeriod: "Clôturer la période financière",
   },
 
   // Attendance
   attendance: {
-    title: "Prise de Présence",
+    title: "Prise de présence",
     welcome: "Bienvenue",
 
     // Activity list
-    todaysActivities: "Activités d'Aujourd'hui",
-    takeAttendance: "Prendre Présence",
+    todaysActivities: "Activités d'aujourd'hui",
+    takeAttendance: "Prendre présence",
 
     // Taking attendance
     tapToChange: "Tapez sur un étudiant pour changer le statut de présence",
@@ -355,12 +355,12 @@ export const fr = {
     statusExcused: "Excusé",
 
     // Student list
-    studentList: "Liste des Étudiants",
+    studentList: "Liste des étudiants",
     allMarkedPresent: "Tous les étudiants sont marqués présents par défaut",
     overduePayment: "Paiement en retard",
 
     // Submit
-    submitAttendance: "Soumettre la Présence",
+    submitAttendance: "Soumettre la présence",
 
     // Instructions
     instructions: "Instructions",
@@ -372,22 +372,22 @@ export const fr = {
 
   // Reports
   reports: {
-    title: "Rapports Académiques",
+    title: "Rapports académiques",
     subtitle: "Supervision des activités et participation",
 
     // Tabs
-    tabOverview: "Vue d'Ensemble",
-    tabParticipation: "Rapports de Participation",
+    tabOverview: "Vue d'ensemble",
+    tabParticipation: "Rapports de participation",
 
     // Summary cards
-    totalActivities: "Total Activités",
+    totalActivities: "Total activités",
     academicActivities: "scolaires",
     extraActivities: "extra",
-    enrolledStudents: "Étudiants Inscrits",
+    enrolledStudents: "Étudiants inscrits",
     totalEnrollments: "Total d'inscriptions",
-    averageAttendance: "Taux de Présence Moyen",
+    averageAttendance: "Taux de présence moyen",
     satisfactoryPerformance: "Performance satisfaisante",
-    atRiskStudents: "Étudiants à Risque",
+    atRiskStudents: "Étudiants à risque",
     lowParticipation: "Faible participation",
 
     // Filters
@@ -395,17 +395,17 @@ export const fr = {
     allLevels: "Tous les niveaux",
 
     // Activities list
-    allActivities: "Toutes les Activités",
+    allActivities: "Toutes les activités",
     activitiesShown: "activité(s) affichée(s)",
     averageAttendanceRate: "Présence moyenne",
 
     // Participation tab
-    attendanceTrend: "Tendance de Présence",
+    attendanceTrend: "Tendance de présence",
     weeklyAttendanceRate: "Taux de présence hebdomadaire pour",
     ratePercent: "Taux (%)",
 
     // Low participation
-    lowParticipationStudents: "Étudiants avec Faible Participation",
+    lowParticipationStudents: "Étudiants avec faible participation",
     studentsNeedingFollowup: "Étudiants nécessitant un suivi pour faible taux de participation (<60%)",
     activitiesEnrolled: "activités inscrites",
 
@@ -416,13 +416,13 @@ export const fr = {
     needsFollowup: "Besoin de suivi",
 
     // Chart
-    attendanceByActivity: "Présence par Activité",
+    attendanceByActivity: "Présence par activité",
     attendanceComparison: "Comparaison des taux de présence entre activités",
   },
 
   // Login
   login: {
-    title: "Système de Gestion Scolaire",
+    title: "Système de gestion scolaire",
     subtitle: "Connectez-vous à votre compte",
     email: "Adresse e-mail",
     emailPlaceholder: "votre.email@ecole.gn",
@@ -437,27 +437,27 @@ export const fr = {
     simulateOnline: "Simuler mode en ligne",
     // Page de connexion améliorée
     schoolName: "Groupe Scolaire Privé de Nongo",
-    schoolTagline: "L'Excellence dans l'Éducation",
-    welcomeTitle: "Bienvenue sur le Système de Gestion Scolaire",
+    schoolTagline: "L'excellence dans l'éducation",
+    welcomeTitle: "Bienvenue sur le système de gestion scolaire",
     welcomeSubtitle: "Une plateforme complète pour gérer les inscriptions, la présence, la comptabilité et plus encore.",
     signInTitle: "Connexion",
-    signInSubtitle: "Accéder au Système de Gestion Scolaire",
-    signInButton: "Se Connecter",
+    signInSubtitle: "Accéder au système de gestion scolaire",
+    signInButton: "Se connecter",
     forgotPassword: "Mot de passe oublié?",
     orContinueWith: "Ou continuer avec",
     signInWithGoogle: "Se connecter avec Google",
     invalidCredentials: "Email ou mot de passe invalide",
     loginError: "Une erreur s'est produite. Veuillez réessayer.",
     // Cartes de fonctionnalités
-    featureOffline: "Mode Hors Ligne",
+    featureOffline: "Mode hors ligne",
     featureOfflineDesc: "Travaillez sans internet. Les données se synchronisent automatiquement.",
-    featureOfflineShort: "Fonctionne Hors Ligne",
-    featureEnrollment: "Inscription des Élèves",
+    featureOfflineShort: "Fonctionne hors ligne",
+    featureEnrollment: "Inscription des élèves",
     featureEnrollmentDesc: "Assistant d'inscription en 6 étapes avec suivi des paiements.",
-    featureEnrollmentShort: "Inscription Facile",
-    featureAccounting: "Contrôle Financier",
+    featureEnrollmentShort: "Inscription facile",
+    featureAccounting: "Contrôle financier",
     featureAccountingDesc: "Suivi complet des paiements avec reçus et réconciliation.",
-    featureAccountingShort: "Suivi des Paiements",
+    featureAccountingShort: "Suivi des paiements",
     featureAttendance: "Présence",
     featureAttendanceDesc: "Suivi de présence mobile avec rapports.",
     featureAttendanceShort: "Présence",
@@ -467,28 +467,28 @@ export const fr = {
 
   // Users
   users: {
-    title: "Gestion des Utilisateurs",
+    title: "Gestion des utilisateurs",
     subtitle: "Inviter et gérer les utilisateurs du système",
-    inviteUser: "Inviter un Utilisateur",
+    inviteUser: "Inviter un utilisateur",
     inviteUserDescription: "Envoyez une invitation par e-mail pour ajouter un nouvel utilisateur au système.",
     userEmailPlaceholder: "utilisateur@email.gn",
     selectRole: "Sélectionner un rôle",
     permissionsForRole: "Permissions pour {role}",
     selectRoleToSeePermissions: "Sélectionnez un rôle pour voir les permissions",
-    sendInvitation: "Envoyer l'Invitation",
+    sendInvitation: "Envoyer l'invitation",
     filterByRole: "Filtrer par rôle",
     allRoles: "Tous les rôles",
-    userList: "Liste des Utilisateurs",
+    userList: "Liste des utilisateurs",
     usersFound: "{count} utilisateur(s) trouvé(s)",
-    lastActivity: "Dernière Activité",
+    lastActivity: "Dernière activité",
     neverConnected: "Jamais connecté",
     active: "Actif",
     invited: "Invité",
     inactive: "Inactif",
-    sendEmail: "Envoyer un Email",
-    editPermissions: "Modifier les Permissions",
-    resendInvitation: "Renvoyer l'Invitation",
-    revokeAccess: "Révoquer l'Accès",
+    sendEmail: "Envoyer un email",
+    editPermissions: "Modifier les permissions",
+    resendInvitation: "Renvoyer l'invitation",
+    revokeAccess: "Révoquer l'accès",
     parent: "Parent",
     permissions: {
       director: {
@@ -524,17 +524,17 @@ export const fr = {
       parents: "Parents",
       students: "Étudiants",
     },
-    addUser: "Ajouter un Utilisateur",
+    addUser: "Ajouter un utilisateur",
     searchPlaceholder: "Rechercher par nom, email...",
     
     // Table headers
     name: "Nom",
     role: "Rôle",
-    lastLogin: "Dernière Connexion",
+    lastLogin: "Dernière connexion",
     
     // Roles
     director: "Directeur",
-    academicDirector: "Directeur Académique",
+    academicDirector: "Directeur académique",
     secretary: "Secrétaire",
     accountant: "Comptable",
     teacher: "Enseignant",
@@ -542,7 +542,7 @@ export const fr = {
 
   // Grades
   grades: {
-    title: "Gestion des Notes",
+    title: "Gestion des notes",
     subtitle: "Prof. {teacherName} - {subjectName}",
     saveChanges: "Sauvegarder ({count})",
     subject: "Matière",
@@ -550,17 +550,17 @@ export const fr = {
     selectClass: "Sélectionner une classe",
     selectSubject: "Sélectionner une matière",
     selectPeriod: "Sélectionner une période",
-    classAverage: "Moyenne de Classe",
+    classAverage: "Moyenne de classe",
     onNStudents: "Sur {count} étudiants",
-    top3Students: "Top 3 Étudiants",
-    needsAttention: "Besoin d'Attention",
+    top3Students: "Top 3 étudiants",
+    needsAttention: "Besoin d'attention",
     studentsBelow10: "Étudiants avec note < 10",
     pendingChanges: "{count} notes en attente de sauvegarde",
     clickToSave: "- Cliquez sur Sauvegarder pour enregistrer vos modifications",
-    gradeEntry: "Saisie des Notes",
+    gradeEntry: "Saisie des notes",
     gradeEntryDescription: "Entrez les notes sur 20. Les modifications sont sauvegardées en temps réel.",
-    previousGrade: "Note Précédente",
-    currentGrade: "Note Actuelle",
+    previousGrade: "Note précédente",
+    currentGrade: "Note actuelle",
     trend: "Tendance",
     synced: "Synchronisé",
     pending: "En attente",
@@ -579,17 +579,17 @@ export const fr = {
 
   // Classes
   classes: {
-    title: "Emploi du Temps",
+    title: "Emploi du temps",
     subtitle: "Gestion des horaires et classes",
     exportPdf: "Exporter PDF",
-    addCourse: "Ajouter un Cours",
+    addCourse: "Ajouter un cours",
     classes: "Classes",
     statistics: "Statistiques",
-    totalClasses: "Total Classes",
-    totalStudents: "Total Étudiants",
-    coursesToday: "Cours Aujourd'hui",
+    totalClasses: "Total classes",
+    totalStudents: "Total étudiants",
+    coursesToday: "Cours aujourd'hui",
     selectDay: "Sélectionner un jour",
-    scheduleForDay: "Emploi du Temps - {day}",
+    scheduleForDay: "Emploi du temps - {day}",
     noCoursesForDay: "Aucun cours prévu pour ce jour",
     days: {
       monday: "Lundi",
@@ -617,74 +617,74 @@ export const fr = {
   // Enrollment Wizard
   enrollmentWizard: {
     // Main
-    title: "Inscription d'Étudiant",
+    title: "Inscription d'étudiant",
     subtitle: "Processus d'inscription pour l'année scolaire",
 
     // Steps
-    step1: "Sélection de Classe",
-    step2: "Information Étudiant",
-    step3: "Échéancier de Paiement",
+    step1: "Sélection de classe",
+    step2: "Information étudiant",
+    step3: "Échéancier de paiement",
     step4: "Paiement",
     step5: "Révision",
     step6: "Confirmation",
 
     // Step 1 - Grade Selection
-    selectGrade: "Sélectionner la Classe",
+    selectGrade: "Sélectionner la classe",
     selectGradeDescription: "Choisissez le niveau scolaire pour l'inscription",
-    schoolYear: "Année Scolaire",
+    schoolYear: "Année scolaire",
     todayDate: "Date d'aujourd'hui",
     elementary: "Primaire",
     college: "Collège",
     highSchool: "Lycée",
     studentsEnrolled: "{count} étudiants inscrits",
-    yearlyTuition: "Frais Annuels",
+    yearlyTuition: "Frais annuels",
     perYear: "/an",
 
     // Step 2 - Student Info
-    studentInfo: "Information de l'Étudiant",
-    newStudent: "Nouvel Étudiant",
-    returningStudent: "Étudiant Existant",
+    studentInfo: "Information de l'étudiant",
+    newStudent: "Nouvel étudiant",
+    returningStudent: "Étudiant existant",
     searchStudent: "Rechercher par numéro, nom ou date de naissance",
     noStudentFound: "Aucun étudiant trouvé",
     selectThisStudent: "Sélectionner cet étudiant",
 
     // Personal info
-    personalInfo: "Informations Personnelles",
+    personalInfo: "Informations personnelles",
     firstName: "Prénom",
     lastName: "Nom",
-    dateOfBirth: "Date de Naissance",
+    dateOfBirth: "Date de naissance",
     gender: "Genre",
     male: "Masculin",
     female: "Féminin",
     phone: "Téléphone",
     email: "Email",
     photo: "Photo",
-    birthCertificate: "Extrait de Naissance",
-    uploadPhoto: "Télécharger une Photo",
-    uploadDocument: "Télécharger le Document",
+    birthCertificate: "Extrait de naissance",
+    uploadPhoto: "Télécharger une photo",
+    uploadDocument: "Télécharger le document",
 
     // Parent info
-    parentInfo: "Information des Parents",
-    fatherInfo: "Informations du Père",
-    motherInfo: "Informations de la Mère",
-    fatherName: "Nom du Père",
-    motherName: "Nom de la Mère",
-    fatherPhone: "Téléphone du Père",
-    motherPhone: "Téléphone de la Mère",
-    fatherEmail: "Email du Père",
-    motherEmail: "Email de la Mère",
+    parentInfo: "Information des parents",
+    fatherInfo: "Informations du père",
+    motherInfo: "Informations de la mère",
+    fatherName: "Nom du père",
+    motherName: "Nom de la mère",
+    fatherPhone: "Téléphone du père",
+    motherPhone: "Téléphone de la mère",
+    fatherEmail: "Email du père",
+    motherEmail: "Email de la mère",
     address: "Adresse",
 
     // Notes
-    additionalNotes: "Notes Additionnelles",
-    addNote: "Ajouter une Note",
+    additionalNotes: "Notes additionnelles",
+    addNote: "Ajouter une note",
     noteTitle: "Titre",
     noteContent: "Contenu",
     removeNote: "Supprimer",
 
     // Step 3 - Payment Breakdown
-    paymentBreakdown: "Échéancier de Paiement",
-    totalYearlyAmount: "Montant Total Annuel",
+    paymentBreakdown: "Échéancier de paiement",
+    totalYearlyAmount: "Montant total annuel",
     schedule1: "Échéance 1",
     schedule2: "Échéance 2",
     schedule3: "Échéance 3",
@@ -692,49 +692,49 @@ export const fr = {
     schedule2Months: "Novembre + Décembre + Janvier",
     schedule3Months: "Février + Mars + Avril",
     dueBy: "Échéance le",
-    adjustAmount: "Modifier le Montant",
-    adjustmentReason: "Raison de la Modification",
+    adjustAmount: "Modifier le montant",
+    adjustmentReason: "Raison de la modification",
     requiresApproval: "Cette modification nécessite une approbation du directeur",
-    originalAmount: "Montant Original",
-    adjustedAmount: "Montant Modifié",
+    originalAmount: "Montant original",
+    adjustedAmount: "Montant modifié",
 
     // Step 4 - Payment Transaction
-    paymentTransaction: "Enregistrer un Paiement",
+    paymentTransaction: "Enregistrer un paiement",
     paymentOptional: "Le paiement est optionnel à cette étape",
-    skipPayment: "Payer Plus Tard",
-    makePayment: "Effectuer un Paiement",
-    paymentMethod: "Mode de Paiement",
+    skipPayment: "Payer plus tard",
+    makePayment: "Effectuer un paiement",
+    paymentMethod: "Mode de paiement",
     cash: "Espèces",
     orangeMoney: "Orange Money",
     amount: "Montant",
-    receiptNumber: "Numéro de Reçu",
-    transactionRef: "Référence de Transaction",
-    uploadReceipt: "Télécharger le Reçu",
+    receiptNumber: "Numéro de reçu",
+    transactionRef: "Référence de transaction",
+    uploadReceipt: "Télécharger le reçu",
     receiptRequired: "Le reçu est obligatoire",
-    paymentCoverage: "Couverture du Paiement",
-    monthsCovered: "Mois Couverts",
-    percentPaid: "Pourcentage Payé",
+    paymentCoverage: "Couverture du paiement",
+    monthsCovered: "Mois couverts",
+    percentPaid: "Pourcentage payé",
 
     // Step 5 - Review
-    reviewEnrollment: "Réviser l'Inscription",
+    reviewEnrollment: "Réviser l'inscription",
     reviewDescription: "Vérifiez toutes les informations avant de soumettre",
     editSection: "Modifier",
-    gradeInfo: "Information de Classe",
-    studentDetails: "Détails de l'Étudiant",
-    parentDetails: "Détails des Parents",
-    paymentDetails: "Détails de Paiement",
+    gradeInfo: "Information de classe",
+    studentDetails: "Détails de l'étudiant",
+    parentDetails: "Détails des parents",
+    paymentDetails: "Détails de paiement",
     notesSection: "Notes",
 
     // Step 6 - Confirmation
-    enrollmentComplete: "Inscription Soumise!",
-    enrollmentNumber: "Numéro d'Inscription",
-    studentNumber: "Numéro d'Étudiant",
+    enrollmentComplete: "Inscription soumise!",
+    enrollmentNumber: "Numéro d'inscription",
+    studentNumber: "Numéro d'étudiant",
     downloadPdf: "Télécharger le PDF",
     downloadingPdf: "Génération du PDF...",
     pdfDownloadError: "Échec du téléchargement du PDF. Veuillez réessayer.",
     printDocument: "Imprimer",
-    statusSubmittedPendingReview: "Soumise - En Attente de Révision",
-    statusReviewRequired: "Révision Requise par le Directeur",
+    statusSubmittedPendingReview: "Soumise - En attente de révision",
+    statusReviewRequired: "Révision requise par le directeur",
     autoApproveIn: "Approbation automatique dans {days} jours",
 
     // Status badges
@@ -747,7 +747,7 @@ export const fr = {
     statusCancelled: "Annulée",
 
     // Suggested students
-    suggestedStudents: "Étudiants Suggérés",
+    suggestedStudents: "Étudiants suggérés",
     suggestedStudentsDescription: "Étudiants de la classe précédente qui peuvent être réinscrits",
     fromPreviousGrade: "Classe précédente",
     noSuggestedStudents: "Aucun étudiant suggéré disponible",
@@ -757,8 +757,8 @@ export const fr = {
     draftSaved: "Brouillon enregistré",
     draftRecovered: "Brouillon récupéré du {date}",
     draftExpires: "Le brouillon expire dans {days} jours",
-    continueDraft: "Continuer le Brouillon",
-    discardDraft: "Supprimer le Brouillon",
+    continueDraft: "Continuer le brouillon",
+    discardDraft: "Supprimer le brouillon",
 
     // Validation errors
     selectGradeRequired: "Veuillez sélectionner une classe",
@@ -769,9 +769,9 @@ export const fr = {
     receiptNumberRequired: "Le numéro de reçu est obligatoire",
 
     // Actions
-    saveAndContinue: "Enregistrer et Continuer",
-    saveDraft: "Enregistrer le Brouillon",
-    submitEnrollment: "Soumettre l'Inscription",
+    saveAndContinue: "Enregistrer et continuer",
+    saveDraft: "Enregistrer le brouillon",
+    submitEnrollment: "Soumettre l'inscription",
     goBack: "Retour",
 
     // Confirmation page
