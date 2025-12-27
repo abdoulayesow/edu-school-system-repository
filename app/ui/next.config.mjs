@@ -5,8 +5,7 @@ import withSerwistInit from "@serwist/next"
 const withSerwist = withSerwistInit({
   swSrc: "src/sw.ts",
   swDest: "public/sw.js",
-  // Disable service worker for now to fix Vercel deployment issues
-  disable: true,
+  disable: process.env.NODE_ENV === "development",
 })
 
 /** @type {import('next').NextConfig} */
