@@ -127,28 +127,21 @@ jobs:
         run: |
           cd app/ui
           
-          # Install platform-specific binary packages
-          npm install lightningcss-linux-x64-gnu @tailwindcss/oxide-linux-x64-gnu --save-optional
+          # Download lightningcss binary directly
+          echo "=== Downloading lightningcss binary ==="
+          curl -sL "https://registry.npmjs.org/lightningcss-linux-x64-gnu/-/lightningcss-linux-x64-gnu-1.30.2.tgz" | tar -xz
+          cp package/lightningcss.linux-x64-gnu.node node_modules/lightningcss/
+          rm -rf package
           
-          # Find and copy the lightningcss binary
-          echo "=== Searching for lightningcss binary ==="
-          find . -name "lightningcss.linux-x64-gnu.node" 2>/dev/null || true
-          find ../.. -name "lightningcss.linux-x64-gnu.node" 2>/dev/null | head -5 || true
-          
-          # Try copying from various possible locations
-          BINARY_PATH=$(find ../.. -name "lightningcss.linux-x64-gnu.node" 2>/dev/null | head -1)
-          if [ -n "$BINARY_PATH" ]; then
-            echo "Found binary at: $BINARY_PATH"
-            cp "$BINARY_PATH" node_modules/lightningcss/
-          else
-            echo "Binary not found, downloading directly..."
-            cd node_modules/lightningcss
-            curl -sL "https://registry.npmjs.org/lightningcss-linux-x64-gnu/-/lightningcss-linux-x64-gnu-1.30.2.tgz" | tar -xz --strip-components=1 package/lightningcss.linux-x64-gnu.node
-            cd ../..
-          fi
+          # Download tailwindcss oxide binary directly
+          echo "=== Downloading tailwindcss oxide binary ==="
+          curl -sL "https://registry.npmjs.org/@tailwindcss/oxide-linux-x64-gnu/-/oxide-linux-x64-gnu-4.1.10.tgz" | tar -xz
+          cp package/*.node node_modules/@tailwindcss/oxide/
+          rm -rf package
           
           # Verify
           ls -la node_modules/lightningcss/*.node
+          ls -la node_modules/@tailwindcss/oxide/*.node
 
       - name: Generate Prisma Client
         run: cd app/db && npx prisma generate
@@ -289,28 +282,21 @@ jobs:
         run: |
           cd app/ui
           
-          # Install platform-specific binary packages
-          npm install lightningcss-linux-x64-gnu @tailwindcss/oxide-linux-x64-gnu --save-optional
+          # Download lightningcss binary directly
+          echo "=== Downloading lightningcss binary ==="
+          curl -sL "https://registry.npmjs.org/lightningcss-linux-x64-gnu/-/lightningcss-linux-x64-gnu-1.30.2.tgz" | tar -xz
+          cp package/lightningcss.linux-x64-gnu.node node_modules/lightningcss/
+          rm -rf package
           
-          # Find and copy the lightningcss binary
-          echo "=== Searching for lightningcss binary ==="
-          find . -name "lightningcss.linux-x64-gnu.node" 2>/dev/null || true
-          find ../.. -name "lightningcss.linux-x64-gnu.node" 2>/dev/null | head -5 || true
-          
-          # Try copying from various possible locations
-          BINARY_PATH=$(find ../.. -name "lightningcss.linux-x64-gnu.node" 2>/dev/null | head -1)
-          if [ -n "$BINARY_PATH" ]; then
-            echo "Found binary at: $BINARY_PATH"
-            cp "$BINARY_PATH" node_modules/lightningcss/
-          else
-            echo "Binary not found, downloading directly..."
-            cd node_modules/lightningcss
-            curl -sL "https://registry.npmjs.org/lightningcss-linux-x64-gnu/-/lightningcss-linux-x64-gnu-1.30.2.tgz" | tar -xz --strip-components=1 package/lightningcss.linux-x64-gnu.node
-            cd ../..
-          fi
+          # Download tailwindcss oxide binary directly
+          echo "=== Downloading tailwindcss oxide binary ==="
+          curl -sL "https://registry.npmjs.org/@tailwindcss/oxide-linux-x64-gnu/-/oxide-linux-x64-gnu-4.1.10.tgz" | tar -xz
+          cp package/*.node node_modules/@tailwindcss/oxide/
+          rm -rf package
           
           # Verify
           ls -la node_modules/lightningcss/*.node
+          ls -la node_modules/@tailwindcss/oxide/*.node
 
       - name: Install Playwright browsers
         run: npx playwright install --with-deps
