@@ -123,6 +123,19 @@ jobs:
       - name: Install dependencies
         run: npm install --include=optional
 
+      - name: Debug - Check lightningcss installation
+        run: |
+          echo "=== Checking lightningcss installation ==="
+          ls -la app/ui/node_modules/ | grep lightning || echo "No lightningcss packages found"
+          if [ -d "app/ui/node_modules/lightningcss-linux-x64-gnu" ]; then
+            echo "✓ lightningcss-linux-x64-gnu is installed"
+            ls -la app/ui/node_modules/lightningcss-linux-x64-gnu/
+          else
+            echo "✗ lightningcss-linux-x64-gnu is NOT installed"
+            echo "Installing it now..."
+            cd app/ui && npm install --no-save lightningcss-linux-x64-gnu
+          fi
+
       - name: Generate Prisma Client
         run: cd app/db && npx prisma generate
 
