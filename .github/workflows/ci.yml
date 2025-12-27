@@ -125,9 +125,8 @@ jobs:
 
       - name: Fix native binaries for Linux
         run: |
-          # Remove platform-specific native modules and reinstall
-          rm -rf node_modules/lightningcss node_modules/@tailwindcss/oxide
-          npm install lightningcss @tailwindcss/oxide
+          # Rebuild native modules for Linux platform
+          cd app/ui && npm rebuild lightningcss @tailwindcss/oxide
 
       - name: Generate Prisma Client
         run: cd app/db && npx prisma generate
