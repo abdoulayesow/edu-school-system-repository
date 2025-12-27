@@ -123,38 +123,11 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Fix lightningcss native module for Linux
+      - name: Fix native modules for Linux
         run: |
-          echo "=== Fixing lightningcss for Linux platform ==="
-          
-          # Delete the problematic package and reinstall fresh
-          cd app/ui
-          rm -rf node_modules/lightningcss
-          
-          # Install lightningcss fresh (will get correct platform binary)
-          npm install lightningcss@latest --no-save --force
-          
-          echo "=== Checking what was installed ==="
-          ls -la node_modules/lightningcss/
-          ls -la node_modules/lightningcss/*.node 2>/dev/null || echo "No .node in root"
-          
-          # If still no binary, download it directly
-          if [ ! -f "node_modules/lightningcss/lightningcss.linux-x64-gnu.node" ]; then
-            echo "=== Downloading binary directly ==="
-            cd node_modules/lightningcss
-            npm pack lightningcss-linux-x64-gnu --json 2>/dev/null | grep -q "filename" && \
-              tar -xzf lightningcss-linux-x64-gnu-*.tgz --strip-components=1 package/lightningcss.linux-x64-gnu.node 2>/dev/null || true
-            
-            # Alternative: use curl to download from unpkg
-            if [ ! -f "lightningcss.linux-x64-gnu.node" ]; then
-              LCSS_VERSION=$(node -p "require('./package.json').version")
-              echo "Downloading lightningcss-linux-x64-gnu@$LCSS_VERSION from npm"
-              curl -sL "https://registry.npmjs.org/lightningcss-linux-x64-gnu/-/lightningcss-linux-x64-gnu-${LCSS_VERSION}.tgz" | tar -xz --strip-components=1 package/lightningcss.linux-x64-gnu.node 2>/dev/null || echo "curl download failed"
-            fi
-          fi
-          
-          echo "=== Final check ==="
-          ls -la node_modules/lightningcss/*.node 2>/dev/null && echo "✅ Binary found!" || echo "❌ No binary"
+          # Remove platform-specific native modules and reinstall
+          rm -rf node_modules/lightningcss node_modules/@tailwindcss/oxide
+          npm install lightningcss @tailwindcss/oxide
 
       - name: Generate Prisma Client
         run: cd app/db && npx prisma generate
@@ -290,6 +263,12 @@ jobs:
 
       - name: Install dependencies
         run: npm ci
+
+      - name: Fix native modules for Linux
+        run: |
+          # Remove platform-specific native modules and reinstall
+          rm -rf node_modules/lightningcss node_modules/@tailwindcss/oxide
+          npm install lightningcss @tailwindcss/oxide
 
       - name: Install Playwright browsers
         run: npx playwright install --with-deps
