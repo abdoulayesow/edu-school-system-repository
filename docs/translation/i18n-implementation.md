@@ -2,7 +2,7 @@
 
 ## Overview
 
-This document describes the internationalization setup for the School Management System. The application supports **French (default)** and **English** languages, designed specifically for the Groupe Scolaire GSPN N'Diolou school in Guinea.
+This document describes the internationalization setup for the School Management System. The application supports **French (default)** and **English** languages, designed specifically for the Groupe Scolaire Privé N'Diolou (GSPN) school in Guinea.
 
 ## Architecture
 

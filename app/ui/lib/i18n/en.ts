@@ -59,7 +59,7 @@ export const en: TranslationKeys = {
 
   // Homepage
   home: {
-    schoolName: "Groupe Scolaire GSPN N'Diolou",
+    schoolName: "Groupe Scolaire Privé N'Diolou",
     managementSystem: "Management System",
     heroDescription: "A comprehensive school management platform built for excellence, security, and traceability in African education.",
     goToDashboard: "Go to Dashboard",
@@ -438,7 +438,7 @@ export const en: TranslationKeys = {
     simulateOffline: "Simulate offline mode",
     simulateOnline: "Simulate online mode",
     // Enhanced login page
-    schoolName: "Groupe Scolaire Prive de Nongo",
+    schoolName: "Groupe Scolaire Privé N'Diolou",
     schoolTagline: "Excellence in Education",
     welcomeTitle: "Welcome to the School Management System",
     welcomeSubtitle: "A comprehensive platform for managing enrollments, attendance, accounting, and more.",

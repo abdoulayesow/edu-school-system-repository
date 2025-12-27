@@ -57,7 +57,7 @@ export const fr = {
 
   // Homepage
   home: {
-    schoolName: "Groupe Scolaire GSPN N'Diolou",
+    schoolName: "Groupe Scolaire Privé N'Diolou",
     managementSystem: "Système de gestion",
     heroDescription: "Une plateforme complète de gestion scolaire construite pour l'excellence, la sécurité et la traçabilité dans l'éducation africaine.",
     goToDashboard: "Aller au tableau de bord",
@@ -436,7 +436,7 @@ export const fr = {
     simulateOffline: "Simuler mode hors ligne",
     simulateOnline: "Simuler mode en ligne",
     // Page de connexion améliorée
-    schoolName: "Groupe Scolaire Privé de Nongo",
+    schoolName: "Groupe Scolaire Privé N'Diolou",
     schoolTagline: "L'excellence dans l'éducation",
     welcomeTitle: "Bienvenue sur le système de gestion scolaire",
     welcomeSubtitle: "Une plateforme complète pour gérer les inscriptions, la présence, la comptabilité et plus encore.",

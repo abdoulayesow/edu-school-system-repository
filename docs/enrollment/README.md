@@ -1,6 +1,6 @@
 # Student Enrollment System
 
-The Student Enrollment System is a comprehensive 6-step wizard for enrolling students at GSPN (Groupe Scolaire Prive de Nongo) in Guinea.
+The Student Enrollment System is a comprehensive 6-step wizard for enrolling students at GSPN (Groupe Scolaire Privé N'Diolou) in Guinea.
 
 ## Table of Contents
 
