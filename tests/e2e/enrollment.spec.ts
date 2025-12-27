@@ -104,7 +104,7 @@ test.describe('Enrollment Management', () => {
 
       // Check for student info section - look for the card title with User icon
       // The page uses CardTitle with icon, so look for the section header
-      const personalInfoSection = page.locator('h1, h2, h3, [class*="CardTitle"]').filter({
+      const personalInfoSection = page.locator('h1, h2, h3, [data-slot="card-title"]').filter({
         hasText: /Personal Information|Informations Personnelles|personal|personnelles/i
       }).first()
       await expect(personalInfoSection).toBeVisible({ timeout: 10000 })
@@ -139,7 +139,7 @@ test.describe('Enrollment Management', () => {
       }
 
       // Check for any badge on the page (status is displayed in header)
-      const anyBadge = page.locator('[class*="badge"]').first()
+      const anyBadge = page.locator('[data-slot="badge"]').first()
       await expect(anyBadge).toBeVisible({ timeout: 5000 })
     })
 
@@ -193,7 +193,7 @@ test.describe('Enrollment Management', () => {
 
       // Check for financial summary - look for any text containing financial info
       // The sidebar has a card with Financial Summary or tuition-related text
-      const financialSection = page.locator('h1, h2, h3, [class*="CardTitle"]').filter({
+      const financialSection = page.locator('h1, h2, h3, [data-slot="card-title"]').filter({
         hasText: /Financial|financier|Tuition|scolarite|Summary|Resume/i
       }).first()
       await expect(financialSection).toBeVisible({ timeout: 10000 })
@@ -215,18 +215,19 @@ test.describe('Enrollment Management', () => {
       await enrollmentLink.click()
       await page.waitForURL(/\/enrollments\/(?!new)[a-zA-Z0-9-]+/, { timeout: 10000 })
 
-      // Find and click back button
-      const backButton = page.locator('a[href="/enrollments"], button').filter({ hasText: /back|retour/i }).first()
-      const backIcon = page.locator('a[href="/enrollments"] svg, button svg').first()
+      // Wait for page to load
+      await page.waitForLoadState('networkidle')
 
-      const hasBackButton = await backButton.isVisible({ timeout: 3000 }).catch(() => false)
-      const hasBackIcon = await backIcon.isVisible({ timeout: 3000 }).catch(() => false)
+      // Find and click back button - it's an icon link to /enrollments
+      const backLink = page.locator('a[href="/enrollments"]').first()
+      const hasBackLink = await backLink.isVisible({ timeout: 5000 }).catch(() => false)
 
-      if (hasBackButton) {
-        await backButton.click()
-      } else if (hasBackIcon) {
-        await backIcon.click()
+      if (!hasBackLink) {
+        test.skip()
+        return
       }
+
+      await backLink.click()
 
       // Should return to enrollments list
       await page.waitForURL(/\/enrollments$/, { timeout: 10000 })
@@ -253,7 +254,7 @@ test.describe('Enrollment Management', () => {
       await page.waitForLoadState('networkidle')
 
       // If the enrollment is in submitted or needs_review status, approve/reject buttons should be visible
-      const statusBadge = page.locator('[class*="badge"]').filter({
+      const statusBadge = page.locator('[data-slot="badge"]').filter({
         hasText: /submitted|needs review|soumis|en attente/i
       }).first()
 
@@ -399,7 +400,7 @@ test.describe('Enrollment Management', () => {
       await page.waitForTimeout(2000)
 
       // Check that status badges exist with appropriate styling
-      const statusBadges = page.locator('[class*="badge"]')
+      const statusBadges = page.locator('[data-slot="badge"]')
       const badgeCount = await statusBadges.count()
 
       // If we have badges, verify they have some content

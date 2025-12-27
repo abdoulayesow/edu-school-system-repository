@@ -3,6 +3,8 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
+    "postinstall": "node scripts/fix-native-modules.js || true",
+    "prebuild": "cd ../db && npx prisma generate",
     "build": "next build --webpack",
     "dev": "next dev --turbopack --port 8000",
     "lint": "eslint . --max-warnings 0",

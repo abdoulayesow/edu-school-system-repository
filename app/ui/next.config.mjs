@@ -10,6 +10,8 @@ const withSerwist = withSerwistInit({
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  // Disable source maps in production to save memory
+  productionBrowserSourceMaps: false,
   experimental: {
     // Allows importing server-only code from outside of the Next.js project root.
     externalDir: true,
