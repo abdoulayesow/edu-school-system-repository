@@ -23,6 +23,26 @@ const TEST_USER = {
  * All authenticated tests reuse this session, eliminating repeated logins.
  */
 async function globalSetup(config: FullConfig) {
+  // Skip authentication in CI without database
+  if (process.env.CI && !process.env.DATABASE_URL) {
+    console.log('⚠ CI environment without DATABASE_URL - skipping E2E authentication setup')
+    console.log('  E2E tests requiring authentication will be skipped')
+    
+    // Create empty auth state so tests can check for it
+    const authDir = path.join(process.cwd(), 'playwright', '.auth')
+    const authFile = path.join(authDir, 'director.json')
+    if (!fs.existsSync(authDir)) {
+      fs.mkdirSync(authDir, { recursive: true })
+    }
+    // Create minimal auth state that indicates no session
+    fs.writeFileSync(authFile, JSON.stringify({
+      cookies: [],
+      origins: [],
+      _ci_skip: true  // Flag to indicate CI skip
+    }))
+    return
+  }
+
   const authDir = path.join(process.cwd(), 'playwright', '.auth')
   const authFile = path.join(authDir, 'director.json')
 
