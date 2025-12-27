@@ -298,6 +298,9 @@ jobs:
           ls -la node_modules/lightningcss/*.node
           ls -la node_modules/@tailwindcss/oxide/*.node
 
+      - name: Generate Prisma Client
+        run: cd app/db && npx prisma generate
+
       - name: Install Playwright browsers
         run: npx playwright install --with-deps
         continue-on-error: true
