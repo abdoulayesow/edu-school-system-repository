@@ -48,14 +48,14 @@ try {
   });
   console.log('[fix-native-modules] ✓ Linux binaries installed');
 
-  // Reinstall all dependencies to restore any packages that were removed
-  console.log('[fix-native-modules] Restoring dependencies...');
-  execSync(`npm install --ignore-scripts --prefer-offline`, {
+  // Force reinstall all dependencies to restore packages removed by npm tree reconciliation
+  console.log('[fix-native-modules] Force reinstalling dependencies...');
+  execSync(`npm install --force --ignore-scripts`, {
     stdio: 'inherit',
     cwd: path.join(__dirname, '..'),
     env: { ...process.env, NODE_OPTIONS: '--max-old-space-size=4096' }
   });
-  console.log('[fix-native-modules] ✓ Dependencies restored');
+  console.log('[fix-native-modules] ✓ Dependencies reinstalled');
 } catch (error) {
   console.error('[fix-native-modules] ✗ Install failed:', error.message);
   process.exit(1);
