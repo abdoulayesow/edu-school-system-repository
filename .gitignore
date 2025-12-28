@@ -9,3 +9,5 @@ playwright/.auth/
 acli.exe
 test-results/
 nul
+
+.anima/

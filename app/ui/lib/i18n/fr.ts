@@ -43,6 +43,8 @@ export const fr = {
   nav: {
     dashboard: "Tableau de bord",
     enrollments: "Inscriptions",
+    students: "Étudiants",
+    grades: "Classes",
     activities: "Activités",
     accounting: "Comptabilité",
     attendance: "Présence",
@@ -778,6 +780,123 @@ export const fr = {
     enrollmentSummary: "Résumé de l'inscription",
     backToEnrollments: "Retour aux inscriptions",
     startNewEnrollment: "Nouvelle inscription",
+  },
+
+  // Students module
+  students: {
+    title: "Gestion des étudiants",
+    subtitle: "Visualiser et gérer les étudiants inscrits",
+    searchPlaceholder: "Rechercher par nom ou numéro...",
+    filters: "Filtres",
+    allGrades: "Toutes les classes",
+    allStatuses: "Tous les statuts",
+
+    // Status labels
+    balanceStatus: "Statut de paiement",
+    late: "En retard",
+    onTime: "À jour",
+    inAdvance: "En avance",
+    complete: "Complet",
+    goldMedal: "Paiement complet",
+
+    // Attendance status
+    attendanceGood: "Bonne présence",
+    attendanceConcerning: "Présence préoccupante",
+    attendanceCritical: "Présence critique",
+
+    // Student detail
+    personalInfo: "Informations personnelles",
+    paymentHistory: "Historique des paiements",
+    attendanceHistory: "Historique de présence",
+    progressBar: "Progression",
+    remainingBalance: "Solde restant",
+    uploadPhoto: "Télécharger une photo",
+  },
+
+  // Enhanced attendance
+  attendanceEnhanced: {
+    selectGrade: "Sélectionner une classe",
+    selectDate: "Sélectionner une date",
+    entryMode: "Mode de saisie",
+    checklistMode: "Liste complète",
+    checklistModeDesc: "Marquer chaque étudiant individuellement",
+    absencesOnlyMode: "Absences seulement",
+    absencesOnlyModeDesc: "Marquer uniquement les absents et retards",
+    markAllPresent: "Tout marquer présent",
+    sessionComplete: "Session complète",
+    completeSession: "Terminer la session",
+    late: "En retard",
+    attendanceRate: "Taux de présence",
+    swipeLeft: "Glisser gauche = absent",
+    swipeRight: "Glisser droite = présent",
+  },
+
+  // Enhanced accounting
+  accountingEnhanced: {
+    pendingDeposit: "En attente de dépôt",
+    deposited: "Déposé",
+    pendingReview: "En attente de révision",
+    confirmed: "Confirmé",
+    rejected: "Rejeté",
+    recordDeposit: "Enregistrer le dépôt",
+    bankReference: "Référence bancaire",
+    depositDate: "Date de dépôt",
+    bankName: "Nom de la banque",
+    depositedBy: "Déposé par",
+    reviewPayment: "Réviser le paiement",
+    approvePayment: "Approuver le paiement",
+    rejectPayment: "Rejeter le paiement",
+    reviewNotes: "Notes de révision",
+    balance: "Solde",
+    cashAvailable: "Espèces disponibles",
+    cashPending: "Espèces en attente",
+    margin: "Marge",
+    orangeMoneyPayments: "Paiements Orange Money",
+    cashPayments: "Paiements en espèces",
+  },
+
+  // Grades module (enhanced)
+  gradesEnhanced: {
+    gradeLeader: "Responsable de classe",
+    assignLeader: "Assigner un responsable",
+    subjectsList: "Liste des matières",
+    teacherAssignment: "Enseignant assigné",
+    assignTeacher: "Assigner un enseignant",
+    attendanceRatio: "Taux de présence",
+    paymentRatio: "Taux de paiement",
+    studentsInGrade: "Étudiants dans la classe",
+    coefficient: "Coefficient",
+    hoursPerWeek: "Heures par semaine",
+  },
+
+  // Expenses
+  expenses: {
+    title: "Gestion des dépenses",
+    subtitle: "Enregistrer et suivre les dépenses",
+    newExpense: "Nouvelle dépense",
+    category: "Catégorie",
+    description: "Description",
+    vendor: "Fournisseur",
+    pending: "En attente",
+    approved: "Approuvée",
+    rejected: "Rejetée",
+    paid: "Payée",
+    requestApproval: "Demander l'approbation",
+    approveExpense: "Approuver la dépense",
+    rejectExpense: "Rejeter la dépense",
+    markAsPaid: "Marquer comme payée",
+    rejectionReason: "Raison du rejet",
+    receipt: "Reçu",
+    uploadReceipt: "Télécharger le reçu",
+    categories: {
+      supplies: "Fournitures",
+      maintenance: "Maintenance",
+      utilities: "Services publics",
+      salary: "Salaires",
+      transport: "Transport",
+      communication: "Communication",
+      other: "Autre",
+    },
   },
 
   // Grade names (Guinea format)

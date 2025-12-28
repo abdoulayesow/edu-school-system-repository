@@ -45,6 +45,8 @@ export const en: TranslationKeys = {
   nav: {
     dashboard: "Dashboard",
     enrollments: "Enrollments",
+    students: "Students",
+    grades: "Classes",
     activities: "Activities",
     accounting: "Accounting",
     attendance: "Attendance",
@@ -780,6 +782,123 @@ export const en: TranslationKeys = {
     enrollmentSummary: "Enrollment Summary",
     backToEnrollments: "Back to Enrollments",
     startNewEnrollment: "Start New Enrollment",
+  },
+
+  // Students module
+  students: {
+    title: "Student Management",
+    subtitle: "View and manage enrolled students",
+    searchPlaceholder: "Search by name or number...",
+    filters: "Filters",
+    allGrades: "All grades",
+    allStatuses: "All statuses",
+
+    // Status labels
+    balanceStatus: "Payment status",
+    late: "Late",
+    onTime: "On time",
+    inAdvance: "In advance",
+    complete: "Complete",
+    goldMedal: "Payment complete",
+
+    // Attendance status
+    attendanceGood: "Good attendance",
+    attendanceConcerning: "Concerning attendance",
+    attendanceCritical: "Critical attendance",
+
+    // Student detail
+    personalInfo: "Personal information",
+    paymentHistory: "Payment history",
+    attendanceHistory: "Attendance history",
+    progressBar: "Progress",
+    remainingBalance: "Remaining balance",
+    uploadPhoto: "Upload photo",
+  },
+
+  // Enhanced attendance
+  attendanceEnhanced: {
+    selectGrade: "Select a class",
+    selectDate: "Select a date",
+    entryMode: "Entry mode",
+    checklistMode: "Full checklist",
+    checklistModeDesc: "Mark each student individually",
+    absencesOnlyMode: "Absences only",
+    absencesOnlyModeDesc: "Mark only absences and late arrivals",
+    markAllPresent: "Mark all present",
+    sessionComplete: "Session complete",
+    completeSession: "Complete session",
+    late: "Late",
+    attendanceRate: "Attendance rate",
+    swipeLeft: "Swipe left = absent",
+    swipeRight: "Swipe right = present",
+  },
+
+  // Enhanced accounting
+  accountingEnhanced: {
+    pendingDeposit: "Pending deposit",
+    deposited: "Deposited",
+    pendingReview: "Pending review",
+    confirmed: "Confirmed",
+    rejected: "Rejected",
+    recordDeposit: "Record deposit",
+    bankReference: "Bank reference",
+    depositDate: "Deposit date",
+    bankName: "Bank name",
+    depositedBy: "Deposited by",
+    reviewPayment: "Review payment",
+    approvePayment: "Approve payment",
+    rejectPayment: "Reject payment",
+    reviewNotes: "Review notes",
+    balance: "Balance",
+    cashAvailable: "Cash available",
+    cashPending: "Cash pending",
+    margin: "Margin",
+    orangeMoneyPayments: "Orange Money payments",
+    cashPayments: "Cash payments",
+  },
+
+  // Grades module (enhanced)
+  gradesEnhanced: {
+    gradeLeader: "Class leader",
+    assignLeader: "Assign leader",
+    subjectsList: "Subjects list",
+    teacherAssignment: "Assigned teacher",
+    assignTeacher: "Assign teacher",
+    attendanceRatio: "Attendance rate",
+    paymentRatio: "Payment rate",
+    studentsInGrade: "Students in class",
+    coefficient: "Coefficient",
+    hoursPerWeek: "Hours per week",
+  },
+
+  // Expenses
+  expenses: {
+    title: "Expense management",
+    subtitle: "Record and track expenses",
+    newExpense: "New expense",
+    category: "Category",
+    description: "Description",
+    vendor: "Vendor",
+    pending: "Pending",
+    approved: "Approved",
+    rejected: "Rejected",
+    paid: "Paid",
+    requestApproval: "Request approval",
+    approveExpense: "Approve expense",
+    rejectExpense: "Reject expense",
+    markAsPaid: "Mark as paid",
+    rejectionReason: "Rejection reason",
+    receipt: "Receipt",
+    uploadReceipt: "Upload receipt",
+    categories: {
+      supplies: "Supplies",
+      maintenance: "Maintenance",
+      utilities: "Utilities",
+      salary: "Salary",
+      transport: "Transport",
+      communication: "Communication",
+      other: "Other",
+    },
   },
 
   // Grade names (Guinea format)

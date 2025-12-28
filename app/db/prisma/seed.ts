@@ -1,12 +1,13 @@
 /**
- * Seed script to create school years, grades, students, enrollments, and payments.
- * Run this to initialize the enrollment system data.
+ * Seed script to create school years, grades, students, enrollments, payments,
+ * subjects, teachers, attendance, and expenses.
+ * Run this to initialize the full system data.
  *
  * Usage: npx tsx app/db/prisma/seed.ts
  */
 
 import { PrismaPg } from "@prisma/adapter-pg"
-import { PrismaClient, PaymentMethod, PaymentStatus, EnrollmentStatus } from "@prisma/client"
+import { PrismaClient, PaymentMethod, PaymentStatus, EnrollmentStatus, AttendanceStatus, AttendanceEntryMode, ExpenseStatus, ExpenseCategory, Gender, PersonStatus, StudentStatus } from "@prisma/client"
 import pg from "pg"
 import fs from "fs"
 import path from "path"
@@ -104,6 +105,110 @@ const GRADES_CONFIG: GradeConfig[] = [
   { name: "Terminale", level: "high_school", order: 13, tuitionFee: 1300000 },
 ]
 
+// Subject configuration from Guinea curriculum
+interface SubjectConfig {
+  code: string
+  nameFr: string
+  nameEn: string
+  isOptional: boolean
+}
+
+const SUBJECTS_CONFIG: SubjectConfig[] = [
+  // Core subjects
+  { code: "FRANCAIS", nameFr: "Français", nameEn: "French", isOptional: false },
+  { code: "MATH", nameFr: "Mathématiques", nameEn: "Mathematics", isOptional: false },
+  { code: "ANG", nameFr: "Anglais", nameEn: "English", isOptional: false },
+  { code: "HIST_GEO", nameFr: "Histoire-Géographie", nameEn: "History-Geography", isOptional: false },
+  { code: "EDU_CIV", nameFr: "Éducation civique et morale", nameEn: "Civic and Moral Education", isOptional: false },
+  { code: "SVT", nameFr: "Sciences de la vie et de la terre", nameEn: "Life and Earth Sciences", isOptional: false },
+  { code: "PC", nameFr: "Physique-Chimie", nameEn: "Physics-Chemistry", isOptional: false },
+  { code: "EPS", nameFr: "Éducation physique et sportive", nameEn: "Physical Education", isOptional: false },
+
+  // Elementary specific
+  { code: "LECTURE", nameFr: "Lecture", nameEn: "Reading", isOptional: false },
+  { code: "ECRITURE", nameFr: "Écriture", nameEn: "Writing", isOptional: false },
+  { code: "CALC", nameFr: "Calcul", nameEn: "Arithmetic", isOptional: false },
+  { code: "DESSIN", nameFr: "Dessin", nameEn: "Drawing/Art", isOptional: false },
+  { code: "CHANT", nameFr: "Chant", nameEn: "Singing", isOptional: false },
+  { code: "TRAV_MAN", nameFr: "Travaux manuels", nameEn: "Manual Work/Crafts", isOptional: false },
+  { code: "SCI_NAT", nameFr: "Sciences naturelles", nameEn: "Natural Sciences", isOptional: false },
+
+  // College/High school specific
+  { code: "TECH", nameFr: "Technologie", nameEn: "Technology", isOptional: false },
+  { code: "ARTS_PLAST", nameFr: "Arts plastiques", nameEn: "Visual Arts", isOptional: false },
+  { code: "MUSIQUE", nameFr: "Éducation musicale", nameEn: "Music Education", isOptional: false },
+  { code: "INFO", nameFr: "Informatique", nameEn: "Computer Science", isOptional: false },
+  { code: "PHILO", nameFr: "Philosophie", nameEn: "Philosophy", isOptional: false },
+  { code: "SES", nameFr: "Sciences économiques et sociales", nameEn: "Economic and Social Sciences", isOptional: false },
+  { code: "TECH_IND", nameFr: "Technologie industrielle", nameEn: "Industrial Technology", isOptional: false },
+
+  // Optional subjects
+  { code: "ARABE", nameFr: "Arabe", nameEn: "Arabic", isOptional: true },
+  { code: "ESP", nameFr: "Espagnol", nameEn: "Spanish", isOptional: true },
+]
+
+// Grade-subject mappings (which subjects for which grades)
+// Key: grade order, Value: array of subject codes
+const GRADE_SUBJECTS_MAP: { [gradeOrder: number]: string[] } = {
+  // Elementary - Grades 1-2 (CP1, CP2)
+  1: ["LECTURE", "ECRITURE", "CALC", "FRANCAIS", "EDU_CIV", "HIST_GEO", "SCI_NAT", "DESSIN", "CHANT", "EPS", "TRAV_MAN"],
+  2: ["LECTURE", "ECRITURE", "CALC", "FRANCAIS", "EDU_CIV", "HIST_GEO", "SCI_NAT", "DESSIN", "CHANT", "EPS", "TRAV_MAN"],
+  // Elementary - Grades 3-6 (CE1, CE2, CM1, CM2)
+  3: ["FRANCAIS", "MATH", "EDU_CIV", "HIST_GEO", "SCI_NAT", "DESSIN", "CHANT", "EPS", "TRAV_MAN"],
+  4: ["FRANCAIS", "MATH", "EDU_CIV", "HIST_GEO", "SCI_NAT", "DESSIN", "CHANT", "EPS", "TRAV_MAN"],
+  5: ["FRANCAIS", "MATH", "EDU_CIV", "HIST_GEO", "SCI_NAT", "DESSIN", "MUSIQUE", "EPS", "TRAV_MAN"],
+  6: ["FRANCAIS", "MATH", "EDU_CIV", "HIST_GEO", "SCI_NAT", "DESSIN", "MUSIQUE", "EPS", "TRAV_MAN"],
+  // College - Grades 7-10
+  7: ["FRANCAIS", "MATH", "ANG", "HIST_GEO", "EDU_CIV", "SVT", "PC", "TECH", "ARTS_PLAST", "MUSIQUE", "EPS", "INFO"],
+  8: ["FRANCAIS", "MATH", "ANG", "HIST_GEO", "EDU_CIV", "SVT", "PC", "TECH", "ARTS_PLAST", "MUSIQUE", "EPS", "INFO"],
+  9: ["FRANCAIS", "MATH", "ANG", "HIST_GEO", "EDU_CIV", "SVT", "PC", "TECH", "ARTS_PLAST", "MUSIQUE", "EPS", "INFO", "ARABE"],
+  10: ["FRANCAIS", "MATH", "ANG", "HIST_GEO", "EDU_CIV", "SVT", "PC", "TECH", "ARTS_PLAST", "MUSIQUE", "EPS", "INFO", "ARABE"],
+  // High School - Grade 11 (Seconde - common core)
+  11: ["FRANCAIS", "MATH", "ANG", "HIST_GEO", "EDU_CIV", "SVT", "PC", "PHILO", "INFO", "EPS", "ARABE", "ESP"],
+  // High School - Grades 12-13 will use series-specific subjects
+  12: ["FRANCAIS", "MATH", "ANG", "HIST_GEO", "SVT", "PC", "PHILO", "EPS", "INFO"],
+  13: ["FRANCAIS", "MATH", "ANG", "HIST_GEO", "SVT", "PC", "PHILO", "EPS", "INFO"],
+}
+
+// Teacher names (mix of first and last names for realistic combinations)
+const TEACHER_FIRST_NAMES = [
+  "Mohamed", "Ousmane", "Ibrahima", "Souleymane", "Mamadou",
+  "Fatou", "Aissatou", "Mariama", "Kadiatou", "Hawa",
+  "Abdoulaye", "Thierno", "Lansana", "Moussa", "Seydou"
+]
+
+const TEACHER_LAST_NAMES = [
+  "Diallo", "Bah", "Barry", "Sow", "Camara",
+  "Sylla", "Keita", "Conde", "Toure", "Traore"
+]
+
+// Teacher specializations mapped to subject codes
+const TEACHER_SPECIALIZATIONS: { [key: string]: string[] } = {
+  "Lettres": ["FRANCAIS", "LECTURE", "ECRITURE"],
+  "Mathématiques": ["MATH", "CALC"],
+  "Sciences": ["SVT", "SCI_NAT", "PC"],
+  "Langues": ["ANG", "ARABE", "ESP"],
+  "Histoire-Géographie": ["HIST_GEO", "EDU_CIV"],
+  "Arts": ["DESSIN", "ARTS_PLAST", "MUSIQUE", "CHANT"],
+  "EPS": ["EPS"],
+  "Technologie": ["TECH", "TECH_IND", "INFO", "TRAV_MAN"],
+  "Philosophie": ["PHILO", "SES"],
+}
+
+// Expense categories with sample descriptions
+const EXPENSE_SAMPLES = [
+  { category: ExpenseCategory.supplies, description: "Fournitures de bureau", amount: 250000 },
+  { category: ExpenseCategory.supplies, description: "Manuels scolaires", amount: 500000 },
+  { category: ExpenseCategory.maintenance, description: "Réparation fenêtres salle 3", amount: 150000 },
+  { category: ExpenseCategory.maintenance, description: "Peinture extérieure", amount: 800000 },
+  { category: ExpenseCategory.utilities, description: "Facture électricité novembre", amount: 180000 },
+  { category: ExpenseCategory.utilities, description: "Facture eau octobre", amount: 75000 },
+  { category: ExpenseCategory.transport, description: "Transport excursion CM2", amount: 300000 },
+  { category: ExpenseCategory.communication, description: "Recharge internet mensuelle", amount: 100000 },
+  { category: ExpenseCategory.other, description: "Décoration fête de fin d'année", amount: 200000 },
+  { category: ExpenseCategory.other, description: "Équipement sportif", amount: 450000 },
+]
+
 // Helper to generate random date of birth for students
 function generateDateOfBirth(gradeOrder: number): Date {
   // Grade 1 students are ~6 years old, Grade 13 students are ~18 years old
@@ -133,6 +238,38 @@ function randomPhone(): string {
   const prefix = randomElement(prefixes)
   const number = Math.floor(Math.random() * 1000000).toString().padStart(6, "0")
   return `+224 ${prefix} ${number.slice(0, 2)} ${number.slice(2, 4)} ${number.slice(4, 6)}`
+}
+
+// Helper to check if date is a school day
+// Elementary/College: Mon-Fri, High School: Mon-Sat
+function isSchoolDay(date: Date, level: SchoolLevel): boolean {
+  const dayOfWeek = date.getDay() // 0 = Sunday, 6 = Saturday
+  if (dayOfWeek === 0) return false // No school on Sunday
+  if (dayOfWeek === 6) {
+    // Saturday: only High School has class
+    return level === "high_school"
+  }
+  return true // Monday-Friday
+}
+
+// Helper to get school days between two dates
+function getSchoolDays(startDate: Date, endDate: Date, level: SchoolLevel): Date[] {
+  const days: Date[] = []
+  const current = new Date(startDate)
+
+  while (current <= endDate) {
+    if (isSchoolDay(current, level)) {
+      days.push(new Date(current))
+    }
+    current.setDate(current.getDate() + 1)
+  }
+
+  return days
+}
+
+// Helper to generate random email for teachers
+function generateTeacherEmail(firstName: string, lastName: string): string {
+  return `${firstName.toLowerCase()}.${lastName.toLowerCase()}@gspn.edu.gn`
 }
 
 async function main() {
@@ -499,6 +636,366 @@ async function main() {
       console.log(`   ✓ ${grade.name}: ${numEnrollments} enrollments (${numReturning} returning)`)
     }
 
+    // ========================================================================
+    // Create Subjects
+    // ========================================================================
+    console.log("\n📚 Creating subjects...")
+    const subjectMap = new Map<string, string>() // code -> id
+
+    for (const subjectConfig of SUBJECTS_CONFIG) {
+      let subject = await prisma.subject.findUnique({
+        where: { code: subjectConfig.code },
+      })
+
+      if (!subject) {
+        subject = await prisma.subject.create({
+          data: {
+            code: subjectConfig.code,
+            nameFr: subjectConfig.nameFr,
+            nameEn: subjectConfig.nameEn,
+            isOptional: subjectConfig.isOptional,
+          },
+        })
+      }
+      subjectMap.set(subjectConfig.code, subject.id)
+    }
+    console.log(`   ✓ Created ${subjectMap.size} subjects`)
+
+    // ========================================================================
+    // Create Teachers (Person + TeacherProfile)
+    // ========================================================================
+    console.log("\n👨‍🏫 Creating teachers...")
+    const teacherProfiles: { id: string; personId: string; specialization: string }[] = []
+    const specializations = Object.keys(TEACHER_SPECIALIZATIONS)
+    let teacherCounter = 0
+
+    // Create 15-20 teachers
+    const numTeachers = 18
+    for (let i = 0; i < numTeachers; i++) {
+      const firstName = randomElement(TEACHER_FIRST_NAMES)
+      const lastName = randomElement(TEACHER_LAST_NAMES)
+      const specialization = specializations[i % specializations.length]
+      const email = generateTeacherEmail(firstName, lastName) + (i > 0 ? i : "")
+      const employeeNumber = `EMP-2024-${(i + 1).toString().padStart(4, "0")}`
+
+      // Check if Person already exists
+      let person = await prisma.person.findFirst({
+        where: {
+          email: { startsWith: `${firstName.toLowerCase()}.${lastName.toLowerCase()}` },
+        },
+      })
+
+      if (!person) {
+        person = await prisma.person.create({
+          data: {
+            firstName,
+            lastName,
+            email,
+            phone: randomPhone(),
+            dateOfBirth: new Date(1975 + Math.floor(Math.random() * 20), Math.floor(Math.random() * 12), Math.floor(Math.random() * 28) + 1),
+            gender: i % 3 === 0 ? Gender.female : Gender.male,
+            status: PersonStatus.active,
+          },
+        })
+      }
+
+      // Check if TeacherProfile exists
+      let teacherProfile = await prisma.teacherProfile.findUnique({
+        where: { personId: person.id },
+      })
+
+      if (!teacherProfile) {
+        teacherProfile = await prisma.teacherProfile.create({
+          data: {
+            personId: person.id,
+            employeeNumber,
+            hireDate: new Date(2020 + Math.floor(Math.random() * 4), 8, 1),
+            specialization,
+          },
+        })
+      }
+
+      teacherProfiles.push({
+        id: teacherProfile.id,
+        personId: person.id,
+        specialization,
+      })
+      teacherCounter++
+    }
+    console.log(`   ✓ Created ${teacherCounter} teachers`)
+
+    // ========================================================================
+    // Create GradeSubjects and ClassAssignments
+    // ========================================================================
+    console.log("\n📖 Creating grade-subject mappings and teacher assignments...")
+    let gradeSubjectCount = 0
+    let classAssignmentCount = 0
+
+    for (const grade of currentGrades) {
+      const subjectCodes = GRADE_SUBJECTS_MAP[grade.order] || []
+
+      for (const subjectCode of subjectCodes) {
+        const subjectId = subjectMap.get(subjectCode)
+        if (!subjectId) continue
+
+        // Check if GradeSubject exists
+        let gradeSubject = await prisma.gradeSubject.findFirst({
+          where: {
+            gradeId: grade.id,
+            subjectId,
+            series: null,
+          },
+        })
+
+        if (!gradeSubject) {
+          gradeSubject = await prisma.gradeSubject.create({
+            data: {
+              gradeId: grade.id,
+              subjectId,
+              coefficient: subjectCode === "MATH" || subjectCode === "FRANCAIS" ? 3 : 2,
+              hoursPerWeek: subjectCode === "EPS" ? 2 : subjectCode === "MATH" || subjectCode === "FRANCAIS" ? 5 : 3,
+            },
+          })
+          gradeSubjectCount++
+        }
+
+        // Find a teacher with matching specialization
+        const subjectSpec = Object.entries(TEACHER_SPECIALIZATIONS).find(([, codes]) =>
+          codes.includes(subjectCode)
+        )
+        if (subjectSpec) {
+          const matchingTeacher = teacherProfiles.find(t => t.specialization === subjectSpec[0])
+          if (matchingTeacher) {
+            // Check if ClassAssignment exists
+            const existingAssignment = await prisma.classAssignment.findFirst({
+              where: {
+                gradeSubjectId: gradeSubject.id,
+                schoolYearId: currentSchoolYear.id,
+              },
+            })
+
+            if (!existingAssignment) {
+              await prisma.classAssignment.create({
+                data: {
+                  gradeSubjectId: gradeSubject.id,
+                  teacherProfileId: matchingTeacher.id,
+                  schoolYearId: currentSchoolYear.id,
+                },
+              })
+              classAssignmentCount++
+            }
+          }
+        }
+      }
+    }
+    console.log(`   ✓ Created ${gradeSubjectCount} grade-subject mappings`)
+    console.log(`   ✓ Created ${classAssignmentCount} teacher assignments`)
+
+    // ========================================================================
+    // Assign Grade Leaders
+    // ========================================================================
+    console.log("\n👔 Assigning grade leaders...")
+    let gradeLeaderCount = 0
+
+    for (let i = 0; i < currentGrades.length; i++) {
+      const grade = currentGrades[i]
+      const teacher = teacherProfiles[i % teacherProfiles.length]
+
+      await prisma.grade.update({
+        where: { id: grade.id },
+        data: { gradeLeaderId: teacher.id },
+      })
+      gradeLeaderCount++
+    }
+    console.log(`   ✓ Assigned ${gradeLeaderCount} grade leaders`)
+
+    // ========================================================================
+    // Create StudentProfiles for existing students (for attendance)
+    // ========================================================================
+    console.log("\n👤 Creating student profiles...")
+    const allStudents = await prisma.student.findMany({
+      where: { status: "active" },
+    })
+
+    const studentProfileMap = new Map<string, string>() // studentId -> studentProfileId
+
+    for (const student of allStudents) {
+      // Check if Person exists for this student
+      let person = await prisma.person.findFirst({
+        where: {
+          firstName: student.firstName,
+          lastName: student.lastName,
+          studentProfile: { studentId: student.id },
+        },
+      })
+
+      if (!person) {
+        person = await prisma.person.create({
+          data: {
+            firstName: student.firstName,
+            lastName: student.lastName,
+            email: student.email,
+            dateOfBirth: student.dateOfBirth,
+            gender: Math.random() > 0.5 ? Gender.male : Gender.female,
+            status: PersonStatus.active,
+          },
+        })
+      }
+
+      // Check if StudentProfile exists
+      let studentProfile = await prisma.studentProfile.findFirst({
+        where: { studentId: student.id },
+      })
+
+      if (!studentProfile) {
+        // Find current grade for student
+        const enrollment = await prisma.enrollment.findFirst({
+          where: {
+            studentId: student.id,
+            schoolYearId: currentSchoolYear.id,
+            status: EnrollmentStatus.completed,
+          },
+          include: { grade: true },
+        })
+
+        studentProfile = await prisma.studentProfile.create({
+          data: {
+            personId: person.id,
+            studentId: student.id,
+            studentNumber: student.studentNumber,
+            studentStatus: StudentStatus.active,
+            enrollmentDate: student.enrollmentDate,
+            currentGradeId: enrollment?.gradeId,
+          },
+        })
+      }
+
+      studentProfileMap.set(student.id, studentProfile.id)
+    }
+    console.log(`   ✓ Created ${studentProfileMap.size} student profiles`)
+
+    // ========================================================================
+    // Create Attendance Sessions and Records (Sept 15 to now, 10% absences)
+    // ========================================================================
+    console.log("\n📋 Creating attendance records...")
+    const attendanceStartDate = new Date("2025-09-15")
+    const attendanceEndDate = new Date() // Today
+    let sessionCount = 0
+    let recordCount = 0
+
+    for (const grade of currentGrades) {
+      const gradeConfig = GRADES_CONFIG.find(g => g.order === grade.order)
+      if (!gradeConfig) continue
+
+      const schoolDays = getSchoolDays(attendanceStartDate, attendanceEndDate, gradeConfig.level)
+
+      // Get enrolled students for this grade
+      const enrolledStudents = await prisma.enrollment.findMany({
+        where: {
+          gradeId: grade.id,
+          schoolYearId: currentSchoolYear.id,
+          status: EnrollmentStatus.completed,
+        },
+        include: { student: true },
+      })
+
+      for (const schoolDay of schoolDays) {
+        // Check if session already exists
+        const existingSession = await prisma.attendanceSession.findFirst({
+          where: {
+            gradeId: grade.id,
+            date: schoolDay,
+          },
+        })
+
+        if (existingSession) continue
+
+        // Create attendance session
+        const session = await prisma.attendanceSession.create({
+          data: {
+            gradeId: grade.id,
+            date: schoolDay,
+            entryMode: AttendanceEntryMode.checklist,
+            isComplete: true,
+            completedAt: new Date(schoolDay.getTime() + 9 * 60 * 60 * 1000), // 9 AM
+            recordedBy: director.id,
+          },
+        })
+        sessionCount++
+
+        // Create attendance records for each student
+        for (const enrollment of enrolledStudents) {
+          if (!enrollment.studentId) continue
+
+          const studentProfileId = studentProfileMap.get(enrollment.studentId)
+          if (!studentProfileId) continue
+
+          // 10% chance of absence
+          const isAbsent = Math.random() < 0.10
+          const isLate = !isAbsent && Math.random() < 0.05 // 5% chance of being late
+
+          let status: AttendanceStatus
+          if (isAbsent) {
+            status = AttendanceStatus.absent
+          } else if (isLate) {
+            status = AttendanceStatus.late
+          } else {
+            status = AttendanceStatus.present
+          }
+
+          await prisma.attendanceRecord.create({
+            data: {
+              sessionId: session.id,
+              studentProfileId,
+              status,
+              notes: isAbsent ? "Absence non justifiée" : null,
+              recordedBy: director.id,
+            },
+          })
+          recordCount++
+        }
+      }
+
+      console.log(`   ✓ ${grade.name}: ${schoolDays.length} sessions created`)
+    }
+    console.log(`   ✓ Total: ${sessionCount} attendance sessions, ${recordCount} records`)
+
+    // ========================================================================
+    // Create Sample Expenses
+    // ========================================================================
+    console.log("\n💰 Creating sample expenses...")
+    let expenseCount = 0
+
+    for (const expenseSample of EXPENSE_SAMPLES) {
+      // Randomize the date within the last 3 months
+      const daysAgo = Math.floor(Math.random() * 90)
+      const expenseDate = new Date()
+      expenseDate.setDate(expenseDate.getDate() - daysAgo)
+
+      // Randomize the status
+      const statusOptions = [ExpenseStatus.pending, ExpenseStatus.approved, ExpenseStatus.paid, ExpenseStatus.rejected]
+      const status = statusOptions[Math.floor(Math.random() * statusOptions.length)]
+
+      await prisma.expense.create({
+        data: {
+          category: expenseSample.category,
+          description: expenseSample.description,
+          amount: expenseSample.amount + Math.floor(Math.random() * 50000), // Add some variance
+          method: Math.random() > 0.8 ? PaymentMethod.orange_money : PaymentMethod.cash,
+          date: expenseDate,
+          vendorName: status !== ExpenseStatus.pending ? randomElement(["Papeterie Centrale", "Mamadou Fournitures", "EDG", "SOTELGUI"]) : null,
+          status,
+          requestedBy: director.id,
+          approvedBy: status !== ExpenseStatus.pending && status !== ExpenseStatus.rejected ? director.id : null,
+          approvedAt: status === ExpenseStatus.approved || status === ExpenseStatus.paid ? new Date(expenseDate.getTime() + 2 * 24 * 60 * 60 * 1000) : null,
+          rejectionReason: status === ExpenseStatus.rejected ? "Budget insuffisant" : null,
+          paidAt: status === ExpenseStatus.paid ? new Date(expenseDate.getTime() + 5 * 24 * 60 * 60 * 1000) : null,
+        },
+      })
+      expenseCount++
+    }
+    console.log(`   ✓ Created ${expenseCount} sample expenses`)
+
     // Summary
     const gradeCount = await prisma.grade.count({
       where: { schoolYearId: currentSchoolYear.id },
@@ -509,6 +1006,11 @@ async function main() {
     })
 
     const paymentCount = await prisma.payment.count()
+    const subjectCount = await prisma.subject.count()
+    const teacherCount = await prisma.teacherProfile.count()
+    const attendanceSessionCount = await prisma.attendanceSession.count()
+    const attendanceRecordCount = await prisma.attendanceRecord.count()
+    const expenseCountDb = await prisma.expense.count()
 
     console.log("\n" + "=".repeat(60))
     console.log("✅ Seed completed!")
@@ -523,6 +1025,11 @@ async function main() {
     console.log(`\n   Returning Students (2024-2025): ${studentCounter - 1}`)
     console.log(`   Current Enrollments (2025-2026): ${enrollmentCount}`)
     console.log(`   Total Payments: ${paymentCount}`)
+    console.log(`\n   Subjects: ${subjectCount}`)
+    console.log(`   Teachers: ${teacherCount}`)
+    console.log(`   Attendance Sessions: ${attendanceSessionCount}`)
+    console.log(`   Attendance Records: ${attendanceRecordCount}`)
+    console.log(`   Expenses: ${expenseCountDb}`)
     console.log("=".repeat(60))
   } catch (error) {
     console.error("❌ Failed to seed data:", error)

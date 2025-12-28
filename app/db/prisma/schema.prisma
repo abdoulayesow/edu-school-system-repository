@@ -51,7 +51,24 @@ model User {
   statusChangedEnrollments Enrollment[] @relation("EnrollmentStatusChanger")
   recordedPayments     Payment[]        @relation("PaymentRecorder")
   confirmedPayments    Payment[]        @relation("PaymentConfirmer")
+  reviewedPayments     Payment[]        @relation("PaymentReviewer")
   enrollmentNotes      EnrollmentNote[]
+
+  // Attendance relations
+  attendanceSessions   AttendanceSession[] @relation("AttendanceSessionRecorder")
+  attendanceRecords    AttendanceRecord[]  @relation("AttendanceRecordRecorder")
+
+  // Cash deposit relations
+  depositedCash        CashDeposit[]    @relation("CashDepositor")
+  verifiedDeposits     CashDeposit[]    @relation("DepositVerifier")
+
+  // Bank deposit relations
+  recordedBankDeposits BankDeposit[]    @relation("BankDepositRecorder")
+  reconciledBankDeposits BankDeposit[]  @relation("BankDepositReconciler")
+
+  // Expense relations
+  requestedExpenses    Expense[]        @relation("ExpenseRequester")
+  approvedExpenses     Expense[]        @relation("ExpenseApprover")
 }
 
 model Address {
@@ -138,9 +155,29 @@ enum PaymentMethod {
 }
 
 enum PaymentStatus {
-  pending
-  confirmed
-  failed
+  pending_deposit   // Cash payment awaiting bank deposit
+  deposited         // Cash deposited at bank, awaiting review
+  pending_review    // Orange Money or deposited cash awaiting final review
+  confirmed         // Payment fully confirmed
+  rejected          // Payment rejected during review
+  failed            // Payment failed
+}
+
+enum ExpenseStatus {
+  pending           // Awaiting approval
+  approved          // Approved by director
+  rejected          // Rejected by director
+  paid              // Expense has been paid
+}
+
+enum ExpenseCategory {
+  supplies          // School supplies
+  maintenance       // Building/equipment maintenance
+  utilities         // Electricity, water, etc.
+  salary            // Staff salaries
+  transport         // Transportation costs
+  communication     // Phone, internet
+  other             // Miscellaneous
 }
 
 model SchoolYear {
@@ -155,31 +192,41 @@ model SchoolYear {
   createdAt       DateTime     @default(now())
   updatedAt       DateTime     @updatedAt
 
-  grades          Grade[]
-  enrollments     Enrollment[]
+  grades            Grade[]
+  enrollments       Enrollment[]
+  classAssignments  ClassAssignment[]
+  gradeEnrollments  GradeEnrollment[]
 
   @@index([isActive])
   @@index([startDate])
 }
 
 model Grade {
-  id            String      @id @default(cuid())
-  name          String      // "7eme Annee"
-  level         SchoolLevel
-  order         Int         // 1-13 for sorting
-  tuitionFee    Int         // Annual fee in GNF
-  schoolYearId  String
-  syncVersion   Int         @default(0)
-  createdAt     DateTime    @default(now())
-  updatedAt     DateTime    @updatedAt
+  id              String      @id @default(cuid())
+  name            String      // "7eme Annee"
+  code            String?     // "7EME" - Short code for the grade
+  level           SchoolLevel
+  order           Int         // 1-13 for sorting
+  tuitionFee      Int         // Annual fee in GNF
+  schoolYearId    String
+  gradeLeaderId   String?     // Teacher who leads this grade (responsable de classe)
+  syncVersion     Int         @default(0)
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt
 
-  schoolYear    SchoolYear  @relation(fields: [schoolYearId], references: [id], onDelete: Cascade)
-  enrollments   Enrollment[]
+  schoolYear      SchoolYear  @relation(fields: [schoolYearId], references: [id], onDelete: Cascade)
+  gradeLeader     TeacherProfile? @relation("GradeLeader", fields: [gradeLeaderId], references: [id])
+  enrollments     Enrollment[]
+  subjects        GradeSubject[]
+  currentStudents StudentProfile[] @relation("CurrentGradeStudents")
+  gradeEnrollments GradeEnrollment[]
+  attendanceSessions AttendanceSession[]
 
   @@unique([schoolYearId, order])
   @@index([schoolYearId])
   @@index([level])
   @@index([order])
+  @@index([gradeLeaderId])
 }
 
 model Enrollment {
@@ -282,7 +329,7 @@ model Payment {
   paymentScheduleId   String?
   amount              Int             // Amount in GNF
   method              PaymentMethod
-  status              PaymentStatus   @default(pending)
+  status              PaymentStatus   @default(pending_deposit)
 
   // Transaction details
   receiptNumber       String          // Required: CASH-2025-XXXXX or OM-2025-XXXXX
@@ -296,6 +343,12 @@ model Payment {
   confirmedAt         DateTime?
   notes               String?
 
+  // Review tracking
+  reviewedBy          String?         // User ID who reviewed
+  reviewedAt          DateTime?
+  reviewNotes         String?         // Notes from reviewer (especially for rejection)
+  autoConfirmAt       DateTime?       // 24h after Orange Money payment for auto-confirmation
+
   syncVersion         Int             @default(0)
   createdAt           DateTime        @default(now())
   updatedAt           DateTime        @updatedAt
@@ -304,12 +357,16 @@ model Payment {
   paymentSchedule     PaymentSchedule? @relation(fields: [paymentScheduleId], references: [id])
   recorder            User            @relation("PaymentRecorder", fields: [recordedBy], references: [id])
   confirmer           User?           @relation("PaymentConfirmer", fields: [confirmedBy], references: [id])
+  reviewer            User?           @relation("PaymentReviewer", fields: [reviewedBy], references: [id])
+  cashDeposit         CashDeposit?    // For cash payments - deposit info
 
   @@index([enrollmentId])
   @@index([paymentScheduleId])
   @@index([status])
   @@index([recordedBy])
   @@index([recordedAt])
+  @@index([reviewedBy])
+  @@index([method])
 }
 
 model EnrollmentNote {
@@ -369,6 +426,7 @@ model Student {
   attendance     Attendance[]
   class          Class?        @relation(fields: [classId], references: [id])
   enrollments    Enrollment[]
+  studentProfile StudentProfile?
 
   @@index([status])
   @@index([classId])
@@ -413,4 +471,339 @@ model Class {
 
   @@index([teacherId])
   @@index([year])
+}
+
+// ============================================================================
+// Person System - Unified Identity Management
+// ============================================================================
+
+enum Gender {
+  male
+  female
+}
+
+enum PersonStatus {
+  active
+  inactive
+  archived
+}
+
+model Person {
+  id             String        @id @default(cuid())
+  firstName      String
+  lastName       String
+  email          String?       @unique
+  phone          String?
+  dateOfBirth    DateTime?
+  gender         Gender?
+  photoUrl       String?
+  address        String?
+  status         PersonStatus  @default(active)
+  syncVersion    Int           @default(0)
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+
+  // Role-specific profiles (one person can have multiple roles)
+  userProfile      UserProfile?
+  studentProfile   StudentProfile?
+  teacherProfile   TeacherProfile?
+  parentProfile    ParentProfile?
+
+  @@index([email])
+  @@index([firstName, lastName])
+  @@index([status])
+}
+
+model UserProfile {
+  id            String      @id @default(cuid())
+  personId      String      @unique
+  userId        String?     @unique  // Links to legacy User table during migration
+  role          Role        @default(user)
+  userStatus    UserStatus  @default(active)
+  syncVersion   Int         @default(0)
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+
+  person        Person      @relation(fields: [personId], references: [id], onDelete: Cascade)
+
+  @@index([personId])
+  @@index([role])
+}
+
+model StudentProfile {
+  id              String        @id @default(cuid())
+  personId        String        @unique
+  studentId       String?       @unique  // Links to legacy Student table during migration
+  studentNumber   String?       @unique  // STU-00001
+  studentStatus   StudentStatus @default(active)
+  enrollmentDate  DateTime      @default(now())
+  currentGradeId  String?
+  syncVersion     Int           @default(0)
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+
+  person          Person        @relation(fields: [personId], references: [id], onDelete: Cascade)
+  student         Student?      @relation(fields: [studentId], references: [id])
+  currentGrade    Grade?        @relation("CurrentGradeStudents", fields: [currentGradeId], references: [id])
+  gradeEnrollments GradeEnrollment[]
+  attendanceRecords AttendanceRecord[]
+  parentLinks     StudentParent[]
+
+  @@index([personId])
+  @@index([studentNumber])
+  @@index([currentGradeId])
+  @@index([studentStatus])
+}
+
+model TeacherProfile {
+  id              String    @id @default(cuid())
+  personId        String    @unique
+  userId          String?   @unique  // Links to legacy User with role=teacher during migration
+  employeeNumber  String?   @unique
+  hireDate        DateTime?
+  specialization  String?
+  syncVersion     Int       @default(0)
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  person          Person    @relation(fields: [personId], references: [id], onDelete: Cascade)
+  classAssignments ClassAssignment[]
+  gradeLederships Grade[]   @relation("GradeLeader")
+
+  @@index([personId])
+  @@index([employeeNumber])
+}
+
+model ParentProfile {
+  id            String    @id @default(cuid())
+  personId      String    @unique
+  relationship  String?   // "father", "mother", "guardian"
+  syncVersion   Int       @default(0)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  person        Person    @relation(fields: [personId], references: [id], onDelete: Cascade)
+  studentLinks  StudentParent[]
+
+  @@index([personId])
+}
+
+model StudentParent {
+  id              String    @id @default(cuid())
+  studentProfileId String
+  parentProfileId  String
+  isPrimary       Boolean   @default(false)
+  createdAt       DateTime  @default(now())
+
+  studentProfile  StudentProfile  @relation(fields: [studentProfileId], references: [id], onDelete: Cascade)
+  parentProfile   ParentProfile   @relation(fields: [parentProfileId], references: [id], onDelete: Cascade)
+
+  @@unique([studentProfileId, parentProfileId])
+  @@index([studentProfileId])
+  @@index([parentProfileId])
+}
+
+// ============================================================================
+// Subject & Curriculum Management
+// ============================================================================
+
+model Subject {
+  id          String    @id @default(cuid())
+  code        String    @unique  // "MATH", "FRANCAIS", "ANGLAIS"
+  nameFr      String    // "Mathematiques"
+  nameEn      String    // "Mathematics"
+  isOptional  Boolean   @default(false)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  gradeSubjects GradeSubject[]
+
+  @@index([code])
+}
+
+model GradeSubject {
+  id            String    @id @default(cuid())
+  gradeId       String
+  subjectId     String
+  coefficient   Int       @default(1)
+  hoursPerWeek  Int?
+  series        String?   // NULL for grades 1-11, "A"/"B"/"C" for Terminal (grade 13)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  grade         Grade     @relation(fields: [gradeId], references: [id], onDelete: Cascade)
+  subject       Subject   @relation(fields: [subjectId], references: [id])
+  classAssignments ClassAssignment[]
+
+  @@unique([gradeId, subjectId, series])
+  @@index([gradeId])
+  @@index([subjectId])
+}
+
+model ClassAssignment {
+  id              String    @id @default(cuid())
+  gradeSubjectId  String
+  teacherProfileId String
+  schoolYearId    String
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  gradeSubject    GradeSubject    @relation(fields: [gradeSubjectId], references: [id], onDelete: Cascade)
+  teacherProfile  TeacherProfile  @relation(fields: [teacherProfileId], references: [id])
+  schoolYear      SchoolYear      @relation(fields: [schoolYearId], references: [id])
+
+  @@unique([gradeSubjectId, schoolYearId])
+  @@index([teacherProfileId])
+  @@index([schoolYearId])
+}
+
+model GradeEnrollment {
+  id              String    @id @default(cuid())
+  studentProfileId String
+  gradeId         String
+  schoolYearId    String
+  enrolledAt      DateTime  @default(now())
+  status          String    @default("active")  // active, transferred, withdrawn
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  studentProfile  StudentProfile @relation(fields: [studentProfileId], references: [id], onDelete: Cascade)
+  grade           Grade          @relation(fields: [gradeId], references: [id])
+  schoolYear      SchoolYear     @relation(fields: [schoolYearId], references: [id])
+
+  @@unique([studentProfileId, gradeId, schoolYearId])
+  @@index([studentProfileId])
+  @@index([gradeId])
+  @@index([schoolYearId])
+}
+
+// ============================================================================
+// Enhanced Attendance System
+// ============================================================================
+
+enum AttendanceEntryMode {
+  checklist       // Full checklist - mark each student
+  absences_only   // Only mark absences/late
+}
+
+model AttendanceSession {
+  id              String              @id @default(cuid())
+  gradeId         String
+  date            DateTime            @db.Date
+  entryMode       AttendanceEntryMode
+  isComplete      Boolean             @default(false)
+  completedAt     DateTime?
+  recordedBy      String
+  syncVersion     Int                 @default(0)
+  createdAt       DateTime            @default(now())
+  updatedAt       DateTime            @updatedAt
+
+  grade           Grade               @relation(fields: [gradeId], references: [id])
+  recorder        User                @relation("AttendanceSessionRecorder", fields: [recordedBy], references: [id])
+  records         AttendanceRecord[]
+
+  @@unique([gradeId, date])
+  @@index([gradeId])
+  @@index([date])
+  @@index([recordedBy])
+  @@index([isComplete])
+}
+
+model AttendanceRecord {
+  id              String            @id @default(cuid())
+  sessionId       String
+  studentProfileId String
+  status          AttendanceStatus
+  notes           String?
+  recordedBy      String
+  syncVersion     Int               @default(0)
+  createdAt       DateTime          @default(now())
+  updatedAt       DateTime          @updatedAt
+
+  session         AttendanceSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  studentProfile  StudentProfile    @relation(fields: [studentProfileId], references: [id])
+  recorder        User              @relation("AttendanceRecordRecorder", fields: [recordedBy], references: [id])
+
+  @@unique([sessionId, studentProfileId])
+  @@index([studentProfileId])
+  @@index([status])
+}
+
+// ============================================================================
+// Enhanced Payment & Accounting System
+// ============================================================================
+
+model CashDeposit {
+  id                String    @id @default(cuid())
+  paymentId         String    @unique
+  bankReference     String
+  depositDate       DateTime
+  depositedBy       String
+  depositedByName   String?   // "Me" or specific name if different
+  bankName          String?
+  verifiedBy        String?
+  verifiedAt        DateTime?
+  syncVersion       Int       @default(0)
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+
+  payment           Payment   @relation(fields: [paymentId], references: [id], onDelete: Cascade)
+  depositor         User      @relation("CashDepositor", fields: [depositedBy], references: [id])
+  verifier          User?     @relation("DepositVerifier", fields: [verifiedBy], references: [id])
+
+  @@index([depositDate])
+  @@index([bankReference])
+  @@index([depositedBy])
+}
+
+model BankDeposit {
+  id                  String    @id @default(cuid())
+  bankReference       String    @unique
+  amount              Int
+  depositDate         DateTime
+  bankName            String
+  depositorName       String
+  recordedBy          String
+  isReconciled        Boolean   @default(false)
+  reconciledAt        DateTime?
+  reconciledBy        String?
+  reconciliationNotes String?
+  syncVersion         Int       @default(0)
+  createdAt           DateTime  @default(now())
+  updatedAt           DateTime  @updatedAt
+
+  recorder            User      @relation("BankDepositRecorder", fields: [recordedBy], references: [id])
+  reconciler          User?     @relation("BankDepositReconciler", fields: [reconciledBy], references: [id])
+
+  @@index([depositDate])
+  @@index([isReconciled])
+  @@index([recordedBy])
+}
+
+model Expense {
+  id              String          @id @default(cuid())
+  category        ExpenseCategory
+  description     String
+  amount          Int
+  method          PaymentMethod
+  date            DateTime
+  vendorName      String?
+  receiptUrl      String?
+  status          ExpenseStatus   @default(pending)
+  requestedBy     String
+  approvedBy      String?
+  approvedAt      DateTime?
+  rejectionReason String?
+  paidAt          DateTime?
+  syncVersion     Int             @default(0)
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
+
+  requester       User            @relation("ExpenseRequester", fields: [requestedBy], references: [id])
+  approver        User?           @relation("ExpenseApprover", fields: [approvedBy], references: [id])
+
+  @@index([category])
+  @@index([date])
+  @@index([status])
+  @@index([requestedBy])
 }

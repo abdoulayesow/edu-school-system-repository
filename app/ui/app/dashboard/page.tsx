@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useState, Suspense, lazy } from "react"
+import { useEffect, useState, useMemo } from "react"
 import dynamic from "next/dynamic"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
@@ -17,7 +17,7 @@ import {
   TableRow,
 } from "@/components/ui/table"
 
-// Lazy load heavy chart components (type assertions needed due to recharts defaultProps)
+// Lazy load heavy chart components
 const BarChart = dynamic(() => import("recharts").then(mod => mod.BarChart) as never, { ssr: false }) as typeof import("recharts").BarChart
 const Bar = dynamic(() => import("recharts").then(mod => mod.Bar) as never, { ssr: false }) as typeof import("recharts").Bar
 const PieChart = dynamic(() => import("recharts").then(mod => mod.PieChart) as never, { ssr: false }) as typeof import("recharts").PieChart
@@ -27,130 +27,211 @@ const CartesianGrid = dynamic(() => import("recharts").then(mod => mod.Cartesian
 const XAxis = dynamic(() => import("recharts").then(mod => mod.XAxis) as never, { ssr: false }) as typeof import("recharts").XAxis
 const YAxis = dynamic(() => import("recharts").then(mod => mod.YAxis) as never, { ssr: false }) as typeof import("recharts").YAxis
 
-// Chart loading skeleton
-function ChartSkeleton() {
-  return (
-    <div className="h-[300px] flex items-center justify-center">
-      <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
-    </div>
-  )
+interface Grade {
+  id: string
+  name: string
+  order: number
+  stats: {
+    studentCount: number
+  }
+}
+
+interface BalanceData {
+  summary: {
+    totalConfirmedPayments: number
+    totalPendingPayments: number
+    totalPaidExpenses: number
+    margin: number
+  }
+  payments: {
+    byStatus: Record<string, { count: number; amount: number }>
+    byMethod: Record<string, { count: number; amount: number; confirmed: number }>
+  }
+}
+
+interface Enrollment {
+  id: string
+  enrollmentNumber: string | null
+  firstName: string
+  lastName: string
+  status: string
+  adjustedTuitionFee: number | null
+  originalTuitionFee: number
+  adjustmentReason: string | null
+  grade: { name: string }
+}
+
+interface BankDeposit {
+  id: string
+  bankReference: string
+  amount: number
+  isReconciled: boolean
+}
+
+interface Payment {
+  id: string
+  amount: number
+  status: string
+  receiptNumber: string
+  enrollment: {
+    student: { firstName: string; lastName: string }
+  }
+  recorder: { name: string } | null
+}
+
+function formatGNF(amount: number): string {
+  if (amount >= 1000000) {
+    return `${(amount / 1000000).toFixed(1)}M GNF`
+  }
+  if (amount >= 1000) {
+    return `${(amount / 1000).toFixed(0)}K GNF`
+  }
+  return `${amount.toLocaleString()} GNF`
 }
 
 export default function DirectorDashboard() {
   const { t } = useI18n()
-  const [chartsLoaded, setChartsLoaded] = useState(false)
+  const [loading, setLoading] = useState(true)
+  const [grades, setGrades] = useState<Grade[]>([])
+  const [balance, setBalance] = useState<BalanceData | null>(null)
+  const [pendingEnrollments, setPendingEnrollments] = useState<Enrollment[]>([])
+  const [unreconciledDeposits, setUnreconciledDeposits] = useState<BankDeposit[]>([])
+  const [pendingPayments, setPendingPayments] = useState<Payment[]>([])
 
-  // Initialize sync manager after dashboard mounts (deferred from app startup)
+  // Fetch all dashboard data
   useEffect(() => {
-    // Defer sync manager initialization to avoid blocking initial render
+    async function fetchDashboardData() {
+      try {
+        const [gradesRes, balanceRes, enrollmentsRes, depositsRes, paymentsRes] = await Promise.all([
+          fetch("/api/grades"),
+          fetch("/api/accounting/balance"),
+          fetch("/api/enrollments?status=needs_review"),
+          fetch("/api/bank-deposits?isReconciled=false"),
+          fetch("/api/payments?status=pending_review"),
+        ])
+
+        if (gradesRes.ok) {
+          const data = await gradesRes.json()
+          setGrades(data.grades || [])
+        }
+
+        if (balanceRes.ok) {
+          const data = await balanceRes.json()
+          setBalance(data)
+        }
+
+        if (enrollmentsRes.ok) {
+          const data = await enrollmentsRes.json()
+          setPendingEnrollments(Array.isArray(data) ? data : [])
+        }
+
+        if (depositsRes.ok) {
+          const data = await depositsRes.json()
+          setUnreconciledDeposits(data.deposits || [])
+        }
+
+        if (paymentsRes.ok) {
+          const data = await paymentsRes.json()
+          setPendingPayments(data.payments || [])
+        }
+      } catch (err) {
+        console.error("Error fetching dashboard data:", err)
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    fetchDashboardData()
+
+    // Initialize sync manager after dashboard mounts
     const timer = setTimeout(() => {
       import("@/lib/sync/manager").then(({ syncManager }) => {
         syncManager.initialize()
       })
-    }, 1000) // Wait 1 second after mount
-
-    // Mark charts as ready to render
-    setChartsLoaded(true)
+    }, 1000)
 
     return () => clearTimeout(timer)
   }, [])
-  const enrollmentData = [
-    { grade: "6ème", count: 95 },
-    { grade: "7ème", count: 102 },
-    { grade: "8ème", count: 98 },
-    { grade: "9ème", count: 89 },
-    { grade: "10ème", count: 87 },
-    { grade: "11ème", count: 76 },
-    { grade: "12ème", count: 68 },
-  ]
 
-  const revenueData = [
-    { category: t.dashboard.tuition, value: 45000000, color: "hsl(var(--chart-1))" },
-    { category: t.dashboard.extraActivities, value: 12000000, color: "hsl(var(--chart-2))" },
-    { category: t.dashboard.canteen, value: 8500000, color: "hsl(var(--chart-3))" },
-    { category: t.dashboard.transport, value: 6200000, color: "hsl(var(--chart-4))" },
-  ]
+  // Calculate total enrollment
+  const totalEnrollment = useMemo(() => {
+    return grades.reduce((sum, g) => sum + g.stats.studentCount, 0)
+  }, [grades])
 
-  const pendingApprovals = [
-    {
-      id: 1,
-      type: t.dashboard.paymentDiscount,
-      student: "Fatoumata Diallo",
-      submittedBy: "Ibrahima Bah",
-      date: "2024-12-18",
-      reason: t.dashboard.reasons.familySituation,
-      amount: "150,000 GNF",
-    },
-    {
-      id: 2,
-      type: t.dashboard.lateEnrollment,
-      student: "Mamadou Sylla",
-      submittedBy: "Mariama Camara",
-      date: "2024-12-17",
-      reason: t.dashboard.reasons.schoolTransfer,
-      amount: null,
-    },
-    {
-      id: 3,
-      type: t.dashboard.feeWaiver,
-      student: "Aminata Touré",
-      submittedBy: "Ibrahima Bah",
-      date: "2024-12-17",
-      reason: t.dashboard.reasons.billingError,
-      amount: "200,000 GNF",
-    },
-    {
-      id: 4,
-      type: t.dashboard.paymentPlan,
-      student: "Oumar Keita",
-      submittedBy: "Ibrahima Bah",
-      date: "2024-12-16",
-      reason: t.dashboard.reasons.paymentSpread,
-      amount: "450,000 GNF",
-    },
-    {
-      id: 5,
-      type: t.dashboard.activityModification,
-      student: "Aissata Conte",
-      submittedBy: "Mariama Camara",
-      date: "2024-12-16",
-      reason: t.dashboard.reasons.clubChange,
-      amount: null,
-    },
-  ]
+  // Prepare enrollment chart data
+  const enrollmentData = useMemo(() => {
+    return grades
+      .sort((a, b) => a.order - b.order)
+      .map(g => ({
+        grade: g.name,
+        count: g.stats.studentCount,
+      }))
+  }, [grades])
 
-  const recentActivity = [
-    {
-      action: t.dashboard.financialPeriodClosed,
-      user: "Ibrahima Bah",
-      time: interpolate(t.dashboard.hoursAgo, { hours: 2 }),
-      type: "success",
-    },
-    {
-      action: interpolate(t.dashboard.bulkEnrollmentProcessed, { count: 23 }),
-      user: "Mariama Camara",
-      time: interpolate(t.dashboard.hoursAgo, { hours: 4 }),
-      type: "info",
-    },
-    {
-      action: t.dashboard.academicReportGenerated,
-      user: "Fatoumata Diallo",
-      time: interpolate(t.dashboard.hoursAgo, { hours: 5 }),
-      type: "info",
-    },
-    {
-      action: t.dashboard.bankDiscrepancyFlagged,
-      user: "Ibrahima Bah",
-      time: interpolate(t.dashboard.yesterdayAt, { time: "16:30" }),
-      type: "warning",
-    },
-    {
-      action: interpolate(t.dashboard.paymentValidation, { count: 12 }),
-      user: "Ibrahima Bah",
-      time: interpolate(t.dashboard.yesterdayAt, { time: "14:20" }),
-      type: "success",
-    },
-  ]
+  // Prepare revenue chart data
+  const revenueData = useMemo(() => {
+    if (!balance) return []
+
+    const { byMethod } = balance.payments
+    const data = []
+
+    if (byMethod.cash?.confirmed > 0) {
+      data.push({
+        category: "Espèces",
+        value: byMethod.cash.confirmed,
+        color: "hsl(var(--chart-1))",
+      })
+    }
+    if (byMethod.orange_money?.confirmed > 0) {
+      data.push({
+        category: "Orange Money",
+        value: byMethod.orange_money.confirmed,
+        color: "hsl(var(--chart-2))",
+      })
+    }
+
+    return data
+  }, [balance])
+
+  // Combine pending items for display
+  const pendingApprovals = useMemo(() => {
+    const items: Array<{
+      id: string
+      type: string
+      student: string
+      submittedBy: string
+      reason: string
+      amount: string | null
+    }> = []
+
+    // Add enrollments needing review
+    pendingEnrollments.slice(0, 3).forEach(enrollment => {
+      items.push({
+        id: enrollment.id,
+        type: t.dashboard.feeWaiver,
+        student: `${enrollment.firstName} ${enrollment.lastName}`,
+        submittedBy: enrollment.grade.name,
+        reason: enrollment.adjustmentReason || "Ajustement de frais",
+        amount: enrollment.adjustedTuitionFee
+          ? formatGNF(enrollment.adjustedTuitionFee)
+          : null,
+      })
+    })
+
+    // Add payments pending review
+    pendingPayments.slice(0, 5 - items.length).forEach(payment => {
+      items.push({
+        id: payment.id,
+        type: t.dashboard.paymentDiscount,
+        student: `${payment.enrollment.student.firstName} ${payment.enrollment.student.lastName}`,
+        submittedBy: payment.recorder?.name || "Système",
+        reason: `Paiement ${payment.receiptNumber}`,
+        amount: formatGNF(payment.amount),
+      })
+    })
+
+    return items
+  }, [pendingEnrollments, pendingPayments, t])
 
   const chartConfig = {
     count: {
@@ -159,12 +240,20 @@ export default function DirectorDashboard() {
     },
   } satisfies ChartConfig
 
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-background pt-4 flex items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+      </div>
+    )
+  }
+
   return (
     <div className="min-h-screen bg-background pt-4 lg:pt-4">
       <main className="container mx-auto px-4 py-4">
         <div className="mb-4">
           <h1 className="text-3xl font-bold text-foreground mb-2">{t.dashboard.title}</h1>
-          <p className="text-muted-foreground">{interpolate(t.dashboard.greetingWithName, { name: "Ousmane Sylla" })}</p>
+          <p className="text-muted-foreground">{t.dashboard.greetingWithName ? interpolate(t.dashboard.greetingWithName, { name: "" }) : t.dashboard.title}</p>
         </div>
 
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4 mb-8">
@@ -174,10 +263,9 @@ export default function DirectorDashboard() {
               <Users className="h-5 w-5 text-primary" />
             </CardHeader>
             <CardContent>
-              <div className="text-3xl font-bold text-foreground">615</div>
-              <p className="text-xs text-success flex items-center gap-1 mt-1">
-                <TrendingUp className="h-3 w-3" />
-                <span>+5% {t.dashboard.vsLastMonth}</span>
+              <div className="text-3xl font-bold text-foreground">{totalEnrollment}</div>
+              <p className="text-xs text-muted-foreground mt-1">
+                {grades.length} classes
               </p>
             </CardContent>
           </Card>
@@ -188,32 +276,46 @@ export default function DirectorDashboard() {
               <DollarSign className="h-5 w-5 text-success" />
             </CardHeader>
             <CardContent>
-              <div className="text-3xl font-bold text-foreground">71.7M GNF</div>
-              <p className="text-xs text-muted-foreground mt-1">{t.dashboard.pending}: 8.2M GNF</p>
+              <div className="text-3xl font-bold text-foreground">
+                {balance ? formatGNF(balance.summary.totalConfirmedPayments) : "0 GNF"}
+              </div>
+              <p className="text-xs text-muted-foreground mt-1">
+                {t.dashboard.pending}: {balance ? formatGNF(balance.summary.totalPendingPayments) : "0 GNF"}
+              </p>
             </CardContent>
           </Card>
 
-          <Card className="border-warning/50 bg-warning/5">
+          <Card className={pendingApprovals.length > 0 ? "border-warning/50 bg-warning/5" : ""}>
             <CardHeader className="flex flex-row items-center justify-between pb-2">
-              <CardTitle className="text-sm font-medium text-warning">{t.dashboard.pendingApprovals}</CardTitle>
-              <AlertTriangle className="h-5 w-5 text-warning" />
+              <CardTitle className={`text-sm font-medium ${pendingApprovals.length > 0 ? "text-warning" : "text-muted-foreground"}`}>
+                {t.dashboard.pendingApprovals}
+              </CardTitle>
+              <AlertTriangle className={`h-5 w-5 ${pendingApprovals.length > 0 ? "text-warning" : "text-muted-foreground"}`} />
             </CardHeader>
             <CardContent>
-              <div className="text-3xl font-bold text-warning">5</div>
-              <Button variant="link" className="p-0 h-auto text-xs text-warning hover:text-warning/80 mt-1">
-                {t.dashboard.viewExceptions}
-              </Button>
+              <div className={`text-3xl font-bold ${pendingApprovals.length > 0 ? "text-warning" : "text-foreground"}`}>
+                {pendingEnrollments.length + pendingPayments.length}
+              </div>
+              <p className="text-xs text-muted-foreground mt-1">
+                {pendingEnrollments.length} inscriptions, {pendingPayments.length} paiements
+              </p>
             </CardContent>
           </Card>
 
-          <Card className="border-destructive/50 bg-destructive/5">
+          <Card className={unreconciledDeposits.length > 0 ? "border-destructive/50 bg-destructive/5" : ""}>
             <CardHeader className="flex flex-row items-center justify-between pb-2">
-              <CardTitle className="text-sm font-medium text-destructive">{t.dashboard.reconciliationFlags}</CardTitle>
-              <AlertTriangle className="h-5 w-5 text-destructive" />
+              <CardTitle className={`text-sm font-medium ${unreconciledDeposits.length > 0 ? "text-destructive" : "text-muted-foreground"}`}>
+                {t.dashboard.reconciliationFlags}
+              </CardTitle>
+              <AlertTriangle className={`h-5 w-5 ${unreconciledDeposits.length > 0 ? "text-destructive" : "text-muted-foreground"}`} />
             </CardHeader>
             <CardContent>
-              <div className="text-3xl font-bold text-destructive">2</div>
-              <p className="text-xs text-destructive/80 mt-1">{t.dashboard.needsAttention}</p>
+              <div className={`text-3xl font-bold ${unreconciledDeposits.length > 0 ? "text-destructive" : "text-foreground"}`}>
+                {unreconciledDeposits.length}
+              </div>
+              <p className="text-xs text-muted-foreground mt-1">
+                {unreconciledDeposits.length > 0 ? t.dashboard.needsAttention : "Aucun"}
+              </p>
             </CardContent>
           </Card>
         </div>
@@ -228,56 +330,63 @@ export default function DirectorDashboard() {
               <CardDescription>{t.dashboard.requestsNeedingApproval}</CardDescription>
             </CardHeader>
             <CardContent>
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>{t.dashboard.requestType}</TableHead>
-                    <TableHead>{t.dashboard.student}</TableHead>
-                    <TableHead>{t.dashboard.details}</TableHead>
-                    <TableHead className="text-right">{t.dashboard.actions}</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {pendingApprovals.map((approval) => (
-                    <TableRow key={approval.id}>
-                      <TableCell>
-                        <Badge variant="outline">{approval.type}</Badge>
-                      </TableCell>
-                      <TableCell>
-                        <div className="font-medium">{approval.student}</div>
-                        <div className="text-xs text-muted-foreground">
-                          {t.dashboard.by}: {approval.submittedBy}
-                        </div>
-                      </TableCell>
-                      <TableCell>
-                        <div className="text-sm text-foreground">
-                          {approval.reason}
-                        </div>
-                        {approval.amount && (
-                          <div className="text-sm font-semibold text-foreground mt-1">
-                            {approval.amount}
-                          </div>
-                        )}
-                      </TableCell>
-                      <TableCell className="text-right">
-                        <div className="flex justify-end gap-2">
-                          <Button size="sm" className="h-8">
-                            <CheckCircle2 className="h-3 w-3 mr-1" />
-                            {t.dashboard.approve}
-                          </Button>
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            className="h-8 bg-transparent"
-                          >
-                            {t.dashboard.review}
-                          </Button>
-                        </div>
-                      </TableCell>
+              {pendingApprovals.length === 0 ? (
+                <div className="text-center py-8 text-muted-foreground">
+                  <CheckCircle2 className="h-8 w-8 mx-auto mb-2 text-success opacity-50" />
+                  <p>Aucune approbation en attente</p>
+                </div>
+              ) : (
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>{t.dashboard.requestType}</TableHead>
+                      <TableHead>{t.dashboard.student}</TableHead>
+                      <TableHead>{t.dashboard.details}</TableHead>
+                      <TableHead className="text-right">{t.dashboard.actions}</TableHead>
                     </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
+                  </TableHeader>
+                  <TableBody>
+                    {pendingApprovals.map((approval) => (
+                      <TableRow key={approval.id}>
+                        <TableCell>
+                          <Badge variant="outline">{approval.type}</Badge>
+                        </TableCell>
+                        <TableCell>
+                          <div className="font-medium">{approval.student}</div>
+                          <div className="text-xs text-muted-foreground">
+                            {approval.submittedBy}
+                          </div>
+                        </TableCell>
+                        <TableCell>
+                          <div className="text-sm text-foreground">
+                            {approval.reason}
+                          </div>
+                          {approval.amount && (
+                            <div className="text-sm font-semibold text-foreground mt-1">
+                              {approval.amount}
+                            </div>
+                          )}
+                        </TableCell>
+                        <TableCell className="text-right">
+                          <div className="flex justify-end gap-2">
+                            <Button size="sm" className="h-8">
+                              <CheckCircle2 className="h-3 w-3 mr-1" />
+                              {t.dashboard.approve}
+                            </Button>
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              className="h-8 bg-transparent"
+                            >
+                              {t.dashboard.review}
+                            </Button>
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              )}
             </CardContent>
           </Card>
 
@@ -291,30 +400,60 @@ export default function DirectorDashboard() {
             </CardHeader>
             <CardContent>
               <div className="space-y-3">
-                {recentActivity.map((activity, index) => (
-                  <div key={index} className="flex items-start gap-3 p-3 rounded-lg border bg-card">
-                    <div
-                      className={`mt-0.5 h-2 w-2 rounded-full ${
-                        activity.type === "success"
-                          ? "bg-success"
-                          : activity.type === "warning"
-                            ? "bg-warning"
-                            : "bg-primary"
-                      }`}
-                    />
+                {balance && (
+                  <>
+                    <div className="flex items-start gap-3 p-3 rounded-lg border bg-card">
+                      <div className="mt-0.5 h-2 w-2 rounded-full bg-success" />
+                      <div className="flex-1 space-y-1">
+                        <p className="text-sm font-medium text-foreground">
+                          Paiements confirmés: {formatGNF(balance.summary.totalConfirmedPayments)}
+                        </p>
+                        <div className="text-xs text-muted-foreground">
+                          {balance.payments.byStatus.confirmed?.count || 0} transactions
+                        </div>
+                      </div>
+                    </div>
+                    <div className="flex items-start gap-3 p-3 rounded-lg border bg-card">
+                      <div className="mt-0.5 h-2 w-2 rounded-full bg-warning" />
+                      <div className="flex-1 space-y-1">
+                        <p className="text-sm font-medium text-foreground">
+                          Paiements en attente: {formatGNF(balance.summary.totalPendingPayments)}
+                        </p>
+                        <div className="text-xs text-muted-foreground">
+                          {(balance.payments.byStatus.pending_deposit?.count || 0) +
+                           (balance.payments.byStatus.pending_review?.count || 0)} transactions
+                        </div>
+                      </div>
+                    </div>
+                    <div className="flex items-start gap-3 p-3 rounded-lg border bg-card">
+                      <div className="mt-0.5 h-2 w-2 rounded-full bg-primary" />
+                      <div className="flex-1 space-y-1">
+                        <p className="text-sm font-medium text-foreground">
+                          Dépenses payées: {formatGNF(balance.summary.totalPaidExpenses)}
+                        </p>
+                        <div className="text-xs text-muted-foreground">
+                          Marge nette: {formatGNF(balance.summary.margin)}
+                        </div>
+                      </div>
+                    </div>
+                  </>
+                )}
+                {unreconciledDeposits.length > 0 && (
+                  <div className="flex items-start gap-3 p-3 rounded-lg border bg-destructive/5">
+                    <div className="mt-0.5 h-2 w-2 rounded-full bg-destructive" />
                     <div className="flex-1 space-y-1">
-                      <p className="text-sm font-medium text-foreground">{activity.action}</p>
-                      <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                        <span>{activity.user}</span>
-                        <span>•</span>
-                        <span>{activity.time}</span>
+                      <p className="text-sm font-medium text-foreground">
+                        {unreconciledDeposits.length} dépôts non rapprochés
+                      </p>
+                      <div className="text-xs text-muted-foreground">
+                        Total: {formatGNF(unreconciledDeposits.reduce((sum, d) => sum + d.amount, 0))}
                       </div>
                     </div>
                   </div>
-                ))}
+                )}
               </div>
-              <Button variant="link" className="w-full mt-4">
-                {t.dashboard.viewAllHistory}
+              <Button variant="link" className="w-full mt-4" asChild>
+                <a href="/accounting">{t.dashboard.viewAllReports}</a>
               </Button>
             </CardContent>
           </Card>
@@ -330,15 +469,21 @@ export default function DirectorDashboard() {
               <CardDescription>{t.dashboard.studentDistribution}</CardDescription>
             </CardHeader>
             <CardContent>
-              <ChartContainer config={chartConfig}>
-                <BarChart data={enrollmentData} accessibilityLayer>
-                  <CartesianGrid strokeDasharray="3 3" vertical={false} />
-                  <XAxis dataKey="grade" tickLine={false} tickMargin={10} axisLine={false} />
-                  <YAxis tickLine={false} axisLine={false} />
-                  <ChartTooltip content={<ChartTooltipContent />} />
-                  <Bar dataKey="count" fill="var(--color-count)" radius={[6, 6, 0, 0]} />
-                </BarChart>
-              </ChartContainer>
+              {enrollmentData.length > 0 ? (
+                <ChartContainer config={chartConfig}>
+                  <BarChart data={enrollmentData} accessibilityLayer>
+                    <CartesianGrid strokeDasharray="3 3" vertical={false} />
+                    <XAxis dataKey="grade" tickLine={false} tickMargin={10} axisLine={false} />
+                    <YAxis tickLine={false} axisLine={false} />
+                    <ChartTooltip content={<ChartTooltipContent />} />
+                    <Bar dataKey="count" fill="var(--color-count)" radius={[6, 6, 0, 0]} />
+                  </BarChart>
+                </ChartContainer>
+              ) : (
+                <div className="h-[200px] flex items-center justify-center text-muted-foreground">
+                  Aucune donnée d'inscription disponible
+                </div>
+              )}
             </CardContent>
           </Card>
 
@@ -351,36 +496,45 @@ export default function DirectorDashboard() {
               <CardDescription>{t.dashboard.revenueDistribution}</CardDescription>
             </CardHeader>
             <CardContent>
-              <ChartContainer config={{
-                value: {
-                  label: t.dashboard.revenue,
-                  color: "hsl(var(--chart-1))" // Default color for single value
-                }
-              }} className="h-[300px] flex items-center justify-center">
-                <PieChart width={300} height={300}>
-                  <Pie
-                    data={revenueData}
-                    cx={150}
-                    cy={150}
-                    labelLine={false}
-                    label={({ category, percent }) => `${category}: ${(percent * 100).toFixed(0)}%`}
-                    outerRadius={100}
-                    fill="#8884d8"
-                    dataKey="value"
-                  >
-                    {revenueData.map((entry, index) => (
-                      <Cell key={`cell-${index}`} fill={entry.color} />
-                    ))}
-                  </Pie>
-                  <ChartTooltip
-                    content={
-                      <ChartTooltipContent formatter={(value) => `${Number(value).toLocaleString()} GNF`} hideLabel />
-                    }
-                  />
-                </PieChart>
-              </ChartContainer>
-              <Button variant="link" className="w-full mt-4">
-                {t.dashboard.viewAllReports}
+              {revenueData.length > 0 ? (
+                <ChartContainer config={{
+                  value: {
+                    label: t.dashboard.revenue,
+                    color: "hsl(var(--chart-1))"
+                  }
+                }} className="h-[300px] flex items-center justify-center">
+                  <PieChart width={300} height={300}>
+                    <Pie
+                      data={revenueData}
+                      cx={150}
+                      cy={150}
+                      labelLine={false}
+                      label={({ category, percent }) => `${category}: ${(percent * 100).toFixed(0)}%`}
+                      outerRadius={100}
+                      fill="#8884d8"
+                      dataKey="value"
+                    >
+                      {revenueData.map((entry, index) => (
+                        <Cell key={`cell-${index}`} fill={entry.color} />
+                      ))}
+                    </Pie>
+                    <ChartTooltip
+                      content={
+                        <ChartTooltipContent formatter={(value) => formatGNF(Number(value))} hideLabel />
+                      }
+                    />
+                  </PieChart>
+                </ChartContainer>
+              ) : (
+                <div className="h-[300px] flex items-center justify-center text-muted-foreground">
+                  <div className="text-center">
+                    <DollarSign className="h-8 w-8 mx-auto mb-2 opacity-50" />
+                    <p>Aucun paiement confirmé</p>
+                  </div>
+                </div>
+              )}
+              <Button variant="link" className="w-full mt-4" asChild>
+                <a href="/reports">{t.dashboard.viewAllReports}</a>
               </Button>
             </CardContent>
           </Card>

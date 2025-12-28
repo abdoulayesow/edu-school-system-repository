@@ -113,6 +113,14 @@ export async function POST(req: NextRequest, { params }: RouteParams) {
       }
     }
 
+    // Determine initial status based on payment method
+    // Cash: pending_deposit (needs bank deposit first)
+    // Orange Money: pending_review (can be reviewed immediately, auto-confirm after 24h)
+    const initialStatus = validated.method === "cash" ? "pending_deposit" : "pending_review"
+    const autoConfirmAt = validated.method === "orange_money"
+      ? new Date(Date.now() + 24 * 60 * 60 * 1000) // 24 hours from now
+      : null
+
     // Create the payment
     const payment = await prisma.payment.create({
       data: {
@@ -125,7 +133,8 @@ export async function POST(req: NextRequest, { params }: RouteParams) {
         receiptImageUrl: validated.receiptImageUrl,
         notes: validated.notes,
         recordedBy: session.user.id,
-        status: "pending", // Needs confirmation
+        status: initialStatus,
+        autoConfirmAt,
       },
       include: {
         recorder: { select: { name: true, email: true } },

@@ -2,11 +2,14 @@ import { LucideIcon } from "lucide-react";
 import {
   LayoutDashboard,
   Users,
+  GraduationCap,
+  School,
   BookOpen,
   Receipt,
   ClipboardCheck,
   BarChart3,
   LogIn,
+  Wallet,
 } from "lucide-react";
 // TODO: Replace with real RBAC roles once the domain model is finalized.
 export type UserRole =
@@ -42,6 +45,18 @@ export const mainNavigation: NavLink[] = [
     roles: ["director", "secretary", "academic_director"],
   },
   {
+    name: "Students",
+    href: "/students",
+    icon: GraduationCap,
+    roles: ["director", "academic_director", "secretary", "teacher"],
+  },
+  {
+    name: "Grades",
+    href: "/grades",
+    icon: School,
+    roles: ["director", "academic_director", "teacher"],
+  },
+  {
     name: "Activities",
     href: "/activities",
     icon: BookOpen,
@@ -51,6 +66,12 @@ export const mainNavigation: NavLink[] = [
     name: "Accounting",
     href: "/accounting",
     icon: Receipt,
+    roles: ["director", "accountant"],
+  },
+  {
+    name: "Expenses",
+    href: "/expenses",
+    icon: Wallet,
     roles: ["director", "accountant"],
   },
   {
