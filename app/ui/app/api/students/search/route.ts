@@ -77,8 +77,15 @@ export async function GET(req: NextRequest) {
                 status: "completed",
               },
               select: {
+                id: true,
+                originalTuitionFee: true,
+                adjustedTuitionFee: true,
                 grade: {
                   select: { id: true, name: true },
+                },
+                payments: {
+                  where: { status: "confirmed" },
+                  select: { amount: true },
                 },
               },
               take: 1,
@@ -89,16 +96,36 @@ export async function GET(req: NextRequest) {
       take: limit,
     })
 
-    const results = students.map((student) => ({
-      id: student.id,
-      studentNumber: student.studentNumber,
-      firstName: student.firstName,
-      lastName: student.lastName,
-      fullName: `${student.firstName} ${student.lastName}`,
-      photoUrl: student.studentProfile?.person?.photoUrl,
-      studentProfileId: student.studentProfile?.id,
-      grade: (student.enrollments as unknown as Array<{ grade: { id: string; name: string } }> | undefined)?.[0]?.grade,
-    }))
+    const results = students.map((student) => {
+      const enrollment = (student.enrollments as unknown as Array<{
+        id: string
+        originalTuitionFee: number
+        adjustedTuitionFee: number | null
+        grade: { id: string; name: string }
+        payments: Array<{ amount: number }>
+      }> | undefined)?.[0]
+
+      const tuitionFee = enrollment?.adjustedTuitionFee ?? enrollment?.originalTuitionFee ?? 0
+      const totalPaid = enrollment?.payments?.reduce((sum, p) => sum + p.amount, 0) ?? 0
+      const remainingBalance = tuitionFee - totalPaid
+
+      return {
+        id: student.id,
+        studentNumber: student.studentNumber,
+        firstName: student.firstName,
+        lastName: student.lastName,
+        fullName: `${student.firstName} ${student.lastName}`,
+        photoUrl: student.studentProfile?.person?.photoUrl,
+        studentProfileId: student.studentProfile?.id,
+        grade: enrollment?.grade,
+        enrollmentId: enrollment?.id,
+        balanceInfo: enrollment ? {
+          tuitionFee,
+          totalPaid,
+          remainingBalance,
+        } : null,
+      }
+    })
 
     return NextResponse.json({ students: results })
   } catch (err) {

@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect, useMemo } from "react"
+import { useState, useEffect, useMemo, useCallback, useRef } from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -32,7 +32,10 @@ import {
   TrendingUp,
   TrendingDown,
   BanknoteIcon,
-  Smartphone
+  Smartphone,
+  Search,
+  X,
+  User
 } from "lucide-react"
 import { Checkbox } from "@/components/ui/checkbox"
 import { useI18n, interpolate } from "@/components/i18n-provider"
@@ -100,6 +103,22 @@ interface BalanceData {
   }
 }
 
+interface StudentSearchResult {
+  id: string
+  studentNumber: string
+  firstName: string
+  lastName: string
+  fullName: string
+  photoUrl?: string
+  grade?: { id: string; name: string }
+  enrollmentId?: string
+  balanceInfo?: {
+    tuitionFee: number
+    totalPaid: number
+    remainingBalance: number
+  }
+}
+
 export default function AccountingPage() {
   const { t } = useI18n()
   const [openRecordPayment, setOpenRecordPayment] = useState(false)
@@ -115,6 +134,23 @@ export default function AccountingPage() {
   const [isLoadingBalance, setIsLoadingBalance] = useState(true)
   const [isLoadingPayments, setIsLoadingPayments] = useState(true)
   const [isLoadingDeposits, setIsLoadingDeposits] = useState(true)
+
+  // Student search state
+  const [studentSearchQuery, setStudentSearchQuery] = useState("")
+  const [studentSearchResults, setStudentSearchResults] = useState<StudentSearchResult[]>([])
+  const [isSearchingStudents, setIsSearchingStudents] = useState(false)
+  const [showSearchResults, setShowSearchResults] = useState(false)
+  const [selectedStudent, setSelectedStudent] = useState<StudentSearchResult | null>(null)
+  const searchTimeoutRef = useRef<NodeJS.Timeout | null>(null)
+  const searchContainerRef = useRef<HTMLDivElement>(null)
+
+  // Payment form state
+  const [paymentAmount, setPaymentAmount] = useState("")
+  const [paymentMethod, setPaymentMethod] = useState<"cash" | "orange_money" | "">("")
+  const [receiptNumber, setReceiptNumber] = useState("")
+  const [transactionRef, setTransactionRef] = useState("")
+  const [paymentNotes, setPaymentNotes] = useState("")
+  const [isSubmittingPayment, setIsSubmittingPayment] = useState(false)
 
   // Fetch balance data
   useEffect(() => {
@@ -169,6 +205,151 @@ export default function AccountingPage() {
     }
     fetchDeposits()
   }, [])
+
+  // Click outside handler for search results
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (searchContainerRef.current && !searchContainerRef.current.contains(event.target as Node)) {
+        setShowSearchResults(false)
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside)
+    return () => document.removeEventListener("mousedown", handleClickOutside)
+  }, [])
+
+  // Search students with debounce
+  const searchStudents = useCallback(async (query: string) => {
+    if (query.length < 2) {
+      setStudentSearchResults([])
+      setShowSearchResults(false)
+      return
+    }
+
+    setIsSearchingStudents(true)
+    try {
+      const response = await fetch(`/api/students/search?q=${encodeURIComponent(query)}&limit=10`)
+      if (!response.ok) throw new Error("Failed to search students")
+      const data = await response.json()
+      // Filter out students without enrollment (not active for current year)
+      const activeStudents = (data.students || []).filter(
+        (s: StudentSearchResult) => s.enrollmentId && s.balanceInfo
+      )
+      setStudentSearchResults(activeStudents)
+      setShowSearchResults(true)
+    } catch (err) {
+      console.error("Error searching students:", err)
+      setStudentSearchResults([])
+    } finally {
+      setIsSearchingStudents(false)
+    }
+  }, [])
+
+  // Handle search input change with debounce
+  const handleSearchChange = useCallback((value: string) => {
+    setStudentSearchQuery(value)
+
+    if (searchTimeoutRef.current) {
+      clearTimeout(searchTimeoutRef.current)
+    }
+
+    searchTimeoutRef.current = setTimeout(() => {
+      searchStudents(value)
+    }, 300)
+  }, [searchStudents])
+
+  // Handle student selection
+  const handleSelectStudent = useCallback((student: StudentSearchResult) => {
+    setSelectedStudent(student)
+    setStudentSearchQuery("")
+    setShowSearchResults(false)
+    setStudentSearchResults([])
+  }, [])
+
+  // Clear selected student
+  const handleClearStudent = useCallback(() => {
+    setSelectedStudent(null)
+    setStudentSearchQuery("")
+  }, [])
+
+  // Reset payment form
+  const resetPaymentForm = useCallback(() => {
+    setSelectedStudent(null)
+    setStudentSearchQuery("")
+    setStudentSearchResults([])
+    setPaymentAmount("")
+    setPaymentMethod("")
+    setReceiptNumber("")
+    setTransactionRef("")
+    setPaymentNotes("")
+  }, [])
+
+  // Handle dialog close
+  const handleDialogChange = useCallback((open: boolean) => {
+    setOpenRecordPayment(open)
+    if (!open) {
+      resetPaymentForm()
+    }
+  }, [resetPaymentForm])
+
+  // Submit payment
+  const handleSubmitPayment = useCallback(async () => {
+    if (!selectedStudent?.enrollmentId || !paymentAmount || !paymentMethod || !receiptNumber) {
+      return
+    }
+
+    const amount = parseFloat(paymentAmount)
+    if (isNaN(amount) || amount <= 0) {
+      return
+    }
+
+    // Check amount doesn't exceed remaining balance
+    if (selectedStudent.balanceInfo && amount > selectedStudent.balanceInfo.remainingBalance) {
+      alert(`Le montant dépasse le solde restant de ${formatAmount(selectedStudent.balanceInfo.remainingBalance)}`)
+      return
+    }
+
+    setIsSubmittingPayment(true)
+    try {
+      const response = await fetch("/api/payments", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          enrollmentId: selectedStudent.enrollmentId,
+          amount,
+          method: paymentMethod,
+          receiptNumber,
+          transactionRef: transactionRef || undefined,
+          notes: paymentNotes || undefined,
+        }),
+      })
+
+      if (!response.ok) {
+        const error = await response.json()
+        throw new Error(error.message || "Failed to record payment")
+      }
+
+      // Refresh payments list
+      const paymentsResponse = await fetch("/api/payments?limit=50")
+      if (paymentsResponse.ok) {
+        const data = await paymentsResponse.json()
+        setPayments(data.payments || [])
+      }
+
+      // Refresh balance
+      const balanceResponse = await fetch("/api/accounting/balance")
+      if (balanceResponse.ok) {
+        const data = await balanceResponse.json()
+        setBalanceData(data)
+      }
+
+      handleDialogChange(false)
+    } catch (err) {
+      console.error("Error recording payment:", err)
+      alert(err instanceof Error ? err.message : "Erreur lors de l'enregistrement du paiement")
+    } finally {
+      setIsSubmittingPayment(false)
+    }
+  }, [selectedStudent, paymentAmount, paymentMethod, receiptNumber, transactionRef, paymentNotes, handleDialogChange])
 
   // Get payments that are ready for reconciliation (deposited status)
   const validatedPayments = useMemo(() => {
@@ -354,7 +535,7 @@ export default function AccountingPage() {
                         : `${payments.length} transactions`}
                     </CardDescription>
                   </div>
-                  <Dialog open={openRecordPayment} onOpenChange={setOpenRecordPayment}>
+                  <Dialog open={openRecordPayment} onOpenChange={handleDialogChange}>
                     <DialogTrigger asChild>
                       <Button>
                         <Plus className="h-4 w-4 mr-2" />
@@ -369,26 +550,127 @@ export default function AccountingPage() {
                         </DialogDescription>
                       </DialogHeader>
                       <div className="space-y-4 py-4">
+                        {/* Student Search */}
                         <div className="space-y-2">
-                          <Label htmlFor="student">{t.common.student} *</Label>
-                          <Select>
-                            <SelectTrigger id="student">
-                              <SelectValue placeholder={t.accounting.searchStudent} />
-                            </SelectTrigger>
-                            <SelectContent>
-                              <SelectItem value="search">Rechercher un étudiant...</SelectItem>
-                            </SelectContent>
-                          </Select>
+                          <Label>{t.common.student} *</Label>
+                          {selectedStudent ? (
+                            <div className="p-4 rounded-lg border bg-primary/5 border-primary/30">
+                              <div className="flex items-start justify-between">
+                                <div className="flex items-center gap-3">
+                                  <div className="size-10 rounded-full bg-primary/20 flex items-center justify-center">
+                                    <User className="size-5 text-primary" />
+                                  </div>
+                                  <div>
+                                    <p className="font-medium text-foreground">
+                                      {selectedStudent.firstName} {selectedStudent.lastName}
+                                    </p>
+                                    <p className="text-sm text-muted-foreground">
+                                      {selectedStudent.studentNumber} • {selectedStudent.grade?.name || "N/A"}
+                                    </p>
+                                  </div>
+                                </div>
+                                <Button
+                                  variant="ghost"
+                                  size="icon"
+                                  onClick={handleClearStudent}
+                                  className="h-8 w-8 text-muted-foreground hover:text-foreground"
+                                >
+                                  <X className="h-4 w-4" />
+                                </Button>
+                              </div>
+                              {selectedStudent.balanceInfo && (
+                                <div className="mt-3 pt-3 border-t grid grid-cols-3 gap-4 text-sm">
+                                  <div>
+                                    <p className="text-muted-foreground">Scolarité</p>
+                                    <p className="font-medium">{formatAmount(selectedStudent.balanceInfo.tuitionFee)}</p>
+                                  </div>
+                                  <div>
+                                    <p className="text-muted-foreground">Payé</p>
+                                    <p className="font-medium text-success">{formatAmount(selectedStudent.balanceInfo.totalPaid)}</p>
+                                  </div>
+                                  <div>
+                                    <p className="text-muted-foreground">Reste</p>
+                                    <p className="font-medium text-warning">{formatAmount(selectedStudent.balanceInfo.remainingBalance)}</p>
+                                  </div>
+                                </div>
+                              )}
+                            </div>
+                          ) : (
+                            <div ref={searchContainerRef} className="relative">
+                              <div className="relative">
+                                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                                <Input
+                                  placeholder={t.accounting.searchStudent}
+                                  value={studentSearchQuery}
+                                  onChange={(e) => handleSearchChange(e.target.value)}
+                                  className="pl-10"
+                                />
+                                {isSearchingStudents && (
+                                  <Loader2 className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 animate-spin text-muted-foreground" />
+                                )}
+                              </div>
+                              {showSearchResults && (
+                                <div className="absolute z-50 w-full mt-1 bg-popover border rounded-lg shadow-lg max-h-64 overflow-auto">
+                                  {studentSearchResults.length === 0 ? (
+                                    <div className="p-4 text-center text-sm text-muted-foreground">
+                                      {studentSearchQuery.length < 2
+                                        ? "Tapez au moins 2 caractères pour rechercher"
+                                        : "Aucun élève actif trouvé"}
+                                    </div>
+                                  ) : (
+                                    studentSearchResults.map((student) => (
+                                      <button
+                                        key={student.id}
+                                        onClick={() => handleSelectStudent(student)}
+                                        className="w-full p-3 text-left hover:bg-muted/50 flex items-center gap-3 border-b last:border-b-0"
+                                      >
+                                        <div className="size-8 rounded-full bg-muted flex items-center justify-center shrink-0">
+                                          <User className="size-4 text-muted-foreground" />
+                                        </div>
+                                        <div className="flex-1 min-w-0">
+                                          <p className="font-medium text-foreground truncate">
+                                            {student.firstName} {student.lastName}
+                                          </p>
+                                          <p className="text-xs text-muted-foreground">
+                                            {student.studentNumber} • {student.grade?.name || "N/A"}
+                                          </p>
+                                        </div>
+                                        {student.balanceInfo && (
+                                          <div className="text-right shrink-0">
+                                            <p className="text-xs text-muted-foreground">Reste</p>
+                                            <p className="text-sm font-medium text-warning">
+                                              {formatAmount(student.balanceInfo.remainingBalance)}
+                                            </p>
+                                          </div>
+                                        )}
+                                      </button>
+                                    ))
+                                  )}
+                                </div>
+                              )}
+                            </div>
+                          )}
                         </div>
 
                         <div className="grid grid-cols-2 gap-4">
                           <div className="space-y-2">
                             <Label htmlFor="amount">{t.accounting.amountGNF} *</Label>
-                            <Input id="amount" type="number" placeholder="800000" />
+                            <Input
+                              id="amount"
+                              type="number"
+                              placeholder="800000"
+                              value={paymentAmount}
+                              onChange={(e) => setPaymentAmount(e.target.value)}
+                            />
+                            {selectedStudent?.balanceInfo && paymentAmount && parseFloat(paymentAmount) > selectedStudent.balanceInfo.remainingBalance && (
+                              <p className="text-xs text-destructive">
+                                Dépasse le solde restant de {formatAmount(selectedStudent.balanceInfo.remainingBalance)}
+                              </p>
+                            )}
                           </div>
                           <div className="space-y-2">
                             <Label htmlFor="paymentType">{t.accounting.paymentType} *</Label>
-                            <Select>
+                            <Select value={paymentMethod} onValueChange={(v) => setPaymentMethod(v as "cash" | "orange_money")}>
                               <SelectTrigger id="paymentType">
                                 <SelectValue placeholder={t.common.select} />
                               </SelectTrigger>
@@ -402,21 +684,38 @@ export default function AccountingPage() {
 
                         <div className="space-y-2">
                           <Label htmlFor="reference">{t.accounting.documentReference} *</Label>
-                          <Input id="reference" placeholder={t.accounting.documentReferencePlaceholder} />
+                          <Input
+                            id="reference"
+                            placeholder={t.accounting.documentReferencePlaceholder}
+                            value={receiptNumber}
+                            onChange={(e) => setReceiptNumber(e.target.value)}
+                          />
                           <p className="text-xs text-muted-foreground">
                             {t.accounting.documentReferenceHint}
                           </p>
                         </div>
 
+                        {paymentMethod === "orange_money" && (
+                          <div className="space-y-2">
+                            <Label htmlFor="transactionRef">Référence transaction Orange Money</Label>
+                            <Input
+                              id="transactionRef"
+                              placeholder="Ex: OM123456789"
+                              value={transactionRef}
+                              onChange={(e) => setTransactionRef(e.target.value)}
+                            />
+                          </div>
+                        )}
+
                         <div className="space-y-2">
-                          <Label htmlFor="document">{t.accounting.supportingDocument} *</Label>
+                          <Label htmlFor="document">{t.accounting.supportingDocument}</Label>
                           <div className="flex items-center gap-2">
                             <Input id="document" type="file" accept=".pdf,.jpg,.jpeg,.png" className="flex-1" />
                             <Button variant="outline" size="icon" className="bg-transparent shrink-0">
                               <Upload className="h-4 w-4" />
                             </Button>
                           </div>
-                          <p className="text-xs text-destructive flex items-center gap-1">
+                          <p className="text-xs text-muted-foreground flex items-center gap-1">
                             <AlertCircle className="h-3 w-3" />
                             {t.accounting.supportingDocumentHint}
                           </p>
@@ -424,18 +723,37 @@ export default function AccountingPage() {
 
                         <div className="space-y-2">
                           <Label htmlFor="notes">{t.accounting.notesOptional}</Label>
-                          <Input id="notes" placeholder={t.accounting.notesPlaceholder} />
+                          <Input
+                            id="notes"
+                            placeholder={t.accounting.notesPlaceholder}
+                            value={paymentNotes}
+                            onChange={(e) => setPaymentNotes(e.target.value)}
+                          />
                         </div>
 
                         <div className="flex justify-end gap-3 pt-4">
                           <Button
                             variant="outline"
-                            onClick={() => setOpenRecordPayment(false)}
+                            onClick={() => handleDialogChange(false)}
                             className="bg-transparent"
+                            disabled={isSubmittingPayment}
                           >
                             {t.common.cancel}
                           </Button>
-                          <Button onClick={() => setOpenRecordPayment(false)}>{t.accounting.savePayment}</Button>
+                          <Button
+                            onClick={handleSubmitPayment}
+                            disabled={
+                              isSubmittingPayment ||
+                              !selectedStudent?.enrollmentId ||
+                              !paymentAmount ||
+                              !paymentMethod ||
+                              !receiptNumber ||
+                              (selectedStudent?.balanceInfo && parseFloat(paymentAmount) > selectedStudent.balanceInfo.remainingBalance)
+                            }
+                          >
+                            {isSubmittingPayment && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
+                            {t.accounting.savePayment}
+                          </Button>
                         </div>
                       </div>
                     </DialogContent>
