@@ -54,14 +54,14 @@ export function LanguageSwitcher({ variant = 'default', className }: LanguageSwi
               onClick={() => setLocale(loc)}
               className={`text-sm transition-colors ${
                 locale === loc
-                  ? 'font-semibold text-primary-foreground'
-                  : 'text-primary-foreground/60 hover:text-primary-foreground'
+                  ? 'font-semibold text-gspn-gold-400'
+                  : 'text-gray-300 hover:text-gspn-gold-400'
               }`}
             >
               {loc.toUpperCase()}
             </button>
             {index < locales.length - 1 && (
-              <span className="mx-1 text-primary-foreground/40">|</span>
+              <span className="mx-1 text-gray-500">|</span>
             )}
           </span>
         ))}

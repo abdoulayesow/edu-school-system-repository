@@ -118,11 +118,41 @@
 }
 
 @theme inline {
-  /* Using Inter for high legibility and professionalism */
+  /* Using Inter for high legibility and professionalism - consistent across all text */
   --font-sans: "Inter", "Inter Fallback", system-ui, -apple-system, sans-serif;
   --font-mono: "Geist Mono", "Geist Mono Fallback", monospace;
-  --font-heading: "Poppins", "Inter Fallback", system-ui, -apple-system,
-    sans-serif;
+  /* Using Inter for headings as well for consistency */
+  --font-heading: "Inter", "Inter Fallback", system-ui, -apple-system, sans-serif;
+  --font-display: "Inter", "Inter Fallback", system-ui, -apple-system, sans-serif;
+
+  /* GSPN Brand Colors - Extended palette for easy use */
+  --color-gspn-maroon-50: #fdf2f4;
+  --color-gspn-maroon-100: #fce4e8;
+  --color-gspn-maroon-200: #faccd4;
+  --color-gspn-maroon-300: #f5a3b3;
+  --color-gspn-maroon-400: #ed6b86;
+  --color-gspn-maroon-500: #8B2332;
+  --color-gspn-maroon-600: #7a1f2c;
+  --color-gspn-maroon-700: #661a25;
+  --color-gspn-maroon-800: #551620;
+  --color-gspn-maroon-900: #47131b;
+  /* Navigation background - lab(2 3.98 1.32) converted to hex */
+  --color-gspn-maroon-950: #050404;
+
+  --color-gspn-gold-50: #fdfaf3;
+  --color-gspn-gold-100: #faf5e6;
+  --color-gspn-gold-200: #f3e6c0;
+  --color-gspn-gold-300: #ecd799;
+  --color-gspn-gold-400: #e5c873;
+  --color-gspn-gold-500: #D4AF37;
+  --color-gspn-gold-600: #c09a2f;
+  --color-gspn-gold-700: #a08527;
+  --color-gspn-gold-800: #80701f;
+  --color-gspn-gold-900: #605b17;
+
+  /* Custom shadows */
+  --shadow-gold: 0 4px 14px 0 rgba(212, 175, 55, 0.2);
+  --shadow-gold-lg: 0 10px 40px 0 rgba(212, 175, 55, 0.3);
 
   --color-background: var(--background);
   --color-foreground: var(--foreground);
@@ -169,7 +199,16 @@
 @layer base {
   * {
     @apply border-border outline-ring/50;
-    transition: all 0.2s ease-in-out;
+  }
+
+  /* Scoped transitions - avoid transition: all which can cause interaction issues */
+  a, button, input, select, textarea,
+  [role="button"], [data-slot] {
+    transition: color 0.2s ease-in-out,
+                background-color 0.2s ease-in-out,
+                border-color 0.2s ease-in-out,
+                box-shadow 0.2s ease-in-out,
+                opacity 0.2s ease-in-out;
   }
   body {
     @apply bg-background text-foreground;
@@ -182,7 +221,7 @@
   h5,
   h6,
   .text-heading {
-    @apply font-heading font-semibold text-foreground;
+    @apply font-sans font-semibold text-foreground;
   }
   h1 {
     @apply text-3xl;
@@ -226,4 +265,86 @@
 .dark .glassmorphism {
   background-color: oklch(var(--sidebar) / 0.6);
   border-right: 1px solid oklch(var(--sidebar-border) / 0.4);
+}
+
+/* Custom Scrollbar - Gold themed (matching restaurant app) */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #e5c873;
+  border-radius: 9999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #D4AF37;
+}
+
+.dark ::-webkit-scrollbar-thumb {
+  background: rgba(212, 175, 55, 0.4);
+}
+
+.dark ::-webkit-scrollbar-thumb:hover {
+  background: rgba(212, 175, 55, 0.6);
+}
+
+/* Navigation blur effect */
+.nav-blur {
+  background-color: rgba(255, 255, 255, 0.8);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+.dark .nav-blur {
+  background-color: rgba(17, 17, 17, 0.8);
+}
+
+/* Enhanced card variants */
+.card-enhanced {
+  @apply rounded-xl border border-gray-100 bg-white shadow-sm;
+  @apply dark:border-gray-800 dark:bg-gray-900;
+  @apply hover:shadow-md transition-shadow duration-200;
+}
+
+.card-gradient {
+  @apply rounded-xl p-6 shadow-lg relative overflow-hidden;
+  background: linear-gradient(135deg, #8B2332 0%, #661a25 100%);
+}
+
+.card-gradient-gold {
+  @apply rounded-xl p-6 shadow-lg relative overflow-hidden;
+  background: linear-gradient(135deg, #D4AF37 0%, #ecd799 100%);
+}
+
+/* Status badge variants */
+.badge-success {
+  @apply bg-green-100 text-green-800 border-green-300;
+  @apply dark:bg-green-900/20 dark:text-green-200 dark:border-green-800;
+}
+
+.badge-warning {
+  @apply bg-yellow-100 text-yellow-800 border-yellow-300;
+  @apply dark:bg-yellow-900/20 dark:text-yellow-200 dark:border-yellow-800;
+}
+
+.badge-error {
+  @apply bg-red-100 text-red-800 border-red-300;
+  @apply dark:bg-red-900/20 dark:text-red-200 dark:border-red-800;
+}
+
+/* Gold focus ring for inputs */
+.focus-gold:focus {
+  @apply ring-2 ring-offset-2;
+  --tw-ring-color: #D4AF37;
+}
+
+/* Font display class - using Inter for consistency */
+.font-display {
+  font-family: "Inter", "Inter Fallback", system-ui, -apple-system, sans-serif;
 }

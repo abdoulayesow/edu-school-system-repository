@@ -13,7 +13,8 @@ import { StepPaymentTransaction } from "./steps/step-payment-transaction"
 import { StepReview } from "./steps/step-review"
 import { StepConfirmation } from "./steps/step-confirmation"
 import { useI18n } from "@/components/i18n-provider"
-import { AlertCircle, Calendar } from "lucide-react"
+import { AlertCircle, Calendar, GraduationCap } from "lucide-react"
+import { Badge } from "@/components/ui/badge"
 
 interface EnrollmentWizardProps {
   schoolYearId?: string
@@ -183,6 +184,32 @@ function WizardContent({ schoolYearId, schoolYearName }: EnrollmentWizardProps) 
         </CardHeader>
 
         <CardContent>
+          {/* Selected Grade Header - shown on steps 2-6 */}
+          {currentStep > 1 && data.gradeName && (
+            <div className="mb-6 p-3 bg-muted/50 rounded-lg border">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <GraduationCap className="h-4 w-4 text-primary" />
+                  <span className="text-sm font-medium">{data.gradeName}</span>
+                  <Badge variant="outline" className="text-xs">
+                    {data.level === "kindergarten" && t.enrollmentWizard.kindergarten}
+                    {data.level === "elementary" && t.enrollmentWizard.elementary}
+                    {data.level === "college" && t.enrollmentWizard.college}
+                    {data.level === "high_school" && t.enrollmentWizard.highSchool}
+                  </Badge>
+                </div>
+                <span className="text-sm text-muted-foreground font-mono">
+                  {new Intl.NumberFormat("fr-GN", {
+                    style: "currency",
+                    currency: "GNF",
+                    minimumFractionDigits: 0,
+                    maximumFractionDigits: 0,
+                  }).format(data.tuitionFee)}
+                </span>
+              </div>
+            </div>
+          )}
+
           {renderStep()}
 
           {currentStep < 6 && (

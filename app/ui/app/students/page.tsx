@@ -375,8 +375,8 @@ export default function StudentsPage() {
                       <TableRow>
                         <TableCell colSpan={7} className="text-center py-8 text-muted-foreground">
                           {searchQuery || gradeFilter !== "all" || paymentStatusFilter !== "all" || attendanceStatusFilter !== "all"
-                            ? "Aucun étudiant trouvé avec ces critères"
-                            : "Aucun étudiant inscrit"}
+                            ? "Aucun élève trouvé avec ces critères"
+                            : "Aucun élève inscrit"}
                         </TableCell>
                       </TableRow>
                     ) : (

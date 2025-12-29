@@ -72,37 +72,44 @@ const LAST_NAMES = [
 ]
 
 // Grade configuration with tuition fees in GNF
+// Kindergarten (PS, MS, GS): 1,200,000 GNF
 // Elementary (1-6): 800,000 - 900,000 GNF
 // College (7-10): 1,000,000 - 1,100,000 GNF
 // High School (11-Terminal): 1,200,000 - 1,300,000 GNF
-type SchoolLevel = "elementary" | "college" | "high_school"
+type SchoolLevel = "kindergarten" | "elementary" | "college" | "high_school"
 
 interface GradeConfig {
   name: string
   level: SchoolLevel
   order: number
   tuitionFee: number
+  capacity: number
 }
 
 const GRADES_CONFIG: GradeConfig[] = [
+  // Kindergarten (Maternelle) - PS, MS, GS - smaller classes
+  { name: "Petite Section (PS)", level: "kindergarten", order: -2, tuitionFee: 1200000, capacity: 25 },
+  { name: "Moyenne Section (MS)", level: "kindergarten", order: -1, tuitionFee: 1200000, capacity: 25 },
+  { name: "Grande Section (GS)", level: "kindergarten", order: 0, tuitionFee: 1200000, capacity: 30 },
+
   // Elementary School (Primaire) - Grades 1-6
-  { name: "1ère Année", level: "elementary", order: 1, tuitionFee: 800000 },
-  { name: "2ème Année", level: "elementary", order: 2, tuitionFee: 820000 },
-  { name: "3ème Année", level: "elementary", order: 3, tuitionFee: 840000 },
-  { name: "4ème Année", level: "elementary", order: 4, tuitionFee: 860000 },
-  { name: "5ème Année", level: "elementary", order: 5, tuitionFee: 880000 },
-  { name: "6ème Année", level: "elementary", order: 6, tuitionFee: 900000 },
+  { name: "1ère Année", level: "elementary", order: 1, tuitionFee: 800000, capacity: 35 },
+  { name: "2ème Année", level: "elementary", order: 2, tuitionFee: 820000, capacity: 35 },
+  { name: "3ème Année", level: "elementary", order: 3, tuitionFee: 840000, capacity: 35 },
+  { name: "4ème Année", level: "elementary", order: 4, tuitionFee: 860000, capacity: 35 },
+  { name: "5ème Année", level: "elementary", order: 5, tuitionFee: 880000, capacity: 35 },
+  { name: "6ème Année", level: "elementary", order: 6, tuitionFee: 900000, capacity: 35 },
 
   // College (Collège) - Grades 7-10
-  { name: "7ème Année", level: "college", order: 7, tuitionFee: 1000000 },
-  { name: "8ème Année", level: "college", order: 8, tuitionFee: 1025000 },
-  { name: "9ème Année", level: "college", order: 9, tuitionFee: 1050000 },
-  { name: "10ème Année", level: "college", order: 10, tuitionFee: 1100000 },
+  { name: "7ème Année", level: "college", order: 7, tuitionFee: 1000000, capacity: 40 },
+  { name: "8ème Année", level: "college", order: 8, tuitionFee: 1025000, capacity: 40 },
+  { name: "9ème Année", level: "college", order: 9, tuitionFee: 1050000, capacity: 40 },
+  { name: "10ème Année", level: "college", order: 10, tuitionFee: 1100000, capacity: 40 },
 
   // High School (Lycée) - Grades 11-Terminal
-  { name: "11ème Année", level: "high_school", order: 11, tuitionFee: 1200000 },
-  { name: "12ème Année", level: "high_school", order: 12, tuitionFee: 1250000 },
-  { name: "Terminale", level: "high_school", order: 13, tuitionFee: 1300000 },
+  { name: "11ème Année", level: "high_school", order: 11, tuitionFee: 1200000, capacity: 35 },
+  { name: "12ème Année", level: "high_school", order: 12, tuitionFee: 1250000, capacity: 35 },
+  { name: "Terminale", level: "high_school", order: 13, tuitionFee: 1300000, capacity: 30 },
 ]
 
 // Subject configuration from Guinea curriculum
@@ -150,6 +157,11 @@ const SUBJECTS_CONFIG: SubjectConfig[] = [
 // Grade-subject mappings (which subjects for which grades)
 // Key: grade order, Value: array of subject codes
 const GRADE_SUBJECTS_MAP: { [gradeOrder: number]: string[] } = {
+  // Kindergarten - Maternelle (PS, MS, GS)
+  [-2]: ["LECTURE", "ECRITURE", "CALC", "DESSIN", "CHANT", "EPS"], // Petite Section
+  [-1]: ["LECTURE", "ECRITURE", "CALC", "DESSIN", "CHANT", "EPS"], // Moyenne Section
+  0: ["LECTURE", "ECRITURE", "CALC", "FRANCAIS", "DESSIN", "CHANT", "EPS"], // Grande Section
+
   // Elementary - Grades 1-2 (CP1, CP2)
   1: ["LECTURE", "ECRITURE", "CALC", "FRANCAIS", "EDU_CIV", "HIST_GEO", "SCI_NAT", "DESSIN", "CHANT", "EPS", "TRAV_MAN"],
   2: ["LECTURE", "ECRITURE", "CALC", "FRANCAIS", "EDU_CIV", "HIST_GEO", "SCI_NAT", "DESSIN", "CHANT", "EPS", "TRAV_MAN"],
@@ -341,6 +353,7 @@ async function main() {
             level: gradeConfig.level,
             order: gradeConfig.order,
             tuitionFee: gradeConfig.tuitionFee,
+            capacity: gradeConfig.capacity,
             schoolYearId: previousSchoolYear.id,
           },
         })
@@ -388,6 +401,7 @@ async function main() {
             level: gradeConfig.level,
             order: gradeConfig.order,
             tuitionFee: gradeConfig.tuitionFee,
+            capacity: gradeConfig.capacity,
             schoolYearId: currentSchoolYear.id,
           },
         })
@@ -398,6 +412,7 @@ async function main() {
             name: gradeConfig.name,
             level: gradeConfig.level,
             tuitionFee: gradeConfig.tuitionFee,
+            capacity: gradeConfig.capacity,
           },
         })
       }

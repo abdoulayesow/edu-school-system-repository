@@ -38,13 +38,14 @@ export async function GET() {
       )
     }
 
-    // Transform grades to include enrollment count
+    // Transform grades to include enrollment count and capacity
     const gradesWithCount = activeSchoolYear.grades.map((grade) => ({
       id: grade.id,
       name: grade.name,
       level: grade.level,
       order: grade.order,
       tuitionFee: grade.tuitionFee,
+      capacity: grade.capacity,
       enrollmentCount: grade._count.enrollments,
     }))
 

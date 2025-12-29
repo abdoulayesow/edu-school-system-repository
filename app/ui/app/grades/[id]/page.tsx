@@ -185,7 +185,7 @@ export default function GradeDetailPage() {
               <Badge variant="outline">{grade.level}</Badge>
             </div>
             <p className="text-muted-foreground">
-              {grade.schoolYear.name} • {grade.studentCount} étudiants
+              {grade.schoolYear.name} • {grade.studentCount} élèves
             </p>
           </div>
 
@@ -232,7 +232,7 @@ export default function GradeDetailPage() {
             <CardHeader className="pb-2">
               <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
                 <Users className="size-4" />
-                Étudiants
+                Élèves
               </CardTitle>
             </CardHeader>
             <CardContent>
@@ -283,7 +283,7 @@ export default function GradeDetailPage() {
         <Tabs defaultValue="overview" className="space-y-4">
           <TabsList>
             <TabsTrigger value="overview">Vue d'ensemble</TabsTrigger>
-            <TabsTrigger value="students">Étudiants ({grade.studentCount})</TabsTrigger>
+            <TabsTrigger value="students">Élèves ({grade.studentCount})</TabsTrigger>
             <TabsTrigger value="subjects">Matières ({grade.subjects.length})</TabsTrigger>
           </TabsList>
 
@@ -390,7 +390,7 @@ export default function GradeDetailPage() {
             <Card>
               <CardHeader>
                 <CardTitle>{t.gradesEnhanced.studentsInGrade}</CardTitle>
-                <CardDescription>{grade.studentCount} étudiants inscrits</CardDescription>
+                <CardDescription>{grade.studentCount} élèves inscrits</CardDescription>
               </CardHeader>
               <CardContent>
                 <div className="rounded-md border">
@@ -406,7 +406,7 @@ export default function GradeDetailPage() {
                       {grade.enrollments.length === 0 ? (
                         <TableRow>
                           <TableCell colSpan={3} className="text-center py-8 text-muted-foreground">
-                            Aucun étudiant inscrit
+                            Aucun élève inscrit
                           </TableCell>
                         </TableRow>
                       ) : (

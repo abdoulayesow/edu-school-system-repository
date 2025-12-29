@@ -21,7 +21,11 @@
       "Bash(git push:*)",
       "Bash(npm run test:e2e:*)",
       "Bash(echo:*)",
-      "Bash(git push)"
+      "Bash(git push)",
+      "Bash(npx tsc:*)",
+      "Bash(npm run typecheck:*)",
+      "Bash(gh pr edit:*)",
+      "Bash(npx prisma generate:*)"
     ]
   }
 }

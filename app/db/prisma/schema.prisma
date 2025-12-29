@@ -135,6 +135,7 @@ model PasswordResetToken {
 // ============================================================================
 
 enum SchoolLevel {
+  kindergarten  // Maternelle (PS, MS, GS)
   elementary    // Primaire (Grades 1-6)
   college       // College (Grades 7-10)
   high_school   // Lycee (Grades 11-12 + Terminal)
@@ -208,6 +209,7 @@ model Grade {
   level           SchoolLevel
   order           Int         // 1-13 for sorting
   tuitionFee      Int         // Annual fee in GNF
+  capacity        Int         @default(35) // Maximum students per grade
   schoolYearId    String
   gradeLeaderId   String?     // Teacher who leads this grade (responsable de classe)
   syncVersion     Int         @default(0)

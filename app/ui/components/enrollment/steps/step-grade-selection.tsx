@@ -17,6 +17,7 @@ interface Grade {
   level: SchoolLevel
   order: number
   tuitionFee: number
+  capacity: number
   enrollmentCount: number
 }
 
@@ -38,7 +39,7 @@ export function StepGradeSelection() {
 
   const [isLoading, setIsLoading] = useState(true)
   const [schoolYear, setSchoolYear] = useState<SchoolYear | null>(null)
-  const [activeLevel, setActiveLevel] = useState<SchoolLevel>("elementary")
+  const [activeLevel, setActiveLevel] = useState<SchoolLevel>("kindergarten")
   const [error, setError] = useState<string | null>(null)
 
   // Fetch active school year with grades
@@ -93,6 +94,30 @@ export function StepGradeSelection() {
     }).format(amount)
   }
 
+  // Get capacity percentage and color
+  const getCapacityInfo = (enrolled: number, capacity: number) => {
+    const percentage = Math.round((enrolled / capacity) * 100)
+    let color: "green" | "orange" | "red"
+    let bgColor: string
+    let textColor: string
+
+    if (percentage <= 55) {
+      color = "green"
+      bgColor = "bg-green-100"
+      textColor = "text-green-700"
+    } else if (percentage <= 65) {
+      color = "orange"
+      bgColor = "bg-orange-100"
+      textColor = "text-orange-700"
+    } else {
+      color = "red"
+      bgColor = "bg-red-100"
+      textColor = "text-red-700"
+    }
+
+    return { percentage, color, bgColor, textColor }
+  }
+
   if (isLoading) {
     return (
       <div className="space-y-4">
@@ -142,7 +167,10 @@ export function StepGradeSelection() {
         value={activeLevel}
         onValueChange={(v) => setActiveLevel(v as SchoolLevel)}
       >
-        <TabsList className="grid w-full grid-cols-3">
+        <TabsList className="grid w-full grid-cols-4">
+          <TabsTrigger value="kindergarten">
+            {t.enrollmentWizard.kindergarten}
+          </TabsTrigger>
           <TabsTrigger value="elementary">
             {t.enrollmentWizard.elementary}
           </TabsTrigger>
@@ -152,12 +180,13 @@ export function StepGradeSelection() {
           </TabsTrigger>
         </TabsList>
 
-        {(["elementary", "college", "high_school"] as SchoolLevel[]).map(
+        {(["kindergarten", "elementary", "college", "high_school"] as SchoolLevel[]).map(
           (level) => (
             <TabsContent key={level} value={level}>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                 {getGradesByLevel(level).map((grade) => {
                   const isSelected = data.gradeId === grade.id
+                  const capacityInfo = getCapacityInfo(grade.enrollmentCount, grade.capacity)
 
                   return (
                     <Card
@@ -185,7 +214,30 @@ export function StepGradeSelection() {
                           )}
                         </CardDescription>
                       </CardHeader>
-                      <CardContent>
+                      <CardContent className="space-y-3">
+                        {/* Capacity indicator */}
+                        <div className="space-y-1">
+                          <div className="flex items-center justify-between text-xs">
+                            <span className="text-muted-foreground">
+                              {t.enrollmentWizard.capacity || "Capacity"}
+                            </span>
+                            <span className={cn("font-medium", capacityInfo.textColor)}>
+                              {capacityInfo.percentage}% ({grade.enrollmentCount}/{grade.capacity})
+                            </span>
+                          </div>
+                          <div className="h-2 w-full bg-muted rounded-full overflow-hidden">
+                            <div
+                              className={cn(
+                                "h-full rounded-full transition-all",
+                                capacityInfo.color === "green" && "bg-green-500",
+                                capacityInfo.color === "orange" && "bg-orange-500",
+                                capacityInfo.color === "red" && "bg-red-500"
+                              )}
+                              style={{ width: `${Math.min(capacityInfo.percentage, 100)}%` }}
+                            />
+                          </div>
+                        </div>
+
                         <div className="flex items-center justify-between">
                           <span className="text-sm text-muted-foreground">
                             {t.enrollmentWizard.yearlyTuition}

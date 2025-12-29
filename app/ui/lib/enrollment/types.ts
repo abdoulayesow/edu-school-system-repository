@@ -8,7 +8,7 @@
 // Enums
 // ============================================================================
 
-export type SchoolLevel = "elementary" | "college" | "high_school"
+export type SchoolLevel = "kindergarten" | "elementary" | "college" | "high_school"
 
 export type EnrollmentStatus =
   | "draft"
@@ -360,30 +360,36 @@ export interface EnrollmentSummary {
 // ============================================================================
 
 export const GRADE_LEVELS: Record<SchoolLevel, { label: string; labelFr: string }> = {
+  kindergarten: { label: "Kindergarten", labelFr: "Maternelle" },
   elementary: { label: "Elementary School", labelFr: "Primaire" },
-  college: { label: "College", labelFr: "College" },
-  high_school: { label: "High School", labelFr: "Lycee" },
+  college: { label: "College", labelFr: "Collège" },
+  high_school: { label: "High School", labelFr: "Lycée" },
 }
 
 export const GRADES_BY_LEVEL: Record<SchoolLevel, Array<{ order: number; name: string; nameFr: string }>> = {
+  kindergarten: [
+    { order: -2, name: "Petite Section (PS)", nameFr: "Petite Section (PS)" },
+    { order: -1, name: "Moyenne Section (MS)", nameFr: "Moyenne Section (MS)" },
+    { order: 0, name: "Grande Section (GS)", nameFr: "Grande Section (GS)" },
+  ],
   elementary: [
-    { order: 1, name: "Grade 1", nameFr: "1ere Annee" },
-    { order: 2, name: "Grade 2", nameFr: "2eme Annee" },
-    { order: 3, name: "Grade 3", nameFr: "3eme Annee" },
-    { order: 4, name: "Grade 4", nameFr: "4eme Annee" },
-    { order: 5, name: "Grade 5", nameFr: "5eme Annee" },
-    { order: 6, name: "Grade 6", nameFr: "6eme Annee" },
+    { order: 1, name: "Grade 1", nameFr: "1ère Année" },
+    { order: 2, name: "Grade 2", nameFr: "2ème Année" },
+    { order: 3, name: "Grade 3", nameFr: "3ème Année" },
+    { order: 4, name: "Grade 4", nameFr: "4ème Année" },
+    { order: 5, name: "Grade 5", nameFr: "5ème Année" },
+    { order: 6, name: "Grade 6", nameFr: "6ème Année" },
   ],
   college: [
-    { order: 7, name: "Grade 7", nameFr: "7eme Annee" },
-    { order: 8, name: "Grade 8", nameFr: "8eme Annee" },
-    { order: 9, name: "Grade 9", nameFr: "9eme Annee" },
-    { order: 10, name: "Grade 10", nameFr: "10eme Annee" },
+    { order: 7, name: "Grade 7", nameFr: "7ème Année" },
+    { order: 8, name: "Grade 8", nameFr: "8ème Année" },
+    { order: 9, name: "Grade 9", nameFr: "9ème Année" },
+    { order: 10, name: "Grade 10", nameFr: "10ème Année" },
   ],
   high_school: [
-    { order: 11, name: "Grade 11", nameFr: "11eme Annee" },
-    { order: 12, name: "Grade 12", nameFr: "12eme Annee" },
-    { order: 13, name: "Terminal", nameFr: "Terminal" },
+    { order: 11, name: "Grade 11", nameFr: "11ème Année" },
+    { order: 12, name: "Grade 12", nameFr: "12ème Année" },
+    { order: 13, name: "Terminal", nameFr: "Terminale" },
   ],
 }
 

@@ -98,11 +98,11 @@ For dynamic values in translations:
 import { interpolate } from '@/components/i18n-provider';
 
 // In translation file:
-// studentsEnrolled: "{count} étudiants inscrits"
+// studentsEnrolled: "{count} élèves inscrits"
 
 // Usage:
 interpolate(t.enrollments.studentsEnrolled, { count: 615 })
-// Output: "615 étudiants inscrits"
+// Output: "615 élèves inscrits"
 ```
 
 ## Configuration

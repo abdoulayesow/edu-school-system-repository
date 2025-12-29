@@ -26,8 +26,8 @@ export const fr = {
     status: "Statut",
     date: "Date",
     amount: "Montant",
-    students: "étudiants",
-    student: "Étudiant",
+    students: "élèves",
+    student: "Élève",
     teacher: "Enseignant",
     user: "Utilisateur",
     level: "Niveau",
@@ -43,7 +43,7 @@ export const fr = {
   nav: {
     dashboard: "Tableau de bord",
     enrollments: "Inscriptions",
-    students: "Étudiants",
+    students: "Élèves",
     grades: "Classes",
     activities: "Activités",
     accounting: "Comptabilité",
@@ -55,6 +55,21 @@ export const fr = {
     managementSystem: "Système de gestion",
     profile: "Profil",
     myAccount: "Mon compte",
+    // New hierarchical navigation keys
+    overview: "Aperçu",
+    charts: "Graphiques",
+    studentsSection: "Élèves",
+    accountingSection: "Comptabilité",
+    balance: "Solde",
+    payments: "Paiements",
+    expenses: "Dépenses",
+    classes: "Classes",
+    audit: "Audit",
+    financialAudit: "Audit Financier",
+    dataHistory: "Historique des Données",
+    collapseMenu: "Réduire le menu",
+    expandMenu: "Agrandir le menu",
+    closeMenu: "Fermer le menu",
   },
 
   // Homepage
@@ -68,7 +83,7 @@ export const fr = {
     
     // Page descriptions
     dashboardDesc: "Vue de supervision du directeur avec KPIs, approbations en attente et éléments d'action",
-    enrollmentsDesc: "Gérer les inscriptions, enregistrements et informations des étudiants",
+    enrollmentsDesc: "Gérer les inscriptions, enregistrements et informations des élèves",
     activitiesDesc: "Organiser les classes, clubs et activités extrascolaires",
     accountingDesc: "Suivre les paiements, réconciliations et contrôle financier avec traçabilité complète",
     attendanceDesc: "Suivi de présence mobile avec interface de marquage rapide",
@@ -115,7 +130,7 @@ export const fr = {
     pendingExceptionTickets: "Tickets d'exception en attente",
     requestsNeedingApproval: "Demandes nécessitant votre approbation",
     requestType: "Type de demande",
-    student: "Étudiant",
+    student: "Élève",
     details: "Détails",
     actions: "Actions",
     approve: "Approuver",
@@ -138,14 +153,14 @@ export const fr = {
 
     // Activity actions
     financialPeriodClosed: "Période financière clôturée",
-    bulkEnrollmentProcessed: "Inscription en masse traitée ({count} étudiants)",
+    bulkEnrollmentProcessed: "Inscription en masse traitée ({count} élèves)",
     academicReportGenerated: "Rapport académique généré",
     bankDiscrepancyFlagged: "Discordance bancaire signalée",
     paymentValidation: "Validation de {count} paiements",
 
     // Charts
     enrollmentByLevel: "Inscriptions par niveau",
-    studentDistribution: "Répartition des étudiants par classe",
+    studentDistribution: "Répartition des élèves par classe",
     revenueByCategory: "Revenu par catégorie",
     revenueDistribution: "Distribution des revenus par type",
     viewAllReports: "Voir tous les rapports",
@@ -168,14 +183,14 @@ export const fr = {
   // Enrollments
   enrollments: {
     title: "Gestion des inscriptions",
-    subtitle: "Gérer les inscriptions et profils des étudiants",
-    allStudents: "Tous les étudiants",
-    studentsEnrolled: "{count} étudiants inscrits",
+    subtitle: "Gérer les inscriptions et profils des élèves",
+    allStudents: "Tous les élèves",
+    studentsEnrolled: "{count} élèves inscrits",
     newEnrollment: "Nouvelle inscription",
-    searchPlaceholder: "Rechercher par nom, ID étudiant...",
+    searchPlaceholder: "Rechercher par nom, ID élève...",
 
     // Table headers
-    studentId: "ID étudiant",
+    studentId: "ID élève",
     fullName: "Nom complet",
     enrollmentDate: "Date d'inscription",
     paymentStatus: "Statut de paiement",
@@ -186,13 +201,13 @@ export const fr = {
     overdue: "En retard",
 
     // New enrollment dialog
-    newStudentEnrollment: "Nouvelle inscription d'étudiant",
-    fillStudentInfo: "Remplissez les informations de l'étudiant pour créer une nouvelle inscription",
+    newStudentEnrollment: "Nouvelle inscription d'élève",
+    fillStudentInfo: "Remplissez les informations de l'élève pour créer une nouvelle inscription",
 
     // Personal info
     personalInfo: "Informations personnelles",
     firstName: "Prénom",
-    firstNamePlaceholder: "Prénom de l'étudiant",
+    firstNamePlaceholder: "Prénom de l'élève",
     lastName: "Nom",
     lastNamePlaceholder: "Nom de famille",
     dateOfBirth: "Date de naissance",
@@ -237,12 +252,12 @@ export const fr = {
     extra: "Extra",
 
     // Card info
-    assignStudent: "Assigner un étudiant",
+    assignStudent: "Assigner un élève",
 
     // Assign dialog
-    assignStudentTitle: "Assigner un étudiant",
-    searchAndAdd: "Recherchez et ajoutez un étudiant à",
-    searchStudentPlaceholder: "Rechercher un étudiant par nom ou ID...",
+    assignStudentTitle: "Assigner un élève",
+    searchAndAdd: "Recherchez et ajoutez un élève à",
+    searchStudentPlaceholder: "Rechercher un élève par nom ou ID...",
     overduePayments: "Paiements en retard",
 
     // Activity names
@@ -267,7 +282,7 @@ export const fr = {
 
     // Payments section
     paymentTransactions: "Transactions de paiement",
-    registerAndValidate: "Enregistrer et valider les paiements des étudiants",
+    registerAndValidate: "Enregistrer et valider les paiements des élèves",
     recordPayment: "Enregistrer un paiement",
     savePayment: "Enregistrer le paiement",
 
@@ -287,7 +302,7 @@ export const fr = {
     // Record payment dialog
     recordNewPayment: "Enregistrer un nouveau paiement",
     allFieldsRequired: "Tous les champs sont obligatoires. Un document justificatif est requis.",
-    searchStudent: "Rechercher un étudiant...",
+    searchStudent: "Rechercher un élève...",
     amountGNF: "Montant (GNF)",
     paymentType: "Type de paiement",
     cash: "Espèces (Cash)",
@@ -344,7 +359,7 @@ export const fr = {
     takeAttendance: "Prendre présence",
 
     // Taking attendance
-    tapToChange: "Tapez sur un étudiant pour changer le statut de présence",
+    tapToChange: "Tapez sur un élève pour changer le statut de présence",
 
     // Summary
     present: "Présents",
@@ -357,8 +372,8 @@ export const fr = {
     statusExcused: "Excusé",
 
     // Student list
-    studentList: "Liste des étudiants",
-    allMarkedPresent: "Tous les étudiants sont marqués présents par défaut",
+    studentList: "Liste des élèves",
+    allMarkedPresent: "Tous les élèves sont marqués présents par défaut",
     overduePayment: "Paiement en retard",
 
     // Submit
@@ -366,9 +381,9 @@ export const fr = {
 
     // Instructions
     instructions: "Instructions",
-    instruction1: "Tapez sur un étudiant pour changer son statut",
+    instruction1: "Tapez sur un élève pour changer son statut",
     instruction2: "Présent (vert) → Absent (rouge) → Excusé (orange) → Présent",
-    instruction3: "Les étudiants avec paiements en retard sont marqués d'un badge",
+    instruction3: "Les élèves avec paiements en retard sont marqués d'un badge",
     instruction4: "Cliquez sur \"Soumettre\" pour enregistrer la présence",
   },
 
@@ -385,11 +400,11 @@ export const fr = {
     totalActivities: "Total activités",
     academicActivities: "scolaires",
     extraActivities: "extra",
-    enrolledStudents: "Étudiants inscrits",
+    enrolledStudents: "Élèves inscrits",
     totalEnrollments: "Total d'inscriptions",
     averageAttendance: "Taux de présence moyen",
     satisfactoryPerformance: "Performance satisfaisante",
-    atRiskStudents: "Étudiants à risque",
+    atRiskStudents: "Élèves à risque",
     lowParticipation: "Faible participation",
 
     // Filters
@@ -407,8 +422,8 @@ export const fr = {
     ratePercent: "Taux (%)",
 
     // Low participation
-    lowParticipationStudents: "Étudiants avec faible participation",
-    studentsNeedingFollowup: "Étudiants nécessitant un suivi pour faible taux de participation (<60%)",
+    lowParticipationStudents: "Élèves avec faible participation",
+    studentsNeedingFollowup: "Élèves nécessitant un suivi pour faible taux de participation (<60%)",
     activitiesEnrolled: "activités inscrites",
 
     // Student reasons
@@ -524,7 +539,7 @@ export const fr = {
       teachers: "Enseignants",
       accountants: "Comptables",
       parents: "Parents",
-      students: "Étudiants",
+      students: "Élèves",
     },
     addUser: "Ajouter un utilisateur",
     searchPlaceholder: "Rechercher par nom, email...",
@@ -553,10 +568,10 @@ export const fr = {
     selectSubject: "Sélectionner une matière",
     selectPeriod: "Sélectionner une période",
     classAverage: "Moyenne de classe",
-    onNStudents: "Sur {count} étudiants",
-    top3Students: "Top 3 étudiants",
+    onNStudents: "Sur {count} élèves",
+    top3Students: "Top 3 élèves",
     needsAttention: "Besoin d'attention",
-    studentsBelow10: "Étudiants avec note < 10",
+    studentsBelow10: "Élèves avec note < 10",
     pendingChanges: "{count} notes en attente de sauvegarde",
     clickToSave: "- Cliquez sur Sauvegarder pour enregistrer vos modifications",
     gradeEntry: "Saisie des notes",
@@ -588,7 +603,7 @@ export const fr = {
     classes: "Classes",
     statistics: "Statistiques",
     totalClasses: "Total classes",
-    totalStudents: "Total étudiants",
+    totalStudents: "Total élèves",
     coursesToday: "Cours aujourd'hui",
     selectDay: "Sélectionner un jour",
     scheduleForDay: "Emploi du temps - {day}",
@@ -619,12 +634,12 @@ export const fr = {
   // Enrollment Wizard
   enrollmentWizard: {
     // Main
-    title: "Inscription d'étudiant",
+    title: "Inscription d'élève",
     subtitle: "Processus d'inscription pour l'année scolaire",
 
     // Steps
     step1: "Sélection de classe",
-    step2: "Information étudiant",
+    step2: "Information élève",
     step3: "Échéancier de paiement",
     step4: "Paiement",
     step5: "Révision",
@@ -635,20 +650,22 @@ export const fr = {
     selectGradeDescription: "Choisissez le niveau scolaire pour l'inscription",
     schoolYear: "Année scolaire",
     todayDate: "Date d'aujourd'hui",
+    kindergarten: "Maternelle",
     elementary: "Primaire",
     college: "Collège",
     highSchool: "Lycée",
-    studentsEnrolled: "{count} étudiants inscrits",
+    studentsEnrolled: "{count} élèves inscrits",
+    capacity: "Capacité",
     yearlyTuition: "Frais annuels",
     perYear: "/an",
 
     // Step 2 - Student Info
-    studentInfo: "Information de l'étudiant",
-    newStudent: "Nouvel étudiant",
-    returningStudent: "Étudiant existant",
+    studentInfo: "Information de l'élève",
+    newStudent: "Nouvel élève",
+    returningStudent: "Élève existant",
     searchStudent: "Rechercher par numéro, nom ou date de naissance",
-    noStudentFound: "Aucun étudiant trouvé",
-    selectThisStudent: "Sélectionner cet étudiant",
+    noStudentFound: "Aucun élève trouvé",
+    selectThisStudent: "Sélectionner cet élève",
 
     // Personal info
     personalInfo: "Informations personnelles",
@@ -713,6 +730,7 @@ export const fr = {
     transactionRef: "Référence de transaction",
     uploadReceipt: "Télécharger le reçu",
     receiptRequired: "Le reçu est obligatoire",
+    autoGenerated: "Généré automatiquement",
     paymentCoverage: "Couverture du paiement",
     monthsCovered: "Mois couverts",
     percentPaid: "Pourcentage payé",
@@ -722,7 +740,7 @@ export const fr = {
     reviewDescription: "Vérifiez toutes les informations avant de soumettre",
     editSection: "Modifier",
     gradeInfo: "Information de classe",
-    studentDetails: "Détails de l'étudiant",
+    studentDetails: "Détails de l'élève",
     parentDetails: "Détails des parents",
     paymentDetails: "Détails de paiement",
     notesSection: "Notes",
@@ -730,7 +748,7 @@ export const fr = {
     // Step 6 - Confirmation
     enrollmentComplete: "Inscription soumise!",
     enrollmentNumber: "Numéro d'inscription",
-    studentNumber: "Numéro d'étudiant",
+    studentNumber: "Numéro d'élève",
     downloadPdf: "Télécharger le PDF",
     downloadingPdf: "Génération du PDF...",
     pdfDownloadError: "Échec du téléchargement du PDF. Veuillez réessayer.",
@@ -749,10 +767,10 @@ export const fr = {
     statusCancelled: "Annulée",
 
     // Suggested students
-    suggestedStudents: "Étudiants suggérés",
-    suggestedStudentsDescription: "Étudiants de la classe précédente qui peuvent être réinscrits",
+    suggestedStudents: "Élèves suggérés",
+    suggestedStudentsDescription: "Élèves de la classe précédente qui peuvent être réinscrits",
     fromPreviousGrade: "Classe précédente",
-    noSuggestedStudents: "Aucun étudiant suggéré disponible",
+    noSuggestedStudents: "Aucun élève suggéré disponible",
     orSearchManually: "ou rechercher manuellement",
 
     // Draft management
@@ -784,8 +802,8 @@ export const fr = {
 
   // Students module
   students: {
-    title: "Gestion des étudiants",
-    subtitle: "Visualiser et gérer les étudiants inscrits",
+    title: "Gestion des élèves",
+    subtitle: "Visualiser et gérer les élèves inscrits",
     searchPlaceholder: "Rechercher par nom ou numéro...",
     filters: "Filtres",
     allGrades: "Toutes les classes",
@@ -819,7 +837,7 @@ export const fr = {
     selectDate: "Sélectionner une date",
     entryMode: "Mode de saisie",
     checklistMode: "Liste complète",
-    checklistModeDesc: "Marquer chaque étudiant individuellement",
+    checklistModeDesc: "Marquer chaque élève individuellement",
     absencesOnlyMode: "Absences seulement",
     absencesOnlyModeDesc: "Marquer uniquement les absents et retards",
     markAllPresent: "Tout marquer présent",
@@ -864,7 +882,7 @@ export const fr = {
     assignTeacher: "Assigner un enseignant",
     attendanceRatio: "Taux de présence",
     paymentRatio: "Taux de paiement",
-    studentsInGrade: "Étudiants dans la classe",
+    studentsInGrade: "Élèves dans la classe",
     coefficient: "Coefficient",
     hoursPerWeek: "Heures par semaine",
   },

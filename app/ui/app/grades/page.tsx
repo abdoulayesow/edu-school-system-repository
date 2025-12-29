@@ -230,7 +230,7 @@ export default function GradesPage() {
                         <CardTitle className="text-lg">{grade.name}</CardTitle>
                         <CardDescription className="flex items-center gap-2 mt-1">
                           <Badge variant="outline">{grade.level}</Badge>
-                          <span>{grade.stats.studentCount} étudiants</span>
+                          <span>{grade.stats.studentCount} élèves</span>
                         </CardDescription>
                       </div>
                       <ChevronRight className="size-5 text-muted-foreground" />

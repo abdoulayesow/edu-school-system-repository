@@ -266,7 +266,7 @@ export default function StudentDetailPage() {
         {/* Back link */}
         <Link href="/students" className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground mb-4">
           <ArrowLeft className="size-4" />
-          Retour aux étudiants
+          Retour aux élèves
         </Link>
 
         {/* Header */}
