@@ -1,6 +1,6 @@
 "use client"
 
-import { useMemo, useState, useEffect } from "react"
+import { useMemo } from "react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { useSession } from "next-auth/react"
@@ -18,12 +18,13 @@ import { navigationConfig } from "@/lib/nav-config"
 import type { UserRole } from "@/lib/nav-links"
 import { useI18n } from "@/components/i18n-provider"
 import { useNavigation } from "./navigation-context"
+import { useMediaQuery } from "@/hooks/use-media-query"
 
 export function NavSidebar() {
   const pathname = usePathname()
   const { t } = useI18n()
   const { data: session } = useSession()
-  const [isLargeScreen, setIsLargeScreen] = useState(true) // Default true to avoid backdrop flash
+  const isLargeScreen = useMediaQuery("(min-width: 1024px)", true) // Default true to avoid backdrop flash
   const {
     activeMainNav,
     isSidebarOpen,
@@ -31,19 +32,6 @@ export function NavSidebar() {
     toggleSidebar,
     closeSidebar,
   } = useNavigation()
-
-  // Track screen size to control backdrop rendering (JS-based for reliability)
-  useEffect(() => {
-    const mediaQuery = window.matchMedia("(min-width: 1024px)")
-    setIsLargeScreen(mediaQuery.matches)
-
-    const handleResize = (e: MediaQueryListEvent) => {
-      setIsLargeScreen(e.matches)
-    }
-
-    mediaQuery.addEventListener("change", handleResize)
-    return () => mediaQuery.removeEventListener("change", handleResize)
-  }, [])
 
   // Get active nav config
   const activeNavConfig = useMemo(() => {
@@ -78,8 +66,8 @@ export function NavSidebar() {
       {/* Sidebar */}
       <aside
         className={cn(
-          "fixed left-0 top-[76px] z-40 h-[calc(100vh-76px)] border-r border-gspn-maroon-800",
-          "bg-gspn-maroon-950 transition-all duration-300 ease-in-out",
+          "fixed left-0 top-[76px] z-40 h-[calc(100vh-76px)] border-r border-gspn-gold-300 dark:border-gray-800/50",
+          "bg-[#e79908] dark:bg-gspn-maroon-950 transition-all duration-300 ease-in-out",
           isSidebarCollapsed ? "w-16" : "w-64"
         )}
       >
@@ -87,14 +75,14 @@ export function NavSidebar() {
           {/* Sidebar Header */}
           <div
             className={cn(
-              "flex items-center justify-between border-b border-gspn-maroon-800 p-4",
+              "flex items-center justify-between border-b border-gspn-gold-300 dark:border-gray-800/50 p-4",
               isSidebarCollapsed && "justify-center px-2"
             )}
           >
             {!isSidebarCollapsed && (
               <div className="flex items-center gap-2">
-                <activeNavConfig.icon className="h-5 w-5 text-gspn-gold-400" />
-                <span className="font-semibold text-white">
+                <activeNavConfig.icon className="h-5 w-5 text-black dark:text-gspn-gold-400" />
+                <span className="font-semibold text-black dark:text-white">
                   {t.nav[activeNavConfig.translationKey as keyof typeof t.nav] ||
                     activeNavConfig.name}
                 </span>
@@ -105,7 +93,7 @@ export function NavSidebar() {
                 variant="ghost"
                 size="icon"
                 onClick={toggleSidebar}
-                className="h-8 w-8 text-gray-300 hover:bg-gspn-maroon-800 hover:text-white"
+                className="h-8 w-8 text-black hover:bg-gspn-gold-300 dark:text-gray-300 dark:hover:bg-gspn-maroon-800 dark:hover:text-white"
                 title={
                   isSidebarCollapsed
                     ? t.nav.expandMenu || "Expand"
@@ -113,9 +101,9 @@ export function NavSidebar() {
                 }
               >
                 {isSidebarCollapsed ? (
-                  <ChevronRight className="h-4 w-4" />
+                  <ChevronRight className="h-4 w-4 text-black dark:text-gray-300" />
                 ) : (
-                  <ChevronLeft className="h-4 w-4" />
+                  <ChevronLeft className="h-4 w-4 text-black dark:text-gray-300" />
                 )}
               </Button>
               {!isSidebarCollapsed && (
@@ -123,7 +111,7 @@ export function NavSidebar() {
                   variant="ghost"
                   size="icon"
                   onClick={closeSidebar}
-                  className="h-8 w-8 text-gray-300 hover:bg-gspn-maroon-800 hover:text-white lg:hidden"
+                  className="h-8 w-8 text-gspn-maroon-900 hover:bg-gspn-maroon-100 dark:text-gray-300 dark:hover:bg-gspn-maroon-800 dark:hover:text-white lg:hidden"
                 >
                   <X className="h-4 w-4" />
                 </Button>
@@ -150,14 +138,14 @@ export function NavSidebar() {
                             className={cn(
                               "flex h-10 w-10 items-center justify-center rounded-lg transition-all duration-200 mx-auto",
                               isActive
-                                ? "bg-gspn-gold-500 text-gspn-maroon-950 shadow-sm"
-                                : "text-gray-300 hover:bg-gspn-maroon-800 hover:text-white"
+                                ? "bg-gspn-gold-50 text-black dark:bg-gspn-gold-500 dark:text-gspn-maroon-950 shadow-sm font-semibold"
+                                : "text-black hover:bg-gspn-gold-300 dark:text-gray-300 dark:hover:bg-gspn-maroon-800 dark:hover:text-white"
                             )}
                           >
                             <Icon className="h-5 w-5" />
                           </Link>
                         </TooltipTrigger>
-                        <TooltipContent side="right" className="bg-gspn-maroon-800 text-white border-gspn-maroon-700">
+                        <TooltipContent side="right" className="bg-gspn-maroon-900 dark:bg-gspn-maroon-800 text-white border-gspn-maroon-700">
                           {t.nav[item.translationKey as keyof typeof t.nav] ||
                             item.name}
                         </TooltipContent>
@@ -172,8 +160,8 @@ export function NavSidebar() {
                       className={cn(
                         "flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all duration-200",
                         isActive
-                          ? "bg-gspn-gold-500 text-gspn-maroon-950 shadow-sm"
-                          : "text-gray-300 hover:bg-gspn-maroon-800 hover:text-white"
+                          ? "bg-gspn-gold-50 text-black dark:bg-gspn-gold-500 dark:text-gspn-maroon-950 shadow-sm font-semibold"
+                          : "text-black hover:bg-gspn-gold-300 dark:text-gray-300 dark:hover:bg-gspn-maroon-800 dark:hover:text-white"
                       )}
                     >
                       <Icon className="h-5 w-5 shrink-0" />
@@ -190,10 +178,10 @@ export function NavSidebar() {
 
           {/* Footer - Close button (expanded mode only) */}
           {!isSidebarCollapsed && (
-            <div className="border-t border-gspn-maroon-800 p-4 hidden lg:block">
+            <div className="border-t border-gspn-gold-300 dark:border-gray-800/50 p-4 hidden lg:block">
               <Button
                 variant="ghost"
-                className="w-full justify-start text-gray-300 hover:bg-gspn-maroon-800 hover:text-white"
+                className="w-full justify-start text-black hover:bg-gspn-gold-300 dark:text-gray-300 dark:hover:bg-gspn-maroon-800 dark:hover:text-white"
                 onClick={closeSidebar}
               >
                 <ChevronLeft className="mr-2 h-4 w-4" />

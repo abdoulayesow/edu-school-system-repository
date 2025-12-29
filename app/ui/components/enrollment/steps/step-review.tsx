@@ -7,6 +7,7 @@ import { Separator } from "@/components/ui/separator"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { useEnrollmentWizard } from "../wizard-context"
 import { useI18n } from "@/components/i18n-provider"
+import { formatCurrency } from "@/lib/utils/currency"
 import {
   BookOpen,
   User,
@@ -23,15 +24,6 @@ export function StepReview() {
   const { state, goToStep } = useEnrollmentWizard()
   const { data } = state
 
-  // Format currency
-  const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat("fr-GN", {
-      style: "currency",
-      currency: "GNF",
-      minimumFractionDigits: 0,
-      maximumFractionDigits: 0,
-    }).format(amount)
-  }
 
   const hasAdjustment =
     data.adjustedTuitionFee !== undefined &&

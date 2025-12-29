@@ -132,7 +132,7 @@ Next, user manual testing: docs/summaries/2025-12-29_enrollment-improvements-ses
 - **Branch:** fix/manifest-and-icons
 - **PR:** https://github.com/abdoulayesow/edu-school-system-repository/pull/8
 
-### Uncommitted Changes:
+### Commited Changes:
 - Grade capacity feature (schema, seed, API, UI, i18n)
 - Selected grade header (enrollment-wizard.tsx)
 - Receipt number auto-generation (API endpoint, UI, i18n)

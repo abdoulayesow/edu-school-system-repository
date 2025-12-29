@@ -1,0 +1,35 @@
+# Token Efficiency Rules
+
+## Code Output Guidelines
+
+### 1. Code Block Output
+- **ALWAYS** output only changed code blocks using code references (`startLine:endLine:filepath`) for existing code
+- **NEVER** output entire files unless explicitly requested by the user
+- When showing changes, use minimal context (3-5 lines before/after the change)
+- For new code, use standard markdown code blocks with language tags
+
+### 2. Utility Method Reuse
+- **ALWAYS** check for existing utility methods using `@Codebase` search before writing new ones
+- Search for similar functionality in `app/ui/lib/` and `app/ui/hooks/` before creating duplicates
+- Reuse existing patterns and utilities from the codebase
+
+### 3. Explanations
+- Use concise Markdown for all explanations
+- Avoid verbose descriptions - be direct and to the point
+- Use bullet points for lists instead of long paragraphs
+- Skip obvious explanations when the code is self-documenting
+
+### 4. File Reading
+- Read only necessary files, not entire directories
+- Use targeted file reads with line offsets when possible
+- Avoid reading large files in full unless necessary
+
+### 5. Search Optimization
+- Use specific, targeted searches rather than broad queries
+- Prefer `grep` for exact string matches over semantic search
+- Limit search results when possible
+
+### 6. Context Management
+- Don't include unnecessary context in responses
+- Reference existing code rather than repeating it
+- Use code references for existing code, markdown blocks for new code

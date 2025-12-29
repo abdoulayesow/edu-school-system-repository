@@ -3,11 +3,12 @@ import { requireSession, requireRole } from "@/lib/authz"
 import { prisma } from "@/lib/prisma"
 import { z } from "zod"
 
-// Schema for updating an enrollment
+// Schema for updating an enrollment (draft)
+// firstName and lastName are optional - only required when submitting for approval
 const updateEnrollmentSchema = z.object({
-  // Student info
-  firstName: z.string().min(1).optional(),
-  lastName: z.string().min(1).optional(),
+  // Student info - optional for drafts (allow empty strings)
+  firstName: z.string().optional(),
+  lastName: z.string().optional(),
   dateOfBirth: z.string().optional(),
   gender: z.enum(["male", "female"]).optional(),
   phone: z.string().optional(),
@@ -145,9 +146,13 @@ export async function PUT(req: NextRequest, { params }: RouteParams) {
     // Prepare update data
     const updateData: Record<string, unknown> = {}
 
-    // Copy validated fields
-    if (validated.firstName !== undefined) updateData.firstName = validated.firstName
-    if (validated.lastName !== undefined) updateData.lastName = validated.lastName
+    // Copy validated fields - firstName/lastName are required in schema, use empty strings for drafts
+    if (validated.firstName !== undefined) {
+      updateData.firstName = validated.firstName && validated.firstName.trim() ? validated.firstName : ""
+    }
+    if (validated.lastName !== undefined) {
+      updateData.lastName = validated.lastName && validated.lastName.trim() ? validated.lastName : ""
+    }
     if (validated.dateOfBirth !== undefined) {
       updateData.dateOfBirth = validated.dateOfBirth ? new Date(validated.dateOfBirth) : null
     }

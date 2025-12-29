@@ -81,14 +81,41 @@ export async function POST(req: NextRequest, { params }: RouteParams) {
       include: {
         grade: true,
         schoolYear: true,
-        notes: {
-          orderBy: { createdAt: "desc" },
-          take: 1,
+        student: true,
+        paymentSchedules: {
+          orderBy: { scheduleNumber: "asc" },
         },
+        payments: {
+          include: {
+            recorder: { select: { name: true, email: true } },
+          },
+          orderBy: { recordedAt: "desc" },
+        },
+        notes: {
+          include: {
+            author: { select: { name: true, email: true } },
+          },
+          orderBy: { createdAt: "desc" },
+        },
+        creator: { select: { name: true, email: true } },
+        approver: { select: { name: true, email: true } },
       },
     })
 
-    return NextResponse.json(updated)
+    // Calculate payment summary
+    const totalPaid = updated.payments
+      .filter((p) => p.status === "confirmed")
+      .reduce((sum, p) => sum + p.amount, 0)
+
+    const tuitionFee = updated.adjustedTuitionFee || updated.originalTuitionFee
+    const remainingBalance = tuitionFee - totalPaid
+
+    return NextResponse.json({
+      ...updated,
+      tuitionFee,
+      totalPaid,
+      remainingBalance,
+    })
   } catch (err) {
     console.error("Error cancelling enrollment:", err)
     return NextResponse.json(

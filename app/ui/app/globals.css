@@ -254,6 +254,24 @@
   }
 }
 
+/* Main panel background color for light mode - outside layer for higher specificity */
+div.bg-background {
+  background-color: #fff5d8 !important;
+}
+
+.dark div.bg-background {
+  background-color: oklch(var(--background)) !important;
+}
+
+/* Also target container divs that are direct children of main (for audit pages that don't have the wrapper) */
+main > div.container {
+  background-color: #fff5d8 !important;
+}
+
+.dark main > div.container {
+  background-color: oklch(var(--background)) !important;
+}
+
 /* Glassmorphism for Sidebars and Modals */
 .glassmorphism {
   background-color: oklch(var(--sidebar) / 0.8);
@@ -347,4 +365,9 @@
 /* Font display class - using Inter for consistency */
 .font-display {
   font-family: "Inter", "Inter Fallback", system-ui, -apple-system, sans-serif;
+}
+
+/* Navigation border utilities */
+.border-nav {
+  @apply border-gspn-maroon-800 dark:border-gray-800/50;
 }

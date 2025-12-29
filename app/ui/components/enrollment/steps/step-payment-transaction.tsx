@@ -13,6 +13,7 @@ import { useI18n } from "@/components/i18n-provider"
 import { calculatePaymentSchedules } from "@/lib/enrollment/calculations"
 import { Banknote, Smartphone, Upload, Check, SkipForward, Info, Loader2 } from "lucide-react"
 import { cn } from "@/lib/utils"
+import { formatCurrency } from "@/lib/utils/currency"
 
 export function StepPaymentTransaction() {
   const { t } = useI18n()
@@ -22,15 +23,6 @@ export function StepPaymentTransaction() {
   const [showPaymentForm, setShowPaymentForm] = useState(data.paymentMade)
   const [isGeneratingReceipt, setIsGeneratingReceipt] = useState(false)
 
-  // Format currency
-  const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat("fr-GN", {
-      style: "currency",
-      currency: "GNF",
-      minimumFractionDigits: 0,
-      maximumFractionDigits: 0,
-    }).format(amount)
-  }
 
   // Calculate coverage based on payment amount
   const totalTuition = data.adjustedTuitionFee || data.originalTuitionFee || 0

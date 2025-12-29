@@ -37,7 +37,7 @@ function MainContent({ children }: { children: React.ReactNode }) {
   return (
     <main
       className={cn(
-        "pt-[76px] transition-all duration-300",
+        "pt-[76px] transition-all duration-300 bg-background",
         // Add left margin on desktop when sidebar is open
         isSidebarOpen && "lg:ml-64",
         isSidebarOpen && isSidebarCollapsed && "lg:ml-16"
@@ -97,7 +97,7 @@ export default function RootLayout({
         />
       </head>
       <body
-        className={`${inter.variable} ${playfair.variable} font-sans antialiased bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-50`}
+        className={`${inter.variable} ${playfair.variable} font-sans antialiased text-gray-900 dark:text-gray-50 bg-background dark:bg-gray-900`}
       >
         <ThemeProvider
           attribute="class"

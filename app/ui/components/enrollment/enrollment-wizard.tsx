@@ -52,37 +52,54 @@ function WizardContent({ schoolYearId, schoolYearName }: EnrollmentWizardProps) 
 
       const method = state.enrollmentId ? "PUT" : "POST"
 
+      // Prepare payload - only include non-empty values for optional fields
+      const payload: Record<string, unknown> = {
+        schoolYearId: data.schoolYearId,
+        gradeId: data.gradeId,
+        currentStep,
+      }
+
+      // Only include firstName/lastName if they have values (optional for drafts)
+      if (data.firstName && data.firstName.trim()) {
+        payload.firstName = data.firstName
+      }
+      if (data.lastName && data.lastName.trim()) {
+        payload.lastName = data.lastName
+      }
+
+      // Include other optional fields if they exist
+      if (data.dateOfBirth) payload.dateOfBirth = data.dateOfBirth
+      if (data.gender) payload.gender = data.gender
+      if (data.phone) payload.phone = data.phone
+      if (data.email) payload.email = data.email
+      if (data.photoUrl) payload.photoUrl = data.photoUrl
+      if (data.birthCertificateUrl) payload.birthCertificateUrl = data.birthCertificateUrl
+      if (data.fatherName) payload.fatherName = data.fatherName
+      if (data.fatherPhone) payload.fatherPhone = data.fatherPhone
+      if (data.fatherEmail) payload.fatherEmail = data.fatherEmail
+      if (data.motherName) payload.motherName = data.motherName
+      if (data.motherPhone) payload.motherPhone = data.motherPhone
+      if (data.motherEmail) payload.motherEmail = data.motherEmail
+      if (data.address) payload.address = data.address
+      if (data.studentId) payload.studentId = data.studentId
+      if (data.adjustedTuitionFee !== undefined) payload.adjustedTuitionFee = data.adjustedTuitionFee
+      if (data.adjustmentReason) payload.adjustmentReason = data.adjustmentReason
+
+      payload.isReturningStudent = data.isReturningStudent || false
+
       const response = await fetch(endpoint, {
         method,
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          schoolYearId: data.schoolYearId,
-          gradeId: data.gradeId,
-          firstName: data.firstName,
-          lastName: data.lastName,
-          dateOfBirth: data.dateOfBirth,
-          gender: data.gender,
-          phone: data.phone,
-          email: data.email,
-          photoUrl: data.photoUrl,
-          birthCertificateUrl: data.birthCertificateUrl,
-          fatherName: data.fatherName,
-          fatherPhone: data.fatherPhone,
-          fatherEmail: data.fatherEmail,
-          motherName: data.motherName,
-          motherPhone: data.motherPhone,
-          motherEmail: data.motherEmail,
-          address: data.address,
-          studentId: data.studentId,
-          isReturningStudent: data.isReturningStudent,
-          adjustedTuitionFee: data.adjustedTuitionFee,
-          adjustmentReason: data.adjustmentReason,
-          currentStep,
-        }),
+        body: JSON.stringify(payload),
       })
 
       if (!response.ok) {
-        throw new Error("Failed to save enrollment")
+        const errorData = await response.json().catch(() => ({ message: "Failed to save enrollment" }))
+        const errorMessage = errorData.errors
+          ? `Validation error: ${errorData.errors.map((e: { path: string[]; message: string }) => 
+              `${e.path.join(".")}: ${e.message}`).join(", ")}`
+          : errorData.message || "Failed to save enrollment"
+        throw new Error(errorMessage)
       }
 
       const result = await response.json()

@@ -7,8 +7,6 @@ import { usePathname, useRouter } from "next/navigation"
 import { useSession, signOut } from "next-auth/react"
 import { useTheme } from "next-themes"
 import {
-  Sun,
-  Moon,
   LogOut,
   User,
   ChevronDown,
@@ -23,22 +21,17 @@ import { useI18n } from "@/components/i18n-provider"
 import { LanguageSwitcher } from "@/components/language-switcher"
 import { OfflineIndicator } from "@/components/offline-indicator"
 import { useNavigation } from "./navigation-context"
+import { useUserInitials } from "@/hooks/use-user-initials"
+import { ThemeToggleButton } from "@/components/theme-toggle-button"
 
 export function TopNav() {
   const pathname = usePathname()
   const router = useRouter()
   const { t } = useI18n()
   const { data: session } = useSession()
-  const { theme, setTheme } = useTheme()
   const { activeMainNav, setActiveMainNav, isSidebarOpen } = useNavigation()
-  const [mounted, setMounted] = useState(false)
   const [dropdownOpen, setDropdownOpen] = useState(false)
   const dropdownRef = useRef<HTMLDivElement>(null)
-
-  // Prevent hydration mismatch by only rendering theme-dependent UI after mount
-  useEffect(() => {
-    setMounted(true)
-  }, [])
 
   // Close dropdown when clicking outside
   useEffect(() => {
@@ -78,15 +71,7 @@ export function TopNav() {
   }
 
   // Get user initials for avatar fallback
-  const userInitials = useMemo(() => {
-    const name = session?.user?.name || session?.user?.email || ""
-    return name
-      .split(" ")
-      .map((n) => n[0])
-      .join("")
-      .toUpperCase()
-      .slice(0, 2)
-  }, [session?.user?.name, session?.user?.email])
+  const userInitials = useUserInitials()
 
   // Don't show full nav on login page
   if (pathname === "/login") {
@@ -94,7 +79,7 @@ export function TopNav() {
   }
 
   return (
-    <header className="fixed top-0 left-0 right-0 z-[60] h-[76px] border-b border-gspn-maroon-800 bg-gspn-maroon-950 backdrop-blur-sm bg-opacity-95">
+    <header className="fixed top-0 left-0 right-0 z-[60] h-[76px] border-b border-gspn-gold-300 dark:border-gray-800/50 bg-[#e79908] dark:bg-gspn-maroon-950 backdrop-blur-sm bg-opacity-95">
       <div className="h-full px-4 lg:px-6">
         <div className="flex items-center justify-between h-full">
           {/* Logo Section */}
@@ -112,10 +97,10 @@ export function TopNav() {
               />
             </div>
             <div className="hidden sm:block">
-              <h1 className="text-lg font-display font-bold text-white">
+              <h1 className="text-lg font-display font-bold text-black dark:text-white">
                 GSPN
               </h1>
-              <p className="text-xs text-gspn-gold-400">
+              <p className="text-xs text-black dark:text-gspn-gold-400">
                 {t.nav.managementSystem}
               </p>
             </div>
@@ -137,8 +122,8 @@ export function TopNav() {
                       "cursor-pointer pointer-events-auto select-none",
                       "transition-colors duration-200",
                       isActive
-                        ? "bg-gspn-gold-500 text-gspn-maroon-950 shadow-md"
-                        : "text-gray-200 hover:bg-gspn-maroon-800 hover:text-white"
+                        ? "bg-gspn-gold-50 text-black dark:bg-gspn-gold-500 dark:text-gspn-maroon-950 shadow-md font-semibold"
+                        : "text-black hover:bg-gspn-gold-300 dark:text-gray-200 dark:hover:bg-gspn-maroon-800 dark:hover:text-white"
                     )}
                   >
                     <Icon className="h-4 w-4" />
@@ -149,6 +134,9 @@ export function TopNav() {
                     <ChevronDown
                       className={cn(
                         "h-3 w-3 transition-transform duration-200",
+                        isActive
+                          ? "text-black dark:text-gspn-maroon-950"
+                          : "text-black dark:text-gray-200",
                         isActive && "rotate-180"
                       )}
                     />
@@ -161,22 +149,7 @@ export function TopNav() {
           {/* Right Section */}
           <div className="flex items-center gap-2">
             {/* Theme Toggle */}
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
-              className="rounded-lg bg-gspn-maroon-800 hover:bg-gspn-maroon-700"
-              aria-label="Toggle theme"
-            >
-              {/* Show consistent icon on server, then switch after hydration */}
-              {!mounted ? (
-                <Sun className="h-5 w-5 text-gspn-gold-400" />
-              ) : theme === "dark" ? (
-                <Sun className="h-5 w-5 text-gspn-gold-400" />
-              ) : (
-                <Moon className="h-5 w-5 text-gspn-gold-400" />
-              )}
-            </Button>
+            <ThemeToggleButton variant="nav" />
 
             <LanguageSwitcher variant="nav" />
 
@@ -187,7 +160,7 @@ export function TopNav() {
               <div className="relative hidden md:block" ref={dropdownRef}>
                 <button
                   onClick={() => setDropdownOpen(!dropdownOpen)}
-                  className="flex items-center gap-2 px-3 py-2 bg-gspn-maroon-800 rounded-lg hover:bg-gspn-maroon-700 transition-colors"
+                  className="flex items-center gap-2 px-3 py-2 bg-gspn-gold-300 hover:bg-gspn-gold-200 dark:bg-gspn-maroon-800 dark:hover:bg-gspn-maroon-700 rounded-lg transition-colors text-black dark:text-gray-200"
                 >
                   <Avatar className="h-7 w-7">
                     <AvatarImage
@@ -198,12 +171,12 @@ export function TopNav() {
                       {userInitials}
                     </AvatarFallback>
                   </Avatar>
-                  <span className="text-sm text-gray-200 max-w-[120px] truncate">
+                  <span className="text-sm font-bold text-black dark:text-gray-200 max-w-[120px] truncate">
                     {session.user.name || session.user.email}
                   </span>
                   <ChevronDown
                     className={cn(
-                      "h-4 w-4 text-gray-300 transition-transform",
+                      "h-4 w-4 text-black dark:text-gray-300 transition-transform",
                       dropdownOpen && "rotate-180"
                     )}
                   />
@@ -217,7 +190,7 @@ export function TopNav() {
                       <p className="text-sm font-medium text-gray-900 dark:text-white">
                         {session.user.name}
                       </p>
-                      <p className="text-xs text-gray-500 dark:text-gray-400 truncate">
+                      <p className="text-xs text-gray-600 dark:text-gray-400 truncate">
                         {session.user.email}
                       </p>
                     </div>

@@ -9,6 +9,7 @@ import { useEnrollmentWizard } from "../wizard-context"
 import { useI18n } from "@/components/i18n-provider"
 import { Users, Check } from "lucide-react"
 import { cn } from "@/lib/utils"
+import { formatCurrency } from "@/lib/utils/currency"
 import type { SchoolLevel } from "@/lib/enrollment/types"
 
 interface Grade {
@@ -84,15 +85,6 @@ export function StepGradeSelection() {
     })
   }
 
-  // Format currency
-  const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat("fr-GN", {
-      style: "currency",
-      currency: "GNF",
-      minimumFractionDigits: 0,
-      maximumFractionDigits: 0,
-    }).format(amount)
-  }
 
   // Get capacity percentage and color
   const getCapacityInfo = (enrolled: number, capacity: number) => {

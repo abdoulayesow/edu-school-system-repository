@@ -13,6 +13,7 @@ import { useI18n } from "@/components/i18n-provider"
 import { calculatePaymentSchedules } from "@/lib/enrollment/calculations"
 import { AlertTriangle, Calendar, Check } from "lucide-react"
 import { cn } from "@/lib/utils"
+import { formatCurrency } from "@/lib/utils/currency"
 
 export function StepPaymentBreakdown() {
   const { t } = useI18n()
@@ -46,15 +47,6 @@ export function StepPaymentBreakdown() {
     }
   }, [schedules, updateData])
 
-  // Format currency
-  const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat("fr-GN", {
-      style: "currency",
-      currency: "GNF",
-      minimumFractionDigits: 0,
-      maximumFractionDigits: 0,
-    }).format(amount)
-  }
 
   // Handle fee adjustment toggle
   const handleAdjustmentToggle = (enabled: boolean) => {

@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useMemo, useEffect } from "react"
+import { useState, useEffect, useMemo } from "react"
 import Link from "next/link"
 import Image from "next/image"
 import { usePathname } from "next/navigation"
@@ -12,8 +12,6 @@ import {
   ChevronRight,
   LogOut,
   User,
-  Sun,
-  Moon,
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
@@ -30,36 +28,24 @@ import type { UserRole } from "@/lib/nav-links"
 import { useI18n } from "@/components/i18n-provider"
 import { LanguageSwitcher } from "@/components/language-switcher"
 import { OfflineIndicator } from "@/components/offline-indicator"
+import { useUserInitials } from "@/hooks/use-user-initials"
+import { useMediaQuery } from "@/hooks/use-media-query"
+import { ThemeToggleButton } from "@/components/theme-toggle-button"
 
 export function MobileNav() {
   const [isOpen, setIsOpen] = useState(false)
   const [expandedItems, setExpandedItems] = useState<string[]>([])
-  const [mounted, setMounted] = useState(false)
-  const [isLargeScreen, setIsLargeScreen] = useState(false)
+  const isLargeScreen = useMediaQuery("(min-width: 1024px)", false)
   const pathname = usePathname()
   const { t } = useI18n()
   const { data: session } = useSession()
-  const { theme, setTheme } = useTheme()
 
-  // Prevent hydration mismatch and track screen size
+  // Close mobile menu when switching to desktop
   useEffect(() => {
-    setMounted(true)
-
-    // Check if we're on a large screen (lg breakpoint = 1024px)
-    const mediaQuery = window.matchMedia("(min-width: 1024px)")
-    setIsLargeScreen(mediaQuery.matches)
-
-    const handleResize = (e: MediaQueryListEvent) => {
-      setIsLargeScreen(e.matches)
-      // Close mobile menu when switching to desktop
-      if (e.matches) {
-        setIsOpen(false)
-      }
+    if (isLargeScreen) {
+      setIsOpen(false)
     }
-
-    mediaQuery.addEventListener("change", handleResize)
-    return () => mediaQuery.removeEventListener("change", handleResize)
-  }, [])
+  }, [isLargeScreen])
 
   const toggleExpanded = (itemId: string) => {
     setExpandedItems((prev) =>
@@ -76,15 +62,7 @@ export function MobileNav() {
   }, [session?.user?.role])
 
   // Get user initials for avatar fallback
-  const userInitials = useMemo(() => {
-    const name = session?.user?.name || session?.user?.email || ""
-    return name
-      .split(" ")
-      .map((n) => n[0])
-      .join("")
-      .toUpperCase()
-      .slice(0, 2)
-  }, [session?.user?.name, session?.user?.email])
+  const userInitials = useUserInitials()
 
   // Don't render on login page
   if (pathname === "/login") {
@@ -99,7 +77,7 @@ export function MobileNav() {
           size="icon"
           variant="outline"
           onClick={() => setIsOpen(!isOpen)}
-          className="bg-gspn-maroon-950 shadow-lg border-gspn-maroon-800 text-white hover:bg-gspn-maroon-900"
+          className="bg-[#e79908] dark:bg-gspn-maroon-950 shadow-lg border-gspn-gold-300 dark:border-gray-800/50 text-black dark:text-white hover:bg-gspn-gold-300 dark:hover:bg-gspn-maroon-900"
         >
           {isOpen ? (
             <X className="h-5 w-5" />
@@ -114,9 +92,9 @@ export function MobileNav() {
         <Sheet open={isOpen} onOpenChange={setIsOpen}>
           <SheetContent
             side="left"
-            className="w-80 p-0 bg-gspn-maroon-950 border-gspn-maroon-800"
+            className="w-80 p-0 bg-[#e79908] dark:bg-gspn-maroon-950 border-gspn-gold-300 dark:border-gray-800/50"
           >
-          <SheetHeader className="border-b border-gspn-maroon-800 p-4">
+          <SheetHeader className="border-b border-gspn-gold-300 dark:border-gray-800/50 p-4">
             <div className="flex items-center gap-3">
               <div className="relative w-10 h-10">
                 <Image
@@ -127,10 +105,10 @@ export function MobileNav() {
                 />
               </div>
               <div>
-                <SheetTitle className="text-left text-white">
+                <SheetTitle className="text-left text-black dark:text-white">
                   GSPN
                 </SheetTitle>
-                <p className="text-xs text-gspn-gold-400">
+                <p className="text-xs text-black dark:text-gspn-gold-400">
                   {t.nav.managementSystem}
                 </p>
               </div>
@@ -139,7 +117,7 @@ export function MobileNav() {
 
           {/* User Info */}
           {session?.user && (
-            <div className="border-b border-gspn-maroon-800 p-4">
+            <div className="border-b border-gspn-gold-300 dark:border-gray-800/50 p-4">
               <div className="flex items-center gap-3">
                 <Avatar className="h-10 w-10">
                   <AvatarImage
@@ -151,10 +129,10 @@ export function MobileNav() {
                   </AvatarFallback>
                 </Avatar>
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium text-white truncate">
+                  <p className="text-sm font-bold text-black dark:text-white truncate">
                     {session.user.name}
                   </p>
-                  <p className="text-xs text-gray-400 truncate">
+                  <p className="text-xs text-gspn-maroon-700 dark:text-gray-400 truncate">
                     {session.user.email}
                   </p>
                 </div>
@@ -178,7 +156,7 @@ export function MobileNav() {
                     open={isExpanded}
                     onOpenChange={() => toggleExpanded(item.id)}
                   >
-                    <CollapsibleTrigger className="flex w-full items-center justify-between rounded-lg px-3 py-2.5 text-sm font-medium text-gray-200 hover:bg-gspn-maroon-800 transition-colors">
+                    <CollapsibleTrigger className="flex w-full items-center justify-between rounded-lg px-3 py-2.5 text-sm font-medium text-black hover:bg-gspn-gold-300 dark:text-gray-200 dark:hover:bg-gspn-maroon-800 transition-colors">
                       <div className="flex items-center gap-3">
                         <Icon className="h-5 w-5" />
                         <span>
@@ -188,13 +166,13 @@ export function MobileNav() {
                       </div>
                       <ChevronRight
                         className={cn(
-                          "h-4 w-4 transition-transform duration-200",
+                          "h-4 w-4 text-black dark:text-gray-200 transition-transform duration-200",
                           isExpanded && "rotate-90"
                         )}
                       />
                     </CollapsibleTrigger>
                     <CollapsibleContent>
-                      <div className="ml-4 mt-1 flex flex-col gap-1 border-l-2 border-gspn-maroon-700 pl-4">
+                      <div className="ml-4 mt-1 flex flex-col gap-1 border-l-2 border-gspn-maroon-300 dark:border-gspn-maroon-700 pl-4">
                         {item.subItems.map((subItem) => {
                           const SubIcon = subItem.icon
                           const isActive = pathname === subItem.href
@@ -206,8 +184,8 @@ export function MobileNav() {
                               className={cn(
                                 "flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-colors",
                                 isActive
-                                  ? "bg-gspn-gold-500 text-gspn-maroon-950"
-                                  : "text-gray-300 hover:bg-gspn-maroon-800 hover:text-white"
+                                  ? "bg-gspn-gold-50 text-black dark:bg-gspn-gold-500 dark:text-gspn-maroon-950 font-semibold"
+                                  : "text-black hover:bg-gspn-gold-300 dark:text-gray-300 dark:hover:bg-gspn-maroon-800 dark:hover:text-white"
                               )}
                             >
                               <SubIcon className="h-4 w-4" />
@@ -227,26 +205,13 @@ export function MobileNav() {
           </ScrollArea>
 
           {/* Footer Actions */}
-          <div className="border-t border-gspn-maroon-800 p-4 space-y-3">
+          <div className="border-t border-gspn-gold-300 dark:border-gray-800/50 p-4 space-y-3">
             {/* Theme Toggle */}
             <div className="flex items-center justify-between">
-              <span className="text-sm text-gray-300">
+              <span className="text-sm text-black dark:text-gray-300">
                 Theme
               </span>
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
-                className="rounded-lg bg-gspn-maroon-800 hover:bg-gspn-maroon-700"
-              >
-                {!mounted ? (
-                  <Sun className="h-5 w-5 text-gspn-gold-400" />
-                ) : theme === "dark" ? (
-                  <Sun className="h-5 w-5 text-gspn-gold-400" />
-                ) : (
-                  <Moon className="h-5 w-5 text-gspn-gold-400" />
-                )}
-              </Button>
+              <ThemeToggleButton variant="nav" />
             </div>
 
             {/* Language Switcher */}
@@ -258,7 +223,7 @@ export function MobileNav() {
                 <Link
                   href="/profile"
                   onClick={() => setIsOpen(false)}
-                  className="flex items-center gap-2 rounded-lg px-3 py-2 text-sm text-gray-300 hover:bg-gspn-maroon-800 hover:text-white transition-colors"
+                  className="flex items-center gap-2 rounded-lg px-3 py-2 text-sm text-black hover:bg-gspn-gold-300 dark:text-gray-300 dark:hover:bg-gspn-maroon-800 dark:hover:text-white transition-colors"
                 >
                   <User className="h-4 w-4" />
                   <span>{t.nav.profile}</span>
@@ -268,7 +233,7 @@ export function MobileNav() {
                     setIsOpen(false)
                     signOut({ callbackUrl: "/" })
                   }}
-                  className="flex items-center gap-2 rounded-lg px-3 py-2 text-sm text-red-400 hover:bg-red-900/30 transition-colors w-full"
+                  className="flex items-center gap-2 rounded-lg px-3 py-2 text-sm text-red-600 hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-900/30 transition-colors w-full"
                 >
                   <LogOut className="h-4 w-4" />
                   <span>{t.nav.signOut}</span>
