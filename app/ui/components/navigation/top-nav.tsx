@@ -13,6 +13,7 @@ import {
   Settings,
 } from "lucide-react"
 import { cn } from "@/lib/utils"
+import { sizing, componentClasses } from "@/lib/design-tokens"
 import { Button } from "@/components/ui/button"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { getNavigationForRole } from "@/lib/nav-config"
@@ -54,19 +55,14 @@ export function TopNav() {
   }, [session?.user?.role])
 
   const handleNavClick = (itemId: string) => {
-    if (activeMainNav === itemId && isSidebarOpen) {
-      // Clicking same nav while open - toggle sidebar closed
-      setActiveMainNav(null)
-    } else {
-      // Opening a new nav section - set active and navigate to first sub-item
-      setActiveMainNav(itemId)
+    // Set active nav and navigate to first sub-item
+    setActiveMainNav(itemId)
 
-      // Find the nav item and navigate to its first sub-item
-      const navItem = visibleNavItems.find(item => item.id === itemId)
-      if (navItem && navItem.subItems.length > 0) {
-        const firstSubItem = navItem.subItems[0]
-        router.push(firstSubItem.href)
-      }
+    // Find the nav item and navigate to its first sub-item
+    const navItem = visibleNavItems.find(item => item.id === itemId)
+    if (navItem && navItem.subItems.length > 0) {
+      const firstSubItem = navItem.subItems[0]
+      router.push(firstSubItem.href)
     }
   }
 
@@ -106,9 +102,9 @@ export function TopNav() {
             </div>
           </Link>
 
-          {/* Main Navigation - 4 buttons */}
+          {/* Main Navigation */}
           {session && (
-            <nav className="hidden lg:flex items-center gap-1 relative z-10">
+            <nav className="hidden lg:flex items-center gap-2">
               {visibleNavItems.map((item) => {
                 const Icon = item.icon
                 const isActive = activeMainNav === item.id
@@ -118,28 +114,17 @@ export function TopNav() {
                     type="button"
                     onClick={() => handleNavClick(item.id)}
                     className={cn(
-                      "flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-semibold",
-                      "cursor-pointer pointer-events-auto select-none",
-                      "transition-colors duration-200",
+                      componentClasses.navMainButtonBase,
                       isActive
-                        ? "bg-gspn-gold-50 text-black dark:bg-gspn-gold-500 dark:text-gspn-maroon-950 shadow-md font-semibold"
-                        : "text-black hover:bg-gspn-gold-300 dark:text-gray-200 dark:hover:bg-gspn-maroon-800 dark:hover:text-white"
+                        ? componentClasses.navMainButtonActive
+                        : componentClasses.navMainButtonInactive
                     )}
                   >
-                    <Icon className="h-4 w-4" />
+                    <Icon className={sizing.toolbarIcon} />
                     <span>
                       {t.nav[item.translationKey as keyof typeof t.nav] ||
                         item.name}
                     </span>
-                    <ChevronDown
-                      className={cn(
-                        "h-3 w-3 transition-transform duration-200",
-                        isActive
-                          ? "text-black dark:text-gspn-maroon-950"
-                          : "text-black dark:text-gray-200",
-                        isActive && "rotate-180"
-                      )}
-                    />
                   </button>
                 )
               })}
@@ -162,7 +147,7 @@ export function TopNav() {
                   onClick={() => setDropdownOpen(!dropdownOpen)}
                   className="flex items-center gap-2 px-3 py-2 bg-gspn-gold-300 hover:bg-gspn-gold-200 dark:bg-gspn-maroon-800 dark:hover:bg-gspn-maroon-700 rounded-lg transition-colors text-black dark:text-gray-200"
                 >
-                  <Avatar className="h-7 w-7">
+                  <Avatar className={sizing.avatar.sm}>
                     <AvatarImage
                       src={session.user.image || undefined}
                       alt={session.user.name || "User"}
@@ -176,7 +161,8 @@ export function TopNav() {
                   </span>
                   <ChevronDown
                     className={cn(
-                      "h-4 w-4 text-black dark:text-gray-300 transition-transform",
+                      sizing.icon.sm,
+                      "text-black dark:text-gray-300 transition-transform",
                       dropdownOpen && "rotate-180"
                     )}
                   />
@@ -201,7 +187,7 @@ export function TopNav() {
                       onClick={() => setDropdownOpen(false)}
                       className="flex items-center gap-2 px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
                     >
-                      <User className="h-4 w-4" />
+                      <User className={sizing.icon.sm} />
                       <span>{t.nav.profile}</span>
                     </Link>
 
@@ -212,7 +198,7 @@ export function TopNav() {
                         onClick={() => setDropdownOpen(false)}
                         className="flex items-center gap-2 px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
                       >
-                        <Settings className="h-4 w-4" />
+                        <Settings className={sizing.icon.sm} />
                         <span>{t.nav.users}</span>
                       </Link>
                     )}
@@ -225,7 +211,7 @@ export function TopNav() {
                       }}
                       className="w-full flex items-center gap-2 px-4 py-2 text-sm text-red-600 dark:text-red-400 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors border-t border-gray-200 dark:border-gray-700"
                     >
-                      <LogOut className="h-4 w-4" />
+                      <LogOut className={sizing.icon.sm} />
                       <span>{t.nav.signOut}</span>
                     </button>
                   </div>
@@ -235,7 +221,7 @@ export function TopNav() {
 
             {/* Mobile user avatar (without dropdown trigger) */}
             {session?.user && (
-              <Avatar className="h-8 w-8 md:hidden">
+              <Avatar className={cn(sizing.avatar.md, "md:hidden")}>
                 <AvatarImage
                   src={session.user.image || undefined}
                   alt={session.user.name || "User"}

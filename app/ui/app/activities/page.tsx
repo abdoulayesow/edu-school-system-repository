@@ -16,6 +16,7 @@ import {
 } from "@/components/ui/dialog"
 import { BookOpen, Users, Plus, Search, AlertCircle } from "lucide-react"
 import { useI18n } from "@/components/i18n-provider"
+import { PageContainer } from "@/components/layout"
 
 export default function ActivitiesPage() {
   const { t } = useI18n()
@@ -81,8 +82,7 @@ export default function ActivitiesPage() {
   ]
 
   return (
-    <div className="min-h-screen bg-background pt-4 lg:pt-4">
-      <main className="container mx-auto px-4 py-4">
+    <PageContainer maxWidth="full">
         <div className="mb-4">
           <h1 className="text-3xl font-bold text-foreground mb-2">{t.activities.title}</h1>
           <p className="text-muted-foreground">{t.activities.subtitle}</p>
@@ -265,7 +265,6 @@ export default function ActivitiesPage() {
             </div>
           </TabsContent>
         </Tabs>
-      </main>
-    </div>
+    </PageContainer>
   )
 }

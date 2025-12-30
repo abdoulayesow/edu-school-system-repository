@@ -8,6 +8,7 @@ import { Badge } from "@/components/ui/badge"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Plus, Search, Eye, Loader2 } from "lucide-react"
 import { useI18n } from "@/components/i18n-provider"
+import { PageContainer } from "@/components/layout"
 import Link from "next/link"
 
 interface Enrollment {
@@ -79,12 +80,11 @@ export default function EnrollmentsPage() {
   )
 
   return (
-    <div className="min-h-screen bg-background pt-4 lg:pt-4">
-      <main className="container mx-auto px-4 py-4">
-        <div className="mb-4">
-          <h1 className="text-3xl font-bold text-foreground mb-2">{t.enrollments.title}</h1>
-          <p className="text-muted-foreground">{t.enrollments.subtitle}</p>
-        </div>
+    <PageContainer>
+      <div className="mb-4">
+        <h1 className="text-3xl font-bold text-foreground mb-2">{t.enrollments.title}</h1>
+        <p className="text-muted-foreground">{t.enrollments.subtitle}</p>
+      </div>
 
         <Card>
           <CardHeader>
@@ -165,7 +165,6 @@ export default function EnrollmentsPage() {
             )}
           </CardContent>
         </Card>
-      </main>
-    </div>
+    </PageContainer>
   )
 }

@@ -19,6 +19,7 @@ import type { UserRole } from "@/lib/nav-links"
 import { useI18n } from "@/components/i18n-provider"
 import { useNavigation } from "./navigation-context"
 import { useMediaQuery } from "@/hooks/use-media-query"
+import { sizing } from "@/lib/design-tokens"
 
 export function NavSidebar() {
   const pathname = usePathname()
@@ -81,7 +82,7 @@ export function NavSidebar() {
           >
             {!isSidebarCollapsed && (
               <div className="flex items-center gap-2">
-                <activeNavConfig.icon className="h-5 w-5 text-black dark:text-gspn-gold-400" />
+                <activeNavConfig.icon className={cn(sizing.toolbarIcon, "text-black dark:text-gspn-gold-400")} />
                 <span className="font-semibold text-black dark:text-white">
                   {t.nav[activeNavConfig.translationKey as keyof typeof t.nav] ||
                     activeNavConfig.name}
@@ -101,9 +102,9 @@ export function NavSidebar() {
                 }
               >
                 {isSidebarCollapsed ? (
-                  <ChevronRight className="h-4 w-4 text-black dark:text-gray-300" />
+                  <ChevronRight className={cn(sizing.icon.sm, "text-black dark:text-gray-300")} />
                 ) : (
-                  <ChevronLeft className="h-4 w-4 text-black dark:text-gray-300" />
+                  <ChevronLeft className={cn(sizing.icon.sm, "text-black dark:text-gray-300")} />
                 )}
               </Button>
               {!isSidebarCollapsed && (
@@ -113,7 +114,7 @@ export function NavSidebar() {
                   onClick={closeSidebar}
                   className="h-8 w-8 text-gspn-maroon-900 hover:bg-gspn-maroon-100 dark:text-gray-300 dark:hover:bg-gspn-maroon-800 dark:hover:text-white lg:hidden"
                 >
-                  <X className="h-4 w-4" />
+                  <X className={sizing.icon.sm} />
                 </Button>
               )}
             </div>
@@ -142,7 +143,7 @@ export function NavSidebar() {
                                 : "text-black hover:bg-gspn-gold-300 dark:text-gray-300 dark:hover:bg-gspn-maroon-800 dark:hover:text-white"
                             )}
                           >
-                            <Icon className="h-5 w-5" />
+                            <Icon className={sizing.toolbarIcon} />
                           </Link>
                         </TooltipTrigger>
                         <TooltipContent side="right" className="bg-gspn-maroon-900 dark:bg-gspn-maroon-800 text-white border-gspn-maroon-700">
@@ -164,7 +165,7 @@ export function NavSidebar() {
                           : "text-black hover:bg-gspn-gold-300 dark:text-gray-300 dark:hover:bg-gspn-maroon-800 dark:hover:text-white"
                       )}
                     >
-                      <Icon className="h-5 w-5 shrink-0" />
+                      <Icon className={cn(sizing.toolbarIcon, "shrink-0")} />
                       <span>
                         {t.nav[item.translationKey as keyof typeof t.nav] ||
                           item.name}
@@ -184,7 +185,7 @@ export function NavSidebar() {
                 className="w-full justify-start text-black hover:bg-gspn-gold-300 dark:text-gray-300 dark:hover:bg-gspn-maroon-800 dark:hover:text-white"
                 onClick={closeSidebar}
               >
-                <ChevronLeft className="mr-2 h-4 w-4" />
+                <ChevronLeft className={cn(sizing.icon.sm, "mr-2")} />
                 {t.nav.closeMenu || "Close Menu"}
               </Button>
             </div>

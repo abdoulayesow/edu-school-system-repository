@@ -23,6 +23,7 @@ import {
   Search
 } from "lucide-react"
 import { useI18n } from "@/components/i18n-provider"
+import { PageContainer } from "@/components/layout"
 
 type AttendanceStatus = "present" | "absent" | "late" | "excused" | null
 
@@ -313,8 +314,7 @@ export default function AttendancePage() {
   const selectedGrade = grades.find(g => g.id === selectedGradeId)
 
   return (
-    <div className="min-h-screen bg-background pt-4">
-      <main className="container mx-auto px-4 py-4 max-w-4xl">
+    <PageContainer maxWidth="lg">
         {/* Header */}
         <div className="mb-6">
           <h1 className="text-3xl font-bold text-foreground mb-2">{t.attendance.title}</h1>
@@ -634,7 +634,6 @@ export default function AttendancePage() {
             </CardContent>
           </Card>
         )}
-      </main>
-    </div>
+    </PageContainer>
   )
 }

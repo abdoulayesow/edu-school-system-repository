@@ -1,0 +1,6 @@
+export { Dashboard } from "./Dashboard"
+export { Students } from "./Students"
+export { Teachers } from "./Teachers"
+export { Accounting } from "./Accounting"
+export { Attendance } from "./Attendance"
+export { Profile } from "./Profile"

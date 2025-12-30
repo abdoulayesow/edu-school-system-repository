@@ -61,6 +61,7 @@ import {
   HelpCircle
 } from "lucide-react"
 import { useI18n } from "@/components/i18n-provider"
+import { PageContainer } from "@/components/layout"
 
 interface User {
   id: string
@@ -353,8 +354,7 @@ export default function ExpensesPage() {
   }
 
   return (
-    <div className="min-h-screen bg-background pt-4 lg:pt-4">
-      <main className="container mx-auto px-4 py-4">
+    <PageContainer maxWidth="full">
         {/* Header */}
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
           <div>
@@ -791,7 +791,6 @@ export default function ExpensesPage() {
             </AlertDialogFooter>
           </AlertDialogContent>
         </AlertDialog>
-      </main>
-    </div>
+    </PageContainer>
   )
 }

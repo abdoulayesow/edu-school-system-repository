@@ -254,21 +254,40 @@
   }
 }
 
-/* Main panel background color for light mode - outside layer for higher specificity */
-div.bg-background {
-  background-color: #fff5d8 !important;
+/* Main panel background color - using CSS custom property for consistency */
+:root {
+  --panel-background: #ffffff;
 }
 
-.dark div.bg-background {
-  background-color: oklch(var(--background)) !important;
+.dark {
+  --panel-background: oklch(var(--background));
 }
 
-/* Also target container divs that are direct children of main (for audit pages that don't have the wrapper) */
-main > div.container {
-  background-color: #fff5d8 !important;
+/* Apply panel background to main content areas with proper specificity (no !important) */
+main.bg-background,
+main > .bg-background,
+.main-content.bg-background {
+  background-color: var(--background);
 }
 
-.dark main > div.container {
+/* Main element should be transparent to allow page-container backgrounds to show */
+main {
+  background-color: transparent !important;
+}
+
+/* Container backgrounds for content pages - white for main panel */
+/* Using higher specificity to ensure white background overrides any other rules */
+main > div.container,
+main .page-container,
+div.page-container,
+.page-container {
+  background-color: #ffffff !important;
+}
+
+.dark main > div.container,
+.dark main .page-container,
+.dark div.page-container,
+.dark .page-container {
   background-color: oklch(var(--background)) !important;
 }
 

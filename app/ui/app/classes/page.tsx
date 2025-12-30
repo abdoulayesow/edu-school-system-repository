@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Calendar, Clock, BookOpen, User, MapPin, Plus, Download, Edit } from "lucide-react"
 import { useI18n, interpolate } from "@/components/i18n-provider"
+import { PageContainer } from "@/components/layout"
 
 interface ScheduleEntry {
   time: string
@@ -64,31 +65,26 @@ export default function ClassesPage() {
   const currentSchedule = schedule[selectedDay] || []
 
   return (
-    <div className="min-h-screen bg-background">
-      {/* Header */}
-      <header className="border-b bg-background">
-        <div className="container mx-auto px-4 py-4">
-          <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-2xl font-bold text-foreground">{t.classes.title}</h1>
-              <p className="text-sm text-muted-foreground">{t.classes.subtitle}</p>
-            </div>
-            <div className="flex items-center gap-3">
-              <Button variant="outline">
-                <Download className="size-4 mr-2" />
-                {t.classes.exportPdf}
-              </Button>
-              <Button>
-                <Plus className="size-4 mr-2" />
-                {t.classes.addCourse}
-              </Button>
-            </div>
+    <PageContainer maxWidth="full">
+        {/* Header */}
+        <div className="flex items-center justify-between mb-6">
+          <div>
+            <h1 className="text-2xl font-bold text-foreground">{t.classes.title}</h1>
+            <p className="text-sm text-muted-foreground">{t.classes.subtitle}</p>
+          </div>
+          <div className="flex items-center gap-3">
+            <Button variant="outline">
+              <Download className="size-4 mr-2" />
+              {t.classes.exportPdf}
+            </Button>
+            <Button>
+              <Plus className="size-4 mr-2" />
+              {t.classes.addCourse}
+            </Button>
           </div>
         </div>
-      </header>
 
-      {/* Main Content */}
-      <main className="container mx-auto px-4 py-8">
+        {/* Main Content */}
         <div className="grid gap-6 lg:grid-cols-7">
           {/* Class List Sidebar */}
           <div className="lg:col-span-2 space-y-4">
@@ -216,7 +212,6 @@ export default function ClassesPage() {
             </Card>
           </div>
         </div>
-      </main>
-    </div>
+    </PageContainer>
   )
 }

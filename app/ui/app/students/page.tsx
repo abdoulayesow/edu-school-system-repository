@@ -22,6 +22,7 @@ import {
   XCircle
 } from "lucide-react"
 import { useI18n } from "@/components/i18n-provider"
+import { PageContainer } from "@/components/layout"
 import Link from "next/link"
 
 interface Student {
@@ -210,10 +211,9 @@ export default function StudentsPage() {
   }
 
   return (
-    <div className="min-h-screen bg-background pt-4 lg:pt-4">
-      <main className="container mx-auto px-4 py-4">
-        {/* Header */}
-        <div className="mb-6">
+    <PageContainer>
+      {/* Header */}
+      <div className="mb-6">
           <h1 className="text-3xl font-bold text-foreground mb-2">{t.students.title}</h1>
           <p className="text-muted-foreground">{t.students.subtitle}</p>
         </div>
@@ -420,7 +420,6 @@ export default function StudentsPage() {
             )}
           </CardContent>
         </Card>
-      </main>
-    </div>
+    </PageContainer>
   )
 }

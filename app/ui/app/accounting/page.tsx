@@ -39,6 +39,7 @@ import {
 } from "lucide-react"
 import { Checkbox } from "@/components/ui/checkbox"
 import { useI18n, interpolate } from "@/components/i18n-provider"
+import { PageContainer } from "@/components/layout"
 
 interface Payment {
   id: string
@@ -433,8 +434,7 @@ export default function AccountingPage() {
   }
 
   return (
-    <div className="min-h-screen bg-background pt-4 lg:pt-4">
-      <main className="container mx-auto px-4 py-4">
+    <PageContainer maxWidth="full">
         <div className="mb-6">
           <h1 className="text-3xl font-bold text-foreground mb-2">{t.accounting.title}</h1>
           <p className="text-muted-foreground">{t.accounting.subtitle}</p>
@@ -1125,7 +1125,6 @@ export default function AccountingPage() {
             </Card>
           </TabsContent>
         </Tabs>
-      </main>
-    </div>
+    </PageContainer>
   )
 }

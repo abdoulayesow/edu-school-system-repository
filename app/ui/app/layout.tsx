@@ -1,7 +1,7 @@
 "use client"
 
 import type React from "react"
-import { Inter, Playfair_Display } from "next/font/google"
+import { Inter } from "next/font/google"
 import { Analytics } from "@vercel/analytics/next"
 import { SessionProvider } from "next-auth/react"
 import "./globals.css"
@@ -23,13 +23,6 @@ const inter = Inter({
   variable: "--font-inter",
 })
 
-const playfair = Playfair_Display({
-  subsets: ["latin"],
-  display: "swap",
-  weight: ["400", "500", "600", "700", "800", "900"],
-  variable: "--font-playfair",
-})
-
 // Main content wrapper that adjusts for sidebar
 function MainContent({ children }: { children: React.ReactNode }) {
   const { isSidebarOpen, isSidebarCollapsed } = useNavigation()
@@ -37,7 +30,7 @@ function MainContent({ children }: { children: React.ReactNode }) {
   return (
     <main
       className={cn(
-        "pt-[76px] transition-all duration-300 bg-background",
+        "min-h-screen pt-[76px] transition-all duration-300",
         // Add left margin on desktop when sidebar is open
         isSidebarOpen && "lg:ml-64",
         isSidebarOpen && isSidebarCollapsed && "lg:ml-16"
@@ -97,7 +90,7 @@ export default function RootLayout({
         />
       </head>
       <body
-        className={`${inter.variable} ${playfair.variable} font-sans antialiased text-gray-900 dark:text-gray-50 bg-background dark:bg-gray-900`}
+        className={`${inter.variable} font-sans antialiased text-gray-900 dark:text-gray-50 bg-white dark:bg-gray-900`}
       >
         <ThemeProvider
           attribute="class"

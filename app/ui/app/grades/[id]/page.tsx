@@ -23,6 +23,7 @@ import {
   AlertCircle
 } from "lucide-react"
 import { useI18n } from "@/components/i18n-provider"
+import { PageContainer } from "@/components/layout/PageContainer"
 import Link from "next/link"
 
 interface Person {
@@ -148,7 +149,7 @@ export default function GradeDetailPage() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
+      <div className="min-h-screen bg-white dark:bg-background flex items-center justify-center">
         <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
       </div>
     )
@@ -156,26 +157,23 @@ export default function GradeDetailPage() {
 
   if (error || !grade) {
     return (
-      <div className="min-h-screen bg-background pt-4 lg:pt-4">
-        <main className="container mx-auto px-4 py-4">
-          <Link href="/grades" className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground mb-4">
-            <ArrowLeft className="size-4" />
-            Retour aux classes
-          </Link>
-          <div className="text-center py-12 text-destructive">{error || "Grade not found"}</div>
-        </main>
-      </div>
-    )
-  }
-
-  return (
-    <div className="min-h-screen bg-background pt-4 lg:pt-4">
-      <main className="container mx-auto px-4 py-4">
-        {/* Back link */}
+      <PageContainer maxWidth="lg">
         <Link href="/grades" className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground mb-4">
           <ArrowLeft className="size-4" />
           Retour aux classes
         </Link>
+        <div className="text-center py-12 text-destructive">{error || "Grade not found"}</div>
+      </PageContainer>
+    )
+  }
+
+  return (
+    <PageContainer maxWidth="lg">
+      {/* Back link */}
+      <Link href="/grades" className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground mb-4">
+        <ArrowLeft className="size-4" />
+        Retour aux classes
+      </Link>
 
         {/* Header */}
         <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-4 mb-6">
@@ -502,7 +500,6 @@ export default function GradeDetailPage() {
             </Card>
           </TabsContent>
         </Tabs>
-      </main>
-    </div>
+    </PageContainer>
   )
 }

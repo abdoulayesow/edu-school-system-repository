@@ -32,6 +32,7 @@ import {
   AlertCircle,
 } from "lucide-react"
 import { useI18n } from "@/components/i18n-provider"
+import { PageContainer } from "@/components/layout/PageContainer"
 import Link from "next/link"
 import type { EnrollmentStatus, PaymentSchedule, Payment, EnrollmentNote } from "@/lib/enrollment/types"
 
@@ -246,7 +247,7 @@ export default function EnrollmentDetailPage({
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
+      <div className="min-h-screen bg-white dark:bg-background flex items-center justify-center">
         <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
       </div>
     )
@@ -254,19 +255,17 @@ export default function EnrollmentDetailPage({
 
   if (error || !enrollment) {
     return (
-      <div className="min-h-screen bg-background pt-4">
-        <main className="container mx-auto px-4 py-4">
-          <div className="text-center py-8">
-            <p className="text-destructive mb-4">{error || "Enrollment not found"}</p>
-            <Button asChild>
-              <Link href="/enrollments">
-                <ArrowLeft className="h-4 w-4 mr-2" />
-                {t.common.back}
-              </Link>
-            </Button>
-          </div>
-        </main>
-      </div>
+      <PageContainer maxWidth="lg">
+        <div className="text-center py-8">
+          <p className="text-destructive mb-4">{error || "Enrollment not found"}</p>
+          <Button asChild>
+            <Link href="/enrollments">
+              <ArrowLeft className="h-4 w-4 mr-2" />
+              {t.common.back}
+            </Link>
+          </Button>
+        </div>
+      </PageContainer>
     )
   }
 
@@ -277,9 +276,8 @@ export default function EnrollmentDetailPage({
   const canCancel = enrollment.status === "draft"
 
   return (
-    <div className="min-h-screen bg-background pt-4">
-      <main className="container mx-auto px-4 py-4">
-        {/* Header */}
+    <PageContainer maxWidth="lg">
+      {/* Header */}
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
           <div className="flex items-center gap-4">
             <Button variant="ghost" size="icon" asChild>
@@ -663,7 +661,6 @@ export default function EnrollmentDetailPage({
             )}
           </div>
         </div>
-      </main>
 
       {/* Approve Dialog */}
       <Dialog open={showApproveDialog} onOpenChange={setShowApproveDialog}>
@@ -751,6 +748,6 @@ export default function EnrollmentDetailPage({
           </DialogFooter>
         </DialogContent>
       </Dialog>
-    </div>
+    </PageContainer>
   )
 }

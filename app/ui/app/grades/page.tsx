@@ -18,6 +18,7 @@ import {
 } from "lucide-react"
 import { useI18n } from "@/components/i18n-provider"
 import Link from "next/link"
+import { PageContainer } from "@/components/layout"
 
 interface GradeLeader {
   id: string
@@ -125,8 +126,7 @@ export default function GradesPage() {
   }
 
   return (
-    <div className="min-h-screen bg-background pt-4 lg:pt-4">
-      <main className="container mx-auto px-4 py-4">
+    <PageContainer maxWidth="full">
         {/* Header */}
         <div className="mb-6">
           <h1 className="text-3xl font-bold text-foreground mb-2">Gestion des classes</h1>
@@ -317,7 +317,6 @@ export default function GradesPage() {
             ))}
           </div>
         )}
-      </main>
-    </div>
+    </PageContainer>
   )
 }

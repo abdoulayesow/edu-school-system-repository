@@ -5,13 +5,15 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { useI18n } from "@/components/i18n-provider"
+import { PageContainer } from "@/components/layout/PageContainer"
 
 export default function DataHistoryPage() {
   const { t } = useI18n()
 
   return (
-    <div className="container mx-auto p-6 space-y-6">
-      {/* Header */}
+    <PageContainer maxWidth="full">
+      <div className="space-y-6">
+        {/* Header */}
       <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
         <div>
           <h1 className="text-3xl font-display font-bold text-gray-900 dark:text-white">
@@ -110,6 +112,7 @@ export default function DataHistoryPage() {
           </div>
         </CardContent>
       </Card>
-    </div>
+      </div>
+    </PageContainer>
   )
 }

@@ -15,6 +15,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { useToast } from "@/hooks/use-toast"
 import { AlertCircle } from "lucide-react"
+import { CenteredFormPage } from "@/components/layout/CenteredFormPage"
 import Link from "next/link"
 
 function ResetPasswordInner() {
@@ -140,8 +141,8 @@ function ResetPasswordInner() {
   // Loading state while validating token
   if (tokenValid === null) {
     return (
-      <div className="flex items-center justify-center min-h-screen bg-background">
-        <Card className="w-full max-w-md">
+      <CenteredFormPage maxWidth="sm">
+        <Card>
           <CardHeader className="text-center">
             <CardTitle>Validating Token...</CardTitle>
             <CardDescription>Please wait while we verify your reset link</CardDescription>
@@ -150,15 +151,15 @@ function ResetPasswordInner() {
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
           </CardContent>
         </Card>
-      </div>
+      </CenteredFormPage>
     )
   }
 
   // Invalid token state
   if (!tokenValid) {
     return (
-      <div className="flex items-center justify-center min-h-screen bg-background">
-        <Card className="w-full max-w-md">
+      <CenteredFormPage maxWidth="sm">
+        <Card>
           <CardHeader className="text-center">
             <div className="flex justify-center mb-4">
               <AlertCircle className="h-12 w-12 text-destructive" />
@@ -180,14 +181,14 @@ function ResetPasswordInner() {
             </Link>
           </CardFooter>
         </Card>
-      </div>
+      </CenteredFormPage>
     )
   }
 
   // Valid token - show password form
   return (
-    <div className="flex items-center justify-center min-h-screen bg-background">
-      <Card className="w-full max-w-md">
+    <CenteredFormPage maxWidth="sm">
+      <Card>
         <form onSubmit={handleSubmit}>
           <CardHeader className="text-center">
             <CardTitle className="text-2xl">Reset Your Password</CardTitle>
@@ -236,7 +237,7 @@ function ResetPasswordInner() {
           </CardFooter>
         </form>
       </Card>
-    </div>
+    </CenteredFormPage>
   )
 }
 

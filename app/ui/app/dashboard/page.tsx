@@ -8,6 +8,9 @@ import { Button } from "@/components/ui/button"
 import { ChartContainer, ChartTooltip, ChartTooltipContent, type ChartConfig } from "@/components/ui/chart"
 import { Users, DollarSign, AlertTriangle, TrendingUp, FileText, CheckCircle2, Clock, BarChart3, Loader2 } from "lucide-react"
 import { useI18n, interpolate } from "@/components/i18n-provider"
+import { PageContainer } from "@/components/layout"
+import { sizing } from "@/lib/design-tokens"
+import { cn } from "@/lib/utils"
 import {
   Table,
   TableBody,
@@ -242,78 +245,79 @@ export default function DirectorDashboard() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-background pt-4 flex items-center justify-center">
-        <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
-      </div>
+      <PageContainer>
+        <div className="flex items-center justify-center min-h-[60vh]">
+          <Loader2 className={cn(sizing.icon.xl, "animate-spin text-muted-foreground")} />
+        </div>
+      </PageContainer>
     )
   }
 
   return (
-    <div className="min-h-screen bg-background pt-4 lg:pt-4">
-      <main className="container mx-auto px-4 py-4">
-        <div className="mb-4">
-          <h1 className="text-3xl font-bold text-foreground mb-2">{t.dashboard.title}</h1>
-          <p className="text-muted-foreground">{t.dashboard.greetingWithName ? interpolate(t.dashboard.greetingWithName, { name: "" }) : t.dashboard.title}</p>
-        </div>
+    <PageContainer>
+      <div className="mb-6">
+        <h1 className="text-3xl font-bold text-foreground mb-2">{t.dashboard.title}</h1>
+        <p className="text-muted-foreground">{t.dashboard.greetingWithName ? interpolate(t.dashboard.greetingWithName, { name: "" }) : t.dashboard.title}</p>
+      </div>
 
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4 mb-8">
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4 mb-6">
           <Card>
-            <CardHeader className="flex flex-row items-center justify-between pb-2">
-              <CardTitle className="text-sm font-medium text-muted-foreground">{t.dashboard.totalEnrollment}</CardTitle>
-              <Users className="h-5 w-5 text-primary" />
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">{t.dashboard.totalEnrollment}</CardTitle>
+              <Users className={sizing.icon.lg} />
             </CardHeader>
             <CardContent>
-              <div className="text-3xl font-bold text-foreground">{totalEnrollment}</div>
-              <p className="text-xs text-muted-foreground mt-1">
+              <div className="text-2xl font-bold">{totalEnrollment}</div>
+              <p className="text-xs text-muted-foreground">
                 {grades.length} classes
               </p>
             </CardContent>
           </Card>
 
           <Card>
-            <CardHeader className="flex flex-row items-center justify-between pb-2">
-              <CardTitle className="text-sm font-medium text-muted-foreground">{t.dashboard.revenue}</CardTitle>
-              <DollarSign className="h-5 w-5 text-success" />
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">{t.dashboard.revenue}</CardTitle>
+              <DollarSign className={sizing.icon.lg} />
             </CardHeader>
             <CardContent>
-              <div className="text-3xl font-bold text-foreground">
+              <div className="text-2xl font-bold">
                 {balance ? formatGNF(balance.summary.totalConfirmedPayments) : "0 GNF"}
               </div>
-              <p className="text-xs text-muted-foreground mt-1">
+              <p className="text-xs text-muted-foreground">
                 {t.dashboard.pending}: {balance ? formatGNF(balance.summary.totalPendingPayments) : "0 GNF"}
               </p>
             </CardContent>
           </Card>
 
-          <Card className={pendingApprovals.length > 0 ? "border-warning/50 bg-warning/5" : ""}>
-            <CardHeader className="flex flex-row items-center justify-between pb-2">
-              <CardTitle className={`text-sm font-medium ${pendingApprovals.length > 0 ? "text-warning" : "text-muted-foreground"}`}>
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">
                 {t.dashboard.pendingApprovals}
               </CardTitle>
-              <AlertTriangle className={`h-5 w-5 ${pendingApprovals.length > 0 ? "text-warning" : "text-muted-foreground"}`} />
+              <AlertTriangle className={sizing.icon.lg} />
             </CardHeader>
             <CardContent>
-              <div className={`text-3xl font-bold ${pendingApprovals.length > 0 ? "text-warning" : "text-foreground"}`}>
+              <div className="text-2xl font-bold">
                 {pendingEnrollments.length + pendingPayments.length}
               </div>
-              <p className="text-xs text-muted-foreground mt-1">
+              <p className="text-xs text-muted-foreground">
                 {pendingEnrollments.length} inscriptions, {pendingPayments.length} paiements
               </p>
             </CardContent>
           </Card>
 
-          <Card className={unreconciledDeposits.length > 0 ? "border-destructive/50 bg-destructive/5" : ""}>
-            <CardHeader className="flex flex-row items-center justify-between pb-2">
-              <CardTitle className={`text-sm font-medium ${unreconciledDeposits.length > 0 ? "text-destructive" : "text-muted-foreground"}`}>
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">
                 {t.dashboard.reconciliationFlags}
               </CardTitle>
-              <AlertTriangle className={`h-5 w-5 ${unreconciledDeposits.length > 0 ? "text-destructive" : "text-muted-foreground"}`} />
+              <AlertTriangle className={sizing.icon.lg} />
             </CardHeader>
             <CardContent>
-              <div className={`text-3xl font-bold ${unreconciledDeposits.length > 0 ? "text-destructive" : "text-foreground"}`}>
+              <div className="text-2xl font-bold">
                 {unreconciledDeposits.length}
               </div>
-              <p className="text-xs text-muted-foreground mt-1">
+              <p className="text-xs text-muted-foreground">
                 {unreconciledDeposits.length > 0 ? t.dashboard.needsAttention : "Aucun"}
               </p>
             </CardContent>
@@ -324,7 +328,7 @@ export default function DirectorDashboard() {
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <Clock className="h-5 w-5 text-warning" />
+                <Clock className={cn(sizing.icon.lg, "text-warning")} />
                 {t.dashboard.pendingExceptionTickets}
               </CardTitle>
               <CardDescription>{t.dashboard.requestsNeedingApproval}</CardDescription>
@@ -332,7 +336,7 @@ export default function DirectorDashboard() {
             <CardContent>
               {pendingApprovals.length === 0 ? (
                 <div className="text-center py-8 text-muted-foreground">
-                  <CheckCircle2 className="h-8 w-8 mx-auto mb-2 text-success opacity-50" />
+                  <CheckCircle2 className={cn(sizing.icon.xl, "mx-auto mb-2 text-success opacity-50")} />
                   <p>Aucune approbation en attente</p>
                 </div>
               ) : (
@@ -370,7 +374,7 @@ export default function DirectorDashboard() {
                         <TableCell className="text-right">
                           <div className="flex justify-end gap-2">
                             <Button size="sm" className="h-8">
-                              <CheckCircle2 className="h-3 w-3 mr-1" />
+                              <CheckCircle2 className={cn(sizing.icon.xs, "mr-1")} />
                               {t.dashboard.approve}
                             </Button>
                             <Button
@@ -393,7 +397,7 @@ export default function DirectorDashboard() {
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <FileText className="h-5 w-5 text-primary" />
+                <FileText className={cn(sizing.icon.lg, "text-primary")} />
                 {t.dashboard.recentActivity}
               </CardTitle>
               <CardDescription>{t.dashboard.importantEvents}</CardDescription>
@@ -463,7 +467,7 @@ export default function DirectorDashboard() {
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <BarChart3 className="h-5 w-5 text-primary" />
+                <BarChart3 className={cn(sizing.icon.lg, "text-primary")} />
                 {t.dashboard.enrollmentByLevel}
               </CardTitle>
               <CardDescription>{t.dashboard.studentDistribution}</CardDescription>
@@ -490,7 +494,7 @@ export default function DirectorDashboard() {
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <DollarSign className="h-5 w-5 text-success" />
+                <DollarSign className={cn(sizing.icon.lg, "text-success")} />
                 {t.dashboard.revenueByCategory}
               </CardTitle>
               <CardDescription>{t.dashboard.revenueDistribution}</CardDescription>
@@ -528,7 +532,7 @@ export default function DirectorDashboard() {
               ) : (
                 <div className="h-[300px] flex items-center justify-center text-muted-foreground">
                   <div className="text-center">
-                    <DollarSign className="h-8 w-8 mx-auto mb-2 opacity-50" />
+                    <DollarSign className={cn(sizing.icon.xl, "mx-auto mb-2 opacity-50")} />
                     <p>Aucun paiement confirmé</p>
                   </div>
                 </div>
@@ -539,7 +543,6 @@ export default function DirectorDashboard() {
             </CardContent>
           </Card>
         </div>
-      </main>
-    </div>
+    </PageContainer>
   )
 }

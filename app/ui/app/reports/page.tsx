@@ -9,6 +9,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { ChartContainer, ChartTooltip, ChartTooltipContent, type ChartConfig } from "@/components/ui/chart"
 import { BookOpen, Users, TrendingDown, BarChart3, Calendar, Loader2, AlertTriangle } from "lucide-react"
 import { useI18n } from "@/components/i18n-provider"
+import { PageContainer } from "@/components/layout"
 
 // Lazy load recharts components
 const LineChart = dynamic(() => import("recharts").then(mod => mod.LineChart) as never, { ssr: false }) as typeof import("recharts").LineChart
@@ -187,15 +188,16 @@ export default function ReportsPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-background pt-4 flex items-center justify-center">
-        <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
-      </div>
+      <PageContainer maxWidth="full">
+        <div className="flex items-center justify-center min-h-[50vh]">
+          <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+        </div>
+      </PageContainer>
     )
   }
 
   return (
-    <div className="min-h-screen bg-background pt-4 lg:pt-4">
-      <main className="container mx-auto px-4 py-4">
+    <PageContainer maxWidth="full">
         <div className="mb-4">
           <h1 className="text-3xl font-bold text-foreground mb-2">{t.reports.title}</h1>
           <p className="text-muted-foreground">{t.reports.subtitle}</p>
@@ -534,7 +536,6 @@ export default function ReportsPage() {
             )}
           </TabsContent>
         </Tabs>
-      </main>
-    </div>
+    </PageContainer>
   )
 }
