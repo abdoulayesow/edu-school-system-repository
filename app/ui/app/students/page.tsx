@@ -222,7 +222,7 @@ export default function StudentsPage() {
         {/* Summary Cards */}
         <div className="grid gap-4 md:grid-cols-3 mb-6">
           {/* Total Students */}
-          <Card>
+          <Card className="py-5">
             <CardHeader className="pb-3">
               <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
                 <Users className={sizing.icon.lg} />
@@ -238,7 +238,7 @@ export default function StudentsPage() {
           </Card>
 
           {/* Payment Summary */}
-          <Card>
+          <Card className="py-5">
             <CardHeader className="pb-3">
               <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
                 <Wallet className={sizing.icon.lg} />
@@ -259,7 +259,7 @@ export default function StudentsPage() {
           </Card>
 
           {/* Attendance Summary */}
-          <Card>
+          <Card className="py-5">
             <CardHeader className="pb-3">
               <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
                 <CalendarCheck className={sizing.icon.lg} />

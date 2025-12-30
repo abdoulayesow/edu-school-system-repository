@@ -67,8 +67,8 @@ export function NavSidebar() {
       {/* Sidebar */}
       <aside
         className={cn(
-          "fixed left-0 top-[76px] z-40 h-[calc(100vh-76px)] border-r border-gspn-gold-300 dark:border-gray-800/50",
-          "bg-[#e79908] dark:bg-gspn-maroon-950 transition-all duration-300 ease-in-out",
+          "fixed left-0 top-[91px] z-40 h-[calc(100vh-91px)] border-r border-gspn-gold-300 dark:border-gray-800/50",
+          "bg-[#eaa428] dark:bg-gspn-maroon-950 transition-all duration-300 ease-in-out",
           isSidebarCollapsed ? "w-16" : "w-64"
         )}
       >

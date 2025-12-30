@@ -351,7 +351,7 @@ export default function UsersPage() {
         <div className="space-y-6">
           {/* User Count Cards */}
           <div className="grid gap-4 md:grid-cols-5">
-            <Card>
+            <Card className="py-5">
               <CardHeader className="pb-3">
                 <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
                   <Shield className="size-4 text-primary" />
@@ -363,7 +363,7 @@ export default function UsersPage() {
               </CardContent>
             </Card>
 
-            <Card>
+            <Card className="py-5">
               <CardHeader className="pb-3">
                 <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
                   <GraduationCap className="size-4 text-accent" />
@@ -375,7 +375,7 @@ export default function UsersPage() {
               </CardContent>
             </Card>
 
-            <Card>
+            <Card className="py-5">
               <CardHeader className="pb-3">
                 <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
                   <Calculator className="size-4 text-success" />
@@ -387,7 +387,7 @@ export default function UsersPage() {
               </CardContent>
             </Card>
 
-            <Card>
+            <Card className="py-5">
               <CardHeader className="pb-3">
                 <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
                   <User className="size-4" />
@@ -399,7 +399,7 @@ export default function UsersPage() {
               </CardContent>
             </Card>
 
-            <Card>
+            <Card className="py-5">
               <CardHeader className="pb-3">
                 <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
                   <Users className="size-4" />

@@ -37,7 +37,7 @@ export default function FinancialAuditPage() {
 
       {/* Stats Cards */}
       <div className="grid gap-4 md:grid-cols-3">
-        <Card className="bg-white dark:bg-gray-900 border-gray-100 dark:border-gray-800">
+        <Card className="bg-white dark:bg-gray-900 border-gray-100 dark:border-gray-800 py-5">
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-sm font-medium text-gray-600 dark:text-gray-400">
               Payment Modifications
@@ -52,7 +52,7 @@ export default function FinancialAuditPage() {
           </CardContent>
         </Card>
 
-        <Card className="bg-white dark:bg-gray-900 border-gray-100 dark:border-gray-800">
+        <Card className="bg-white dark:bg-gray-900 border-gray-100 dark:border-gray-800 py-5">
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-sm font-medium text-gray-600 dark:text-gray-400">
               Expense Approvals
@@ -67,7 +67,7 @@ export default function FinancialAuditPage() {
           </CardContent>
         </Card>
 
-        <Card className="bg-white dark:bg-gray-900 border-gray-100 dark:border-gray-800">
+        <Card className="bg-white dark:bg-gray-900 border-gray-100 dark:border-gray-800 py-5">
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-sm font-medium text-gray-600 dark:text-gray-400">
               Reconciliations

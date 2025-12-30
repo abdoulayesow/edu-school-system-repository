@@ -192,7 +192,11 @@ export function StepConfirmation() {
 
       {/* Actions */}
       <div className="flex flex-col sm:flex-row gap-3 justify-center">
-        <Button onClick={handleDownloadPdf} disabled={isDownloading} className="gap-2">
+        <Button
+          onClick={handleDownloadPdf}
+          disabled={isDownloading}
+          className="gap-2 bg-[#e79908] hover:bg-[#d68907] text-black dark:bg-gspn-maroon-950 dark:hover:bg-gspn-maroon-900 dark:text-white"
+        >
           {isDownloading ? (
             <Loader2 className={sizing.icon.sm + " animate-spin"} />
           ) : (

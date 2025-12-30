@@ -261,7 +261,7 @@ export default function DirectorDashboard() {
       </div>
 
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4 mb-6">
-          <Card>
+          <Card className="py-5">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">{t.dashboard.totalEnrollment}</CardTitle>
               <Users className={sizing.icon.lg} />
@@ -274,7 +274,7 @@ export default function DirectorDashboard() {
             </CardContent>
           </Card>
 
-          <Card>
+          <Card className="py-5">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">{t.dashboard.revenue}</CardTitle>
               <DollarSign className={sizing.icon.lg} />
@@ -289,7 +289,7 @@ export default function DirectorDashboard() {
             </CardContent>
           </Card>
 
-          <Card>
+          <Card className="py-5">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">
                 {t.dashboard.pendingApprovals}
@@ -306,7 +306,7 @@ export default function DirectorDashboard() {
             </CardContent>
           </Card>
 
-          <Card>
+          <Card className="py-5">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">
                 {t.dashboard.reconciliationFlags}

@@ -213,7 +213,7 @@ export default function ReportsPage() {
           <TabsContent value="overview" className="space-y-6">
             {/* Summary Cards */}
             <div className="grid gap-4 md:grid-cols-4">
-              <Card>
+              <Card className="py-5">
                 <CardHeader className="flex flex-row items-center justify-between pb-2">
                   <CardTitle className="text-sm font-medium text-muted-foreground">{t.reports.totalActivities}</CardTitle>
                   <BookOpen className="h-5 w-5 text-primary" />
@@ -226,7 +226,7 @@ export default function ReportsPage() {
                 </CardContent>
               </Card>
 
-              <Card>
+              <Card className="py-5">
                 <CardHeader className="flex flex-row items-center justify-between pb-2">
                   <CardTitle className="text-sm font-medium text-muted-foreground">{t.reports.enrolledStudents}</CardTitle>
                   <Users className="h-5 w-5 text-accent" />
@@ -237,7 +237,7 @@ export default function ReportsPage() {
                 </CardContent>
               </Card>
 
-              <Card>
+              <Card className="py-5">
                 <CardHeader className="flex flex-row items-center justify-between pb-2">
                   <CardTitle className="text-sm font-medium text-muted-foreground">{t.reports.averageAttendance}</CardTitle>
                   <BarChart3 className="h-5 w-5 text-success" />
@@ -250,7 +250,7 @@ export default function ReportsPage() {
                 </CardContent>
               </Card>
 
-              <Card>
+              <Card className="py-5">
                 <CardHeader className="flex flex-row items-center justify-between pb-2">
                   <CardTitle className="text-sm font-medium text-muted-foreground">{t.reports.atRiskStudents}</CardTitle>
                   <TrendingDown className="h-5 w-5 text-destructive" />

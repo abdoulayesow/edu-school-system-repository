@@ -472,7 +472,7 @@ export default function ExpensesPage() {
 
         {/* Summary Cards */}
         <div className="grid gap-4 md:grid-cols-4 mb-6">
-          <Card>
+          <Card className="py-5">
             <CardHeader className="pb-2">
               <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
                 <Receipt className="size-4" />
@@ -485,7 +485,7 @@ export default function ExpensesPage() {
             </CardContent>
           </Card>
 
-          <Card>
+          <Card className="py-5">
             <CardHeader className="pb-2">
               <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
                 <Clock className="size-4" />
@@ -498,7 +498,7 @@ export default function ExpensesPage() {
             </CardContent>
           </Card>
 
-          <Card>
+          <Card className="py-5">
             <CardHeader className="pb-2">
               <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
                 <CheckCircle className="size-4" />
@@ -511,7 +511,7 @@ export default function ExpensesPage() {
             </CardContent>
           </Card>
 
-          <Card>
+          <Card className="py-5">
             <CardHeader className="pb-2">
               <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
                 <CreditCard className="size-4" />
