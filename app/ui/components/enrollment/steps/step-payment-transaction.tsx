@@ -260,7 +260,6 @@ export function StepPaymentTransaction() {
                     "font-mono",
                     isGeneratingReceipt && "pr-10"
                   )}
-                  disabled={isGeneratingReceipt}
                 />
                 {isGeneratingReceipt && (
                   <div className="absolute right-3 top-1/2 -translate-y-1/2">

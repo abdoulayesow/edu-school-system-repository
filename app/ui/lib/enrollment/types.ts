@@ -353,6 +353,7 @@ export interface EnrollmentSummary {
   totalPaid: number
   totalOwed: number
   percentPaid: number
+  studentNumber?: string
 }
 
 // ============================================================================

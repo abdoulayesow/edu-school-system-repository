@@ -19,6 +19,7 @@ import {
 import { useI18n } from "@/components/i18n-provider"
 import Link from "next/link"
 import { PageContainer } from "@/components/layout"
+import { sizing } from "@/lib/design-tokens"
 
 interface GradeLeader {
   id: string
@@ -134,56 +135,52 @@ export default function GradesPage() {
         </div>
 
         {/* Summary Cards */}
-        <div className="grid gap-4 md:grid-cols-4 mb-6">
-          <Card>
-            <CardHeader className="pb-3">
-              <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
-                <GraduationCap className="size-4" />
-                Classes
-              </CardTitle>
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4 mb-6">
+          <Card className="py-5">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Classes</CardTitle>
+              <GraduationCap className={sizing.icon.lg} />
             </CardHeader>
             <CardContent>
-              <div className="text-3xl font-bold">{grades.length}</div>
+              <div className="text-2xl font-bold">{grades.length}</div>
+              <p className="text-xs text-muted-foreground">Total classes</p>
             </CardContent>
           </Card>
 
-          <Card>
-            <CardHeader className="pb-3">
-              <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
-                <Users className="size-4" />
-                {t.common.students}
-              </CardTitle>
+          <Card className="py-5">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">{t.common.students}</CardTitle>
+              <Users className={sizing.icon.lg} />
             </CardHeader>
             <CardContent>
-              <div className="text-3xl font-bold">{stats.totalStudents}</div>
+              <div className="text-2xl font-bold">{stats.totalStudents}</div>
+              <p className="text-xs text-muted-foreground">Total students</p>
             </CardContent>
           </Card>
 
-          <Card>
-            <CardHeader className="pb-3">
-              <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
-                <CalendarCheck className="size-4" />
-                {t.gradesEnhanced.attendanceRatio}
-              </CardTitle>
+          <Card className="py-5">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">{t.gradesEnhanced.attendanceRatio}</CardTitle>
+              <CalendarCheck className={sizing.icon.lg} />
             </CardHeader>
             <CardContent>
-              <div className={`text-3xl font-bold ${getAttendanceColor(stats.avgAttendance)}`}>
+              <div className={`text-2xl font-bold ${getAttendanceColor(stats.avgAttendance)}`}>
                 {stats.avgAttendance}%
               </div>
+              <p className="text-xs text-muted-foreground">Average attendance</p>
             </CardContent>
           </Card>
 
-          <Card>
-            <CardHeader className="pb-3">
-              <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
-                <Wallet className="size-4" />
-                {t.gradesEnhanced.paymentRatio}
-              </CardTitle>
+          <Card className="py-5">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">{t.gradesEnhanced.paymentRatio}</CardTitle>
+              <Wallet className={sizing.icon.lg} />
             </CardHeader>
             <CardContent>
-              <div className={`text-3xl font-bold ${getPaymentColor(stats.avgPayment)}`}>
+              <div className={`text-2xl font-bold ${getPaymentColor(stats.avgPayment)}`}>
                 {stats.avgPayment}%
               </div>
+              <p className="text-xs text-muted-foreground">Average payment</p>
             </CardContent>
           </Card>
         </div>

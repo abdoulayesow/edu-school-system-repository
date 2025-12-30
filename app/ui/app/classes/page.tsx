@@ -1,13 +1,14 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useMemo } from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Calendar, Clock, BookOpen, User, MapPin, Plus, Download, Edit } from "lucide-react"
+import { Calendar, Clock, BookOpen, User, MapPin, Plus, Download, Edit, GraduationCap, Users } from "lucide-react"
 import { useI18n, interpolate } from "@/components/i18n-provider"
 import { PageContainer } from "@/components/layout"
+import { sizing } from "@/lib/design-tokens"
 
 interface ScheduleEntry {
   time: string
@@ -64,24 +65,70 @@ export default function ClassesPage() {
 
   const currentSchedule = schedule[selectedDay] || []
 
+  // Calculate summary stats
+  const stats = useMemo(() => {
+    const totalClasses = classes.length
+    const totalStudents = classes.reduce((sum, c) => sum + c.students, 0)
+    // Get today's day name in French (lundi, mardi, etc.)
+    const today = new Date().toLocaleDateString('fr-FR', { weekday: 'long' }).toLowerCase()
+    const coursesToday = schedule[today]?.length || 0
+    return { totalClasses, totalStudents, coursesToday }
+  }, [classes, schedule])
+
   return (
     <PageContainer maxWidth="full">
         {/* Header */}
-        <div className="flex items-center justify-between mb-6">
-          <div>
-            <h1 className="text-2xl font-bold text-foreground">{t.classes.title}</h1>
-            <p className="text-sm text-muted-foreground">{t.classes.subtitle}</p>
+        <div className="mb-6">
+          <div className="flex items-center justify-between mb-2">
+            <h1 className="text-3xl font-bold text-foreground">{t.classes.title}</h1>
+            <div className="flex items-center gap-3">
+              <Button variant="outline">
+                <Download className="size-4 mr-2" />
+                {t.classes.exportPdf}
+              </Button>
+              <Button>
+                <Plus className="size-4 mr-2" />
+                {t.classes.addCourse}
+              </Button>
+            </div>
           </div>
-          <div className="flex items-center gap-3">
-            <Button variant="outline">
-              <Download className="size-4 mr-2" />
-              {t.classes.exportPdf}
-            </Button>
-            <Button>
-              <Plus className="size-4 mr-2" />
-              {t.classes.addCourse}
-            </Button>
-          </div>
+          <p className="text-muted-foreground">{t.classes.subtitle}</p>
+        </div>
+
+        {/* Summary Cards */}
+        <div className="grid gap-4 md:grid-cols-3 mb-6">
+          <Card className="py-5">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">{t.classes.totalClasses}</CardTitle>
+              <GraduationCap className={sizing.icon.lg} />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">{stats.totalClasses}</div>
+              <p className="text-xs text-muted-foreground">{t.classes.allClasses}</p>
+            </CardContent>
+          </Card>
+
+          <Card className="py-5">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">{t.classes.totalStudents}</CardTitle>
+              <Users className={sizing.icon.lg} />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">{stats.totalStudents}</div>
+              <p className="text-xs text-muted-foreground">{t.classes.acrossAllClasses}</p>
+            </CardContent>
+          </Card>
+
+          <Card className="py-5">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">{t.classes.coursesToday}</CardTitle>
+              <Calendar className={sizing.icon.lg} />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">{stats.coursesToday}</div>
+              <p className="text-xs text-muted-foreground">{t.classes.scheduledToday}</p>
+            </CardContent>
+          </Card>
         </div>
 
         {/* Main Content */}

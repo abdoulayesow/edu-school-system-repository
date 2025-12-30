@@ -36,7 +36,6 @@ export async function GET(req: NextRequest, { params }: RouteParams) {
           orderBy: { scheduleNumber: "asc" },
         },
         payments: {
-          where: { status: "confirmed" },
           orderBy: { recordedAt: "desc" },
         },
         notes: {
@@ -52,7 +51,7 @@ export async function GET(req: NextRequest, { params }: RouteParams) {
       )
     }
 
-    // Calculate totals
+    // Calculate totals - include all payments (not just confirmed)
     const totalPaid = enrollment.payments.reduce((sum, p) => sum + p.amount, 0)
     const tuitionFee = enrollment.adjustedTuitionFee || enrollment.originalTuitionFee
     const totalOwed = tuitionFee - totalPaid
@@ -171,6 +170,7 @@ export async function GET(req: NextRequest, { params }: RouteParams) {
       totalPaid,
       totalOwed,
       percentPaid: tuitionFee > 0 ? Math.round((totalPaid / tuitionFee) * 100) : 0,
+      studentNumber: enrollment.student?.studentNumber,
     }
 
     // Generate PDF

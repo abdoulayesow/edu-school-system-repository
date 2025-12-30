@@ -192,9 +192,11 @@ export const fr = {
 
     // Table headers
     studentId: "ID élève",
+    enrollmentId: "ID d'inscription",
     fullName: "Nom complet",
     enrollmentDate: "Date d'inscription",
     paymentStatus: "Statut de paiement",
+    enrollmentStatus: "Statut d'inscription",
 
     // Payment status
     paid: "Payé",
@@ -236,6 +238,21 @@ export const fr = {
 
     // Buttons
     createEnrollment: "Créer l'inscription",
+
+    // Summary cards
+    totalEnrollments: "Total des inscriptions",
+    draftEnrollments: "Inscriptions en brouillon",
+    submitted: "Soumis",
+    completed: "Complété",
+    allEnrollments: "Toutes les inscriptions",
+    inProgress: "En cours",
+    awaitingReview: "En attente de révision",
+    approvedEnrollments: "Inscriptions approuvées",
+
+    // Filters
+    filterEnrollments: "Filtrer les inscriptions",
+    allStatuses: "Tous les statuts",
+    allGrades: "Toutes les classes",
   },
 
   // Activities
@@ -268,6 +285,21 @@ export const fr = {
     physics: "Sciences physiques",
     readingClub: "Club de lecture",
     computerScience: "Informatique",
+
+    // Summary cards
+    totalActivities: "Total des activités",
+    academicActivities: "Activités académiques",
+    extraActivities: "Activités extrascolaires",
+    enrolledStudents: "Élèves inscrits",
+    allActivities: "Toutes les activités",
+    curricularActivities: "Activités curriculaires",
+    extracurricularActivities: "Activités extrascolaires",
+    totalEnrollments: "Total des inscriptions",
+
+    // Filters
+    filterActivities: "Filtrer les activités",
+    allTypes: "Tous les types",
+    allTeachers: "Tous les enseignants",
   },
 
   // Accounting
@@ -371,6 +403,19 @@ export const fr = {
     statusPresent: "Présent",
     statusAbsent: "Absent",
     statusExcused: "Excusé",
+
+    // Summary cards
+    totalSessions: "Total des sessions",
+    averageAttendanceRate: "Taux de présence moyen",
+    presentToday: "Présents aujourd'hui",
+    absentToday: "Absents aujourd'hui",
+    attendanceSessions: "Sessions de présence",
+    overallRate: "Taux global",
+    studentsPresent: "Élèves présents",
+    studentsAbsent: "Élèves absents",
+
+    // Filters
+    filterAttendance: "Filtrer la présence",
 
     // Student list
     studentList: "Liste des élèves",
@@ -606,6 +651,9 @@ export const fr = {
     totalClasses: "Total classes",
     totalStudents: "Total élèves",
     coursesToday: "Cours aujourd'hui",
+    allClasses: "Toutes les classes",
+    acrossAllClasses: "Dans toutes les classes",
+    scheduledToday: "Prévus aujourd'hui",
     selectDay: "Sélectionner un jour",
     scheduleForDay: "Emploi du temps - {day}",
     noCoursesForDay: "Aucun cours prévu pour ce jour",
@@ -807,8 +855,11 @@ export const fr = {
     subtitle: "Visualiser et gérer les élèves inscrits",
     searchPlaceholder: "Rechercher par nom ou numéro...",
     filters: "Filtres",
+    filterStudents: "Filtrer les élèves",
     allGrades: "Toutes les classes",
     allStatuses: "Tous les statuts",
+    allPayments: "Tous les paiements",
+    allAttendances: "Toutes les présences",
 
     // Status labels
     balanceStatus: "Statut de paiement",
@@ -822,6 +873,7 @@ export const fr = {
     attendanceGood: "Bonne présence",
     attendanceConcerning: "Présence préoccupante",
     attendanceCritical: "Présence critique",
+    missingData: "Données manquantes",
 
     // Student detail
     personalInfo: "Informations personnelles",

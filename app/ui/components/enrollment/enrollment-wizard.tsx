@@ -127,9 +127,21 @@ function WizardContent({ schoolYearId, schoolYearName }: EnrollmentWizardProps) 
     setError(undefined)
 
     try {
+      // Include payment data if payment was made in step 4
+      const submitPayload: Record<string, unknown> = {}
+      if (data.paymentMade && data.paymentAmount && data.paymentMethod && data.receiptNumber) {
+        submitPayload.paymentMade = data.paymentMade
+        submitPayload.paymentAmount = data.paymentAmount
+        submitPayload.paymentMethod = data.paymentMethod
+        submitPayload.receiptNumber = data.receiptNumber
+        if (data.transactionRef) submitPayload.transactionRef = data.transactionRef
+        if (data.receiptImageUrl) submitPayload.receiptImageUrl = data.receiptImageUrl
+      }
+
       const response = await fetch(`/api/enrollments/${state.enrollmentId}/submit`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(submitPayload),
       })
 
       if (!response.ok) {

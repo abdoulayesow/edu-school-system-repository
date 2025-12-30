@@ -185,6 +185,7 @@ export async function GET(req: NextRequest) {
           photoUrl: student.studentProfile?.person?.photoUrl,
           grade: enrollment?.grade,
           paymentStatus: paymentStatusValue,
+          enrollmentStatus: enrollment?.status || null,
           attendanceStatus: attendanceStatusValue,
           balanceInfo,
         }

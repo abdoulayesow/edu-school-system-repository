@@ -194,9 +194,11 @@ export const en: TranslationKeys = {
 
     // Table headers
     studentId: "Student ID",
+    enrollmentId: "Enrollment ID",
     fullName: "Full Name",
     enrollmentDate: "Enrollment Date",
     paymentStatus: "Payment Status",
+    enrollmentStatus: "Enrollment Status",
 
     // Payment status
     paid: "Paid",
@@ -238,6 +240,21 @@ export const en: TranslationKeys = {
 
     // Buttons
     createEnrollment: "Create Enrollment",
+
+    // Summary cards
+    totalEnrollments: "Total Enrollments",
+    draftEnrollments: "Draft Enrollments",
+    submitted: "Submitted",
+    completed: "Completed",
+    allEnrollments: "All enrollments",
+    inProgress: "In progress",
+    awaitingReview: "Awaiting review",
+    approvedEnrollments: "Approved enrollments",
+
+    // Filters
+    filterEnrollments: "Filter enrollments",
+    allStatuses: "All statuses",
+    allGrades: "All grades",
   },
 
   // Activities
@@ -270,6 +287,21 @@ export const en: TranslationKeys = {
     physics: "Physics",
     readingClub: "Reading Club",
     computerScience: "Computer Science",
+
+    // Summary cards
+    totalActivities: "Total Activities",
+    academicActivities: "Academic Activities",
+    extraActivities: "Extra Activities",
+    enrolledStudents: "Enrolled Students",
+    allActivities: "All activities",
+    curricularActivities: "Curricular activities",
+    extracurricularActivities: "Extracurricular activities",
+    totalEnrollments: "Total enrollments",
+
+    // Filters
+    filterActivities: "Filter activities",
+    allTypes: "All types",
+    allTeachers: "All teachers",
   },
 
   // Accounting
@@ -373,6 +405,19 @@ export const en: TranslationKeys = {
     statusPresent: "Present",
     statusAbsent: "Absent",
     statusExcused: "Excused",
+
+    // Summary cards
+    totalSessions: "Total Sessions",
+    averageAttendanceRate: "Average Attendance Rate",
+    presentToday: "Present Today",
+    absentToday: "Absent Today",
+    attendanceSessions: "Attendance sessions",
+    overallRate: "Overall rate",
+    studentsPresent: "Students present",
+    studentsAbsent: "Students absent",
+
+    // Filters
+    filterAttendance: "Filter attendance",
 
     // Student list
     studentList: "Student List",
@@ -608,6 +653,9 @@ export const en: TranslationKeys = {
     totalClasses: "Total Classes",
     totalStudents: "Total Students",
     coursesToday: "Courses Today",
+    allClasses: "All classes",
+    acrossAllClasses: "Across all classes",
+    scheduledToday: "Scheduled today",
     selectDay: "Select a day",
     scheduleForDay: "Timetable - {day}",
     noCoursesForDay: "No courses scheduled for this day",
@@ -809,8 +857,11 @@ export const en: TranslationKeys = {
     subtitle: "View and manage enrolled students",
     searchPlaceholder: "Search by name or number...",
     filters: "Filters",
+    filterStudents: "Filter students",
     allGrades: "All grades",
     allStatuses: "All statuses",
+    allPayments: "All Payments",
+    allAttendances: "All Attendances",
 
     // Status labels
     balanceStatus: "Payment status",
@@ -824,6 +875,7 @@ export const en: TranslationKeys = {
     attendanceGood: "Good attendance",
     attendanceConcerning: "Concerning attendance",
     attendanceCritical: "Critical attendance",
+    missingData: "Missing data",
 
     // Student detail
     personalInfo: "Personal information",

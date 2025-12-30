@@ -51,7 +51,34 @@ export async function GET(req: NextRequest) {
     }
 
     // Format the next receipt number with zero-padding
-    const nextReceiptNumber = `GSPN-${currentYear}-${prefix}-${nextNumber.toString().padStart(5, "0")}`
+    let nextReceiptNumber = `GSPN-${currentYear}-${prefix}-${nextNumber.toString().padStart(5, "0")}`
+
+    // Ensure uniqueness by checking if the generated number already exists
+    let attempts = 0
+    const maxAttempts = 100
+    while (attempts < maxAttempts) {
+      const existing = await prisma.payment.findUnique({
+        where: { receiptNumber: nextReceiptNumber },
+        select: { id: true },
+      })
+
+      if (!existing) {
+        // Number is unique, break out of loop
+        break
+      }
+
+      // Number exists, increment and try again
+      nextNumber++
+      nextReceiptNumber = `GSPN-${currentYear}-${prefix}-${nextNumber.toString().padStart(5, "0")}`
+      attempts++
+    }
+
+    if (attempts >= maxAttempts) {
+      return NextResponse.json(
+        { message: "Failed to generate unique receipt number after multiple attempts" },
+        { status: 500 }
+      )
+    }
 
     return NextResponse.json({
       receiptNumber: nextReceiptNumber,

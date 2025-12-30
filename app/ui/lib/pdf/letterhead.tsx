@@ -78,13 +78,12 @@ export function Letterhead({ schoolYear, documentDate, compact = false }: Letter
   // Standard letterhead
   return (
     <View style={styles.header}>
-      {/* Left: Logo placeholder */}
+      {/* Left: Logo */}
       <View style={styles.logoContainer}>
-        {/* Placeholder for school logo - would use Image component with actual logo */}
         <View style={{
           width: 70,
           height: 70,
-          backgroundColor: "#1e40af",
+          backgroundColor: colors.primary,
           borderRadius: 35,
           justifyContent: "center",
           alignItems: "center",

@@ -19,7 +19,8 @@ import {
   Award,
   CheckCircle,
   AlertCircle,
-  XCircle
+  XCircle,
+  CircleAlert
 } from "lucide-react"
 import { useI18n } from "@/components/i18n-provider"
 import { PageContainer } from "@/components/layout"
@@ -34,6 +35,7 @@ interface Student {
   photoUrl: string | null
   grade: { id: string; name: string; level: number; order: number } | null
   paymentStatus: "late" | "on_time" | "in_advance" | "complete" | null
+  enrollmentStatus: "draft" | "submitted" | "needs_review" | "completed" | "rejected" | "cancelled" | null
   attendanceStatus: "good" | "concerning" | "critical" | null
   balanceInfo: {
     tuitionFee: number
@@ -61,6 +63,9 @@ interface Pagination {
 export default function StudentsPage() {
   const { t } = useI18n()
 
+  // Track if component is mounted to prevent hydration mismatches
+  const [isMounted, setIsMounted] = useState(false)
+
   // Data states
   const [students, setStudents] = useState<Student[]>([])
   const [grades, setGrades] = useState<Grade[]>([])
@@ -73,6 +78,11 @@ export default function StudentsPage() {
   const [gradeFilter, setGradeFilter] = useState<string>("all")
   const [paymentStatusFilter, setPaymentStatusFilter] = useState<string>("all")
   const [attendanceStatusFilter, setAttendanceStatusFilter] = useState<string>("all")
+
+  // Set mounted flag after component mounts
+  useEffect(() => {
+    setIsMounted(true)
+  }, [])
 
   // Fetch data on mount
   useEffect(() => {
@@ -140,48 +150,58 @@ export default function StudentsPage() {
   }, [students])
 
   // Badge helper functions
-  const getPaymentBadge = (status: string | null, balanceInfo: Student["balanceInfo"]) => {
+  const getEnrollmentStatusBadge = (status: string | null) => {
     if (!status) return <Badge variant="outline">-</Badge>
 
-    const config: Record<string, { className: string; label: string }> = {
-      late: {
-        className: "bg-destructive/10 text-destructive border-destructive/30",
-        label: t.students.late
+    const config: Record<string, { className: string; label: string; icon?: React.ElementType }> = {
+      draft: {
+        className: "bg-muted/10 text-muted-foreground border-muted/30",
+        label: t.enrollments.statusDraft || "Draft"
       },
-      on_time: {
+      submitted: {
+        className: "bg-warning/10 text-warning border-warning/30",
+        label: t.enrollments.statusSubmitted || "Submitted"
+      },
+      needs_review: {
+        className: "bg-warning/10 text-warning border-warning/30",
+        label: t.enrollments.statusNeedsReview || "Needs Review"
+      },
+      completed: {
         className: "bg-success/10 text-success border-success/30",
-        label: t.students.onTime
+        label: t.enrollments.statusCompleted || "Completed",
+        icon: CheckCircle
       },
-      in_advance: {
-        className: "bg-primary/10 text-primary border-primary/30",
-        label: t.students.inAdvance
+      rejected: {
+        className: "bg-destructive/10 text-destructive border-destructive/30",
+        label: t.enrollments.statusRejected || "Rejected",
+        icon: XCircle
       },
-      complete: {
-        className: "bg-amber-500/10 text-amber-600 border-amber-500/30",
-        label: t.students.goldMedal
+      cancelled: {
+        className: "bg-destructive/10 text-destructive border-destructive/30",
+        label: t.enrollments.statusCancelled || "Cancelled",
+        icon: XCircle
       },
     }
 
-    const { className, label } = config[status] || { className: "", label: status }
+    const { className, label, icon: Icon } = config[status] || { className: "", label: status }
 
     return (
-      <div className="flex flex-col gap-1">
-        <Badge variant="outline" className={className}>
-          {status === "complete" && <Award className="size-3 mr-1" />}
-          {label}
-        </Badge>
-        {balanceInfo && status !== "complete" && (
-          <div className="flex items-center gap-2">
-            <Progress value={balanceInfo.paymentPercentage} className="h-1.5 w-16" />
-            <span className="text-xs text-muted-foreground">{Math.round(balanceInfo.paymentPercentage)}%</span>
-          </div>
-        )}
-      </div>
+      <Badge variant="outline" className={className}>
+        {Icon && <Icon className="size-3 mr-1" />}
+        {label}
+      </Badge>
     )
   }
 
   const getAttendanceBadge = (status: string | null) => {
-    if (!status) return <Badge variant="outline">-</Badge>
+    if (!status) {
+      return (
+        <Badge variant="outline" className="bg-muted/10 text-muted-foreground border-muted/30 gap-1">
+          <CircleAlert className="size-3" />
+          {t.students.missingData || "Missing data"}
+        </Badge>
+      )
+    }
 
     const config: Record<string, { className: string; label: string; icon: React.ElementType }> = {
       good: {
@@ -204,8 +224,8 @@ export default function StudentsPage() {
     const { className, label, icon: Icon } = config[status] || { className: "", label: status, icon: CheckCircle }
 
     return (
-      <Badge variant="outline" className={className}>
-        <Icon className="size-3 mr-1" />
+      <Badge variant="outline" className={`${className} gap-1`}>
+        <Icon className="size-3" />
         {label}
       </Badge>
     )
@@ -223,65 +243,53 @@ export default function StudentsPage() {
         <div className="grid gap-4 md:grid-cols-3 mb-6">
           {/* Total Students */}
           <Card className="py-5">
-            <CardHeader className="pb-3">
-              <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
-                <Users className={sizing.icon.lg} />
-                {t.common.students}
-              </CardTitle>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">{t.common.students}</CardTitle>
+              <Users className={sizing.icon.lg} />
             </CardHeader>
             <CardContent>
-              <div className="text-3xl font-bold">{stats.total}</div>
-              <p className="text-xs text-muted-foreground mt-1">
-                {filteredStudents.length !== stats.total && `${filteredStudents.length} affichés`}
+              <div className="text-2xl font-bold">{stats.total}</div>
+              <p className="text-xs text-muted-foreground">
+                {filteredStudents.length !== stats.total ? `${filteredStudents.length} affichés` : ""}
               </p>
             </CardContent>
           </Card>
 
           {/* Payment Summary */}
           <Card className="py-5">
-            <CardHeader className="pb-3">
-              <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
-                <Wallet className={sizing.icon.lg} />
-                {t.students.balanceStatus}
-              </CardTitle>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">{t.students.balanceStatus}</CardTitle>
+              <Wallet className={sizing.icon.lg} />
             </CardHeader>
             <CardContent>
-              <div className="flex items-baseline gap-2">
-                <span className="text-3xl font-bold text-destructive">{stats.payment.late}</span>
-                <span className="text-sm text-muted-foreground">{t.students.late}</span>
-              </div>
-              <div className="flex gap-3 mt-2 text-xs text-muted-foreground">
-                <span className="text-success">{stats.payment.onTime} {t.students.onTime}</span>
-                <span className="text-primary">{stats.payment.inAdvance} {t.students.inAdvance}</span>
-                <span className="text-success">{stats.payment.complete} {t.students.complete}</span>
-              </div>
+              <div className="text-2xl font-bold text-destructive">{stats.payment.late}</div>
+              <p className="text-xs text-muted-foreground">
+                {stats.payment.onTime} {t.students.onTime}, {stats.payment.inAdvance} {t.students.inAdvance}, {stats.payment.complete} {t.students.complete}
+              </p>
             </CardContent>
           </Card>
 
           {/* Attendance Summary */}
           <Card className="py-5">
-            <CardHeader className="pb-3">
-              <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
-                <CalendarCheck className={sizing.icon.lg} />
-                Présence
-              </CardTitle>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Présence</CardTitle>
+              <CalendarCheck className={sizing.icon.lg} />
             </CardHeader>
             <CardContent>
-              <div className="flex items-baseline gap-2">
-                <span className="text-3xl font-bold text-success">{stats.attendance.good}</span>
-                <span className="text-sm text-muted-foreground">{t.students.attendanceGood}</span>
-              </div>
-              <div className="flex gap-3 mt-2 text-xs">
-                <span className="text-warning">{stats.attendance.concerning} préoccupante</span>
-                <span className="text-destructive">{stats.attendance.critical} critique</span>
-              </div>
+              <div className="text-2xl font-bold text-success">{stats.attendance.good}</div>
+              <p className="text-xs text-muted-foreground">
+                {stats.attendance.concerning} préoccupante, {stats.attendance.critical} critique
+              </p>
             </CardContent>
           </Card>
         </div>
 
         {/* Filters */}
-        <Card className="mb-6">
-          <CardContent className="pt-6">
+        <Card className="mb-6 py-2">
+          <CardHeader className="pb-1 px-6 pt-3">
+            <CardTitle className="text-sm">{t.students.filterStudents}</CardTitle>
+          </CardHeader>
+          <CardContent className="pt-0 pb-2 px-6">
             <div className="flex flex-col sm:flex-row gap-4">
               {/* Search Input */}
               <div className="relative flex-1">
@@ -295,44 +303,62 @@ export default function StudentsPage() {
               </div>
 
               {/* Grade Filter */}
-              <Select value={gradeFilter} onValueChange={setGradeFilter}>
-                <SelectTrigger className="w-full sm:w-[180px]">
-                  <SelectValue placeholder={t.students.allGrades} />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">{t.students.allGrades}</SelectItem>
-                  {grades.map(grade => (
-                    <SelectItem key={grade.id} value={grade.id}>{grade.name}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              {isMounted ? (
+                <Select value={gradeFilter} onValueChange={setGradeFilter}>
+                  <SelectTrigger className="w-full sm:w-[180px]">
+                    <SelectValue placeholder={t.students.allGrades} />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">{t.students.allGrades}</SelectItem>
+                    {grades.map(grade => (
+                      <SelectItem key={grade.id} value={grade.id}>{grade.name}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              ) : (
+                <div className="w-full sm:w-[180px] h-9 rounded-md border bg-transparent px-3 py-2 flex items-center text-sm text-muted-foreground">
+                  {t.students.allGrades}
+                </div>
+              )}
 
               {/* Payment Status Filter */}
-              <Select value={paymentStatusFilter} onValueChange={setPaymentStatusFilter}>
-                <SelectTrigger className="w-full sm:w-[180px]">
-                  <SelectValue placeholder={t.students.balanceStatus} />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">{t.students.allStatuses}</SelectItem>
-                  <SelectItem value="late">{t.students.late}</SelectItem>
-                  <SelectItem value="on_time">{t.students.onTime}</SelectItem>
-                  <SelectItem value="in_advance">{t.students.inAdvance}</SelectItem>
-                  <SelectItem value="complete">{t.students.complete}</SelectItem>
-                </SelectContent>
-              </Select>
+              {isMounted ? (
+                <Select value={paymentStatusFilter} onValueChange={setPaymentStatusFilter}>
+                  <SelectTrigger className="w-full sm:w-[180px]">
+                    <SelectValue placeholder={t.students.allPayments} />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">{t.students.allPayments}</SelectItem>
+                    <SelectItem value="late">{t.students.late}</SelectItem>
+                    <SelectItem value="on_time">{t.students.onTime}</SelectItem>
+                    <SelectItem value="in_advance">{t.students.inAdvance}</SelectItem>
+                    <SelectItem value="complete">{t.students.complete}</SelectItem>
+                  </SelectContent>
+                </Select>
+              ) : (
+                <div className="w-full sm:w-[180px] h-9 rounded-md border bg-transparent px-3 py-2 flex items-center text-sm text-muted-foreground">
+                  {t.students.allPayments}
+                </div>
+              )}
 
               {/* Attendance Status Filter */}
-              <Select value={attendanceStatusFilter} onValueChange={setAttendanceStatusFilter}>
-                <SelectTrigger className="w-full sm:w-[180px]">
-                  <SelectValue placeholder="Présence" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">{t.students.allStatuses}</SelectItem>
-                  <SelectItem value="good">{t.students.attendanceGood}</SelectItem>
-                  <SelectItem value="concerning">{t.students.attendanceConcerning}</SelectItem>
-                  <SelectItem value="critical">{t.students.attendanceCritical}</SelectItem>
-                </SelectContent>
-              </Select>
+              {isMounted ? (
+                <Select value={attendanceStatusFilter} onValueChange={setAttendanceStatusFilter}>
+                  <SelectTrigger className="w-full sm:w-[180px]">
+                    <SelectValue placeholder={t.students.allAttendances} />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">{t.students.allAttendances}</SelectItem>
+                    <SelectItem value="good">{t.students.attendanceGood}</SelectItem>
+                    <SelectItem value="concerning">{t.students.attendanceConcerning}</SelectItem>
+                    <SelectItem value="critical">{t.students.attendanceCritical}</SelectItem>
+                  </SelectContent>
+                </Select>
+              ) : (
+                <div className="w-full sm:w-[180px] h-9 rounded-md border bg-transparent px-3 py-2 flex items-center text-sm text-muted-foreground">
+                  {t.students.allAttendances}
+                </div>
+              )}
             </div>
           </CardContent>
         </Card>
@@ -364,9 +390,9 @@ export default function StudentsPage() {
                     <TableRow>
                       <TableHead className="w-[50px]"></TableHead>
                       <TableHead>{t.enrollments.fullName}</TableHead>
-                      <TableHead>{t.enrollments.studentId}</TableHead>
+                      <TableHead>{t.enrollments.enrollmentId}</TableHead>
                       <TableHead>{t.common.level}</TableHead>
-                      <TableHead>{t.students.balanceStatus}</TableHead>
+                      <TableHead>{t.enrollments.enrollmentStatus}</TableHead>
                       <TableHead>Présence</TableHead>
                       <TableHead className="text-right">{t.common.actions}</TableHead>
                     </TableRow>
@@ -399,7 +425,7 @@ export default function StudentsPage() {
                           </TableCell>
                           <TableCell>{student.grade?.name ?? "-"}</TableCell>
                           <TableCell>
-                            {getPaymentBadge(student.paymentStatus, student.balanceInfo)}
+                            {getEnrollmentStatusBadge(student.enrollmentStatus)}
                           </TableCell>
                           <TableCell>
                             {getAttendanceBadge(student.attendanceStatus)}

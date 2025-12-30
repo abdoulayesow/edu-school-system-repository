@@ -20,10 +20,14 @@ import {
   Save,
   ListChecks,
   UserX,
-  Search
+  Search,
+  CalendarCheck,
+  TrendingUp,
+  CircleAlert
 } from "lucide-react"
 import { useI18n } from "@/components/i18n-provider"
 import { PageContainer } from "@/components/layout"
+import { sizing } from "@/lib/design-tokens"
 
 type AttendanceStatus = "present" | "absent" | "late" | "excused" | null
 
@@ -83,7 +87,7 @@ export default function AttendancePage() {
 
   // Selection state
   const [grades, setGrades] = useState<Grade[]>([])
-  const [selectedGradeId, setSelectedGradeId] = useState<string | null>(null)
+  const [selectedGradeId, setSelectedGradeId] = useState<string>("all")
   const [selectedDate, setSelectedDate] = useState<string>(new Date().toISOString().split('T')[0])
   const [entryMode, setEntryMode] = useState<"checklist" | "absences_only">("checklist")
 
@@ -122,7 +126,7 @@ export default function AttendancePage() {
 
   // Fetch attendance when grade and date are selected
   useEffect(() => {
-    if (!selectedGradeId || !selectedDate) return
+    if (!selectedGradeId || selectedGradeId === "all" || !selectedDate) return
 
     async function fetchAttendance() {
       try {
@@ -301,6 +305,53 @@ export default function AttendancePage() {
     }
   }
 
+  const getStatusBadge = (status: AttendanceStatus) => {
+    if (status === null) {
+      return (
+        <Badge variant="outline" className="bg-muted/10 text-muted-foreground border-muted/30">
+          <CircleAlert className="size-3 mr-1" />
+          {t.students.missingData || "Missing data"}
+        </Badge>
+      )
+    }
+
+    const config: Record<string, { className: string; label: string; icon: React.ElementType }> = {
+      present: {
+        className: "bg-success/10 text-success border-success/30",
+        label: t.attendance.statusPresent,
+        icon: CheckCircle2
+      },
+      absent: {
+        className: "bg-destructive/10 text-destructive border-destructive/30",
+        label: t.attendance.statusAbsent,
+        icon: XCircle
+      },
+      late: {
+        className: "bg-warning/10 text-warning border-warning/30",
+        label: "En retard",
+        icon: Clock
+      },
+      excused: {
+        className: "bg-blue-500/10 text-blue-500 border-blue-500/30",
+        label: t.attendance.statusExcused,
+        icon: AlertCircle
+      },
+    }
+
+    const { className, label, icon: Icon } = config[status] || { 
+      className: "", 
+      label: status, 
+      icon: CheckCircle2 
+    }
+
+    return (
+      <Badge variant="outline" className={className}>
+        <Icon className="size-3 mr-1" />
+        {label}
+      </Badge>
+    )
+  }
+
   const getStatusBorder = (status: AttendanceStatus) => {
     switch (status) {
       case "present": return "border-success bg-success/5 hover:bg-success/10"
@@ -313,118 +364,180 @@ export default function AttendancePage() {
 
   const selectedGrade = grades.find(g => g.id === selectedGradeId)
 
+  // Calculate summary stats for cards
+  const attendanceStats = useMemo(() => {
+    if (!currentSummary) {
+      return {
+        totalSessions: 0,
+        avgAttendanceRate: 0,
+        presentToday: 0,
+        absentToday: 0
+      }
+    }
+
+    const total = currentSummary.total
+    const present = currentSummary.present + currentSummary.late + currentSummary.excused
+    const avgRate = total > 0 ? Math.round((present / total) * 100) : 0
+
+    return {
+      totalSessions: 1, // This would need to be fetched from API
+      avgAttendanceRate: avgRate,
+      presentToday: currentSummary.present + currentSummary.late + currentSummary.excused,
+      absentToday: currentSummary.absent
+    }
+  }, [currentSummary])
+
   return (
-    <PageContainer maxWidth="lg">
+    <PageContainer maxWidth="full">
         {/* Header */}
         <div className="mb-6">
           <h1 className="text-3xl font-bold text-foreground mb-2">{t.attendance.title}</h1>
           <p className="text-muted-foreground">Suivi de présence par classe</p>
         </div>
 
-        {/* Grade and Date Selection */}
-        {!isRecording ? (
-          <div className="space-y-6">
-            {/* Selection Card */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-lg flex items-center gap-2">
-                  <Calendar className="size-5" />
-                  Sélection de la classe et date
-                </CardTitle>
-                <CardDescription>
-                  Choisissez une classe et une date pour prendre la présence
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-4">
+        {/* Summary Cards */}
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4 mb-6">
+          <Card className="py-5">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">{t.attendance.totalSessions}</CardTitle>
+              <CalendarCheck className={sizing.icon.lg} />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">{attendanceStats.totalSessions}</div>
+              <p className="text-xs text-muted-foreground">{t.attendance.attendanceSessions}</p>
+            </CardContent>
+          </Card>
+
+          <Card className="py-5">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">{t.attendance.averageAttendanceRate}</CardTitle>
+              <TrendingUp className={sizing.icon.lg} />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">{attendanceStats.avgAttendanceRate}%</div>
+              <p className="text-xs text-muted-foreground">{t.attendance.overallRate}</p>
+            </CardContent>
+          </Card>
+
+          <Card className="py-5">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">{t.attendance.presentToday}</CardTitle>
+              <CheckCircle2 className={sizing.icon.lg} />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold text-success">{attendanceStats.presentToday}</div>
+              <p className="text-xs text-muted-foreground">{t.attendance.studentsPresent}</p>
+            </CardContent>
+          </Card>
+
+          <Card className="py-5">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">{t.attendance.absentToday}</CardTitle>
+              <XCircle className={sizing.icon.lg} />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold text-destructive">{attendanceStats.absentToday}</div>
+              <p className="text-xs text-muted-foreground">{t.attendance.studentsAbsent}</p>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Filters */}
+        {!isRecording && (
+          <Card className="mb-6 py-2">
+            <CardHeader className="pb-1 px-6 pt-3">
+              <CardTitle className="text-sm">{t.attendance.filterAttendance}</CardTitle>
+            </CardHeader>
+            <CardContent className="pt-0 pb-2 px-6">
+              <div className="flex flex-col sm:flex-row gap-4">
                 {/* Grade Selection */}
-                <div className="space-y-2">
-                  <label className="text-sm font-medium">Classe</label>
-                  {isLoadingGrades ? (
-                    <div className="flex items-center gap-2 text-muted-foreground">
-                      <Loader2 className="size-4 animate-spin" />
-                      Chargement des classes...
-                    </div>
-                  ) : (
-                    <Select value={selectedGradeId || ""} onValueChange={setSelectedGradeId}>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Sélectionner une classe" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {grades.map(grade => (
-                          <SelectItem key={grade.id} value={grade.id}>
-                            {grade.name} ({grade.stats.studentCount} élèves)
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  )}
-                </div>
-
-                {/* Date Selection */}
-                <div className="space-y-2">
-                  <label className="text-sm font-medium">Date</label>
-                  <Input
-                    type="date"
-                    value={selectedDate}
-                    onChange={(e) => setSelectedDate(e.target.value)}
-                    max={new Date().toISOString().split('T')[0]}
-                  />
-                </div>
-
-                {/* Entry Mode Selection */}
-                <div className="space-y-2">
-                  <label className="text-sm font-medium">Mode de saisie</label>
-                  <Tabs value={entryMode} onValueChange={(v) => setEntryMode(v as "checklist" | "absences_only")}>
-                    <TabsList className="grid w-full grid-cols-2">
-                      <TabsTrigger value="checklist" className="flex items-center gap-2">
-                        <ListChecks className="size-4" />
-                        Liste complète
-                      </TabsTrigger>
-                      <TabsTrigger value="absences_only" className="flex items-center gap-2">
-                        <UserX className="size-4" />
-                        Absences seulement
-                      </TabsTrigger>
-                    </TabsList>
-                  </Tabs>
-                  <p className="text-xs text-muted-foreground">
-                    {entryMode === "checklist"
-                      ? "Tous les élèves sont présents par défaut. Tapez pour changer le statut."
-                      : "Marquez uniquement les absents et retards. Les non-marqués sont présents."}
-                  </p>
-                </div>
-
-                {/* Existing Session Info */}
-                {attendanceData?.session && (
-                  <div className="p-3 rounded-lg bg-primary/10 border border-primary/30">
-                    <p className="text-sm font-medium text-primary">Session existante</p>
-                    <p className="text-xs text-muted-foreground mt-1">
-                      {attendanceData.session.isComplete
-                        ? "Présence complétée"
-                        : "Présence en cours"} - Mode: {attendanceData.session.entryMode === "checklist" ? "Liste complète" : "Absences seulement"}
-                    </p>
+                {isLoadingGrades ? (
+                  <div className="flex items-center gap-2 text-muted-foreground">
+                    <Loader2 className="size-4 animate-spin" />
+                    Chargement des classes...
                   </div>
+                ) : (
+                  <Select value={selectedGradeId} onValueChange={setSelectedGradeId}>
+                    <SelectTrigger className="w-full sm:w-[180px]">
+                      <SelectValue placeholder="All grades" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">All grades</SelectItem>
+                      {grades.map(grade => (
+                        <SelectItem key={grade.id} value={grade.id}>
+                          {grade.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 )}
 
-                {/* Start Button */}
-                <Button
-                  className="w-full"
-                  size="lg"
-                  disabled={!selectedGradeId || isLoadingAttendance}
-                  onClick={startRecording}
-                >
-                  {isLoadingAttendance ? (
-                    <>
-                      <Loader2 className="size-4 mr-2 animate-spin" />
-                      Chargement...
-                    </>
-                  ) : attendanceData?.session ? (
-                    <>Continuer la présence</>
-                  ) : (
-                    <>Commencer la présence</>
-                  )}
-                </Button>
-              </CardContent>
-            </Card>
+                {/* Date Selection */}
+                <Input
+                  type="date"
+                  value={selectedDate}
+                  onChange={(e) => setSelectedDate(e.target.value)}
+                  max={new Date().toISOString().split('T')[0]}
+                  className="w-full sm:w-[180px]"
+                />
+
+                {/* Entry Mode Selection */}
+                <Select value={entryMode} onValueChange={(value: "checklist" | "absences_only") => setEntryMode(value)}>
+                  <SelectTrigger className="w-full sm:w-[180px]">
+                    <SelectValue placeholder="Entry mode" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="checklist">Checklist</SelectItem>
+                    <SelectItem value="absences_only">Absences Only</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
+        {/* Attendance Content */}
+        {!isRecording ? (
+          <div className="space-y-6">
+            {/* Entry Mode Description */}
+            <div className="p-3 rounded-lg bg-muted/50 border">
+              <p className="text-xs text-muted-foreground">
+                {entryMode === "checklist"
+                  ? "Tous les élèves sont présents par défaut. Tapez pour changer le statut."
+                  : "Marquez uniquement les absents et retards. Les non-marqués sont présents."}
+              </p>
+            </div>
+
+            {/* Existing Session Info */}
+            {attendanceData?.session && (
+              <div className="p-3 rounded-lg bg-primary/10 border border-primary/30">
+                <p className="text-sm font-medium text-primary">Session existante</p>
+                <p className="text-xs text-muted-foreground mt-1">
+                  {attendanceData.session.isComplete
+                    ? "Présence complétée"
+                    : "Présence en cours"} - Mode: {attendanceData.session.entryMode === "checklist" ? "Liste complète" : "Absences seulement"}
+                </p>
+              </div>
+            )}
+
+            {/* Start Button */}
+            <Button
+              className="w-full"
+              size="lg"
+              disabled={!selectedGradeId || selectedGradeId === "all" || isLoadingAttendance}
+              onClick={startRecording}
+            >
+              {isLoadingAttendance ? (
+                <>
+                  <Loader2 className="size-4 mr-2 animate-spin" />
+                  Chargement...
+                </>
+              ) : attendanceData?.session ? (
+                <>Continuer la présence</>
+              ) : (
+                <>Commencer la présence</>
+              )}
+            </Button>
 
             {/* Recent Sessions Preview */}
             {attendanceData && !attendanceData.session && (
@@ -581,10 +694,8 @@ export default function AttendancePage() {
                             <p className="font-medium">
                               {student.person?.firstName} {student.person?.lastName}
                             </p>
-                            <div className="flex items-center gap-2">
-                              <p className="text-xs text-muted-foreground">
-                                {getStatusLabel(status)}
-                              </p>
+                            <div className="flex items-center gap-2 mt-1">
+                              {getStatusBadge(status)}
                             </div>
                           </div>
                         </div>

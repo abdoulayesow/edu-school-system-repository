@@ -38,6 +38,7 @@ const compactStyles = StyleSheet.create({
     paddingBottom: 2,
     borderBottomWidth: 1,
     borderBottomColor: colors.border,
+    textAlign: "center",
   },
   infoRow: {
     width: "50%",
@@ -277,7 +278,7 @@ const levelLabels = {
 
 export function EnrollmentDocument({ data, language = "fr" }: EnrollmentDocumentProps) {
   const t = labels[language]
-  const { enrollment, schoolYear, grade, paymentSchedules, payments, totalPaid, totalOwed } = data
+  const { enrollment, schoolYear, grade, paymentSchedules, payments, totalPaid, totalOwed, studentNumber } = data
 
   const statusDisplay = getStatusDisplay(enrollment.status, language)
   const effectiveFee = enrollment.adjustedTuitionFee ?? enrollment.originalTuitionFee
@@ -298,15 +299,15 @@ export function EnrollmentDocument({ data, language = "fr" }: EnrollmentDocument
           backgroundColor: "#f3f4f6",
           borderRadius: 4,
         }}>
-          <View style={{ flex: 1 }}>
-            <Text style={{ fontSize: 14, fontFamily: "Helvetica-Bold", color: colors.primary }}>
+          <View style={{ flex: 1, alignItems: "center" }}>
+            <Text style={{ fontSize: 14, fontFamily: "Helvetica-Bold", color: colors.primary, textAlign: "center" }}>
               {t.title}
             </Text>
-            <Text style={{ fontSize: 9, color: colors.secondary }}>{t.titleAlt}</Text>
+            <Text style={{ fontSize: 9, color: colors.secondary, textAlign: "center" }}>{t.titleAlt}</Text>
           </View>
           <View style={{ alignItems: "flex-end" }}>
             <Text style={{ fontSize: 8, color: colors.textLight }}>{t.enrollmentNumber}: <Text style={{ fontFamily: "Helvetica-Bold", fontSize: 9 }}>{enrollment.enrollmentNumber || "-"}</Text></Text>
-            <Text style={{ fontSize: 8, color: colors.textLight }}>{t.studentNumber}: <Text style={{ fontFamily: "Helvetica-Bold", fontSize: 9 }}>{enrollment.studentId || "-"}</Text></Text>
+            <Text style={{ fontSize: 8, color: colors.textLight }}>{t.studentNumber}: <Text style={{ fontFamily: "Helvetica-Bold", fontSize: 9 }}>{studentNumber || "-"}</Text></Text>
             <Text style={{ fontSize: 8, color: statusDisplay.color, fontFamily: "Helvetica-Bold" }}>{statusDisplay.label}</Text>
           </View>
         </View>

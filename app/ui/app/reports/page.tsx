@@ -10,6 +10,7 @@ import { ChartContainer, ChartTooltip, ChartTooltipContent, type ChartConfig } f
 import { BookOpen, Users, TrendingDown, BarChart3, Calendar, Loader2, AlertTriangle } from "lucide-react"
 import { useI18n } from "@/components/i18n-provider"
 import { PageContainer } from "@/components/layout"
+import { sizing } from "@/lib/design-tokens"
 
 // Lazy load recharts components
 const LineChart = dynamic(() => import("recharts").then(mod => mod.LineChart) as never, { ssr: false }) as typeof import("recharts").LineChart
@@ -198,9 +199,60 @@ export default function ReportsPage() {
 
   return (
     <PageContainer maxWidth="full">
-        <div className="mb-4">
+        <div className="mb-6">
           <h1 className="text-3xl font-bold text-foreground mb-2">{t.reports.title}</h1>
           <p className="text-muted-foreground">{t.reports.subtitle}</p>
+        </div>
+
+        {/* Summary Cards */}
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4 mb-6">
+          <Card className="py-5">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">{t.reports.totalActivities}</CardTitle>
+              <BookOpen className={sizing.icon.lg} />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">{summaryStats.totalGrades}</div>
+              <p className="text-xs text-muted-foreground">
+                {t.common.level}s
+              </p>
+            </CardContent>
+          </Card>
+
+          <Card className="py-5">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">{t.reports.enrolledStudents}</CardTitle>
+              <Users className={sizing.icon.lg} />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">{summaryStats.totalStudents}</div>
+              <p className="text-xs text-muted-foreground">{t.reports.totalEnrollments}</p>
+            </CardContent>
+          </Card>
+
+          <Card className="py-5">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">{t.reports.averageAttendance}</CardTitle>
+              <BarChart3 className={sizing.icon.lg} />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">{summaryStats.avgAttendance}%</div>
+              <p className="text-xs text-muted-foreground">
+                {summaryStats.avgAttendance >= 80 ? t.reports.satisfactoryPerformance : t.reports.needsFollowup}
+              </p>
+            </CardContent>
+          </Card>
+
+          <Card className="py-5">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">{t.reports.atRiskStudents}</CardTitle>
+              <TrendingDown className={sizing.icon.lg} />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">{summaryStats.atRiskCount}</div>
+              <p className="text-xs text-muted-foreground">{t.reports.lowParticipation}</p>
+            </CardContent>
+          </Card>
         </div>
 
         <Tabs defaultValue="overview" className="space-y-6">
@@ -211,56 +263,6 @@ export default function ReportsPage() {
 
           {/* Overview Tab */}
           <TabsContent value="overview" className="space-y-6">
-            {/* Summary Cards */}
-            <div className="grid gap-4 md:grid-cols-4">
-              <Card className="py-5">
-                <CardHeader className="flex flex-row items-center justify-between pb-2">
-                  <CardTitle className="text-sm font-medium text-muted-foreground">{t.reports.totalActivities}</CardTitle>
-                  <BookOpen className="h-5 w-5 text-primary" />
-                </CardHeader>
-                <CardContent>
-                  <div className="text-3xl font-bold text-foreground">{summaryStats.totalGrades}</div>
-                  <p className="text-xs text-muted-foreground mt-1">
-                    {t.common.level}s
-                  </p>
-                </CardContent>
-              </Card>
-
-              <Card className="py-5">
-                <CardHeader className="flex flex-row items-center justify-between pb-2">
-                  <CardTitle className="text-sm font-medium text-muted-foreground">{t.reports.enrolledStudents}</CardTitle>
-                  <Users className="h-5 w-5 text-accent" />
-                </CardHeader>
-                <CardContent>
-                  <div className="text-3xl font-bold text-foreground">{summaryStats.totalStudents}</div>
-                  <p className="text-xs text-muted-foreground mt-1">{t.reports.totalEnrollments}</p>
-                </CardContent>
-              </Card>
-
-              <Card className="py-5">
-                <CardHeader className="flex flex-row items-center justify-between pb-2">
-                  <CardTitle className="text-sm font-medium text-muted-foreground">{t.reports.averageAttendance}</CardTitle>
-                  <BarChart3 className="h-5 w-5 text-success" />
-                </CardHeader>
-                <CardContent>
-                  <div className="text-3xl font-bold text-foreground">{summaryStats.avgAttendance}%</div>
-                  <p className="text-xs text-success mt-1">
-                    {summaryStats.avgAttendance >= 80 ? t.reports.satisfactoryPerformance : t.reports.needsFollowup}
-                  </p>
-                </CardContent>
-              </Card>
-
-              <Card className="py-5">
-                <CardHeader className="flex flex-row items-center justify-between pb-2">
-                  <CardTitle className="text-sm font-medium text-muted-foreground">{t.reports.atRiskStudents}</CardTitle>
-                  <TrendingDown className="h-5 w-5 text-destructive" />
-                </CardHeader>
-                <CardContent>
-                  <div className="text-3xl font-bold text-destructive">{summaryStats.atRiskCount}</div>
-                  <p className="text-xs text-muted-foreground mt-1">{t.reports.lowParticipation}</p>
-                </CardContent>
-              </Card>
-            </div>
 
             {/* Level Filter */}
             <Card>
