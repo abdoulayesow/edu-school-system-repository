@@ -36,7 +36,7 @@ interface Person {
 
 interface TeacherProfile {
   id: string
-  person: Person
+  person: Person | null
 }
 
 interface Subject {
@@ -75,7 +75,7 @@ interface GradeDetail {
   order: number
   gradeLeader: {
     id: string
-    person: Person
+    person: Person | null
   } | null
   schoolYear: {
     id: string
@@ -160,9 +160,9 @@ export default function GradeDetailPage() {
       <PageContainer maxWidth="lg">
         <Link href="/grades" className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground mb-4">
           <ArrowLeft className="size-4" />
-          Retour aux classes
+          {t.gradesEnhanced.backToGrades}
         </Link>
-        <div className="text-center py-12 text-destructive">{error || "Grade not found"}</div>
+        <div className="text-center py-12 text-destructive">{error || t.common.error}</div>
       </PageContainer>
     )
   }
@@ -172,7 +172,7 @@ export default function GradeDetailPage() {
       {/* Back link */}
       <Link href="/grades" className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground mb-4">
         <ArrowLeft className="size-4" />
-        Retour aux classes
+        {t.gradesEnhanced.backToGrades}
       </Link>
 
         {/* Header */}
@@ -183,7 +183,7 @@ export default function GradeDetailPage() {
               <Badge variant="outline">{grade.level}</Badge>
             </div>
             <p className="text-muted-foreground">
-              {grade.schoolYear.name} • {grade.studentCount} élèves
+              {grade.schoolYear.name} • {grade.studentCount} {t.gradesEnhanced.studentsCount}
             </p>
           </div>
 
@@ -191,7 +191,7 @@ export default function GradeDetailPage() {
           <Card className="w-full md:w-auto">
             <CardContent className="pt-4 pb-4">
               <div className="flex items-center gap-3">
-                {grade.gradeLeader ? (
+                {grade.gradeLeader && grade.gradeLeader.person ? (
                   <>
                     <Avatar className="size-12">
                       <AvatarImage src={grade.gradeLeader.person.photoUrl ?? undefined} />
@@ -212,7 +212,7 @@ export default function GradeDetailPage() {
                       <User className="size-6 text-muted-foreground" />
                     </div>
                     <div>
-                      <p className="font-medium text-muted-foreground">Aucun responsable</p>
+                      <p className="font-medium text-muted-foreground">{t.gradesEnhanced.noLeader}</p>
                       <Button variant="link" size="sm" className="h-auto p-0 text-primary">
                         {t.gradesEnhanced.assignLeader}
                       </Button>
@@ -230,7 +230,7 @@ export default function GradeDetailPage() {
             <CardHeader className="pb-2">
               <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
                 <Users className="size-4" />
-                Élèves
+                {t.gradesEnhanced.students}
               </CardTitle>
             </CardHeader>
             <CardContent>
@@ -242,7 +242,7 @@ export default function GradeDetailPage() {
             <CardHeader className="pb-2">
               <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
                 <BookOpen className="size-4" />
-                Matières
+                {t.gradesEnhanced.subjects}
               </CardTitle>
             </CardHeader>
             <CardContent>
@@ -254,7 +254,7 @@ export default function GradeDetailPage() {
             <CardHeader className="pb-2">
               <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
                 <CalendarCheck className="size-4" />
-                Présence
+                {t.gradesEnhanced.attendance}
               </CardTitle>
             </CardHeader>
             <CardContent>
@@ -267,7 +267,7 @@ export default function GradeDetailPage() {
             <CardHeader className="pb-2">
               <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
                 <Wallet className="size-4" />
-                Paiement
+                {t.gradesEnhanced.payment}
               </CardTitle>
             </CardHeader>
             <CardContent>
@@ -280,9 +280,9 @@ export default function GradeDetailPage() {
         {/* Tabs */}
         <Tabs defaultValue="overview" className="space-y-4">
           <TabsList>
-            <TabsTrigger value="overview">Vue d'ensemble</TabsTrigger>
-            <TabsTrigger value="students">Élèves ({grade.studentCount})</TabsTrigger>
-            <TabsTrigger value="subjects">Matières ({grade.subjects.length})</TabsTrigger>
+            <TabsTrigger value="overview">{t.gradesEnhanced.overview}</TabsTrigger>
+            <TabsTrigger value="students">{t.gradesEnhanced.students} ({grade.studentCount})</TabsTrigger>
+            <TabsTrigger value="subjects">{t.gradesEnhanced.subjects} ({grade.subjects.length})</TabsTrigger>
           </TabsList>
 
           {/* Overview Tab */}
@@ -293,10 +293,10 @@ export default function GradeDetailPage() {
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
                     <CalendarCheck className="size-5" />
-                    Résumé de présence
+                    {t.gradesEnhanced.attendanceSummary}
                   </CardTitle>
                   <CardDescription>
-                    {grade.attendanceSummary.total} enregistrements au total
+                    {grade.attendanceSummary.total} {t.gradesEnhanced.totalRecords}
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4">
@@ -305,28 +305,28 @@ export default function GradeDetailPage() {
                       <CheckCircle className="size-5 text-success" />
                       <div>
                         <p className="text-2xl font-bold text-success">{grade.attendanceSummary.present}</p>
-                        <p className="text-xs text-muted-foreground">Présents</p>
+                        <p className="text-xs text-muted-foreground">{t.gradesEnhanced.present}</p>
                       </div>
                     </div>
                     <div className="flex items-center gap-3 p-3 rounded-lg bg-destructive/10">
                       <XCircle className="size-5 text-destructive" />
                       <div>
                         <p className="text-2xl font-bold text-destructive">{grade.attendanceSummary.absent}</p>
-                        <p className="text-xs text-muted-foreground">Absents</p>
+                        <p className="text-xs text-muted-foreground">{t.gradesEnhanced.absent}</p>
                       </div>
                     </div>
                     <div className="flex items-center gap-3 p-3 rounded-lg bg-warning/10">
                       <Clock className="size-5 text-warning" />
                       <div>
                         <p className="text-2xl font-bold text-warning">{grade.attendanceSummary.late}</p>
-                        <p className="text-xs text-muted-foreground">En retard</p>
+                        <p className="text-xs text-muted-foreground">{t.students.late}</p>
                       </div>
                     </div>
                     <div className="flex items-center gap-3 p-3 rounded-lg bg-muted">
                       <AlertCircle className="size-5 text-muted-foreground" />
                       <div>
                         <p className="text-2xl font-bold">{grade.attendanceSummary.excused}</p>
-                        <p className="text-xs text-muted-foreground">Excusés</p>
+                        <p className="text-xs text-muted-foreground">{t.gradesEnhanced.excused}</p>
                       </div>
                     </div>
                   </div>
@@ -338,7 +338,7 @@ export default function GradeDetailPage() {
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
                     <Wallet className="size-5" />
-                    Résumé des paiements
+                    {t.gradesEnhanced.paymentSummary}
                   </CardTitle>
                   <CardDescription>
                     {formatCurrency(grade.paymentSummary.totalPaid)} sur {formatCurrency(grade.paymentSummary.totalTuition)}
@@ -347,7 +347,7 @@ export default function GradeDetailPage() {
                 <CardContent className="space-y-4">
                   <div>
                     <div className="flex justify-between text-sm mb-2">
-                      <span>Progression globale</span>
+                      <span>{t.gradesEnhanced.overallProgress}</span>
                       <span className="font-medium">{grade.paymentSummary.paymentRate}%</span>
                     </div>
                     <Progress value={grade.paymentSummary.paymentRate} className="h-3" />
@@ -356,25 +356,25 @@ export default function GradeDetailPage() {
                   <div className="grid grid-cols-2 gap-3 pt-2">
                     <div className="text-center p-3 rounded-lg bg-destructive/10">
                       <p className="text-xl font-bold text-destructive">{grade.paymentSummary.breakdown.late}</p>
-                      <p className="text-xs text-muted-foreground">En retard</p>
+                      <p className="text-xs text-muted-foreground">{t.students.late}</p>
                     </div>
                     <div className="text-center p-3 rounded-lg bg-success/10">
                       <p className="text-xl font-bold text-success">{grade.paymentSummary.breakdown.onTime}</p>
-                      <p className="text-xs text-muted-foreground">À jour</p>
+                      <p className="text-xs text-muted-foreground">{t.students.onTime}</p>
                     </div>
                     <div className="text-center p-3 rounded-lg bg-primary/10">
                       <p className="text-xl font-bold text-primary">{grade.paymentSummary.breakdown.inAdvance}</p>
-                      <p className="text-xs text-muted-foreground">En avance</p>
+                      <p className="text-xs text-muted-foreground">{t.students.inAdvance}</p>
                     </div>
                     <div className="text-center p-3 rounded-lg bg-success/10">
                       <p className="text-xl font-bold text-success">{grade.paymentSummary.breakdown.complete}</p>
-                      <p className="text-xs text-muted-foreground">Complet</p>
+                      <p className="text-xs text-muted-foreground">{t.students.complete}</p>
                     </div>
                   </div>
 
                   <div className="pt-2 border-t">
                     <div className="flex justify-between text-sm">
-                      <span className="text-muted-foreground">Solde restant</span>
+                      <span className="text-muted-foreground">{t.students.remainingBalance}</span>
                       <span className="font-medium text-destructive">{formatCurrency(grade.paymentSummary.remainingBalance)}</span>
                     </div>
                   </div>
@@ -388,23 +388,23 @@ export default function GradeDetailPage() {
             <Card>
               <CardHeader>
                 <CardTitle>{t.gradesEnhanced.studentsInGrade}</CardTitle>
-                <CardDescription>{grade.studentCount} élèves inscrits</CardDescription>
+                <CardDescription>{grade.studentCount} {t.gradesEnhanced.enrolledStudents}</CardDescription>
               </CardHeader>
               <CardContent>
                 <div className="rounded-md border">
                   <Table>
                     <TableHeader>
                       <TableRow>
-                        <TableHead>Nom</TableHead>
-                        <TableHead>Numéro</TableHead>
-                        <TableHead className="text-right">Actions</TableHead>
+                        <TableHead>{t.gradesEnhanced.name}</TableHead>
+                        <TableHead>{t.gradesEnhanced.number}</TableHead>
+                        <TableHead className="text-right">{t.common.actions}</TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
                       {grade.enrollments.length === 0 ? (
                         <TableRow>
                           <TableCell colSpan={3} className="text-center py-8 text-muted-foreground">
-                            Aucun élève inscrit
+                            {t.gradesEnhanced.noStudentsEnrolled}
                           </TableCell>
                         </TableRow>
                       ) : (
@@ -438,15 +438,15 @@ export default function GradeDetailPage() {
             <Card>
               <CardHeader>
                 <CardTitle>{t.gradesEnhanced.subjectsList}</CardTitle>
-                <CardDescription>{grade.subjects.length} matières enseignées</CardDescription>
+                <CardDescription>{grade.subjects.length} {t.gradesEnhanced.subjectsTaught}</CardDescription>
               </CardHeader>
               <CardContent>
                 <div className="rounded-md border">
                   <Table>
                     <TableHeader>
                       <TableRow>
-                        <TableHead>Matière</TableHead>
-                        <TableHead>Enseignant</TableHead>
+                        <TableHead>{t.gradesEnhanced.subject}</TableHead>
+                        <TableHead>{t.gradesEnhanced.teacher}</TableHead>
                         <TableHead className="text-center">{t.gradesEnhanced.coefficient}</TableHead>
                         <TableHead className="text-center">{t.gradesEnhanced.hoursPerWeek}</TableHead>
                       </TableRow>
@@ -455,7 +455,7 @@ export default function GradeDetailPage() {
                       {grade.subjects.length === 0 ? (
                         <TableRow>
                           <TableCell colSpan={4} className="text-center py-8 text-muted-foreground">
-                            Aucune matière assignée
+                            {t.gradesEnhanced.noSubjectsAssigned}
                           </TableCell>
                         </TableRow>
                       ) : (
@@ -470,7 +470,7 @@ export default function GradeDetailPage() {
                                 </div>
                               </TableCell>
                               <TableCell>
-                                {teacher ? (
+                                {teacher && teacher.person ? (
                                   <div className="flex items-center gap-2">
                                     <Avatar className="size-6">
                                       <AvatarFallback className="text-xs">
@@ -480,7 +480,7 @@ export default function GradeDetailPage() {
                                     <span>{teacher.person.firstName} {teacher.person.lastName}</span>
                                   </div>
                                 ) : (
-                                  <span className="text-muted-foreground">Non assigné</span>
+                                  <span className="text-muted-foreground">{t.gradesEnhanced.notAssigned}</span>
                                 )}
                               </TableCell>
                               <TableCell className="text-center">

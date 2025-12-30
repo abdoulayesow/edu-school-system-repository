@@ -253,7 +253,7 @@ export default function StudentsPage() {
               <div className="flex gap-3 mt-2 text-xs text-muted-foreground">
                 <span className="text-success">{stats.payment.onTime} {t.students.onTime}</span>
                 <span className="text-primary">{stats.payment.inAdvance} {t.students.inAdvance}</span>
-                <span className="text-amber-600">{stats.payment.complete} {t.students.complete}</span>
+                <span className="text-success">{stats.payment.complete} {t.students.complete}</span>
               </div>
             </CardContent>
           </Card>

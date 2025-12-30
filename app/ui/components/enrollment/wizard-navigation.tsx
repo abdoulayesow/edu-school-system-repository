@@ -22,7 +22,9 @@ export function WizardNavigation({ onSave, onSubmit }: WizardNavigationProps) {
   const canGoNext = canProceed(currentStep)
 
   const handleNext = async () => {
-    if (onSave && isDirty) {
+    // Only save when moving from step 2 onwards (student info step and beyond)
+    // Don't save when moving from step 1 to step 2 (grade selection to student info)
+    if (onSave && isDirty && currentStep >= 2) {
       await onSave()
     }
     nextStep()

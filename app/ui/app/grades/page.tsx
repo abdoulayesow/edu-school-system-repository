@@ -198,7 +198,7 @@ export default function GradesPage() {
                   <SelectValue placeholder="Tous les niveaux" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all">Tous les niveaux</SelectItem>
+                  <SelectItem value="all">{t.gradesEnhanced.allLevels}</SelectItem>
                   {levels.map(level => (
                     <SelectItem key={level} value={level}>{level}</SelectItem>
                   ))}
@@ -217,7 +217,7 @@ export default function GradesPage() {
           <div className="text-center py-12 text-destructive">{error}</div>
         ) : filteredGrades.length === 0 ? (
           <div className="text-center py-12 text-muted-foreground">
-            Aucune classe trouvée
+            {t.gradesEnhanced.noGradesFound}
           </div>
         ) : (
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
@@ -230,7 +230,7 @@ export default function GradesPage() {
                         <CardTitle className="text-lg">{grade.name}</CardTitle>
                         <CardDescription className="flex items-center gap-2 mt-1">
                           <Badge variant="outline">{grade.level}</Badge>
-                          <span>{grade.stats.studentCount} élèves</span>
+                          <span>{grade.stats.studentCount} {t.gradesEnhanced.studentsCount}</span>
                         </CardDescription>
                       </div>
                       <ChevronRight className="size-5 text-muted-foreground" />
@@ -257,7 +257,7 @@ export default function GradesPage() {
                       ) : (
                         <div className="flex items-center gap-2 text-muted-foreground text-sm">
                           <User className="size-4" />
-                          <span>Aucun responsable assigné</span>
+                          <span>{t.gradesEnhanced.noLeaderAssigned}</span>
                         </div>
                       )}
                     </div>
@@ -269,7 +269,7 @@ export default function GradesPage() {
                         <div className="flex items-center justify-between text-sm mb-1">
                           <span className="text-muted-foreground flex items-center gap-1">
                             <CalendarCheck className="size-3" />
-                            Présence
+                            {t.gradesEnhanced.attendance}
                           </span>
                           <span className={getAttendanceColor(grade.stats.attendanceRate)}>
                             {grade.stats.attendanceRate !== null ? `${grade.stats.attendanceRate}%` : '-'}
@@ -286,7 +286,7 @@ export default function GradesPage() {
                         <div className="flex items-center justify-between text-sm mb-1">
                           <span className="text-muted-foreground flex items-center gap-1">
                             <Wallet className="size-3" />
-                            Paiement
+                            {t.gradesEnhanced.payment}
                           </span>
                           <span className={getPaymentColor(grade.stats.paymentRate)}>
                             {grade.stats.paymentRate !== null ? `${grade.stats.paymentRate}%` : '-'}
@@ -300,16 +300,16 @@ export default function GradesPage() {
 
                       {/* Payment breakdown */}
                       <div className="flex gap-3 text-xs pt-1">
-                        <span className="text-destructive">{grade.stats.paymentBreakdown.late} en retard</span>
-                        <span className="text-success">{grade.stats.paymentBreakdown.onTime} à jour</span>
-                        <span className="text-amber-600">{grade.stats.paymentBreakdown.complete} complet</span>
+                        <span className="text-destructive">{grade.stats.paymentBreakdown.late} {t.students.late}</span>
+                        <span className="text-success">{grade.stats.paymentBreakdown.onTime} {t.students.onTime}</span>
+                        <span className="text-success">{grade.stats.paymentBreakdown.complete} {t.students.complete}</span>
                       </div>
                     </div>
 
                     {/* Subjects count */}
                     <div className="flex items-center gap-2 text-sm text-muted-foreground pt-2 border-t">
                       <BookOpen className="size-4" />
-                      <span>{grade.stats.subjectCount} matières</span>
+                      <span>{grade.stats.subjectCount} {t.gradesEnhanced.subjects.toLowerCase()}</span>
                     </div>
                   </CardContent>
                 </Card>

@@ -38,8 +38,10 @@ function WizardContent({ schoolYearId, schoolYearName }: EnrollmentWizardProps) 
 
   // Auto-save function
   const handleSave = useCallback(async () => {
-    if (!data.enrollmentId && !data.gradeId) {
-      // Nothing to save yet
+    // Only save if we have grade AND student information (firstName and lastName)
+    // This ensures we only save after step 2 (student info), not after step 1 (grade selection)
+    if (!data.enrollmentId && (!data.gradeId || !data.firstName || !data.lastName)) {
+      // Nothing to save yet - need both grade selection and student information
       return
     }
 
