@@ -27,5 +27,19 @@
       "Bash(gh pr edit:*)",
       "Bash(npx prisma generate:*)"
     ]
+  },
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash \"$CLAUDE_PROJECT_DIR/.claude/hooks/auto-lint.sh\"",
+            "timeout": 30
+          }
+        ]
+      }
+    ]
   }
 }
