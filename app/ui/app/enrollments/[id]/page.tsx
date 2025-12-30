@@ -30,6 +30,7 @@ import {
   Mail,
   MapPin,
   AlertCircle,
+  Trash2,
 } from "lucide-react"
 import { useI18n } from "@/components/i18n-provider"
 import { PageContainer } from "@/components/layout/PageContainer"
@@ -108,6 +109,7 @@ export default function EnrollmentDetailPage({
   const [showApproveDialog, setShowApproveDialog] = useState(false)
   const [showRejectDialog, setShowRejectDialog] = useState(false)
   const [showCancelDialog, setShowCancelDialog] = useState(false)
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false)
   const [comment, setComment] = useState("")
   const [userRole, setUserRole] = useState<string>("")
 
@@ -228,6 +230,27 @@ export default function EnrollmentDetailPage({
     }
   }
 
+  const handleDelete = async () => {
+    setActionLoading(true)
+    try {
+      const response = await fetch(`/api/enrollments/${id}`, {
+        method: "DELETE",
+      })
+
+      if (!response.ok) {
+        const data = await response.json()
+        throw new Error(data.message || "Failed to delete enrollment")
+      }
+
+      // Redirect to enrollments list after successful deletion
+      router.push("/enrollments")
+    } catch (err) {
+      console.error("Error deleting enrollment:", err)
+      alert(err instanceof Error ? err.message : "Failed to delete enrollment")
+      setActionLoading(false)
+    }
+  }
+
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat("fr-GN", {
       style: "currency",
@@ -321,6 +344,12 @@ export default function EnrollmentDetailPage({
               </Button>
             )}
             {enrollment.status === "draft" && (
+              <Button variant="destructive" onClick={() => setShowDeleteDialog(true)}>
+                <Trash2 className="h-4 w-4 mr-2" />
+                {t.common.delete}
+              </Button>
+            )}
+            {["draft", "submitted", "needs_review"].includes(enrollment.status) && (
               <Button asChild>
                 <Link href={`/enrollments/new?draft=${enrollment.id}`}>
                   {t.common.edit}
@@ -744,6 +773,29 @@ export default function EnrollmentDetailPage({
             <Button variant="destructive" onClick={handleCancel} disabled={!comment.trim() || actionLoading}>
               {actionLoading && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
               {locale === "fr" ? "Annuler" : "Cancel"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Delete Dialog */}
+      <Dialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>{locale === "fr" ? "Supprimer l'inscription" : "Delete Enrollment"}</DialogTitle>
+            <DialogDescription>
+              {locale === "fr"
+                ? "Cette action est irreversible. L'inscription brouillon sera definitivement supprimee."
+                : "This action cannot be undone. The draft enrollment will be permanently deleted."}
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowDeleteDialog(false)}>
+              {t.common.cancel}
+            </Button>
+            <Button variant="destructive" onClick={handleDelete} disabled={actionLoading}>
+              {actionLoading && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
+              {t.common.delete}
             </Button>
           </DialogFooter>
         </DialogContent>

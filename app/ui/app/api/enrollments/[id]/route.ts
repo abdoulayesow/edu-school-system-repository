@@ -127,13 +127,15 @@ export async function PUT(req: NextRequest, { params }: RouteParams) {
       )
     }
 
-    // Only allow editing drafts or by the creator (for drafts)
+    // Only allow editing non-approved enrollments
     // Directors can edit any enrollment
+    // Creators can edit their own enrollments that haven't been approved/rejected/cancelled
     const isDirector = session.user.role === "director"
     const isCreator = existing.createdBy === session.user.id
     const isDraft = existing.status === "draft"
+    const isEditable = ["draft", "submitted", "needs_review"].includes(existing.status)
 
-    if (!isDirector && (!isDraft || !isCreator)) {
+    if (!isDirector && (!isEditable || !isCreator)) {
       return NextResponse.json(
         { message: "Cannot edit this enrollment" },
         { status: 403 }
