@@ -250,14 +250,14 @@ export async function DELETE(req: NextRequest, { params }: RouteParams) {
       )
     }
 
-    // Only allow deleting drafts by the creator or directors
+    // Only allow deleting drafts or cancelled enrollments by the creator or directors
     const isDirector = session.user.role === "director"
     const isCreator = existing.createdBy === session.user.id
-    const isDraft = existing.status === "draft"
+    const isDeletable = existing.status === "draft" || existing.status === "cancelled"
 
-    if (!isDraft) {
+    if (!isDeletable) {
       return NextResponse.json(
-        { message: "Can only delete draft enrollments" },
+        { message: "Can only delete draft or cancelled enrollments" },
         { status: 400 }
       )
     }

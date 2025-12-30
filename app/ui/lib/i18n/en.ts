@@ -255,6 +255,12 @@ export const en: TranslationKeys = {
     filterEnrollments: "Filter enrollments",
     allStatuses: "All statuses",
     allGrades: "All grades",
+
+    // Status labels
+    draft: "Draft",
+    needsReview: "Needs Review",
+    rejected: "Rejected",
+    cancelled: "Cancelled",
   },
 
   // Activities
@@ -974,6 +980,8 @@ export const en: TranslationKeys = {
     noLeaderAssigned: "No leader assigned",
     allLevels: "All levels",
     noGradesFound: "No grades found",
+    filterGrades: "Filter grades",
+    searchGradePlaceholder: "Search by name...",
   },
 
   // Expenses

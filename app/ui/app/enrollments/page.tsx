@@ -88,14 +88,20 @@ export default function EnrollmentsPage() {
     return "overdue"
   }
 
-  const getPaymentBadge = (status: string) => {
+  const getEnrollmentStatusBadge = (status: string) => {
     switch (status) {
-      case "paid":
-        return <Badge className="bg-success text-success-foreground">{t.enrollments.paid}</Badge>
-      case "pending":
-        return <Badge className="bg-warning text-warning-foreground">{t.enrollments.pendingPayment}</Badge>
-      case "overdue":
-        return <Badge variant="destructive">{t.enrollments.overdue}</Badge>
+      case "draft":
+        return <Badge variant="secondary">{t.enrollments.draft}</Badge>
+      case "submitted":
+        return <Badge className="bg-blue-500 text-white">{t.enrollments.submitted}</Badge>
+      case "needs_review":
+        return <Badge className="bg-warning text-warning-foreground">{t.enrollments.needsReview}</Badge>
+      case "completed":
+        return <Badge className="bg-success text-success-foreground">{t.enrollments.completed}</Badge>
+      case "rejected":
+        return <Badge variant="destructive">{t.enrollments.rejected}</Badge>
+      case "cancelled":
+        return <Badge variant="secondary">{t.enrollments.cancelled}</Badge>
       default:
         return <Badge variant="outline">{status}</Badge>
     }
@@ -271,11 +277,11 @@ export default function EnrollmentsPage() {
                 <Table>
                   <TableHeader>
                     <TableRow>
+                      <TableHead>{t.enrollments.enrollmentDate}</TableHead>
                       <TableHead>{t.enrollments.fullName}</TableHead>
                       <TableHead>{t.enrollments.enrollmentId}</TableHead>
                       <TableHead>{t.common.level}</TableHead>
-                      <TableHead>{t.enrollments.enrollmentDate}</TableHead>
-                      <TableHead>{t.enrollments.paymentStatus}</TableHead>
+                      <TableHead>{t.enrollments.enrollmentStatus}</TableHead>
                       <TableHead className="text-right">{t.common.actions}</TableHead>
                     </TableRow>
                   </TableHeader>
@@ -289,11 +295,11 @@ export default function EnrollmentsPage() {
                     ) : (
                       filteredEnrollments.map((enrollment) => (
                         <TableRow key={enrollment.id}>
+                          <TableCell>{new Date(enrollment.createdAt).toLocaleDateString()}</TableCell>
                           <TableCell className="font-medium">{enrollment.firstName} {enrollment.lastName}</TableCell>
                           <TableCell className="text-muted-foreground">{enrollment.enrollmentNumber}</TableCell>
                           <TableCell>{enrollment.grade?.name}</TableCell>
-                          <TableCell>{new Date(enrollment.createdAt).toLocaleDateString()}</TableCell>
-                          <TableCell>{getPaymentBadge(getPaymentStatus(enrollment))}</TableCell>
+                          <TableCell>{getEnrollmentStatusBadge(enrollment.status)}</TableCell>
                           <TableCell className="text-right">
                             <Button variant="ghost" size="sm" asChild>
                               <Link href={`/enrollments/${enrollment.id}`}>

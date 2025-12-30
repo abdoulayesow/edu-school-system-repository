@@ -343,7 +343,7 @@ export default function EnrollmentDetailPage({
                 {locale === "fr" ? "Annuler" : "Cancel"}
               </Button>
             )}
-            {enrollment.status === "draft" && (
+            {(enrollment.status === "draft" || enrollment.status === "cancelled") && (
               <Button variant="destructive" onClick={() => setShowDeleteDialog(true)}>
                 <Trash2 className="h-4 w-4 mr-2" />
                 {t.common.delete}
@@ -785,8 +785,8 @@ export default function EnrollmentDetailPage({
             <DialogTitle>{locale === "fr" ? "Supprimer l'inscription" : "Delete Enrollment"}</DialogTitle>
             <DialogDescription>
               {locale === "fr"
-                ? "Cette action est irreversible. L'inscription brouillon sera definitivement supprimee."
-                : "This action cannot be undone. The draft enrollment will be permanently deleted."}
+                ? "Cette action est irreversible. L'inscription sera definitivement supprimee."
+                : "This action cannot be undone. The enrollment will be permanently deleted."}
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>

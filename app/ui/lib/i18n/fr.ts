@@ -253,6 +253,12 @@ export const fr = {
     filterEnrollments: "Filtrer les inscriptions",
     allStatuses: "Tous les statuts",
     allGrades: "Toutes les classes",
+
+    // Status labels
+    draft: "Brouillon",
+    needsReview: "En attente de validation",
+    rejected: "Rejeté",
+    cancelled: "Annulé",
   },
 
   // Activities
@@ -972,6 +978,8 @@ export const fr = {
     noLeaderAssigned: "Aucun responsable assigné",
     allLevels: "Tous les niveaux",
     noGradesFound: "Aucune classe trouvée",
+    filterGrades: "Filtrer les classes",
+    searchGradePlaceholder: "Rechercher par nom...",
   },
 
   // Expenses

@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useMemo } from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
 import { Progress } from "@/components/ui/progress"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
@@ -14,7 +15,8 @@ import {
   Loader2,
   GraduationCap,
   User,
-  ChevronRight
+  ChevronRight,
+  Search
 } from "lucide-react"
 import { useI18n } from "@/components/i18n-provider"
 import Link from "next/link"
@@ -62,6 +64,7 @@ export default function GradesPage() {
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [levelFilter, setLevelFilter] = useState<string>("all")
+  const [gradeSearchQuery, setGradeSearchQuery] = useState("")
 
   useEffect(() => {
     async function fetchGrades() {
@@ -90,11 +93,15 @@ export default function GradesPage() {
     return uniqueLevels.sort()
   }, [grades])
 
-  // Filter grades by level
+  // Filter grades by level and search query
   const filteredGrades = useMemo(() => {
-    if (levelFilter === "all") return grades
-    return grades.filter(g => g.level === levelFilter)
-  }, [grades, levelFilter])
+    return grades.filter(g => {
+      const matchesLevel = levelFilter === "all" || g.level === levelFilter
+      const matchesSearch = gradeSearchQuery === "" ||
+        g.name.toLowerCase().includes(gradeSearchQuery.toLowerCase())
+      return matchesLevel && matchesSearch
+    })
+  }, [grades, levelFilter, gradeSearchQuery])
 
   // Summary stats
   const stats = useMemo(() => {
@@ -185,14 +192,28 @@ export default function GradesPage() {
           </Card>
         </div>
 
-        {/* Level Filter */}
-        <Card className="mb-6">
-          <CardContent className="pt-6">
-            <div className="flex items-center gap-4">
-              <span className="text-sm font-medium text-muted-foreground">Niveau:</span>
+        {/* Filters */}
+        <Card className="mb-6 py-2">
+          <CardHeader className="pb-1 px-6 pt-3">
+            <CardTitle className="text-sm">{t.gradesEnhanced.filterGrades}</CardTitle>
+          </CardHeader>
+          <CardContent className="pt-0 pb-2 px-6">
+            <div className="flex flex-col sm:flex-row gap-4">
+              {/* Search Input */}
+              <div className="relative flex-1">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground" />
+                <Input
+                  placeholder={t.gradesEnhanced.searchGradePlaceholder}
+                  value={gradeSearchQuery}
+                  onChange={(e) => setGradeSearchQuery(e.target.value)}
+                  className="pl-10"
+                />
+              </div>
+
+              {/* Level Filter */}
               <Select value={levelFilter} onValueChange={setLevelFilter}>
-                <SelectTrigger className="w-[200px]">
-                  <SelectValue placeholder="Tous les niveaux" />
+                <SelectTrigger className="w-full sm:w-[180px]">
+                  <SelectValue placeholder={t.gradesEnhanced.allLevels} />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">{t.gradesEnhanced.allLevels}</SelectItem>
