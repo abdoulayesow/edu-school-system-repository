@@ -41,16 +41,15 @@ function TabsTrigger({
       data-slot="tabs-trigger"
       className={cn(
         componentClasses.tabButtonBase,
-        // Inactive state (default)
+        // Inactive state - very light yellow with hover effect
         componentClasses.tabButtonInactive,
-        // Active state with light yellow background and bottom border indicator
-        'data-[state=active]:text-foreground',
-        'data-[state=active]:bg-gspn-gold-50 dark:data-[state=active]:bg-input/30',
+        // Active state - same color as top panel (#e79908)
+        'data-[state=active]:bg-[#e79908] dark:data-[state=active]:bg-gspn-gold-500',
+        'data-[state=active]:text-black dark:data-[state=active]:text-[#2d0707]',
         'data-[state=active]:border-b-2 data-[state=active]:border-b-primary',
         'data-[state=active]:border-t data-[state=active]:border-l data-[state=active]:border-r data-[state=active]:border-border',
         'data-[state=active]:rounded-t-lg data-[state=active]:rounded-b-none',
         'data-[state=active]:shadow-sm',
-        'dark:data-[state=active]:border-b-primary',
         className,
       )}
       {...props}

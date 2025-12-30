@@ -163,21 +163,28 @@ export const componentClasses = {
     'relative',
   ].join(' '),
 
-  // Tab button active state - with light yellow background and bottom border indicator
+  // Tab button active state - same color as top panel (#e79908)
   tabButtonActive: [
-    'text-foreground',
-    'bg-gspn-gold-50 dark:bg-input/30',
+    'text-black dark:text-[#2d0707]',
+    'bg-[#e79908] dark:bg-gspn-gold-500',
     'border-b-2 border-b-primary border-t border-l border-r border-border',
     'rounded-t-lg rounded-b-none',
     'shadow-sm',
-    'dark:border-b-primary',
   ].join(' '),
 
-  // Tab button inactive state
+  // Tab button inactive state - very light yellow with hover effect
   tabButtonInactive: [
     'text-muted-foreground hover:text-foreground',
-    'hover:bg-muted/30 dark:hover:bg-muted/20',
+    'bg-gspn-gold-50 dark:bg-gspn-maroon-900',
+    'hover:bg-gspn-gold-100 dark:hover:bg-gspn-maroon-800',
     'border-b-2 border-b-transparent',
+    'cursor-pointer',
+  ].join(' '),
+
+  // Primary action button (yellow) - consistent across light/dark mode
+  primaryActionButton: [
+    'bg-[#e79908] hover:bg-[#d68907] text-black',
+    'dark:bg-gspn-gold-500 dark:hover:bg-gspn-gold-400 dark:text-[#2d0707]',
   ].join(' '),
 } as const
 

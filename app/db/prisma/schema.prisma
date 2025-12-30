@@ -334,7 +334,7 @@ model Payment {
   status              PaymentStatus   @default(pending_deposit)
 
   // Transaction details
-  receiptNumber       String          // Required: CASH-2025-XXXXX or OM-2025-XXXXX
+  receiptNumber       String   @unique // Required: GSPN-YYYY-CASH-XXXXX or GSPN-YYYY-OM-XXXXX - MUST be unique
   transactionRef      String?         // Orange Money transaction ID
   receiptImageUrl     String?         // Uploaded receipt image
 

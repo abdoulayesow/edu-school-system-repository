@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server"
 import { requireSession, requireRole } from "@/lib/authz"
 import { prisma } from "@/lib/prisma"
+import { Prisma } from "@prisma/client"
 import { z } from "zod"
 
 // Schema for creating an enrollment (draft)
@@ -175,7 +176,7 @@ export async function POST(req: NextRequest) {
 
     // Build data object, only including fields that have values (not undefined)
     // Note: firstName and lastName are required in schema, so use empty strings for drafts
-    const enrollmentData: Record<string, unknown> = {
+    const enrollmentData: Prisma.EnrollmentUncheckedCreateInput = {
       enrollmentNumber,
       schoolYearId: validated.schoolYearId,
       gradeId: validated.gradeId,
@@ -192,38 +193,17 @@ export async function POST(req: NextRequest) {
       currentStep: validated.currentStep || 1,
       draftExpiresAt,
       createdBy: session.user.id,
-    }
-
-    // Only include optional fields if they have values (not undefined)
-    if (validated.studentId !== undefined) {
-      enrollmentData.studentId = validated.studentId
-    }
-    if (validated.gender !== undefined) {
-      enrollmentData.gender = validated.gender
-    }
-    if (validated.phone !== undefined) {
-      enrollmentData.phone = validated.phone
-    }
-    if (validated.photoUrl !== undefined) {
-      enrollmentData.photoUrl = validated.photoUrl
-    }
-    if (validated.birthCertificateUrl !== undefined) {
-      enrollmentData.birthCertificateUrl = validated.birthCertificateUrl
-    }
-    if (validated.fatherName !== undefined) {
-      enrollmentData.fatherName = validated.fatherName
-    }
-    if (validated.fatherPhone !== undefined) {
-      enrollmentData.fatherPhone = validated.fatherPhone
-    }
-    if (validated.motherName !== undefined) {
-      enrollmentData.motherName = validated.motherName
-    }
-    if (validated.motherPhone !== undefined) {
-      enrollmentData.motherPhone = validated.motherPhone
-    }
-    if (validated.address !== undefined) {
-      enrollmentData.address = validated.address
+      // Optional fields
+      studentId: validated.studentId,
+      gender: validated.gender,
+      phone: validated.phone,
+      photoUrl: validated.photoUrl,
+      birthCertificateUrl: validated.birthCertificateUrl,
+      fatherName: validated.fatherName,
+      fatherPhone: validated.fatherPhone,
+      motherName: validated.motherName,
+      motherPhone: validated.motherPhone,
+      address: validated.address,
     }
 
     const enrollment = await prisma.enrollment.create({

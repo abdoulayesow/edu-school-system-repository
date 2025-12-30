@@ -230,6 +230,7 @@ export function EnrollmentWizardProvider({
           return (
             !!data.firstName &&
             !!data.lastName &&
+            !!data.dateOfBirth && // Date of birth is required
             (!!data.fatherName || !!data.motherName) &&
             (!!data.phone || !!data.fatherPhone || !!data.motherPhone)
           )

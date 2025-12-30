@@ -351,7 +351,7 @@ export function StepStudentInfo() {
       {/* Personal Information */}
       <div className="space-y-4">
         <h4 className="font-medium">{t.enrollmentWizard.personalInfo}</h4>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <div className="space-y-2">
             <Label htmlFor="firstName">
               {t.enrollmentWizard.firstName} *
@@ -361,6 +361,15 @@ export function StepStudentInfo() {
               value={data.firstName}
               onChange={(e) => updateData({ firstName: e.target.value })}
               placeholder={t.enrollmentWizard.firstName}
+            />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="middleName">{t.enrollmentWizard.middleName || "Middle Name"}</Label>
+            <Input
+              id="middleName"
+              value={data.middleName || ""}
+              onChange={(e) => updateData({ middleName: e.target.value })}
+              placeholder={t.enrollmentWizard.middleName || "Middle Name"}
             />
           </div>
           <div className="space-y-2">
@@ -376,12 +385,13 @@ export function StepStudentInfo() {
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div className="space-y-2">
-            <Label htmlFor="dateOfBirth">{t.enrollmentWizard.dateOfBirth}</Label>
+            <Label htmlFor="dateOfBirth">{t.enrollmentWizard.dateOfBirth} *</Label>
             <Input
               id="dateOfBirth"
               type="date"
               value={data.dateOfBirth || ""}
               onChange={(e) => updateData({ dateOfBirth: e.target.value })}
+              required
             />
           </div>
           <div className="space-y-2">
@@ -409,10 +419,13 @@ export function StepStudentInfo() {
             <Input
               id="phone"
               type="tel"
-              value={data.phone || ""}
+              value={data.phone || "+224 "}
               onChange={(e) => updateData({ phone: e.target.value })}
               placeholder="+224 XXX XX XX XX"
             />
+            <p className="text-xs text-muted-foreground">
+              {t.enrollmentWizard.phoneFormat || "Format: +224 XXX XX XX XX"}
+            </p>
           </div>
           <div className="space-y-2">
             <Label htmlFor="email">{t.enrollmentWizard.email}</Label>
@@ -451,8 +464,9 @@ export function StepStudentInfo() {
                 <Input
                   id="fatherPhone"
                   type="tel"
-                  value={data.fatherPhone || ""}
+                  value={data.fatherPhone || "+224 "}
                   onChange={(e) => updateData({ fatherPhone: e.target.value })}
+                  placeholder="+224 XXX XX XX XX"
                 />
               </div>
               <div className="space-y-2">
@@ -488,8 +502,9 @@ export function StepStudentInfo() {
                 <Input
                   id="motherPhone"
                   type="tel"
-                  value={data.motherPhone || ""}
+                  value={data.motherPhone || "+224 "}
                   onChange={(e) => updateData({ motherPhone: e.target.value })}
+                  placeholder="+224 XXX XX XX XX"
                 />
               </div>
               <div className="space-y-2">

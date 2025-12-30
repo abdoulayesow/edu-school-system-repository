@@ -202,7 +202,7 @@ export async function POST(req: NextRequest, { params }: RouteParams) {
       return updatedEnrollment
     })
 
-    // Get the complete enrollment with payment schedules
+    // Get the complete enrollment with payment schedules and payments
     const complete = await prisma.enrollment.findUnique({
       where: { id },
       include: {
@@ -211,6 +211,9 @@ export async function POST(req: NextRequest, { params }: RouteParams) {
         student: true,
         paymentSchedules: {
           orderBy: { scheduleNumber: "asc" },
+        },
+        payments: {
+          orderBy: { recordedAt: "desc" },
         },
       },
     })

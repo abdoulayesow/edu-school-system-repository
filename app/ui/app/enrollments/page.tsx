@@ -249,7 +249,7 @@ export default function EnrollmentsPage() {
             </div>
             <Button
               asChild
-              className="w-full sm:w-auto bg-[#e79908] hover:bg-[#d68907] text-black dark:bg-gspn-maroon-950 dark:hover:bg-gspn-maroon-900 dark:text-white"
+              className="w-full sm:w-auto bg-[#e79908] hover:bg-[#d68907] text-black dark:bg-gspn-gold-500 dark:hover:bg-gspn-gold-400 dark:text-[#2d0707]"
             >
               <Link href="/enrollments/new">
                 <Plus className="h-4 w-4 mr-2" />
@@ -271,8 +271,8 @@ export default function EnrollmentsPage() {
                 <Table>
                   <TableHeader>
                     <TableRow>
-                      <TableHead>{t.enrollments.studentId}</TableHead>
                       <TableHead>{t.enrollments.fullName}</TableHead>
+                      <TableHead>{t.enrollments.enrollmentId}</TableHead>
                       <TableHead>{t.common.level}</TableHead>
                       <TableHead>{t.enrollments.enrollmentDate}</TableHead>
                       <TableHead>{t.enrollments.paymentStatus}</TableHead>
@@ -289,8 +289,8 @@ export default function EnrollmentsPage() {
                     ) : (
                       filteredEnrollments.map((enrollment) => (
                         <TableRow key={enrollment.id}>
-                          <TableCell className="font-medium">{enrollment.enrollmentNumber}</TableCell>
-                          <TableCell>{enrollment.firstName} {enrollment.lastName}</TableCell>
+                          <TableCell className="font-medium">{enrollment.firstName} {enrollment.lastName}</TableCell>
+                          <TableCell className="text-muted-foreground">{enrollment.enrollmentNumber}</TableCell>
                           <TableCell>{enrollment.grade?.name}</TableCell>
                           <TableCell>{new Date(enrollment.createdAt).toLocaleDateString()}</TableCell>
                           <TableCell>{getPaymentBadge(getPaymentStatus(enrollment))}</TableCell>

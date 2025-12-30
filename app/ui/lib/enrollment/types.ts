@@ -213,6 +213,7 @@ export interface EnrollmentWizardData {
   isReturningStudent: boolean
   studentId?: string
   firstName: string
+  middleName?: string
   lastName: string
   dateOfBirth?: string
   gender?: Gender

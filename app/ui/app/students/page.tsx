@@ -153,32 +153,42 @@ export default function StudentsPage() {
   const getEnrollmentStatusBadge = (status: string | null) => {
     if (!status) return <Badge variant="outline">-</Badge>
 
+    // Type assertion for status keys that exist in enrollments translations
+    const enrollments = t.enrollments as typeof t.enrollments & {
+      statusDraft?: string
+      statusSubmitted?: string
+      statusNeedsReview?: string
+      statusCompleted?: string
+      statusRejected?: string
+      statusCancelled?: string
+    }
+
     const config: Record<string, { className: string; label: string; icon?: React.ElementType }> = {
       draft: {
         className: "bg-muted/10 text-muted-foreground border-muted/30",
-        label: t.enrollments.statusDraft || "Draft"
+        label: enrollments.statusDraft || "Draft"
       },
       submitted: {
         className: "bg-warning/10 text-warning border-warning/30",
-        label: t.enrollments.statusSubmitted || "Submitted"
+        label: enrollments.statusSubmitted || "Submitted"
       },
       needs_review: {
         className: "bg-warning/10 text-warning border-warning/30",
-        label: t.enrollments.statusNeedsReview || "Needs Review"
+        label: enrollments.statusNeedsReview || "Needs Review"
       },
       completed: {
         className: "bg-success/10 text-success border-success/30",
-        label: t.enrollments.statusCompleted || "Completed",
+        label: enrollments.statusCompleted || "Completed",
         icon: CheckCircle
       },
       rejected: {
         className: "bg-destructive/10 text-destructive border-destructive/30",
-        label: t.enrollments.statusRejected || "Rejected",
+        label: enrollments.statusRejected || "Rejected",
         icon: XCircle
       },
       cancelled: {
         className: "bg-destructive/10 text-destructive border-destructive/30",
-        label: t.enrollments.statusCancelled || "Cancelled",
+        label: enrollments.statusCancelled || "Cancelled",
         icon: XCircle
       },
     }
@@ -196,8 +206,7 @@ export default function StudentsPage() {
   const getAttendanceBadge = (status: string | null) => {
     if (!status) {
       return (
-        <Badge variant="outline" className="bg-muted/10 text-muted-foreground border-muted/30 gap-1">
-          <CircleAlert className="size-3" />
+        <Badge variant="outline" className="bg-gray-100 text-gray-600 border-gray-300 dark:bg-gray-800 dark:text-gray-400 dark:border-gray-600">
           {t.students.missingData || "Missing data"}
         </Badge>
       )
@@ -226,6 +235,37 @@ export default function StudentsPage() {
     return (
       <Badge variant="outline" className={`${className} gap-1`}>
         <Icon className="size-3" />
+        {label}
+      </Badge>
+    )
+  }
+
+  const getPaymentStatusBadge = (status: string | null) => {
+    if (!status) return <Badge variant="outline">-</Badge>
+
+    const config: Record<string, { className: string; label: string }> = {
+      late: {
+        className: "bg-destructive/10 text-destructive border-destructive/30",
+        label: t.students.late
+      },
+      on_time: {
+        className: "bg-success/10 text-success border-success/30",
+        label: t.students.onTime
+      },
+      in_advance: {
+        className: "bg-primary/10 text-primary border-primary/30",
+        label: t.students.inAdvance
+      },
+      complete: {
+        className: "bg-success/10 text-success border-success/30",
+        label: t.students.complete
+      },
+    }
+
+    const { className, label } = config[status] || { className: "", label: status }
+
+    return (
+      <Badge variant="outline" className={className}>
         {label}
       </Badge>
     )
@@ -390,9 +430,9 @@ export default function StudentsPage() {
                     <TableRow>
                       <TableHead className="w-[50px]"></TableHead>
                       <TableHead>{t.enrollments.fullName}</TableHead>
-                      <TableHead>{t.enrollments.enrollmentId}</TableHead>
+                      <TableHead>{t.enrollments.studentId}</TableHead>
                       <TableHead>{t.common.level}</TableHead>
-                      <TableHead>{t.enrollments.enrollmentStatus}</TableHead>
+                      <TableHead>{t.enrollments.paymentStatus}</TableHead>
                       <TableHead>Présence</TableHead>
                       <TableHead className="text-right">{t.common.actions}</TableHead>
                     </TableRow>
@@ -425,7 +465,7 @@ export default function StudentsPage() {
                           </TableCell>
                           <TableCell>{student.grade?.name ?? "-"}</TableCell>
                           <TableCell>
-                            {getEnrollmentStatusBadge(student.enrollmentStatus)}
+                            {getPaymentStatusBadge(student.paymentStatus)}
                           </TableCell>
                           <TableCell>
                             {getAttendanceBadge(student.attendanceStatus)}

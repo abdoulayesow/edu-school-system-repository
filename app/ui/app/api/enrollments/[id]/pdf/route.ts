@@ -170,7 +170,7 @@ export async function GET(req: NextRequest, { params }: RouteParams) {
       totalPaid,
       totalOwed,
       percentPaid: tuitionFee > 0 ? Math.round((totalPaid / tuitionFee) * 100) : 0,
-      studentNumber: enrollment.student?.studentNumber,
+      studentNumber: enrollment.student?.studentNumber ?? undefined,
     }
 
     // Generate PDF
