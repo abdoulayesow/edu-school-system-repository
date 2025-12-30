@@ -14,6 +14,7 @@ import {
   History,
   PieChart,
   UserPlus,
+  Calendar,
 } from "lucide-react"
 import type { UserRole } from "./nav-links"
 
@@ -106,10 +107,10 @@ export const navigationConfig: MainNavItem[] = [
       },
       {
         id: "classes",
-        name: "Classes",
-        translationKey: "classes",
+        name: "Timetable",
+        translationKey: "timetable",
         href: "/classes",
-        icon: School,
+        icon: Calendar,
         roles: ["director", "academic_director"],
       },
       {

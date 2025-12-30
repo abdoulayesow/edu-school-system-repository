@@ -31,6 +31,7 @@ import {
 } from "lucide-react"
 import { useI18n } from "@/components/i18n-provider"
 import { PageContainer } from "@/components/layout/PageContainer"
+import { cn } from "@/lib/utils"
 import Link from "next/link"
 
 interface Person {
@@ -193,7 +194,7 @@ export default function StudentDetailPage() {
       late: { color: "bg-destructive/10 text-destructive", label: t.students.late },
       on_time: { color: "bg-success/10 text-success", label: t.students.onTime },
       in_advance: { color: "bg-primary/10 text-primary", label: t.students.inAdvance },
-      complete: { color: "bg-amber-500/10 text-amber-600", label: t.students.complete }
+      complete: { color: "bg-success/10 text-success", label: t.students.complete }
     }
     const config = statusConfig[status] || { color: "bg-muted", label: status }
     return <Badge className={config.color}>{config.label}</Badge>
@@ -260,7 +261,7 @@ export default function StudentDetailPage() {
   )
 
   return (
-    <PageContainer maxWidth="lg">
+    <PageContainer maxWidth="full">
       {/* Back link */}
       <Link href="/students" className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground mb-4">
         <ArrowLeft className="size-4" />
@@ -575,7 +576,10 @@ export default function StudentDetailPage() {
                           <p className="text-lg font-bold text-destructive">{formatCurrency(student.balanceInfo.remainingBalance)}</p>
                           <p className="text-xs text-muted-foreground">{t.students.remainingBalance}</p>
                         </div>
-                        <div className="text-center p-3 rounded-lg">
+                        <div className={cn(
+                          "text-center p-3 rounded-lg",
+                          student.balanceInfo.paymentStatus === "complete" && "bg-success/10"
+                        )}>
                           {getPaymentStatusBadge(student.balanceInfo.paymentStatus)}
                           <p className="text-xs text-muted-foreground mt-2">Statut</p>
                         </div>

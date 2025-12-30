@@ -5,7 +5,7 @@
 
 :root {
   /* GSPN N'Diolou Logo Colors - Maroon, Gold, Black */
-  --background: oklch(0.98 0.01 20);
+  --background: #ffffff;
   --foreground: oklch(0.15 0.02 20);
 
   --card: oklch(1 0 0);
@@ -67,13 +67,13 @@
 
 .dark {
   /* Dark mode with logo colors */
-  --background: oklch(0.15 0.02 20);
+  --background: #000000;
   --foreground: oklch(0.95 0.01 20);
 
-  --card: oklch(0.18 0.02 20);
+  --card: #000000;
   --card-foreground: oklch(0.95 0.01 20);
 
-  --popover: oklch(0.18 0.02 20);
+  --popover: #000000;
   --popover-foreground: oklch(0.95 0.01 20);
 
   --primary: oklch(0.48 0.16 15);
@@ -270,9 +270,14 @@ main > .bg-background,
   background-color: var(--background);
 }
 
-/* Main element should be transparent to allow page-container backgrounds to show */
+/* Main element background - transparent in light mode, black in dark mode */
 main {
-  background-color: transparent !important;
+  background-color: transparent;
+}
+
+.dark main,
+.dark main.bg-background {
+  background-color: #000000 !important;
 }
 
 /* Container backgrounds for content pages - white for main panel */
@@ -287,8 +292,9 @@ div.page-container,
 .dark main > div.container,
 .dark main .page-container,
 .dark div.page-container,
-.dark .page-container {
-  background-color: oklch(var(--background)) !important;
+.dark .page-container,
+.dark main div.page-container {
+  background-color: #000000 !important;
 }
 
 /* Glassmorphism for Sidebars and Modals */

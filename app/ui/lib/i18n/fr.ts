@@ -64,6 +64,7 @@ export const fr = {
     payments: "Paiements",
     expenses: "Dépenses",
     classes: "Classes",
+    timetable: "Emploi du temps",
     audit: "Audit",
     financialAudit: "Audit Financier",
     dataHistory: "Historique des Données",

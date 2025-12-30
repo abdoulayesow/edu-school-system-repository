@@ -527,7 +527,7 @@ export default function AccountingPage() {
             <Card>
               <CardHeader>
                 <div className="flex items-center justify-between">
-                  <div>
+                  <div className="space-y-2">
                     <CardTitle>{t.accounting.paymentTransactions}</CardTitle>
                     <CardDescription>
                       {isLoadingPayments

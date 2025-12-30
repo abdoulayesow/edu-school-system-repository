@@ -68,7 +68,7 @@ export function NavSidebar() {
       <aside
         className={cn(
           "fixed left-0 top-[91px] z-40 h-[calc(100vh-91px)] border-r border-gspn-gold-300 dark:border-gray-800/50",
-          "bg-[#eaa428] dark:bg-gspn-maroon-950 transition-all duration-300 ease-in-out",
+          "bg-[#eaa428] dark:bg-gspn-maroon-800 transition-all duration-300 ease-in-out",
           isSidebarCollapsed ? "w-16" : "w-64"
         )}
       >
@@ -94,7 +94,7 @@ export function NavSidebar() {
                 variant="ghost"
                 size="icon"
                 onClick={toggleSidebar}
-                className="h-8 w-8 text-black hover:bg-gspn-gold-300 dark:text-gray-300 dark:hover:bg-gspn-maroon-800 dark:hover:text-white"
+                className="h-8 w-8 text-black hover:bg-gspn-gold-300 dark:text-gray-300 dark:hover:bg-[#4a0c0c] dark:hover:text-white"
                 title={
                   isSidebarCollapsed
                     ? t.nav.expandMenu || "Expand"
@@ -112,7 +112,7 @@ export function NavSidebar() {
                   variant="ghost"
                   size="icon"
                   onClick={closeSidebar}
-                  className="h-8 w-8 text-gspn-maroon-900 hover:bg-gspn-maroon-100 dark:text-gray-300 dark:hover:bg-gspn-maroon-800 dark:hover:text-white lg:hidden"
+                  className="h-8 w-8 text-gspn-maroon-900 hover:bg-gspn-maroon-100 dark:text-gray-300 dark:hover:bg-[#4a0c0c] dark:hover:text-white lg:hidden"
                 >
                   <X className={sizing.icon.sm} />
                 </Button>
@@ -139,8 +139,8 @@ export function NavSidebar() {
                             className={cn(
                               "flex h-10 w-10 items-center justify-center rounded-lg transition-all duration-200 mx-auto",
                               isActive
-                                ? "bg-gspn-gold-50 text-black dark:bg-gspn-gold-500 dark:text-gspn-maroon-950 shadow-sm font-semibold"
-                                : "text-black hover:bg-gspn-gold-300 dark:text-gray-300 dark:hover:bg-gspn-maroon-800 dark:hover:text-white"
+                                ? "bg-gspn-gold-50 text-black dark:bg-gspn-gold-500 dark:text-[#2d0707] shadow-sm font-semibold"
+                                : "text-black hover:bg-gspn-gold-300 dark:text-gray-300 dark:hover:bg-[#4a0c0c] dark:hover:text-white"
                             )}
                           >
                             <Icon className={sizing.toolbarIcon} />
@@ -161,8 +161,8 @@ export function NavSidebar() {
                       className={cn(
                         "flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all duration-200",
                         isActive
-                          ? "bg-gspn-gold-50 text-black dark:bg-gspn-gold-500 dark:text-gspn-maroon-950 shadow-sm font-semibold"
-                          : "text-black hover:bg-gspn-gold-300 dark:text-gray-300 dark:hover:bg-gspn-maroon-800 dark:hover:text-white"
+                          ? "bg-gspn-gold-50 text-black dark:bg-gspn-gold-500 dark:text-[#2d0707] shadow-sm font-semibold"
+                          : "text-black hover:bg-gspn-gold-300 dark:text-gray-300 dark:hover:bg-[#4a0c0c] dark:hover:text-white"
                       )}
                     >
                       <Icon className={cn(sizing.toolbarIcon, "shrink-0")} />
@@ -182,7 +182,7 @@ export function NavSidebar() {
             <div className="border-t border-gspn-gold-300 dark:border-gray-800/50 p-4 hidden lg:block">
               <Button
                 variant="ghost"
-                className="w-full justify-start text-black hover:bg-gspn-gold-300 dark:text-gray-300 dark:hover:bg-gspn-maroon-800 dark:hover:text-white"
+                className="w-full justify-start text-black hover:bg-gspn-gold-300 dark:text-gray-300 dark:hover:bg-[#4a0c0c] dark:hover:text-white"
                 onClick={closeSidebar}
               >
                 <ChevronLeft className={cn(sizing.icon.sm, "mr-2")} />

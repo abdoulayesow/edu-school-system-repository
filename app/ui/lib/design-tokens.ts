@@ -140,10 +140,10 @@ export const componentClasses = {
   ].join(' '),
 
   // Navigation button active state
-  navMainButtonActive: 'bg-gspn-gold-50 text-black dark:bg-gspn-gold-500 dark:text-gspn-maroon-950 shadow-md',
+  navMainButtonActive: 'bg-gspn-gold-50 text-black dark:bg-gspn-gold-500 dark:text-[#2d0707] shadow-md',
 
   // Navigation button inactive state
-  navMainButtonInactive: 'text-black hover:bg-gspn-gold-300 dark:text-gray-200 dark:hover:bg-gspn-maroon-800 dark:hover:text-white',
+  navMainButtonInactive: 'text-black hover:bg-gspn-gold-300 dark:text-gray-200 dark:hover:bg-[#4a0c0c] dark:hover:text-white',
 
   // Tab list container (base classes) - multi-tab style with horizontal line (full width)
   tabListBase: [

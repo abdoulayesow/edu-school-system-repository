@@ -31,7 +31,7 @@ export function PageContainer({
   return (
     <div
       className={cn(
-        "pt-4 lg:pt-4 container mx-auto page-container bg-white dark:bg-background",
+        "pt-4 lg:pt-4 container mx-auto page-container",
         spacing.container[maxWidth],
         !noPadding && spacing.page.x,
         !noPadding && "py-4",

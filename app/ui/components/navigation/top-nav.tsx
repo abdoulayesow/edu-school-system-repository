@@ -75,7 +75,7 @@ export function TopNav() {
   }
 
   return (
-    <header className="fixed top-0 left-0 right-0 z-[60] h-[91px] border-b border-gspn-gold-300 dark:border-gray-800/50 bg-[#e79908] dark:bg-gspn-maroon-950 backdrop-blur-sm bg-opacity-95">
+    <header className="fixed top-0 left-0 right-0 z-[60] h-[91px] border-b border-gspn-gold-300 dark:border-gray-800/50 bg-[#e79908] dark:bg-[#2d0707] backdrop-blur-sm bg-opacity-95">
       <div className="h-full px-4 lg:px-6">
         <div className="flex items-center justify-between h-full">
           {/* Logo Section */}

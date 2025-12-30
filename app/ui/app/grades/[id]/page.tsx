@@ -366,8 +366,8 @@ export default function GradeDetailPage() {
                       <p className="text-xl font-bold text-primary">{grade.paymentSummary.breakdown.inAdvance}</p>
                       <p className="text-xs text-muted-foreground">En avance</p>
                     </div>
-                    <div className="text-center p-3 rounded-lg bg-amber-500/10">
-                      <p className="text-xl font-bold text-amber-600">{grade.paymentSummary.breakdown.complete}</p>
+                    <div className="text-center p-3 rounded-lg bg-success/10">
+                      <p className="text-xl font-bold text-success">{grade.paymentSummary.breakdown.complete}</p>
                       <p className="text-xs text-muted-foreground">Complet</p>
                     </div>
                   </div>

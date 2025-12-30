@@ -30,7 +30,7 @@ function MainContent({ children }: { children: React.ReactNode }) {
   return (
     <main
       className={cn(
-        "min-h-screen pt-[91px] transition-all duration-300",
+        "min-h-screen pt-[91px] transition-all duration-300 bg-background",
         // Add left margin on desktop when sidebar is open
         isSidebarOpen && "lg:ml-64",
         isSidebarOpen && isSidebarCollapsed && "lg:ml-16"

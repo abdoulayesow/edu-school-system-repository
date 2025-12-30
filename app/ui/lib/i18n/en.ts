@@ -66,6 +66,7 @@ export const en: TranslationKeys = {
     payments: "Payments",
     expenses: "Expenses",
     classes: "Classes",
+    timetable: "Timetable",
     audit: "Audit",
     financialAudit: "Financial Audit",
     dataHistory: "Data History",
