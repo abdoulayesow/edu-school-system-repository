@@ -81,7 +81,7 @@ export default function EnrollmentsPage() {
 
   return (
     <PageContainer>
-      <div className="mb-4">
+      <div className="mb-6">
         <h1 className="text-3xl font-bold text-foreground mb-2">{t.enrollments.title}</h1>
         <p className="text-muted-foreground">{t.enrollments.subtitle}</p>
       </div>
@@ -93,7 +93,10 @@ export default function EnrollmentsPage() {
                 <CardTitle>{t.enrollments.allStudents}</CardTitle>
                 <CardDescription>{enrollments.length} {t.common.students}</CardDescription>
               </div>
-              <Button asChild className="w-full sm:w-auto">
+              <Button
+                asChild
+                className="w-full sm:w-auto bg-[#e79908] hover:bg-[#d68907] text-black dark:bg-gspn-maroon-950 dark:hover:bg-gspn-maroon-900 dark:text-white"
+              >
                 <Link href="/enrollments/new">
                   <Plus className="h-4 w-4 mr-2" />
                   {t.enrollments.newEnrollment}

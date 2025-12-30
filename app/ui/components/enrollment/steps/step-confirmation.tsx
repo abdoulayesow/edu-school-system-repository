@@ -18,6 +18,7 @@ import {
   Loader2,
 } from "lucide-react"
 import Link from "next/link"
+import { sizing } from "@/lib/design-tokens"
 
 export function StepConfirmation() {
   const { t, locale } = useI18n()
@@ -88,7 +89,7 @@ export function StepConfirmation() {
       {/* Status Alert */}
       {hasAdjustment ? (
         <Alert variant="destructive">
-          <AlertTriangle className="h-4 w-4" />
+          <AlertTriangle className={sizing.icon.sm} />
           <AlertTitle>{t.enrollmentWizard.statusReviewRequired}</AlertTitle>
           <AlertDescription>
             {t.enrollmentWizard.requiresApproval}
@@ -96,7 +97,7 @@ export function StepConfirmation() {
         </Alert>
       ) : (
         <Alert>
-          <Clock className="h-4 w-4" />
+          <Clock className={sizing.icon.sm} />
           <AlertTitle>{t.enrollmentWizard.statusSubmitted}</AlertTitle>
           <AlertDescription>
             {t.enrollmentWizard.autoApproveIn.replace("{days}", String(daysUntilApproval))}
@@ -184,7 +185,7 @@ export function StepConfirmation() {
       {/* Download Error */}
       {downloadError && (
         <Alert variant="destructive">
-          <AlertTriangle className="h-4 w-4" />
+          <AlertTriangle className={sizing.icon.sm} />
           <AlertDescription>{downloadError}</AlertDescription>
         </Alert>
       )}
@@ -193,14 +194,14 @@ export function StepConfirmation() {
       <div className="flex flex-col sm:flex-row gap-3 justify-center">
         <Button onClick={handleDownloadPdf} disabled={isDownloading} className="gap-2">
           {isDownloading ? (
-            <Loader2 className="h-4 w-4 animate-spin" />
+            <Loader2 className={sizing.icon.sm + " animate-spin"} />
           ) : (
-            <Download className="h-4 w-4" />
+            <Download className={sizing.icon.sm} />
           )}
           {isDownloading ? t.common.loading || "Loading..." : t.enrollmentWizard.downloadPdf}
         </Button>
         <Button variant="outline" onClick={handlePrint} className="gap-2 bg-transparent">
-          <Printer className="h-4 w-4" />
+          <Printer className={sizing.icon.sm} />
           {t.enrollmentWizard.printDocument}
         </Button>
       </div>
@@ -209,13 +210,13 @@ export function StepConfirmation() {
       <div className="flex flex-col sm:flex-row gap-3 justify-center pt-6 border-t">
         <Button variant="ghost" asChild className="gap-2">
           <Link href="/enrollments">
-            <Home className="h-4 w-4" />
+            <Home className={sizing.icon.sm} />
             {t.enrollmentWizard.backToEnrollments}
           </Link>
         </Button>
         <Button variant="outline" asChild className="gap-2 bg-transparent">
           <Link href="/enrollments/new">
-            <ArrowRight className="h-4 w-4" />
+            <ArrowRight className={sizing.icon.sm} />
             {t.enrollmentWizard.startNewEnrollment}
           </Link>
         </Button>

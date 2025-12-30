@@ -15,6 +15,7 @@ import { StepConfirmation } from "./steps/step-confirmation"
 import { useI18n } from "@/components/i18n-provider"
 import { AlertCircle, Calendar, GraduationCap } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
+import { sizing } from "@/lib/design-tokens"
 
 interface EnrollmentWizardProps {
   schoolYearId?: string
@@ -172,14 +173,14 @@ function WizardContent({ schoolYearId, schoolYearName }: EnrollmentWizardProps) 
   }
 
   return (
-    <div className="max-w-4xl mx-auto">
+    <div className="w-full">
       <Card>
         <CardHeader className="space-y-4">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
             <div>
               <CardTitle className="text-2xl">{t.enrollmentWizard.title}</CardTitle>
               <CardDescription className="flex items-center gap-2 mt-1">
-                <Calendar className="h-4 w-4" />
+                <Calendar className={sizing.icon.sm} />
                 {schoolYearName || t.enrollmentWizard.schoolYear}
               </CardDescription>
             </div>
@@ -194,7 +195,7 @@ function WizardContent({ schoolYearId, schoolYearName }: EnrollmentWizardProps) 
 
           {error && (
             <Alert variant="destructive">
-              <AlertCircle className="h-4 w-4" />
+              <AlertCircle className={sizing.icon.sm} />
               <AlertDescription>{error}</AlertDescription>
             </Alert>
           )}
@@ -206,7 +207,7 @@ function WizardContent({ schoolYearId, schoolYearName }: EnrollmentWizardProps) 
             <div className="mb-6 p-3 bg-muted/50 rounded-lg border">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
-                  <GraduationCap className="h-4 w-4 text-primary" />
+                  <GraduationCap className={sizing.icon.sm + " text-primary"} />
                   <span className="text-sm font-medium">{data.gradeName}</span>
                   <Badge variant="outline" className="text-xs">
                     {data.level === "kindergarten" && t.enrollmentWizard.kindergarten}

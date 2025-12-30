@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button"
 import { useEnrollmentWizard } from "./wizard-context"
 import { useI18n } from "@/components/i18n-provider"
 import { ArrowLeft, ArrowRight, Save, Loader2, Send } from "lucide-react"
+import { sizing } from "@/lib/design-tokens"
 
 interface WizardNavigationProps {
   onSave?: () => Promise<void>
@@ -44,7 +45,7 @@ export function WizardNavigation({ onSave, onSubmit }: WizardNavigationProps) {
             disabled={isSubmitting}
             className="bg-transparent"
           >
-            <ArrowLeft className="h-4 w-4 mr-2" />
+            <ArrowLeft className={sizing.icon.sm + " mr-2"} />
             {t.enrollmentWizard.goBack}
           </Button>
         )}
@@ -60,7 +61,7 @@ export function WizardNavigation({ onSave, onSubmit }: WizardNavigationProps) {
             disabled={isSubmitting || !isDirty}
             className="bg-transparent"
           >
-            <Save className="h-4 w-4 mr-2" />
+            <Save className={sizing.icon.sm + " mr-2"} />
             {t.enrollmentWizard.saveDraft}
           </Button>
         )}
@@ -73,10 +74,10 @@ export function WizardNavigation({ onSave, onSubmit }: WizardNavigationProps) {
             disabled={isSubmitting || !canGoNext}
           >
             {isSubmitting ? (
-              <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+              <Loader2 className={sizing.icon.sm + " mr-2 animate-spin"} />
             ) : null}
             {t.enrollmentWizard.saveAndContinue}
-            <ArrowRight className="h-4 w-4 ml-2" />
+            <ArrowRight className={sizing.icon.sm + " ml-2"} />
           </Button>
         )}
 
@@ -89,9 +90,9 @@ export function WizardNavigation({ onSave, onSubmit }: WizardNavigationProps) {
             className="bg-primary"
           >
             {isSubmitting ? (
-              <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+              <Loader2 className={sizing.icon.sm + " mr-2 animate-spin"} />
             ) : (
-              <Send className="h-4 w-4 mr-2" />
+              <Send className={sizing.icon.sm + " mr-2"} />
             )}
             {t.enrollmentWizard.submitEnrollment}
           </Button>

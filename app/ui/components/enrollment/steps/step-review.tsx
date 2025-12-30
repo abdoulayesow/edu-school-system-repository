@@ -18,6 +18,7 @@ import {
   Edit2,
   AlertTriangle,
 } from "lucide-react"
+import { sizing } from "@/lib/design-tokens"
 
 export function StepReview() {
   const { t } = useI18n()
@@ -43,7 +44,7 @@ export function StepReview() {
       {/* Warning for adjusted fee */}
       {hasAdjustment && (
         <Alert variant="destructive">
-          <AlertTriangle className="h-4 w-4" />
+          <AlertTriangle className={sizing.icon.sm} />
           <AlertTitle>{t.enrollmentWizard.statusReviewRequired}</AlertTitle>
           <AlertDescription>
             {t.enrollmentWizard.requiresApproval}
@@ -56,7 +57,7 @@ export function StepReview() {
         <CardHeader className="pb-2">
           <div className="flex items-center justify-between">
             <CardTitle className="text-base flex items-center gap-2">
-              <BookOpen className="h-4 w-4" />
+              <BookOpen className={sizing.icon.sm} />
               {t.enrollmentWizard.gradeInfo}
             </CardTitle>
             <Button
@@ -65,7 +66,7 @@ export function StepReview() {
               size="sm"
               onClick={() => goToStep(1)}
             >
-              <Edit2 className="h-4 w-4 mr-1" />
+              <Edit2 className={sizing.icon.sm + " mr-1"} />
               {t.enrollmentWizard.editSection}
             </Button>
           </div>
@@ -95,7 +96,7 @@ export function StepReview() {
         <CardHeader className="pb-2">
           <div className="flex items-center justify-between">
             <CardTitle className="text-base flex items-center gap-2">
-              <User className="h-4 w-4" />
+              <User className={sizing.icon.sm} />
               {t.enrollmentWizard.studentDetails}
             </CardTitle>
             <Button
@@ -104,7 +105,7 @@ export function StepReview() {
               size="sm"
               onClick={() => goToStep(2)}
             >
-              <Edit2 className="h-4 w-4 mr-1" />
+              <Edit2 className={sizing.icon.sm + " mr-1"} />
               {t.enrollmentWizard.editSection}
             </Button>
           </div>
@@ -173,7 +174,7 @@ export function StepReview() {
         <CardHeader className="pb-2">
           <div className="flex items-center justify-between">
             <CardTitle className="text-base flex items-center gap-2">
-              <Users className="h-4 w-4" />
+              <Users className={sizing.icon.sm} />
               {t.enrollmentWizard.parentDetails}
             </CardTitle>
             <Button
@@ -182,7 +183,7 @@ export function StepReview() {
               size="sm"
               onClick={() => goToStep(2)}
             >
-              <Edit2 className="h-4 w-4 mr-1" />
+              <Edit2 className={sizing.icon.sm + " mr-1"} />
               {t.enrollmentWizard.editSection}
             </Button>
           </div>
@@ -263,7 +264,7 @@ export function StepReview() {
         <CardHeader className="pb-2">
           <div className="flex items-center justify-between">
             <CardTitle className="text-base flex items-center gap-2">
-              <Calculator className="h-4 w-4" />
+              <Calculator className={sizing.icon.sm} />
               {t.enrollmentWizard.paymentDetails}
             </CardTitle>
             <Button
@@ -272,7 +273,7 @@ export function StepReview() {
               size="sm"
               onClick={() => goToStep(3)}
             >
-              <Edit2 className="h-4 w-4 mr-1" />
+              <Edit2 className={sizing.icon.sm + " mr-1"} />
               {t.enrollmentWizard.editSection}
             </Button>
           </div>
@@ -343,7 +344,7 @@ export function StepReview() {
           <CardHeader className="pb-2">
             <div className="flex items-center justify-between">
               <CardTitle className="text-base flex items-center gap-2">
-                <FileText className="h-4 w-4" />
+                <FileText className={sizing.icon.sm} />
                 {t.enrollmentWizard.notesSection}
               </CardTitle>
               <Button
@@ -352,7 +353,7 @@ export function StepReview() {
                 size="sm"
                 onClick={() => goToStep(2)}
               >
-                <Edit2 className="h-4 w-4 mr-1" />
+                <Edit2 className={sizing.icon.sm + " mr-1"} />
                 {t.enrollmentWizard.editSection}
               </Button>
             </div>

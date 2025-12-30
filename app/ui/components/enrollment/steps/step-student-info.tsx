@@ -19,6 +19,7 @@ import { useI18n } from "@/components/i18n-provider"
 import { Search, Plus, X, User, UserCheck, Users, Loader2 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { useDebouncedCallback } from "use-debounce"
+import { sizing } from "@/lib/design-tokens"
 
 interface SearchResult {
   id: string
@@ -190,7 +191,7 @@ export function StepStudentInfo() {
   }
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-6">
       {/* Student Type Selection */}
       <div className="space-y-4">
         <h3 className="text-lg font-semibold">{t.enrollmentWizard.studentInfo}</h3>
@@ -207,7 +208,7 @@ export function StepStudentInfo() {
             )}
           >
             <RadioGroupItem value="new" id="new" />
-            <User className="h-5 w-5" />
+            <User className={sizing.toolbarIcon} />
             <span>{t.enrollmentWizard.newStudent}</span>
           </Label>
           <Label
@@ -218,7 +219,7 @@ export function StepStudentInfo() {
             )}
           >
             <RadioGroupItem value="returning" id="returning" />
-            <UserCheck className="h-5 w-5" />
+            <UserCheck className={sizing.toolbarIcon} />
             <span>{t.enrollmentWizard.returningStudent}</span>
           </Label>
         </RadioGroup>
@@ -231,7 +232,7 @@ export function StepStudentInfo() {
           {data.gradeId && (
             <div className="space-y-3">
               <div className="flex items-center gap-2">
-                <Users className="h-4 w-4 text-muted-foreground" />
+                <Users className={sizing.icon.sm + " text-muted-foreground"} />
                 <Label>{t.enrollmentWizard.suggestedStudents}</Label>
               </div>
               <p className="text-sm text-muted-foreground">
@@ -240,7 +241,7 @@ export function StepStudentInfo() {
 
               {isLoadingSuggestions && (
                 <div className="flex items-center justify-center py-4">
-                  <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
+                  <Loader2 className={sizing.toolbarIcon + " animate-spin text-muted-foreground"} />
                 </div>
               )}
 
@@ -269,7 +270,7 @@ export function StepStudentInfo() {
                           </p>
                         </div>
                         {data.studentId === student.id && (
-                          <UserCheck className="h-4 w-4 text-primary" />
+                          <UserCheck className={sizing.icon.sm + " text-primary"} />
                         )}
                       </div>
                     </button>
@@ -300,7 +301,7 @@ export function StepStudentInfo() {
           <div className="space-y-2">
             <Label>{t.enrollmentWizard.searchStudent}</Label>
             <div className="relative">
-              <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+              <Search className={sizing.icon.sm + " absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground"} />
               <Input
                 placeholder={t.enrollmentWizard.searchStudent}
                 value={searchQuery}
@@ -527,7 +528,7 @@ export function StepStudentInfo() {
             onClick={handleAddNote}
             className="bg-transparent"
           >
-            <Plus className="h-4 w-4 mr-1" />
+            <Plus className={sizing.icon.sm + " mr-1"} />
             {t.enrollmentWizard.addNote}
           </Button>
         </div>
@@ -560,7 +561,7 @@ export function StepStudentInfo() {
                   onClick={() => handleRemoveNote(index)}
                   className="text-destructive hover:text-destructive"
                 >
-                  <X className="h-4 w-4" />
+                  <X className={sizing.icon.sm} />
                 </Button>
               </div>
             </CardContent>

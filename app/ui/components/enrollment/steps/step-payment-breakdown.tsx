@@ -14,6 +14,7 @@ import { calculatePaymentSchedules } from "@/lib/enrollment/calculations"
 import { AlertTriangle, Calendar, Check } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { formatCurrency } from "@/lib/utils/currency"
+import { sizing } from "@/lib/design-tokens"
 
 export function StepPaymentBreakdown() {
   const { t } = useI18n()
@@ -149,7 +150,7 @@ export function StepPaymentBreakdown() {
 
               {isAdjusted && (
                 <Alert variant="destructive">
-                  <AlertTriangle className="h-4 w-4" />
+                  <AlertTriangle className={sizing.icon.sm} />
                   <AlertDescription>
                     {t.enrollmentWizard.requiresApproval}
                   </AlertDescription>
@@ -189,7 +190,7 @@ export function StepPaymentBreakdown() {
                 </CardHeader>
                 <CardContent>
                   <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                    <Calendar className="h-4 w-4" />
+                    <Calendar className={sizing.icon.sm} />
                     <span>
                       {t.enrollmentWizard.dueBy}{" "}
                       {new Date(schedule.dueDate).toLocaleDateString("fr-GN", {

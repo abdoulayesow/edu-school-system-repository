@@ -13,3 +13,9 @@ nul
 .anima/
 temp/
 design-ux/
+
+db-backups/
+package-lock.json
+yarn.lock
+pnpm-lock.json
+pnpm-lock.yaml

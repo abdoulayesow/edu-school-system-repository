@@ -4,6 +4,7 @@ import { cn } from "@/lib/utils"
 import { Check, BookOpen, User, Calculator, CreditCard, FileSearch, CheckCircle } from "lucide-react"
 import { useEnrollmentWizard } from "./wizard-context"
 import { useI18n } from "@/components/i18n-provider"
+import { sizing } from "@/lib/design-tokens"
 
 const stepIcons = [
   BookOpen,
@@ -68,9 +69,9 @@ export function WizardProgress() {
                   )}
                 >
                   {isCompleted ? (
-                    <Check className="h-5 w-5" />
+                    <Check className={sizing.toolbarIcon} />
                   ) : (
-                    <Icon className="h-5 w-5" />
+                    <Icon className={sizing.toolbarIcon} />
                   )}
                 </div>
                 <span

@@ -14,6 +14,7 @@ import { calculatePaymentSchedules } from "@/lib/enrollment/calculations"
 import { Banknote, Smartphone, Upload, Check, SkipForward, Info, Loader2 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { formatCurrency } from "@/lib/utils/currency"
+import { sizing } from "@/lib/design-tokens"
 
 export function StepPaymentTransaction() {
   const { t } = useI18n()
@@ -127,7 +128,7 @@ export function StepPaymentTransaction() {
             onClick={() => setShowPaymentForm(true)}
           >
             <CardContent className="pt-6 text-center">
-              <Banknote className="h-12 w-12 mx-auto text-primary mb-4" />
+              <Banknote className={sizing.icon.xl + " mx-auto text-primary mb-4"} />
               <CardTitle className="text-base">
                 {t.enrollmentWizard.makePayment}
               </CardTitle>
@@ -142,7 +143,7 @@ export function StepPaymentTransaction() {
             onClick={handleSkipPayment}
           >
             <CardContent className="pt-6 text-center">
-              <SkipForward className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
+              <SkipForward className={sizing.icon.xl + " mx-auto text-muted-foreground mb-4"} />
               <CardTitle className="text-base text-muted-foreground">
                 {t.enrollmentWizard.skipPayment}
               </CardTitle>
@@ -170,7 +171,7 @@ export function StepPaymentTransaction() {
                 )}
               >
                 <RadioGroupItem value="cash" id="cash" />
-                <Banknote className="h-5 w-5" />
+                <Banknote className={sizing.toolbarIcon} />
                 <span>{t.enrollmentWizard.cash}</span>
               </Label>
               <Label
@@ -182,7 +183,7 @@ export function StepPaymentTransaction() {
                 )}
               >
                 <RadioGroupItem value="orange_money" id="orange_money" />
-                <Smartphone className="h-5 w-5" />
+                <Smartphone className={sizing.toolbarIcon} />
                 <span>{t.enrollmentWizard.orangeMoney}</span>
               </Label>
             </RadioGroup>
@@ -224,7 +225,7 @@ export function StepPaymentTransaction() {
                   <div className="flex flex-wrap gap-2">
                     {coverage.coveredMonths.map((month) => (
                       <Badge key={month} variant="outline" className="gap-1">
-                        <Check className="h-3 w-3" />
+                        <Check className={sizing.icon.xs} />
                         {month}
                       </Badge>
                     ))}
@@ -263,7 +264,7 @@ export function StepPaymentTransaction() {
                 />
                 {isGeneratingReceipt && (
                   <div className="absolute right-3 top-1/2 -translate-y-1/2">
-                    <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
+                    <Loader2 className={sizing.icon.sm + " animate-spin text-muted-foreground"} />
                   </div>
                 )}
               </div>
@@ -305,7 +306,7 @@ export function StepPaymentTransaction() {
                 }}
               />
               <Button variant="outline" size="icon" className="bg-transparent shrink-0">
-                <Upload className="h-4 w-4" />
+                <Upload className={sizing.icon.sm} />
               </Button>
             </div>
             <p className="text-xs text-muted-foreground">
@@ -336,7 +337,7 @@ export function StepPaymentTransaction() {
 
       {/* Info Alert */}
       <Alert>
-        <Info className="h-4 w-4" />
+        <Info className={sizing.icon.sm} />
         <AlertDescription>{t.enrollmentWizard.paymentOptional}</AlertDescription>
       </Alert>
     </div>

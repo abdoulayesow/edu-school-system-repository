@@ -24,6 +24,7 @@ import {
 import { useI18n } from "@/components/i18n-provider"
 import { PageContainer } from "@/components/layout"
 import Link from "next/link"
+import { sizing } from "@/lib/design-tokens"
 
 interface Student {
   id: string
@@ -224,7 +225,7 @@ export default function StudentsPage() {
           <Card>
             <CardHeader className="pb-3">
               <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
-                <Users className="size-4" />
+                <Users className={sizing.icon.lg} />
                 {t.common.students}
               </CardTitle>
             </CardHeader>
@@ -240,7 +241,7 @@ export default function StudentsPage() {
           <Card>
             <CardHeader className="pb-3">
               <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
-                <Wallet className="size-4" />
+                <Wallet className={sizing.icon.lg} />
                 {t.students.balanceStatus}
               </CardTitle>
             </CardHeader>
@@ -261,7 +262,7 @@ export default function StudentsPage() {
           <Card>
             <CardHeader className="pb-3">
               <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
-                <CalendarCheck className="size-4" />
+                <CalendarCheck className={sizing.icon.lg} />
                 Présence
               </CardTitle>
             </CardHeader>

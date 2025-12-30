@@ -11,6 +11,7 @@ import { Users, Check } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { formatCurrency } from "@/lib/utils/currency"
 import type { SchoolLevel } from "@/lib/enrollment/types"
+import { sizing } from "@/lib/design-tokens"
 
 interface Grade {
   id: string
@@ -194,12 +195,12 @@ export function StepGradeSelection() {
                           <CardTitle className="text-base">{grade.name}</CardTitle>
                           {isSelected && (
                             <div className="h-6 w-6 rounded-full bg-primary flex items-center justify-center">
-                              <Check className="h-4 w-4 text-primary-foreground" />
+                              <Check className={sizing.icon.sm + " text-primary-foreground"} />
                             </div>
                           )}
                         </div>
                         <CardDescription className="flex items-center gap-1">
-                          <Users className="h-3 w-3" />
+                          <Users className={sizing.icon.xs} />
                           {t.enrollmentWizard.studentsEnrolled.replace(
                             "{count}",
                             String(grade.enrollmentCount)
