@@ -42,6 +42,7 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog"
 import { useI18n } from "@/components/i18n-provider"
+import { formatDateLong } from "@/lib/utils"
 import {
   Plus,
   CalendarDays,
@@ -72,7 +73,7 @@ interface SchoolYear {
 }
 
 export default function SchoolYearsPage() {
-  const { t } = useI18n()
+  const { t, locale } = useI18n()
   const [schoolYears, setSchoolYears] = useState<SchoolYear[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [isMounted, setIsMounted] = useState(false)
@@ -129,12 +130,8 @@ export default function SchoolYearsPage() {
     [schoolYears]
   )
 
-  function formatDate(dateStr: string) {
-    return new Date(dateStr).toLocaleDateString("fr-FR", {
-      year: "numeric",
-      month: "short",
-      day: "numeric",
-    })
+  function formatDisplayDate(dateStr: string) {
+    return formatDateLong(dateStr, locale)
   }
 
   function formatDateForInput(dateStr: string) {
@@ -400,7 +397,7 @@ export default function SchoolYearsPage() {
             </div>
             {activeYear && (
               <p className="text-xs text-muted-foreground mt-1">
-                {activeYear.gradesCount} {t.common.level.toLowerCase()}s, {activeYear.enrollmentsCount} {t.common.students}
+                {activeYear.gradesCount} {t.admin.grades.toLowerCase()}, {activeYear.enrollmentsCount} {t.common.students}
               </p>
             )}
           </CardContent>
@@ -417,7 +414,7 @@ export default function SchoolYearsPage() {
             </div>
             {newYear && (
               <p className="text-xs text-muted-foreground mt-1">
-                {newYear.gradesCount} {t.common.level.toLowerCase()}s configured
+                {newYear.gradesCount} {t.admin.grades.toLowerCase()} {t.admin.configured}
               </p>
             )}
           </CardContent>
@@ -431,7 +428,7 @@ export default function SchoolYearsPage() {
           <CardContent>
             <div className="text-2xl font-bold">{schoolYears.length}</div>
             <p className="text-xs text-muted-foreground mt-1">
-              {schoolYears.filter((sy) => sy.status === "passed").length} passed
+              {schoolYears.filter((sy) => sy.status === "passed").length} {t.admin.passed}
             </p>
           </CardContent>
         </Card>
@@ -462,11 +459,11 @@ export default function SchoolYearsPage() {
                   <TableHead>{t.common.status}</TableHead>
                   <TableHead className="text-center">
                     <GraduationCap className="h-4 w-4 inline mr-1" />
-                    Grades
+                    {t.admin.grades}
                   </TableHead>
                   <TableHead className="text-center">
                     <Users className="h-4 w-4 inline mr-1" />
-                    Students
+                    {t.admin.students}
                   </TableHead>
                   <TableHead className="text-right">{t.common.actions}</TableHead>
                 </TableRow>
@@ -475,8 +472,8 @@ export default function SchoolYearsPage() {
                 {schoolYears.map((year) => (
                   <TableRow key={year.id}>
                     <TableCell className="font-medium">{year.name}</TableCell>
-                    <TableCell>{formatDate(year.startDate)}</TableCell>
-                    <TableCell>{formatDate(year.endDate)}</TableCell>
+                    <TableCell>{formatDisplayDate(year.startDate)}</TableCell>
+                    <TableCell>{formatDisplayDate(year.endDate)}</TableCell>
                     <TableCell>{getStatusBadge(year.status)}</TableCell>
                     <TableCell className="text-center">{year.gradesCount}</TableCell>
                     <TableCell className="text-center">{year.enrollmentsCount}</TableCell>

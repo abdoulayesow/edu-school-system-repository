@@ -32,6 +32,7 @@ import {
 } from "@/components/ui/table"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { useI18n } from "@/components/i18n-provider"
+import { formatDateLong } from "@/lib/utils"
 import {
   UserPlus,
   Users,
@@ -71,7 +72,7 @@ interface Invitation {
 const ROLE_KEYS = ["director", "academic_director", "secretary", "accountant", "teacher"] as const
 
 export default function AdminUsersPage() {
-  const { t } = useI18n()
+  const { t, locale } = useI18n()
   const [users, setUsers] = useState<User[]>([])
   const [invitations, setInvitations] = useState<Invitation[]>([])
   const [isLoading, setIsLoading] = useState(true)
@@ -213,12 +214,8 @@ export default function AdminUsersPage() {
     )
   }
 
-  function formatDate(dateStr: string) {
-    return new Date(dateStr).toLocaleDateString("fr-FR", {
-      year: "numeric",
-      month: "short",
-      day: "numeric",
-    })
+  function formatDisplayDate(dateStr: string) {
+    return formatDateLong(dateStr, locale)
   }
 
   if (!isMounted) {
@@ -346,7 +343,7 @@ export default function AdminUsersPage() {
                         <TableCell>{invitation.name || "-"}</TableCell>
                         <TableCell>{getRoleBadge(invitation.role)}</TableCell>
                         <TableCell>{getStatusBadge(invitation.status)}</TableCell>
-                        <TableCell>{formatDate(invitation.expiresAt)}</TableCell>
+                        <TableCell>{formatDisplayDate(invitation.expiresAt)}</TableCell>
                         <TableCell>{invitation.inviter.name || t.admin.unknown}</TableCell>
                         <TableCell className="text-right">
                           {invitation.status === "pending" && (
@@ -451,7 +448,7 @@ export default function AdminUsersPage() {
               <Input
                 id="email"
                 type="email"
-                placeholder="user@example.com"
+                placeholder={t.admin.emailPlaceholder}
                 value={inviteForm.email}
                 onChange={(e) => setInviteForm({ ...inviteForm, email: e.target.value })}
               />
@@ -460,7 +457,7 @@ export default function AdminUsersPage() {
               <Label htmlFor="name">{t.admin.inviteeName}</Label>
               <Input
                 id="name"
-                placeholder="John Doe"
+                placeholder={t.admin.namePlaceholder}
                 value={inviteForm.name}
                 onChange={(e) => setInviteForm({ ...inviteForm, name: e.target.value })}
               />

@@ -382,33 +382,33 @@ export default function TeachersPage() {
       <div className="grid gap-4 md:grid-cols-3 mb-6">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Teachers</CardTitle>
+            <CardTitle className="text-sm font-medium">{t.admin.teachers}</CardTitle>
             <Users className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{teachers.length}</div>
             <p className="text-xs text-muted-foreground mt-1">
-              {teachers.filter((t) => t.workload.assignmentsCount > 0).length} with assignments
+              {teachers.filter((t) => t.workload.assignmentsCount > 0).length} {t.admin.withAssignments}
             </p>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Class Assignments</CardTitle>
+            <CardTitle className="text-sm font-medium">{t.admin.classAssignments}</CardTitle>
             <BookOpen className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{assignments.length}</div>
             <p className="text-xs text-muted-foreground mt-1">
-              Across {assignmentsByGrade.length} grades
+              {t.admin.acrossGrades.replace("{count}", String(assignmentsByGrade.length))}
             </p>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Unassigned</CardTitle>
+            <CardTitle className="text-sm font-medium">{t.admin.unassigned}</CardTitle>
             <AlertCircle className="h-4 w-4 text-orange-500" />
           </CardHeader>
           <CardContent>
@@ -416,7 +416,7 @@ export default function TeachersPage() {
               {grades.reduce((acc, g: any) => acc + (g.subjects?.length || 0), 0) - assignments.length}
             </div>
             <p className="text-xs text-muted-foreground mt-1">
-              Subjects need teachers
+              {t.admin.subjectsNeedTeachers}
             </p>
           </CardContent>
         </Card>
@@ -460,11 +460,11 @@ export default function TeachersPage() {
                     <Table>
                       <TableHeader>
                         <TableRow>
-                          <TableHead>Subject</TableHead>
-                          <TableHead className="text-center">Coefficient</TableHead>
-                          <TableHead className="text-center">Hours/Week</TableHead>
-                          <TableHead>Teacher</TableHead>
-                          <TableHead className="text-right">Actions</TableHead>
+                          <TableHead>{t.admin.subjects}</TableHead>
+                          <TableHead className="text-center">{t.admin.coefficient}</TableHead>
+                          <TableHead className="text-center">{t.admin.hoursWeek}</TableHead>
+                          <TableHead>{t.common.teacher}</TableHead>
+                          <TableHead className="text-right">{t.common.actions}</TableHead>
                         </TableRow>
                       </TableHeader>
                       <TableBody>
@@ -554,7 +554,7 @@ export default function TeachersPage() {
                       </span>
                       {teacher.workload.assignmentsCount === 0 && (
                         <Badge variant="outline" className="text-muted-foreground">
-                          No classes
+                          {t.admin.noClasses}
                         </Badge>
                       )}
                     </CardTitle>
@@ -581,7 +581,7 @@ export default function TeachersPage() {
                       <div className="flex items-center justify-between text-sm">
                         <span className="flex items-center gap-2 text-muted-foreground">
                           <BookOpen className="h-4 w-4" />
-                          Classes
+                          {t.admin.classes}
                         </span>
                         <span className="font-medium">
                           {teacher.workload.assignmentsCount}
@@ -590,7 +590,7 @@ export default function TeachersPage() {
 
                       {teacher.classAssignments.length > 0 && (
                         <div className="pt-2 border-t">
-                          <p className="text-xs text-muted-foreground mb-2">Assigned subjects:</p>
+                          <p className="text-xs text-muted-foreground mb-2">{t.admin.assignedSubjects}:</p>
                           <div className="flex flex-wrap gap-1">
                             {teacher.classAssignments.slice(0, 5).map((ca) => (
                               <Badge key={ca.id} variant="secondary" className="text-xs">
@@ -644,7 +644,7 @@ export default function TeachersPage() {
               onValueChange={(v) => setAssignForm({ teacherProfileId: v })}
             >
               <SelectTrigger>
-                <SelectValue placeholder="Select a teacher" />
+                <SelectValue placeholder={t.admin.selectTeacher} />
               </SelectTrigger>
               <SelectContent>
                 {teachers.map((teacher) => (
@@ -697,26 +697,26 @@ export default function TeachersPage() {
                   </div>
                   <div className="text-center">
                     <div className="text-2xl font-bold">{teacherSchedule.workload.assignmentsCount}</div>
-                    <div className="text-xs text-muted-foreground">Classes</div>
+                    <div className="text-xs text-muted-foreground">{t.admin.classes}</div>
                   </div>
                   <div className="text-center">
                     <div className="text-2xl font-bold">{teacherSchedule.assignmentsByGrade.length}</div>
-                    <div className="text-xs text-muted-foreground">Grades</div>
+                    <div className="text-xs text-muted-foreground">{t.admin.grades}</div>
                   </div>
                 </div>
 
                 {teacherSchedule.assignmentsByGrade.length === 0 ? (
                   <p className="text-center text-muted-foreground py-8">
-                    No assignments for this school year
+                    {t.admin.noAssignmentsForYear}
                   </p>
                 ) : (
                   <Table>
                     <TableHeader>
                       <TableRow>
-                        <TableHead>Grade</TableHead>
-                        <TableHead>Subject</TableHead>
-                        <TableHead className="text-center">Coef</TableHead>
-                        <TableHead className="text-center">Hours</TableHead>
+                        <TableHead>{t.admin.grades}</TableHead>
+                        <TableHead>{t.admin.subjects}</TableHead>
+                        <TableHead className="text-center">{t.admin.coefficientShort}</TableHead>
+                        <TableHead className="text-center">{t.admin.hoursWeek}</TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
@@ -761,7 +761,7 @@ export default function TeachersPage() {
           <AlertDialogHeader>
             <AlertDialogTitle>{t.admin.removeAssignment}</AlertDialogTitle>
             <AlertDialogDescription>
-              Are you sure you want to remove this teacher assignment? This action cannot be undone.
+              {t.admin.removeAssignmentConfirm}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>

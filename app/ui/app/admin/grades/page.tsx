@@ -117,16 +117,16 @@ interface Subject {
 const LEVELS = ["all", "kindergarten", "elementary", "college", "high_school"] as const
 type Level = (typeof LEVELS)[number]
 
-const LEVEL_LABELS: Record<Level, string> = {
-  all: "All",
-  kindergarten: "Kindergarten",
-  elementary: "Elementary",
-  college: "College",
-  high_school: "High School",
-}
-
 export default function GradesPage() {
   const { t, locale } = useI18n()
+
+  const LEVEL_LABELS: Record<Level, string> = {
+    all: t.common.all,
+    kindergarten: t.admin.levelKindergarten,
+    elementary: t.admin.levelElementary,
+    college: t.admin.levelCollege,
+    high_school: t.admin.levelHighSchool,
+  }
   const [schoolYears, setSchoolYears] = useState<SchoolYear[]>([])
   const [selectedYearId, setSelectedYearId] = useState<string>("")
   const [grades, setGrades] = useState<Grade[]>([])
@@ -741,15 +741,15 @@ export default function GradesPage() {
                 <div className="grid grid-cols-3 gap-2 text-center">
                   <div className="bg-muted rounded p-2">
                     <div className="text-lg font-semibold">{grade._count.enrollments}</div>
-                    <div className="text-xs text-muted-foreground">Students</div>
+                    <div className="text-xs text-muted-foreground">{t.admin.students}</div>
                   </div>
                   <div className="bg-muted rounded p-2">
                     <div className="text-lg font-semibold">{grade.rooms.length}</div>
-                    <div className="text-xs text-muted-foreground">Rooms</div>
+                    <div className="text-xs text-muted-foreground">{t.admin.rooms}</div>
                   </div>
                   <div className="bg-muted rounded p-2">
                     <div className="text-lg font-semibold">{grade.subjects.length}</div>
-                    <div className="text-xs text-muted-foreground">Subjects</div>
+                    <div className="text-xs text-muted-foreground">{t.admin.subjects}</div>
                   </div>
                 </div>
 
@@ -780,7 +780,7 @@ export default function GradesPage() {
                   <CollapsibleContent className="mt-2 space-y-2">
                     {grade.rooms.length === 0 ? (
                       <p className="text-sm text-muted-foreground text-center py-2">
-                        No rooms configured
+                        {t.admin.noRoomsConfigured}
                       </p>
                     ) : (
                       grade.rooms.map((room) => (
@@ -920,15 +920,15 @@ export default function GradesPage() {
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="kindergarten">Kindergarten</SelectItem>
-                    <SelectItem value="elementary">Elementary</SelectItem>
-                    <SelectItem value="college">College</SelectItem>
-                    <SelectItem value="high_school">High School</SelectItem>
+                    <SelectItem value="kindergarten">{t.admin.levelKindergarten}</SelectItem>
+                    <SelectItem value="elementary">{t.admin.levelElementary}</SelectItem>
+                    <SelectItem value="college">{t.admin.levelCollege}</SelectItem>
+                    <SelectItem value="high_school">{t.admin.levelHighSchool}</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
               <div className="grid gap-2">
-                <Label htmlFor="grade-order">Order</Label>
+                <Label htmlFor="grade-order">{t.admin.order}</Label>
                 <Input
                   id="grade-order"
                   type="number"
@@ -945,10 +945,10 @@ export default function GradesPage() {
                   onValueChange={(v) => setGradeForm({ ...gradeForm, series: v })}
                 >
                   <SelectTrigger>
-                    <SelectValue placeholder="Select series (optional)" />
+                    <SelectValue placeholder={t.admin.selectSeriesOptional} />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">None</SelectItem>
+                    <SelectItem value="">{t.admin.none}</SelectItem>
                     <SelectItem value="SM">{t.admin.seriesSM}</SelectItem>
                     <SelectItem value="SS">{t.admin.seriesSS}</SelectItem>
                     <SelectItem value="SE">{t.admin.seriesSE}</SelectItem>
@@ -982,7 +982,7 @@ export default function GradesPage() {
                 checked={gradeForm.isEnabled}
                 onCheckedChange={(checked) => setGradeForm({ ...gradeForm, isEnabled: checked })}
               />
-              <Label htmlFor="grade-enabled">Enabled for enrollment</Label>
+              <Label htmlFor="grade-enabled">{t.admin.enabledForEnrollment}</Label>
             </div>
           </div>
           <DialogFooter>
@@ -1014,7 +1014,7 @@ export default function GradesPage() {
                 <Label htmlFor="room-name">{t.admin.roomName}</Label>
                 <Input
                   id="room-name"
-                  placeholder="A, B, C..."
+                  placeholder={t.admin.roomNamePlaceholder}
                   value={roomForm.name}
                   onChange={(e) => setRoomForm({ ...roomForm, name: e.target.value })}
                 />
@@ -1023,7 +1023,7 @@ export default function GradesPage() {
                 <Label htmlFor="room-display">{t.admin.roomDisplayName}</Label>
                 <Input
                   id="room-display"
-                  placeholder="7A, 7B..."
+                  placeholder={t.admin.roomDisplayNamePlaceholder}
                   value={roomForm.displayName}
                   onChange={(e) => setRoomForm({ ...roomForm, displayName: e.target.value })}
                 />
@@ -1044,7 +1044,7 @@ export default function GradesPage() {
                 checked={roomForm.isActive}
                 onCheckedChange={(checked) => setRoomForm({ ...roomForm, isActive: checked })}
               />
-              <Label htmlFor="room-active">Active</Label>
+              <Label htmlFor="room-active">{t.admin.active}</Label>
             </div>
           </div>
           <DialogFooter>
@@ -1072,7 +1072,7 @@ export default function GradesPage() {
             {/* Current Subjects */}
             {selectedGrade && selectedGrade.subjects.length > 0 && (
               <div className="mb-6">
-                <h4 className="text-sm font-medium mb-2">Assigned Subjects</h4>
+                <h4 className="text-sm font-medium mb-2">{t.admin.assignedSubjects}</h4>
                 <div className="space-y-2 max-h-48 overflow-y-auto">
                   {selectedGrade.subjects.map((gs) => (
                     <div
@@ -1087,11 +1087,11 @@ export default function GradesPage() {
                           ({gs.subject.code})
                         </span>
                         <span className="text-muted-foreground ml-2">
-                          Coef: {gs.coefficient}
+                          {t.admin.coefficientShort}: {gs.coefficient}
                         </span>
                         {gs.hoursPerWeek && (
                           <span className="text-muted-foreground ml-2">
-                            {gs.hoursPerWeek}h/week
+                            {gs.hoursPerWeek}{t.admin.hoursPerWeekShort}
                           </span>
                         )}
                       </div>
@@ -1114,16 +1114,16 @@ export default function GradesPage() {
             {/* Add New Subject */}
             {canEdit && (
               <div className="border-t pt-4">
-                <h4 className="text-sm font-medium mb-2">Add Subject</h4>
+                <h4 className="text-sm font-medium mb-2">{t.admin.addSubject}</h4>
                 <div className="grid gap-4">
                   <div className="grid gap-2">
-                    <Label>Subject</Label>
+                    <Label>{t.admin.subjects}</Label>
                     <Select
                       value={subjectForm.subjectId}
                       onValueChange={(v) => setSubjectForm({ ...subjectForm, subjectId: v })}
                     >
                       <SelectTrigger>
-                        <SelectValue placeholder="Select a subject" />
+                        <SelectValue placeholder={t.admin.selectTeacher} />
                       </SelectTrigger>
                       <SelectContent>
                         {subjects
@@ -1138,7 +1138,7 @@ export default function GradesPage() {
                   </div>
                   <div className="grid grid-cols-2 gap-4">
                     <div className="grid gap-2">
-                      <Label>Coefficient</Label>
+                      <Label>{t.admin.coefficient}</Label>
                       <Input
                         type="number"
                         value={subjectForm.coefficient}
@@ -1146,7 +1146,7 @@ export default function GradesPage() {
                       />
                     </div>
                     <div className="grid gap-2">
-                      <Label>Hours/Week</Label>
+                      <Label>{t.admin.hoursWeek}</Label>
                       <Input
                         type="number"
                         value={subjectForm.hoursPerWeek}
@@ -1156,7 +1156,7 @@ export default function GradesPage() {
                   </div>
                   <Button onClick={handleAssignSubject} disabled={isSubmitting || !subjectForm.subjectId}>
                     {isSubmitting && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
-                    Add Subject
+                    {t.admin.addSubject}
                   </Button>
                 </div>
               </div>
@@ -1213,7 +1213,7 @@ export default function GradesPage() {
                   {t.admin.deleteRoomWithStudents.replace("{count}", String(deleteRoomHasStudents))}
                 </span>
               ) : (
-                "Are you sure you want to delete this room? This action cannot be undone."
+                t.admin.deleteGradeConfirmation
               )}
             </AlertDialogDescription>
           </AlertDialogHeader>
