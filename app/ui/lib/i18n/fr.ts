@@ -418,6 +418,17 @@ export const fr = {
     irreversibleAction: "Action irréversible",
     closePeriodWarning: "La clôture de période verrouille toutes les transactions et empêche toute modification ultérieure. Assurez-vous que toutes les vérifications sont complètes.",
     closeFinancialPeriod: "Clôturer la période financière",
+
+    // New keys for Payments page redesign
+    cashDeposit: "Dépôt en caisse",
+    paymentsToday: "Paiements d'aujourd'hui",
+    pendingConfirmation: "En attente de confirmation",
+    confirmedThisWeek: "Confirmés cette semaine",
+    filterByGrade: "Filtrer par classe",
+    allGrades: "Toutes les classes",
+    filterPayments: "Filtrer les paiements",
+    paymentsCount: "paiements",
+    confirmedPercent: "confirmés",
   },
 
   // Attendance

@@ -126,9 +126,16 @@ export function NavSidebar() {
               <nav className="flex flex-col gap-1">
                 {visibleSubItems.map((item) => {
                   const Icon = item.icon
+                  // Check for exact match first, then prefix match only if no sibling has a more specific match
+                  const hasMoreSpecificSiblingMatch = visibleSubItems.some(
+                    (other) =>
+                      other.href !== item.href &&
+                      other.href.startsWith(item.href) &&
+                      pathname.startsWith(other.href)
+                  )
                   const isActive =
                     pathname === item.href ||
-                    pathname.startsWith(item.href + "/")
+                    (pathname.startsWith(item.href + "/") && !hasMoreSpecificSiblingMatch)
 
                   if (isSidebarCollapsed) {
                     return (

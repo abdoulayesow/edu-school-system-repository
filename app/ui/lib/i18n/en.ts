@@ -420,6 +420,17 @@ export const en: TranslationKeys = {
     irreversibleAction: "Irreversible Action",
     closePeriodWarning: "Closing the period locks all transactions and prevents any further modifications. Make sure all verifications are complete.",
     closeFinancialPeriod: "Close Financial Period",
+
+    // New keys for Payments page redesign
+    cashDeposit: "Cash Deposit",
+    paymentsToday: "Today's Payments",
+    pendingConfirmation: "Pending Confirmation",
+    confirmedThisWeek: "Confirmed This Week",
+    filterByGrade: "Filter by grade",
+    allGrades: "All grades",
+    filterPayments: "Filter payments",
+    paymentsCount: "payments",
+    confirmedPercent: "confirmed",
   },
 
   // Attendance

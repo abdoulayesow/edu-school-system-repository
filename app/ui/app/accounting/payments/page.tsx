@@ -1,13 +1,21 @@
 "use client"
 
-import { useState, useEffect, useCallback } from "react"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { useState, useEffect, useCallback, useRef } from "react"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog"
 import {
   CheckCircle2,
   Clock,
@@ -18,6 +26,13 @@ import {
   ChevronLeft,
   ChevronRight,
   Filter,
+  Plus,
+  CalendarCheck,
+  Wallet,
+  Search,
+  X,
+  User,
+  Upload,
 } from "lucide-react"
 import { useI18n } from "@/components/i18n-provider"
 import { PageContainer } from "@/components/layout"
@@ -57,6 +72,37 @@ interface PaginationInfo {
   hasMore: boolean
 }
 
+interface PaymentStats {
+  today: { count: number; amount: number }
+  pending: { count: number; amount: number }
+  confirmedThisWeek: { count: number; amount: number }
+  byMethod: {
+    cash: { count: number; amount: number }
+    orange_money: { count: number; amount: number }
+  }
+}
+
+interface Grade {
+  id: string
+  name: string
+}
+
+interface StudentSearchResult {
+  id: string
+  studentNumber: string
+  firstName: string
+  lastName: string
+  fullName: string
+  photoUrl?: string
+  grade?: { id: string; name: string }
+  enrollmentId?: string
+  balanceInfo?: {
+    tuitionFee: number
+    totalPaid: number
+    remainingBalance: number
+  }
+}
+
 export default function PaymentsPage() {
   const { t, locale } = useI18n()
   const [payments, setPayments] = useState<Payment[]>([])
@@ -68,16 +114,42 @@ export default function PaymentsPage() {
   })
   const [isLoading, setIsLoading] = useState(true)
 
+  // Stats state
+  const [stats, setStats] = useState<PaymentStats | null>(null)
+  const [isLoadingStats, setIsLoadingStats] = useState(true)
+
+  // Grades for filter
+  const [grades, setGrades] = useState<Grade[]>([])
+
   // Filter state
   const [statusFilter, setStatusFilter] = useState<string>("all")
   const [methodFilter, setMethodFilter] = useState<string>("all")
+  const [gradeFilter, setGradeFilter] = useState<string>("all")
   const [startDate, setStartDate] = useState("")
   const [endDate, setEndDate] = useState("")
 
   // Dialog state
   const [openDepositDialog, setOpenDepositDialog] = useState(false)
   const [openReviewDialog, setOpenReviewDialog] = useState(false)
+  const [openRecordPayment, setOpenRecordPayment] = useState(false)
   const [selectedPayment, setSelectedPayment] = useState<Payment | null>(null)
+
+  // Student search state for Record Payment
+  const [studentSearchQuery, setStudentSearchQuery] = useState("")
+  const [studentSearchResults, setStudentSearchResults] = useState<StudentSearchResult[]>([])
+  const [isSearchingStudents, setIsSearchingStudents] = useState(false)
+  const [showSearchResults, setShowSearchResults] = useState(false)
+  const [selectedStudent, setSelectedStudent] = useState<StudentSearchResult | null>(null)
+  const searchTimeoutRef = useRef<NodeJS.Timeout | null>(null)
+  const searchContainerRef = useRef<HTMLDivElement>(null)
+
+  // Payment form state
+  const [paymentAmount, setPaymentAmount] = useState("")
+  const [paymentMethod, setPaymentMethod] = useState<"cash" | "orange_money" | "">("")
+  const [receiptNumber, setReceiptNumber] = useState("")
+  const [transactionRef, setTransactionRef] = useState("")
+  const [paymentNotes, setPaymentNotes] = useState("")
+  const [isSubmittingPayment, setIsSubmittingPayment] = useState(false)
 
   // Fetch payments with filters
   const fetchPayments = useCallback(async (offset: number = 0) => {
@@ -118,6 +190,52 @@ export default function PaymentsPage() {
     fetchPayments(0)
   }, [fetchPayments])
 
+  // Fetch stats
+  useEffect(() => {
+    async function fetchStats() {
+      setIsLoadingStats(true)
+      try {
+        const response = await fetch("/api/payments/stats")
+        if (response.ok) {
+          const data = await response.json()
+          setStats(data)
+        }
+      } catch (err) {
+        console.error("Error fetching stats:", err)
+      } finally {
+        setIsLoadingStats(false)
+      }
+    }
+    fetchStats()
+  }, [])
+
+  // Fetch grades for filter
+  useEffect(() => {
+    async function fetchGrades() {
+      try {
+        const response = await fetch("/api/grades")
+        if (response.ok) {
+          const data = await response.json()
+          setGrades(data.grades || [])
+        }
+      } catch (err) {
+        console.error("Error fetching grades:", err)
+      }
+    }
+    fetchGrades()
+  }, [])
+
+  // Click outside handler for student search
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (searchContainerRef.current && !searchContainerRef.current.contains(event.target as Node)) {
+        setShowSearchResults(false)
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside)
+    return () => document.removeEventListener("mousedown", handleClickOutside)
+  }, [])
+
   // Handle pagination
   const handleNextPage = () => {
     if (pagination.hasMore) {
@@ -147,6 +265,130 @@ export default function PaymentsPage() {
     setSelectedPayment(payment)
     setOpenReviewDialog(true)
   }
+
+  // Search students with debounce
+  const searchStudents = useCallback(async (query: string) => {
+    if (query.length < 2) {
+      setStudentSearchResults([])
+      setShowSearchResults(false)
+      return
+    }
+
+    setIsSearchingStudents(true)
+    try {
+      const response = await fetch(`/api/students/search?q=${encodeURIComponent(query)}&limit=10`)
+      if (!response.ok) throw new Error("Failed to search students")
+      const data = await response.json()
+      const activeStudents = (data.students || []).filter(
+        (s: StudentSearchResult) => s.enrollmentId && s.balanceInfo
+      )
+      setStudentSearchResults(activeStudents)
+      setShowSearchResults(true)
+    } catch (err) {
+      console.error("Error searching students:", err)
+      setStudentSearchResults([])
+    } finally {
+      setIsSearchingStudents(false)
+    }
+  }, [])
+
+  // Handle search input change with debounce
+  const handleSearchChange = useCallback((value: string) => {
+    setStudentSearchQuery(value)
+    if (searchTimeoutRef.current) {
+      clearTimeout(searchTimeoutRef.current)
+    }
+    searchTimeoutRef.current = setTimeout(() => {
+      searchStudents(value)
+    }, 300)
+  }, [searchStudents])
+
+  // Handle student selection
+  const handleSelectStudent = useCallback((student: StudentSearchResult) => {
+    setSelectedStudent(student)
+    setStudentSearchQuery("")
+    setShowSearchResults(false)
+    setStudentSearchResults([])
+  }, [])
+
+  // Clear selected student
+  const handleClearStudent = useCallback(() => {
+    setSelectedStudent(null)
+    setStudentSearchQuery("")
+  }, [])
+
+  // Reset payment form
+  const resetPaymentForm = useCallback(() => {
+    setSelectedStudent(null)
+    setStudentSearchQuery("")
+    setStudentSearchResults([])
+    setPaymentAmount("")
+    setPaymentMethod("")
+    setReceiptNumber("")
+    setTransactionRef("")
+    setPaymentNotes("")
+  }, [])
+
+  // Handle dialog close
+  const handleRecordPaymentDialogChange = useCallback((open: boolean) => {
+    setOpenRecordPayment(open)
+    if (!open) {
+      resetPaymentForm()
+    }
+  }, [resetPaymentForm])
+
+  // Submit payment
+  const handleSubmitPayment = useCallback(async () => {
+    if (!selectedStudent?.enrollmentId || !paymentAmount || !paymentMethod || !receiptNumber) {
+      return
+    }
+
+    const amount = parseFloat(paymentAmount)
+    if (isNaN(amount) || amount <= 0) {
+      return
+    }
+
+    if (selectedStudent.balanceInfo && amount > selectedStudent.balanceInfo.remainingBalance) {
+      alert(`Le montant dépasse le solde restant de ${formatAmount(selectedStudent.balanceInfo.remainingBalance)}`)
+      return
+    }
+
+    setIsSubmittingPayment(true)
+    try {
+      const response = await fetch("/api/payments", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          enrollmentId: selectedStudent.enrollmentId,
+          amount,
+          method: paymentMethod,
+          receiptNumber,
+          transactionRef: transactionRef || undefined,
+          notes: paymentNotes || undefined,
+        }),
+      })
+
+      if (!response.ok) {
+        const error = await response.json()
+        throw new Error(error.message || "Failed to record payment")
+      }
+
+      // Refresh payments list and stats
+      fetchPayments(0)
+      const statsResponse = await fetch("/api/payments/stats")
+      if (statsResponse.ok) {
+        const statsData = await statsResponse.json()
+        setStats(statsData)
+      }
+
+      handleRecordPaymentDialogChange(false)
+    } catch (err) {
+      console.error("Error recording payment:", err)
+      alert(err instanceof Error ? err.message : "Erreur lors de l'enregistrement du paiement")
+    } finally {
+      setIsSubmittingPayment(false)
+    }
+  }, [selectedStudent, paymentAmount, paymentMethod, receiptNumber, transactionRef, paymentNotes, handleRecordPaymentDialogChange, fetchPayments])
 
   const getStatusBadge = (status: string) => {
     switch (status) {
@@ -225,28 +467,347 @@ export default function PaymentsPage() {
         <p className="text-muted-foreground">{t.accounting.paymentsPageSubtitle}</p>
       </div>
 
-      <Card>
-        <CardHeader>
-          <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-            <div>
-              <CardTitle>{t.accounting.paymentTransactions}</CardTitle>
-              <CardDescription>
-                {isLoading ? "Chargement..." : `${pagination.total} transactions`}
-              </CardDescription>
-            </div>
-          </div>
+      {/* Summary Cards */}
+      <div className="grid gap-4 md:grid-cols-4 mb-6">
+        {/* Today's Payments */}
+        <Card>
+          <CardHeader className="pb-3">
+            <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
+              <CalendarCheck className="size-4 text-primary" />
+              {t.accounting.paymentsToday}
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            {isLoadingStats ? (
+              <Loader2 className="size-5 animate-spin text-muted-foreground" />
+            ) : (
+              <>
+                <div className="text-2xl font-bold">{stats?.today.count || 0}</div>
+                <p className="text-xs text-muted-foreground">
+                  {formatAmount(stats?.today.amount || 0)}
+                </p>
+              </>
+            )}
+          </CardContent>
+        </Card>
 
-          {/* Filters */}
-          <div className="flex flex-wrap items-end gap-4 pt-4 border-t">
+        {/* Pending Confirmation */}
+        <Card>
+          <CardHeader className="pb-3">
+            <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
+              <Clock className="size-4 text-yellow-500" />
+              {t.accounting.pendingConfirmation}
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            {isLoadingStats ? (
+              <Loader2 className="size-5 animate-spin text-muted-foreground" />
+            ) : (
+              <>
+                <div className="text-2xl font-bold text-yellow-600">{stats?.pending.count || 0}</div>
+                <p className="text-xs text-muted-foreground">
+                  {formatAmount(stats?.pending.amount || 0)}
+                </p>
+              </>
+            )}
+          </CardContent>
+        </Card>
+
+        {/* Confirmed This Week */}
+        <Card>
+          <CardHeader className="pb-3">
+            <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
+              <CheckCircle2 className="size-4 text-green-500" />
+              {t.accounting.confirmedThisWeek}
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            {isLoadingStats ? (
+              <Loader2 className="size-5 animate-spin text-muted-foreground" />
+            ) : (
+              <>
+                <div className="text-2xl font-bold text-green-600">{stats?.confirmedThisWeek.count || 0}</div>
+                <p className="text-xs text-muted-foreground">
+                  {formatAmount(stats?.confirmedThisWeek.amount || 0)}
+                </p>
+              </>
+            )}
+          </CardContent>
+        </Card>
+
+        {/* By Method */}
+        <Card>
+          <CardHeader className="pb-3">
+            <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
+              <Wallet className="size-4" />
+              {t.accounting.byMethod}
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            {isLoadingStats ? (
+              <Loader2 className="size-5 animate-spin text-muted-foreground" />
+            ) : (
+              <div className="flex items-center gap-4">
+                <div>
+                  <div className="flex items-center gap-1">
+                    <BanknoteIcon className="size-3 text-green-600" />
+                    <span className="text-sm font-semibold">{stats?.byMethod.cash.count || 0}</span>
+                  </div>
+                  <p className="text-xs text-muted-foreground">{t.accounting.cash}</p>
+                </div>
+                <div>
+                  <div className="flex items-center gap-1">
+                    <Smartphone className="size-3 text-orange-500" />
+                    <span className="text-sm font-semibold">{stats?.byMethod.orange_money.count || 0}</span>
+                  </div>
+                  <p className="text-xs text-muted-foreground">Orange Money</p>
+                </div>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Filter Card with Record Payment Button */}
+      <Card className="mb-6 py-2">
+        <CardHeader className="pb-1 px-6 pt-3">
+          <div className="flex items-center justify-between">
+            <CardTitle className="text-sm">{t.accounting.filterPayments}</CardTitle>
+            <Dialog open={openRecordPayment} onOpenChange={handleRecordPaymentDialogChange}>
+              <DialogTrigger asChild>
+                <Button>
+                  <Plus className="h-4 w-4 mr-2" />
+                  {t.accounting.recordPayment}
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="max-w-2xl">
+                <DialogHeader>
+                  <DialogTitle>{t.accounting.recordNewPayment}</DialogTitle>
+                  <DialogDescription>
+                    {t.accounting.allFieldsRequired}
+                  </DialogDescription>
+                </DialogHeader>
+                <div className="space-y-4 py-4">
+                  {/* Student Search */}
+                  <div className="space-y-2">
+                    <Label>{t.common.student} *</Label>
+                    {selectedStudent ? (
+                      <div className="p-4 rounded-lg border bg-primary/5 border-primary/30">
+                        <div className="flex items-start justify-between">
+                          <div className="flex items-center gap-3">
+                            <div className="size-10 rounded-full bg-primary/20 flex items-center justify-center">
+                              <User className="size-5 text-primary" />
+                            </div>
+                            <div>
+                              <p className="font-medium text-foreground">
+                                {selectedStudent.firstName} {selectedStudent.lastName}
+                              </p>
+                              <p className="text-sm text-muted-foreground">
+                                {selectedStudent.studentNumber} • {selectedStudent.grade?.name || "N/A"}
+                              </p>
+                            </div>
+                          </div>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={handleClearStudent}
+                            className="h-8 w-8 text-muted-foreground hover:text-foreground"
+                          >
+                            <X className="h-4 w-4" />
+                          </Button>
+                        </div>
+                        {selectedStudent.balanceInfo && (
+                          <div className="mt-3 pt-3 border-t grid grid-cols-3 gap-4 text-sm">
+                            <div>
+                              <p className="text-muted-foreground">Scolarité</p>
+                              <p className="font-medium">{formatAmount(selectedStudent.balanceInfo.tuitionFee)}</p>
+                            </div>
+                            <div>
+                              <p className="text-muted-foreground">Payé</p>
+                              <p className="font-medium text-success">{formatAmount(selectedStudent.balanceInfo.totalPaid)}</p>
+                            </div>
+                            <div>
+                              <p className="text-muted-foreground">Reste</p>
+                              <p className="font-medium text-warning">{formatAmount(selectedStudent.balanceInfo.remainingBalance)}</p>
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    ) : (
+                      <div ref={searchContainerRef} className="relative">
+                        <div className="relative">
+                          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                          <Input
+                            placeholder={t.accounting.searchStudent}
+                            value={studentSearchQuery}
+                            onChange={(e) => handleSearchChange(e.target.value)}
+                            className="pl-10"
+                          />
+                          {isSearchingStudents && (
+                            <Loader2 className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 animate-spin text-muted-foreground" />
+                          )}
+                        </div>
+                        {showSearchResults && (
+                          <div className="absolute z-50 w-full mt-1 bg-popover border rounded-lg shadow-lg max-h-64 overflow-auto">
+                            {studentSearchResults.length === 0 ? (
+                              <div className="p-4 text-center text-sm text-muted-foreground">
+                                {studentSearchQuery.length < 2
+                                  ? "Tapez au moins 2 caractères pour rechercher"
+                                  : "Aucun élève actif trouvé"}
+                              </div>
+                            ) : (
+                              studentSearchResults.map((student) => (
+                                <button
+                                  key={student.id}
+                                  onClick={() => handleSelectStudent(student)}
+                                  className="w-full p-3 text-left hover:bg-muted/50 flex items-center gap-3 border-b last:border-b-0"
+                                >
+                                  <div className="size-8 rounded-full bg-muted flex items-center justify-center shrink-0">
+                                    <User className="size-4 text-muted-foreground" />
+                                  </div>
+                                  <div className="flex-1 min-w-0">
+                                    <p className="font-medium text-foreground truncate">
+                                      {student.firstName} {student.lastName}
+                                    </p>
+                                    <p className="text-xs text-muted-foreground">
+                                      {student.studentNumber} • {student.grade?.name || "N/A"}
+                                    </p>
+                                  </div>
+                                  {student.balanceInfo && (
+                                    <div className="text-right shrink-0">
+                                      <p className="text-xs text-muted-foreground">Reste</p>
+                                      <p className="text-sm font-medium text-warning">
+                                        {formatAmount(student.balanceInfo.remainingBalance)}
+                                      </p>
+                                    </div>
+                                  )}
+                                </button>
+                              ))
+                            )}
+                          </div>
+                        )}
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="amount">{t.accounting.amountGNF} *</Label>
+                      <Input
+                        id="amount"
+                        type="number"
+                        placeholder="800000"
+                        value={paymentAmount}
+                        onChange={(e) => setPaymentAmount(e.target.value)}
+                      />
+                      {selectedStudent?.balanceInfo && paymentAmount && parseFloat(paymentAmount) > selectedStudent.balanceInfo.remainingBalance && (
+                        <p className="text-xs text-destructive">
+                          Dépasse le solde restant de {formatAmount(selectedStudent.balanceInfo.remainingBalance)}
+                        </p>
+                      )}
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="paymentType">{t.accounting.paymentType} *</Label>
+                      <Select value={paymentMethod} onValueChange={(v) => setPaymentMethod(v as "cash" | "orange_money")}>
+                        <SelectTrigger id="paymentType">
+                          <SelectValue placeholder={t.common.select} />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="cash">{t.accounting.cash}</SelectItem>
+                          <SelectItem value="orange_money">{t.accounting.mobileMoney}</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="reference">{t.accounting.documentReference} *</Label>
+                    <Input
+                      id="reference"
+                      placeholder={t.accounting.documentReferencePlaceholder}
+                      value={receiptNumber}
+                      onChange={(e) => setReceiptNumber(e.target.value)}
+                    />
+                    <p className="text-xs text-muted-foreground">
+                      {t.accounting.documentReferenceHint}
+                    </p>
+                  </div>
+
+                  {paymentMethod === "orange_money" && (
+                    <div className="space-y-2">
+                      <Label htmlFor="transactionRef">Référence transaction Orange Money</Label>
+                      <Input
+                        id="transactionRef"
+                        placeholder="Ex: OM123456789"
+                        value={transactionRef}
+                        onChange={(e) => setTransactionRef(e.target.value)}
+                      />
+                    </div>
+                  )}
+
+                  <div className="space-y-2">
+                    <Label htmlFor="document">{t.accounting.supportingDocument}</Label>
+                    <div className="flex items-center gap-2">
+                      <Input id="document" type="file" accept=".pdf,.jpg,.jpeg,.png" className="flex-1" />
+                      <Button variant="outline" size="icon" className="bg-transparent shrink-0">
+                        <Upload className="h-4 w-4" />
+                      </Button>
+                    </div>
+                    <p className="text-xs text-muted-foreground flex items-center gap-1">
+                      <AlertCircle className="h-3 w-3" />
+                      {t.accounting.supportingDocumentHint}
+                    </p>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="notes">{t.accounting.notesOptional}</Label>
+                    <Input
+                      id="notes"
+                      placeholder={t.accounting.notesPlaceholder}
+                      value={paymentNotes}
+                      onChange={(e) => setPaymentNotes(e.target.value)}
+                    />
+                  </div>
+
+                  <div className="flex justify-end gap-3 pt-4">
+                    <Button
+                      variant="outline"
+                      onClick={() => handleRecordPaymentDialogChange(false)}
+                      className="bg-transparent"
+                      disabled={isSubmittingPayment}
+                    >
+                      {t.common.cancel}
+                    </Button>
+                    <Button
+                      onClick={handleSubmitPayment}
+                      disabled={
+                        isSubmittingPayment ||
+                        !selectedStudent?.enrollmentId ||
+                        !paymentAmount ||
+                        !paymentMethod ||
+                        !receiptNumber ||
+                        (selectedStudent?.balanceInfo && parseFloat(paymentAmount) > selectedStudent.balanceInfo.remainingBalance)
+                      }
+                    >
+                      {isSubmittingPayment && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
+                      {t.accounting.savePayment}
+                    </Button>
+                  </div>
+                </div>
+              </DialogContent>
+            </Dialog>
+          </div>
+        </CardHeader>
+        <CardContent className="pt-0 pb-2 px-6">
+          <div className="flex flex-wrap items-end gap-4">
             <div className="flex items-center gap-2 text-muted-foreground">
               <Filter className="size-4" />
-              <span className="text-sm font-medium">Filtres:</span>
             </div>
 
             <div className="space-y-1">
               <Label className="text-xs">{t.accounting.filterByStatus}</Label>
               <Select value={statusFilter} onValueChange={setStatusFilter}>
-                <SelectTrigger className="w-[180px]">
+                <SelectTrigger className="w-[160px]">
                   <SelectValue placeholder={t.accounting.allStatuses} />
                 </SelectTrigger>
                 <SelectContent>
@@ -263,7 +824,7 @@ export default function PaymentsPage() {
             <div className="space-y-1">
               <Label className="text-xs">{t.accounting.filterByMethod}</Label>
               <Select value={methodFilter} onValueChange={setMethodFilter}>
-                <SelectTrigger className="w-[180px]">
+                <SelectTrigger className="w-[160px]">
                   <SelectValue placeholder={t.accounting.allMethods} />
                 </SelectTrigger>
                 <SelectContent>
@@ -275,31 +836,47 @@ export default function PaymentsPage() {
             </div>
 
             <div className="space-y-1">
+              <Label className="text-xs">{t.accounting.filterByGrade}</Label>
+              <Select value={gradeFilter} onValueChange={setGradeFilter}>
+                <SelectTrigger className="w-[160px]">
+                  <SelectValue placeholder={t.accounting.allGrades} />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">{t.accounting.allGrades}</SelectItem>
+                  {grades.map((grade) => (
+                    <SelectItem key={grade.id} value={grade.id}>{grade.name}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="space-y-1">
               <Label className="text-xs">{t.accounting.filterByDate}</Label>
               <div className="flex items-center gap-2">
                 <Input
                   type="date"
                   value={startDate}
                   onChange={(e) => setStartDate(e.target.value)}
-                  className="w-[150px]"
+                  className="w-[140px]"
                 />
                 <span className="text-muted-foreground">-</span>
                 <Input
                   type="date"
                   value={endDate}
                   onChange={(e) => setEndDate(e.target.value)}
-                  className="w-[150px]"
+                  className="w-[140px]"
                 />
               </div>
             </div>
 
-            {(statusFilter !== "all" || methodFilter !== "all" || startDate || endDate) && (
+            {(statusFilter !== "all" || methodFilter !== "all" || gradeFilter !== "all" || startDate || endDate) && (
               <Button
                 variant="ghost"
                 size="sm"
                 onClick={() => {
                   setStatusFilter("all")
                   setMethodFilter("all")
+                  setGradeFilter("all")
                   setStartDate("")
                   setEndDate("")
                 }}
@@ -309,8 +886,12 @@ export default function PaymentsPage() {
               </Button>
             )}
           </div>
-        </CardHeader>
-        <CardContent>
+        </CardContent>
+      </Card>
+
+      {/* Payments Table */}
+      <Card>
+        <CardContent className="pt-6">
           {isLoading ? (
             <div className="flex items-center justify-center py-12">
               <Loader2 className="size-8 animate-spin text-muted-foreground" />
