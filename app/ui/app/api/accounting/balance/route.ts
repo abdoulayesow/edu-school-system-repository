@@ -34,6 +34,16 @@ export async function GET(req: NextRequest) {
         amount: true,
         method: true,
         status: true,
+        enrollment: {
+          select: {
+            grade: {
+              select: {
+                id: true,
+                name: true,
+              },
+            },
+          },
+        },
       },
     })
 
@@ -52,6 +62,8 @@ export async function GET(req: NextRequest) {
       orange_money: { count: 0, amount: 0, confirmed: 0 },
     }
 
+    const paymentsByGrade: Record<string, { count: number; amount: number; confirmed: number }> = {}
+
     for (const payment of payments) {
       const statusKey = payment.status as keyof typeof paymentsByStatus
       if (paymentsByStatus[statusKey]) {
@@ -66,6 +78,17 @@ export async function GET(req: NextRequest) {
         if (payment.status === "confirmed") {
           paymentsByMethod[methodKey].confirmed += payment.amount
         }
+      }
+
+      // Aggregate by grade
+      const gradeName = payment.enrollment?.grade?.name || "Unknown"
+      if (!paymentsByGrade[gradeName]) {
+        paymentsByGrade[gradeName] = { count: 0, amount: 0, confirmed: 0 }
+      }
+      paymentsByGrade[gradeName].count++
+      paymentsByGrade[gradeName].amount += payment.amount
+      if (payment.status === "confirmed") {
+        paymentsByGrade[gradeName].confirmed += payment.amount
       }
     }
 
@@ -133,6 +156,7 @@ export async function GET(req: NextRequest) {
       payments: {
         byStatus: paymentsByStatus,
         byMethod: paymentsByMethod,
+        byGrade: paymentsByGrade,
         total: {
           count: payments.length,
           amount: payments.reduce((sum, p) => sum + p.amount, 0),

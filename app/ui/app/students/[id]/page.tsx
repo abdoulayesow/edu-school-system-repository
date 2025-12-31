@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react"
 import { useParams } from "next/navigation"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Progress } from "@/components/ui/progress"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
@@ -540,17 +541,24 @@ export default function StudentDetailPage() {
 
               {/* Payment Summary Card */}
               <Card className="md:col-span-2">
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Wallet className="size-5" />
-                    {t.students.paymentHistory}
-                  </CardTitle>
-                  <CardDescription>
-                    {student.balanceInfo ?
-                      `${formatCurrency(student.balanceInfo.totalPaid)} payé sur ${formatCurrency(student.balanceInfo.tuitionFee)}` :
-                      "Aucune inscription active"
-                    }
-                  </CardDescription>
+                <CardHeader className="flex flex-row items-start justify-between">
+                  <div>
+                    <CardTitle className="flex items-center gap-2">
+                      <Wallet className="size-5" />
+                      {t.students.paymentHistory}
+                    </CardTitle>
+                    <CardDescription>
+                      {student.balanceInfo ?
+                        `${formatCurrency(student.balanceInfo.totalPaid)} payé sur ${formatCurrency(student.balanceInfo.tuitionFee)}` :
+                        "Aucune inscription active"
+                      }
+                    </CardDescription>
+                  </div>
+                  <Link href={`/students/${student.id}/payments`}>
+                    <Button variant="outline" size="sm">
+                      {t.common.viewDetails}
+                    </Button>
+                  </Link>
                 </CardHeader>
                 <CardContent>
                   {student.balanceInfo ? (

@@ -16,6 +16,7 @@ import { useI18n } from "@/components/i18n-provider"
 import { AlertCircle, Calendar, GraduationCap } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
 import { sizing } from "@/lib/design-tokens"
+import { isPhoneEmpty } from "@/lib/utils/phone"
 
 interface EnrollmentWizardProps {
   schoolYearId?: string
@@ -66,6 +67,9 @@ function WizardContent({ schoolYearId, schoolYearName }: EnrollmentWizardProps) 
       if (data.firstName && data.firstName.trim()) {
         payload.firstName = data.firstName
       }
+      if (data.middleName && data.middleName.trim()) {
+        payload.middleName = data.middleName
+      }
       if (data.lastName && data.lastName.trim()) {
         payload.lastName = data.lastName
       }
@@ -73,15 +77,16 @@ function WizardContent({ schoolYearId, schoolYearName }: EnrollmentWizardProps) 
       // Include other optional fields if they exist
       if (data.dateOfBirth) payload.dateOfBirth = data.dateOfBirth
       if (data.gender) payload.gender = data.gender
-      if (data.phone) payload.phone = data.phone
+      // Only save phone numbers if they have actual digits (not just "+224" prefix)
+      if (data.phone && !isPhoneEmpty(data.phone)) payload.phone = data.phone
       if (data.email) payload.email = data.email
       if (data.photoUrl) payload.photoUrl = data.photoUrl
       if (data.birthCertificateUrl) payload.birthCertificateUrl = data.birthCertificateUrl
       if (data.fatherName) payload.fatherName = data.fatherName
-      if (data.fatherPhone) payload.fatherPhone = data.fatherPhone
+      if (data.fatherPhone && !isPhoneEmpty(data.fatherPhone)) payload.fatherPhone = data.fatherPhone
       if (data.fatherEmail) payload.fatherEmail = data.fatherEmail
       if (data.motherName) payload.motherName = data.motherName
-      if (data.motherPhone) payload.motherPhone = data.motherPhone
+      if (data.motherPhone && !isPhoneEmpty(data.motherPhone)) payload.motherPhone = data.motherPhone
       if (data.motherEmail) payload.motherEmail = data.motherEmail
       if (data.address) payload.address = data.address
       if (data.studentId) payload.studentId = data.studentId
@@ -128,9 +133,11 @@ function WizardContent({ schoolYearId, schoolYearName }: EnrollmentWizardProps) 
 
     try {
       // Include payment data if payment was made in step 4
+      // Derive paymentMade from amount to ensure consistency
       const submitPayload: Record<string, unknown> = {}
-      if (data.paymentMade && data.paymentAmount && data.paymentMethod && data.receiptNumber) {
-        submitPayload.paymentMade = data.paymentMade
+      const hasPayment = data.paymentAmount && data.paymentAmount > 0 && data.paymentMethod && data.receiptNumber
+      if (hasPayment) {
+        submitPayload.paymentMade = true
         submitPayload.paymentAmount = data.paymentAmount
         submitPayload.paymentMethod = data.paymentMethod
         submitPayload.receiptNumber = data.receiptNumber
@@ -221,7 +228,7 @@ function WizardContent({ schoolYearId, schoolYearName }: EnrollmentWizardProps) 
             <div className="mb-6 p-3 bg-muted/50 rounded-lg border">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
-                  <GraduationCap className={sizing.icon.sm + " text-primary"} />
+                  <GraduationCap className={sizing.icon.sm + " text-amber-500"} />
                   <span className="text-sm font-medium">{data.gradeName}</span>
                   <Badge variant="outline" className="text-xs">
                     {data.level === "kindergarten" && t.enrollmentWizard.kindergarten}

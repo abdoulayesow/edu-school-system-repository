@@ -16,6 +16,8 @@ export const colors = {
   primary: "#8B2332", // Maroon (GSPN brand)
   secondary: "#6b7280", // Gray
   accent: "#D4AF37", // Gold (GSPN brand)
+  blue: "#0000FF", // Blue (for contact info)
+  navy: "#1E3A5F", // Navy (for payment table header)
   success: "#16a34a", // Green
   warning: "#ca8a04", // Yellow
   danger: "#dc2626", // Red

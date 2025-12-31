@@ -30,6 +30,9 @@ export function StepReview() {
     data.adjustedTuitionFee !== undefined &&
     data.adjustedTuitionFee !== data.originalTuitionFee
 
+  // Derive payment status from actual data to ensure consistency
+  const hasPayment = data.paymentAmount && data.paymentAmount > 0 && data.paymentMethod
+
   return (
     <div className="space-y-6">
       <div>
@@ -127,6 +130,14 @@ export function StepReview() {
               </p>
               <p className="font-medium">{data.firstName || "-"}</p>
             </div>
+            {data.middleName && (
+              <div>
+                <p className="text-sm text-muted-foreground">
+                  {t.enrollmentWizard.middleName}
+                </p>
+                <p className="font-medium">{data.middleName}</p>
+              </div>
+            )}
             <div>
               <p className="text-sm text-muted-foreground">
                 {t.enrollmentWizard.lastName}
@@ -304,7 +315,7 @@ export function StepReview() {
           </div>
 
           {/* Initial Payment */}
-          {data.paymentMade && (
+          {hasPayment && (
             <>
               <Separator />
               <div className="space-y-2">

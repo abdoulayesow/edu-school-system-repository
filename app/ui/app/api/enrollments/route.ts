@@ -11,6 +11,7 @@ const createEnrollmentSchema = z.object({
   gradeId: z.string().min(1),
   // Student info - optional for drafts (allow empty strings)
   firstName: z.string().optional(),
+  middleName: z.string().optional(),
   lastName: z.string().optional(),
   dateOfBirth: z.string().optional(),
   gender: z.enum(["male", "female"]).optional(),
@@ -182,6 +183,7 @@ export async function POST(req: NextRequest) {
       gradeId: validated.gradeId,
       // Use empty strings for drafts (firstName/lastName are required in schema)
       firstName: validated.firstName && validated.firstName.trim() ? validated.firstName : "",
+      middleName: validated.middleName?.trim() || null,
       lastName: validated.lastName && validated.lastName.trim() ? validated.lastName : "",
       dateOfBirth: validated.dateOfBirth ? new Date(validated.dateOfBirth) : null,
       email: validated.email || null,

@@ -6,8 +6,9 @@
  */
 
 import React from "react"
-import { Document, Page, View, Text, StyleSheet } from "@react-pdf/renderer"
+import { Document, Page, View, Text, Image, StyleSheet } from "@react-pdf/renderer"
 import { colors } from "./styles"
+import { letterheadBase64 } from "./letterhead-base64"
 import type { EnrollmentSummary } from "../enrollment/types"
 
 interface EnrollmentDocumentProps {
@@ -26,37 +27,13 @@ const attestationStyles = StyleSheet.create({
     fontSize: 11,
     color: colors.text,
   },
-  header: {
-    alignItems: "center",
-    marginBottom: 20,
-    paddingBottom: 15,
-    borderBottomWidth: 2,
-    borderBottomColor: colors.primary,
+  // Letterhead - using official template image
+  letterhead: {
+    marginBottom: 15,
   },
-  schoolName: {
-    fontSize: 16,
-    fontFamily: "Helvetica-Bold",
-    color: colors.primary,
-    marginBottom: 4,
-    textAlign: "center",
-  },
-  schoolAddress: {
-    fontSize: 9,
-    color: colors.textLight,
-    textAlign: "center",
-    marginBottom: 2,
-  },
-  schoolContact: {
-    fontSize: 9,
-    color: colors.textLight,
-    textAlign: "center",
-    marginBottom: 2,
-  },
-  governmentCodes: {
-    fontSize: 8,
-    color: colors.textLight,
-    textAlign: "center",
-    marginTop: 4,
+  letterheadImage: {
+    width: "100%",
+    height: "auto",
   },
   title: {
     fontSize: 18,
@@ -117,7 +94,7 @@ const attestationStyles = StyleSheet.create({
   },
   paymentHeader: {
     flexDirection: "row",
-    backgroundColor: colors.primary,
+    backgroundColor: colors.navy,
     padding: 8,
   },
   paymentHeaderCell: {
@@ -260,7 +237,10 @@ export function EnrollmentDocument({ data, language = "fr" }: EnrollmentDocument
   const { enrollment, schoolYear, grade, payments, totalPaid, totalOwed, studentNumber } = data
 
   const effectiveFee = enrollment.adjustedTuitionFee ?? enrollment.originalTuitionFee
-  const studentName = `${enrollment.firstName} ${enrollment.lastName}`
+  // Include middle name if present
+  const studentName = enrollment.middleName
+    ? `${enrollment.firstName} ${enrollment.middleName} ${enrollment.lastName}`
+    : `${enrollment.firstName} ${enrollment.lastName}`
 
   // Get the most recent receipt number if available
   const latestReceipt = payments.length > 0 ? payments[0].receiptNumber : "-"
@@ -268,23 +248,9 @@ export function EnrollmentDocument({ data, language = "fr" }: EnrollmentDocument
   return (
     <Document>
       <Page size="A4" style={attestationStyles.page}>
-        {/* School Header */}
-        <View style={attestationStyles.header}>
-          <Text style={attestationStyles.schoolName}>
-            GROUPE SCOLAIRE PRIVE N'DIOLOU
-          </Text>
-          <Text style={attestationStyles.schoolAddress}>
-            Quartier de Pounthioun secteur N'Diolou Ndantari
-          </Text>
-          <Text style={attestationStyles.schoolContact}>
-            Tel: 622 612 612 / 622 340 146 / 622 620 061
-          </Text>
-          <Text style={attestationStyles.schoolContact}>
-            Email: groupescolaireprivendioloulabe@gmail.com
-          </Text>
-          <Text style={attestationStyles.governmentCodes}>
-            MEPU-A / IRE: LABE / DPE: LABE / DSEE: THIAGHE
-          </Text>
+        {/* School Letterhead - Official template image */}
+        <View style={attestationStyles.letterhead}>
+          <Image src={letterheadBase64} style={attestationStyles.letterheadImage} />
         </View>
 
         {/* Document Title */}

@@ -67,6 +67,7 @@ export interface Enrollment {
 
   // Student info
   firstName: string
+  middleName?: string
   lastName: string
   dateOfBirth?: Date
   gender?: Gender
@@ -207,6 +208,7 @@ export interface EnrollmentWizardData {
   gradeId: string
   gradeName: string
   level: SchoolLevel
+  gradeOrder: number // Used to calculate expected birth year
   tuitionFee: number
 
   // Step 2 - Student Info

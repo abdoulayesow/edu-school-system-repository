@@ -20,6 +20,7 @@ import { Search, Plus, X, User, UserCheck, Users, Loader2 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { useDebouncedCallback } from "use-debounce"
 import { sizing } from "@/lib/design-tokens"
+import { formatGuineaPhone, isValidGuineaPhone, isPhoneEmpty } from "@/lib/utils/phone"
 
 interface SearchResult {
   id: string
@@ -65,6 +66,19 @@ export function StepStudentInfo() {
   const [isSearching, setIsSearching] = useState(false)
   const [suggestedStudents, setSuggestedStudents] = useState<SuggestedStudent[]>([])
   const [isLoadingSuggestions, setIsLoadingSuggestions] = useState(false)
+
+  // Set default date of birth based on grade order (expected age)
+  // Formula: expectedBirthYear = currentYear - (5 + gradeOrder)
+  // GS (order 0) = 5yo, 1ere Annee (order 1) = 6yo, etc.
+  useEffect(() => {
+    if (data.gradeId && !data.dateOfBirth && !data.isReturningStudent) {
+      const currentYear = new Date().getFullYear()
+      const expectedAge = 5 + (data.gradeOrder || 0)
+      const expectedBirthYear = currentYear - expectedAge
+      const defaultDate = `${expectedBirthYear}-01-01`
+      updateData({ dateOfBirth: defaultDate })
+    }
+  }, [data.gradeId, data.gradeOrder, data.dateOfBirth, data.isReturningStudent, updateData])
 
   // Fetch suggested students when grade is selected and returning student is chosen
   useEffect(() => {
@@ -204,7 +218,7 @@ export function StepStudentInfo() {
             htmlFor="new"
             className={cn(
               "flex items-center gap-3 p-4 border rounded-lg cursor-pointer transition-colors",
-              !data.isReturningStudent && "border-primary bg-primary/5"
+              !data.isReturningStudent && "border-amber-500 bg-amber-50 dark:border-amber-400 dark:bg-amber-950/30"
             )}
           >
             <RadioGroupItem value="new" id="new" />
@@ -215,7 +229,7 @@ export function StepStudentInfo() {
             htmlFor="returning"
             className={cn(
               "flex items-center gap-3 p-4 border rounded-lg cursor-pointer transition-colors",
-              data.isReturningStudent && "border-primary bg-primary/5"
+              data.isReturningStudent && "border-amber-500 bg-amber-50 dark:border-amber-400 dark:bg-amber-950/30"
             )}
           >
             <RadioGroupItem value="returning" id="returning" />
@@ -391,8 +405,12 @@ export function StepStudentInfo() {
               type="date"
               value={data.dateOfBirth || ""}
               onChange={(e) => updateData({ dateOfBirth: e.target.value })}
+              max={new Date().toISOString().split("T")[0]}
               required
             />
+            <p className="text-xs text-muted-foreground">
+              {t.enrollmentWizard.dateFormatHint || "Format: JJ/MM/AAAA (ex: 15/03/2010)"}
+            </p>
           </div>
           <div className="space-y-2">
             <Label htmlFor="gender">{t.enrollmentWizard.gender}</Label>
@@ -402,7 +420,7 @@ export function StepStudentInfo() {
                 updateData({ gender: value as "male" | "female" })
               }
             >
-              <SelectTrigger id="gender">
+              <SelectTrigger id="gender" className="w-full">
                 <SelectValue placeholder={t.common.select} />
               </SelectTrigger>
               <SelectContent>
@@ -421,9 +439,21 @@ export function StepStudentInfo() {
               type="tel"
               value={data.phone || "+224 "}
               onChange={(e) => updateData({ phone: e.target.value })}
+              onBlur={(e) => {
+                const formatted = formatGuineaPhone(e.target.value)
+                updateData({ phone: formatted })
+              }}
               placeholder="+224 XXX XX XX XX"
+              className={cn(
+                !isPhoneEmpty(data.phone) && !isValidGuineaPhone(data.phone) && "border-amber-500 focus-visible:ring-amber-500"
+              )}
             />
-            <p className="text-xs text-muted-foreground">
+            <p className={cn(
+              "text-xs",
+              !isPhoneEmpty(data.phone) && !isValidGuineaPhone(data.phone)
+                ? "text-amber-600"
+                : "text-muted-foreground"
+            )}>
               {t.enrollmentWizard.phoneFormat || "Format: +224 XXX XX XX XX"}
             </p>
           </div>
@@ -445,8 +475,8 @@ export function StepStudentInfo() {
         <h4 className="font-medium">{t.enrollmentWizard.parentInfo}</h4>
 
         {/* Father Info */}
-        <Card>
-          <CardContent className="pt-4">
+        <Card className="py-4">
+          <CardContent>
             <h5 className="text-sm font-medium mb-3">
               {t.enrollmentWizard.fatherInfo}
             </h5>
@@ -466,7 +496,14 @@ export function StepStudentInfo() {
                   type="tel"
                   value={data.fatherPhone || "+224 "}
                   onChange={(e) => updateData({ fatherPhone: e.target.value })}
+                  onBlur={(e) => {
+                    const formatted = formatGuineaPhone(e.target.value)
+                    updateData({ fatherPhone: formatted })
+                  }}
                   placeholder="+224 XXX XX XX XX"
+                  className={cn(
+                    !isPhoneEmpty(data.fatherPhone) && !isValidGuineaPhone(data.fatherPhone) && "border-amber-500 focus-visible:ring-amber-500"
+                  )}
                 />
               </div>
               <div className="space-y-2">
@@ -483,8 +520,8 @@ export function StepStudentInfo() {
         </Card>
 
         {/* Mother Info */}
-        <Card>
-          <CardContent className="pt-4">
+        <Card className="py-4">
+          <CardContent>
             <h5 className="text-sm font-medium mb-3">
               {t.enrollmentWizard.motherInfo}
             </h5>
@@ -504,7 +541,14 @@ export function StepStudentInfo() {
                   type="tel"
                   value={data.motherPhone || "+224 "}
                   onChange={(e) => updateData({ motherPhone: e.target.value })}
+                  onBlur={(e) => {
+                    const formatted = formatGuineaPhone(e.target.value)
+                    updateData({ motherPhone: formatted })
+                  }}
                   placeholder="+224 XXX XX XX XX"
+                  className={cn(
+                    !isPhoneEmpty(data.motherPhone) && !isValidGuineaPhone(data.motherPhone) && "border-amber-500 focus-visible:ring-amber-500"
+                  )}
                 />
               </div>
               <div className="space-y-2">

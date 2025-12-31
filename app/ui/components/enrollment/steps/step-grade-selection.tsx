@@ -103,6 +103,7 @@ export function StepGradeSelection() {
       gradeId: grade.id,
       gradeName: grade.name,
       level: grade.level,
+      gradeOrder: grade.order,
       tuitionFee: grade.tuitionFee,
       originalTuitionFee: grade.tuitionFee,
     })
@@ -126,8 +127,8 @@ export function StepGradeSelection() {
       textColor = "text-orange-700"
     } else {
       color = "red"
-      bgColor = "bg-red-100"
-      textColor = "text-red-700"
+      bgColor = "bg-amber-100"
+      textColor = "text-amber-700"
     }
 
     return { percentage, color, bgColor, textColor }
@@ -273,7 +274,7 @@ export function StepGradeSelection() {
                                 "h-full rounded-full transition-all",
                                 capacityInfo.color === "green" && "bg-green-500",
                                 capacityInfo.color === "orange" && "bg-orange-500",
-                                capacityInfo.color === "red" && "bg-red-500"
+                                capacityInfo.color === "red" && "bg-amber-500"
                               )}
                               style={{ width: `${Math.min(capacityInfo.percentage, 100)}%` }}
                             />

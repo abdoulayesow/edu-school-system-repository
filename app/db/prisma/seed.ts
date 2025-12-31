@@ -87,29 +87,29 @@ interface GradeConfig {
 }
 
 const GRADES_CONFIG: GradeConfig[] = [
-  // Kindergarten (Maternelle) - PS, MS, GS - smaller classes
-  { name: "Petite Section (PS)", level: "kindergarten", order: -2, tuitionFee: 1200000, capacity: 25 },
-  { name: "Moyenne Section (MS)", level: "kindergarten", order: -1, tuitionFee: 1200000, capacity: 25 },
-  { name: "Grande Section (GS)", level: "kindergarten", order: 0, tuitionFee: 1200000, capacity: 30 },
+  // Kindergarten (Maternelle) - PS, MS, GS
+  { name: "Petite Section (PS)", level: "kindergarten", order: -2, tuitionFee: 1200000, capacity: 70 },
+  { name: "Moyenne Section (MS)", level: "kindergarten", order: -1, tuitionFee: 1200000, capacity: 70 },
+  { name: "Grande Section (GS)", level: "kindergarten", order: 0, tuitionFee: 1200000, capacity: 70 },
 
   // Elementary School (Primaire) - Grades 1-6
-  { name: "1ère Année", level: "elementary", order: 1, tuitionFee: 800000, capacity: 35 },
-  { name: "2ème Année", level: "elementary", order: 2, tuitionFee: 820000, capacity: 35 },
-  { name: "3ème Année", level: "elementary", order: 3, tuitionFee: 840000, capacity: 35 },
-  { name: "4ème Année", level: "elementary", order: 4, tuitionFee: 860000, capacity: 35 },
-  { name: "5ème Année", level: "elementary", order: 5, tuitionFee: 880000, capacity: 35 },
-  { name: "6ème Année", level: "elementary", order: 6, tuitionFee: 900000, capacity: 35 },
+  { name: "1ère Année", level: "elementary", order: 1, tuitionFee: 800000, capacity: 70 },
+  { name: "2ème Année", level: "elementary", order: 2, tuitionFee: 820000, capacity: 70 },
+  { name: "3ème Année", level: "elementary", order: 3, tuitionFee: 840000, capacity: 70 },
+  { name: "4ème Année", level: "elementary", order: 4, tuitionFee: 860000, capacity: 70 },
+  { name: "5ème Année", level: "elementary", order: 5, tuitionFee: 880000, capacity: 70 },
+  { name: "6ème Année", level: "elementary", order: 6, tuitionFee: 900000, capacity: 70 },
 
   // College (Collège) - Grades 7-10
-  { name: "7ème Année", level: "college", order: 7, tuitionFee: 1000000, capacity: 40 },
-  { name: "8ème Année", level: "college", order: 8, tuitionFee: 1025000, capacity: 40 },
-  { name: "9ème Année", level: "college", order: 9, tuitionFee: 1050000, capacity: 40 },
-  { name: "10ème Année", level: "college", order: 10, tuitionFee: 1100000, capacity: 40 },
+  { name: "7ème Année", level: "college", order: 7, tuitionFee: 1000000, capacity: 70 },
+  { name: "8ème Année", level: "college", order: 8, tuitionFee: 1025000, capacity: 70 },
+  { name: "9ème Année", level: "college", order: 9, tuitionFee: 1050000, capacity: 70 },
+  { name: "10ème Année", level: "college", order: 10, tuitionFee: 1100000, capacity: 70 },
 
   // High School (Lycée) - Grades 11-Terminal
-  { name: "11ème Année", level: "high_school", order: 11, tuitionFee: 1200000, capacity: 35 },
-  { name: "12ème Année", level: "high_school", order: 12, tuitionFee: 1250000, capacity: 35 },
-  { name: "Terminale", level: "high_school", order: 13, tuitionFee: 1300000, capacity: 30 },
+  { name: "11ème Année", level: "high_school", order: 11, tuitionFee: 1200000, capacity: 70 },
+  { name: "12ème Année", level: "high_school", order: 12, tuitionFee: 1250000, capacity: 70 },
+  { name: "Terminale", level: "high_school", order: 13, tuitionFee: 1300000, capacity: 70 },
 ]
 
 // Subject configuration from Guinea curriculum
@@ -437,6 +437,21 @@ async function main() {
         const birthdayStr = formatBirthday(dateOfBirth)
         const studentNumber = `STD-2024-${birthdayStr}-${studentCounter.toString().padStart(4, "0")}`
 
+        // Check if enrollment already exists (handles partial re-runs)
+        const enrollmentNumber = `ENR-2024-${grade.order.toString().padStart(2, "0")}-${studentCounter.toString().padStart(5, "0")}`
+        const existingEnrollment = await prisma.enrollment.findUnique({
+          where: { enrollmentNumber },
+        })
+
+        if (existingEnrollment) {
+          // Skip if enrollment exists, but still track for returning students
+          if (existingEnrollment.studentId && grade.order < 13) {
+            returningStudents.push({ studentId: existingEnrollment.studentId, gradeOrder: grade.order + 1 })
+          }
+          studentCounter++
+          continue
+        }
+
         // Check if student already exists
         let student = await prisma.student.findUnique({
           where: { studentNumber },
@@ -456,36 +471,35 @@ async function main() {
               enrollmentDate: new Date("2024-09-01"),
             },
           })
-
-          // Create enrollment for 2024-2025
-          const enrollmentNumber = `ENR-2024-${grade.order.toString().padStart(2, "0")}-${studentCounter.toString().padStart(5, "0")}`
-          await prisma.enrollment.create({
-            data: {
-              enrollmentNumber,
-              studentId: student.id,
-              schoolYearId: previousSchoolYear.id,
-              gradeId: grade.id,
-              firstName,
-              lastName,
-              dateOfBirth,
-              gender: Math.random() > 0.5 ? "male" : "female",
-              fatherName: `${randomElement(FIRST_NAMES)} ${lastName}`,
-              fatherPhone: randomPhone(),
-              motherName: `${randomElement(FIRST_NAMES)} ${lastName}`,
-              motherPhone: randomPhone(),
-              originalTuitionFee: grade.tuitionFee,
-              status: EnrollmentStatus.completed,
-              isReturningStudent: false,
-              submittedAt: new Date("2024-08-15"),
-              approvedAt: new Date("2024-08-20"),
-              approvedBy: director.id,
-              statusChangedAt: new Date("2024-08-20"),
-              statusChangedBy: director.id,
-              statusComment: "Enrollment approved for 2024-2025 school year",
-              createdBy: director.id,
-            },
-          })
         }
+
+        // Create enrollment for 2024-2025
+        await prisma.enrollment.create({
+          data: {
+            enrollmentNumber,
+            studentId: student.id,
+            schoolYearId: previousSchoolYear.id,
+            gradeId: grade.id,
+            firstName,
+            lastName,
+            dateOfBirth,
+            gender: Math.random() > 0.5 ? "male" : "female",
+            fatherName: `${randomElement(FIRST_NAMES)} ${lastName}`,
+            fatherPhone: randomPhone(),
+            motherName: `${randomElement(FIRST_NAMES)} ${lastName}`,
+            motherPhone: randomPhone(),
+            originalTuitionFee: grade.tuitionFee,
+            status: EnrollmentStatus.completed,
+            isReturningStudent: false,
+            submittedAt: new Date("2024-08-15"),
+            approvedAt: new Date("2024-08-20"),
+            approvedBy: director.id,
+            statusChangedAt: new Date("2024-08-20"),
+            statusChangedBy: director.id,
+            statusComment: "Enrollment approved for 2024-2025 school year",
+            createdBy: director.id,
+          },
+        })
 
         // Only some students will be returning (those not in Terminal)
         if (grade.order < 13) {
@@ -612,7 +626,87 @@ async function main() {
           },
         ]
 
-        for (const scheduleData of schedules) {
+        // Determine payment scenario for this enrollment based on enrollment counter
+        // ~40% confirmed, ~20% pending_deposit, ~15% deposited, ~15% pending_review, ~10% partial/mixed
+        const scenarioRoll = enrollmentCounter % 10
+        let paymentScenario: "all_confirmed" | "pending_deposit" | "deposited" | "pending_review" | "mixed"
+        if (scenarioRoll < 4) paymentScenario = "all_confirmed"
+        else if (scenarioRoll < 6) paymentScenario = "pending_deposit"
+        else if (scenarioRoll < 7) paymentScenario = "deposited"
+        else if (scenarioRoll < 9) paymentScenario = "pending_review"
+        else paymentScenario = "mixed"
+
+        const BANKS = ["BICIGUI", "SGBG", "Ecobank", "Vista Bank", "Banque Centrale"]
+
+        for (let scheduleIndex = 0; scheduleIndex < schedules.length; scheduleIndex++) {
+          const scheduleData = schedules[scheduleIndex]
+
+          // Determine if this schedule is paid based on scenario
+          let isPaid = false
+          let paymentStatus: PaymentStatus = PaymentStatus.pending_deposit
+          let paymentMethod: PaymentMethod = PaymentMethod.cash
+          let needsCashDeposit = false
+
+          switch (paymentScenario) {
+            case "all_confirmed":
+              isPaid = true
+              paymentStatus = PaymentStatus.confirmed
+              paymentMethod = scheduleIndex % 3 === 2 ? PaymentMethod.orange_money : PaymentMethod.cash
+              needsCashDeposit = paymentMethod === PaymentMethod.cash
+              break
+            case "pending_deposit":
+              // First schedule confirmed, rest pending deposit
+              if (scheduleIndex === 0) {
+                isPaid = true
+                paymentStatus = PaymentStatus.confirmed
+                needsCashDeposit = true
+              } else {
+                isPaid = false
+                paymentStatus = PaymentStatus.pending_deposit
+              }
+              break
+            case "deposited":
+              // First schedule confirmed, second deposited (awaiting review)
+              if (scheduleIndex === 0) {
+                isPaid = true
+                paymentStatus = PaymentStatus.confirmed
+                needsCashDeposit = true
+              } else if (scheduleIndex === 1) {
+                isPaid = false
+                paymentStatus = PaymentStatus.deposited
+                needsCashDeposit = true
+              } else {
+                continue // Skip third schedule
+              }
+              break
+            case "pending_review":
+              // Orange Money payments pending review
+              paymentMethod = PaymentMethod.orange_money
+              if (scheduleIndex === 0) {
+                isPaid = true
+                paymentStatus = PaymentStatus.confirmed
+              } else if (scheduleIndex === 1) {
+                isPaid = false
+                paymentStatus = PaymentStatus.pending_review
+              } else {
+                continue // Skip third schedule
+              }
+              break
+            case "mixed":
+              // One confirmed, one rejected, one pending
+              if (scheduleIndex === 0) {
+                isPaid = true
+                paymentStatus = PaymentStatus.confirmed
+                needsCashDeposit = true
+              } else if (scheduleIndex === 1) {
+                isPaid = false
+                paymentStatus = PaymentStatus.rejected
+              } else {
+                continue // Skip third schedule
+              }
+              break
+          }
+
           const schedule = await prisma.paymentSchedule.create({
             data: {
               enrollmentId: enrollment.id,
@@ -620,27 +714,53 @@ async function main() {
               amount: scheduleData.amount,
               months: scheduleData.months,
               dueDate: scheduleData.dueDate,
-              isPaid: true,
-              paidAt: new Date(scheduleData.dueDate.getTime() - 7 * 24 * 60 * 60 * 1000), // Paid 7 days before due
+              isPaid,
+              paidAt: isPaid ? new Date(scheduleData.dueDate.getTime() - 7 * 24 * 60 * 60 * 1000) : null,
             },
           })
 
           // Create payment for this schedule
-          const receiptNumber = `CASH-2025-${(totalPayments + 1).toString().padStart(5, "0")}`
-          await prisma.payment.create({
+          const methodPrefix = paymentMethod === PaymentMethod.orange_money ? "OM" : "CASH"
+          const receiptNumber = `GSPN-2025-${methodPrefix}-${(totalPayments + 1).toString().padStart(5, "0")}`
+          const recordedAt = new Date(scheduleData.dueDate.getTime() - 7 * 24 * 60 * 60 * 1000)
+
+          const payment = await prisma.payment.create({
             data: {
               enrollmentId: enrollment.id,
               paymentScheduleId: schedule.id,
               amount: scheduleData.amount,
-              method: PaymentMethod.cash,
-              status: PaymentStatus.confirmed,
+              method: paymentMethod,
+              status: paymentStatus,
               receiptNumber,
+              transactionRef: paymentMethod === PaymentMethod.orange_money ? `OM-TXN-${Date.now()}-${totalPayments}` : null,
               recordedBy: director.id,
-              recordedAt: schedule.paidAt!,
-              confirmedBy: director.id,
-              confirmedAt: schedule.paidAt!,
+              recordedAt,
+              confirmedBy: paymentStatus === PaymentStatus.confirmed ? director.id : null,
+              confirmedAt: paymentStatus === PaymentStatus.confirmed ? recordedAt : null,
+              reviewedBy: paymentStatus === PaymentStatus.rejected ? director.id : null,
+              reviewedAt: paymentStatus === PaymentStatus.rejected ? recordedAt : null,
+              reviewNotes: paymentStatus === PaymentStatus.rejected ? "Paiement rejeté - reçu non valide" : null,
+              autoConfirmAt: paymentMethod === PaymentMethod.orange_money && paymentStatus === PaymentStatus.pending_review
+                ? new Date(recordedAt.getTime() + 24 * 60 * 60 * 1000)
+                : null,
             },
           })
+
+          // Create CashDeposit for cash payments that are deposited or confirmed
+          if (needsCashDeposit && paymentMethod === PaymentMethod.cash &&
+              (paymentStatus === PaymentStatus.confirmed || paymentStatus === PaymentStatus.deposited)) {
+            await prisma.cashDeposit.create({
+              data: {
+                paymentId: payment.id,
+                bankReference: `DEP-${randomElement(BANKS).substring(0, 3).toUpperCase()}-${Date.now().toString().slice(-6)}`,
+                depositDate: new Date(recordedAt.getTime() + 1 * 24 * 60 * 60 * 1000), // 1 day after recording
+                depositedBy: director.id,
+                depositedByName: "Moi-même",
+                bankName: randomElement(BANKS),
+              },
+            })
+          }
+
           totalPayments++
         }
 
@@ -714,10 +834,17 @@ async function main() {
         })
       }
 
-      // Check if TeacherProfile exists
+      // Check if TeacherProfile exists (by personId or employeeNumber)
       let teacherProfile = await prisma.teacherProfile.findUnique({
         where: { personId: person.id },
       })
+
+      if (!teacherProfile) {
+        // Also check by employeeNumber to handle re-runs
+        teacherProfile = await prisma.teacherProfile.findUnique({
+          where: { employeeNumber },
+        })
+      }
 
       if (!teacherProfile) {
         teacherProfile = await prisma.teacherProfile.create({
@@ -835,6 +962,18 @@ async function main() {
     const studentProfileMap = new Map<string, string>() // studentId -> studentProfileId
 
     for (const student of allStudents) {
+      // Check if StudentProfile already exists first
+      let studentProfile = await prisma.studentProfile.findFirst({
+        where: { studentId: student.id },
+        include: { person: true },
+      })
+
+      if (studentProfile) {
+        // StudentProfile exists, use its person
+        studentProfileMap.set(student.id, studentProfile.id)
+        continue
+      }
+
       // Check if Person exists for this student
       let person = await prisma.person.findFirst({
         where: {
@@ -845,44 +984,57 @@ async function main() {
       })
 
       if (!person) {
-        person = await prisma.person.create({
-          data: {
-            firstName: student.firstName,
-            lastName: student.lastName,
-            email: student.email,
-            dateOfBirth: student.dateOfBirth,
-            gender: Math.random() > 0.5 ? Gender.male : Gender.female,
-            status: PersonStatus.active,
-          },
+        // Generate unique email to avoid conflicts
+        const uniqueEmail = student.email || `student-${student.id}@placeholder.local`
+
+        // Check if Person with this email already exists
+        person = await prisma.person.findUnique({
+          where: { email: uniqueEmail },
         })
+
+        if (!person) {
+          person = await prisma.person.create({
+            data: {
+              firstName: student.firstName,
+              lastName: student.lastName,
+              email: uniqueEmail,
+              dateOfBirth: student.dateOfBirth,
+              gender: Math.random() > 0.5 ? Gender.male : Gender.female,
+              status: PersonStatus.active,
+            },
+          })
+        }
       }
 
-      // Check if StudentProfile exists
-      let studentProfile = await prisma.studentProfile.findFirst({
-        where: { studentId: student.id },
-      })
-
+      // Create StudentProfile (check if Person already has one)
       if (!studentProfile) {
-        // Find current grade for student
-        const enrollment = await prisma.enrollment.findFirst({
-          where: {
-            studentId: student.id,
-            schoolYearId: currentSchoolYear.id,
-            status: EnrollmentStatus.completed,
-          },
-          include: { grade: true },
+        // Check if this Person already has a StudentProfile
+        studentProfile = await prisma.studentProfile.findUnique({
+          where: { personId: person.id },
         })
 
-        studentProfile = await prisma.studentProfile.create({
-          data: {
-            personId: person.id,
-            studentId: student.id,
-            studentNumber: student.studentNumber,
-            studentStatus: StudentStatus.active,
-            enrollmentDate: student.enrollmentDate,
-            currentGradeId: enrollment?.gradeId,
-          },
-        })
+        if (!studentProfile) {
+          // Find current grade for student
+          const enrollment = await prisma.enrollment.findFirst({
+            where: {
+              studentId: student.id,
+              schoolYearId: currentSchoolYear.id,
+              status: EnrollmentStatus.completed,
+            },
+            include: { grade: true },
+          })
+
+          studentProfile = await prisma.studentProfile.create({
+            data: {
+              personId: person.id,
+              studentId: student.id,
+              studentNumber: student.studentNumber,
+              studentStatus: StudentStatus.active,
+              enrollmentDate: student.enrollmentDate,
+              currentGradeId: enrollment?.gradeId,
+            },
+          })
+        }
       }
 
       studentProfileMap.set(student.id, studentProfile.id)
@@ -902,6 +1054,18 @@ async function main() {
       const gradeConfig = GRADES_CONFIG.find(g => g.order === grade.order)
       if (!gradeConfig) continue
 
+      // Check if this grade already has attendance sessions (handles re-runs)
+      const existingSessionCount = await prisma.attendanceSession.count({
+        where: {
+          gradeId: grade.id,
+          date: { gte: attendanceStartDate },
+        },
+      })
+      if (existingSessionCount > 0) {
+        console.log(`   ⏭ ${grade.name}: ${existingSessionCount} sessions already exist`)
+        continue
+      }
+
       const schoolDays = getSchoolDays(attendanceStartDate, attendanceEndDate, gradeConfig.level)
 
       // Get enrolled students for this grade
@@ -915,15 +1079,6 @@ async function main() {
       })
 
       for (const schoolDay of schoolDays) {
-        // Check if session already exists
-        const existingSession = await prisma.attendanceSession.findFirst({
-          where: {
-            gradeId: grade.id,
-            date: schoolDay,
-          },
-        })
-
-        if (existingSession) continue
 
         // Create attendance session
         const session = await prisma.attendanceSession.create({
@@ -979,37 +1134,44 @@ async function main() {
     // Create Sample Expenses
     // ========================================================================
     console.log("\n💰 Creating sample expenses...")
-    let expenseCount = 0
 
-    for (const expenseSample of EXPENSE_SAMPLES) {
-      // Randomize the date within the last 3 months
-      const daysAgo = Math.floor(Math.random() * 90)
-      const expenseDate = new Date()
-      expenseDate.setDate(expenseDate.getDate() - daysAgo)
+    // Check if expenses already exist (handles re-runs)
+    const existingExpenseCount = await prisma.expense.count()
+    if (existingExpenseCount > 0) {
+      console.log(`   ⏭ Skipping expenses (${existingExpenseCount} already exist)`)
+    } else {
+      let expenseCount = 0
 
-      // Randomize the status
-      const statusOptions = [ExpenseStatus.pending, ExpenseStatus.approved, ExpenseStatus.paid, ExpenseStatus.rejected]
-      const status = statusOptions[Math.floor(Math.random() * statusOptions.length)]
+      for (const expenseSample of EXPENSE_SAMPLES) {
+        // Randomize the date within the last 3 months
+        const daysAgo = Math.floor(Math.random() * 90)
+        const expenseDate = new Date()
+        expenseDate.setDate(expenseDate.getDate() - daysAgo)
 
-      await prisma.expense.create({
-        data: {
-          category: expenseSample.category,
-          description: expenseSample.description,
-          amount: expenseSample.amount + Math.floor(Math.random() * 50000), // Add some variance
-          method: Math.random() > 0.8 ? PaymentMethod.orange_money : PaymentMethod.cash,
-          date: expenseDate,
-          vendorName: status !== ExpenseStatus.pending ? randomElement(["Papeterie Centrale", "Mamadou Fournitures", "EDG", "SOTELGUI"]) : null,
-          status,
-          requestedBy: director.id,
-          approvedBy: status !== ExpenseStatus.pending && status !== ExpenseStatus.rejected ? director.id : null,
-          approvedAt: status === ExpenseStatus.approved || status === ExpenseStatus.paid ? new Date(expenseDate.getTime() + 2 * 24 * 60 * 60 * 1000) : null,
-          rejectionReason: status === ExpenseStatus.rejected ? "Budget insuffisant" : null,
-          paidAt: status === ExpenseStatus.paid ? new Date(expenseDate.getTime() + 5 * 24 * 60 * 60 * 1000) : null,
-        },
-      })
-      expenseCount++
+        // Randomize the status
+        const statusOptions = [ExpenseStatus.pending, ExpenseStatus.approved, ExpenseStatus.paid, ExpenseStatus.rejected]
+        const status = statusOptions[Math.floor(Math.random() * statusOptions.length)]
+
+        await prisma.expense.create({
+          data: {
+            category: expenseSample.category,
+            description: expenseSample.description,
+            amount: expenseSample.amount + Math.floor(Math.random() * 50000), // Add some variance
+            method: Math.random() > 0.8 ? PaymentMethod.orange_money : PaymentMethod.cash,
+            date: expenseDate,
+            vendorName: status !== ExpenseStatus.pending ? randomElement(["Papeterie Centrale", "Mamadou Fournitures", "EDG", "SOTELGUI"]) : null,
+            status,
+            requestedBy: director.id,
+            approvedBy: status !== ExpenseStatus.pending && status !== ExpenseStatus.rejected ? director.id : null,
+            approvedAt: status === ExpenseStatus.approved || status === ExpenseStatus.paid ? new Date(expenseDate.getTime() + 2 * 24 * 60 * 60 * 1000) : null,
+            rejectionReason: status === ExpenseStatus.rejected ? "Budget insuffisant" : null,
+            paidAt: status === ExpenseStatus.paid ? new Date(expenseDate.getTime() + 5 * 24 * 60 * 60 * 1000) : null,
+          },
+        })
+        expenseCount++
+      }
+      console.log(`   ✓ Created ${expenseCount} sample expenses`)
     }
-    console.log(`   ✓ Created ${expenseCount} sample expenses`)
 
     // Summary
     const gradeCount = await prisma.grade.count({

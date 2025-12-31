@@ -8,6 +8,7 @@ import { z } from "zod"
 const updateEnrollmentSchema = z.object({
   // Student info - optional for drafts (allow empty strings)
   firstName: z.string().optional(),
+  middleName: z.string().optional(),
   lastName: z.string().optional(),
   dateOfBirth: z.string().optional(),
   gender: z.enum(["male", "female"]).optional(),
@@ -151,6 +152,9 @@ export async function PUT(req: NextRequest, { params }: RouteParams) {
     // Copy validated fields - firstName/lastName are required in schema, use empty strings for drafts
     if (validated.firstName !== undefined) {
       updateData.firstName = validated.firstName && validated.firstName.trim() ? validated.firstName : ""
+    }
+    if (validated.middleName !== undefined) {
+      updateData.middleName = validated.middleName?.trim() || null
     }
     if (validated.lastName !== undefined) {
       updateData.lastName = validated.lastName && validated.lastName.trim() ? validated.lastName : ""

@@ -23,10 +23,6 @@ import {
   CheckCircle2,
   Clock,
   AlertCircle,
-  DollarSign,
-  Link2,
-  Flag,
-  Lock,
   Loader2,
   Wallet,
   TrendingUp,
@@ -35,11 +31,13 @@ import {
   Smartphone,
   Search,
   X,
-  User
+  User,
+  ArrowRight,
 } from "lucide-react"
-import { Checkbox } from "@/components/ui/checkbox"
+import Link from "next/link"
 import { useI18n, interpolate } from "@/components/i18n-provider"
 import { PageContainer } from "@/components/layout"
+import { CashDepositDialog, PaymentReviewDialog } from "@/components/payments"
 
 interface Payment {
   id: string
@@ -67,18 +65,6 @@ interface Payment {
   recorder: { id: string; name: string; email: string } | null
 }
 
-interface BankDeposit {
-  id: string
-  bankReference: string
-  amount: number
-  depositDate: string
-  bankName: string
-  depositorName: string
-  isReconciled: boolean
-  reconciledAmount: number
-  recorder: { id: string; name: string }
-  reconciler: { id: string; name: string } | null
-}
 
 interface BalanceSummary {
   totalConfirmedPayments: number
@@ -95,6 +81,7 @@ interface BalanceData {
   payments: {
     byStatus: Record<string, { count: number; amount: number }>
     byMethod: Record<string, { count: number; amount: number; confirmed: number }>
+    byGrade: Record<string, { count: number; amount: number; confirmed: number }>
     total: { count: number; amount: number }
   }
   expenses: {
@@ -122,19 +109,19 @@ interface StudentSearchResult {
 
 export default function AccountingPage() {
   const { t } = useI18n()
+  const [isMounted, setIsMounted] = useState(false)
   const [openRecordPayment, setOpenRecordPayment] = useState(false)
-  const [selectedPayments, setSelectedPayments] = useState<string[]>([])
-  const [selectedDeposit, setSelectedDeposit] = useState<string | null>(null)
+  const [openDepositDialog, setOpenDepositDialog] = useState(false)
+  const [openReviewDialog, setOpenReviewDialog] = useState(false)
+  const [selectedPayment, setSelectedPayment] = useState<Payment | null>(null)
 
   // Data state
   const [balanceData, setBalanceData] = useState<BalanceData | null>(null)
   const [payments, setPayments] = useState<Payment[]>([])
-  const [bankDeposits, setBankDeposits] = useState<BankDeposit[]>([])
 
   // Loading states
   const [isLoadingBalance, setIsLoadingBalance] = useState(true)
   const [isLoadingPayments, setIsLoadingPayments] = useState(true)
-  const [isLoadingDeposits, setIsLoadingDeposits] = useState(true)
 
   // Student search state
   const [studentSearchQuery, setStudentSearchQuery] = useState("")
@@ -189,23 +176,6 @@ export default function AccountingPage() {
     fetchPayments()
   }, [])
 
-  // Fetch bank deposits
-  useEffect(() => {
-    async function fetchDeposits() {
-      try {
-        setIsLoadingDeposits(true)
-        const response = await fetch("/api/bank-deposits?limit=50")
-        if (!response.ok) throw new Error("Failed to fetch deposits")
-        const data = await response.json()
-        setBankDeposits(data.deposits || [])
-      } catch (err) {
-        console.error("Error fetching deposits:", err)
-      } finally {
-        setIsLoadingDeposits(false)
-      }
-    }
-    fetchDeposits()
-  }, [])
 
   // Click outside handler for search results
   useEffect(() => {
@@ -216,6 +186,11 @@ export default function AccountingPage() {
     }
     document.addEventListener("mousedown", handleClickOutside)
     return () => document.removeEventListener("mousedown", handleClickOutside)
+  }, [])
+
+  // Client-side mount detection for hydration-safe Tabs rendering
+  useEffect(() => {
+    setIsMounted(true)
   }, [])
 
   // Search students with debounce
@@ -352,16 +327,6 @@ export default function AccountingPage() {
     }
   }, [selectedStudent, paymentAmount, paymentMethod, receiptNumber, transactionRef, paymentNotes, handleDialogChange])
 
-  // Get payments that are ready for reconciliation (deposited status)
-  const validatedPayments = useMemo(() => {
-    return payments.filter(p => p.status === "deposited" || p.status === "pending_review")
-  }, [payments])
-
-  // Get unreconciled bank deposits
-  const unreconciledDeposits = useMemo(() => {
-    return bankDeposits.filter(d => !d.isReconciled)
-  }, [bankDeposits])
-
   const getStatusBadge = (status: string) => {
     switch (status) {
       case "pending_deposit":
@@ -374,7 +339,7 @@ export default function AccountingPage() {
       case "deposited":
         return (
           <Badge variant="outline" className="text-blue-500 border-blue-500">
-            <DollarSign className="h-3 w-3 mr-1" />
+            <Clock className="h-3 w-3 mr-1" />
             Déposé
           </Badge>
         )
@@ -425,12 +390,36 @@ export default function AccountingPage() {
     }
   }
 
-  const selectedTotal = validatedPayments
-    .filter((p) => selectedPayments.includes(p.id))
-    .reduce((sum, p) => sum + p.amount, 0)
-
   const formatAmount = (amount: number) => {
     return new Intl.NumberFormat('fr-GN').format(amount) + " GNF"
+  }
+
+  // Refresh data after dialog actions
+  const refreshData = async () => {
+    // Refresh payments
+    const paymentsResponse = await fetch("/api/payments?limit=50")
+    if (paymentsResponse.ok) {
+      const data = await paymentsResponse.json()
+      setPayments(data.payments || [])
+    }
+    // Refresh balance
+    const balanceResponse = await fetch("/api/accounting/balance")
+    if (balanceResponse.ok) {
+      const data = await balanceResponse.json()
+      setBalanceData(data)
+    }
+  }
+
+  // Handle opening deposit dialog
+  const handleOpenDeposit = (payment: Payment) => {
+    setSelectedPayment(payment)
+    setOpenDepositDialog(true)
+  }
+
+  // Handle opening review dialog
+  const handleOpenReview = (payment: Payment) => {
+    setSelectedPayment(payment)
+    setOpenReviewDialog(true)
   }
 
   return (
@@ -515,14 +504,182 @@ export default function AccountingPage() {
           </Card>
         </div>
 
-        <Tabs defaultValue="payments" className="space-y-6">
+        {isMounted ? (
+        <Tabs defaultValue="balance" className="space-y-6">
           <TabsList>
+            <TabsTrigger value="balance">{t.accounting.tabBalance}</TabsTrigger>
             <TabsTrigger value="payments">{t.accounting.tabPayments}</TabsTrigger>
-            <TabsTrigger value="reconciliation">{t.accounting.tabReconciliation}</TabsTrigger>
-            <TabsTrigger value="period-close">{t.accounting.tabPeriodClose}</TabsTrigger>
           </TabsList>
 
-          {/* Payment Recording Screen */}
+          {/* Balance Overview Tab */}
+          <TabsContent value="balance" className="space-y-6">
+            {/* Breakdown by Payment Method */}
+            <div className="grid gap-4 md:grid-cols-2">
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-lg">{t.accounting.byMethod}</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  {isLoadingBalance ? (
+                    <div className="flex items-center justify-center py-8">
+                      <Loader2 className="size-6 animate-spin text-muted-foreground" />
+                    </div>
+                  ) : (
+                    <div className="space-y-4">
+                      <div className="flex items-center justify-between p-3 rounded-lg bg-muted/50">
+                        <div className="flex items-center gap-3">
+                          <div className="p-2 rounded-full bg-green-100 dark:bg-green-900/30">
+                            <BanknoteIcon className="size-4 text-green-600" />
+                          </div>
+                          <div>
+                            <p className="font-medium">{t.accounting.cashPayments}</p>
+                            <p className="text-xs text-muted-foreground">
+                              {balanceData?.payments.byMethod.cash?.count || 0} transactions
+                            </p>
+                          </div>
+                        </div>
+                        <div className="text-right">
+                          <p className="font-bold">{formatAmount(balanceData?.payments.byMethod.cash?.amount || 0)}</p>
+                          <p className="text-xs text-success">
+                            {formatAmount(balanceData?.payments.byMethod.cash?.confirmed || 0)} confirmé
+                          </p>
+                        </div>
+                      </div>
+                      <div className="flex items-center justify-between p-3 rounded-lg bg-muted/50">
+                        <div className="flex items-center gap-3">
+                          <div className="p-2 rounded-full bg-orange-100 dark:bg-orange-900/30">
+                            <Smartphone className="size-4 text-orange-600" />
+                          </div>
+                          <div>
+                            <p className="font-medium">{t.accounting.orangeMoneyPayments}</p>
+                            <p className="text-xs text-muted-foreground">
+                              {balanceData?.payments.byMethod.orange_money?.count || 0} transactions
+                            </p>
+                          </div>
+                        </div>
+                        <div className="text-right">
+                          <p className="font-bold">{formatAmount(balanceData?.payments.byMethod.orange_money?.amount || 0)}</p>
+                          <p className="text-xs text-success">
+                            {formatAmount(balanceData?.payments.byMethod.orange_money?.confirmed || 0)} confirmé
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+
+              {/* Breakdown by Status */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-lg">{t.accounting.byStatus}</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  {isLoadingBalance ? (
+                    <div className="flex items-center justify-center py-8">
+                      <Loader2 className="size-6 animate-spin text-muted-foreground" />
+                    </div>
+                  ) : (
+                    <div className="space-y-3">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                          <div className="size-2 rounded-full bg-orange-500" />
+                          <span className="text-sm">{t.accounting.pendingDeposit}</span>
+                        </div>
+                        <div className="text-right">
+                          <span className="font-medium">{formatAmount(balanceData?.payments.byStatus.pending_deposit?.amount || 0)}</span>
+                          <span className="text-xs text-muted-foreground ml-2">({balanceData?.payments.byStatus.pending_deposit?.count || 0})</span>
+                        </div>
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                          <div className="size-2 rounded-full bg-blue-500" />
+                          <span className="text-sm">{t.accounting.deposited}</span>
+                        </div>
+                        <div className="text-right">
+                          <span className="font-medium">{formatAmount(balanceData?.payments.byStatus.deposited?.amount || 0)}</span>
+                          <span className="text-xs text-muted-foreground ml-2">({balanceData?.payments.byStatus.deposited?.count || 0})</span>
+                        </div>
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                          <div className="size-2 rounded-full bg-yellow-500" />
+                          <span className="text-sm">{t.accounting.pendingReview}</span>
+                        </div>
+                        <div className="text-right">
+                          <span className="font-medium">{formatAmount(balanceData?.payments.byStatus.pending_review?.amount || 0)}</span>
+                          <span className="text-xs text-muted-foreground ml-2">({balanceData?.payments.byStatus.pending_review?.count || 0})</span>
+                        </div>
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                          <div className="size-2 rounded-full bg-green-500" />
+                          <span className="text-sm">{t.accounting.confirmed}</span>
+                        </div>
+                        <div className="text-right">
+                          <span className="font-medium">{formatAmount(balanceData?.payments.byStatus.confirmed?.amount || 0)}</span>
+                          <span className="text-xs text-muted-foreground ml-2">({balanceData?.payments.byStatus.confirmed?.count || 0})</span>
+                        </div>
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                          <div className="size-2 rounded-full bg-red-500" />
+                          <span className="text-sm">{t.accounting.rejected}</span>
+                        </div>
+                        <div className="text-right">
+                          <span className="font-medium">{formatAmount(balanceData?.payments.byStatus.rejected?.amount || 0)}</span>
+                          <span className="text-xs text-muted-foreground ml-2">({balanceData?.payments.byStatus.rejected?.count || 0})</span>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            </div>
+
+            {/* Breakdown by Grade */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-lg">{t.accounting.byGrade}</CardTitle>
+              </CardHeader>
+              <CardContent>
+                {isLoadingBalance ? (
+                  <div className="flex items-center justify-center py-8">
+                    <Loader2 className="size-6 animate-spin text-muted-foreground" />
+                  </div>
+                ) : balanceData?.payments.byGrade && Object.keys(balanceData.payments.byGrade).length > 0 ? (
+                  <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+                    {Object.entries(balanceData.payments.byGrade)
+                      .sort(([a], [b]) => a.localeCompare(b))
+                      .map(([grade, data]) => (
+                        <div key={grade} className="p-3 rounded-lg border bg-card">
+                          <p className="font-medium text-sm">{grade}</p>
+                          <p className="text-lg font-bold">{formatAmount(data.amount)}</p>
+                          <div className="flex items-center justify-between text-xs text-muted-foreground mt-1">
+                            <span>{data.count} paiements</span>
+                            <span className="text-success">{formatAmount(data.confirmed)} confirmé</span>
+                          </div>
+                        </div>
+                      ))}
+                  </div>
+                ) : (
+                  <p className="text-center text-muted-foreground py-4">Aucune donnée disponible</p>
+                )}
+              </CardContent>
+            </Card>
+
+            {/* Link to full payments page */}
+            <div className="flex justify-center">
+              <Button asChild variant="outline" className="bg-transparent">
+                <Link href="/accounting/payments">
+                  {t.accounting.viewAllPayments}
+                  <ArrowRight className="ml-2 size-4" />
+                </Link>
+              </Button>
+            </div>
+          </TabsContent>
+
+          {/* Payment Recording Tab */}
           <TabsContent value="payments" className="space-y-6">
             <Card>
               <CardHeader>
@@ -812,17 +969,33 @@ export default function AccountingPage() {
                               {payment.transactionRef || "-"}
                             </TableCell>
                             <TableCell className="text-right">
-                              {payment.status === "pending_review" && (
-                                <Button size="sm" variant="outline" className="bg-transparent">
+                              {payment.status === "pending_deposit" && payment.method === "cash" && (
+                                <Button
+                                  size="sm"
+                                  variant="outline"
+                                  className="bg-transparent"
+                                  onClick={() => handleOpenDeposit(payment)}
+                                >
+                                  <BanknoteIcon className="h-3 w-3 mr-1" />
+                                  Dépôt
+                                </Button>
+                              )}
+                              {(payment.status === "pending_review" || payment.status === "deposited") && (
+                                <Button
+                                  size="sm"
+                                  variant="outline"
+                                  className="bg-transparent"
+                                  onClick={() => handleOpenReview(payment)}
+                                >
                                   <CheckCircle2 className="h-3 w-3 mr-1" />
                                   {t.accounting.validate}
                                 </Button>
                               )}
-                              {payment.status === "deposited" && (
-                                <span className="text-xs text-muted-foreground">{t.accounting.readyForReconciliation}</span>
-                              )}
                               {payment.status === "confirmed" && (
                                 <span className="text-xs text-success">{t.accounting.completed}</span>
+                              )}
+                              {payment.status === "rejected" && (
+                                <span className="text-xs text-destructive">Rejeté</span>
                               )}
                             </TableCell>
                           </TableRow>
@@ -834,297 +1007,32 @@ export default function AccountingPage() {
               </CardContent>
             </Card>
           </TabsContent>
-
-          {/* Reconciliation Screen */}
-          <TabsContent value="reconciliation" className="space-y-6">
-            <div className="grid gap-6 lg:grid-cols-2">
-              {/* Left Panel: Validated Payments */}
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <CheckCircle2 className="h-5 w-5 text-primary" />
-                    {t.accounting.validatedPayments}
-                  </CardTitle>
-                  <CardDescription>
-                    {isLoadingPayments
-                      ? "Chargement..."
-                      : `${validatedPayments.length} paiements à réconcilier`}
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  {isLoadingPayments ? (
-                    <div className="flex items-center justify-center py-8">
-                      <Loader2 className="size-6 animate-spin text-muted-foreground" />
-                    </div>
-                  ) : validatedPayments.length === 0 ? (
-                    <div className="text-center py-8 text-muted-foreground">
-                      Aucun paiement à réconcilier
-                    </div>
-                  ) : (
-                    <div className="space-y-3">
-                      {validatedPayments.map((payment) => (
-                        <div
-                          key={payment.id}
-                          className={`flex items-center justify-between p-4 rounded-lg border transition-colors ${
-                            selectedPayments.includes(payment.id)
-                              ? "border-primary bg-primary/5"
-                              : "border-border bg-card hover:bg-muted/50"
-                          }`}
-                        >
-                          <div className="flex items-center gap-3">
-                            <Checkbox
-                              checked={selectedPayments.includes(payment.id)}
-                              onCheckedChange={(checked) => {
-                                if (checked) {
-                                  setSelectedPayments([...selectedPayments, payment.id])
-                                } else {
-                                  setSelectedPayments(selectedPayments.filter((id) => id !== payment.id))
-                                }
-                              }}
-                            />
-                            <div>
-                              <p className="font-medium text-foreground">
-                                {payment.enrollment?.student?.firstName ?? "N/A"} {payment.enrollment?.student?.lastName ?? ""}
-                              </p>
-                              <p className="text-xs text-muted-foreground">
-                                {payment.receiptNumber} • {new Date(payment.recordedAt).toLocaleDateString('fr-FR')}
-                              </p>
-                            </div>
-                          </div>
-                          <p className="font-mono font-semibold text-foreground">
-                            {formatAmount(payment.amount)}
-                          </p>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                  {selectedPayments.length > 0 && (
-                    <div className="mt-4 p-4 rounded-lg bg-primary/10 border border-primary/30">
-                      <p className="text-sm text-muted-foreground">{t.accounting.totalSelected}</p>
-                      <p className="text-2xl font-bold text-primary">{formatAmount(selectedTotal)}</p>
-                    </div>
-                  )}
-                </CardContent>
-              </Card>
-
-              {/* Right Panel: Bank Deposits */}
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <DollarSign className="h-5 w-5 text-success" />
-                    {t.accounting.bankDeposits}
-                  </CardTitle>
-                  <CardDescription>
-                    {isLoadingDeposits
-                      ? "Chargement..."
-                      : `${unreconciledDeposits.length} dépôts non réconciliés`}
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  {isLoadingDeposits ? (
-                    <div className="flex items-center justify-center py-8">
-                      <Loader2 className="size-6 animate-spin text-muted-foreground" />
-                    </div>
-                  ) : unreconciledDeposits.length === 0 ? (
-                    <div className="text-center py-8 text-muted-foreground">
-                      Aucun dépôt bancaire non réconcilié
-                    </div>
-                  ) : (
-                    <div className="space-y-3">
-                      {unreconciledDeposits.map((deposit) => (
-                        <div
-                          key={deposit.id}
-                          onClick={() => setSelectedDeposit(deposit.id)}
-                          className={`p-4 rounded-lg border cursor-pointer transition-colors ${
-                            selectedDeposit === deposit.id
-                              ? "border-success bg-success/5"
-                              : "border-border bg-card hover:bg-muted/50"
-                          }`}
-                        >
-                          <div className="flex items-center justify-between mb-2">
-                            <p className="font-medium text-foreground">{deposit.bankReference}</p>
-                            <Badge variant="outline" className="text-success border-success">
-                              {deposit.bankName}
-                            </Badge>
-                          </div>
-                          <p className="text-2xl font-bold text-foreground">{formatAmount(deposit.amount)}</p>
-                          <p className="text-xs text-muted-foreground mt-1">
-                            {new Date(deposit.depositDate).toLocaleDateString('fr-FR')} • {deposit.depositorName}
-                          </p>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                </CardContent>
-              </Card>
-            </div>
-
-            {/* Reconciliation Actions */}
-            <Card className="border-primary/30 bg-primary/5">
-              <CardContent className="pt-6">
-                <div className="flex items-center justify-between">
-                  <div className="space-y-1">
-                    <p className="text-sm font-medium text-muted-foreground">{t.accounting.comparison}</p>
-                    <div className="flex items-center gap-4">
-                      <div>
-                        <p className="text-xs text-muted-foreground">{t.accounting.selectedPayments}</p>
-                        <p className="text-lg font-bold text-foreground">{formatAmount(selectedTotal)}</p>
-                      </div>
-                      <div className="text-muted-foreground">{t.accounting.vs}</div>
-                      <div>
-                        <p className="text-xs text-muted-foreground">{t.accounting.bankDeposit}</p>
-                        <p className="text-lg font-bold text-foreground">
-                          {selectedDeposit
-                            ? formatAmount(unreconciledDeposits.find((d) => d.id === selectedDeposit)?.amount || 0)
-                            : formatAmount(0)}
-                        </p>
-                      </div>
-                    </div>
-                    {selectedPayments.length > 0 &&
-                      selectedDeposit &&
-                      selectedTotal !== (unreconciledDeposits.find((d) => d.id === selectedDeposit)?.amount || 0) && (
-                        <p className="text-xs text-warning flex items-center gap-1 mt-2">
-                          <AlertCircle className="h-3 w-3" />
-                          {t.accounting.discrepancyDetected}
-                        </p>
-                      )}
-                  </div>
-                  <div className="flex gap-3">
-                    <Button
-                      variant="outline"
-                      disabled={selectedPayments.length === 0 || !selectedDeposit}
-                      className="bg-transparent"
-                    >
-                      <Flag className="h-4 w-4 mr-2" />
-                      {t.accounting.flagDiscrepancy}
-                    </Button>
-                    <Button
-                      disabled={
-                        selectedPayments.length === 0 ||
-                        !selectedDeposit ||
-                        selectedTotal !== (unreconciledDeposits.find((d) => d.id === selectedDeposit)?.amount || 0)
-                      }
-                    >
-                      <Link2 className="h-4 w-4 mr-2" />
-                      {t.accounting.reconcile}
-                    </Button>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          </TabsContent>
-
-          {/* Period Close Workflow */}
-          <TabsContent value="period-close" className="space-y-6">
-            <Card>
-              <CardHeader>
-                <CardTitle>{t.accounting.periodCloseWizard}</CardTitle>
-                <CardDescription>{t.accounting.closeCurrentPeriod}</CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-6">
-                {/* Step 1: Pre-Close Checklist */}
-                <div className="space-y-4">
-                  <div className="flex items-center gap-2">
-                    <div className="flex items-center justify-center h-8 w-8 rounded-full bg-primary text-primary-foreground font-bold text-sm">
-                      1
-                    </div>
-                    <h3 className="text-lg font-semibold">{t.accounting.preCloseVerification}</h3>
-                  </div>
-                  <div className="ml-10 space-y-3">
-                    <div className="flex items-center justify-between p-4 rounded-lg border bg-card">
-                      <div className="flex items-center gap-3">
-                        {balanceData?.payments.byStatus.pending_review?.count === 0 ? (
-                          <CheckCircle2 className="h-5 w-5 text-success" />
-                        ) : (
-                          <AlertCircle className="h-5 w-5 text-warning" />
-                        )}
-                        <div>
-                          <p className="font-medium text-foreground">{t.accounting.allPaymentsValidated}</p>
-                          <p className="text-sm text-muted-foreground">
-                            {balanceData?.payments.byStatus.pending_review?.count || 0} paiements en attente de validation
-                          </p>
-                        </div>
-                      </div>
-                      {balanceData?.payments.byStatus.pending_review?.count === 0 ? (
-                        <Badge className="bg-success text-success-foreground">{t.accounting.completed}</Badge>
-                      ) : (
-                        <Button variant="outline" size="sm" className="bg-transparent">
-                          {t.dashboard.review}
-                        </Button>
-                      )}
-                    </div>
-                    <div className="flex items-center justify-between p-4 rounded-lg border bg-card">
-                      <div className="flex items-center gap-3">
-                        {unreconciledDeposits.length === 0 ? (
-                          <CheckCircle2 className="h-5 w-5 text-success" />
-                        ) : (
-                          <AlertCircle className="h-5 w-5 text-warning" />
-                        )}
-                        <div>
-                          <p className="font-medium text-foreground">{t.accounting.allReconciliationsDone}</p>
-                          <p className="text-sm text-muted-foreground">
-                            {unreconciledDeposits.length} dépôts en attente de réconciliation
-                          </p>
-                        </div>
-                      </div>
-                      {unreconciledDeposits.length === 0 ? (
-                        <Badge className="bg-success text-success-foreground">{t.accounting.completed}</Badge>
-                      ) : (
-                        <Button variant="outline" size="sm" className="bg-transparent">
-                          {t.dashboard.review}
-                        </Button>
-                      )}
-                    </div>
-                  </div>
-                </div>
-
-                {/* Step 2: Review Summary */}
-                <div className="space-y-4">
-                  <div className="flex items-center gap-2">
-                    <div className="flex items-center justify-center h-8 w-8 rounded-full bg-muted text-muted-foreground font-bold text-sm">
-                      2
-                    </div>
-                    <h3 className="text-lg font-semibold text-muted-foreground">{t.accounting.summaryReview}</h3>
-                  </div>
-                  <div className="ml-10">
-                    <p className="text-sm text-muted-foreground">
-                      {t.accounting.availableAfterPreClose}
-                    </p>
-                  </div>
-                </div>
-
-                {/* Step 3: Close Period */}
-                <div className="space-y-4">
-                  <div className="flex items-center gap-2">
-                    <div className="flex items-center justify-center h-8 w-8 rounded-full bg-muted text-muted-foreground font-bold text-sm">
-                      3
-                    </div>
-                    <h3 className="text-lg font-semibold text-muted-foreground">{t.accounting.closePeriod}</h3>
-                  </div>
-                  <div className="ml-10">
-                    <Card className="border-destructive/30 bg-destructive/5">
-                      <CardContent className="pt-6">
-                        <div className="flex items-start gap-3">
-                          <Lock className="h-5 w-5 text-destructive mt-0.5" />
-                          <div className="flex-1">
-                            <p className="font-medium text-foreground mb-1">{t.accounting.irreversibleAction}</p>
-                            <p className="text-sm text-muted-foreground mb-4">
-                              {t.accounting.closePeriodWarning}
-                            </p>
-                            <Button disabled variant="destructive">
-                              <Lock className="h-4 w-4 mr-2" />
-                              {t.accounting.closeFinancialPeriod}
-                            </Button>
-                          </div>
-                        </div>
-                      </CardContent>
-                    </Card>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          </TabsContent>
         </Tabs>
+        ) : (
+          <div className="space-y-6">
+            <div className="h-10 w-48 bg-muted animate-pulse rounded-md" />
+            <div className="grid gap-4 md:grid-cols-2">
+              <div className="h-48 bg-muted animate-pulse rounded-lg" />
+              <div className="h-48 bg-muted animate-pulse rounded-lg" />
+            </div>
+          </div>
+        )}
+
+        {/* Cash Deposit Dialog */}
+        <CashDepositDialog
+          payment={selectedPayment}
+          open={openDepositDialog}
+          onOpenChange={setOpenDepositDialog}
+          onSuccess={refreshData}
+        />
+
+        {/* Payment Review Dialog */}
+        <PaymentReviewDialog
+          payment={selectedPayment}
+          open={openReviewDialog}
+          onOpenChange={setOpenReviewDialog}
+          onSuccess={refreshData}
+        />
     </PageContainer>
   )
 }
