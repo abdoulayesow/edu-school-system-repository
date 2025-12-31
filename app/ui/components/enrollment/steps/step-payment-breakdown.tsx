@@ -14,7 +14,7 @@ import { useEnrollmentWizard } from "../wizard-context"
 import { useI18n } from "@/components/i18n-provider"
 import { calculatePaymentSchedules } from "@/lib/enrollment/calculations"
 import { AlertTriangle, Calendar, Check, Percent } from "lucide-react"
-import { cn } from "@/lib/utils"
+import { cn, formatDateLong } from "@/lib/utils"
 import { formatCurrency } from "@/lib/utils/currency"
 import { sizing } from "@/lib/design-tokens"
 
@@ -22,7 +22,7 @@ import { sizing } from "@/lib/design-tokens"
 const PERCENTAGE_PRESETS = [10, 25, 50, 75, 100]
 
 export function StepPaymentBreakdown() {
-  const { t } = useI18n()
+  const { t, locale } = useI18n()
   const { state, updateData } = useEnrollmentWizard()
   const { data } = state
 
@@ -266,11 +266,7 @@ export function StepPaymentBreakdown() {
                     <Calendar className={sizing.icon.sm} />
                     <span>
                       {t.enrollmentWizard.dueBy}{" "}
-                      {new Date(schedule.dueDate).toLocaleDateString("fr-GN", {
-                        day: "numeric",
-                        month: "long",
-                        year: "numeric",
-                      })}
+                      {formatDateLong(schedule.dueDate, locale)}
                     </span>
                   </div>
                 </CardContent>

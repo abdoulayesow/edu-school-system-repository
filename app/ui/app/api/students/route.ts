@@ -75,6 +75,17 @@ export async function GET(req: NextRequest) {
                 photoUrl: true,
               },
             },
+            roomAssignments: activeSchoolYearId
+              ? {
+                  where: { isActive: true, schoolYearId: activeSchoolYearId },
+                  include: {
+                    gradeRoom: {
+                      select: { id: true, name: true, displayName: true },
+                    },
+                  },
+                  take: 1,
+                }
+              : undefined,
           },
         },
         enrollments: {
@@ -174,6 +185,11 @@ export async function GET(req: NextRequest) {
           }
         }
 
+        // Get room assignment
+        const roomAssignment = student.studentProfile?.roomAssignments?.[0] as
+          | { id: string; gradeRoom: { id: string; name: string; displayName: string | null } }
+          | undefined
+
         return {
           id: student.id,
           studentNumber: student.studentNumber,
@@ -184,6 +200,12 @@ export async function GET(req: NextRequest) {
           status: student.status,
           photoUrl: student.studentProfile?.person?.photoUrl,
           grade: enrollment?.grade,
+          roomAssignment: roomAssignment
+            ? {
+                id: roomAssignment.id,
+                gradeRoom: roomAssignment.gradeRoom,
+              }
+            : null,
           paymentStatus: paymentStatusValue,
           enrollmentStatus: enrollment?.status || null,
           attendanceStatus: attendanceStatusValue,

@@ -8,6 +8,7 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { useEnrollmentWizard } from "../wizard-context"
 import { useI18n } from "@/components/i18n-provider"
 import { formatCurrency } from "@/lib/utils/currency"
+import { formatDate } from "@/lib/utils"
 import {
   BookOpen,
   User,
@@ -21,7 +22,7 @@ import {
 import { sizing } from "@/lib/design-tokens"
 
 export function StepReview() {
-  const { t } = useI18n()
+  const { t, locale } = useI18n()
   const { state, goToStep } = useEnrollmentWizard()
   const { data } = state
 
@@ -149,9 +150,7 @@ export function StepReview() {
                 {t.enrollmentWizard.dateOfBirth}
               </p>
               <p className="font-medium">
-                {data.dateOfBirth
-                  ? new Date(data.dateOfBirth).toLocaleDateString("fr-GN")
-                  : "-"}
+                {formatDate(data.dateOfBirth, locale)}
               </p>
             </div>
             <div>

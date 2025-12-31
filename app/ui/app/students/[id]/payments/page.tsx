@@ -39,6 +39,7 @@ import {
 } from "lucide-react"
 import { useI18n } from "@/components/i18n-provider"
 import { PageContainer } from "@/components/layout"
+import { formatDate as formatDateUtil } from "@/lib/utils"
 import { CashDepositDialog, PaymentReviewDialog } from "@/components/payments"
 
 interface Student {
@@ -124,7 +125,7 @@ interface BalanceData {
 export default function StudentPaymentsPage() {
   const params = useParams()
   const router = useRouter()
-  const { t } = useI18n()
+  const { t, locale } = useI18n()
   const studentId = params.id as string
 
   const [balanceData, setBalanceData] = useState<BalanceData | null>(null)
@@ -193,11 +194,7 @@ export default function StudentPaymentsPage() {
   }
 
   const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString("fr-FR", {
-      year: "numeric",
-      month: "short",
-      day: "numeric",
-    })
+    return formatDateUtil(dateString, locale)
   }
 
   const getStatusBadge = (status: string) => {

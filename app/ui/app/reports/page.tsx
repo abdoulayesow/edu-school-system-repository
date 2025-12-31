@@ -11,6 +11,7 @@ import { BookOpen, Users, TrendingDown, BarChart3, Calendar, Loader2, AlertTrian
 import { useI18n } from "@/components/i18n-provider"
 import { PageContainer } from "@/components/layout"
 import { sizing } from "@/lib/design-tokens"
+import { formatDate } from "@/lib/utils"
 
 // Lazy load recharts components
 const LineChart = dynamic(() => import("recharts").then(mod => mod.LineChart) as never, { ssr: false }) as typeof import("recharts").LineChart
@@ -74,7 +75,7 @@ interface AttendanceStats {
 }
 
 export default function ReportsPage() {
-  const { t } = useI18n()
+  const { t, locale } = useI18n()
   const [grades, setGrades] = useState<Grade[]>([])
   const [selectedGradeId, setSelectedGradeId] = useState<string | null>(null)
   const [attendanceStats, setAttendanceStats] = useState<AttendanceStats | null>(null)
@@ -156,7 +157,7 @@ export default function ReportsPage() {
       .slice(0, 14)
       .reverse()
       .map(day => ({
-        date: new Date(day.date).toLocaleDateString("fr-FR", { day: "2-digit", month: "short" }),
+        date: formatDate(day.date, locale),
         rate: day.total > 0 ? Math.round((day.present + day.late + day.excused) / day.total * 100) : 0,
         present: day.present,
         absent: day.absent,

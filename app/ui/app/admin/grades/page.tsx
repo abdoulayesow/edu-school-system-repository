@@ -53,10 +53,7 @@ import {
   ChevronRight,
   Power,
   PowerOff,
-  UserPlus,
 } from "lucide-react"
-import { RoomAssignmentDialog, BulkMoveDialog } from "@/components/room-assignments"
-import { ArrowRightLeft } from "lucide-react"
 
 interface SchoolYear {
   id: string
@@ -142,8 +139,6 @@ export default function GradesPage() {
   const [isSubjectDialogOpen, setIsSubjectDialogOpen] = useState(false)
   const [isDeleteGradeDialogOpen, setIsDeleteGradeDialogOpen] = useState(false)
   const [isDeleteRoomDialogOpen, setIsDeleteRoomDialogOpen] = useState(false)
-  const [isRoomAssignmentDialogOpen, setIsRoomAssignmentDialogOpen] = useState(false)
-  const [isBulkMoveDialogOpen, setIsBulkMoveDialogOpen] = useState(false)
   const [deleteRoomHasStudents, setDeleteRoomHasStudents] = useState<number>(0)
   const [deleteTargetRoomId, setDeleteTargetRoomId] = useState<string>("")
 
@@ -493,11 +488,6 @@ export default function GradesPage() {
     }
   }
 
-  function openBulkMoveDialog(grade: Grade) {
-    setSelectedGrade(grade)
-    setIsBulkMoveDialogOpen(true)
-  }
-
   function resetRoomForm() {
     setRoomForm({
       name: "",
@@ -586,11 +576,6 @@ export default function GradesPage() {
     setSelectedGrade(grade)
     resetSubjectForm()
     setIsSubjectDialogOpen(true)
-  }
-
-  function openRoomAssignmentDialog(grade: Grade) {
-    setSelectedGrade(grade)
-    setIsRoomAssignmentDialogOpen(true)
   }
 
   if (!isMounted) {
@@ -778,6 +763,16 @@ export default function GradesPage() {
                     </Button>
                   </CollapsibleTrigger>
                   <CollapsibleContent className="mt-2 space-y-2">
+                    {/* Capacity Tracker */}
+                    <div className="flex items-center justify-between text-xs text-muted-foreground bg-muted/50 rounded p-2">
+                      <span>{t.admin.gradeCapacity}: {grade.capacity}</span>
+                      <span>
+                        {t.admin.allocated}: {grade.rooms.reduce((sum, r) => sum + r.capacity, 0)}/{grade.capacity}
+                      </span>
+                      <span className={grade.rooms.reduce((sum, r) => sum + r.capacity, 0) >= grade.capacity ? "text-destructive" : "text-green-600"}>
+                        {t.admin.available}: {grade.capacity - grade.rooms.reduce((sum, r) => sum + r.capacity, 0)}
+                      </span>
+                    </div>
                     {grade.rooms.length === 0 ? (
                       <p className="text-sm text-muted-foreground text-center py-2">
                         {t.admin.noRoomsConfigured}
@@ -840,29 +835,7 @@ export default function GradesPage() {
                           {t.admin.addRoom}
                         </Button>
                       )}
-                      {canEdit && grade.rooms.length > 0 && (
-                        <>
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            className="flex-1"
-                            onClick={() => openRoomAssignmentDialog(grade)}
-                          >
-                            <UserPlus className="h-3 w-3 mr-1" />
-                            {t.admin.assignStudents}
-                          </Button>
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            className="flex-1"
-                            onClick={() => openBulkMoveDialog(grade)}
-                          >
-                            <ArrowRightLeft className="h-3 w-3 mr-1" />
-                            {t.admin.moveStudents}
-                          </Button>
-                        </>
-                      )}
-                    </div>
+                                          </div>
                   </CollapsibleContent>
                 </Collapsible>
               </CardContent>
@@ -1279,31 +1252,6 @@ export default function GradesPage() {
         </AlertDialogContent>
       </AlertDialog>
 
-      {/* Room Assignment Dialog */}
-      {selectedGrade && (
-        <RoomAssignmentDialog
-          open={isRoomAssignmentDialogOpen}
-          onOpenChange={setIsRoomAssignmentDialogOpen}
-          gradeId={selectedGrade.id}
-          gradeName={selectedGrade.name}
-          schoolYearId={selectedYearId}
-          rooms={selectedGrade.rooms}
-          onSuccess={fetchGrades}
-        />
-      )}
-
-      {/* Bulk Move Dialog */}
-      {selectedGrade && (
-        <BulkMoveDialog
-          open={isBulkMoveDialogOpen}
-          onOpenChange={setIsBulkMoveDialogOpen}
-          gradeId={selectedGrade.id}
-          gradeName={selectedGrade.name}
-          schoolYearId={selectedYearId}
-          rooms={selectedGrade.rooms}
-          onSuccess={fetchGrades}
-        />
-      )}
-    </PageContainer>
+      </PageContainer>
   )
 }

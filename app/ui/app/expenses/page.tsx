@@ -62,6 +62,7 @@ import {
 } from "lucide-react"
 import { useI18n } from "@/components/i18n-provider"
 import { PageContainer } from "@/components/layout"
+import { formatDate as formatDateUtil } from "@/lib/utils"
 
 interface User {
   id: string
@@ -99,7 +100,7 @@ type ExpenseStatus = "pending" | "approved" | "rejected" | "paid"
 type PaymentMethod = "cash" | "orange_money"
 
 export default function ExpensesPage() {
-  const { t } = useI18n()
+  const { t, locale } = useI18n()
 
   // Hydration guard - prevents SSR/client mismatch with Radix IDs
   const [isMounted, setIsMounted] = useState(false)
@@ -216,11 +217,7 @@ export default function ExpensesPage() {
 
   // Format date
   const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('fr-GN', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric'
-    })
+    return formatDateUtil(dateString, locale)
   }
 
   // Get category icon

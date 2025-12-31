@@ -130,6 +130,30 @@ export async function PUT(req: NextRequest, { params }: RouteParams) {
       }
     }
 
+    // If capacity is changing, validate against grade capacity
+    if (validated.capacity !== undefined && validated.capacity !== room.capacity) {
+      const otherRooms = await prisma.gradeRoom.findMany({
+        where: { gradeId, id: { not: roomId } },
+        select: { capacity: true },
+      })
+      const otherRoomsCapacity = otherRooms.reduce((sum, r) => sum + r.capacity, 0)
+      const newTotal = otherRoomsCapacity + validated.capacity
+
+      if (newTotal > room.grade.capacity) {
+        const available = room.grade.capacity - otherRoomsCapacity
+        return NextResponse.json(
+          {
+            message: `Room capacity (${validated.capacity}) would exceed grade limit. Available capacity: ${available}`,
+            gradeCapacity: room.grade.capacity,
+            allocatedCapacity: otherRoomsCapacity,
+            availableCapacity: available,
+            requestedCapacity: validated.capacity,
+          },
+          { status: 400 }
+        )
+      }
+    }
+
     const updatedRoom = await prisma.gradeRoom.update({
       where: { id: roomId },
       data: {

@@ -72,6 +72,7 @@ export const fr = {
     collapseMenu: "Réduire le menu",
     expandMenu: "Agrandir le menu",
     closeMenu: "Fermer le menu",
+    gradesClasses: "Niveaux & Classes",
   },
 
   // Homepage
@@ -929,6 +930,14 @@ export const fr = {
     progressBar: "Progression",
     remainingBalance: "Solde restant",
     uploadPhoto: "Télécharger une photo",
+
+    // Grades & Classes page
+    gradesClassesSubtitle: "Gérer les affectations de salles et voir les informations de classe",
+    assigned: "Affectés",
+    unassigned: "Non affectés",
+    roomsAndStudents: "Salles & Élèves",
+    room: "Salle",
+    changeRoom: "Changer de Salle",
   },
 
   // Enhanced attendance
@@ -1121,6 +1130,8 @@ export const fr = {
     gradeSeries: "Série (Lycée)",
     tuitionFee: "Frais de Scolarité",
     gradeCapacity: "Capacité",
+    allocated: "Alloué",
+    available: "Disponible",
     addRoom: "Ajouter une Salle",
     editRoom: "Modifier la Salle",
     deleteRoom: "Supprimer la Salle",
@@ -1262,6 +1273,9 @@ export const fr = {
       studentName: "Nom de l'Élève",
       studentNumber: "Numéro de l'Élève",
       fetchError: "Échec du chargement des élèves non assignés",
+      currentRoom: "Salle Actuelle",
+      newRoom: "Nouvelle Salle",
+      reassignSuccess: "Salle changée avec succès",
     },
 
     // Common

@@ -21,6 +21,7 @@ import {
 } from "lucide-react"
 import { useI18n } from "@/components/i18n-provider"
 import { PageContainer } from "@/components/layout"
+import { formatDate } from "@/lib/utils"
 import { CashDepositDialog, PaymentReviewDialog } from "@/components/payments"
 
 interface Payment {
@@ -57,7 +58,7 @@ interface PaginationInfo {
 }
 
 export default function PaymentsPage() {
-  const { t } = useI18n()
+  const { t, locale } = useI18n()
   const [payments, setPayments] = useState<Payment[]>([])
   const [pagination, setPagination] = useState<PaginationInfo>({
     total: 0,
@@ -355,7 +356,7 @@ export default function PaymentsPage() {
                         </TableCell>
                         <TableCell>{getMethodBadge(payment.method)}</TableCell>
                         <TableCell>
-                          {new Date(payment.recordedAt).toLocaleDateString('fr-FR')}
+                          {formatDate(payment.recordedAt, locale)}
                         </TableCell>
                         <TableCell>{getStatusBadge(payment.status)}</TableCell>
                         <TableCell className="font-mono text-sm">

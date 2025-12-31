@@ -108,6 +108,28 @@ export async function POST(req: NextRequest, { params }: RouteParams) {
       )
     }
 
+    // Check capacity constraint: sum of room capacities cannot exceed grade capacity
+    const existingRooms = await prisma.gradeRoom.findMany({
+      where: { gradeId },
+      select: { capacity: true },
+    })
+    const totalAllocated = existingRooms.reduce((sum, r) => sum + r.capacity, 0)
+    const newTotal = totalAllocated + validated.capacity
+
+    if (newTotal > grade.capacity) {
+      const available = grade.capacity - totalAllocated
+      return NextResponse.json(
+        {
+          message: `Room capacity (${validated.capacity}) would exceed grade limit. Available capacity: ${available}`,
+          gradeCapacity: grade.capacity,
+          allocatedCapacity: totalAllocated,
+          availableCapacity: available,
+          requestedCapacity: validated.capacity,
+        },
+        { status: 400 }
+      )
+    }
+
     // Generate display name if not provided
     const displayName = validated.displayName || `${grade.name} ${validated.name}`
 

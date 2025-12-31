@@ -74,6 +74,7 @@ export const en: TranslationKeys = {
     collapseMenu: "Collapse Menu",
     expandMenu: "Expand Menu",
     closeMenu: "Close Menu",
+    gradesClasses: "Grades & Classes",
   },
 
   // Homepage
@@ -931,6 +932,14 @@ export const en: TranslationKeys = {
     progressBar: "Progress",
     remainingBalance: "Remaining balance",
     uploadPhoto: "Upload photo",
+
+    // Grades & Classes page
+    gradesClassesSubtitle: "Manage student room assignments and view class information",
+    assigned: "Assigned",
+    unassigned: "Unassigned",
+    roomsAndStudents: "Rooms & Students",
+    room: "Room",
+    changeRoom: "Change Room",
   },
 
   // Enhanced attendance
@@ -1123,6 +1132,8 @@ export const en: TranslationKeys = {
     gradeSeries: "Series (High School)",
     tuitionFee: "Tuition Fee",
     gradeCapacity: "Capacity",
+    allocated: "Allocated",
+    available: "Available",
     addRoom: "Add Room",
     editRoom: "Edit Room",
     deleteRoom: "Delete Room",
@@ -1264,6 +1275,9 @@ export const en: TranslationKeys = {
       studentName: "Student Name",
       studentNumber: "Student Number",
       fetchError: "Failed to load unassigned students",
+      currentRoom: "Current Room",
+      newRoom: "New Room",
+      reassignSuccess: "Room changed successfully",
     },
 
     // Common

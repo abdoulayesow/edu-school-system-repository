@@ -34,6 +34,10 @@ interface Student {
   lastName: string
   photoUrl: string | null
   grade: { id: string; name: string; level: number; order: number } | null
+  roomAssignment: {
+    id: string
+    gradeRoom: { id: string; name: string; displayName: string | null }
+  } | null
   paymentStatus: "late" | "on_time" | "in_advance" | "complete" | null
   enrollmentStatus: "draft" | "submitted" | "needs_review" | "completed" | "rejected" | "cancelled" | null
   attendanceStatus: "good" | "concerning" | "critical" | null
@@ -432,6 +436,7 @@ export default function StudentsPage() {
                       <TableHead>{t.enrollments.fullName}</TableHead>
                       <TableHead>{t.enrollments.studentId}</TableHead>
                       <TableHead>{t.common.level}</TableHead>
+                      <TableHead>{t.students.room}</TableHead>
                       <TableHead>{t.enrollments.paymentStatus}</TableHead>
                       <TableHead>Présence</TableHead>
                       <TableHead className="text-right">{t.common.actions}</TableHead>
@@ -440,7 +445,7 @@ export default function StudentsPage() {
                   <TableBody>
                     {filteredStudents.length === 0 ? (
                       <TableRow>
-                        <TableCell colSpan={7} className="text-center py-8 text-muted-foreground">
+                        <TableCell colSpan={8} className="text-center py-8 text-muted-foreground">
                           {searchQuery || gradeFilter !== "all" || paymentStatusFilter !== "all" || attendanceStatusFilter !== "all"
                             ? "Aucun élève trouvé avec ces critères"
                             : "Aucun élève inscrit"}
@@ -464,6 +469,11 @@ export default function StudentsPage() {
                             {student.studentNumber}
                           </TableCell>
                           <TableCell>{student.grade?.name ?? "-"}</TableCell>
+                          <TableCell>
+                            {student.roomAssignment?.gradeRoom?.displayName ||
+                              student.roomAssignment?.gradeRoom?.name ||
+                              "-"}
+                          </TableCell>
                           <TableCell>
                             {getPaymentStatusBadge(student.paymentStatus)}
                           </TableCell>

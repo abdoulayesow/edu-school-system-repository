@@ -8,7 +8,7 @@ import { Badge } from "@/components/ui/badge"
 import { useEnrollmentWizard } from "../wizard-context"
 import { useI18n } from "@/components/i18n-provider"
 import { Users, Check, AlertTriangle, Lock } from "lucide-react"
-import { cn } from "@/lib/utils"
+import { cn, formatDate } from "@/lib/utils"
 import { formatCurrency } from "@/lib/utils/currency"
 import type { SchoolLevel } from "@/lib/enrollment/types"
 import { sizing } from "@/lib/design-tokens"
@@ -38,7 +38,7 @@ interface SchoolYear {
 const GRADE_SOFT_LIMIT = 70
 
 export function StepGradeSelection() {
-  const { t } = useI18n()
+  const { t, locale } = useI18n()
   const { state, updateData } = useEnrollmentWizard()
   const { data } = state
 
@@ -173,7 +173,7 @@ export function StepGradeSelection() {
           </span>
           <span>
             <strong>{t.enrollmentWizard.todayDate}:</strong>{" "}
-            {new Date().toLocaleDateString("fr-GN")}
+            {formatDate(new Date(), locale)}
           </span>
         </div>
       )}

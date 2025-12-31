@@ -93,6 +93,14 @@ export const navigationConfig: MainNavItem[] = [
         roles: ["director", "academic_director", "secretary", "teacher"],
       },
       {
+        id: "grades-classes",
+        name: "Grades & Classes",
+        translationKey: "gradesClasses",
+        href: "/students/grades",
+        icon: School,
+        roles: ["director", "academic_director", "secretary"],
+      },
+      {
         id: "enrollments",
         name: "Enrollments",
         translationKey: "enrollments",

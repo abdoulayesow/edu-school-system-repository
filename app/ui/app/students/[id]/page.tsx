@@ -28,12 +28,15 @@ import {
   Receipt,
   TrendingUp,
   TrendingDown,
-  Minus
+  Minus,
+  DoorOpen,
+  Edit2,
 } from "lucide-react"
 import { useI18n } from "@/components/i18n-provider"
 import { PageContainer } from "@/components/layout/PageContainer"
-import { cn } from "@/lib/utils"
+import { cn, formatDateLong } from "@/lib/utils"
 import Link from "next/link"
+import { StudentRoomChangeDialog } from "@/components/room-assignments"
 
 interface Person {
   id: string
@@ -43,13 +46,24 @@ interface Person {
   phone?: string | null
 }
 
+interface RoomAssignment {
+  id: string
+  gradeRoom: {
+    id: string
+    name: string
+    displayName: string | null
+  }
+}
+
 interface StudentProfile {
+  id: string
   person: Person
   currentGrade?: {
     id: string
     name: string
     level: string
   } | null
+  roomAssignments?: RoomAssignment[]
 }
 
 interface Payment {
@@ -118,13 +132,14 @@ interface StudentDetail {
 }
 
 export default function StudentDetailPage() {
-  const { t } = useI18n()
+  const { t, locale } = useI18n()
   const params = useParams()
   const studentId = params.id as string
 
   const [student, setStudent] = useState<StudentDetail | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const [roomChangeDialogOpen, setRoomChangeDialogOpen] = useState(false)
 
   useEffect(() => {
     async function fetchStudent() {
@@ -152,6 +167,27 @@ export default function StudentDetailPage() {
     }
   }, [studentId])
 
+  // Refetch student data after room change
+  async function refetchStudent() {
+    try {
+      const response = await fetch(`/api/students/${studentId}`)
+      if (response.ok) {
+        const data = await response.json()
+        setStudent(data)
+      }
+    } catch (err) {
+      console.error("Error refetching student:", err)
+    }
+  }
+
+  // Get current room assignment
+  const currentRoomAssignment = student?.studentProfile?.roomAssignments?.[0]
+  const currentRoomName = currentRoomAssignment?.gradeRoom?.displayName || currentRoomAssignment?.gradeRoom?.name
+
+  // Get active school year from enrollments
+  const activeEnrollment = student?.enrollments?.find(e => e.schoolYear.isActive)
+  const activeSchoolYearId = activeEnrollment?.schoolYear.id
+
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('fr-GN', {
       style: 'decimal',
@@ -161,21 +197,17 @@ export default function StudentDetailPage() {
   }
 
   const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('fr-GN', {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric'
-    })
+    return formatDateLong(dateString, locale)
   }
 
   const formatDateTime = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('fr-GN', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric',
+    const d = new Date(dateString)
+    const datePart = formatDateLong(dateString, locale)
+    const timePart = d.toLocaleTimeString(locale === "fr" ? "fr-FR" : "en-US", {
       hour: '2-digit',
       minute: '2-digit'
     })
+    return `${datePart}, ${timePart}`
   }
 
   const getStatusBadge = (status: string) => {
@@ -288,12 +320,42 @@ export default function StudentDetailPage() {
               <p className="text-muted-foreground mb-2">
                 {student.studentNumber}
               </p>
-              {student.studentProfile?.currentGrade && (
-                <Badge variant="outline" className="gap-1">
-                  <GraduationCap className="size-3" />
-                  {student.studentProfile.currentGrade.name}
-                </Badge>
-              )}
+              <div className="flex items-center gap-2 flex-wrap">
+                {student.studentProfile?.currentGrade && (
+                  <Badge variant="outline" className="gap-1">
+                    <GraduationCap className="size-3" />
+                    {student.studentProfile.currentGrade.name}
+                  </Badge>
+                )}
+                {currentRoomName ? (
+                  <Badge variant="secondary" className="gap-1">
+                    <DoorOpen className="size-3" />
+                    {currentRoomName}
+                    {activeSchoolYearId && student.studentProfile?.currentGrade && (
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-4 w-4 ml-1 hover:bg-primary/10"
+                        onClick={() => setRoomChangeDialogOpen(true)}
+                      >
+                        <Edit2 className="size-3" />
+                      </Button>
+                    )}
+                  </Badge>
+                ) : (
+                  activeSchoolYearId && student.studentProfile?.currentGrade && (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="gap-1 h-6"
+                      onClick={() => setRoomChangeDialogOpen(true)}
+                    >
+                      <DoorOpen className="size-3" />
+                      {t.students.room}
+                    </Button>
+                  )
+                )}
+              </div>
             </div>
           </div>
 
@@ -842,6 +904,23 @@ export default function StudentDetailPage() {
             </Card>
           </TabsContent>
         </Tabs>
+
+        {/* Room Change Dialog */}
+        {student.studentProfile && activeSchoolYearId && student.studentProfile.currentGrade && (
+          <StudentRoomChangeDialog
+            open={roomChangeDialogOpen}
+            onOpenChange={setRoomChangeDialogOpen}
+            studentId={student.id}
+            studentName={`${student.firstName} ${student.lastName}`}
+            studentProfileId={student.studentProfile.id}
+            gradeId={student.studentProfile.currentGrade.id}
+            gradeName={student.studentProfile.currentGrade.name}
+            currentRoomId={currentRoomAssignment?.gradeRoom?.id || null}
+            currentRoomName={currentRoomName || null}
+            schoolYearId={activeSchoolYearId}
+            onSuccess={refetchStudent}
+          />
+        )}
     </PageContainer>
   )
 }

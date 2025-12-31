@@ -37,6 +37,7 @@ import {
 import Link from "next/link"
 import { useI18n, interpolate } from "@/components/i18n-provider"
 import { PageContainer } from "@/components/layout"
+import { formatDate } from "@/lib/utils"
 import { CashDepositDialog, PaymentReviewDialog } from "@/components/payments"
 
 interface Payment {
@@ -108,7 +109,7 @@ interface StudentSearchResult {
 }
 
 export default function AccountingPage() {
-  const { t } = useI18n()
+  const { t, locale } = useI18n()
   const [isMounted, setIsMounted] = useState(false)
   const [openRecordPayment, setOpenRecordPayment] = useState(false)
   const [openDepositDialog, setOpenDepositDialog] = useState(false)
@@ -962,7 +963,7 @@ export default function AccountingPage() {
                             </TableCell>
                             <TableCell>{getMethodBadge(payment.method)}</TableCell>
                             <TableCell>
-                              {new Date(payment.recordedAt).toLocaleDateString('fr-FR')}
+                              {formatDate(payment.recordedAt, locale)}
                             </TableCell>
                             <TableCell>{getStatusBadge(payment.status)}</TableCell>
                             <TableCell className="font-mono text-sm">

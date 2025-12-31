@@ -11,6 +11,7 @@ import { Plus, Search, Eye, Loader2, FileText, Clock, CheckCircle2, Users } from
 import { useI18n } from "@/components/i18n-provider"
 import { PageContainer } from "@/components/layout"
 import { sizing } from "@/lib/design-tokens"
+import { formatDate } from "@/lib/utils"
 import Link from "next/link"
 
 interface Enrollment {
@@ -37,7 +38,7 @@ interface Grade {
 }
 
 export default function EnrollmentsPage() {
-  const { t } = useI18n()
+  const { t, locale } = useI18n()
   const [isMounted, setIsMounted] = useState(false)
   const [searchQuery, setSearchQuery] = useState("")
   const [statusFilter, setStatusFilter] = useState<string>("all")
@@ -295,7 +296,7 @@ export default function EnrollmentsPage() {
                     ) : (
                       filteredEnrollments.map((enrollment) => (
                         <TableRow key={enrollment.id}>
-                          <TableCell>{new Date(enrollment.createdAt).toLocaleDateString()}</TableCell>
+                          <TableCell>{formatDate(enrollment.createdAt, locale)}</TableCell>
                           <TableCell className="font-medium">{enrollment.firstName} {enrollment.lastName}</TableCell>
                           <TableCell className="text-muted-foreground">{enrollment.enrollmentNumber}</TableCell>
                           <TableCell>{enrollment.grade?.name}</TableCell>

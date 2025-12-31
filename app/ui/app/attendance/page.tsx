@@ -28,6 +28,7 @@ import {
 import { useI18n } from "@/components/i18n-provider"
 import { PageContainer } from "@/components/layout"
 import { sizing } from "@/lib/design-tokens"
+import { formatDateWithDay } from "@/lib/utils"
 
 type AttendanceStatus = "present" | "absent" | "late" | "excused" | null
 
@@ -83,7 +84,7 @@ interface AttendanceData {
 }
 
 export default function AttendancePage() {
-  const { t } = useI18n()
+  const { t, locale } = useI18n()
 
   // Selection state
   const [grades, setGrades] = useState<Grade[]>([])
@@ -550,12 +551,7 @@ export default function AttendancePage() {
                     <div>
                       <p className="font-medium">{attendanceData.grade.name}</p>
                       <p className="text-sm text-muted-foreground">
-                        {new Date(selectedDate).toLocaleDateString('fr-FR', {
-                          weekday: 'long',
-                          year: 'numeric',
-                          month: 'long',
-                          day: 'numeric'
-                        })}
+                        {formatDateWithDay(selectedDate, locale)}
                       </p>
                     </div>
                     <Badge variant="secondary">
@@ -585,11 +581,7 @@ export default function AttendancePage() {
                   <div className="text-center">
                     <p className="font-semibold">{selectedGrade?.name}</p>
                     <p className="text-xs text-muted-foreground">
-                      {new Date(selectedDate).toLocaleDateString('fr-FR', {
-                        weekday: 'short',
-                        day: 'numeric',
-                        month: 'short'
-                      })}
+                      {formatDateWithDay(selectedDate, locale)}
                     </p>
                   </div>
                   <Button

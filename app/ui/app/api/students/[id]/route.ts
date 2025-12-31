@@ -46,6 +46,19 @@ export async function GET(req: NextRequest, { params }: RouteParams) {
             currentGrade: {
               select: { id: true, name: true, level: true },
             },
+            roomAssignments: {
+              where: { isActive: true },
+              include: {
+                gradeRoom: {
+                  select: { id: true, name: true, displayName: true, capacity: true },
+                },
+                schoolYear: {
+                  select: { id: true, name: true, isActive: true },
+                },
+              },
+              orderBy: { assignedAt: "desc" },
+              take: 1,
+            },
           },
         },
         enrollments: {
