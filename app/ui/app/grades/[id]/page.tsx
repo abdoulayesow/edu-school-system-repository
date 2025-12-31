@@ -1,7 +1,8 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useCallback } from "react"
 import { useParams } from "next/navigation"
+import { useSession } from "next-auth/react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -20,10 +21,13 @@ import {
   Clock,
   CheckCircle,
   XCircle,
-  AlertCircle
+  AlertCircle,
+  UserPlus,
 } from "lucide-react"
 import { useI18n } from "@/components/i18n-provider"
 import { PageContainer } from "@/components/layout/PageContainer"
+import { RoomAssignmentDialog } from "@/components/room-assignments"
+import { canPerformAction } from "@/lib/rbac"
 import Link from "next/link"
 
 interface Person {
@@ -67,6 +71,17 @@ interface Enrollment {
   }
 }
 
+interface Room {
+  id: string
+  name: string
+  displayName: string
+  capacity: number
+  isActive: boolean
+  _count: {
+    studentAssignments: number
+  }
+}
+
 interface GradeDetail {
   id: string
   name: string
@@ -84,6 +99,7 @@ interface GradeDetail {
   }
   subjects: GradeSubject[]
   enrollments: Enrollment[]
+  rooms?: Room[]
   studentCount: number
   attendanceSummary: {
     total: number
@@ -109,35 +125,40 @@ interface GradeDetail {
 
 export default function GradeDetailPage() {
   const { t } = useI18n()
+  const { data: session } = useSession()
   const params = useParams()
   const gradeId = params.id as string
 
   const [grade, setGrade] = useState<GradeDetail | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const [isRoomAssignmentDialogOpen, setIsRoomAssignmentDialogOpen] = useState(false)
+
+  // Check if user can assign students to rooms
+  const canAssignRooms = canPerformAction("admin:rooms:assignStudents", session?.user?.role)
+
+  const fetchGrade = useCallback(async () => {
+    try {
+      setIsLoading(true)
+      const response = await fetch(`/api/grades/${gradeId}`)
+      if (!response.ok) {
+        throw new Error("Failed to fetch grade")
+      }
+      const data = await response.json()
+      setGrade(data)
+    } catch (err) {
+      console.error("Error fetching grade:", err)
+      setError("Failed to load grade details")
+    } finally {
+      setIsLoading(false)
+    }
+  }, [gradeId])
 
   useEffect(() => {
-    async function fetchGrade() {
-      try {
-        setIsLoading(true)
-        const response = await fetch(`/api/grades/${gradeId}`)
-        if (!response.ok) {
-          throw new Error("Failed to fetch grade")
-        }
-        const data = await response.json()
-        setGrade(data)
-      } catch (err) {
-        console.error("Error fetching grade:", err)
-        setError("Failed to load grade details")
-      } finally {
-        setIsLoading(false)
-      }
-    }
-
     if (gradeId) {
       fetchGrade()
     }
-  }, [gradeId])
+  }, [gradeId, fetchGrade])
 
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('fr-GN', {
@@ -387,8 +408,22 @@ export default function GradeDetailPage() {
           <TabsContent value="students">
             <Card>
               <CardHeader>
-                <CardTitle>{t.gradesEnhanced.studentsInGrade}</CardTitle>
-                <CardDescription>{grade.studentCount} {t.gradesEnhanced.enrolledStudents}</CardDescription>
+                <div className="flex items-center justify-between">
+                  <div>
+                    <CardTitle>{t.gradesEnhanced.studentsInGrade}</CardTitle>
+                    <CardDescription>{grade.studentCount} {t.gradesEnhanced.enrolledStudents}</CardDescription>
+                  </div>
+                  {canAssignRooms && grade.rooms && grade.rooms.length > 0 && (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setIsRoomAssignmentDialogOpen(true)}
+                    >
+                      <UserPlus className="h-4 w-4 mr-2" />
+                      {t.admin.assignStudents}
+                    </Button>
+                  )}
+                </div>
               </CardHeader>
               <CardContent>
                 <div className="rounded-md border">
@@ -500,6 +535,19 @@ export default function GradeDetailPage() {
             </Card>
           </TabsContent>
         </Tabs>
+
+      {/* Room Assignment Dialog */}
+      {grade && grade.rooms && (
+        <RoomAssignmentDialog
+          open={isRoomAssignmentDialogOpen}
+          onOpenChange={setIsRoomAssignmentDialogOpen}
+          gradeId={grade.id}
+          gradeName={grade.name}
+          schoolYearId={grade.schoolYear.id}
+          rooms={grade.rooms}
+          onSuccess={fetchGrade}
+        />
+      )}
     </PageContainer>
   )
 }

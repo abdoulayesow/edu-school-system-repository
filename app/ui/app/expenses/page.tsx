@@ -101,6 +101,12 @@ type PaymentMethod = "cash" | "orange_money"
 export default function ExpensesPage() {
   const { t } = useI18n()
 
+  // Hydration guard - prevents SSR/client mismatch with Radix IDs
+  const [isMounted, setIsMounted] = useState(false)
+  useEffect(() => {
+    setIsMounted(true)
+  }, [])
+
   // Data states
   const [expenses, setExpenses] = useState<Expense[]>([])
   const [pagination, setPagination] = useState<Pagination | null>(null)
@@ -119,15 +125,23 @@ export default function ExpensesPage() {
   const [actionType, setActionType] = useState<"approve" | "reject" | "mark_paid" | "delete" | null>(null)
   const [rejectionReason, setRejectionReason] = useState("")
 
-  // New expense form
+  // New expense form - initialize date only on client to avoid hydration mismatch
   const [newExpense, setNewExpense] = useState({
     category: "" as ExpenseCategory | "",
     description: "",
     amount: "",
     method: "cash" as PaymentMethod,
-    date: new Date().toISOString().split("T")[0],
+    date: "",
     vendorName: "",
   })
+
+  // Set the date on client mount
+  useEffect(() => {
+    setNewExpense(prev => ({
+      ...prev,
+      date: new Date().toISOString().split("T")[0]
+    }))
+  }, [])
 
   // Fetch expenses
   const fetchExpenses = async () => {
@@ -351,6 +365,23 @@ export default function ExpensesPage() {
     } finally {
       setIsSubmitting(false)
     }
+  }
+
+  // Prevent hydration mismatch by not rendering interactive components until mounted
+  if (!isMounted) {
+    return (
+      <PageContainer maxWidth="full">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
+          <div>
+            <h1 className="text-3xl font-bold text-foreground mb-2">{t.expenses.title}</h1>
+            <p className="text-muted-foreground">{t.expenses.subtitle}</p>
+          </div>
+        </div>
+        <div className="flex items-center justify-center py-8">
+          <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+        </div>
+      </PageContainer>
+    )
   }
 
   return (

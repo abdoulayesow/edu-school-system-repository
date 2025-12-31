@@ -66,6 +66,19 @@ export async function GET(req: NextRequest, { params }: RouteParams) {
             },
           },
         },
+        rooms: {
+          select: {
+            id: true,
+            name: true,
+            displayName: true,
+            capacity: true,
+            isActive: true,
+            _count: {
+              select: { studentAssignments: { where: { isActive: true } } },
+            },
+          },
+          orderBy: { name: "asc" },
+        },
       },
     })
 

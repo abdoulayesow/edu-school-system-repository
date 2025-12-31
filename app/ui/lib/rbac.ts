@@ -51,12 +51,15 @@ const routeRoleRules: Array<{ prefix: string; roles: AppRole[] }> = [
   { prefix: "/enrollments", roles: ["director", "secretary", "academic_director"] },
   // Students module - view for teachers, edit for director/secretary
   { prefix: "/students", roles: ["director", "academic_director", "secretary", "teacher"] },
-  // Grades module - management for director/academic, view for teachers
-  { prefix: "/grades", roles: ["director", "academic_director", "teacher"] },
   // Expenses module - director and accountant only
   { prefix: "/expenses", roles: ["director", "accountant"] },
   // Default dashboard: allow all authenticated roles for now
   { prefix: "/dashboard", roles: ["user", "director", "academic_director", "secretary", "accountant", "teacher", "parent", "student"] },
+  // Administration module
+  { prefix: "/admin/school-years", roles: ["director", "academic_director"] },
+  { prefix: "/admin/grades", roles: ["director", "academic_director"] },
+  { prefix: "/admin/teachers", roles: ["director", "academic_director"] },
+  { prefix: "/admin/users", roles: ["director"] },
 ];
 
 // Action-level permissions for more granular control
@@ -86,6 +89,30 @@ export const actionPermissions = {
   "expenses:view": ["director", "accountant"],
   "expenses:create": ["director", "accountant", "secretary"],
   "expenses:approve": ["director"],
+
+  // School Years
+  "schoolYears:view": ["director", "academic_director"],
+  "schoolYears:create": ["director"],
+  "schoolYears:edit": ["director"],
+  "schoolYears:activate": ["director"],
+  "schoolYears:copyConfig": ["director"],
+
+  // Grades & Rooms (Admin)
+  "admin:grades:view": ["director", "academic_director"],
+  "admin:grades:create": ["director"],
+  "admin:grades:edit": ["director", "academic_director"],
+  "admin:grades:delete": ["director"],
+  "admin:grades:toggle": ["director"],
+  "admin:rooms:manage": ["director", "academic_director"],
+  "admin:rooms:assignStudents": ["director", "secretary"],
+
+  // Teachers & Class Assignments
+  "classAssignments:view": ["director", "academic_director"],
+  "classAssignments:manage": ["director", "academic_director"],
+
+  // User Invitations
+  "users:invite": ["director"],
+  "users:resendInvitation": ["director"],
 } as const;
 
 export type ActionPermission = keyof typeof actionPermissions;

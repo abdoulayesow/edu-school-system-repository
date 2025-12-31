@@ -15,6 +15,9 @@ import {
   PieChart,
   UserPlus,
   Calendar,
+  Settings,
+  CalendarDays,
+  UserCog,
 } from "lucide-react"
 import type { UserRole } from "./nav-links"
 
@@ -98,14 +101,6 @@ export const navigationConfig: MainNavItem[] = [
         roles: ["director", "secretary", "academic_director"],
       },
       {
-        id: "grades",
-        name: "Grades",
-        translationKey: "grades",
-        href: "/grades",
-        icon: School,
-        roles: ["director", "academic_director", "teacher"],
-      },
-      {
         id: "classes",
         name: "Timetable",
         translationKey: "timetable",
@@ -185,6 +180,47 @@ export const navigationConfig: MainNavItem[] = [
         translationKey: "dataHistory",
         href: "/audit/history",
         icon: History,
+        roles: ["director"],
+      },
+    ],
+  },
+  {
+    id: "administration",
+    name: "Administration",
+    translationKey: "administrationSection",
+    icon: Settings,
+    roles: ["director", "academic_director"],
+    subItems: [
+      {
+        id: "school-years",
+        name: "School Years",
+        translationKey: "schoolYears",
+        href: "/admin/school-years",
+        icon: CalendarDays,
+        roles: ["director", "academic_director"],
+      },
+      {
+        id: "grades-config",
+        name: "Grades & Rooms",
+        translationKey: "gradesAndRooms",
+        href: "/admin/grades",
+        icon: School,
+        roles: ["director", "academic_director"],
+      },
+      {
+        id: "teachers-classes",
+        name: "Teachers & Classes",
+        translationKey: "teachersAndClasses",
+        href: "/admin/teachers",
+        icon: Users,
+        roles: ["director", "academic_director"],
+      },
+      {
+        id: "users-config",
+        name: "Users",
+        translationKey: "usersManagement",
+        href: "/admin/users",
+        icon: UserCog,
         roles: ["director"],
       },
     ],

@@ -69,6 +69,12 @@ model User {
   // Expense relations
   requestedExpenses    Expense[]        @relation("ExpenseRequester")
   approvedExpenses     Expense[]        @relation("ExpenseApprover")
+
+  // Room assignment relations
+  assignedRoomAssignments StudentRoomAssignment[] @relation("RoomAssigner")
+
+  // User invitation relations
+  sentInvitations      UserInvitation[] @relation("InvitationSender")
 }
 
 model Address {
@@ -99,6 +105,7 @@ model Account {
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([provider, providerAccountId])
+  @@index([userId])
 }
 
 model Session {
@@ -107,6 +114,8 @@ model Session {
   userId       String
   expires      DateTime
   user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
 }
 
 model VerificationToken {
@@ -181,25 +190,34 @@ enum ExpenseCategory {
   other             // Miscellaneous
 }
 
+enum SchoolYearStatus {
+  new               // Newly created, not yet started
+  active            // Currently active
+  passed            // Past school year
+}
+
 model SchoolYear {
-  id              String       @id @default(cuid())
-  name            String       // "2025 - 2026"
-  startDate       DateTime     // September 1, 2025
-  endDate         DateTime     // June 30, 2026
-  enrollmentStart DateTime     // July 1, 2025
-  enrollmentEnd   DateTime     // June 15, 2026
-  isActive        Boolean      @default(false)
-  syncVersion     Int          @default(0)
-  createdAt       DateTime     @default(now())
-  updatedAt       DateTime     @updatedAt
+  id              String           @id @default(cuid())
+  name            String           // "2025 - 2026"
+  startDate       DateTime         // September 1, 2025
+  endDate         DateTime         // June 30, 2026
+  enrollmentStart DateTime         // July 1, 2025
+  enrollmentEnd   DateTime         // June 15, 2026
+  isActive        Boolean          @default(false)
+  status          SchoolYearStatus @default(new)
+  syncVersion     Int              @default(0)
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
 
   grades            Grade[]
   enrollments       Enrollment[]
   classAssignments  ClassAssignment[]
   gradeEnrollments  GradeEnrollment[]
+  studentRoomAssignments StudentRoomAssignment[]
 
   @@index([isActive])
   @@index([startDate])
+  @@index([status])
 }
 
 model Grade {
@@ -207,11 +225,13 @@ model Grade {
   name            String      // "7eme Annee"
   code            String?     // "7EME" - Short code for the grade
   level           SchoolLevel
-  order           Int         // 1-13 for sorting
+  order           Int         // 1-13 for sorting (extended to 19 for high school specializations)
   tuitionFee      Int         // Annual fee in GNF
   capacity        Int         @default(70) // Maximum students per grade (soft limit)
   schoolYearId    String
   gradeLeaderId   String?     // Teacher who leads this grade (responsable de classe)
+  series          String?     // For high school specializations: "SM", "SS", "SE"
+  isEnabled       Boolean     @default(true) // Enable/disable grade for enrollment
   syncVersion     Int         @default(0)
   createdAt       DateTime    @default(now())
   updatedAt       DateTime    @updatedAt
@@ -223,12 +243,14 @@ model Grade {
   currentStudents StudentProfile[] @relation("CurrentGradeStudents")
   gradeEnrollments GradeEnrollment[]
   attendanceSessions AttendanceSession[]
+  rooms           GradeRoom[]
 
   @@unique([schoolYearId, order])
   @@index([schoolYearId])
   @@index([level])
   @@index([order])
   @@index([gradeLeaderId])
+  @@index([isEnabled])
 }
 
 model Enrollment {
@@ -551,6 +573,7 @@ model StudentProfile {
   gradeEnrollments GradeEnrollment[]
   attendanceRecords AttendanceRecord[]
   parentLinks     StudentParent[]
+  roomAssignments StudentRoomAssignment[]
 
   @@index([personId])
   @@index([studentNumber])
@@ -646,14 +669,14 @@ model GradeSubject {
 model ClassAssignment {
   id              String    @id @default(cuid())
   gradeSubjectId  String
-  teacherProfileId String
+  teacherProfileId String?
   schoolYearId    String
   createdAt       DateTime  @default(now())
   updatedAt       DateTime  @updatedAt
 
   gradeSubject    GradeSubject    @relation(fields: [gradeSubjectId], references: [id], onDelete: Cascade)
-  teacherProfile  TeacherProfile  @relation(fields: [teacherProfileId], references: [id])
-  schoolYear      SchoolYear      @relation(fields: [schoolYearId], references: [id])
+  teacherProfile  TeacherProfile?  @relation(fields: [teacherProfileId], references: [id], onDelete: SetNull)
+  schoolYear      SchoolYear      @relation(fields: [schoolYearId], references: [id], onDelete: Cascade)
 
   @@unique([gradeSubjectId, schoolYearId])
   @@index([teacherProfileId])
@@ -701,7 +724,7 @@ model AttendanceSession {
   createdAt       DateTime            @default(now())
   updatedAt       DateTime            @updatedAt
 
-  grade           Grade               @relation(fields: [gradeId], references: [id])
+  grade           Grade               @relation(fields: [gradeId], references: [id], onDelete: Cascade)
   recorder        User                @relation("AttendanceSessionRecorder", fields: [recordedBy], references: [id])
   records         AttendanceRecord[]
 
@@ -724,12 +747,13 @@ model AttendanceRecord {
   updatedAt       DateTime          @updatedAt
 
   session         AttendanceSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
-  studentProfile  StudentProfile    @relation(fields: [studentProfileId], references: [id])
+  studentProfile  StudentProfile    @relation(fields: [studentProfileId], references: [id], onDelete: Cascade)
   recorder        User              @relation("AttendanceRecordRecorder", fields: [recordedBy], references: [id])
 
   @@unique([sessionId, studentProfileId])
   @@index([studentProfileId])
   @@index([status])
+  @@index([recordedBy])
 }
 
 // ============================================================================
@@ -757,6 +781,7 @@ model CashDeposit {
   @@index([depositDate])
   @@index([bankReference])
   @@index([depositedBy])
+  @@index([verifiedBy])
 }
 
 model BankDeposit {
@@ -781,6 +806,7 @@ model BankDeposit {
   @@index([depositDate])
   @@index([isReconciled])
   @@index([recordedBy])
+  @@index([reconciledBy])
 }
 
 model Expense {
@@ -809,4 +835,76 @@ model Expense {
   @@index([date])
   @@index([status])
   @@index([requestedBy])
+  @@index([approvedBy])
+}
+
+// ============================================================================
+// Grade Rooms & Student Room Assignments
+// ============================================================================
+
+model GradeRoom {
+  id          String    @id @default(cuid())
+  gradeId     String
+  name        String    // "A", "B", "C"
+  displayName String    // "7A", "7B", "7C"
+  capacity    Int       @default(35)
+  isActive    Boolean   @default(true)
+  syncVersion Int       @default(0)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  grade       Grade     @relation(fields: [gradeId], references: [id], onDelete: Cascade)
+  studentAssignments StudentRoomAssignment[]
+
+  @@unique([gradeId, name])
+  @@index([gradeId])
+  @@index([isActive])
+}
+
+model StudentRoomAssignment {
+  id               String   @id @default(cuid())
+  studentProfileId String
+  gradeRoomId      String
+  schoolYearId     String
+  assignedAt       DateTime @default(now())
+  assignedBy       String
+  isActive         Boolean  @default(true)
+  syncVersion      Int      @default(0)
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  studentProfile   StudentProfile @relation(fields: [studentProfileId], references: [id], onDelete: Cascade)
+  gradeRoom        GradeRoom      @relation(fields: [gradeRoomId], references: [id], onDelete: Cascade)
+  schoolYear       SchoolYear     @relation(fields: [schoolYearId], references: [id], onDelete: Cascade)
+  assigner         User           @relation("RoomAssigner", fields: [assignedBy], references: [id])
+
+  @@unique([studentProfileId, schoolYearId])
+  @@index([gradeRoomId])
+  @@index([schoolYearId])
+  @@index([assignedBy])
+  @@index([isActive])
+}
+
+// ============================================================================
+// User Invitations
+// ============================================================================
+
+model UserInvitation {
+  id         String    @id @default(cuid())
+  email      String
+  name       String?   // Optional name for the invitee
+  role       Role
+  token      String    @unique
+  expiresAt  DateTime
+  invitedBy  String
+  acceptedAt DateTime?
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+
+  inviter    User      @relation("InvitationSender", fields: [invitedBy], references: [id])
+
+  @@index([email])
+  @@index([token])
+  @@index([invitedBy])
+  @@index([expiresAt])
 }
