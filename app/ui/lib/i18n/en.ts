@@ -763,7 +763,7 @@ export const en: TranslationKeys = {
     middleName: "Middle Name",
     lastName: "Last Name",
     dateOfBirth: "Date of Birth",
-    dateFormatHint: "Format: DD/MM/YYYY (e.g., 15/03/2010)",
+    dateFormatHint: "Format: MM/DD/YYYY (e.g., 03/15/2010)",
     gender: "Gender",
     male: "Male",
     female: "Female",
@@ -1272,5 +1272,57 @@ export const en: TranslationKeys = {
     discardChanges: "Discard Changes",
     noDataFound: "No data found",
     loadingData: "Loading data...",
+
+    // Additional labels for pages
+    configured: "configured",
+    passed: "passed",
+    teachers: "Teachers",
+    withAssignments: "with assignments",
+    classAssignments: "Class Assignments",
+    acrossGrades: "Across {count} grades",
+    subjectsNeedTeachers: "Subjects need teachers",
+    noClasses: "No classes",
+    classes: "Classes",
+    selectTeacher: "Select a teacher",
+    grades: "Grades",
+    noAssignmentsForYear: "No assignments for this school year",
+    removeAssignmentConfirm: "Are you sure you want to remove this teacher assignment? This action cannot be undone.",
+
+    // Grade stats
+    students: "Students",
+    rooms: "Rooms",
+    subjects: "Subjects",
+    noRoomsConfigured: "No rooms configured",
+
+    // Grade levels
+    levelKindergarten: "Kindergarten",
+    levelElementary: "Elementary",
+    levelCollege: "College",
+    levelHighSchool: "High School",
+
+    // Grade form
+    order: "Order",
+    selectSeriesOptional: "Select series (optional)",
+    none: "None",
+    enabledForEnrollment: "Enabled for enrollment",
+    roomNamePlaceholder: "A, B, C...",
+    roomDisplayNamePlaceholder: "7A, 7B...",
+    active: "Active",
+    assignedSubjects: "Assigned Subjects",
+    coefficient: "Coefficient",
+    coefficientShort: "Coef",
+    hoursWeek: "Hours/Week",
+    hoursPerWeekShort: "h/week",
+    addSubject: "Add Subject",
+    removeSubjectConfirm: "Are you sure you want to remove this subject?",
+
+    // Bulk move dialog
+    failedToFetchStudents: "Failed to fetch students",
+    failedToMoveStudents: "Failed to move students",
+    noStudentsInRoom: "No students in this room",
+
+    // Placeholders
+    emailPlaceholder: "user@example.com",
+    namePlaceholder: "John Doe",
   },
 } as const;

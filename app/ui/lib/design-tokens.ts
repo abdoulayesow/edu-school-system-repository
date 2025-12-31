@@ -140,10 +140,10 @@ export const componentClasses = {
   ].join(' '),
 
   // Navigation button active state
-  navMainButtonActive: 'bg-gspn-gold-50 text-black dark:bg-gspn-gold-500 dark:text-[#2d0707] shadow-md',
+  navMainButtonActive: 'bg-gspn-gold-50 text-black dark:bg-gspn-gold-500 dark:text-nav-dark-text shadow-md',
 
   // Navigation button inactive state
-  navMainButtonInactive: 'text-black hover:bg-gspn-gold-300 dark:text-gray-200 dark:hover:bg-[#4a0c0c] dark:hover:text-white',
+  navMainButtonInactive: 'text-black hover:bg-gspn-gold-300 dark:text-sidebar-foreground dark:hover:bg-nav-dark-hover dark:hover:text-white',
 
   // Tab list container (base classes) - multi-tab style with horizontal line (full width)
   tabListBase: [
@@ -163,10 +163,10 @@ export const componentClasses = {
     'relative',
   ].join(' '),
 
-  // Tab button active state - same color as top panel (#e79908)
+  // Tab button active state - same color as top panel
   tabButtonActive: [
-    'text-black dark:text-[#2d0707]',
-    'bg-[#e79908] dark:bg-gspn-gold-500',
+    'text-black dark:text-nav-dark-text',
+    'bg-nav-highlight dark:bg-gspn-gold-500',
     'border-b-2 border-b-primary border-t border-l border-r border-border',
     'rounded-t-lg rounded-b-none',
     'shadow-sm',
@@ -183,8 +183,8 @@ export const componentClasses = {
 
   // Primary action button (yellow) - consistent across light/dark mode
   primaryActionButton: [
-    'bg-[#e79908] hover:bg-[#d68907] text-black',
-    'dark:bg-gspn-gold-500 dark:hover:bg-gspn-gold-400 dark:text-[#2d0707]',
+    'bg-nav-highlight hover:bg-nav-highlight/90 text-black',
+    'dark:bg-gspn-gold-500 dark:hover:bg-gspn-gold-400 dark:text-nav-dark-text',
   ].join(' '),
 } as const
 

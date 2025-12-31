@@ -75,7 +75,7 @@ export function TopNav() {
   }
 
   return (
-    <header className="fixed top-0 left-0 right-0 z-[60] h-[91px] border-b border-gspn-gold-300 dark:border-gray-800/50 bg-[#e79908] dark:bg-[#2d0707] backdrop-blur-sm bg-opacity-95">
+    <header className="fixed top-0 left-0 right-0 z-[60] h-[91px] border-b border-gspn-gold-300 dark:border-sidebar-border bg-nav-highlight dark:bg-nav-dark-text backdrop-blur-sm bg-opacity-95">
       <div className="h-full px-4 lg:px-6">
         <div className="flex items-center justify-between h-full">
           {/* Logo Section */}
@@ -170,13 +170,13 @@ export function TopNav() {
 
                 {/* Dropdown Menu */}
                 {dropdownOpen && (
-                  <div className="absolute right-0 mt-2 w-56 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 py-1 z-50">
+                  <div className="absolute right-0 mt-2 w-56 bg-popover dark:bg-popover rounded-lg shadow-lg border border-border py-1 z-50">
                     {/* User Info */}
-                    <div className="px-4 py-3 border-b border-gray-200 dark:border-gray-700">
-                      <p className="text-sm font-medium text-gray-900 dark:text-white">
+                    <div className="px-4 py-3 border-b border-border">
+                      <p className="text-sm font-medium text-foreground">
                         {session.user.name}
                       </p>
-                      <p className="text-xs text-gray-600 dark:text-gray-400 truncate">
+                      <p className="text-xs text-muted-foreground truncate">
                         {session.user.email}
                       </p>
                     </div>
@@ -185,7 +185,7 @@ export function TopNav() {
                     <Link
                       href="/profile"
                       onClick={() => setDropdownOpen(false)}
-                      className="flex items-center gap-2 px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+                      className="flex items-center gap-2 px-4 py-2 text-sm text-foreground hover:bg-muted transition-colors"
                     >
                       <User className={sizing.icon.sm} />
                       <span>{t.nav.profile}</span>
@@ -196,7 +196,7 @@ export function TopNav() {
                       <Link
                         href="/users"
                         onClick={() => setDropdownOpen(false)}
-                        className="flex items-center gap-2 px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+                        className="flex items-center gap-2 px-4 py-2 text-sm text-foreground hover:bg-muted transition-colors"
                       >
                         <Settings className={sizing.icon.sm} />
                         <span>{t.nav.users}</span>
@@ -209,7 +209,7 @@ export function TopNav() {
                         setDropdownOpen(false)
                         signOut({ callbackUrl: "/" })
                       }}
-                      className="w-full flex items-center gap-2 px-4 py-2 text-sm text-red-600 dark:text-red-400 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors border-t border-gray-200 dark:border-gray-700"
+                      className="w-full flex items-center gap-2 px-4 py-2 text-sm text-destructive hover:bg-muted transition-colors border-t border-border"
                     >
                       <LogOut className={sizing.icon.sm} />
                       <span>{t.nav.signOut}</span>

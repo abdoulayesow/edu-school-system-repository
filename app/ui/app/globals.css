@@ -63,6 +63,14 @@
   --sidebar-accent-foreground: oklch(0.98 0.01 20);
   --sidebar-border: oklch(0.35 0.02 20);
   --sidebar-ring: oklch(0.72 0.12 85);
+
+  /* Navigation highlight - Golden amber for active states (replaces #e79908) */
+  --nav-highlight: oklch(0.72 0.16 75);
+  --nav-highlight-foreground: oklch(0.15 0.02 20);
+
+  /* Navigation dark text - Deep maroon for text on gold backgrounds */
+  --nav-dark-text: oklch(0.25 0.12 15);
+  --nav-dark-hover: oklch(0.35 0.14 15);
 }
 
 .dark {
@@ -115,6 +123,14 @@
   --sidebar-accent-foreground: oklch(0.95 0.01 20);
   --sidebar-border: oklch(0.28 0.02 20);
   --sidebar-ring: oklch(0.75 0.12 85);
+
+  /* Navigation highlight - Brighter amber for dark mode */
+  --nav-highlight: oklch(0.75 0.16 75);
+  --nav-highlight-foreground: oklch(0.15 0.02 20);
+
+  /* Navigation dark text - Lighter maroon for dark backgrounds */
+  --nav-dark-text: oklch(0.25 0.12 15);
+  --nav-dark-hover: oklch(0.38 0.16 15);
 }
 
 @theme inline {
@@ -194,6 +210,10 @@
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-ring: var(--sidebar-ring);
+  --color-nav-highlight: var(--nav-highlight);
+  --color-nav-highlight-foreground: var(--nav-highlight-foreground);
+  --color-nav-dark-text: var(--nav-dark-text);
+  --color-nav-dark-hover: var(--nav-dark-hover);
 }
 
 @layer base {
@@ -365,26 +385,25 @@ div.page-container,
   background: linear-gradient(135deg, #D4AF37 0%, #ecd799 100%);
 }
 
-/* Status badge variants */
+/* Status badge variants - using design tokens */
 .badge-success {
-  @apply bg-green-100 text-green-800 border-green-300;
-  @apply dark:bg-green-900/20 dark:text-green-200 dark:border-green-800;
+  @apply bg-success/15 text-success border-success/30;
+  @apply dark:bg-success/20 dark:text-success dark:border-success/40;
 }
 
 .badge-warning {
-  @apply bg-yellow-100 text-yellow-800 border-yellow-300;
-  @apply dark:bg-yellow-900/20 dark:text-yellow-200 dark:border-yellow-800;
+  @apply bg-warning/15 text-warning border-warning/30;
+  @apply dark:bg-warning/20 dark:text-warning dark:border-warning/40;
 }
 
 .badge-error {
-  @apply bg-red-100 text-red-800 border-red-300;
-  @apply dark:bg-red-900/20 dark:text-red-200 dark:border-red-800;
+  @apply bg-destructive/15 text-destructive border-destructive/30;
+  @apply dark:bg-destructive/20 dark:text-destructive dark:border-destructive/40;
 }
 
-/* Gold focus ring for inputs */
+/* Gold focus ring for inputs - using design token */
 .focus-gold:focus {
-  @apply ring-2 ring-offset-2;
-  --tw-ring-color: #D4AF37;
+  @apply ring-2 ring-offset-2 ring-accent;
 }
 
 /* Font display class - using Inter for consistency */

@@ -18,15 +18,15 @@ const badgeVariants = cva(
         outline:
           'text-foreground [a&]:hover:bg-accent [a&]:hover:text-accent-foreground',
         success:
-          'border-transparent bg-emerald-500/15 text-emerald-600 dark:bg-emerald-500/20 dark:text-emerald-400',
+          'border-transparent bg-success/15 text-success dark:bg-success/20 dark:text-success',
         warning:
-          'border-transparent bg-amber-500/15 text-amber-600 dark:bg-amber-500/20 dark:text-amber-400',
+          'border-transparent bg-warning/15 text-warning dark:bg-warning/20 dark:text-warning',
         error:
-          'border-transparent bg-red-500/15 text-red-600 dark:bg-red-500/20 dark:text-red-400',
+          'border-transparent bg-destructive/15 text-destructive dark:bg-destructive/20 dark:text-destructive',
         info:
-          'border-transparent bg-blue-500/15 text-blue-600 dark:bg-blue-500/20 dark:text-blue-400',
+          'border-transparent bg-primary/15 text-primary dark:bg-primary/20 dark:text-primary',
         gold:
-          'border-amber-500/30 bg-amber-500/10 text-amber-600 dark:bg-amber-500/20 dark:text-amber-400',
+          'border-accent/30 bg-accent/10 text-accent-foreground dark:bg-accent/20 dark:text-accent',
       },
     },
     defaultVariants: {

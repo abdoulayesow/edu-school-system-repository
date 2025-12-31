@@ -1270,6 +1270,58 @@ export const fr = {
     discardChanges: "Annuler les Modifications",
     noDataFound: "Aucune donnée trouvée",
     loadingData: "Chargement des données...",
+
+    // Additional labels for pages
+    configured: "configuré(s)",
+    passed: "passé(s)",
+    teachers: "Enseignants",
+    withAssignments: "avec affectations",
+    classAssignments: "Affectations de Classes",
+    acrossGrades: "Répartis sur {count} niveaux",
+    subjectsNeedTeachers: "Matières sans enseignant",
+    noClasses: "Aucune classe",
+    classes: "Classes",
+    selectTeacher: "Sélectionner un enseignant",
+    grades: "Niveaux",
+    noAssignmentsForYear: "Aucune affectation pour cette année scolaire",
+    removeAssignmentConfirm: "Êtes-vous sûr de vouloir supprimer cette affectation ? Cette action est irréversible.",
+
+    // Grade stats
+    students: "Élèves",
+    rooms: "Salles",
+    subjects: "Matières",
+    noRoomsConfigured: "Aucune salle configurée",
+
+    // Grade levels
+    levelKindergarten: "Maternelle",
+    levelElementary: "Élémentaire",
+    levelCollege: "Collège",
+    levelHighSchool: "Lycée",
+
+    // Grade form
+    order: "Ordre",
+    selectSeriesOptional: "Sélectionner une série (optionnel)",
+    none: "Aucune",
+    enabledForEnrollment: "Activé pour les inscriptions",
+    roomNamePlaceholder: "A, B, C...",
+    roomDisplayNamePlaceholder: "7A, 7B...",
+    active: "Actif",
+    assignedSubjects: "Matières Affectées",
+    coefficient: "Coefficient",
+    coefficientShort: "Coef",
+    hoursWeek: "Heures/Semaine",
+    hoursPerWeekShort: "h/sem",
+    addSubject: "Ajouter Matière",
+    removeSubjectConfirm: "Êtes-vous sûr de vouloir supprimer cette matière ?",
+
+    // Bulk move dialog
+    failedToFetchStudents: "Échec du chargement des élèves",
+    failedToMoveStudents: "Échec du déplacement des élèves",
+    noStudentsInRoom: "Aucun élève dans cette salle",
+
+    // Placeholders
+    emailPlaceholder: "utilisateur@exemple.com",
+    namePlaceholder: "Jean Dupont",
   },
 } as const;
 

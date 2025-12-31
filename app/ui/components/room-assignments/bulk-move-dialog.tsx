@@ -146,10 +146,10 @@ export function BulkMoveDialog({
         const data = await res.json()
         setStudentsInRoom(data.studentAssignments || [])
       } else {
-        setError("Failed to fetch students")
+        setError(t.admin.failedToFetchStudents)
       }
     } catch {
-      setError("Failed to fetch students")
+      setError(t.admin.failedToFetchStudents)
     } finally {
       setIsLoading(false)
     }
@@ -204,10 +204,10 @@ export function BulkMoveDialog({
         onOpenChange(false)
       } else {
         const data = await res.json()
-        setError(data.message || "Failed to move students")
+        setError(data.message || t.admin.failedToMoveStudents)
       }
     } catch {
-      setError("Failed to move students")
+      setError(t.admin.failedToMoveStudents)
     } finally {
       setIsSubmitting(false)
     }
@@ -338,7 +338,7 @@ export function BulkMoveDialog({
               ) : studentsInRoom.length === 0 ? (
                 <div className="flex flex-col items-center justify-center py-8 text-muted-foreground">
                   <Users className="size-8 mb-2" />
-                  <p className="text-sm">No students in this room</p>
+                  <p className="text-sm">{t.admin.noStudentsInRoom}</p>
                 </div>
               ) : (
                 <Table>
