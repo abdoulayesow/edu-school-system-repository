@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useMemo } from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -17,7 +17,16 @@ import {
   BanknoteIcon,
   Smartphone,
   ArrowRight,
+  Filter,
+  XCircle,
 } from "lucide-react"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
 import Link from "next/link"
 import { useI18n } from "@/components/i18n-provider"
 import { PageContainer } from "@/components/layout"
@@ -90,6 +99,13 @@ export default function AccountingPage() {
   // Loading states
   const [isLoadingBalance, setIsLoadingBalance] = useState(true)
   const [isLoadingPayments, setIsLoadingPayments] = useState(true)
+
+  // Filter states for Transactions tab
+  const [transactionStatusFilter, setTransactionStatusFilter] = useState<string>("all")
+  const [transactionMethodFilter, setTransactionMethodFilter] = useState<string>("all")
+
+  // Filter states for Review tab
+  const [reviewTypeFilter, setReviewTypeFilter] = useState<string>("all")
 
   // Fetch balance data
   useEffect(() => {
@@ -227,6 +243,35 @@ export default function AccountingPage() {
     setOpenReviewDialog(true)
   }
 
+  // Filtered payments for Transactions tab
+  const filteredTransactions = useMemo(() => {
+    return payments.filter((payment) => {
+      if (transactionStatusFilter !== "all" && payment.status !== transactionStatusFilter) {
+        return false
+      }
+      if (transactionMethodFilter !== "all" && payment.method !== transactionMethodFilter) {
+        return false
+      }
+      return true
+    })
+  }, [payments, transactionStatusFilter, transactionMethodFilter])
+
+  // Filtered payments for Review tab (only pending items)
+  const pendingReviewItems = useMemo(() => {
+    const pending = payments.filter((payment) => {
+      // Include payments that need review: pending_deposit, deposited, pending_review
+      const needsReview = ["pending_deposit", "deposited", "pending_review"].includes(payment.status)
+      if (!needsReview) return false
+
+      if (reviewTypeFilter === "all") return true
+      if (reviewTypeFilter === "deposit" && payment.status === "pending_deposit") return true
+      if (reviewTypeFilter === "review" && (payment.status === "pending_review" || payment.status === "deposited")) return true
+
+      return false
+    })
+    return pending
+  }, [payments, reviewTypeFilter])
+
   return (
     <PageContainer maxWidth="full">
         <div className="mb-6">
@@ -313,7 +358,15 @@ export default function AccountingPage() {
         <Tabs defaultValue="balance" className="space-y-6">
           <TabsList>
             <TabsTrigger value="balance">{t.accounting.tabBalance}</TabsTrigger>
-            <TabsTrigger value="payments">{t.accounting.cashDeposit}</TabsTrigger>
+            <TabsTrigger value="transactions">{t.accounting.tabTransactions}</TabsTrigger>
+            <TabsTrigger value="review" className="relative">
+              {t.accounting.tabReview}
+              {pendingReviewItems.length > 0 && (
+                <span className="ml-2 inline-flex items-center justify-center rounded-full bg-destructive text-destructive-foreground text-xs w-5 h-5">
+                  {pendingReviewItems.length}
+                </span>
+              )}
+            </TabsTrigger>
           </TabsList>
 
           {/* Balance Overview Tab */}
@@ -516,25 +569,68 @@ export default function AccountingPage() {
             </div>
           </TabsContent>
 
-          {/* Payment Recording Tab */}
-          <TabsContent value="payments" className="space-y-6">
+          {/* Transactions Tab */}
+          <TabsContent value="transactions" className="space-y-6">
             <Card>
               <CardHeader>
-                <CardTitle>{t.accounting.cashDeposit}</CardTitle>
-                <CardDescription>
-                  {isLoadingPayments
-                    ? "Chargement..."
-                    : `${payments.length} transactions`}
-                </CardDescription>
+                <div className="flex items-center justify-between">
+                  <div>
+                    <CardTitle>{t.accounting.tabTransactions}</CardTitle>
+                    <CardDescription>
+                      {isLoadingPayments
+                        ? "Chargement..."
+                        : `${filteredTransactions.length} transactions`}
+                    </CardDescription>
+                  </div>
+                  {/* Filters */}
+                  <div className="flex items-center gap-2">
+                    <Select value={transactionStatusFilter} onValueChange={setTransactionStatusFilter}>
+                      <SelectTrigger className="w-[160px]">
+                        <SelectValue placeholder={t.accounting.filterByStatus} />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="all">{t.accounting.allStatuses}</SelectItem>
+                        <SelectItem value="pending_deposit">{t.accounting.pendingDeposit}</SelectItem>
+                        <SelectItem value="deposited">{t.accounting.deposited}</SelectItem>
+                        <SelectItem value="pending_review">{t.accounting.pendingReview}</SelectItem>
+                        <SelectItem value="confirmed">{t.accounting.confirmed}</SelectItem>
+                        <SelectItem value="rejected">{t.accounting.rejected}</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <Select value={transactionMethodFilter} onValueChange={setTransactionMethodFilter}>
+                      <SelectTrigger className="w-[140px]">
+                        <SelectValue placeholder={t.accounting.filterByMethod} />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="all">{t.accounting.allMethods}</SelectItem>
+                        <SelectItem value="cash">{t.accounting.cashPayments}</SelectItem>
+                        <SelectItem value="orange_money">{t.accounting.orangeMoneyPayments}</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    {(transactionStatusFilter !== "all" || transactionMethodFilter !== "all") && (
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => {
+                          setTransactionStatusFilter("all")
+                          setTransactionMethodFilter("all")
+                        }}
+                      >
+                        <XCircle className="h-4 w-4 mr-1" />
+                        {t.common.reset}
+                      </Button>
+                    )}
+                  </div>
+                </div>
               </CardHeader>
               <CardContent>
                 {isLoadingPayments ? (
                   <div className="flex items-center justify-center py-12">
                     <Loader2 className="size-8 animate-spin text-muted-foreground" />
                   </div>
-                ) : payments.length === 0 ? (
+                ) : filteredTransactions.length === 0 ? (
                   <div className="text-center py-12 text-muted-foreground">
-                    Aucun paiement enregistré
+                    {t.accounting.noPaymentsFound}
                   </div>
                 ) : (
                   <div className="rounded-md border">
@@ -552,7 +648,7 @@ export default function AccountingPage() {
                         </TableRow>
                       </TableHeader>
                       <TableBody>
-                        {payments.map((payment) => (
+                        {filteredTransactions.map((payment) => (
                           <TableRow key={payment.id}>
                             <TableCell className="font-medium font-mono text-sm">
                               {payment.receiptNumber}
@@ -587,7 +683,7 @@ export default function AccountingPage() {
                                   onClick={() => handleOpenDeposit(payment)}
                                 >
                                   <BanknoteIcon className="h-3 w-3 mr-1" />
-                                  Dépôt
+                                  {t.accounting.deposit}
                                 </Button>
                               )}
                               {(payment.status === "pending_review" || payment.status === "deposited") && (
@@ -605,7 +701,129 @@ export default function AccountingPage() {
                                 <span className="text-xs text-success">{t.accounting.completed}</span>
                               )}
                               {payment.status === "rejected" && (
-                                <span className="text-xs text-destructive">Rejeté</span>
+                                <span className="text-xs text-destructive">{t.accounting.rejected}</span>
+                              )}
+                            </TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          {/* Review Tab */}
+          <TabsContent value="review" className="space-y-6">
+            <Card>
+              <CardHeader>
+                <div className="flex items-center justify-between">
+                  <div>
+                    <CardTitle>{t.accounting.tabReview}</CardTitle>
+                    <CardDescription>
+                      {isLoadingPayments
+                        ? "Chargement..."
+                        : `${pendingReviewItems.length} ${t.accounting.itemsToReview}`}
+                    </CardDescription>
+                  </div>
+                  {/* Filters */}
+                  <div className="flex items-center gap-2">
+                    <Select value={reviewTypeFilter} onValueChange={setReviewTypeFilter}>
+                      <SelectTrigger className="w-[160px]">
+                        <SelectValue placeholder={t.accounting.filterByType} />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="all">{t.accounting.allTypes}</SelectItem>
+                        <SelectItem value="deposit">{t.accounting.pendingDeposit}</SelectItem>
+                        <SelectItem value="review">{t.accounting.pendingReview}</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    {reviewTypeFilter !== "all" && (
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => setReviewTypeFilter("all")}
+                      >
+                        <XCircle className="h-4 w-4 mr-1" />
+                        {t.common.reset}
+                      </Button>
+                    )}
+                  </div>
+                </div>
+              </CardHeader>
+              <CardContent>
+                {isLoadingPayments ? (
+                  <div className="flex items-center justify-center py-12">
+                    <Loader2 className="size-8 animate-spin text-muted-foreground" />
+                  </div>
+                ) : pendingReviewItems.length === 0 ? (
+                  <div className="text-center py-12 text-muted-foreground">
+                    <CheckCircle2 className="h-12 w-12 mx-auto mb-4 text-success opacity-50" />
+                    <p>{t.accounting.noItemsToReview}</p>
+                  </div>
+                ) : (
+                  <div className="rounded-md border">
+                    <Table>
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead>{t.accounting.transactionId}</TableHead>
+                          <TableHead>{t.common.student}</TableHead>
+                          <TableHead className="text-right">{t.common.amount}</TableHead>
+                          <TableHead>{t.accounting.method}</TableHead>
+                          <TableHead>{t.common.date}</TableHead>
+                          <TableHead>{t.common.status}</TableHead>
+                          <TableHead className="text-right">{t.common.actions}</TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {pendingReviewItems.map((payment) => (
+                          <TableRow key={payment.id}>
+                            <TableCell className="font-medium font-mono text-sm">
+                              {payment.receiptNumber}
+                            </TableCell>
+                            <TableCell>
+                              <div>
+                                <p className="font-medium">
+                                  {payment.enrollment?.student?.firstName ?? "N/A"} {payment.enrollment?.student?.lastName ?? ""}
+                                </p>
+                                <p className="text-xs text-muted-foreground">
+                                  {payment.enrollment?.grade?.name ?? "-"}
+                                </p>
+                              </div>
+                            </TableCell>
+                            <TableCell className="text-right font-mono font-semibold">
+                              {formatAmount(payment.amount)}
+                            </TableCell>
+                            <TableCell>{getMethodBadge(payment.method)}</TableCell>
+                            <TableCell>
+                              {formatDate(payment.recordedAt, locale)}
+                            </TableCell>
+                            <TableCell>{getStatusBadge(payment.status)}</TableCell>
+                            <TableCell className="text-right">
+                              {payment.status === "pending_deposit" && payment.method === "cash" && (
+                                <Button
+                                  size="sm"
+                                  variant="outline"
+                                  className="bg-transparent"
+                                  onClick={() => handleOpenDeposit(payment)}
+                                >
+                                  <BanknoteIcon className="h-3 w-3 mr-1" />
+                                  {t.accounting.deposit}
+                                </Button>
+                              )}
+                              {(payment.status === "pending_review" || payment.status === "deposited") && (
+                                <div className="flex items-center gap-2 justify-end">
+                                  <Button
+                                    size="sm"
+                                    variant="outline"
+                                    className="bg-transparent text-success border-success hover:bg-success/10"
+                                    onClick={() => handleOpenReview(payment)}
+                                  >
+                                    <CheckCircle2 className="h-3 w-3 mr-1" />
+                                    {t.accounting.approve}
+                                  </Button>
+                                </div>
                               )}
                             </TableCell>
                           </TableRow>

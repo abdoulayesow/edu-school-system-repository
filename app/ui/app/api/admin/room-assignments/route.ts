@@ -88,15 +88,25 @@ export async function GET(req: NextRequest) {
 
       const assignedIds = new Set(assignedStudentIds.map(a => a.studentProfileId))
 
-      // Filter to get unassigned students
-      const unassignedStudents = enrolledStudents
+      // Filter to get unassigned students, deduplicating by studentProfile.id
+      // (handles edge case where a student has multiple enrollment records)
+      const studentMap = new Map<string, { id: string; firstName: string; lastName: string; studentNumber?: string | null }>()
+
+      enrolledStudents
         .filter(e => e.student?.studentProfile && !assignedIds.has(e.student.studentProfile.id))
-        .map(e => ({
-          id: e.student!.studentProfile!.id,
-          firstName: e.firstName,
-          lastName: e.lastName,
-          studentNumber: e.student?.studentProfile?.studentNumber,
-        }))
+        .forEach(e => {
+          const profileId = e.student!.studentProfile!.id
+          if (!studentMap.has(profileId)) {
+            studentMap.set(profileId, {
+              id: profileId,
+              firstName: e.firstName,
+              lastName: e.lastName,
+              studentNumber: e.student?.studentProfile?.studentNumber,
+            })
+          }
+        })
+
+      const unassignedStudents = Array.from(studentMap.values())
 
       return NextResponse.json(unassignedStudents)
     }

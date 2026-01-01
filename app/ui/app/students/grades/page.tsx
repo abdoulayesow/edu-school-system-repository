@@ -285,6 +285,19 @@ export default function GradesClassesPage() {
                         )}
                       </CardDescription>
                     </div>
+                    {/* Assign button in header - visible when there are unassigned students */}
+                    {hasUnassigned && (
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        disabled={activeRooms.length === 0}
+                        onClick={() => openAssignDialog(grade)}
+                        title={activeRooms.length === 0 ? t.students.noRoomsConfigured : undefined}
+                      >
+                        <UserPlus className="h-4 w-4 mr-2" />
+                        {t.admin.assignStudents}
+                      </Button>
+                    )}
                   </div>
                 </CardHeader>
                 <CardContent className="space-y-4">
@@ -364,31 +377,18 @@ export default function GradesClassesPage() {
                         })
                       )}
 
-                      {/* Action Buttons */}
-                      {activeRooms.length > 0 && (
+                      {/* Move Students Button - only shown when there are assigned students and multiple rooms */}
+                      {totalAssigned > 0 && activeRooms.length > 1 && (
                         <div className="flex gap-2 pt-2">
-                          {hasUnassigned && (
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              className="flex-1"
-                              onClick={() => openAssignDialog(grade)}
-                            >
-                              <UserPlus className="h-3 w-3 mr-1" />
-                              {t.admin.assignStudents}
-                            </Button>
-                          )}
-                          {totalAssigned > 0 && activeRooms.length > 1 && (
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              className="flex-1"
-                              onClick={() => openBulkMoveDialog(grade)}
-                            >
-                              <ArrowRightLeft className="h-3 w-3 mr-1" />
-                              {t.admin.moveStudents}
-                            </Button>
-                          )}
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="flex-1"
+                            onClick={() => openBulkMoveDialog(grade)}
+                          >
+                            <ArrowRightLeft className="h-3 w-3 mr-1" />
+                            {t.admin.moveStudents}
+                          </Button>
                         </div>
                       )}
                     </CollapsibleContent>
