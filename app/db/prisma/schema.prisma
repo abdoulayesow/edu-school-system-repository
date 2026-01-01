@@ -75,6 +75,12 @@ model User {
 
   // User invitation relations
   sentInvitations      UserInvitation[] @relation("InvitationSender")
+
+  // Activity relations
+  createdActivities         Activity[]           @relation("ActivityCreator")
+  activityEnrollments       ActivityEnrollment[] @relation("ActivityEnroller")
+  recordedActivityPayments  ActivityPayment[]    @relation("ActivityPaymentRecorder")
+  confirmedActivityPayments ActivityPayment[]    @relation("ActivityPaymentConfirmer")
 }
 
 model Address {
@@ -196,6 +202,22 @@ enum SchoolYearStatus {
   passed            // Past school year
 }
 
+enum ActivityStatus {
+  draft             // Creation in progress
+  active            // Open for enrollment
+  closed            // No more enrollments
+  completed         // Activity finished
+  cancelled         // Cancelled
+}
+
+enum ActivityType {
+  club              // Student clubs
+  sport             // Sports activities
+  arts              // Arts/music
+  academic          // Academic enrichment
+  other             // Miscellaneous
+}
+
 model SchoolYear {
   id              String           @id @default(cuid())
   name            String           // "2025 - 2026"
@@ -214,6 +236,7 @@ model SchoolYear {
   classAssignments  ClassAssignment[]
   gradeEnrollments  GradeEnrollment[]
   studentRoomAssignments StudentRoomAssignment[]
+  activities        Activity[]
 
   @@index([isActive])
   @@index([startDate])
@@ -574,6 +597,7 @@ model StudentProfile {
   attendanceRecords AttendanceRecord[]
   parentLinks     StudentParent[]
   roomAssignments StudentRoomAssignment[]
+  activityEnrollments ActivityEnrollment[]
 
   @@index([personId])
   @@index([studentNumber])
@@ -907,4 +931,91 @@ model UserInvitation {
   @@index([token])
   @@index([invitedBy])
   @@index([expiresAt])
+}
+
+// ============================================================================
+// Activities (Extracurricular)
+// ============================================================================
+
+model Activity {
+  id              String          @id @default(cuid())
+  name            String          // e.g., "Football Club"
+  nameFr          String?         // French translation
+  description     String?
+  type            ActivityType
+  schoolYearId    String
+  startDate       DateTime
+  endDate         DateTime
+  fee             Int             // Activity fee in GNF
+  capacity        Int             @default(30)
+  status          ActivityStatus  @default(draft)
+  isEnabled       Boolean         @default(true)
+  createdBy       String
+  syncVersion     Int             @default(0)
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
+
+  schoolYear      SchoolYear      @relation(fields: [schoolYearId], references: [id], onDelete: Cascade)
+  creator         User            @relation("ActivityCreator", fields: [createdBy], references: [id])
+  enrollments     ActivityEnrollment[]
+  payments        ActivityPayment[]
+
+  @@index([schoolYearId])
+  @@index([type])
+  @@index([status])
+  @@index([createdBy])
+  @@index([isEnabled])
+}
+
+model ActivityEnrollment {
+  id                String          @id @default(cuid())
+  activityId        String
+  studentProfileId  String
+  status            String          @default("active")  // active, transferred, withdrawn
+  enrolledBy        String          // User ID who recorded
+  enrolledAt        DateTime        @default(now())
+  syncVersion       Int             @default(0)
+  createdAt         DateTime        @default(now())
+  updatedAt         DateTime        @updatedAt
+
+  activity          Activity        @relation(fields: [activityId], references: [id], onDelete: Cascade)
+  studentProfile    StudentProfile  @relation(fields: [studentProfileId], references: [id], onDelete: Cascade)
+  enroller          User            @relation("ActivityEnroller", fields: [enrolledBy], references: [id])
+  payments          ActivityPayment[]
+
+  @@unique([activityId, studentProfileId])
+  @@index([activityId])
+  @@index([studentProfileId])
+  @@index([enrolledBy])
+}
+
+model ActivityPayment {
+  id                    String          @id @default(cuid())
+  activityId            String
+  activityEnrollmentId  String?
+  amount                Int             // Amount in GNF
+  method                PaymentMethod
+  status                PaymentStatus   @default(pending_deposit)
+  receiptNumber         String          @unique
+  transactionRef        String?
+  receiptImageUrl       String?
+  recordedBy            String
+  recordedAt            DateTime        @default(now())
+  confirmedBy           String?
+  confirmedAt           DateTime?
+  notes                 String?
+  syncVersion           Int             @default(0)
+  createdAt             DateTime        @default(now())
+  updatedAt             DateTime        @updatedAt
+
+  activity              Activity        @relation(fields: [activityId], references: [id], onDelete: Cascade)
+  activityEnrollment    ActivityEnrollment? @relation(fields: [activityEnrollmentId], references: [id], onDelete: SetNull)
+  recorder              User            @relation("ActivityPaymentRecorder", fields: [recordedBy], references: [id])
+  confirmer             User?           @relation("ActivityPaymentConfirmer", fields: [confirmedBy], references: [id])
+
+  @@index([activityId])
+  @@index([activityEnrollmentId])
+  @@index([status])
+  @@index([recordedBy])
+  @@index([confirmedBy])
 }

@@ -231,6 +231,14 @@ export const navigationConfig: MainNavItem[] = [
         icon: UserCog,
         roles: ["director"],
       },
+      {
+        id: "activities-config",
+        name: "Activities",
+        translationKey: "activitiesManagement",
+        href: "/admin/activities",
+        icon: BookOpen,
+        roles: ["director", "academic_director"],
+      },
     ],
   },
 ]

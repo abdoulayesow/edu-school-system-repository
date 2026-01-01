@@ -268,24 +268,68 @@ export const fr = {
   activities: {
     title: "Gestion des activités",
     subtitle: "Gérer les activités scolaires et extrascolaires",
-    
+    adminTitle: "Administration des activités",
+    adminSubtitle: "Créer et gérer les activités scolaires",
+
     // Tabs
     tabAll: "Toutes",
     tabAcademic: "Scolaires",
     tabExtra: "Extrascolaires",
+    tabStudents: "Élèves",
+    tabActivities: "Activités",
+    tabEnrollments: "Inscriptions",
+    tabPayments: "Paiements",
 
     // Activity types
     academic: "Scolaire",
     extra: "Extra",
+    typeClub: "Club",
+    typeSport: "Sport",
+    typeArts: "Arts",
+    typeAcademic: "Académique",
+    typeOther: "Autre",
+
+    // Activity status
+    statusDraft: "Brouillon",
+    statusActive: "Active",
+    statusClosed: "Fermée",
+    statusCompleted: "Terminée",
+    statusCancelled: "Annulée",
+
+    // CRUD
+    addActivity: "Ajouter une activité",
+    editActivity: "Modifier l'activité",
+    deleteActivity: "Supprimer l'activité",
+    createActivity: "Créer l'activité",
+    updateActivity: "Mettre à jour l'activité",
+    activityName: "Nom de l'activité",
+    activityNameFr: "Nom de l'activité (Français)",
+    activityDescription: "Description",
+    activityType: "Type",
+    activityFee: "Frais",
+    activityCapacity: "Capacité",
+    startDate: "Date de début",
+    endDate: "Date de fin",
+    selectType: "Sélectionner le type",
+    selectStatus: "Sélectionner le statut",
 
     // Card info
     assignStudent: "Assigner un élève",
+    enrollStudent: "Inscrire un élève",
+    removeStudent: "Retirer l'élève",
+    enrolled: "Inscrits",
+    spotsLeft: "places restantes",
+    noSpots: "Complet",
 
     // Assign dialog
     assignStudentTitle: "Assigner un élève",
+    enrollStudentTitle: "Inscrire un élève à l'activité",
     searchAndAdd: "Recherchez et ajoutez un élève à",
     searchStudentPlaceholder: "Rechercher un élève par nom ou ID...",
     overduePayments: "Paiements en retard",
+    onlyCompletedEnrollments: "Seuls les élèves avec une inscription complète peuvent être inscrits",
+    noEligibleStudents: "Aucun élève éligible trouvé",
+    studentAlreadyEnrolled: "Élève déjà inscrit",
 
     // Activity names
     englishClub: "Club d'anglais",
@@ -304,11 +348,32 @@ export const fr = {
     curricularActivities: "Activités curriculaires",
     extracurricularActivities: "Activités extrascolaires",
     totalEnrollments: "Total des inscriptions",
+    activeActivities: "Activités actives",
 
     // Filters
     filterActivities: "Filtrer les activités",
     allTypes: "Tous les types",
     allTeachers: "Tous les enseignants",
+    allStatuses: "Tous les statuts",
+
+    // Payment
+    recordPayment: "Enregistrer le paiement",
+    activityPayment: "Paiement d'activité",
+    paymentRecorded: "Paiement enregistré avec succès",
+    totalFee: "Frais total",
+    amountPaid: "Montant payé",
+    remainingBalance: "Solde restant",
+
+    // Messages
+    activityCreated: "Activité créée avec succès",
+    activityUpdated: "Activité mise à jour avec succès",
+    activityDeleted: "Activité supprimée avec succès",
+    studentEnrolled: "Élève inscrit avec succès",
+    studentRemoved: "Élève retiré de l'activité",
+    confirmDelete: "Êtes-vous sûr de vouloir supprimer cette activité ?",
+    confirmRemoveStudent: "Êtes-vous sûr de vouloir retirer cet élève de l'activité ?",
+    noActivities: "Aucune activité trouvée",
+    noEnrollments: "Aucun élève inscrit à cette activité",
   },
 
   // Accounting
@@ -1102,6 +1167,7 @@ export const fr = {
     gradesAndRooms: "Classes & Salles",
     teachersAndClasses: "Enseignants & Matières",
     usersManagement: "Gestion des Utilisateurs",
+    activitiesManagement: "Activités",
 
     // School Years
     schoolYearsTitle: "Gestion des Années Scolaires",

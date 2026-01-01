@@ -270,24 +270,68 @@ export const en: TranslationKeys = {
   activities: {
     title: "Activity Management",
     subtitle: "Manage academic and extracurricular activities",
-    
+    adminTitle: "Activities Administration",
+    adminSubtitle: "Create and manage school activities",
+
     // Tabs
     tabAll: "All",
     tabAcademic: "Academic",
     tabExtra: "Extracurricular",
+    tabStudents: "Students",
+    tabActivities: "Activities",
+    tabEnrollments: "Enrollments",
+    tabPayments: "Payments",
 
     // Activity types
     academic: "Academic",
     extra: "Extra",
+    typeClub: "Club",
+    typeSport: "Sport",
+    typeArts: "Arts",
+    typeAcademic: "Academic",
+    typeOther: "Other",
+
+    // Activity status
+    statusDraft: "Draft",
+    statusActive: "Active",
+    statusClosed: "Closed",
+    statusCompleted: "Completed",
+    statusCancelled: "Cancelled",
+
+    // CRUD
+    addActivity: "Add Activity",
+    editActivity: "Edit Activity",
+    deleteActivity: "Delete Activity",
+    createActivity: "Create Activity",
+    updateActivity: "Update Activity",
+    activityName: "Activity Name",
+    activityNameFr: "Activity Name (French)",
+    activityDescription: "Description",
+    activityType: "Type",
+    activityFee: "Fee",
+    activityCapacity: "Capacity",
+    startDate: "Start Date",
+    endDate: "End Date",
+    selectType: "Select type",
+    selectStatus: "Select status",
 
     // Card info
     assignStudent: "Assign Student",
+    enrollStudent: "Enroll Student",
+    removeStudent: "Remove Student",
+    enrolled: "Enrolled",
+    spotsLeft: "spots left",
+    noSpots: "Full",
 
     // Assign dialog
     assignStudentTitle: "Assign Student",
+    enrollStudentTitle: "Enroll Student to Activity",
     searchAndAdd: "Search and add a student to",
     searchStudentPlaceholder: "Search student by name or ID...",
     overduePayments: "Overdue payments",
+    onlyCompletedEnrollments: "Only students with completed enrollments can be enrolled",
+    noEligibleStudents: "No eligible students found",
+    studentAlreadyEnrolled: "Student already enrolled",
 
     // Activity names
     englishClub: "English Club",
@@ -306,11 +350,32 @@ export const en: TranslationKeys = {
     curricularActivities: "Curricular activities",
     extracurricularActivities: "Extracurricular activities",
     totalEnrollments: "Total enrollments",
+    activeActivities: "Active Activities",
 
     // Filters
     filterActivities: "Filter activities",
     allTypes: "All types",
     allTeachers: "All teachers",
+    allStatuses: "All statuses",
+
+    // Payment
+    recordPayment: "Record Payment",
+    activityPayment: "Activity Payment",
+    paymentRecorded: "Payment recorded successfully",
+    totalFee: "Total Fee",
+    amountPaid: "Amount Paid",
+    remainingBalance: "Remaining Balance",
+
+    // Messages
+    activityCreated: "Activity created successfully",
+    activityUpdated: "Activity updated successfully",
+    activityDeleted: "Activity deleted successfully",
+    studentEnrolled: "Student enrolled successfully",
+    studentRemoved: "Student removed from activity",
+    confirmDelete: "Are you sure you want to delete this activity?",
+    confirmRemoveStudent: "Are you sure you want to remove this student from the activity?",
+    noActivities: "No activities found",
+    noEnrollments: "No students enrolled in this activity",
   },
 
   // Accounting
@@ -1104,6 +1169,7 @@ export const en: TranslationKeys = {
     gradesAndRooms: "Grades & Rooms",
     teachersAndClasses: "Teachers & Classes",
     usersManagement: "User Management",
+    activitiesManagement: "Activities",
 
     // School Years
     schoolYearsTitle: "School Year Management",

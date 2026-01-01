@@ -914,14 +914,14 @@ export default function GradesPage() {
               <div className="grid gap-2">
                 <Label htmlFor="grade-series">{t.admin.gradeSeries}</Label>
                 <Select
-                  value={gradeForm.series}
-                  onValueChange={(v) => setGradeForm({ ...gradeForm, series: v })}
+                  value={gradeForm.series || "none"}
+                  onValueChange={(v) => setGradeForm({ ...gradeForm, series: v === "none" ? "" : v })}
                 >
                   <SelectTrigger>
                     <SelectValue placeholder={t.admin.selectSeriesOptional} />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">{t.admin.none}</SelectItem>
+                    <SelectItem value="none">{t.admin.none}</SelectItem>
                     <SelectItem value="SM">{t.admin.seriesSM}</SelectItem>
                     <SelectItem value="SS">{t.admin.seriesSS}</SelectItem>
                     <SelectItem value="SE">{t.admin.seriesSE}</SelectItem>
