@@ -1,13 +1,21 @@
 "use client"
 
 import type React from "react"
-import { Inter, Poppins } from "next/font/google"
+import { Inter } from "next/font/google"
 import { Analytics } from "@vercel/analytics/next"
 import { SessionProvider } from "next-auth/react"
 import "./globals.css"
-import { Navigation } from "@/components/navigation"
+import {
+  TopNav,
+  NavSidebar,
+  MobileNav,
+  NavigationProvider,
+  useNavigation,
+} from "@/components/navigation"
 import { I18nProvider } from "@/components/i18n-provider"
+import { ThemeProvider } from "@/components/theme-provider"
 import { Toaster } from "@/components/ui/toaster"
+import { cn } from "@/lib/utils"
 
 const inter = Inter({
   subsets: ["latin"],
@@ -15,12 +23,23 @@ const inter = Inter({
   variable: "--font-inter",
 })
 
-const poppins = Poppins({
-  subsets: ["latin"],
-  display: "swap",
-  weight: ["400", "500", "600", "700", "800", "900"],
-  variable: "--font-poppins",
-})
+// Main content wrapper that adjusts for sidebar
+function MainContent({ children }: { children: React.ReactNode }) {
+  const { isSidebarOpen, isSidebarCollapsed } = useNavigation()
+
+  return (
+    <main
+      className={cn(
+        "min-h-screen pt-[91px] transition-all duration-300 bg-background",
+        // Add left margin on desktop when sidebar is open
+        isSidebarOpen && "lg:ml-64",
+        isSidebarOpen && isSidebarCollapsed && "lg:ml-16"
+      )}
+    >
+      {children}
+    </main>
+  )
+}
 
 export default function RootLayout({
   children,
@@ -71,16 +90,25 @@ export default function RootLayout({
         />
       </head>
       <body
-        className={`${inter.variable} ${poppins.variable} font-sans antialiased`}
+        className={`${inter.variable} font-sans antialiased text-gray-900 dark:text-gray-50 bg-white dark:bg-gray-900`}
       >
-        <SessionProvider>
-          <I18nProvider>
-            <Navigation />
-            <main className="lg:pt-16">
-              {children}
-            </main>
-          </I18nProvider>
-        </SessionProvider>
+        <ThemeProvider
+          attribute="class"
+          defaultTheme="dark"
+          enableSystem={false}
+          disableTransitionOnChange
+        >
+          <SessionProvider>
+            <I18nProvider>
+              <NavigationProvider>
+                <TopNav />
+                <NavSidebar />
+                <MobileNav />
+                <MainContent>{children}</MainContent>
+              </NavigationProvider>
+            </I18nProvider>
+          </SessionProvider>
+        </ThemeProvider>
         <Analytics />
         <Toaster />
       </body>

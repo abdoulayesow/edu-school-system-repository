@@ -7,6 +7,8 @@ import { Separator } from "@/components/ui/separator"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { useEnrollmentWizard } from "../wizard-context"
 import { useI18n } from "@/components/i18n-provider"
+import { formatCurrency } from "@/lib/utils/currency"
+import { formatDate } from "@/lib/utils"
 import {
   BookOpen,
   User,
@@ -17,25 +19,20 @@ import {
   Edit2,
   AlertTriangle,
 } from "lucide-react"
+import { sizing } from "@/lib/design-tokens"
 
 export function StepReview() {
-  const { t } = useI18n()
+  const { t, locale } = useI18n()
   const { state, goToStep } = useEnrollmentWizard()
   const { data } = state
 
-  // Format currency
-  const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat("fr-GN", {
-      style: "currency",
-      currency: "GNF",
-      minimumFractionDigits: 0,
-      maximumFractionDigits: 0,
-    }).format(amount)
-  }
 
   const hasAdjustment =
     data.adjustedTuitionFee !== undefined &&
     data.adjustedTuitionFee !== data.originalTuitionFee
+
+  // Derive payment status from actual data to ensure consistency
+  const hasPayment = data.paymentAmount && data.paymentAmount > 0 && data.paymentMethod
 
   return (
     <div className="space-y-6">
@@ -51,7 +48,7 @@ export function StepReview() {
       {/* Warning for adjusted fee */}
       {hasAdjustment && (
         <Alert variant="destructive">
-          <AlertTriangle className="h-4 w-4" />
+          <AlertTriangle className={sizing.icon.sm} />
           <AlertTitle>{t.enrollmentWizard.statusReviewRequired}</AlertTitle>
           <AlertDescription>
             {t.enrollmentWizard.requiresApproval}
@@ -64,7 +61,7 @@ export function StepReview() {
         <CardHeader className="pb-2">
           <div className="flex items-center justify-between">
             <CardTitle className="text-base flex items-center gap-2">
-              <BookOpen className="h-4 w-4" />
+              <BookOpen className={sizing.icon.sm} />
               {t.enrollmentWizard.gradeInfo}
             </CardTitle>
             <Button
@@ -73,7 +70,7 @@ export function StepReview() {
               size="sm"
               onClick={() => goToStep(1)}
             >
-              <Edit2 className="h-4 w-4 mr-1" />
+              <Edit2 className={sizing.icon.sm + " mr-1"} />
               {t.enrollmentWizard.editSection}
             </Button>
           </div>
@@ -103,7 +100,7 @@ export function StepReview() {
         <CardHeader className="pb-2">
           <div className="flex items-center justify-between">
             <CardTitle className="text-base flex items-center gap-2">
-              <User className="h-4 w-4" />
+              <User className={sizing.icon.sm} />
               {t.enrollmentWizard.studentDetails}
             </CardTitle>
             <Button
@@ -112,7 +109,7 @@ export function StepReview() {
               size="sm"
               onClick={() => goToStep(2)}
             >
-              <Edit2 className="h-4 w-4 mr-1" />
+              <Edit2 className={sizing.icon.sm + " mr-1"} />
               {t.enrollmentWizard.editSection}
             </Button>
           </div>
@@ -134,6 +131,14 @@ export function StepReview() {
               </p>
               <p className="font-medium">{data.firstName || "-"}</p>
             </div>
+            {data.middleName && (
+              <div>
+                <p className="text-sm text-muted-foreground">
+                  {t.enrollmentWizard.middleName}
+                </p>
+                <p className="font-medium">{data.middleName}</p>
+              </div>
+            )}
             <div>
               <p className="text-sm text-muted-foreground">
                 {t.enrollmentWizard.lastName}
@@ -145,9 +150,7 @@ export function StepReview() {
                 {t.enrollmentWizard.dateOfBirth}
               </p>
               <p className="font-medium">
-                {data.dateOfBirth
-                  ? new Date(data.dateOfBirth).toLocaleDateString("fr-GN")
-                  : "-"}
+                {formatDate(data.dateOfBirth, locale)}
               </p>
             </div>
             <div>
@@ -181,7 +184,7 @@ export function StepReview() {
         <CardHeader className="pb-2">
           <div className="flex items-center justify-between">
             <CardTitle className="text-base flex items-center gap-2">
-              <Users className="h-4 w-4" />
+              <Users className={sizing.icon.sm} />
               {t.enrollmentWizard.parentDetails}
             </CardTitle>
             <Button
@@ -190,7 +193,7 @@ export function StepReview() {
               size="sm"
               onClick={() => goToStep(2)}
             >
-              <Edit2 className="h-4 w-4 mr-1" />
+              <Edit2 className={sizing.icon.sm + " mr-1"} />
               {t.enrollmentWizard.editSection}
             </Button>
           </div>
@@ -271,7 +274,7 @@ export function StepReview() {
         <CardHeader className="pb-2">
           <div className="flex items-center justify-between">
             <CardTitle className="text-base flex items-center gap-2">
-              <Calculator className="h-4 w-4" />
+              <Calculator className={sizing.icon.sm} />
               {t.enrollmentWizard.paymentDetails}
             </CardTitle>
             <Button
@@ -280,7 +283,7 @@ export function StepReview() {
               size="sm"
               onClick={() => goToStep(3)}
             >
-              <Edit2 className="h-4 w-4 mr-1" />
+              <Edit2 className={sizing.icon.sm + " mr-1"} />
               {t.enrollmentWizard.editSection}
             </Button>
           </div>
@@ -311,7 +314,7 @@ export function StepReview() {
           </div>
 
           {/* Initial Payment */}
-          {data.paymentMade && (
+          {hasPayment && (
             <>
               <Separator />
               <div className="space-y-2">
@@ -351,7 +354,7 @@ export function StepReview() {
           <CardHeader className="pb-2">
             <div className="flex items-center justify-between">
               <CardTitle className="text-base flex items-center gap-2">
-                <FileText className="h-4 w-4" />
+                <FileText className={sizing.icon.sm} />
                 {t.enrollmentWizard.notesSection}
               </CardTitle>
               <Button
@@ -360,7 +363,7 @@ export function StepReview() {
                 size="sm"
                 onClick={() => goToStep(2)}
               >
-                <Edit2 className="h-4 w-4 mr-1" />
+                <Edit2 className={sizing.icon.sm + " mr-1"} />
                 {t.enrollmentWizard.editSection}
               </Button>
             </div>

@@ -1,262 +1,340 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect, useMemo } from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
-import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
+import { Badge } from "@/components/ui/badge"
+import { Progress } from "@/components/ui/progress"
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-import { Save, TrendingUp, TrendingDown, Trophy, AlertTriangle, CheckCircle2, Clock } from "lucide-react"
-import { useI18n, interpolate } from "@/components/i18n-provider"
+import {
+  Users,
+  BookOpen,
+  CalendarCheck,
+  Wallet,
+  Loader2,
+  GraduationCap,
+  User,
+  ChevronRight,
+  Search
+} from "lucide-react"
+import { useI18n } from "@/components/i18n-provider"
+import Link from "next/link"
+import { PageContainer } from "@/components/layout"
+import { sizing } from "@/lib/design-tokens"
 
-interface Student {
+interface GradeLeader {
+  id: string
+  person: {
+    firstName: string
+    lastName: string
+    photoUrl: string | null
+  }
+}
+
+interface Grade {
   id: string
   name: string
-  grade: number | null
-  previousGrade: number | null
-  status: "saved" | "pending" | "synced"
+  code: string
+  level: string
+  order: number
+  gradeLeader: GradeLeader | null
+  schoolYear: {
+    id: string
+    name: string
+    isActive: boolean
+  }
+  stats: {
+    studentCount: number
+    subjectCount: number
+    attendanceRate: number | null
+    paymentRate: number | null
+    paymentBreakdown: {
+      late: number
+      onTime: number
+      complete: number
+    }
+  }
 }
 
 export default function GradesPage() {
   const { t } = useI18n()
-  const [pendingChanges, setPendingChanges] = useState(3)
-  const [selectedClass, setSelectedClass] = useState("6eme-A")
-  const [selectedSubject, setSelectedSubject] = useState("mathematiques")
-  const [selectedTerm, setSelectedTerm] = useState("trimestre-1")
 
-  const [students, setStudents] = useState<Student[]>([
-    { id: "1", name: "Diallo Mamadou", grade: 16, previousGrade: 14, status: "synced" },
-    { id: "2", name: "Camara Aissatou", grade: 18, previousGrade: 17, status: "synced" },
-    { id: "3", name: "Bah Fatoumata", grade: 15, previousGrade: 16, status: "pending" },
-    { id: "4", name: "Sow Ibrahim", grade: 12, previousGrade: 11, status: "synced" },
-    { id: "5", name: "Keita Mariama", grade: 17, previousGrade: 15, status: "synced" },
-    { id: "6", name: "Barry Mohamed", grade: 14, previousGrade: 14, status: "pending" },
-    { id: "7", name: "Diaby Hawa", grade: 19, previousGrade: 18, status: "synced" },
-    { id: "8", name: "Touré Amadou", grade: 11, previousGrade: 13, status: "pending" },
-  ])
+  const [grades, setGrades] = useState<Grade[]>([])
+  const [isLoading, setIsLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+  const [levelFilter, setLevelFilter] = useState<string>("all")
+  const [gradeSearchQuery, setGradeSearchQuery] = useState("")
 
-  const classAverage = students.reduce((sum, s) => sum + (s.grade || 0), 0) / students.length
-  const topStudents = [...students].sort((a, b) => (b.grade || 0) - (a.grade || 0)).slice(0, 3)
-  const needsAttention = students.filter((s) => (s.grade || 0) < 10)
+  useEffect(() => {
+    async function fetchGrades() {
+      try {
+        setIsLoading(true)
+        const response = await fetch("/api/grades")
+        if (!response.ok) {
+          throw new Error("Failed to fetch grades")
+        }
+        const data = await response.json()
+        setGrades(data.grades || [])
+      } catch (err) {
+        console.error("Error fetching grades:", err)
+        setError("Failed to load grades")
+      } finally {
+        setIsLoading(false)
+      }
+    }
 
-  const handleGradeChange = (studentId: string, newGrade: string) => {
-    const gradeValue = newGrade === "" ? null : Number.parseFloat(newGrade)
-    setStudents((prev) =>
-      prev.map((s) => (s.id === studentId ? { ...s, grade: gradeValue, status: "pending" as const } : s)),
-    )
-    setPendingChanges((prev) => prev + 1)
+    fetchGrades()
+  }, [])
+
+  // Get unique levels for filter
+  const levels = useMemo(() => {
+    const uniqueLevels = [...new Set(grades.map(g => g.level))]
+    return uniqueLevels.sort()
+  }, [grades])
+
+  // Filter grades by level and search query
+  const filteredGrades = useMemo(() => {
+    return grades.filter(g => {
+      const matchesLevel = levelFilter === "all" || g.level === levelFilter
+      const matchesSearch = gradeSearchQuery === "" ||
+        g.name.toLowerCase().includes(gradeSearchQuery.toLowerCase())
+      return matchesLevel && matchesSearch
+    })
+  }, [grades, levelFilter, gradeSearchQuery])
+
+  // Summary stats
+  const stats = useMemo(() => {
+    const totalStudents = grades.reduce((sum, g) => sum + g.stats.studentCount, 0)
+    const totalSubjects = grades.reduce((sum, g) => sum + g.stats.subjectCount, 0)
+    const gradesWithAttendance = grades.filter(g => g.stats.attendanceRate !== null)
+    const avgAttendance = gradesWithAttendance.length > 0
+      ? Math.round(gradesWithAttendance.reduce((sum, g) => sum + (g.stats.attendanceRate || 0), 0) / gradesWithAttendance.length)
+      : 0
+    const gradesWithPayment = grades.filter(g => g.stats.paymentRate !== null)
+    const avgPayment = gradesWithPayment.length > 0
+      ? Math.round(gradesWithPayment.reduce((sum, g) => sum + (g.stats.paymentRate || 0), 0) / gradesWithPayment.length)
+      : 0
+
+    return { totalStudents, totalSubjects, avgAttendance, avgPayment }
+  }, [grades])
+
+  const getAttendanceColor = (rate: number | null) => {
+    if (rate === null) return "text-muted-foreground"
+    if (rate >= 90) return "text-success"
+    if (rate >= 70) return "text-warning"
+    return "text-destructive"
   }
 
-  const handleSaveAll = () => {
-    // Simulate saving grades
-    setStudents((prev) => prev.map((s) => ({ ...s, status: "synced" as const })))
-    setPendingChanges(0)
-  }
-
-  const getTrendIcon = (current: number | null, previous: number | null) => {
-    if (!current || !previous) return null
-    if (current > previous) return <TrendingUp className="size-3 text-success" />
-    if (current < previous) return <TrendingDown className="size-3 text-destructive" />
-    return null
+  const getPaymentColor = (rate: number | null) => {
+    if (rate === null) return "text-muted-foreground"
+    if (rate >= 80) return "text-success"
+    if (rate >= 50) return "text-warning"
+    return "text-destructive"
   }
 
   return (
-    <div className="min-h-screen bg-background">
-      {/* Main Content */}
-      <main className="container mx-auto px-4 py-8">
-        <div className="mb-8 flex items-center justify-between">
-          <div>
-            <h1 className="text-3xl font-bold text-foreground mb-2">{t.grades.title}</h1>
-            <p className="text-muted-foreground">{interpolate(t.grades.subtitle, { teacherName: "Amara", subjectName: t.grades.subjects.mathematics })}</p>
-          </div>
-          <Button onClick={handleSaveAll} disabled={pendingChanges === 0}>
-            <Save className="size-4 mr-2" />
-            {interpolate(t.grades.saveChanges, { count: pendingChanges })}
-          </Button>
+    <PageContainer maxWidth="full">
+        {/* Header */}
+        <div className="mb-6">
+          <h1 className="text-3xl font-bold text-foreground mb-2">Gestion des classes</h1>
+          <p className="text-muted-foreground">Visualiser et gérer les classes de l'année scolaire</p>
         </div>
 
-        <div className="space-y-6">
-          {/* Filters */}
-          <Card>
-            <CardContent className="pt-6">
-              <div className="grid gap-4 md:grid-cols-3">
-                <div className="space-y-2">
-                  <Label htmlFor="class">{t.common.level}</Label>
-                  <Select value={selectedClass} onValueChange={setSelectedClass}>
-                    <SelectTrigger id="class">
-                      <SelectValue placeholder={t.grades.selectClass} />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="6eme-A">6ème A</SelectItem>
-                      <SelectItem value="6eme-B">6ème B</SelectItem>
-                      <SelectItem value="5eme-A">5ème A</SelectItem>
-                      <SelectItem value="5eme-B">5ème B</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="subject">{t.grades.subject}</Label>
-                  <Select value={selectedSubject} onValueChange={setSelectedSubject}>
-                    <SelectTrigger id="subject">
-                      <SelectValue placeholder={t.grades.selectSubject} />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="mathematiques">{t.grades.subjects.mathematics}</SelectItem>
-                      <SelectItem value="francais">{t.grades.subjects.french}</SelectItem>
-                      <SelectItem value="anglais">{t.grades.subjects.english}</SelectItem>
-                      <SelectItem value="sciences">{t.grades.subjects.sciences}</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="term">{t.grades.period}</Label>
-                  <Select value={selectedTerm} onValueChange={setSelectedTerm}>
-                    <SelectTrigger id="term">
-                      <SelectValue placeholder={t.grades.selectPeriod} />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="trimestre-1">{t.grades.terms.term1}</SelectItem>
-                      <SelectItem value="trimestre-2">{t.grades.terms.term2}</SelectItem>
-                      <SelectItem value="trimestre-3">{t.grades.terms.term3}</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Class Performance Summary */}
-          <div className="grid gap-4 md:grid-cols-3">
-            <Card>
-              <CardHeader className="pb-3">
-                <CardTitle className="text-sm font-medium text-muted-foreground">{t.grades.classAverage}</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="text-3xl font-bold text-foreground">{classAverage.toFixed(1)}/20</div>
-                <p className="text-xs text-muted-foreground mt-1">{interpolate(t.grades.onNStudents, { count: students.length })}</p>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader className="pb-3">
-                <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
-                  <Trophy className="size-4 text-accent" />
-                  {t.grades.top3Students}
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-2">
-                  {topStudents.map((student, index) => (
-                    <div key={student.id} className="flex items-center justify-between text-sm">
-                      <span className="text-muted-foreground">
-                        {index + 1}. {student.name.split(" ")[0]}
-                      </span>
-                      <Badge variant="outline" className="text-success border-success">
-                        {student.grade}/20
-                      </Badge>
-                    </div>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader className="pb-3">
-                <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
-                  <AlertTriangle className="size-4 text-warning" />
-                  {t.grades.needsAttention}
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="text-3xl font-bold text-warning">{needsAttention.length}</div>
-                <p className="text-xs text-muted-foreground mt-1">{t.grades.studentsBelow10}</p>
-              </CardContent>
-            </Card>
-          </div>
-
-          {pendingChanges > 0 && (
-            <Card className="border-warning/50 bg-warning/5">
-              <CardContent className="py-3">
-                <div className="flex items-center gap-2 text-sm">
-                  <Clock className="size-4 text-warning" />
-                  <span className="font-medium text-warning">{interpolate(t.grades.pendingChanges, { count: pendingChanges })}</span>
-                  <span className="text-muted-foreground">
-                    {t.grades.clickToSave}
-                  </span>
-                </div>
-              </CardContent>
-            </Card>
-          )}
-
-          {/* Grade Entry Table */}
-          <Card>
-            <CardHeader>
-              <CardTitle>{t.grades.gradeEntry}</CardTitle>
-              <CardDescription>
-                {t.grades.gradeEntryDescription}
-              </CardDescription>
+        {/* Summary Cards */}
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4 mb-6">
+          <Card className="py-5">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Classes</CardTitle>
+              <GraduationCap className={sizing.icon.lg} />
             </CardHeader>
             <CardContent>
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>{t.common.student}</TableHead>
-                    <TableHead className="text-center">{t.grades.previousGrade}</TableHead>
-                    <TableHead className="text-center">{t.grades.currentGrade}</TableHead>
-                    <TableHead className="text-center">{t.grades.trend}</TableHead>
-                    <TableHead className="text-center">{t.common.status}</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {students.map((student) => (
-                    <TableRow key={student.id}>
-                      <TableCell className="font-medium">{student.name}</TableCell>
-                      <TableCell className="text-center">
-                        {student.previousGrade ? (
-                          <span className="text-muted-foreground">{student.previousGrade}/20</span>
-                        ) : (
-                          <span className="text-muted-foreground">-</span>
-                        )}
-                      </TableCell>
-                      <TableCell>
-                        <Input
-                          type="number"
-                          min="0"
-                          max="20"
-                          step="0.5"
-                          value={student.grade ?? ""}
-                          onChange={(e) => handleGradeChange(student.id, e.target.value)}
-                          className="w-20 mx-auto text-center"
-                          placeholder="0-20"
-                        />
-                      </TableCell>
-                      <TableCell className="text-center">
-                        {getTrendIcon(student.grade, student.previousGrade)}
-                      </TableCell>
-                      <TableCell className="text-center">
-                        {student.status === "synced" && (
-                          <Badge variant="outline" className="text-success border-success">
-                            <CheckCircle2 className="size-3 mr-1" />
-                            {t.grades.synced}
-                          </Badge>
-                        )}
-                        {student.status === "pending" && (
-                          <Badge variant="outline" className="text-warning border-warning">
-                            <Clock className="size-3 mr-1" />
-                            {t.grades.pending}
-                          </Badge>
-                        )}
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
+              <div className="text-2xl font-bold">{grades.length}</div>
+              <p className="text-xs text-muted-foreground">Total classes</p>
+            </CardContent>
+          </Card>
+
+          <Card className="py-5">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">{t.common.students}</CardTitle>
+              <Users className={sizing.icon.lg} />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">{stats.totalStudents}</div>
+              <p className="text-xs text-muted-foreground">Total students</p>
+            </CardContent>
+          </Card>
+
+          <Card className="py-5">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">{t.gradesEnhanced.attendanceRatio}</CardTitle>
+              <CalendarCheck className={sizing.icon.lg} />
+            </CardHeader>
+            <CardContent>
+              <div className={`text-2xl font-bold ${getAttendanceColor(stats.avgAttendance)}`}>
+                {stats.avgAttendance}%
+              </div>
+              <p className="text-xs text-muted-foreground">Average attendance</p>
+            </CardContent>
+          </Card>
+
+          <Card className="py-5">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">{t.gradesEnhanced.paymentRatio}</CardTitle>
+              <Wallet className={sizing.icon.lg} />
+            </CardHeader>
+            <CardContent>
+              <div className={`text-2xl font-bold ${getPaymentColor(stats.avgPayment)}`}>
+                {stats.avgPayment}%
+              </div>
+              <p className="text-xs text-muted-foreground">Average payment</p>
             </CardContent>
           </Card>
         </div>
-      </main>
-    </div>
+
+        {/* Filters */}
+        <Card className="mb-6 py-2">
+          <CardHeader className="pb-1 px-6 pt-3">
+            <CardTitle className="text-sm">{t.gradesEnhanced.filterGrades}</CardTitle>
+          </CardHeader>
+          <CardContent className="pt-0 pb-2 px-6">
+            <div className="flex flex-col sm:flex-row gap-4">
+              {/* Search Input */}
+              <div className="relative flex-1">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground" />
+                <Input
+                  placeholder={t.gradesEnhanced.searchGradePlaceholder}
+                  value={gradeSearchQuery}
+                  onChange={(e) => setGradeSearchQuery(e.target.value)}
+                  className="pl-10"
+                />
+              </div>
+
+              {/* Level Filter */}
+              <Select value={levelFilter} onValueChange={setLevelFilter}>
+                <SelectTrigger className="w-full sm:w-[180px]">
+                  <SelectValue placeholder={t.gradesEnhanced.allLevels} />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">{t.gradesEnhanced.allLevels}</SelectItem>
+                  {levels.map(level => (
+                    <SelectItem key={level} value={level}>{level}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Grades Grid */}
+        {isLoading ? (
+          <div className="flex items-center justify-center py-12">
+            <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+          </div>
+        ) : error ? (
+          <div className="text-center py-12 text-destructive">{error}</div>
+        ) : filteredGrades.length === 0 ? (
+          <div className="text-center py-12 text-muted-foreground">
+            {t.gradesEnhanced.noGradesFound}
+          </div>
+        ) : (
+          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+            {filteredGrades.map((grade) => (
+              <Link key={grade.id} href={`/grades/${grade.id}`}>
+                <Card className="hover:border-primary/50 hover:shadow-md transition-all cursor-pointer h-full">
+                  <CardHeader className="pb-3">
+                    <div className="flex items-start justify-between">
+                      <div>
+                        <CardTitle className="text-lg">{grade.name}</CardTitle>
+                        <CardDescription className="flex items-center gap-2 mt-1">
+                          <Badge variant="outline">{grade.level}</Badge>
+                          <span>{grade.stats.studentCount} {t.gradesEnhanced.studentsCount}</span>
+                        </CardDescription>
+                      </div>
+                      <ChevronRight className="size-5 text-muted-foreground" />
+                    </div>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    {/* Grade Leader */}
+                    <div className="flex items-center gap-3">
+                      {grade.gradeLeader ? (
+                        <>
+                          <Avatar className="size-8">
+                            <AvatarImage src={grade.gradeLeader.person.photoUrl ?? undefined} />
+                            <AvatarFallback>
+                              {grade.gradeLeader.person.firstName[0]}{grade.gradeLeader.person.lastName[0]}
+                            </AvatarFallback>
+                          </Avatar>
+                          <div className="text-sm">
+                            <p className="font-medium">
+                              {grade.gradeLeader.person.firstName} {grade.gradeLeader.person.lastName}
+                            </p>
+                            <p className="text-xs text-muted-foreground">{t.gradesEnhanced.gradeLeader}</p>
+                          </div>
+                        </>
+                      ) : (
+                        <div className="flex items-center gap-2 text-muted-foreground text-sm">
+                          <User className="size-4" />
+                          <span>{t.gradesEnhanced.noLeaderAssigned}</span>
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Stats */}
+                    <div className="space-y-3">
+                      {/* Attendance */}
+                      <div>
+                        <div className="flex items-center justify-between text-sm mb-1">
+                          <span className="text-muted-foreground flex items-center gap-1">
+                            <CalendarCheck className="size-3" />
+                            {t.gradesEnhanced.attendance}
+                          </span>
+                          <span className={getAttendanceColor(grade.stats.attendanceRate)}>
+                            {grade.stats.attendanceRate !== null ? `${grade.stats.attendanceRate}%` : '-'}
+                          </span>
+                        </div>
+                        <Progress
+                          value={grade.stats.attendanceRate ?? 0}
+                          className="h-2"
+                        />
+                      </div>
+
+                      {/* Payment */}
+                      <div>
+                        <div className="flex items-center justify-between text-sm mb-1">
+                          <span className="text-muted-foreground flex items-center gap-1">
+                            <Wallet className="size-3" />
+                            {t.gradesEnhanced.payment}
+                          </span>
+                          <span className={getPaymentColor(grade.stats.paymentRate)}>
+                            {grade.stats.paymentRate !== null ? `${grade.stats.paymentRate}%` : '-'}
+                          </span>
+                        </div>
+                        <Progress
+                          value={grade.stats.paymentRate ?? 0}
+                          className="h-2"
+                        />
+                      </div>
+
+                      {/* Payment breakdown */}
+                      <div className="flex gap-3 text-xs pt-1">
+                        <span className="text-destructive">{grade.stats.paymentBreakdown.late} {t.students.late}</span>
+                        <span className="text-success">{grade.stats.paymentBreakdown.onTime} {t.students.onTime}</span>
+                        <span className="text-success">{grade.stats.paymentBreakdown.complete} {t.students.complete}</span>
+                      </div>
+                    </div>
+
+                    {/* Subjects count */}
+                    <div className="flex items-center gap-2 text-sm text-muted-foreground pt-2 border-t">
+                      <BookOpen className="size-4" />
+                      <span>{grade.stats.subjectCount} {t.gradesEnhanced.subjects.toLowerCase()}</span>
+                    </div>
+                  </CardContent>
+                </Card>
+              </Link>
+            ))}
+          </div>
+        )}
+    </PageContainer>
   )
 }

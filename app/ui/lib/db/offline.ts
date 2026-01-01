@@ -68,7 +68,7 @@ export interface LocalAttendance extends SyncMetadata {
 // Enrollment System Types
 // ============================================================================
 
-export type SchoolLevel = "elementary" | "college" | "high_school"
+export type SchoolLevel = "kindergarten" | "elementary" | "college" | "high_school"
 
 export type EnrollmentStatusType =
   | "draft"

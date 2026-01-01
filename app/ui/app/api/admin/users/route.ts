@@ -2,6 +2,37 @@ import { NextResponse } from "next/server"
 import { requireRole } from "@/lib/authz"
 import { createUser } from "@api/users/createUser"
 import { VALID_ROLES, type AppRole } from "@/lib/rbac"
+import { prisma } from "@/lib/prisma"
+
+/**
+ * GET /api/admin/users
+ * List all users
+ */
+export async function GET() {
+  const { error } = await requireRole(["director"])
+  if (error) return error
+
+  try {
+    const users = await prisma.user.findMany({
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        role: true,
+        status: true,
+      },
+      orderBy: { name: "asc" },
+    })
+
+    return NextResponse.json(users)
+  } catch (err) {
+    console.error("Error fetching users:", err)
+    return NextResponse.json(
+      { message: "Failed to fetch users" },
+      { status: 500 }
+    )
+  }
+}
 
 // Email validation helper
 function isValidEmail(email: string): boolean {

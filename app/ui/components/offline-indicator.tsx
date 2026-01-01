@@ -136,7 +136,7 @@ export function OfflineIndicator({
             data-testid="offline-indicator"
             data-status={variant}
             className={cn(
-              "inline-flex items-center gap-1.5 rounded-full px-2 py-1",
+              "inline-flex items-center gap-1.5 rounded-full px-2 h-9",
               "transition-colors duration-200",
               config.bgColor,
               isOnline && pendingCount > 0 && "cursor-pointer hover:opacity-80",

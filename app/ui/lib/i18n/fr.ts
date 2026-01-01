@@ -22,12 +22,13 @@ export const fr = {
     yes: "Oui",
     no: "Non",
     all: "Tous",
+    reset: "Réinitialiser",
     actions: "Actions",
     status: "Statut",
     date: "Date",
     amount: "Montant",
-    students: "étudiants",
-    student: "Étudiant",
+    students: "élèves",
+    student: "Élève",
     teacher: "Enseignant",
     user: "Utilisateur",
     level: "Niveau",
@@ -37,12 +38,15 @@ export const fr = {
     offlineMode: "Mode hors ligne",
     menu: "Menu",
     select: "Sélectionner",
+    viewDetails: "Voir les détails",
   },
 
   // Navigation
   nav: {
     dashboard: "Tableau de bord",
     enrollments: "Inscriptions",
+    students: "Élèves",
+    grades: "Classes",
     activities: "Activités",
     accounting: "Comptabilité",
     attendance: "Présence",
@@ -53,11 +57,28 @@ export const fr = {
     managementSystem: "Système de gestion",
     profile: "Profil",
     myAccount: "Mon compte",
+    // New hierarchical navigation keys
+    overview: "Aperçu",
+    charts: "Graphiques",
+    studentsSection: "Élèves",
+    accountingSection: "Comptabilité",
+    balance: "Solde",
+    payments: "Paiements",
+    expenses: "Dépenses",
+    classes: "Classes",
+    timetable: "Emploi du temps",
+    audit: "Audit",
+    financialAudit: "Audit Financier",
+    dataHistory: "Historique des Données",
+    collapseMenu: "Réduire le menu",
+    expandMenu: "Agrandir le menu",
+    closeMenu: "Fermer le menu",
+    gradesClasses: "Niveaux & Classes",
   },
 
   // Homepage
   home: {
-    schoolName: "Groupe Scolaire GSPN N'Diolou",
+    schoolName: "Groupe Scolaire Privé N'Diolou",
     managementSystem: "Système de gestion",
     heroDescription: "Une plateforme complète de gestion scolaire construite pour l'excellence, la sécurité et la traçabilité dans l'éducation africaine.",
     goToDashboard: "Aller au tableau de bord",
@@ -66,7 +87,7 @@ export const fr = {
     
     // Page descriptions
     dashboardDesc: "Vue de supervision du directeur avec KPIs, approbations en attente et éléments d'action",
-    enrollmentsDesc: "Gérer les inscriptions, enregistrements et informations des étudiants",
+    enrollmentsDesc: "Gérer les inscriptions, enregistrements et informations des élèves",
     activitiesDesc: "Organiser les classes, clubs et activités extrascolaires",
     accountingDesc: "Suivre les paiements, réconciliations et contrôle financier avec traçabilité complète",
     attendanceDesc: "Suivi de présence mobile avec interface de marquage rapide",
@@ -113,11 +134,11 @@ export const fr = {
     pendingExceptionTickets: "Tickets d'exception en attente",
     requestsNeedingApproval: "Demandes nécessitant votre approbation",
     requestType: "Type de demande",
-    student: "Étudiant",
+    student: "Élève",
     details: "Détails",
     actions: "Actions",
     approve: "Approuver",
-    review: "Réviser",
+    review: "Revue",
     by: "Par", 
 
     // Exception types
@@ -136,14 +157,14 @@ export const fr = {
 
     // Activity actions
     financialPeriodClosed: "Période financière clôturée",
-    bulkEnrollmentProcessed: "Inscription en masse traitée ({count} étudiants)",
+    bulkEnrollmentProcessed: "Inscription en masse traitée ({count} élèves)",
     academicReportGenerated: "Rapport académique généré",
     bankDiscrepancyFlagged: "Discordance bancaire signalée",
     paymentValidation: "Validation de {count} paiements",
 
     // Charts
     enrollmentByLevel: "Inscriptions par niveau",
-    studentDistribution: "Répartition des étudiants par classe",
+    studentDistribution: "Répartition des élèves par classe",
     revenueByCategory: "Revenu par catégorie",
     revenueDistribution: "Distribution des revenus par type",
     viewAllReports: "Voir tous les rapports",
@@ -166,17 +187,19 @@ export const fr = {
   // Enrollments
   enrollments: {
     title: "Gestion des inscriptions",
-    subtitle: "Gérer les inscriptions et profils des étudiants",
-    allStudents: "Tous les étudiants",
-    studentsEnrolled: "{count} étudiants inscrits",
+    subtitle: "Gérer les inscriptions et profils des élèves",
+    allStudents: "Tous les élèves",
+    studentsEnrolled: "{count} élèves inscrits",
     newEnrollment: "Nouvelle inscription",
-    searchPlaceholder: "Rechercher par nom, ID étudiant...",
+    searchPlaceholder: "Rechercher par nom, ID élève...",
 
     // Table headers
-    studentId: "ID étudiant",
+    studentId: "ID élève",
+    enrollmentId: "ID d'inscription",
     fullName: "Nom complet",
     enrollmentDate: "Date d'inscription",
     paymentStatus: "Statut de paiement",
+    enrollmentStatus: "Statut d'inscription",
 
     // Payment status
     paid: "Payé",
@@ -184,13 +207,13 @@ export const fr = {
     overdue: "En retard",
 
     // New enrollment dialog
-    newStudentEnrollment: "Nouvelle inscription d'étudiant",
-    fillStudentInfo: "Remplissez les informations de l'étudiant pour créer une nouvelle inscription",
+    newStudentEnrollment: "Nouvelle inscription d'élève",
+    fillStudentInfo: "Remplissez les informations de l'élève pour créer une nouvelle inscription",
 
     // Personal info
     personalInfo: "Informations personnelles",
     firstName: "Prénom",
-    firstNamePlaceholder: "Prénom de l'étudiant",
+    firstNamePlaceholder: "Prénom de l'élève",
     lastName: "Nom",
     lastNamePlaceholder: "Nom de famille",
     dateOfBirth: "Date de naissance",
@@ -218,30 +241,95 @@ export const fr = {
 
     // Buttons
     createEnrollment: "Créer l'inscription",
+
+    // Summary cards
+    totalEnrollments: "Total des inscriptions",
+    draftEnrollments: "Inscriptions en brouillon",
+    submitted: "Soumis",
+    completed: "Complété",
+    allEnrollments: "Toutes les inscriptions",
+    inProgress: "En cours",
+    awaitingReview: "En attente de révision",
+    approvedEnrollments: "Inscriptions approuvées",
+
+    // Filters
+    filterEnrollments: "Filtrer les inscriptions",
+    allStatuses: "Tous les statuts",
+    allGrades: "Toutes les classes",
+
+    // Status labels
+    draft: "Brouillon",
+    needsReview: "En attente de validation",
+    rejected: "Rejeté",
+    cancelled: "Annulé",
   },
 
   // Activities
   activities: {
     title: "Gestion des activités",
     subtitle: "Gérer les activités scolaires et extrascolaires",
-    
+    adminTitle: "Administration des activités",
+    adminSubtitle: "Créer et gérer les activités scolaires",
+
     // Tabs
     tabAll: "Toutes",
     tabAcademic: "Scolaires",
     tabExtra: "Extrascolaires",
+    tabStudents: "Élèves",
+    tabActivities: "Activités",
+    tabEnrollments: "Inscriptions",
+    tabPayments: "Paiements",
 
     // Activity types
     academic: "Scolaire",
     extra: "Extra",
+    typeClub: "Club",
+    typeSport: "Sport",
+    typeArts: "Arts",
+    typeAcademic: "Académique",
+    typeOther: "Autre",
+
+    // Activity status
+    statusDraft: "Brouillon",
+    statusActive: "Active",
+    statusClosed: "Fermée",
+    statusCompleted: "Terminée",
+    statusCancelled: "Annulée",
+
+    // CRUD
+    addActivity: "Ajouter une activité",
+    editActivity: "Modifier l'activité",
+    deleteActivity: "Supprimer l'activité",
+    createActivity: "Créer l'activité",
+    updateActivity: "Mettre à jour l'activité",
+    activityName: "Nom de l'activité",
+    activityNameFr: "Nom de l'activité (Français)",
+    activityDescription: "Description",
+    activityType: "Type",
+    activityFee: "Frais",
+    activityCapacity: "Capacité",
+    startDate: "Date de début",
+    endDate: "Date de fin",
+    selectType: "Sélectionner le type",
+    selectStatus: "Sélectionner le statut",
 
     // Card info
-    assignStudent: "Assigner un étudiant",
+    assignStudent: "Assigner un élève",
+    enrollStudent: "Inscrire un élève",
+    removeStudent: "Retirer l'élève",
+    enrolled: "Inscrits",
+    spotsLeft: "places restantes",
+    noSpots: "Complet",
 
     // Assign dialog
-    assignStudentTitle: "Assigner un étudiant",
-    searchAndAdd: "Recherchez et ajoutez un étudiant à",
-    searchStudentPlaceholder: "Rechercher un étudiant par nom ou ID...",
+    assignStudentTitle: "Assigner un élève",
+    enrollStudentTitle: "Inscrire un élève à l'activité",
+    searchAndAdd: "Recherchez et ajoutez un élève à",
+    searchStudentPlaceholder: "Rechercher un élève par nom ou ID...",
     overduePayments: "Paiements en retard",
+    onlyCompletedEnrollments: "Seuls les élèves avec une inscription complète peuvent être inscrits",
+    noEligibleStudents: "Aucun élève éligible trouvé",
+    studentAlreadyEnrolled: "Élève déjà inscrit",
 
     // Activity names
     englishClub: "Club d'anglais",
@@ -250,22 +338,88 @@ export const fr = {
     physics: "Sciences physiques",
     readingClub: "Club de lecture",
     computerScience: "Informatique",
+
+    // Summary cards
+    totalActivities: "Total des activités",
+    academicActivities: "Activités académiques",
+    extraActivities: "Activités extrascolaires",
+    enrolledStudents: "Élèves inscrits",
+    allActivities: "Toutes les activités",
+    curricularActivities: "Activités curriculaires",
+    extracurricularActivities: "Activités extrascolaires",
+    totalEnrollments: "Total des inscriptions",
+    activeActivities: "Activités actives",
+
+    // Filters
+    filterActivities: "Filtrer les activités",
+    allTypes: "Tous les types",
+    allTeachers: "Tous les enseignants",
+    allStatuses: "Tous les statuts",
+
+    // Payment
+    recordPayment: "Enregistrer le paiement",
+    activityPayment: "Paiement d'activité",
+    paymentRecorded: "Paiement enregistré avec succès",
+    totalFee: "Frais total",
+    amountPaid: "Montant payé",
+    remainingBalance: "Solde restant",
+
+    // Messages
+    activityCreated: "Activité créée avec succès",
+    activityUpdated: "Activité mise à jour avec succès",
+    activityDeleted: "Activité supprimée avec succès",
+    studentEnrolled: "Élève inscrit avec succès",
+    studentRemoved: "Élève retiré de l'activité",
+    confirmDelete: "Êtes-vous sûr de vouloir supprimer cette activité ?",
+    confirmRemoveStudent: "Êtes-vous sûr de vouloir retirer cet élève de l'activité ?",
+    noActivities: "Aucune activité trouvée",
+    noEnrollments: "Aucun élève inscrit à cette activité",
   },
 
   // Accounting
   accounting: {
-    title: "Centre de contrôle financier",
-    subtitle: "Gérer les paiements, validations et réconciliations",
-    subtitleWithName: "Gérer les paiements, validations et réconciliations - {personName}",
+    title: "Gestion comptable",
+    subtitle: "Gérer les entrées et sorties d'argent",
+    subtitleWithName: "Gérer les entrées et sorties d'argent - {personName}",
 
     // Tabs
+    tabBalance: "Solde",
     tabPayments: "Enregistrement de paiements",
     tabReconciliation: "Réconciliation",
     tabPeriodClose: "Clôture de période",
 
+    // Balance tab
+    byMethod: "Par méthode",
+    byGrade: "Par classe",
+    byStatus: "Par statut",
+    confirmedPayments: "Paiements confirmés",
+    pendingPayments: "Paiements en attente",
+    paidExpenses: "Dépenses payées",
+    netMargin: "Marge nette",
+    cashPayments: "Espèces",
+    orangeMoneyPayments: "Orange Money",
+    pendingDeposit: "En attente de dépôt",
+    deposited: "Déposé",
+    pendingReview: "En attente de validation",
+    confirmed: "Confirmé",
+    rejected: "Rejeté",
+
+    // Payments page
+    paymentsPageTitle: "Gestion des paiements",
+    paymentsPageSubtitle: "Voir et gérer toutes les transactions de paiement",
+    viewAllPayments: "Voir tous les paiements",
+    recentPayments: "Paiements récents",
+    filterByStatus: "Filtrer par statut",
+    filterByMethod: "Filtrer par méthode",
+    filterByDate: "Filtrer par date",
+    allStatuses: "Tous les statuts",
+    allMethods: "Toutes les méthodes",
+    noPaymentsFound: "Aucun paiement trouvé",
+    deposit: "Dépôt",
+
     // Payments section
     paymentTransactions: "Transactions de paiement",
-    registerAndValidate: "Enregistrer et valider les paiements des étudiants",
+    registerAndValidate: "Enregistrer et valider les paiements des élèves",
     recordPayment: "Enregistrer un paiement",
     savePayment: "Enregistrer le paiement",
 
@@ -285,7 +439,7 @@ export const fr = {
     // Record payment dialog
     recordNewPayment: "Enregistrer un nouveau paiement",
     allFieldsRequired: "Tous les champs sont obligatoires. Un document justificatif est requis.",
-    searchStudent: "Rechercher un étudiant...",
+    searchStudent: "Rechercher un élève...",
     amountGNF: "Montant (GNF)",
     paymentType: "Type de paiement",
     cash: "Espèces (Cash)",
@@ -330,6 +484,26 @@ export const fr = {
     irreversibleAction: "Action irréversible",
     closePeriodWarning: "La clôture de période verrouille toutes les transactions et empêche toute modification ultérieure. Assurez-vous que toutes les vérifications sont complètes.",
     closeFinancialPeriod: "Clôturer la période financière",
+
+    // New keys for Payments page redesign
+    cashDeposit: "Dépôt en caisse",
+    paymentsToday: "Paiements d'aujourd'hui",
+    pendingConfirmation: "En attente de confirmation",
+    confirmedThisWeek: "Confirmés cette semaine",
+    filterByGrade: "Filtrer par classe",
+    allGrades: "Toutes les classes",
+    filterPayments: "Filtrer les paiements",
+    paymentsCount: "paiements",
+    confirmedPercent: "confirmés",
+
+    // Transactions and Review tabs
+    tabTransactions: "Transactions",
+    tabReview: "Revue",
+    filterByType: "Filtrer par type",
+    allTypes: "Tous les types",
+    itemsToReview: "éléments à revoir",
+    noItemsToReview: "Aucun élément à revoir. Toutes les transactions sont à jour !",
+    approve: "Approuver",
   },
 
   // Attendance
@@ -342,7 +516,7 @@ export const fr = {
     takeAttendance: "Prendre présence",
 
     // Taking attendance
-    tapToChange: "Tapez sur un étudiant pour changer le statut de présence",
+    tapToChange: "Tapez sur un élève pour changer le statut de présence",
 
     // Summary
     present: "Présents",
@@ -354,9 +528,22 @@ export const fr = {
     statusAbsent: "Absent",
     statusExcused: "Excusé",
 
+    // Summary cards
+    totalSessions: "Total des sessions",
+    averageAttendanceRate: "Taux de présence moyen",
+    presentToday: "Présents aujourd'hui",
+    absentToday: "Absents aujourd'hui",
+    attendanceSessions: "Sessions de présence",
+    overallRate: "Taux global",
+    studentsPresent: "Élèves présents",
+    studentsAbsent: "Élèves absents",
+
+    // Filters
+    filterAttendance: "Filtrer la présence",
+
     // Student list
-    studentList: "Liste des étudiants",
-    allMarkedPresent: "Tous les étudiants sont marqués présents par défaut",
+    studentList: "Liste des élèves",
+    allMarkedPresent: "Tous les élèves sont marqués présents par défaut",
     overduePayment: "Paiement en retard",
 
     // Submit
@@ -364,9 +551,9 @@ export const fr = {
 
     // Instructions
     instructions: "Instructions",
-    instruction1: "Tapez sur un étudiant pour changer son statut",
+    instruction1: "Tapez sur un élève pour changer son statut",
     instruction2: "Présent (vert) → Absent (rouge) → Excusé (orange) → Présent",
-    instruction3: "Les étudiants avec paiements en retard sont marqués d'un badge",
+    instruction3: "Les élèves avec paiements en retard sont marqués d'un badge",
     instruction4: "Cliquez sur \"Soumettre\" pour enregistrer la présence",
   },
 
@@ -383,11 +570,11 @@ export const fr = {
     totalActivities: "Total activités",
     academicActivities: "scolaires",
     extraActivities: "extra",
-    enrolledStudents: "Étudiants inscrits",
+    enrolledStudents: "Élèves inscrits",
     totalEnrollments: "Total d'inscriptions",
     averageAttendance: "Taux de présence moyen",
     satisfactoryPerformance: "Performance satisfaisante",
-    atRiskStudents: "Étudiants à risque",
+    atRiskStudents: "Élèves à risque",
     lowParticipation: "Faible participation",
 
     // Filters
@@ -405,8 +592,8 @@ export const fr = {
     ratePercent: "Taux (%)",
 
     // Low participation
-    lowParticipationStudents: "Étudiants avec faible participation",
-    studentsNeedingFollowup: "Étudiants nécessitant un suivi pour faible taux de participation (<60%)",
+    lowParticipationStudents: "Élèves avec faible participation",
+    studentsNeedingFollowup: "Élèves nécessitant un suivi pour faible taux de participation (<60%)",
     activitiesEnrolled: "activités inscrites",
 
     // Student reasons
@@ -436,7 +623,7 @@ export const fr = {
     simulateOffline: "Simuler mode hors ligne",
     simulateOnline: "Simuler mode en ligne",
     // Page de connexion améliorée
-    schoolName: "Groupe Scolaire Privé de Nongo",
+    schoolName: "Groupe Scolaire Privé N'Diolou",
     schoolTagline: "L'excellence dans l'éducation",
     welcomeTitle: "Bienvenue sur le système de gestion scolaire",
     welcomeSubtitle: "Une plateforme complète pour gérer les inscriptions, la présence, la comptabilité et plus encore.",
@@ -522,7 +709,7 @@ export const fr = {
       teachers: "Enseignants",
       accountants: "Comptables",
       parents: "Parents",
-      students: "Étudiants",
+      students: "Élèves",
     },
     addUser: "Ajouter un utilisateur",
     searchPlaceholder: "Rechercher par nom, email...",
@@ -551,10 +738,10 @@ export const fr = {
     selectSubject: "Sélectionner une matière",
     selectPeriod: "Sélectionner une période",
     classAverage: "Moyenne de classe",
-    onNStudents: "Sur {count} étudiants",
-    top3Students: "Top 3 étudiants",
+    onNStudents: "Sur {count} élèves",
+    top3Students: "Top 3 élèves",
     needsAttention: "Besoin d'attention",
-    studentsBelow10: "Étudiants avec note < 10",
+    studentsBelow10: "Élèves avec note < 10",
     pendingChanges: "{count} notes en attente de sauvegarde",
     clickToSave: "- Cliquez sur Sauvegarder pour enregistrer vos modifications",
     gradeEntry: "Saisie des notes",
@@ -586,8 +773,11 @@ export const fr = {
     classes: "Classes",
     statistics: "Statistiques",
     totalClasses: "Total classes",
-    totalStudents: "Total étudiants",
+    totalStudents: "Total élèves",
     coursesToday: "Cours aujourd'hui",
+    allClasses: "Toutes les classes",
+    acrossAllClasses: "Dans toutes les classes",
+    scheduledToday: "Prévus aujourd'hui",
     selectDay: "Sélectionner un jour",
     scheduleForDay: "Emploi du temps - {day}",
     noCoursesForDay: "Aucun cours prévu pour ce jour",
@@ -617,46 +807,53 @@ export const fr = {
   // Enrollment Wizard
   enrollmentWizard: {
     // Main
-    title: "Inscription d'étudiant",
+    title: "Inscription d'élève",
     subtitle: "Processus d'inscription pour l'année scolaire",
 
     // Steps
     step1: "Sélection de classe",
-    step2: "Information étudiant",
+    step2: "Information élève",
     step3: "Échéancier de paiement",
     step4: "Paiement",
     step5: "Révision",
     step6: "Confirmation",
 
     // Step 1 - Grade Selection
-    selectGrade: "Sélectionner la classe",
+    selectGrade: "Sélectionner le niveau",
     selectGradeDescription: "Choisissez le niveau scolaire pour l'inscription",
     schoolYear: "Année scolaire",
     todayDate: "Date d'aujourd'hui",
+    kindergarten: "Maternelle",
     elementary: "Primaire",
     college: "Collège",
     highSchool: "Lycée",
-    studentsEnrolled: "{count} étudiants inscrits",
+    studentsEnrolled: "{count} élèves inscrits",
+    capacity: "Capacité",
     yearlyTuition: "Frais annuels",
     perYear: "/an",
+    onlyGrandeSection: "Seule la Grande Section est disponible pour les nouvelles inscriptions",
+    atCapacityWarning: "Limite de capacité atteinte (70 élèves)",
 
     // Step 2 - Student Info
-    studentInfo: "Information de l'étudiant",
-    newStudent: "Nouvel étudiant",
-    returningStudent: "Étudiant existant",
+    studentInfo: "Information de l'élève",
+    newStudent: "Nouvel élève",
+    returningStudent: "Élève existant",
     searchStudent: "Rechercher par numéro, nom ou date de naissance",
-    noStudentFound: "Aucun étudiant trouvé",
-    selectThisStudent: "Sélectionner cet étudiant",
+    noStudentFound: "Aucun élève trouvé",
+    selectThisStudent: "Sélectionner cet élève",
 
     // Personal info
     personalInfo: "Informations personnelles",
     firstName: "Prénom",
+    middleName: "Deuxième prénom",
     lastName: "Nom",
     dateOfBirth: "Date de naissance",
+    dateFormatHint: "Format: JJ/MM/AAAA (ex: 15/03/2010)",
     gender: "Genre",
     male: "Masculin",
     female: "Féminin",
     phone: "Téléphone",
+    phoneFormat: "Format: +224 XXX XX XX XX",
     email: "Email",
     photo: "Photo",
     birthCertificate: "Extrait de naissance",
@@ -697,6 +894,8 @@ export const fr = {
     requiresApproval: "Cette modification nécessite une approbation du directeur",
     originalAmount: "Montant original",
     adjustedAmount: "Montant modifié",
+    percentagePresets: "Pourcentages rapides",
+    adjustPercentage: "Ajuster le pourcentage",
 
     // Step 4 - Payment Transaction
     paymentTransaction: "Enregistrer un paiement",
@@ -711,6 +910,10 @@ export const fr = {
     transactionRef: "Référence de transaction",
     uploadReceipt: "Télécharger le reçu",
     receiptRequired: "Le reçu est obligatoire",
+    autoGenerated: "Généré automatiquement",
+    receiptIdUnique: "Numéro de reçu unique",
+    generatingReceipt: "Génération en cours...",
+    pleaseWait: "Veuillez patienter...",
     paymentCoverage: "Couverture du paiement",
     monthsCovered: "Mois couverts",
     percentPaid: "Pourcentage payé",
@@ -720,7 +923,7 @@ export const fr = {
     reviewDescription: "Vérifiez toutes les informations avant de soumettre",
     editSection: "Modifier",
     gradeInfo: "Information de classe",
-    studentDetails: "Détails de l'étudiant",
+    studentDetails: "Détails de l'élève",
     parentDetails: "Détails des parents",
     paymentDetails: "Détails de paiement",
     notesSection: "Notes",
@@ -728,7 +931,7 @@ export const fr = {
     // Step 6 - Confirmation
     enrollmentComplete: "Inscription soumise!",
     enrollmentNumber: "Numéro d'inscription",
-    studentNumber: "Numéro d'étudiant",
+    studentNumber: "Numéro d'élève",
     downloadPdf: "Télécharger le PDF",
     downloadingPdf: "Génération du PDF...",
     pdfDownloadError: "Échec du téléchargement du PDF. Veuillez réessayer.",
@@ -747,10 +950,10 @@ export const fr = {
     statusCancelled: "Annulée",
 
     // Suggested students
-    suggestedStudents: "Étudiants suggérés",
-    suggestedStudentsDescription: "Étudiants de la classe précédente qui peuvent être réinscrits",
+    suggestedStudents: "Élèves suggérés",
+    suggestedStudentsDescription: "Élèves de la classe précédente qui peuvent être réinscrits",
     fromPreviousGrade: "Classe précédente",
-    noSuggestedStudents: "Aucun étudiant suggéré disponible",
+    noSuggestedStudents: "Aucun élève suggéré disponible",
     orSearchManually: "ou rechercher manuellement",
 
     // Draft management
@@ -780,6 +983,165 @@ export const fr = {
     startNewEnrollment: "Nouvelle inscription",
   },
 
+  // Students module
+  students: {
+    title: "Gestion des élèves",
+    subtitle: "Visualiser et gérer les élèves inscrits",
+    searchPlaceholder: "Rechercher par nom ou numéro...",
+    filters: "Filtres",
+    filterStudents: "Filtrer les élèves",
+    allGrades: "Toutes les classes",
+    allStatuses: "Tous les statuts",
+    allPayments: "Tous les paiements",
+    allAttendances: "Toutes les présences",
+
+    // Status labels
+    balanceStatus: "Statut de paiement",
+    late: "En retard",
+    onTime: "À jour",
+    inAdvance: "En avance",
+    complete: "Complet",
+    goldMedal: "Paiement complet",
+
+    // Attendance status
+    attendanceGood: "Bonne présence",
+    attendanceConcerning: "Présence préoccupante",
+    attendanceCritical: "Présence critique",
+    missingData: "Données manquantes",
+
+    // Student detail
+    personalInfo: "Informations personnelles",
+    paymentHistory: "Historique des paiements",
+    attendanceHistory: "Historique de présence",
+    progressBar: "Progression",
+    remainingBalance: "Solde restant",
+    uploadPhoto: "Télécharger une photo",
+
+    // Grades & Classes page
+    gradesClassesSubtitle: "Gérer les affectations de salles et voir les informations de classe",
+    assigned: "Affectés",
+    unassigned: "Non affectés",
+    roomsAndStudents: "Salles & Élèves",
+    room: "Salle",
+    changeRoom: "Changer de Salle",
+    noRoomsConfigured: "Aucune salle configurée pour ce niveau",
+  },
+
+  // Enhanced attendance
+  attendanceEnhanced: {
+    selectGrade: "Sélectionner une classe",
+    selectDate: "Sélectionner une date",
+    entryMode: "Mode de saisie",
+    checklistMode: "Liste complète",
+    checklistModeDesc: "Marquer chaque élève individuellement",
+    absencesOnlyMode: "Absences seulement",
+    absencesOnlyModeDesc: "Marquer uniquement les absents et retards",
+    markAllPresent: "Tout marquer présent",
+    sessionComplete: "Session complète",
+    completeSession: "Terminer la session",
+    late: "En retard",
+    attendanceRate: "Taux de présence",
+    swipeLeft: "Glisser gauche = absent",
+    swipeRight: "Glisser droite = présent",
+  },
+
+  // Enhanced accounting
+  accountingEnhanced: {
+    pendingDeposit: "En attente de dépôt",
+    deposited: "Déposé",
+    pendingReview: "En attente de révision",
+    confirmed: "Confirmé",
+    rejected: "Rejeté",
+    recordDeposit: "Enregistrer le dépôt",
+    bankReference: "Référence bancaire",
+    depositDate: "Date de dépôt",
+    bankName: "Nom de la banque",
+    depositedBy: "Déposé par",
+    reviewPayment: "Réviser le paiement",
+    approvePayment: "Approuver le paiement",
+    rejectPayment: "Rejeter le paiement",
+    reviewNotes: "Notes de révision",
+    balance: "Solde",
+    cashAvailable: "Espèces disponibles",
+    cashPending: "Espèces en attente",
+    margin: "Marge",
+    orangeMoneyPayments: "Paiements Orange Money",
+    cashPayments: "Paiements en espèces",
+  },
+
+  // Grades module (enhanced)
+  gradesEnhanced: {
+    gradeLeader: "Responsable de classe",
+    assignLeader: "Assigner un responsable",
+    subjectsList: "Liste des matières",
+    teacherAssignment: "Enseignant assigné",
+    assignTeacher: "Assigner un enseignant",
+    attendanceRatio: "Taux de présence",
+    paymentRatio: "Taux de paiement",
+    studentsInGrade: "Élèves dans la classe",
+    coefficient: "Coefficient",
+    hoursPerWeek: "Heures par semaine",
+    backToGrades: "Retour aux classes",
+    students: "Élèves",
+    subjects: "Matières",
+    attendance: "Présence",
+    payment: "Paiement",
+    overview: "Vue d'ensemble",
+    present: "Présents",
+    absent: "Absents",
+    excused: "Excusés",
+    attendanceSummary: "Résumé de présence",
+    totalRecords: "enregistrements au total",
+    notAssigned: "Non assigné",
+    subject: "Matière",
+    teacher: "Enseignant",
+    enrolledStudents: "élèves inscrits",
+    subjectsTaught: "matières enseignées",
+    noLeader: "Aucun responsable",
+    overallProgress: "Progression globale",
+    studentsCount: "élèves",
+    paymentSummary: "Résumé des paiements",
+    name: "Nom",
+    number: "Numéro",
+    noStudentsEnrolled: "Aucun élève inscrit",
+    noSubjectsAssigned: "Aucune matière assignée",
+    noLeaderAssigned: "Aucun responsable assigné",
+    allLevels: "Tous les niveaux",
+    noGradesFound: "Aucune classe trouvée",
+    filterGrades: "Filtrer les classes",
+    searchGradePlaceholder: "Rechercher par nom...",
+  },
+
+  // Expenses
+  expenses: {
+    title: "Gestion des dépenses",
+    subtitle: "Enregistrer et suivre les dépenses",
+    newExpense: "Nouvelle dépense",
+    category: "Catégorie",
+    description: "Description",
+    vendor: "Fournisseur",
+    pending: "En attente",
+    approved: "Approuvée",
+    rejected: "Rejetée",
+    paid: "Payée",
+    requestApproval: "Demander l'approbation",
+    approveExpense: "Approuver la dépense",
+    rejectExpense: "Rejeter la dépense",
+    markAsPaid: "Marquer comme payée",
+    rejectionReason: "Raison du rejet",
+    receipt: "Reçu",
+    uploadReceipt: "Télécharger le reçu",
+    categories: {
+      supplies: "Fournitures",
+      maintenance: "Maintenance",
+      utilities: "Services publics",
+      salary: "Salaires",
+      transport: "Transport",
+      communication: "Communication",
+      other: "Autre",
+    },
+  },
+
   // Grade names (Guinea format)
   gradeNames: {
     "1ere": "1ère Année",
@@ -795,6 +1157,286 @@ export const fr = {
     "11eme": "11ème Année",
     "12eme": "12ème Année",
     terminal: "Terminale",
+  },
+
+  // Administration module
+  admin: {
+    // Navigation
+    administrationSection: "Administration",
+    schoolYears: "Années Scolaires",
+    gradesAndRooms: "Classes & Salles",
+    teachersAndClasses: "Enseignants & Matières",
+    usersManagement: "Gestion des Utilisateurs",
+    activitiesManagement: "Activités",
+
+    // School Years
+    schoolYearsTitle: "Gestion des Années Scolaires",
+    schoolYearsSubtitle: "Gérer les configurations des années académiques",
+    createSchoolYear: "Créer une Année Scolaire",
+    editSchoolYear: "Modifier l'Année Scolaire",
+    schoolYearName: "Nom",
+    schoolYearNamePlaceholder: "ex: 2025 - 2026",
+    startDate: "Date de Début",
+    endDate: "Date de Fin",
+    enrollmentStartDate: "Début des Inscriptions",
+    enrollmentEndDate: "Fin des Inscriptions",
+    activateSchoolYear: "Activer l'Année Scolaire",
+    activateConfirmation: "Êtes-vous sûr de vouloir activer cette année scolaire ? Cela désactivera l'année active actuelle.",
+    copyFromPreviousYear: "Copier la Configuration",
+    copyConfigDescription: "Copier les classes, matières et salles d'une année précédente",
+    selectSourceYear: "Sélectionner l'année source",
+    copyGrades: "Copier les Classes",
+    copySubjects: "Copier les Matières",
+    copyRooms: "Copier les Salles",
+    configCopied: "Configuration copiée avec succès",
+    activeYear: "Année Active",
+    newYear: "Nouvelle Année",
+    totalYears: "Total des Années",
+    noActiveYear: "Aucune année active",
+    noNewYear: "Aucune nouvelle année configurée",
+
+    // School Year Status
+    statusNew: "Nouvelle",
+    statusActive: "Active",
+    statusPassed: "Passée",
+
+    // Grades & Rooms
+    gradesRoomsTitle: "Gestion des Classes & Salles",
+    gradesRoomsSubtitle: "Configurer les classes et sections pour chaque année scolaire",
+    selectSchoolYear: "Sélectionner l'Année Scolaire",
+    addGrade: "Ajouter une Classe",
+    editGrade: "Modifier la Classe",
+    deleteGrade: "Supprimer la Classe",
+    deleteGradeConfirmation: "Êtes-vous sûr de vouloir supprimer cette classe ? Cette action est irréversible.",
+    enableGrade: "Activer la Classe",
+    disableGrade: "Désactiver la Classe",
+    gradeEnabled: "Classe activée",
+    gradeDisabled: "Classe désactivée",
+    gradeName: "Nom de la Classe",
+    gradeCode: "Code de la Classe",
+    gradeLevel: "Niveau",
+    gradeSeries: "Série (Lycée)",
+    tuitionFee: "Frais de Scolarité",
+    gradeCapacity: "Capacité",
+    allocated: "Alloué",
+    available: "Disponible",
+    addRoom: "Ajouter une Salle",
+    editRoom: "Modifier la Salle",
+    deleteRoom: "Supprimer la Salle",
+    roomName: "Nom de la Salle",
+    roomDisplayName: "Nom Affiché",
+    roomCapacity: "Capacité de la Salle",
+    manageRooms: "Gérer les Salles",
+    manageSubjects: "Gérer les Matières",
+    assignToRoom: "Assigner à une Salle",
+    unassignedStudents: "Élèves Non Assignés",
+    assignStudents: "Assigner des Élèves",
+    studentsInRoom: "élèves dans la salle",
+    roomFull: "Salle pleine",
+    moveStudents: "Déplacer les Élèves",
+    moveStudentsTitle: "Déplacer les Élèves entre les Salles",
+    sourceRoom: "De la Salle",
+    targetRoom: "Vers la Salle",
+    selectStudentsToMove: "Sélectionner les Élèves à Déplacer",
+    moveSelected: "Déplacer la Sélection",
+    studentsSelected: "élève(s) sélectionné(s)",
+    confirmDeleteRoom: "Supprimer la Salle",
+    deleteRoomWithStudents: "Cette salle contient {count} élève(s). Choisissez où les déplacer :",
+    removeAllAssignments: "Supprimer toutes les affectations",
+    moveAndDelete: "Déplacer & Supprimer",
+    studentsMoved: "Élèves déplacés avec succès",
+    roomDeleted: "Salle supprimée avec succès",
+
+    // High School Series
+    seriesSM: "Sciences Mathématiques (SM)",
+    seriesSS: "Sciences Sociales (SS)",
+    seriesSE: "Sciences Expérimentales (SE)",
+
+    // Teachers & Classes
+    teachersClassesTitle: "Enseignants & Affectations",
+    teachersClassesSubtitle: "Assigner les enseignants aux matières pour chaque classe",
+    bySubject: "Par Matière",
+    byTeacher: "Par Enseignant",
+    assignTeacher: "Assigner un Enseignant",
+    removeAssignment: "Retirer l'Affectation",
+    unassigned: "Non assigné",
+    teacherWorkload: "Charge de travail",
+    hoursPerWeek: "heures/semaine",
+    noTeachersFound: "Aucun enseignant trouvé",
+    noSubjectsFound: "Aucune matière trouvée",
+    viewSchedule: "Voir l'Emploi du Temps",
+    teacherSchedule: "Emploi du Temps de l'Enseignant",
+
+    // User Invitations
+    inviteUser: "Inviter un Utilisateur",
+    sendInvitation: "Envoyer l'Invitation",
+    invitationSent: "Invitation Envoyée",
+    invitationPending: "Invitation en Attente",
+    resendInvitation: "Renvoyer l'Invitation",
+    invitationExpired: "Invitation Expirée",
+    invitationAccepted: "Invitation Acceptée",
+    copyInvitationLink: "Copier le Lien d'Invitation",
+    linkCopied: "Lien copié dans le presse-papiers",
+    invitationEmailSubject: "Invitation au Système de Gestion GSPN",
+    inviteUserDescription: "Entrez l'adresse email de l'utilisateur à inviter",
+    inviteeEmail: "Adresse Email",
+    inviteeName: "Nom (Optionnel)",
+    selectRole: "Sélectionner le Rôle",
+    invitationExpiresIn: "L'invitation expire dans 7 jours",
+    pendingInvitations: "Invitations en Attente",
+    noPendingInvitations: "Aucune invitation en attente",
+
+    // Users page additional keys
+    usersPageSubtitle: "Gérer les utilisateurs et envoyer des invitations",
+    totalUsers: "Total Utilisateurs",
+    acceptedInvitations: "Acceptées",
+    expiredInvitations: "Expirées",
+    invitationsTab: "Invitations",
+    usersTab: "Utilisateurs",
+    manageInvitations: "Gérer les invitations en attente et passées",
+    allUsers: "Tous les Utilisateurs",
+    viewAllUsers: "Voir tous les utilisateurs enregistrés",
+    noUsersFound: "Aucun utilisateur trouvé",
+    emailColumn: "Email",
+    nameColumn: "Nom",
+    roleColumn: "Rôle",
+    statusColumn: "Statut",
+    expiresColumn: "Expire le",
+    invitedByColumn: "Invité par",
+    actionsColumn: "Actions",
+    resend: "Renvoyer",
+    unknown: "Inconnu",
+
+    // Role labels
+    roles: {
+      director: "Directeur",
+      academic_director: "Directeur Académique",
+      secretary: "Secrétaire",
+      accountant: "Comptable",
+      teacher: "Enseignant",
+    },
+
+    // Accept invitation page
+    acceptInvitation: {
+      pageTitle: "Accepter l'Invitation",
+      pageDescription: "Créez votre compte pour accéder au Système de Gestion GSPN",
+      validatingInvitation: "Validation de l'invitation...",
+      accountCreated: "Compte Créé !",
+      accountCreatedDescription: "Votre compte a été créé avec succès. Vous serez redirigé vers la page de connexion.",
+      goToLogin: "Aller à la Connexion",
+      invalidInvitation: "Invitation Invalide",
+      invalidInvitationDescription: "Ce lien d'invitation est invalide ou a expiré.",
+      noTokenProvided: "Aucun jeton d'invitation fourni",
+      failedToValidate: "Échec de la validation de l'invitation",
+      fullName: "Nom Complet",
+      password: "Mot de Passe",
+      confirmPassword: "Confirmer le Mot de Passe",
+      createAccount: "Créer le Compte",
+      passwordsDoNotMatch: "Les mots de passe ne correspondent pas",
+      passwordMinLength: "Le mot de passe doit contenir au moins 8 caractères",
+      failedToCreateAccount: "Échec de la création du compte",
+      alreadyHaveAccount: "Vous avez déjà un compte ?",
+      signIn: "Se connecter",
+    },
+
+    // Room Assignments
+    roomAssignments: {
+      dialogTitle: "Assigner des Élèves à une Salle",
+      dialogDescription: "Sélectionnez les élèves à assigner à {gradeName}",
+      selectRoom: "Sélectionner une Salle",
+      noRoomsAvailable: "Aucune salle disponible",
+      roomCapacity: "{current}/{capacity} élèves",
+      roomFull: "Complète",
+      roomNearCapacity: "Presque complète",
+      unassignedStudents: "Élèves Non Assignés",
+      noUnassignedStudents: "Tous les élèves sont assignés à des salles",
+      selectAll: "Tout Sélectionner",
+      deselectAll: "Tout Désélectionner",
+      selectedCount: "{count} sélectionné(s)",
+      assignStudents: "Assigner les Élèves",
+      assigningStudents: "Assignation...",
+      assignmentSuccess: "{count} élève(s) assigné(s) avec succès",
+      assignmentPartialSuccess: "{success} élève(s) assigné(s), {failed} échoué(s)",
+      assignmentError: "Échec de l'assignation des élèves",
+      studentName: "Nom de l'Élève",
+      studentNumber: "Numéro de l'Élève",
+      fetchError: "Échec du chargement des élèves non assignés",
+      currentRoom: "Salle Actuelle",
+      newRoom: "Nouvelle Salle",
+      reassignSuccess: "Salle changée avec succès",
+    },
+
+    // Common
+    configuration: "Configuration",
+    saveChanges: "Enregistrer les Modifications",
+    discardChanges: "Annuler les Modifications",
+    noDataFound: "Aucune donnée trouvée",
+    loadingData: "Chargement des données...",
+
+    // Additional labels for pages
+    configured: "configuré(s)",
+    passed: "passé(s)",
+    teachers: "Enseignants",
+    withAssignments: "avec affectations",
+    classAssignments: "Affectations de Classes",
+    acrossGrades: "Répartis sur {count} niveaux",
+    subjectsNeedTeachers: "Matières sans enseignant",
+    noClasses: "Aucune classe",
+    classes: "Classes",
+    selectTeacher: "Sélectionner un enseignant",
+    grades: "Niveaux",
+    noAssignmentsForYear: "Aucune affectation pour cette année scolaire",
+    removeAssignmentConfirm: "Êtes-vous sûr de vouloir supprimer cette affectation ? Cette action est irréversible.",
+
+    // Grade stats
+    students: "Élèves",
+    rooms: "Salles",
+    subjects: "Matières",
+    noRoomsConfigured: "Aucune salle configurée",
+
+    // Grade levels
+    levelKindergarten: "Maternelle",
+    levelElementary: "Élémentaire",
+    levelCollege: "Collège",
+    levelHighSchool: "Lycée",
+
+    // High school tracks (series)
+    trackSM: "Sciences Mathématiques",
+    trackSS: "Sciences Sociales",
+    trackSE: "Sciences Expérimentales",
+    trackSMShort: "SM",
+    trackSSShort: "SS",
+    trackSEShort: "SE",
+    trackSMFull: "Sciences Mathématiques (SM)",
+    trackSSFull: "Sciences Sociales (SS)",
+    trackSEFull: "Sciences Expérimentales (SE)",
+    selectTrack: "Sélectionner la série",
+    trackRequired: "La sélection de série est obligatoire pour le lycée",
+
+    // Grade form
+    order: "Ordre",
+    selectSeriesOptional: "Sélectionner une série (optionnel)",
+    none: "Aucune",
+    enabledForEnrollment: "Activé pour les inscriptions",
+    roomNamePlaceholder: "A, B, C...",
+    roomDisplayNamePlaceholder: "7A, 7B...",
+    active: "Actif",
+    assignedSubjects: "Matières Affectées",
+    coefficient: "Coefficient",
+    coefficientShort: "Coef",
+    hoursWeek: "Heures/Semaine",
+    hoursPerWeekShort: "h/sem",
+    addSubject: "Ajouter Matière",
+    removeSubjectConfirm: "Êtes-vous sûr de vouloir supprimer cette matière ?",
+
+    // Bulk move dialog
+    failedToFetchStudents: "Échec du chargement des élèves",
+    failedToMoveStudents: "Échec du déplacement des élèves",
+    noStudentsInRoom: "Aucun élève dans cette salle",
+
+    // Placeholders
+    emailPlaceholder: "utilisateur@exemple.com",
+    namePlaceholder: "Jean Dupont",
   },
 } as const;
 

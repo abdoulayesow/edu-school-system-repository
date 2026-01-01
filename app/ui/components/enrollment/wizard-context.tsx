@@ -26,6 +26,7 @@ const initialData: EnrollmentWizardData = {
   gradeId: "",
   gradeName: "",
   level: "elementary" as SchoolLevel,
+  gradeOrder: 0,
   tuitionFee: 0,
 
   // Step 2 - Student Info
@@ -230,12 +231,17 @@ export function EnrollmentWizardProvider({
           return (
             !!data.firstName &&
             !!data.lastName &&
+            !!data.dateOfBirth && // Date of birth is required
             (!!data.fatherName || !!data.motherName) &&
             (!!data.phone || !!data.fatherPhone || !!data.motherPhone)
           )
         case 3: // Payment Breakdown
           return data.paymentSchedules.length > 0
-        case 4: // Payment Transaction (optional)
+        case 4: // Payment Transaction (optional, but if making payment, receipt number is required)
+          // If user is making a payment (amount > 0 and method selected), receipt number must be set
+          if (data.paymentAmount && data.paymentAmount > 0 && data.paymentMethod) {
+            return !!data.receiptNumber
+          }
           return true // Payment is optional
         case 5: // Review
           return true // Just review, always can proceed

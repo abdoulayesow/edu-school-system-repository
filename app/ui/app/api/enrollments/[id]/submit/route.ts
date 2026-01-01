@@ -11,12 +11,39 @@ interface RouteParams {
  * POST /api/enrollments/[id]/submit
  * Submit an enrollment for approval
  * Creates payment schedules and sets auto-approval date
+ * Optionally creates payment record if payment was made during enrollment
  */
 export async function POST(req: NextRequest, { params }: RouteParams) {
   const { session, error } = await requireSession()
   if (error) return error
 
   const { id } = await params
+
+  // Parse request body for payment data (optional)
+  let paymentData: {
+    paymentMade: boolean
+    paymentAmount?: number
+    paymentMethod?: "cash" | "orange_money"
+    receiptNumber?: string
+    transactionRef?: string
+    receiptImageUrl?: string
+  } | null = null
+
+  try {
+    const body = await req.json().catch(() => ({}))
+    if (body.paymentMade && body.paymentAmount && body.paymentMethod && body.receiptNumber) {
+      paymentData = {
+        paymentMade: body.paymentMade,
+        paymentAmount: body.paymentAmount,
+        paymentMethod: body.paymentMethod,
+        receiptNumber: body.receiptNumber,
+        transactionRef: body.transactionRef,
+        receiptImageUrl: body.receiptImageUrl,
+      }
+    }
+  } catch {
+    // No payment data in request, continue
+  }
 
   try {
     const enrollment = await prisma.enrollment.findUnique({
@@ -131,8 +158,9 @@ export async function POST(req: NextRequest, { params }: RouteParams) {
       })
 
       // Create payment schedules
+      const createdSchedules = []
       for (const schedule of schedules) {
-        await tx.paymentSchedule.create({
+        const created = await tx.paymentSchedule.create({
           data: {
             enrollmentId: id,
             scheduleNumber: schedule.scheduleNumber,
@@ -141,12 +169,40 @@ export async function POST(req: NextRequest, { params }: RouteParams) {
             dueDate: schedule.dueDate,
           },
         })
+        createdSchedules.push(created)
+      }
+
+      // Create payment record if payment was made during enrollment
+      if (paymentData && paymentData.paymentMade && paymentData.paymentAmount && paymentData.paymentMethod && paymentData.receiptNumber) {
+        // Determine initial status based on payment method
+        const initialStatus = paymentData.paymentMethod === "cash" ? "pending_deposit" : "pending_review"
+        const autoConfirmAt = paymentData.paymentMethod === "orange_money"
+          ? new Date(Date.now() + 24 * 60 * 60 * 1000) // 24 hours from now
+          : null
+
+        // Link to first payment schedule
+        const firstScheduleId = createdSchedules[0]?.id
+
+        await tx.payment.create({
+          data: {
+            enrollmentId: id,
+            paymentScheduleId: firstScheduleId,
+            amount: paymentData.paymentAmount,
+            method: paymentData.paymentMethod,
+            receiptNumber: paymentData.receiptNumber,
+            transactionRef: paymentData.transactionRef,
+            receiptImageUrl: paymentData.receiptImageUrl,
+            recordedBy: session.user.id,
+            status: initialStatus,
+            autoConfirmAt,
+          },
+        })
       }
 
       return updatedEnrollment
     })
 
-    // Get the complete enrollment with payment schedules
+    // Get the complete enrollment with payment schedules and payments
     const complete = await prisma.enrollment.findUnique({
       where: { id },
       include: {
@@ -155,6 +211,9 @@ export async function POST(req: NextRequest, { params }: RouteParams) {
         student: true,
         paymentSchedules: {
           orderBy: { scheduleNumber: "asc" },
+        },
+        payments: {
+          orderBy: { recordedAt: "desc" },
         },
       },
     })

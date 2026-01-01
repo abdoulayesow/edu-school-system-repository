@@ -1,21 +1,28 @@
 "use client"
 
-import { useEffect, useMemo } from "react"
+import { useEffect, useMemo, useState } from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { Badge } from "@/components/ui/badge"
+import { Button } from "@/components/ui/button"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Switch } from "@/components/ui/switch"
+import { Slider } from "@/components/ui/slider"
 import { useEnrollmentWizard } from "../wizard-context"
 import { useI18n } from "@/components/i18n-provider"
 import { calculatePaymentSchedules } from "@/lib/enrollment/calculations"
-import { AlertTriangle, Calendar, Check } from "lucide-react"
-import { cn } from "@/lib/utils"
+import { AlertTriangle, Calendar, Check, Percent } from "lucide-react"
+import { cn, formatDateLong } from "@/lib/utils"
+import { formatCurrency } from "@/lib/utils/currency"
+import { sizing } from "@/lib/design-tokens"
+
+// Percentage presets for quick selection
+const PERCENTAGE_PRESETS = [10, 25, 50, 75, 100]
 
 export function StepPaymentBreakdown() {
-  const { t } = useI18n()
+  const { t, locale } = useI18n()
   const { state, updateData } = useEnrollmentWizard()
   const { data } = state
 
@@ -46,15 +53,6 @@ export function StepPaymentBreakdown() {
     }
   }, [schedules, updateData])
 
-  // Format currency
-  const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat("fr-GN", {
-      style: "currency",
-      currency: "GNF",
-      minimumFractionDigits: 0,
-      maximumFractionDigits: 0,
-    }).format(amount)
-  }
 
   // Handle fee adjustment toggle
   const handleAdjustmentToggle = (enabled: boolean) => {
@@ -70,12 +68,31 @@ export function StepPaymentBreakdown() {
     }
   }
 
+  // Calculate current percentage
+  const currentPercentage = useMemo(() => {
+    if (!data.originalTuitionFee || !data.adjustedTuitionFee) return 100
+    return Math.round((data.adjustedTuitionFee / data.originalTuitionFee) * 100)
+  }, [data.adjustedTuitionFee, data.originalTuitionFee])
+
   // Handle adjusted amount change
   const handleAmountChange = (value: string) => {
     const amount = parseInt(value.replace(/\D/g, ""), 10)
     if (!isNaN(amount) && amount > 0) {
       updateData({ adjustedTuitionFee: amount })
     }
+  }
+
+  // Handle percentage preset button click
+  const handlePercentageClick = (percentage: number) => {
+    const newAmount = Math.round((data.originalTuitionFee * percentage) / 100)
+    updateData({ adjustedTuitionFee: newAmount })
+  }
+
+  // Handle slider change
+  const handleSliderChange = (value: number[]) => {
+    const percentage = value[0]
+    const newAmount = Math.round((data.originalTuitionFee * percentage) / 100)
+    updateData({ adjustedTuitionFee: newAmount })
   }
 
   const hasAdjustment = data.adjustedTuitionFee !== undefined
@@ -127,6 +144,52 @@ export function StepPaymentBreakdown() {
           {/* Adjustment Fields */}
           {hasAdjustment && (
             <div className="mt-4 pt-4 border-t space-y-4">
+              {/* Percentage Preset Buttons */}
+              <div className="space-y-2">
+                <Label className="flex items-center gap-2">
+                  <Percent className={sizing.icon.sm} />
+                  {t.enrollmentWizard.percentagePresets || "Quick Percentages"}
+                </Label>
+                <div className="flex flex-wrap gap-2">
+                  {PERCENTAGE_PRESETS.map((pct) => (
+                    <Button
+                      key={pct}
+                      type="button"
+                      variant={currentPercentage === pct ? "default" : "outline"}
+                      size="sm"
+                      onClick={() => handlePercentageClick(pct)}
+                      className="min-w-[60px]"
+                    >
+                      {pct}%
+                    </Button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Percentage Slider */}
+              <div className="space-y-3">
+                <div className="flex items-center justify-between">
+                  <Label>{t.enrollmentWizard.adjustPercentage || "Adjust Percentage"}</Label>
+                  <Badge variant="secondary" className="font-mono">
+                    {currentPercentage}%
+                  </Badge>
+                </div>
+                <Slider
+                  value={[currentPercentage]}
+                  onValueChange={handleSliderChange}
+                  min={0}
+                  max={100}
+                  step={1}
+                  className="w-full"
+                />
+                <div className="flex justify-between text-xs text-muted-foreground">
+                  <span>0%</span>
+                  <span>50%</span>
+                  <span>100%</span>
+                </div>
+              </div>
+
+              {/* Amount Input and Reason */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label htmlFor="adjustedAmount">
@@ -139,6 +202,9 @@ export function StepPaymentBreakdown() {
                     onChange={(e) => handleAmountChange(e.target.value)}
                     placeholder="1,000,000"
                   />
+                  <p className="text-xs text-muted-foreground">
+                    {t.enrollmentWizard.originalAmount || "Original"}: {formatCurrency(data.originalTuitionFee)}
+                  </p>
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="reason">
@@ -157,7 +223,7 @@ export function StepPaymentBreakdown() {
 
               {isAdjusted && (
                 <Alert variant="destructive">
-                  <AlertTriangle className="h-4 w-4" />
+                  <AlertTriangle className={sizing.icon.sm} />
                   <AlertDescription>
                     {t.enrollmentWizard.requiresApproval}
                   </AlertDescription>
@@ -197,14 +263,10 @@ export function StepPaymentBreakdown() {
                 </CardHeader>
                 <CardContent>
                   <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                    <Calendar className="h-4 w-4" />
+                    <Calendar className={sizing.icon.sm} />
                     <span>
                       {t.enrollmentWizard.dueBy}{" "}
-                      {new Date(schedule.dueDate).toLocaleDateString("fr-GN", {
-                        day: "numeric",
-                        month: "long",
-                        year: "numeric",
-                      })}
+                      {formatDateLong(schedule.dueDate, locale)}
                     </span>
                   </div>
                 </CardContent>

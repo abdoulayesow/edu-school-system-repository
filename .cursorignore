@@ -1,0 +1,63 @@
+# Dependencies
+**/node_modules/**
+**/package-lock.json
+**/yarn.lock
+**/pnpm-lock.json
+**/pnpm-lock.yaml
+
+# Build artifacts
+**/.next/**
+**/dist/**
+**/build/**
+**/*.tsbuildinfo
+**/.turbo/**
+
+# Test artifacts
+**/test-results/**
+**/playwright-report/**
+**/playwright/.auth/**
+**/coverage/**
+
+# Logs
+**/*.log
+**/logs/**
+
+# Database backups
+**/db-backups/**
+
+# Large binary files (images, media)
+**/*.png
+**/*.jpg
+**/*.jpeg
+**/*.gif
+**/*.ico
+**/*.webp
+**/*.svg
+**/*.pdf
+**/*.zip
+**/*.tar
+**/*.tar.gz
+**/*.exe
+
+# Temporary files
+**/temp/**
+**/.anima/
+**/nul
+
+# IDE/Editor files
+**/.vscode/**
+**/.idea/**
+**/*.swp
+**/*.swo
+**/*~
+
+# OS files
+**/.DS_Store
+**/Thumbs.db
+
+# Design/UX folder (separate project)
+**/design-ux/**
+
+# Script executables
+**/acli.exe
+

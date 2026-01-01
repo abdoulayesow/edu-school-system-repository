@@ -1,15 +1,18 @@
 import { NextRequest, NextResponse } from "next/server"
 import { requireSession, requireRole } from "@/lib/authz"
 import { prisma } from "@/lib/prisma"
+import { Prisma } from "@prisma/client"
 import { z } from "zod"
 
-// Schema for creating an enrollment
+// Schema for creating an enrollment (draft)
+// firstName and lastName are optional for drafts - only required when submitting for approval
 const createEnrollmentSchema = z.object({
   schoolYearId: z.string().min(1),
   gradeId: z.string().min(1),
-  // Student info
-  firstName: z.string().min(1),
-  lastName: z.string().min(1),
+  // Student info - optional for drafts (allow empty strings)
+  firstName: z.string().optional(),
+  middleName: z.string().optional(),
+  lastName: z.string().optional(),
   dateOfBirth: z.string().optional(),
   gender: z.enum(["male", "female"]).optional(),
   phone: z.string().optional(),
@@ -27,6 +30,8 @@ const createEnrollmentSchema = z.object({
   // Returning student
   studentId: z.string().optional(),
   isReturningStudent: z.boolean().default(false),
+  // Wizard progress (for auto-save)
+  currentStep: z.number().min(1).max(6).optional(),
 })
 
 /**
@@ -170,34 +175,41 @@ export async function POST(req: NextRequest) {
       }
     }
 
+    // Build data object, only including fields that have values (not undefined)
+    // Note: firstName and lastName are required in schema, so use empty strings for drafts
+    const enrollmentData: Prisma.EnrollmentUncheckedCreateInput = {
+      enrollmentNumber,
+      schoolYearId: validated.schoolYearId,
+      gradeId: validated.gradeId,
+      // Use empty strings for drafts (firstName/lastName are required in schema)
+      firstName: validated.firstName && validated.firstName.trim() ? validated.firstName : "",
+      middleName: validated.middleName?.trim() || null,
+      lastName: validated.lastName && validated.lastName.trim() ? validated.lastName : "",
+      dateOfBirth: validated.dateOfBirth ? new Date(validated.dateOfBirth) : null,
+      email: validated.email || null,
+      fatherEmail: validated.fatherEmail || null,
+      motherEmail: validated.motherEmail || null,
+      isReturningStudent: validated.isReturningStudent,
+      originalTuitionFee: grade.tuitionFee,
+      status: "draft",
+      currentStep: validated.currentStep || 1,
+      draftExpiresAt,
+      createdBy: session.user.id,
+      // Optional fields
+      studentId: validated.studentId,
+      gender: validated.gender,
+      phone: validated.phone,
+      photoUrl: validated.photoUrl,
+      birthCertificateUrl: validated.birthCertificateUrl,
+      fatherName: validated.fatherName,
+      fatherPhone: validated.fatherPhone,
+      motherName: validated.motherName,
+      motherPhone: validated.motherPhone,
+      address: validated.address,
+    }
+
     const enrollment = await prisma.enrollment.create({
-      data: {
-        enrollmentNumber,
-        schoolYearId: validated.schoolYearId,
-        gradeId: validated.gradeId,
-        studentId: validated.studentId,
-        firstName: validated.firstName,
-        lastName: validated.lastName,
-        dateOfBirth: validated.dateOfBirth ? new Date(validated.dateOfBirth) : null,
-        gender: validated.gender,
-        phone: validated.phone,
-        email: validated.email || null,
-        photoUrl: validated.photoUrl,
-        birthCertificateUrl: validated.birthCertificateUrl,
-        fatherName: validated.fatherName,
-        fatherPhone: validated.fatherPhone,
-        fatherEmail: validated.fatherEmail || null,
-        motherName: validated.motherName,
-        motherPhone: validated.motherPhone,
-        motherEmail: validated.motherEmail || null,
-        address: validated.address,
-        isReturningStudent: validated.isReturningStudent,
-        originalTuitionFee: grade.tuitionFee,
-        status: "draft",
-        currentStep: 1,
-        draftExpiresAt,
-        createdBy: session.user.id,
-      },
+      data: enrollmentData,
       include: {
         grade: true,
         schoolYear: true,

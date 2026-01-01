@@ -27,6 +27,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { useI18n, interpolate } from "@/components/i18n-provider"
+import { PageContainer } from "@/components/layout"
 
 interface UserData {
   id: string
@@ -246,22 +247,20 @@ export default function UsersPage() {
   }
 
   return (
-    <div className="min-h-screen bg-background">
-      {/* Header */}
-      <header className="border-b bg-background">
-        <div className="container mx-auto px-4 py-4">
-          <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-2xl font-bold text-foreground">{t.users.title}</h1>
-              <p className="text-sm text-muted-foreground">{t.users.subtitle}</p>
-            </div>
-            <Dialog open={isInviteDialogOpen} onOpenChange={setIsInviteDialogOpen}>
-              <DialogTrigger asChild>
-                <Button>
-                  <Plus className="size-4 mr-2" />
-                  {t.users.inviteUser}
-                </Button>
-              </DialogTrigger>
+    <PageContainer maxWidth="full">
+        {/* Header */}
+        <div className="flex items-center justify-between mb-6">
+          <div>
+            <h1 className="text-2xl font-bold text-foreground">{t.users.title}</h1>
+            <p className="text-sm text-muted-foreground">{t.users.subtitle}</p>
+          </div>
+          <Dialog open={isInviteDialogOpen} onOpenChange={setIsInviteDialogOpen}>
+            <DialogTrigger asChild>
+              <Button>
+                <Plus className="size-4 mr-2" />
+                {t.users.inviteUser}
+              </Button>
+            </DialogTrigger>
               <DialogContent>
                 <DialogHeader>
                   <DialogTitle>{t.users.inviteUser}</DialogTitle>
@@ -345,17 +344,14 @@ export default function UsersPage() {
                   </Button>
                 </DialogFooter>
               </DialogContent>
-            </Dialog>
-          </div>
+          </Dialog>
         </div>
-      </header>
 
-      {/* Main Content */}
-      <main className="container mx-auto px-4 py-8">
+        {/* Main Content */}
         <div className="space-y-6">
           {/* User Count Cards */}
           <div className="grid gap-4 md:grid-cols-5">
-            <Card>
+            <Card className="py-5">
               <CardHeader className="pb-3">
                 <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
                   <Shield className="size-4 text-primary" />
@@ -367,7 +363,7 @@ export default function UsersPage() {
               </CardContent>
             </Card>
 
-            <Card>
+            <Card className="py-5">
               <CardHeader className="pb-3">
                 <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
                   <GraduationCap className="size-4 text-accent" />
@@ -379,7 +375,7 @@ export default function UsersPage() {
               </CardContent>
             </Card>
 
-            <Card>
+            <Card className="py-5">
               <CardHeader className="pb-3">
                 <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
                   <Calculator className="size-4 text-success" />
@@ -391,7 +387,7 @@ export default function UsersPage() {
               </CardContent>
             </Card>
 
-            <Card>
+            <Card className="py-5">
               <CardHeader className="pb-3">
                 <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
                   <User className="size-4" />
@@ -403,7 +399,7 @@ export default function UsersPage() {
               </CardContent>
             </Card>
 
-            <Card>
+            <Card className="py-5">
               <CardHeader className="pb-3">
                 <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
                   <Users className="size-4" />
@@ -515,7 +511,6 @@ export default function UsersPage() {
             </CardContent>
           </Card>
         </div>
-      </main>
-    </div>
+    </PageContainer>
   )
 }

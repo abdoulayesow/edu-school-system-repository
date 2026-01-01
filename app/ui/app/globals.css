@@ -5,7 +5,7 @@
 
 :root {
   /* GSPN N'Diolou Logo Colors - Maroon, Gold, Black */
-  --background: oklch(0.98 0.01 20);
+  --background: #ffffff;
   --foreground: oklch(0.15 0.02 20);
 
   --card: oklch(1 0 0);
@@ -63,17 +63,25 @@
   --sidebar-accent-foreground: oklch(0.98 0.01 20);
   --sidebar-border: oklch(0.35 0.02 20);
   --sidebar-ring: oklch(0.72 0.12 85);
+
+  /* Navigation highlight - Golden amber for active states (replaces #e79908) */
+  --nav-highlight: oklch(0.72 0.16 75);
+  --nav-highlight-foreground: oklch(0.15 0.02 20);
+
+  /* Navigation dark text - Deep maroon for text on gold backgrounds */
+  --nav-dark-text: oklch(0.25 0.12 15);
+  --nav-dark-hover: oklch(0.35 0.14 15);
 }
 
 .dark {
   /* Dark mode with logo colors */
-  --background: oklch(0.15 0.02 20);
+  --background: #000000;
   --foreground: oklch(0.95 0.01 20);
 
-  --card: oklch(0.18 0.02 20);
+  --card: #000000;
   --card-foreground: oklch(0.95 0.01 20);
 
-  --popover: oklch(0.18 0.02 20);
+  --popover: #000000;
   --popover-foreground: oklch(0.95 0.01 20);
 
   --primary: oklch(0.48 0.16 15);
@@ -115,14 +123,52 @@
   --sidebar-accent-foreground: oklch(0.95 0.01 20);
   --sidebar-border: oklch(0.28 0.02 20);
   --sidebar-ring: oklch(0.75 0.12 85);
+
+  /* Navigation highlight - Brighter amber for dark mode */
+  --nav-highlight: oklch(0.75 0.16 75);
+  --nav-highlight-foreground: oklch(0.15 0.02 20);
+
+  /* Navigation dark text - Lighter maroon for dark backgrounds */
+  --nav-dark-text: oklch(0.25 0.12 15);
+  --nav-dark-hover: oklch(0.38 0.16 15);
 }
 
 @theme inline {
-  /* Using Inter for high legibility and professionalism */
+  /* Using Inter for high legibility and professionalism - consistent across all text */
   --font-sans: "Inter", "Inter Fallback", system-ui, -apple-system, sans-serif;
   --font-mono: "Geist Mono", "Geist Mono Fallback", monospace;
-  --font-heading: "Poppins", "Inter Fallback", system-ui, -apple-system,
-    sans-serif;
+  /* Using Inter for headings as well for consistency */
+  --font-heading: "Inter", "Inter Fallback", system-ui, -apple-system, sans-serif;
+  --font-display: "Inter", "Inter Fallback", system-ui, -apple-system, sans-serif;
+
+  /* GSPN Brand Colors - Extended palette for easy use */
+  --color-gspn-maroon-50: #fdf2f4;
+  --color-gspn-maroon-100: #fce4e8;
+  --color-gspn-maroon-200: #faccd4;
+  --color-gspn-maroon-300: #f5a3b3;
+  --color-gspn-maroon-400: #ed6b86;
+  --color-gspn-maroon-500: #8B2332;
+  --color-gspn-maroon-600: #7a1f2c;
+  --color-gspn-maroon-700: #661a25;
+  --color-gspn-maroon-800: #551620;
+  --color-gspn-maroon-900: #47131b;
+  /* Navigation background - lab(2 3.98 1.32) converted to hex */
+  --color-gspn-maroon-950: #050404;
+
+  --color-gspn-gold-50: #fdfaf3;
+  --color-gspn-gold-100: #faf5e6;
+  --color-gspn-gold-200: #f3e6c0;
+  --color-gspn-gold-300: #ecd799;
+  --color-gspn-gold-400: #e5c873;
+  --color-gspn-gold-500: #D4AF37;
+  --color-gspn-gold-600: #c09a2f;
+  --color-gspn-gold-700: #a08527;
+  --color-gspn-gold-800: #80701f;
+  --color-gspn-gold-900: #605b17;
+
+  /* Custom shadows */
+  --shadow-gold: 0 4px 14px 0 rgba(212, 175, 55, 0.2);
+  --shadow-gold-lg: 0 10px 40px 0 rgba(212, 175, 55, 0.3);
 
   --color-background: var(--background);
   --color-foreground: var(--foreground);
@@ -164,12 +210,25 @@
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-ring: var(--sidebar-ring);
+  --color-nav-highlight: var(--nav-highlight);
+  --color-nav-highlight-foreground: var(--nav-highlight-foreground);
+  --color-nav-dark-text: var(--nav-dark-text);
+  --color-nav-dark-hover: var(--nav-dark-hover);
 }
 
 @layer base {
   * {
     @apply border-border outline-ring/50;
-    transition: all 0.2s ease-in-out;
+  }
+
+  /* Scoped transitions - avoid transition: all which can cause interaction issues */
+  a, button, input, select, textarea,
+  [role="button"], [data-slot] {
+    transition: color 0.2s ease-in-out,
+                background-color 0.2s ease-in-out,
+                border-color 0.2s ease-in-out,
+                box-shadow 0.2s ease-in-out,
+                opacity 0.2s ease-in-out;
   }
   body {
     @apply bg-background text-foreground;
@@ -182,7 +241,7 @@
   h5,
   h6,
   .text-heading {
-    @apply font-heading font-semibold text-foreground;
+    @apply font-sans font-semibold text-foreground;
   }
   h1 {
     @apply text-3xl;
@@ -215,6 +274,49 @@
   }
 }
 
+/* Main panel background color - using CSS custom property for consistency */
+:root {
+  --panel-background: #ffffff;
+}
+
+.dark {
+  --panel-background: oklch(var(--background));
+}
+
+/* Apply panel background to main content areas with proper specificity (no !important) */
+main.bg-background,
+main > .bg-background,
+.main-content.bg-background {
+  background-color: var(--background);
+}
+
+/* Main element background - transparent in light mode, black in dark mode */
+main {
+  background-color: transparent;
+}
+
+.dark main,
+.dark main.bg-background {
+  background-color: #000000 !important;
+}
+
+/* Container backgrounds for content pages - white for main panel */
+/* Using higher specificity to ensure white background overrides any other rules */
+main > div.container,
+main .page-container,
+div.page-container,
+.page-container {
+  background-color: #ffffff !important;
+}
+
+.dark main > div.container,
+.dark main .page-container,
+.dark div.page-container,
+.dark .page-container,
+.dark main div.page-container {
+  background-color: #000000 !important;
+}
+
 /* Glassmorphism for Sidebars and Modals */
 .glassmorphism {
   background-color: oklch(var(--sidebar) / 0.8);
@@ -226,4 +328,90 @@
 .dark .glassmorphism {
   background-color: oklch(var(--sidebar) / 0.6);
   border-right: 1px solid oklch(var(--sidebar-border) / 0.4);
+}
+
+/* Custom Scrollbar - Gold themed (matching restaurant app) */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #e5c873;
+  border-radius: 9999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #D4AF37;
+}
+
+.dark ::-webkit-scrollbar-thumb {
+  background: rgba(212, 175, 55, 0.4);
+}
+
+.dark ::-webkit-scrollbar-thumb:hover {
+  background: rgba(212, 175, 55, 0.6);
+}
+
+/* Navigation blur effect */
+.nav-blur {
+  background-color: rgba(255, 255, 255, 0.8);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+.dark .nav-blur {
+  background-color: rgba(17, 17, 17, 0.8);
+}
+
+/* Enhanced card variants */
+.card-enhanced {
+  @apply rounded-xl border border-gray-100 bg-white shadow-sm;
+  @apply dark:border-gray-800 dark:bg-gray-900;
+  @apply hover:shadow-md transition-shadow duration-200;
+}
+
+.card-gradient {
+  @apply rounded-xl p-6 shadow-lg relative overflow-hidden;
+  background: linear-gradient(135deg, #8B2332 0%, #661a25 100%);
+}
+
+.card-gradient-gold {
+  @apply rounded-xl p-6 shadow-lg relative overflow-hidden;
+  background: linear-gradient(135deg, #D4AF37 0%, #ecd799 100%);
+}
+
+/* Status badge variants - using design tokens */
+.badge-success {
+  @apply bg-success/15 text-success border-success/30;
+  @apply dark:bg-success/20 dark:text-success dark:border-success/40;
+}
+
+.badge-warning {
+  @apply bg-warning/15 text-warning border-warning/30;
+  @apply dark:bg-warning/20 dark:text-warning dark:border-warning/40;
+}
+
+.badge-error {
+  @apply bg-destructive/15 text-destructive border-destructive/30;
+  @apply dark:bg-destructive/20 dark:text-destructive dark:border-destructive/40;
+}
+
+/* Gold focus ring for inputs - using design token */
+.focus-gold:focus {
+  @apply ring-2 ring-offset-2 ring-accent;
+}
+
+/* Font display class - using Inter for consistency */
+.font-display {
+  font-family: "Inter", "Inter Fallback", system-ui, -apple-system, sans-serif;
+}
+
+/* Navigation border utilities */
+.border-nav {
+  @apply border-gspn-maroon-800 dark:border-gray-800/50;
 }

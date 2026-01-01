@@ -86,8 +86,8 @@ export default function HomePage() {
           <div className="flex items-center gap-4 mb-6">
             <img src="/logo.png" alt="GSPN Logo" className="h-16 w-16 rounded-full" />
             <div>
-              <h1 className="text-5xl font-bold text-balance">Groupe Scolaire GSPN N'Diolou</h1>
-              <p className="text-lg text-secondary-foreground/80 mt-2">Management System</p>
+              <h1 className="text-5xl font-bold text-balance">Groupe Scolaire Privé N'Diolou</h1>
+              <p className="text-lg text-secondary-foreground/80 mt-2">Système de Gestion Scolaire</p>
             </div>
           </div>
           <p className="text-2xl text-secondary-foreground/90 max-w-3xl text-pretty leading-relaxed mt-8">
@@ -229,8 +229,8 @@ export default function HomePage() {
             <div className="flex items-center gap-3">
               <img src="/logo.png" alt="GSPN Logo" className="h-10 w-10 rounded-full" />
               <div>
-                <p className="font-bold">Groupe Scolaire GSPN N'Diolou</p>
-                <p className="text-sm text-secondary-foreground/70">Excellence in Education</p>
+                <p className="font-bold">Groupe Scolaire Privé N'Diolou</p>
+                <p className="text-sm text-secondary-foreground/70">L'Excellence dans l'Éducation</p>
               </div>
             </div>
             <div className="flex gap-6 text-sm">

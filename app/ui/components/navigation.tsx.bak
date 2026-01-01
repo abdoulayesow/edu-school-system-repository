@@ -28,6 +28,8 @@ const visibleBottomNavigation = bottomNavigation
 const navTranslationKeys: Record<string, keyof typeof import('@/lib/i18n').fr.nav> = {
   'Dashboard': 'dashboard',
   'Enrollments': 'enrollments',
+  'Students': 'students',
+  'Grades': 'grades',
   'Activities': 'activities',
   'Accounting': 'accounting',
   'Attendance': 'attendance',

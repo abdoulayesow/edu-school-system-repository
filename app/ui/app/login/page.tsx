@@ -121,7 +121,7 @@ function LoginInner() {
             </div>
             <div>
               <h1 className="text-2xl font-bold text-white">
-                {t.login?.schoolName || "Groupe Scolaire Prive de Nongo"}
+                {t.login?.schoolName || "Groupe Scolaire Privé N'Diolou"}
               </h1>
               <p className="text-white/80 text-sm">
                 {t.login?.schoolTagline || "Excellence in Education"}
@@ -180,7 +180,7 @@ function LoginInner() {
               <GraduationCap className="w-8 h-8 text-primary" />
             </div>
             <h1 className="text-xl font-bold text-foreground">
-              {t.login?.schoolName || "Groupe Scolaire Prive de Nongo"}
+              {t.login?.schoolName || "Groupe Scolaire Privé N'Diolou"}
             </h1>
             <p className="text-muted-foreground text-sm">
               {t.login?.schoolTagline || "Excellence in Education"}

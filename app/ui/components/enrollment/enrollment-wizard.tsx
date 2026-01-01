@@ -13,7 +13,10 @@ import { StepPaymentTransaction } from "./steps/step-payment-transaction"
 import { StepReview } from "./steps/step-review"
 import { StepConfirmation } from "./steps/step-confirmation"
 import { useI18n } from "@/components/i18n-provider"
-import { AlertCircle, Calendar } from "lucide-react"
+import { AlertCircle, Calendar, GraduationCap } from "lucide-react"
+import { Badge } from "@/components/ui/badge"
+import { sizing } from "@/lib/design-tokens"
+import { isPhoneEmpty } from "@/lib/utils/phone"
 
 interface EnrollmentWizardProps {
   schoolYearId?: string
@@ -36,8 +39,10 @@ function WizardContent({ schoolYearId, schoolYearName }: EnrollmentWizardProps) 
 
   // Auto-save function
   const handleSave = useCallback(async () => {
-    if (!data.enrollmentId && !data.gradeId) {
-      // Nothing to save yet
+    // Only save if we have grade AND student information (firstName and lastName)
+    // This ensures we only save after step 2 (student info), not after step 1 (grade selection)
+    if (!data.enrollmentId && (!data.gradeId || !data.firstName || !data.lastName)) {
+      // Nothing to save yet - need both grade selection and student information
       return
     }
 
@@ -51,37 +56,58 @@ function WizardContent({ schoolYearId, schoolYearName }: EnrollmentWizardProps) 
 
       const method = state.enrollmentId ? "PUT" : "POST"
 
+      // Prepare payload - only include non-empty values for optional fields
+      const payload: Record<string, unknown> = {
+        schoolYearId: data.schoolYearId,
+        gradeId: data.gradeId,
+        currentStep,
+      }
+
+      // Only include firstName/lastName if they have values (optional for drafts)
+      if (data.firstName && data.firstName.trim()) {
+        payload.firstName = data.firstName
+      }
+      if (data.middleName && data.middleName.trim()) {
+        payload.middleName = data.middleName
+      }
+      if (data.lastName && data.lastName.trim()) {
+        payload.lastName = data.lastName
+      }
+
+      // Include other optional fields if they exist
+      if (data.dateOfBirth) payload.dateOfBirth = data.dateOfBirth
+      if (data.gender) payload.gender = data.gender
+      // Only save phone numbers if they have actual digits (not just "+224" prefix)
+      if (data.phone && !isPhoneEmpty(data.phone)) payload.phone = data.phone
+      if (data.email) payload.email = data.email
+      if (data.photoUrl) payload.photoUrl = data.photoUrl
+      if (data.birthCertificateUrl) payload.birthCertificateUrl = data.birthCertificateUrl
+      if (data.fatherName) payload.fatherName = data.fatherName
+      if (data.fatherPhone && !isPhoneEmpty(data.fatherPhone)) payload.fatherPhone = data.fatherPhone
+      if (data.fatherEmail) payload.fatherEmail = data.fatherEmail
+      if (data.motherName) payload.motherName = data.motherName
+      if (data.motherPhone && !isPhoneEmpty(data.motherPhone)) payload.motherPhone = data.motherPhone
+      if (data.motherEmail) payload.motherEmail = data.motherEmail
+      if (data.address) payload.address = data.address
+      if (data.studentId) payload.studentId = data.studentId
+      if (data.adjustedTuitionFee !== undefined) payload.adjustedTuitionFee = data.adjustedTuitionFee
+      if (data.adjustmentReason) payload.adjustmentReason = data.adjustmentReason
+
+      payload.isReturningStudent = data.isReturningStudent || false
+
       const response = await fetch(endpoint, {
         method,
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          schoolYearId: data.schoolYearId,
-          gradeId: data.gradeId,
-          firstName: data.firstName,
-          lastName: data.lastName,
-          dateOfBirth: data.dateOfBirth,
-          gender: data.gender,
-          phone: data.phone,
-          email: data.email,
-          photoUrl: data.photoUrl,
-          birthCertificateUrl: data.birthCertificateUrl,
-          fatherName: data.fatherName,
-          fatherPhone: data.fatherPhone,
-          fatherEmail: data.fatherEmail,
-          motherName: data.motherName,
-          motherPhone: data.motherPhone,
-          motherEmail: data.motherEmail,
-          address: data.address,
-          studentId: data.studentId,
-          isReturningStudent: data.isReturningStudent,
-          adjustedTuitionFee: data.adjustedTuitionFee,
-          adjustmentReason: data.adjustmentReason,
-          currentStep,
-        }),
+        body: JSON.stringify(payload),
       })
 
       if (!response.ok) {
-        throw new Error("Failed to save enrollment")
+        const errorData = await response.json().catch(() => ({ message: "Failed to save enrollment" }))
+        const errorMessage = errorData.errors
+          ? `Validation error: ${errorData.errors.map((e: { path: string[]; message: string }) => 
+              `${e.path.join(".")}: ${e.message}`).join(", ")}`
+          : errorData.message || "Failed to save enrollment"
+        throw new Error(errorMessage)
       }
 
       const result = await response.json()
@@ -106,9 +132,23 @@ function WizardContent({ schoolYearId, schoolYearName }: EnrollmentWizardProps) 
     setError(undefined)
 
     try {
+      // Include payment data if payment was made in step 4
+      // Derive paymentMade from amount to ensure consistency
+      const submitPayload: Record<string, unknown> = {}
+      const hasPayment = data.paymentAmount && data.paymentAmount > 0 && data.paymentMethod && data.receiptNumber
+      if (hasPayment) {
+        submitPayload.paymentMade = true
+        submitPayload.paymentAmount = data.paymentAmount
+        submitPayload.paymentMethod = data.paymentMethod
+        submitPayload.receiptNumber = data.receiptNumber
+        if (data.transactionRef) submitPayload.transactionRef = data.transactionRef
+        if (data.receiptImageUrl) submitPayload.receiptImageUrl = data.receiptImageUrl
+      }
+
       const response = await fetch(`/api/enrollments/${state.enrollmentId}/submit`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(submitPayload),
       })
 
       if (!response.ok) {
@@ -154,14 +194,14 @@ function WizardContent({ schoolYearId, schoolYearName }: EnrollmentWizardProps) 
   }
 
   return (
-    <div className="max-w-4xl mx-auto">
+    <div className="w-full">
       <Card>
         <CardHeader className="space-y-4">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
             <div>
               <CardTitle className="text-2xl">{t.enrollmentWizard.title}</CardTitle>
               <CardDescription className="flex items-center gap-2 mt-1">
-                <Calendar className="h-4 w-4" />
+                <Calendar className={sizing.icon.sm} />
                 {schoolYearName || t.enrollmentWizard.schoolYear}
               </CardDescription>
             </div>
@@ -176,13 +216,39 @@ function WizardContent({ schoolYearId, schoolYearName }: EnrollmentWizardProps) 
 
           {error && (
             <Alert variant="destructive">
-              <AlertCircle className="h-4 w-4" />
+              <AlertCircle className={sizing.icon.sm} />
               <AlertDescription>{error}</AlertDescription>
             </Alert>
           )}
         </CardHeader>
 
         <CardContent>
+          {/* Selected Grade Header - shown on steps 2-6 */}
+          {currentStep > 1 && data.gradeName && (
+            <div className="mb-6 p-3 bg-muted/50 rounded-lg border">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <GraduationCap className={sizing.icon.sm + " text-amber-500"} />
+                  <span className="text-sm font-medium">{data.gradeName}</span>
+                  <Badge variant="outline" className="text-xs">
+                    {data.level === "kindergarten" && t.enrollmentWizard.kindergarten}
+                    {data.level === "elementary" && t.enrollmentWizard.elementary}
+                    {data.level === "college" && t.enrollmentWizard.college}
+                    {data.level === "high_school" && t.enrollmentWizard.highSchool}
+                  </Badge>
+                </div>
+                <span className="text-sm text-muted-foreground font-mono">
+                  {new Intl.NumberFormat("fr-GN", {
+                    style: "currency",
+                    currency: "GNF",
+                    minimumFractionDigits: 0,
+                    maximumFractionDigits: 0,
+                  }).format(data.tuitionFee)}
+                </span>
+              </div>
+            </div>
+          )}
+
           {renderStep()}
 
           {currentStep < 6 && (

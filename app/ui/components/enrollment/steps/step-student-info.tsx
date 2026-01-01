@@ -19,6 +19,8 @@ import { useI18n } from "@/components/i18n-provider"
 import { Search, Plus, X, User, UserCheck, Users, Loader2 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { useDebouncedCallback } from "use-debounce"
+import { sizing } from "@/lib/design-tokens"
+import { formatGuineaPhone, isValidGuineaPhone, isPhoneEmpty } from "@/lib/utils/phone"
 
 interface SearchResult {
   id: string
@@ -64,6 +66,19 @@ export function StepStudentInfo() {
   const [isSearching, setIsSearching] = useState(false)
   const [suggestedStudents, setSuggestedStudents] = useState<SuggestedStudent[]>([])
   const [isLoadingSuggestions, setIsLoadingSuggestions] = useState(false)
+
+  // Set default date of birth based on grade order (expected age)
+  // Formula: expectedBirthYear = currentYear - (5 + gradeOrder)
+  // GS (order 0) = 5yo, 1ere Annee (order 1) = 6yo, etc.
+  useEffect(() => {
+    if (data.gradeId && !data.dateOfBirth && !data.isReturningStudent) {
+      const currentYear = new Date().getFullYear()
+      const expectedAge = 5 + (data.gradeOrder || 0)
+      const expectedBirthYear = currentYear - expectedAge
+      const defaultDate = `${expectedBirthYear}-01-01`
+      updateData({ dateOfBirth: defaultDate })
+    }
+  }, [data.gradeId, data.gradeOrder, data.dateOfBirth, data.isReturningStudent, updateData])
 
   // Fetch suggested students when grade is selected and returning student is chosen
   useEffect(() => {
@@ -190,7 +205,7 @@ export function StepStudentInfo() {
   }
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-6">
       {/* Student Type Selection */}
       <div className="space-y-4">
         <h3 className="text-lg font-semibold">{t.enrollmentWizard.studentInfo}</h3>
@@ -203,22 +218,22 @@ export function StepStudentInfo() {
             htmlFor="new"
             className={cn(
               "flex items-center gap-3 p-4 border rounded-lg cursor-pointer transition-colors",
-              !data.isReturningStudent && "border-primary bg-primary/5"
+              !data.isReturningStudent && "border-amber-500 bg-amber-50 dark:border-amber-400 dark:bg-amber-950/30"
             )}
           >
             <RadioGroupItem value="new" id="new" />
-            <User className="h-5 w-5" />
+            <User className={sizing.toolbarIcon} />
             <span>{t.enrollmentWizard.newStudent}</span>
           </Label>
           <Label
             htmlFor="returning"
             className={cn(
               "flex items-center gap-3 p-4 border rounded-lg cursor-pointer transition-colors",
-              data.isReturningStudent && "border-primary bg-primary/5"
+              data.isReturningStudent && "border-amber-500 bg-amber-50 dark:border-amber-400 dark:bg-amber-950/30"
             )}
           >
             <RadioGroupItem value="returning" id="returning" />
-            <UserCheck className="h-5 w-5" />
+            <UserCheck className={sizing.toolbarIcon} />
             <span>{t.enrollmentWizard.returningStudent}</span>
           </Label>
         </RadioGroup>
@@ -231,7 +246,7 @@ export function StepStudentInfo() {
           {data.gradeId && (
             <div className="space-y-3">
               <div className="flex items-center gap-2">
-                <Users className="h-4 w-4 text-muted-foreground" />
+                <Users className={sizing.icon.sm + " text-muted-foreground"} />
                 <Label>{t.enrollmentWizard.suggestedStudents}</Label>
               </div>
               <p className="text-sm text-muted-foreground">
@@ -240,7 +255,7 @@ export function StepStudentInfo() {
 
               {isLoadingSuggestions && (
                 <div className="flex items-center justify-center py-4">
-                  <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
+                  <Loader2 className={sizing.toolbarIcon + " animate-spin text-muted-foreground"} />
                 </div>
               )}
 
@@ -269,7 +284,7 @@ export function StepStudentInfo() {
                           </p>
                         </div>
                         {data.studentId === student.id && (
-                          <UserCheck className="h-4 w-4 text-primary" />
+                          <UserCheck className={sizing.icon.sm + " text-primary"} />
                         )}
                       </div>
                     </button>
@@ -300,7 +315,7 @@ export function StepStudentInfo() {
           <div className="space-y-2">
             <Label>{t.enrollmentWizard.searchStudent}</Label>
             <div className="relative">
-              <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+              <Search className={sizing.icon.sm + " absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground"} />
               <Input
                 placeholder={t.enrollmentWizard.searchStudent}
                 value={searchQuery}
@@ -350,7 +365,7 @@ export function StepStudentInfo() {
       {/* Personal Information */}
       <div className="space-y-4">
         <h4 className="font-medium">{t.enrollmentWizard.personalInfo}</h4>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <div className="space-y-2">
             <Label htmlFor="firstName">
               {t.enrollmentWizard.firstName} *
@@ -360,6 +375,15 @@ export function StepStudentInfo() {
               value={data.firstName}
               onChange={(e) => updateData({ firstName: e.target.value })}
               placeholder={t.enrollmentWizard.firstName}
+            />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="middleName">{t.enrollmentWizard.middleName || "Middle Name"}</Label>
+            <Input
+              id="middleName"
+              value={data.middleName || ""}
+              onChange={(e) => updateData({ middleName: e.target.value })}
+              placeholder={t.enrollmentWizard.middleName || "Middle Name"}
             />
           </div>
           <div className="space-y-2">
@@ -375,13 +399,18 @@ export function StepStudentInfo() {
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div className="space-y-2">
-            <Label htmlFor="dateOfBirth">{t.enrollmentWizard.dateOfBirth}</Label>
+            <Label htmlFor="dateOfBirth">{t.enrollmentWizard.dateOfBirth} *</Label>
             <Input
               id="dateOfBirth"
               type="date"
               value={data.dateOfBirth || ""}
               onChange={(e) => updateData({ dateOfBirth: e.target.value })}
+              max={new Date().toISOString().split("T")[0]}
+              required
             />
+            <p className="text-xs text-muted-foreground">
+              {t.enrollmentWizard.dateFormatHint || "Format: JJ/MM/AAAA (ex: 15/03/2010)"}
+            </p>
           </div>
           <div className="space-y-2">
             <Label htmlFor="gender">{t.enrollmentWizard.gender}</Label>
@@ -391,7 +420,7 @@ export function StepStudentInfo() {
                 updateData({ gender: value as "male" | "female" })
               }
             >
-              <SelectTrigger id="gender">
+              <SelectTrigger id="gender" className="w-full">
                 <SelectValue placeholder={t.common.select} />
               </SelectTrigger>
               <SelectContent>
@@ -408,10 +437,25 @@ export function StepStudentInfo() {
             <Input
               id="phone"
               type="tel"
-              value={data.phone || ""}
+              value={data.phone || "+224 "}
               onChange={(e) => updateData({ phone: e.target.value })}
+              onBlur={(e) => {
+                const formatted = formatGuineaPhone(e.target.value)
+                updateData({ phone: formatted })
+              }}
               placeholder="+224 XXX XX XX XX"
+              className={cn(
+                !isPhoneEmpty(data.phone) && !isValidGuineaPhone(data.phone) && "border-amber-500 focus-visible:ring-amber-500"
+              )}
             />
+            <p className={cn(
+              "text-xs",
+              !isPhoneEmpty(data.phone) && !isValidGuineaPhone(data.phone)
+                ? "text-amber-600"
+                : "text-muted-foreground"
+            )}>
+              {t.enrollmentWizard.phoneFormat || "Format: +224 XXX XX XX XX"}
+            </p>
           </div>
           <div className="space-y-2">
             <Label htmlFor="email">{t.enrollmentWizard.email}</Label>
@@ -431,8 +475,8 @@ export function StepStudentInfo() {
         <h4 className="font-medium">{t.enrollmentWizard.parentInfo}</h4>
 
         {/* Father Info */}
-        <Card>
-          <CardContent className="pt-4">
+        <Card className="py-4">
+          <CardContent>
             <h5 className="text-sm font-medium mb-3">
               {t.enrollmentWizard.fatherInfo}
             </h5>
@@ -450,8 +494,16 @@ export function StepStudentInfo() {
                 <Input
                   id="fatherPhone"
                   type="tel"
-                  value={data.fatherPhone || ""}
+                  value={data.fatherPhone || "+224 "}
                   onChange={(e) => updateData({ fatherPhone: e.target.value })}
+                  onBlur={(e) => {
+                    const formatted = formatGuineaPhone(e.target.value)
+                    updateData({ fatherPhone: formatted })
+                  }}
+                  placeholder="+224 XXX XX XX XX"
+                  className={cn(
+                    !isPhoneEmpty(data.fatherPhone) && !isValidGuineaPhone(data.fatherPhone) && "border-amber-500 focus-visible:ring-amber-500"
+                  )}
                 />
               </div>
               <div className="space-y-2">
@@ -468,8 +520,8 @@ export function StepStudentInfo() {
         </Card>
 
         {/* Mother Info */}
-        <Card>
-          <CardContent className="pt-4">
+        <Card className="py-4">
+          <CardContent>
             <h5 className="text-sm font-medium mb-3">
               {t.enrollmentWizard.motherInfo}
             </h5>
@@ -487,8 +539,16 @@ export function StepStudentInfo() {
                 <Input
                   id="motherPhone"
                   type="tel"
-                  value={data.motherPhone || ""}
+                  value={data.motherPhone || "+224 "}
                   onChange={(e) => updateData({ motherPhone: e.target.value })}
+                  onBlur={(e) => {
+                    const formatted = formatGuineaPhone(e.target.value)
+                    updateData({ motherPhone: formatted })
+                  }}
+                  placeholder="+224 XXX XX XX XX"
+                  className={cn(
+                    !isPhoneEmpty(data.motherPhone) && !isValidGuineaPhone(data.motherPhone) && "border-amber-500 focus-visible:ring-amber-500"
+                  )}
                 />
               </div>
               <div className="space-y-2">
@@ -527,7 +587,7 @@ export function StepStudentInfo() {
             onClick={handleAddNote}
             className="bg-transparent"
           >
-            <Plus className="h-4 w-4 mr-1" />
+            <Plus className={sizing.icon.sm + " mr-1"} />
             {t.enrollmentWizard.addNote}
           </Button>
         </div>
@@ -560,7 +620,7 @@ export function StepStudentInfo() {
                   onClick={() => handleRemoveNote(index)}
                   className="text-destructive hover:text-destructive"
                 >
-                  <X className="h-4 w-4" />
+                  <X className={sizing.icon.sm} />
                 </Button>
               </div>
             </CardContent>

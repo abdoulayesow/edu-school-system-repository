@@ -34,6 +34,10 @@ npm run test:e2e:ui
 - [E2E Tests (Playwright)](./e2e-tests.md) - End-to-end user flow testing
 - [CI Pipeline](./ci-pipeline.md) - GitHub Actions configuration
 
+### Test Plans
+- [Comprehensive Test Plan](./comprehensive-test-plan.md) - Full test coverage for all modules (136 tests)
+- [New Features Checklist](./new-features-test-checklist.md) - Quick validation for Student Detail & Expenses
+
 ## Test Commands Reference
 
 ### Unit Tests

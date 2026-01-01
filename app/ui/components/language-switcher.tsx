@@ -26,7 +26,7 @@ export function LanguageSwitcher({ variant = 'default', className }: LanguageSwi
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
           <Button variant="ghost" size="icon" className={className}>
-            <Languages className="h-4 w-4" />
+            <Languages className="h-5 w-5" />
             <span className="sr-only">Switch language</span>
           </Button>
         </DropdownMenuTrigger>
@@ -52,16 +52,16 @@ export function LanguageSwitcher({ variant = 'default', className }: LanguageSwi
           <span key={loc} className="flex items-center">
             <button
               onClick={() => setLocale(loc)}
-              className={`text-sm transition-colors ${
+              className={`text-sm transition-colors rounded-lg px-3 py-2 h-9 ${
                 locale === loc
-                  ? 'font-semibold text-primary-foreground'
-                  : 'text-primary-foreground/60 hover:text-primary-foreground'
+                  ? 'font-semibold text-black dark:text-gray-200 bg-gspn-gold-300 hover:bg-gspn-gold-200 dark:bg-gspn-maroon-800 dark:hover:bg-gspn-maroon-700'
+                  : 'text-black dark:text-gray-200 hover:bg-gspn-gold-300 dark:hover:bg-gspn-maroon-800'
               }`}
             >
               {loc.toUpperCase()}
             </button>
             {index < locales.length - 1 && (
-              <span className="mx-1 text-primary-foreground/40">|</span>
+              <span className="mx-1 text-black dark:text-gray-500">|</span>
             )}
           </span>
         ))}

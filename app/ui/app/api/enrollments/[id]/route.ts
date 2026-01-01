@@ -3,11 +3,13 @@ import { requireSession, requireRole } from "@/lib/authz"
 import { prisma } from "@/lib/prisma"
 import { z } from "zod"
 
-// Schema for updating an enrollment
+// Schema for updating an enrollment (draft)
+// firstName and lastName are optional - only required when submitting for approval
 const updateEnrollmentSchema = z.object({
-  // Student info
-  firstName: z.string().min(1).optional(),
-  lastName: z.string().min(1).optional(),
+  // Student info - optional for drafts (allow empty strings)
+  firstName: z.string().optional(),
+  middleName: z.string().optional(),
+  lastName: z.string().optional(),
   dateOfBirth: z.string().optional(),
   gender: z.enum(["male", "female"]).optional(),
   phone: z.string().optional(),
@@ -126,13 +128,15 @@ export async function PUT(req: NextRequest, { params }: RouteParams) {
       )
     }
 
-    // Only allow editing drafts or by the creator (for drafts)
+    // Only allow editing non-approved enrollments
     // Directors can edit any enrollment
+    // Creators can edit their own enrollments that haven't been approved/rejected/cancelled
     const isDirector = session.user.role === "director"
     const isCreator = existing.createdBy === session.user.id
     const isDraft = existing.status === "draft"
+    const isEditable = ["draft", "submitted", "needs_review"].includes(existing.status)
 
-    if (!isDirector && (!isDraft || !isCreator)) {
+    if (!isDirector && (!isEditable || !isCreator)) {
       return NextResponse.json(
         { message: "Cannot edit this enrollment" },
         { status: 403 }
@@ -145,9 +149,16 @@ export async function PUT(req: NextRequest, { params }: RouteParams) {
     // Prepare update data
     const updateData: Record<string, unknown> = {}
 
-    // Copy validated fields
-    if (validated.firstName !== undefined) updateData.firstName = validated.firstName
-    if (validated.lastName !== undefined) updateData.lastName = validated.lastName
+    // Copy validated fields - firstName/lastName are required in schema, use empty strings for drafts
+    if (validated.firstName !== undefined) {
+      updateData.firstName = validated.firstName && validated.firstName.trim() ? validated.firstName : ""
+    }
+    if (validated.middleName !== undefined) {
+      updateData.middleName = validated.middleName?.trim() || null
+    }
+    if (validated.lastName !== undefined) {
+      updateData.lastName = validated.lastName && validated.lastName.trim() ? validated.lastName : ""
+    }
     if (validated.dateOfBirth !== undefined) {
       updateData.dateOfBirth = validated.dateOfBirth ? new Date(validated.dateOfBirth) : null
     }
@@ -243,14 +254,14 @@ export async function DELETE(req: NextRequest, { params }: RouteParams) {
       )
     }
 
-    // Only allow deleting drafts by the creator or directors
+    // Only allow deleting drafts or cancelled enrollments by the creator or directors
     const isDirector = session.user.role === "director"
     const isCreator = existing.createdBy === session.user.id
-    const isDraft = existing.status === "draft"
+    const isDeletable = existing.status === "draft" || existing.status === "cancelled"
 
-    if (!isDraft) {
+    if (!isDeletable) {
       return NextResponse.json(
-        { message: "Can only delete draft enrollments" },
+        { message: "Can only delete draft or cancelled enrollments" },
         { status: 400 }
       )
     }

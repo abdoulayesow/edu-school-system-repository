@@ -4,6 +4,7 @@ import { cn } from "@/lib/utils"
 import { Check, BookOpen, User, Calculator, CreditCard, FileSearch, CheckCircle } from "lucide-react"
 import { useEnrollmentWizard } from "./wizard-context"
 import { useI18n } from "@/components/i18n-provider"
+import { sizing } from "@/lib/design-tokens"
 
 const stepIcons = [
   BookOpen,
@@ -61,25 +62,25 @@ export function WizardProgress() {
                   className={cn(
                     "flex items-center justify-center w-10 h-10 rounded-full border-2 transition-colors",
                     isCompleted
-                      ? "bg-primary border-primary text-primary-foreground"
+                      ? "bg-[#e79908] border-[#e79908] text-black dark:bg-gspn-gold-500 dark:border-gspn-gold-500 dark:text-gspn-maroon-950"
                       : isCurrent
-                        ? "border-primary bg-primary/10 text-primary"
+                        ? "border-[#e79908] bg-gspn-gold-50 text-black dark:border-gspn-gold-500 dark:bg-gspn-gold-500/30 dark:text-gspn-gold-200"
                         : "border-muted-foreground/30 text-muted-foreground/50"
                   )}
                 >
                   {isCompleted ? (
-                    <Check className="h-5 w-5" />
+                    <Check className={sizing.toolbarIcon} />
                   ) : (
-                    <Icon className="h-5 w-5" />
+                    <Icon className={sizing.toolbarIcon} />
                   )}
                 </div>
                 <span
                   className={cn(
                     "text-xs font-medium text-center max-w-[80px]",
                     isCurrent
-                      ? "text-primary"
+                      ? "text-black dark:text-gspn-gold-200"
                       : isCompleted
-                        ? "text-foreground"
+                        ? "text-black dark:text-gspn-gold-200"
                         : "text-muted-foreground/50"
                   )}
                 >
@@ -87,14 +88,14 @@ export function WizardProgress() {
                 </span>
               </button>
               {index < steps.length - 1 && (
-                <div
-                  className={cn(
-                    "flex-1 h-0.5 mx-2",
-                    completedSteps.includes(step.number)
-                      ? "bg-primary"
-                      : "bg-muted-foreground/20"
-                  )}
-                />
+              <div
+                className={cn(
+                  "flex-1 h-0.5 mx-2",
+                  completedSteps.includes(step.number)
+                    ? "bg-[#e79908] dark:bg-gspn-gold-500"
+                    : "bg-muted-foreground/20"
+                )}
+              />
               )}
             </div>
           )
@@ -107,7 +108,7 @@ export function WizardProgress() {
           <span className="text-sm font-medium text-muted-foreground">
             {t.enrollmentWizard.step1.split(" ")[0]} {currentStep} / {steps.length}
           </span>
-          <span className="text-sm font-medium text-primary">
+          <span className="text-sm font-medium text-black dark:text-gspn-gold-200">
             {steps[currentStep - 1]?.label}
           </span>
         </div>
@@ -122,9 +123,9 @@ export function WizardProgress() {
                 className={cn(
                   "flex-1 h-2 rounded-full transition-colors",
                   isCompleted
-                    ? "bg-primary"
+                    ? "bg-[#e79908] dark:bg-gspn-gold-500"
                     : isCurrent
-                      ? "bg-primary/50"
+                      ? "bg-[#e79908]/50 dark:bg-gspn-gold-500/50"
                       : "bg-muted-foreground/20"
                 )}
               />

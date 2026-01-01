@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useCallback } from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -11,8 +11,10 @@ import { Badge } from "@/components/ui/badge"
 import { useEnrollmentWizard } from "../wizard-context"
 import { useI18n } from "@/components/i18n-provider"
 import { calculatePaymentSchedules } from "@/lib/enrollment/calculations"
-import { Banknote, Smartphone, Upload, Check, SkipForward, Info } from "lucide-react"
+import { Banknote, Smartphone, Upload, Check, SkipForward, Info, Loader2 } from "lucide-react"
 import { cn } from "@/lib/utils"
+import { formatCurrency } from "@/lib/utils/currency"
+import { sizing } from "@/lib/design-tokens"
 
 export function StepPaymentTransaction() {
   const { t } = useI18n()
@@ -20,16 +22,8 @@ export function StepPaymentTransaction() {
   const { data } = state
 
   const [showPaymentForm, setShowPaymentForm] = useState(data.paymentMade)
+  const [isGeneratingReceipt, setIsGeneratingReceipt] = useState(false)
 
-  // Format currency
-  const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat("fr-GN", {
-      style: "currency",
-      currency: "GNF",
-      minimumFractionDigits: 0,
-      maximumFractionDigits: 0,
-    }).format(amount)
-  }
 
   // Calculate coverage based on payment amount
   const totalTuition = data.adjustedTuitionFee || data.originalTuitionFee || 0
@@ -63,9 +57,34 @@ export function StepPaymentTransaction() {
 
   const coverage = { percentPaid, coveredMonths, remainingBalance }
 
+  // Fetch next receipt number from API
+  const fetchNextReceiptNumber = useCallback(async (method: "cash" | "orange_money") => {
+    setIsGeneratingReceipt(true)
+    try {
+      const response = await fetch(`/api/payments/next-receipt-number?method=${method}`)
+      if (response.ok) {
+        const data = await response.json()
+        return data.receiptNumber
+      }
+    } catch (err) {
+      console.error("Failed to fetch receipt number:", err)
+    } finally {
+      setIsGeneratingReceipt(false)
+    }
+    return null
+  }, [])
+
   // Handle payment method change
-  const handleMethodChange = (method: "cash" | "orange_money") => {
+  const handleMethodChange = async (method: "cash" | "orange_money") => {
     updateData({ paymentMethod: method })
+
+    // Auto-generate receipt number if not already set or if method changed
+    if (!data.receiptNumber || !data.receiptNumber.includes(method === "cash" ? "CASH" : "OM")) {
+      const receiptNumber = await fetchNextReceiptNumber(method)
+      if (receiptNumber) {
+        updateData({ receiptNumber })
+      }
+    }
   }
 
   // Handle amount change
@@ -109,7 +128,7 @@ export function StepPaymentTransaction() {
             onClick={() => setShowPaymentForm(true)}
           >
             <CardContent className="pt-6 text-center">
-              <Banknote className="h-12 w-12 mx-auto text-primary mb-4" />
+              <Banknote className={sizing.icon.xl + " mx-auto text-primary mb-4"} />
               <CardTitle className="text-base">
                 {t.enrollmentWizard.makePayment}
               </CardTitle>
@@ -124,7 +143,7 @@ export function StepPaymentTransaction() {
             onClick={handleSkipPayment}
           >
             <CardContent className="pt-6 text-center">
-              <SkipForward className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
+              <SkipForward className={sizing.icon.xl + " mx-auto text-muted-foreground mb-4"} />
               <CardTitle className="text-base text-muted-foreground">
                 {t.enrollmentWizard.skipPayment}
               </CardTitle>
@@ -148,11 +167,11 @@ export function StepPaymentTransaction() {
                 htmlFor="cash"
                 className={cn(
                   "flex items-center gap-3 p-4 border rounded-lg cursor-pointer transition-colors",
-                  data.paymentMethod === "cash" && "border-primary bg-primary/5"
+                  data.paymentMethod === "cash" && "border-amber-500 bg-amber-50 dark:border-amber-400 dark:bg-amber-950/30"
                 )}
               >
                 <RadioGroupItem value="cash" id="cash" />
-                <Banknote className="h-5 w-5" />
+                <Banknote className={sizing.toolbarIcon} />
                 <span>{t.enrollmentWizard.cash}</span>
               </Label>
               <Label
@@ -160,11 +179,11 @@ export function StepPaymentTransaction() {
                 className={cn(
                   "flex items-center gap-3 p-4 border rounded-lg cursor-pointer transition-colors",
                   data.paymentMethod === "orange_money" &&
-                    "border-primary bg-primary/5"
+                    "border-amber-500 bg-amber-50 dark:border-amber-400 dark:bg-amber-950/30"
                 )}
               >
                 <RadioGroupItem value="orange_money" id="orange_money" />
-                <Smartphone className="h-5 w-5" />
+                <Smartphone className={sizing.toolbarIcon} />
                 <span>{t.enrollmentWizard.orangeMoney}</span>
               </Label>
             </RadioGroup>
@@ -206,7 +225,7 @@ export function StepPaymentTransaction() {
                   <div className="flex flex-wrap gap-2">
                     {coverage.coveredMonths.map((month) => (
                       <Badge key={month} variant="outline" className="gap-1">
-                        <Check className="h-3 w-3" />
+                        <Check className={sizing.icon.xs} />
                         {month}
                       </Badge>
                     ))}
@@ -225,18 +244,43 @@ export function StepPaymentTransaction() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label htmlFor="receiptNumber">
-                {t.enrollmentWizard.receiptNumber} *
+                {t.enrollmentWizard.receiptNumber}
               </Label>
-              <Input
-                id="receiptNumber"
-                value={data.receiptNumber || ""}
-                onChange={(e) => updateData({ receiptNumber: e.target.value })}
-                placeholder={
-                  data.paymentMethod === "orange_money"
-                    ? "OM-2025-XXXXX"
-                    : "CASH-2025-XXXXX"
-                }
-              />
+              <div className="relative">
+                <Input
+                  id="receiptNumber"
+                  value={data.receiptNumber || ""}
+                  readOnly
+                  placeholder={
+                    isGeneratingReceipt
+                      ? (t.enrollmentWizard.generatingReceipt || "Generating...")
+                      : data.paymentMethod === "orange_money"
+                        ? "GSPN-2025-OM-00001"
+                        : "GSPN-2025-CASH-00001"
+                  }
+                  className={cn(
+                    "font-mono bg-muted cursor-not-allowed",
+                    isGeneratingReceipt && "pr-10"
+                  )}
+                />
+                {isGeneratingReceipt && (
+                  <div className="absolute right-3 top-1/2 -translate-y-1/2">
+                    <Loader2 className={sizing.icon.sm + " animate-spin text-muted-foreground"} />
+                  </div>
+                )}
+              </div>
+              <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                {isGeneratingReceipt ? (
+                  <span className="text-amber-600">{t.enrollmentWizard.pleaseWait || "Please wait..."}</span>
+                ) : (
+                  <>
+                    <Badge variant="secondary" className="text-xs py-0">
+                      {t.enrollmentWizard.autoGenerated || "Auto-generated"}
+                    </Badge>
+                    <span>{t.enrollmentWizard.receiptIdUnique || "Unique receipt ID"}</span>
+                  </>
+                )}
+              </div>
             </div>
             {data.paymentMethod === "orange_money" && (
               <div className="space-y-2">
@@ -272,7 +316,7 @@ export function StepPaymentTransaction() {
                 }}
               />
               <Button variant="outline" size="icon" className="bg-transparent shrink-0">
-                <Upload className="h-4 w-4" />
+                <Upload className={sizing.icon.sm} />
               </Button>
             </div>
             <p className="text-xs text-muted-foreground">
@@ -303,7 +347,7 @@ export function StepPaymentTransaction() {
 
       {/* Info Alert */}
       <Alert>
-        <Info className="h-4 w-4" />
+        <Info className={sizing.icon.sm} />
         <AlertDescription>{t.enrollmentWizard.paymentOptional}</AlertDescription>
       </Alert>
     </div>

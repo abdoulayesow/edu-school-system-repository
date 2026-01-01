@@ -3,6 +3,7 @@ import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { ProfileForm } from "./ProfileForm";
+import { PageContainer } from "@/components/layout/PageContainer";
 
 export default async function ProfilePage() {
   const session = await getServerSession(authOptions);
@@ -27,7 +28,7 @@ export default async function ProfilePage() {
   }
 
   return (
-    <main className="container mx-auto py-8">
+    <PageContainer maxWidth="lg">
       <h1 className="text-3xl font-bold mb-6">User Profile</h1>
 
       <div className="bg-white shadow rounded-lg p-6">
@@ -89,6 +90,6 @@ export default async function ProfilePage() {
       <div className="mt-8 bg-white shadow rounded-lg p-6">
         <ProfileForm user={user} />
       </div>
-    </main>
+    </PageContainer>
   );
 }
