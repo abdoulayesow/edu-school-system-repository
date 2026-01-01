@@ -22,6 +22,7 @@ export const fr = {
     yes: "Oui",
     no: "Non",
     all: "Tous",
+    reset: "Réinitialiser",
     actions: "Actions",
     status: "Statut",
     date: "Date",
@@ -137,7 +138,7 @@ export const fr = {
     details: "Détails",
     actions: "Actions",
     approve: "Approuver",
-    review: "Réviser",
+    review: "Revue",
     by: "Par", 
 
     // Exception types
@@ -312,9 +313,9 @@ export const fr = {
 
   // Accounting
   accounting: {
-    title: "Centre de contrôle financier",
-    subtitle: "Gérer les paiements, validations et réconciliations",
-    subtitleWithName: "Gérer les paiements, validations et réconciliations - {personName}",
+    title: "Gestion comptable",
+    subtitle: "Gérer les entrées et sorties d'argent",
+    subtitleWithName: "Gérer les entrées et sorties d'argent - {personName}",
 
     // Tabs
     tabBalance: "Solde",
@@ -429,6 +430,15 @@ export const fr = {
     filterPayments: "Filtrer les paiements",
     paymentsCount: "paiements",
     confirmedPercent: "confirmés",
+
+    // Transactions and Review tabs
+    tabTransactions: "Transactions",
+    tabReview: "Revue",
+    filterByType: "Filtrer par type",
+    allTypes: "Tous les types",
+    itemsToReview: "éléments à revoir",
+    noItemsToReview: "Aucun élément à revoir. Toutes les transactions sont à jour !",
+    approve: "Approuver",
   },
 
   // Attendance
@@ -949,6 +959,7 @@ export const fr = {
     roomsAndStudents: "Salles & Élèves",
     room: "Salle",
     changeRoom: "Changer de Salle",
+    noRoomsConfigured: "Aucune salle configurée pour ce niveau",
   },
 
   // Enhanced attendance
@@ -1322,6 +1333,19 @@ export const fr = {
     levelElementary: "Élémentaire",
     levelCollege: "Collège",
     levelHighSchool: "Lycée",
+
+    // High school tracks (series)
+    trackSM: "Sciences Mathématiques",
+    trackSS: "Sciences Sociales",
+    trackSE: "Sciences Expérimentales",
+    trackSMShort: "SM",
+    trackSSShort: "SS",
+    trackSEShort: "SE",
+    trackSMFull: "Sciences Mathématiques (SM)",
+    trackSSFull: "Sciences Sociales (SS)",
+    trackSEFull: "Sciences Expérimentales (SE)",
+    selectTrack: "Sélectionner la série",
+    trackRequired: "La sélection de série est obligatoire pour le lycée",
 
     // Grade form
     order: "Ordre",

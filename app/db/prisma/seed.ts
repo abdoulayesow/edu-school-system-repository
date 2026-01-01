@@ -84,6 +84,7 @@ interface GradeConfig {
   order: number
   tuitionFee: number
   capacity: number
+  series?: string // SM, SS, SE for high school tracks
 }
 
 const GRADES_CONFIG: GradeConfig[] = [
@@ -106,10 +107,19 @@ const GRADES_CONFIG: GradeConfig[] = [
   { name: "9ème Année", level: "college", order: 9, tuitionFee: 1050000, capacity: 70 },
   { name: "10ème Année", level: "college", order: 10, tuitionFee: 1100000, capacity: 70 },
 
-  // High School (Lycée) - Grades 11-Terminal
-  { name: "11ème Année", level: "high_school", order: 11, tuitionFee: 1200000, capacity: 70 },
-  { name: "12ème Année", level: "high_school", order: 12, tuitionFee: 1250000, capacity: 70 },
-  { name: "Terminale", level: "high_school", order: 13, tuitionFee: 1300000, capacity: 70 },
+  // High School (Lycée) - Grades 11-Terminal with specialized tracks (SM, SS, SE)
+  // 11ème Année - 3 tracks
+  { name: "11ème Année SM", level: "high_school", order: 11, tuitionFee: 1200000, capacity: 70, series: "SM" },
+  { name: "11ème Année SS", level: "high_school", order: 11, tuitionFee: 1200000, capacity: 70, series: "SS" },
+  { name: "11ème Année SE", level: "high_school", order: 11, tuitionFee: 1200000, capacity: 70, series: "SE" },
+  // 12ème Année - 3 tracks
+  { name: "12ème Année SM", level: "high_school", order: 12, tuitionFee: 1250000, capacity: 70, series: "SM" },
+  { name: "12ème Année SS", level: "high_school", order: 12, tuitionFee: 1250000, capacity: 70, series: "SS" },
+  { name: "12ème Année SE", level: "high_school", order: 12, tuitionFee: 1250000, capacity: 70, series: "SE" },
+  // Terminale - 3 tracks
+  { name: "Terminale SM", level: "high_school", order: 13, tuitionFee: 1300000, capacity: 70, series: "SM" },
+  { name: "Terminale SS", level: "high_school", order: 13, tuitionFee: 1300000, capacity: 70, series: "SS" },
+  { name: "Terminale SE", level: "high_school", order: 13, tuitionFee: 1300000, capacity: 70, series: "SE" },
 ]
 
 // Subject configuration from Guinea curriculum
@@ -149,37 +159,69 @@ const SUBJECTS_CONFIG: SubjectConfig[] = [
   { code: "SES", nameFr: "Sciences économiques et sociales", nameEn: "Economic and Social Sciences", isOptional: false },
   { code: "TECH_IND", nameFr: "Technologie industrielle", nameEn: "Industrial Technology", isOptional: false },
 
+  // High School track-specific subjects
+  { code: "PHYS", nameFr: "Physique", nameEn: "Physics", isOptional: false },
+  { code: "CHIMIE", nameFr: "Chimie", nameEn: "Chemistry", isOptional: false },
+  { code: "ECON", nameFr: "Économie", nameEn: "Economics", isOptional: false },
+  { code: "SOCIO", nameFr: "Sociologie", nameEn: "Sociology", isOptional: false },
+
   // Optional subjects
   { code: "ARABE", nameFr: "Arabe", nameEn: "Arabic", isOptional: true },
   { code: "ESP", nameFr: "Espagnol", nameEn: "Spanish", isOptional: true },
 ]
 
 // Grade-subject mappings (which subjects for which grades)
-// Key: grade order, Value: array of subject codes
-const GRADE_SUBJECTS_MAP: { [gradeOrder: number]: string[] } = {
+// Key: grade order (or "order_series" for high school tracks)
+// Value: array of subject codes
+const GRADE_SUBJECTS_MAP: { [key: string]: string[] } = {
   // Kindergarten - Maternelle (PS, MS, GS)
-  [-2]: ["LECTURE", "ECRITURE", "CALC", "DESSIN", "CHANT", "EPS"], // Petite Section
-  [-1]: ["LECTURE", "ECRITURE", "CALC", "DESSIN", "CHANT", "EPS"], // Moyenne Section
-  0: ["LECTURE", "ECRITURE", "CALC", "FRANCAIS", "DESSIN", "CHANT", "EPS"], // Grande Section
+  "-2": ["LECTURE", "ECRITURE", "CALC", "DESSIN", "CHANT", "EPS"], // Petite Section
+  "-1": ["LECTURE", "ECRITURE", "CALC", "DESSIN", "CHANT", "EPS"], // Moyenne Section
+  "0": ["LECTURE", "ECRITURE", "CALC", "FRANCAIS", "DESSIN", "CHANT", "EPS"], // Grande Section
 
   // Elementary - Grades 1-2 (CP1, CP2)
-  1: ["LECTURE", "ECRITURE", "CALC", "FRANCAIS", "EDU_CIV", "HIST_GEO", "SCI_NAT", "DESSIN", "CHANT", "EPS", "TRAV_MAN"],
-  2: ["LECTURE", "ECRITURE", "CALC", "FRANCAIS", "EDU_CIV", "HIST_GEO", "SCI_NAT", "DESSIN", "CHANT", "EPS", "TRAV_MAN"],
+  "1": ["LECTURE", "ECRITURE", "CALC", "FRANCAIS", "EDU_CIV", "HIST_GEO", "SCI_NAT", "DESSIN", "CHANT", "EPS", "TRAV_MAN"],
+  "2": ["LECTURE", "ECRITURE", "CALC", "FRANCAIS", "EDU_CIV", "HIST_GEO", "SCI_NAT", "DESSIN", "CHANT", "EPS", "TRAV_MAN"],
   // Elementary - Grades 3-6 (CE1, CE2, CM1, CM2)
-  3: ["FRANCAIS", "MATH", "EDU_CIV", "HIST_GEO", "SCI_NAT", "DESSIN", "CHANT", "EPS", "TRAV_MAN"],
-  4: ["FRANCAIS", "MATH", "EDU_CIV", "HIST_GEO", "SCI_NAT", "DESSIN", "CHANT", "EPS", "TRAV_MAN"],
-  5: ["FRANCAIS", "MATH", "EDU_CIV", "HIST_GEO", "SCI_NAT", "DESSIN", "MUSIQUE", "EPS", "TRAV_MAN"],
-  6: ["FRANCAIS", "MATH", "EDU_CIV", "HIST_GEO", "SCI_NAT", "DESSIN", "MUSIQUE", "EPS", "TRAV_MAN"],
+  "3": ["FRANCAIS", "MATH", "EDU_CIV", "HIST_GEO", "SCI_NAT", "DESSIN", "CHANT", "EPS", "TRAV_MAN"],
+  "4": ["FRANCAIS", "MATH", "EDU_CIV", "HIST_GEO", "SCI_NAT", "DESSIN", "CHANT", "EPS", "TRAV_MAN"],
+  "5": ["FRANCAIS", "MATH", "EDU_CIV", "HIST_GEO", "SCI_NAT", "DESSIN", "MUSIQUE", "EPS", "TRAV_MAN"],
+  "6": ["FRANCAIS", "MATH", "EDU_CIV", "HIST_GEO", "SCI_NAT", "DESSIN", "MUSIQUE", "EPS", "TRAV_MAN"],
   // College - Grades 7-10
-  7: ["FRANCAIS", "MATH", "ANG", "HIST_GEO", "EDU_CIV", "SVT", "PC", "TECH", "ARTS_PLAST", "MUSIQUE", "EPS", "INFO"],
-  8: ["FRANCAIS", "MATH", "ANG", "HIST_GEO", "EDU_CIV", "SVT", "PC", "TECH", "ARTS_PLAST", "MUSIQUE", "EPS", "INFO"],
-  9: ["FRANCAIS", "MATH", "ANG", "HIST_GEO", "EDU_CIV", "SVT", "PC", "TECH", "ARTS_PLAST", "MUSIQUE", "EPS", "INFO", "ARABE"],
-  10: ["FRANCAIS", "MATH", "ANG", "HIST_GEO", "EDU_CIV", "SVT", "PC", "TECH", "ARTS_PLAST", "MUSIQUE", "EPS", "INFO", "ARABE"],
-  // High School - Grade 11 (Seconde - common core)
-  11: ["FRANCAIS", "MATH", "ANG", "HIST_GEO", "EDU_CIV", "SVT", "PC", "PHILO", "INFO", "EPS", "ARABE", "ESP"],
-  // High School - Grades 12-13 will use series-specific subjects
-  12: ["FRANCAIS", "MATH", "ANG", "HIST_GEO", "SVT", "PC", "PHILO", "EPS", "INFO"],
-  13: ["FRANCAIS", "MATH", "ANG", "HIST_GEO", "SVT", "PC", "PHILO", "EPS", "INFO"],
+  "7": ["FRANCAIS", "MATH", "ANG", "HIST_GEO", "EDU_CIV", "SVT", "PC", "TECH", "ARTS_PLAST", "MUSIQUE", "EPS", "INFO"],
+  "8": ["FRANCAIS", "MATH", "ANG", "HIST_GEO", "EDU_CIV", "SVT", "PC", "TECH", "ARTS_PLAST", "MUSIQUE", "EPS", "INFO"],
+  "9": ["FRANCAIS", "MATH", "ANG", "HIST_GEO", "EDU_CIV", "SVT", "PC", "TECH", "ARTS_PLAST", "MUSIQUE", "EPS", "INFO", "ARABE"],
+  "10": ["FRANCAIS", "MATH", "ANG", "HIST_GEO", "EDU_CIV", "SVT", "PC", "TECH", "ARTS_PLAST", "MUSIQUE", "EPS", "INFO", "ARABE"],
+
+  // ========================================================================
+  // HIGH SCHOOL TRACK-SPECIFIC SUBJECTS (Based on Guinea 2025 curriculum)
+  // ========================================================================
+
+  // Sciences Mathématiques (SM) - Focus on Math & Physics
+  // Core: FRANCAIS, ANG, EPS, HIST_GEO | Specialized: MATH, PHYS, CHIMIE, SVT
+  "11_SM": ["FRANCAIS", "MATH", "ANG", "HIST_GEO", "PHYS", "CHIMIE", "SVT", "EPS", "INFO"],
+  "12_SM": ["FRANCAIS", "MATH", "ANG", "HIST_GEO", "PHYS", "CHIMIE", "SVT", "PHILO", "EPS"],
+  "13_SM": ["FRANCAIS", "MATH", "ANG", "HIST_GEO", "PHYS", "CHIMIE", "SVT", "PHILO", "EPS"],
+
+  // Sciences Expérimentales (SE) - Focus on Biology & Chemistry
+  // Core: FRANCAIS, ANG, EPS, HIST_GEO | Specialized: SVT, PC, MATH
+  "11_SE": ["FRANCAIS", "MATH", "ANG", "HIST_GEO", "SVT", "PC", "EPS", "INFO"],
+  "12_SE": ["FRANCAIS", "MATH", "ANG", "HIST_GEO", "SVT", "PC", "PHILO", "EPS"],
+  "13_SE": ["FRANCAIS", "MATH", "ANG", "HIST_GEO", "SVT", "PC", "PHILO", "EPS"],
+
+  // Sciences Sociales (SS) - Focus on Humanities & Social Sciences
+  // Core: FRANCAIS, ANG, EPS | Specialized: HIST_GEO, ECON, PHILO, SOCIO
+  "11_SS": ["FRANCAIS", "MATH", "ANG", "HIST_GEO", "ECON", "SOCIO", "PC", "EPS", "INFO"],
+  "12_SS": ["FRANCAIS", "MATH", "ANG", "HIST_GEO", "ECON", "SOCIO", "PHILO", "EPS"],
+  "13_SS": ["FRANCAIS", "ANG", "HIST_GEO", "ECON", "SOCIO", "PHILO", "MATH", "EPS"],
+}
+
+// Helper function to get subject key for a grade
+function getGradeSubjectKey(order: number, series?: string): string {
+  if (series && order >= 11) {
+    return `${order}_${series}`
+  }
+  return String(order)
 }
 
 // Teacher names (mix of first and last names for realistic combinations)
@@ -198,13 +240,15 @@ const TEACHER_LAST_NAMES = [
 const TEACHER_SPECIALIZATIONS: { [key: string]: string[] } = {
   "Lettres": ["FRANCAIS", "LECTURE", "ECRITURE"],
   "Mathématiques": ["MATH", "CALC"],
-  "Sciences": ["SVT", "SCI_NAT", "PC"],
+  "Sciences Physiques": ["PHYS", "CHIMIE", "PC"],
+  "Sciences Naturelles": ["SVT", "SCI_NAT"],
   "Langues": ["ANG", "ARABE", "ESP"],
   "Histoire-Géographie": ["HIST_GEO", "EDU_CIV"],
   "Arts": ["DESSIN", "ARTS_PLAST", "MUSIQUE", "CHANT"],
   "EPS": ["EPS"],
   "Technologie": ["TECH", "TECH_IND", "INFO", "TRAV_MAN"],
-  "Philosophie": ["PHILO", "SES"],
+  "Philosophie": ["PHILO"],
+  "Sciences Sociales": ["ECON", "SOCIO", "SES"],
 }
 
 // Expense categories with sample descriptions
@@ -337,12 +381,13 @@ async function main() {
 
     // Create grades for previous school year
     console.log("   Creating grades for 2024-2025...")
-    const previousGrades: { id: string; order: number; tuitionFee: number; name: string }[] = []
+    const previousGrades: { id: string; order: number; tuitionFee: number; name: string; series?: string }[] = []
     for (const gradeConfig of GRADES_CONFIG) {
       let grade = await prisma.grade.findFirst({
         where: {
           schoolYearId: previousSchoolYear.id,
           order: gradeConfig.order,
+          series: gradeConfig.series || null,
         },
       })
 
@@ -354,11 +399,12 @@ async function main() {
             order: gradeConfig.order,
             tuitionFee: gradeConfig.tuitionFee,
             capacity: gradeConfig.capacity,
+            series: gradeConfig.series,
             schoolYearId: previousSchoolYear.id,
           },
         })
       }
-      previousGrades.push({ id: grade.id, order: grade.order, tuitionFee: grade.tuitionFee, name: grade.name })
+      previousGrades.push({ id: grade.id, order: grade.order, tuitionFee: grade.tuitionFee, name: grade.name, series: grade.series || undefined })
     }
     console.log(`   ✓ Created ${previousGrades.length} grades for 2024-2025`)
 
@@ -385,12 +431,13 @@ async function main() {
 
     // Create grades for current school year
     console.log("   Creating grades for 2025-2026...")
-    const currentGrades: { id: string; order: number; tuitionFee: number; name: string }[] = []
+    const currentGrades: { id: string; order: number; tuitionFee: number; name: string; series?: string }[] = []
     for (const gradeConfig of GRADES_CONFIG) {
       let grade = await prisma.grade.findFirst({
         where: {
           schoolYearId: currentSchoolYear.id,
           order: gradeConfig.order,
+          series: gradeConfig.series || null,
         },
       })
 
@@ -402,6 +449,7 @@ async function main() {
             order: gradeConfig.order,
             tuitionFee: gradeConfig.tuitionFee,
             capacity: gradeConfig.capacity,
+            series: gradeConfig.series,
             schoolYearId: currentSchoolYear.id,
           },
         })
@@ -413,10 +461,11 @@ async function main() {
             level: gradeConfig.level,
             tuitionFee: gradeConfig.tuitionFee,
             capacity: gradeConfig.capacity,
+            series: gradeConfig.series,
           },
         })
       }
-      currentGrades.push({ id: grade.id, order: grade.order, tuitionFee: grade.tuitionFee, name: grade.name })
+      currentGrades.push({ id: grade.id, order: grade.order, tuitionFee: grade.tuitionFee, name: grade.name, series: grade.series || undefined })
     }
     console.log(`   ✓ Created ${currentGrades.length} grades for 2025-2026`)
 
@@ -874,7 +923,9 @@ async function main() {
     let classAssignmentCount = 0
 
     for (const grade of currentGrades) {
-      const subjectCodes = GRADE_SUBJECTS_MAP[grade.order] || []
+      // Use track-specific subject mapping for high school grades
+      const subjectKey = getGradeSubjectKey(grade.order, grade.series)
+      const subjectCodes = GRADE_SUBJECTS_MAP[subjectKey] || []
 
       for (const subjectCode of subjectCodes) {
         const subjectId = subjectMap.get(subjectCode)
@@ -890,12 +941,28 @@ async function main() {
         })
 
         if (!gradeSubject) {
+          // Determine coefficient based on track and subject
+          let coefficient = 2
+          if (subjectCode === "MATH") {
+            coefficient = grade.series === "SM" ? 5 : grade.series === "SE" ? 3 : 2
+          } else if (subjectCode === "FRANCAIS") {
+            coefficient = 3
+          } else if (subjectCode === "PHYS" || subjectCode === "CHIMIE") {
+            coefficient = grade.series === "SM" ? 4 : 2
+          } else if (subjectCode === "SVT") {
+            coefficient = grade.series === "SE" ? 5 : 2
+          } else if (subjectCode === "HIST_GEO" || subjectCode === "ECON") {
+            coefficient = grade.series === "SS" ? 5 : 2
+          } else if (subjectCode === "PHILO") {
+            coefficient = grade.series === "SS" ? 4 : 3
+          }
+
           gradeSubject = await prisma.gradeSubject.create({
             data: {
               gradeId: grade.id,
               subjectId,
-              coefficient: subjectCode === "MATH" || subjectCode === "FRANCAIS" ? 3 : 2,
-              hoursPerWeek: subjectCode === "EPS" ? 2 : subjectCode === "MATH" || subjectCode === "FRANCAIS" ? 5 : 3,
+              coefficient,
+              hoursPerWeek: subjectCode === "EPS" ? 2 : coefficient >= 4 ? 5 : 3,
             },
           })
           gradeSubjectCount++

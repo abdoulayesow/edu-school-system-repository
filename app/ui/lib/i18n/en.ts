@@ -24,6 +24,7 @@ export const en: TranslationKeys = {
     yes: "Yes",
     no: "No",
     all: "All",
+    reset: "Reset",
     actions: "Actions",
     status: "Status",
     date: "Date",
@@ -431,6 +432,15 @@ export const en: TranslationKeys = {
     filterPayments: "Filter payments",
     paymentsCount: "payments",
     confirmedPercent: "confirmed",
+
+    // Transactions and Review tabs
+    tabTransactions: "Transactions",
+    tabReview: "Review",
+    filterByType: "Filter by type",
+    allTypes: "All types",
+    itemsToReview: "items to review",
+    noItemsToReview: "No items to review. All transactions are up to date!",
+    approve: "Approve",
   },
 
   // Attendance
@@ -951,6 +961,7 @@ export const en: TranslationKeys = {
     roomsAndStudents: "Rooms & Students",
     room: "Room",
     changeRoom: "Change Room",
+    noRoomsConfigured: "No rooms configured for this grade",
   },
 
   // Enhanced attendance
@@ -1324,6 +1335,19 @@ export const en: TranslationKeys = {
     levelElementary: "Elementary",
     levelCollege: "College",
     levelHighSchool: "High School",
+
+    // High school tracks (series)
+    trackSM: "Mathematics Sciences",
+    trackSS: "Social Sciences",
+    trackSE: "Experimental Sciences",
+    trackSMShort: "SM",
+    trackSSShort: "SS",
+    trackSEShort: "SE",
+    trackSMFull: "Sciences Mathématiques (SM)",
+    trackSSFull: "Sciences Sociales (SS)",
+    trackSEFull: "Sciences Expérimentales (SE)",
+    selectTrack: "Select track",
+    trackRequired: "Track selection is required for high school",
 
     // Grade form
     order: "Order",

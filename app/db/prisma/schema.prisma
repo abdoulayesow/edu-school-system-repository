@@ -245,7 +245,7 @@ model Grade {
   attendanceSessions AttendanceSession[]
   rooms           GradeRoom[]
 
-  @@unique([schoolYearId, order])
+  @@unique([schoolYearId, order, series])
   @@index([schoolYearId])
   @@index([level])
   @@index([order])
