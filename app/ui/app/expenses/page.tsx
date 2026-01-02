@@ -61,6 +61,9 @@ import { PageContainer } from "@/components/layout"
 import { DataPagination } from "@/components/data-pagination"
 import { formatDate as formatDateUtil } from "@/lib/utils"
 import { useExpenses, useCreateExpense, useUpdateExpenseStatus, useDeleteExpense } from "@/lib/hooks/use-api"
+import { getExpenseRowStatus } from "@/lib/status-helpers"
+import { Empty, EmptyMedia, EmptyTitle, EmptyDescription } from "@/components/ui/empty"
+import { EmptyExpensesIllustration } from "@/components/illustrations"
 
 const ITEMS_PER_PAGE = 50
 
@@ -272,7 +275,7 @@ export default function ExpensesPage() {
 
   // Get payment method label
   const getMethodLabel = (method: string) => {
-    return method === "orange_money" ? "Orange Money" : "Espèces"
+    return method === "orange_money" ? t.expenses.orangeMoney : t.expenses.cash
   }
 
   // Handle create expense
@@ -375,7 +378,7 @@ export default function ExpensesPage() {
 
           <Dialog open={isNewExpenseOpen} onOpenChange={setIsNewExpenseOpen}>
             <DialogTrigger asChild>
-              <Button>
+              <Button variant="gold">
                 <Plus className="size-4 mr-2" />
                 {t.expenses.newExpense}
               </Button>
@@ -395,7 +398,7 @@ export default function ExpensesPage() {
                     onValueChange={(value) => setNewExpense({ ...newExpense, category: value as ExpenseCategory })}
                   >
                     <SelectTrigger>
-                      <SelectValue placeholder="Sélectionner une catégorie" />
+                      <SelectValue placeholder={t.expenses.selectCategory} />
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="supplies">{t.expenses.categories.supplies}</SelectItem>
@@ -414,7 +417,7 @@ export default function ExpensesPage() {
                   <Textarea
                     value={newExpense.description}
                     onChange={(e) => setNewExpense({ ...newExpense, description: e.target.value })}
-                    placeholder="Description de la dépense..."
+                    placeholder={t.expenses.descriptionPlaceholder}
                     rows={2}
                   />
                 </div>
@@ -441,7 +444,7 @@ export default function ExpensesPage() {
 
                 <div className="grid grid-cols-2 gap-4">
                   <div className="grid gap-2">
-                    <Label>Méthode de paiement</Label>
+                    <Label>{t.expenses.paymentMethod}</Label>
                     <Select
                       value={newExpense.method}
                       onValueChange={(value) => setNewExpense({ ...newExpense, method: value as PaymentMethod })}
@@ -450,8 +453,8 @@ export default function ExpensesPage() {
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="cash">Espèces</SelectItem>
-                        <SelectItem value="orange_money">Orange Money</SelectItem>
+                        <SelectItem value="cash">{t.expenses.cash}</SelectItem>
+                        <SelectItem value="orange_money">{t.expenses.orangeMoney}</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
@@ -460,7 +463,7 @@ export default function ExpensesPage() {
                     <Input
                       value={newExpense.vendorName}
                       onChange={(e) => setNewExpense({ ...newExpense, vendorName: e.target.value })}
-                      placeholder="Nom du fournisseur"
+                      placeholder={t.expenses.vendorPlaceholder}
                     />
                   </div>
                 </div>
@@ -487,12 +490,12 @@ export default function ExpensesPage() {
             <CardHeader className="pb-2">
               <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
                 <Receipt className="size-4" />
-                Total dépenses
+                {t.expenses.totalExpenses}
               </CardTitle>
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">{formatCurrency(stats.totalAmount)}</div>
-              <p className="text-xs text-muted-foreground mt-1">{stats.total} dépense(s)</p>
+              <p className="text-xs text-muted-foreground mt-1">{stats.total} {t.expenses.expenseCount}</p>
             </CardContent>
           </Card>
 
@@ -505,7 +508,7 @@ export default function ExpensesPage() {
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold text-warning">{formatCurrency(stats.pendingAmount)}</div>
-              <p className="text-xs text-muted-foreground mt-1">{stats.pending} en attente</p>
+              <p className="text-xs text-muted-foreground mt-1">{stats.pending} {t.expenses.pending.toLowerCase()}</p>
             </CardContent>
           </Card>
 
@@ -518,7 +521,7 @@ export default function ExpensesPage() {
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold text-primary">{formatCurrency(stats.approvedAmount)}</div>
-              <p className="text-xs text-muted-foreground mt-1">{stats.approved} approuvée(s)</p>
+              <p className="text-xs text-muted-foreground mt-1">{stats.approved} {t.expenses.approved.toLowerCase()}</p>
             </CardContent>
           </Card>
 
@@ -531,19 +534,22 @@ export default function ExpensesPage() {
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold text-success">{formatCurrency(stats.paidAmount)}</div>
-              <p className="text-xs text-muted-foreground mt-1">{stats.paid} payée(s)</p>
+              <p className="text-xs text-muted-foreground mt-1">{stats.paid} {t.expenses.paid.toLowerCase()}</p>
             </CardContent>
           </Card>
         </div>
 
         {/* Filters */}
-        <Card className="mb-6">
-          <CardContent className="pt-6">
+        <Card className="mb-6 py-2">
+          <CardHeader className="pb-1 px-6 pt-3">
+            <CardTitle className="text-sm">{t.expenses.filterExpenses}</CardTitle>
+          </CardHeader>
+          <CardContent className="pt-0 pb-2 px-6">
             <div className="flex flex-col sm:flex-row gap-4">
               <div className="relative flex-1">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground" />
                 <Input
-                  placeholder="Rechercher par description, fournisseur..."
+                  placeholder={t.expenses.searchPlaceholder}
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   className="pl-10"
@@ -552,10 +558,10 @@ export default function ExpensesPage() {
 
               <Select value={statusFilter} onValueChange={setStatusFilter}>
                 <SelectTrigger className="w-full sm:w-[180px]">
-                  <SelectValue placeholder="Tous les statuts" />
+                  <SelectValue placeholder={t.expenses.allStatuses} />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all">Tous les statuts</SelectItem>
+                  <SelectItem value="all">{t.expenses.allStatuses}</SelectItem>
                   <SelectItem value="pending">{t.expenses.pending}</SelectItem>
                   <SelectItem value="approved">{t.expenses.approved}</SelectItem>
                   <SelectItem value="rejected">{t.expenses.rejected}</SelectItem>
@@ -565,10 +571,10 @@ export default function ExpensesPage() {
 
               <Select value={categoryFilter} onValueChange={setCategoryFilter}>
                 <SelectTrigger className="w-full sm:w-[180px]">
-                  <SelectValue placeholder="Toutes les catégories" />
+                  <SelectValue placeholder={t.expenses.allCategories} />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all">Toutes les catégories</SelectItem>
+                  <SelectItem value="all">{t.expenses.allCategories}</SelectItem>
                   <SelectItem value="supplies">{t.expenses.categories.supplies}</SelectItem>
                   <SelectItem value="maintenance">{t.expenses.categories.maintenance}</SelectItem>
                   <SelectItem value="utilities">{t.expenses.categories.utilities}</SelectItem>
@@ -585,10 +591,10 @@ export default function ExpensesPage() {
         {/* Expenses Table */}
         <Card>
           <CardHeader>
-            <CardTitle>Liste des dépenses</CardTitle>
+            <CardTitle>{t.expenses.expenseList}</CardTitle>
             <CardDescription>
-              {filteredExpenses.length} dépense(s)
-              {pagination && ` sur ${pagination.total}`}
+              {filteredExpenses.length} {t.expenses.expenseCount}
+              {pagination && ` / ${pagination.total}`}
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -598,6 +604,18 @@ export default function ExpensesPage() {
               </div>
             ) : error ? (
               <div className="text-center py-8 text-destructive">{error}</div>
+            ) : filteredExpenses.length === 0 ? (
+              <Empty className="py-12">
+                <EmptyMedia variant="illustration">
+                  <EmptyExpensesIllustration />
+                </EmptyMedia>
+                <EmptyTitle>{t.expenses.noExpensesFound}</EmptyTitle>
+                <EmptyDescription>
+                  {searchQuery || statusFilter !== "all" || categoryFilter !== "all"
+                    ? t.common.noData
+                    : t.expenses.subtitle}
+                </EmptyDescription>
+              </Empty>
             ) : (
               <>
               <div className="rounded-md border">
@@ -609,22 +627,15 @@ export default function ExpensesPage() {
                       <TableHead>{t.expenses.description}</TableHead>
                       <TableHead>{t.expenses.vendor}</TableHead>
                       <TableHead className="text-right">{t.common.amount}</TableHead>
-                      <TableHead>Méthode</TableHead>
+                      <TableHead>{t.expenses.method}</TableHead>
                       <TableHead>{t.common.status}</TableHead>
-                      <TableHead>Demandeur</TableHead>
+                      <TableHead>{t.expenses.requestedBy}</TableHead>
                       <TableHead className="text-right">{t.common.actions}</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {filteredExpenses.length === 0 ? (
-                      <TableRow>
-                        <TableCell colSpan={9} className="text-center py-8 text-muted-foreground">
-                          Aucune dépense enregistrée
-                        </TableCell>
-                      </TableRow>
-                    ) : (
-                      filteredExpenses.map((expense) => (
-                        <TableRow key={expense.id}>
+                    {filteredExpenses.map((expense) => (
+                        <TableRow key={expense.id} status={getExpenseRowStatus(expense.status)}>
                           <TableCell className="text-sm">
                             {formatDate(expense.date)}
                           </TableCell>
@@ -691,7 +702,7 @@ export default function ExpensesPage() {
                                       }}
                                     >
                                       <Trash2 className="size-4 mr-2" />
-                                      Supprimer
+                                      {t.common.delete}
                                     </DropdownMenuItem>
                                   </>
                                 )}
@@ -724,8 +735,7 @@ export default function ExpensesPage() {
                             </DropdownMenu>
                           </TableCell>
                         </TableRow>
-                      ))
-                    )}
+                      ))}
                   </TableBody>
                 </Table>
               </div>
@@ -760,24 +770,24 @@ export default function ExpensesPage() {
                 {actionType === "approve" && t.expenses.approveExpense}
                 {actionType === "reject" && t.expenses.rejectExpense}
                 {actionType === "mark_paid" && t.expenses.markAsPaid}
-                {actionType === "delete" && "Supprimer la dépense"}
+                {actionType === "delete" && t.expenses.deleteExpense}
               </AlertDialogTitle>
               <AlertDialogDescription>
                 {actionType === "approve" && (
                   <>
-                    Voulez-vous approuver cette dépense de{" "}
+                    {t.expenses.confirmApproveExpenseAmount}{" "}
                     <strong>{selectedExpense && formatCurrency(selectedExpense.amount)}</strong>?
                   </>
                 )}
                 {actionType === "reject" && (
                   <div className="space-y-4">
-                    <p>Voulez-vous rejeter cette dépense?</p>
+                    <p>{t.expenses.confirmRejectExpenseQuestion}</p>
                     <div className="grid gap-2">
                       <Label>{t.expenses.rejectionReason} *</Label>
                       <Textarea
                         value={rejectionReason}
                         onChange={(e) => setRejectionReason(e.target.value)}
-                        placeholder="Raison du rejet..."
+                        placeholder={t.expenses.rejectionReasonPlaceholder}
                         rows={2}
                       />
                     </div>
@@ -785,14 +795,14 @@ export default function ExpensesPage() {
                 )}
                 {actionType === "mark_paid" && (
                   <>
-                    Confirmer que cette dépense de{" "}
+                    {t.expenses.confirmMarkPaidExpenseAmount}{" "}
                     <strong>{selectedExpense && formatCurrency(selectedExpense.amount)}</strong>{" "}
-                    a été payée?
+                    {t.expenses.confirmMarkPaidExpenseAmountEnd}
                   </>
                 )}
                 {actionType === "delete" && (
                   <>
-                    Voulez-vous supprimer cette dépense? Cette action est irréversible.
+                    {t.expenses.confirmDeleteExpense}
                   </>
                 )}
               </AlertDialogDescription>
@@ -805,10 +815,10 @@ export default function ExpensesPage() {
                 className={actionType === "delete" ? "bg-destructive hover:bg-destructive/90" : ""}
               >
                 {isSubmitting && <Loader2 className="size-4 mr-2 animate-spin" />}
-                {actionType === "approve" && "Approuver"}
-                {actionType === "reject" && "Rejeter"}
-                {actionType === "mark_paid" && "Marquer payée"}
-                {actionType === "delete" && "Supprimer"}
+                {actionType === "approve" && t.expenses.approve}
+                {actionType === "reject" && t.expenses.reject}
+                {actionType === "mark_paid" && t.expenses.markPaid}
+                {actionType === "delete" && t.common.delete}
               </AlertDialogAction>
             </AlertDialogFooter>
           </AlertDialogContent>

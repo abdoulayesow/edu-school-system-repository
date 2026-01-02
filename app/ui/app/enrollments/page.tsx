@@ -15,6 +15,9 @@ import { sizing } from "@/lib/design-tokens"
 import { formatDate } from "@/lib/utils"
 import Link from "next/link"
 import { useEnrollments, useGrades } from "@/lib/hooks/use-api"
+import { getEnrollmentRowStatus } from "@/lib/status-helpers"
+import { Empty, EmptyMedia, EmptyTitle, EmptyDescription } from "@/components/ui/empty"
+import { EmptyEnrollmentsIllustration } from "@/components/illustrations"
 
 const ITEMS_PER_PAGE = 50
 
@@ -231,12 +234,12 @@ export default function EnrollmentsPage() {
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">{t.enrollments.allStatuses}</SelectItem>
-                  <SelectItem value="draft">Draft</SelectItem>
-                  <SelectItem value="submitted">Submitted</SelectItem>
-                  <SelectItem value="needs_review">Needs Review</SelectItem>
-                  <SelectItem value="completed">Completed</SelectItem>
-                  <SelectItem value="rejected">Rejected</SelectItem>
-                  <SelectItem value="cancelled">Cancelled</SelectItem>
+                  <SelectItem value="draft">{t.enrollments.draft}</SelectItem>
+                  <SelectItem value="submitted">{t.enrollments.submitted}</SelectItem>
+                  <SelectItem value="needs_review">{t.enrollments.needsReview}</SelectItem>
+                  <SelectItem value="completed">{t.enrollments.completed}</SelectItem>
+                  <SelectItem value="rejected">{t.enrollments.rejected}</SelectItem>
+                  <SelectItem value="cancelled">{t.enrollments.cancelled}</SelectItem>
                 </SelectContent>
               </Select>
             ) : (
@@ -280,7 +283,8 @@ export default function EnrollmentsPage() {
             </div>
             <Button
               asChild
-              className="w-full sm:w-auto bg-[#e79908] hover:bg-[#d68907] text-black dark:bg-gspn-gold-500 dark:hover:bg-gspn-gold-400 dark:text-[#2d0707]"
+              variant="gold"
+              className="w-full sm:w-auto"
             >
               <Link href="/enrollments/new">
                 <Plus className="h-4 w-4 mr-2" />
@@ -314,13 +318,23 @@ export default function EnrollmentsPage() {
                   <TableBody>
                     {filteredEnrollments.length === 0 ? (
                       <TableRow>
-                        <TableCell colSpan={6} className="text-center py-8 text-muted-foreground">
-                          {searchQuery ? "No enrollments found matching your search" : "No enrollments yet"}
+                        <TableCell colSpan={6} className="p-0">
+                          <Empty className="py-12">
+                            <EmptyMedia variant="illustration">
+                              <EmptyEnrollmentsIllustration />
+                            </EmptyMedia>
+                            <EmptyTitle>
+                              {searchQuery || statusFilter !== "all" || gradeFilter !== "all"
+                                ? t.common.noData
+                                : t.enrollments.subtitle}
+                            </EmptyTitle>
+                            <EmptyDescription>{t.enrollments.subtitle}</EmptyDescription>
+                          </Empty>
                         </TableCell>
                       </TableRow>
                     ) : (
                       filteredEnrollments.map((enrollment) => (
-                        <TableRow key={enrollment.id}>
+                        <TableRow key={enrollment.id} status={getEnrollmentRowStatus(enrollment.status)}>
                           <TableCell>{formatDate(enrollment.createdAt, locale)}</TableCell>
                           <TableCell className="font-medium">{enrollment.firstName} {enrollment.lastName}</TableCell>
                           <TableCell className="text-muted-foreground">{enrollment.enrollmentNumber}</TableCell>

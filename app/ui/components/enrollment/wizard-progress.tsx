@@ -48,7 +48,19 @@ export function WizardProgress() {
             step.number < currentStep || completedSteps.includes(step.number - 1)
 
           return (
-            <div key={step.number} className="flex items-center flex-1">
+            <div
+              key={step.number}
+              className={cn(
+                "flex items-center flex-1",
+                "animate-fade-in-up",
+                index === 0 && "stagger-1",
+                index === 1 && "stagger-2",
+                index === 2 && "stagger-3",
+                index === 3 && "stagger-4",
+                index === 4 && "stagger-5",
+                index === 5 && "stagger-6"
+              )}
+            >
               <button
                 type="button"
                 onClick={() => handleStepClick(step.number)}
@@ -60,11 +72,12 @@ export function WizardProgress() {
               >
                 <div
                   className={cn(
-                    "flex items-center justify-center w-10 h-10 rounded-full border-2 transition-colors",
+                    "flex items-center justify-center w-10 h-10 rounded-full border-2 transition-all duration-300",
+                    isCurrent && "animate-scale-in",
                     isCompleted
                       ? "bg-[#e79908] border-[#e79908] text-black dark:bg-gspn-gold-500 dark:border-gspn-gold-500 dark:text-gspn-maroon-950"
                       : isCurrent
-                        ? "border-[#e79908] bg-gspn-gold-50 text-black dark:border-gspn-gold-500 dark:bg-gspn-gold-500/30 dark:text-gspn-gold-200"
+                        ? "border-[#e79908] bg-gspn-gold-50 text-black dark:border-gspn-gold-500 dark:bg-gspn-gold-500/30 dark:text-gspn-gold-200 shadow-md shadow-gspn-gold-500/20"
                         : "border-muted-foreground/30 text-muted-foreground/50"
                   )}
                 >
@@ -90,7 +103,7 @@ export function WizardProgress() {
               {index < steps.length - 1 && (
               <div
                 className={cn(
-                  "flex-1 h-0.5 mx-2",
+                  "flex-1 h-0.5 mx-2 transition-colors duration-500 ease-out",
                   completedSteps.includes(step.number)
                     ? "bg-[#e79908] dark:bg-gspn-gold-500"
                     : "bg-muted-foreground/20"
@@ -113,7 +126,7 @@ export function WizardProgress() {
           </span>
         </div>
         <div className="flex gap-1">
-          {steps.map((step) => {
+          {steps.map((step, index) => {
             const isCompleted = completedSteps.includes(step.number)
             const isCurrent = currentStep === step.number
 
@@ -121,7 +134,14 @@ export function WizardProgress() {
               <div
                 key={step.number}
                 className={cn(
-                  "flex-1 h-2 rounded-full transition-colors",
+                  "flex-1 h-2 rounded-full transition-all duration-300",
+                  "animate-scale-in",
+                  index === 0 && "stagger-1",
+                  index === 1 && "stagger-2",
+                  index === 2 && "stagger-3",
+                  index === 3 && "stagger-4",
+                  index === 4 && "stagger-5",
+                  index === 5 && "stagger-6",
                   isCompleted
                     ? "bg-[#e79908] dark:bg-gspn-gold-500"
                     : isCurrent

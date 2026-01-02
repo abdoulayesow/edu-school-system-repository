@@ -51,6 +51,9 @@
   --chart-3: oklch(0.25 0.01 20); /* Black */
   --chart-4: oklch(0.52 0.12 150); /* Green */
   --chart-5: oklch(0.76 0.15 70); /* Amber */
+  --chart-6: oklch(0.58 0.14 280); /* Purple */
+  --chart-7: oklch(0.62 0.16 230); /* Blue */
+  --chart-8: oklch(0.48 0.12 50);  /* Brown */
 
   --radius: 6px;
 
@@ -114,6 +117,9 @@
   --chart-3: oklch(0.3 0.01 20);
   --chart-4: oklch(0.58 0.12 150);
   --chart-5: oklch(0.78 0.15 70);
+  --chart-6: oklch(0.65 0.14 280); /* Purple */
+  --chart-7: oklch(0.68 0.16 230); /* Blue */
+  --chart-8: oklch(0.55 0.12 50);  /* Brown */
 
   --sidebar: oklch(0.18 0.02 20);
   --sidebar-foreground: oklch(0.95 0.01 20);
@@ -134,12 +140,46 @@
 }
 
 @theme inline {
-  /* Using Inter for high legibility and professionalism - consistent across all text */
-  --font-sans: "Inter", "Inter Fallback", system-ui, -apple-system, sans-serif;
+  /* Typography - Premium font stack */
+  --font-sans: var(--font-inter), "Inter", system-ui, -apple-system, sans-serif;
   --font-mono: "Geist Mono", "Geist Mono Fallback", monospace;
-  /* Using Inter for headings as well for consistency */
-  --font-heading: "Inter", "Inter Fallback", system-ui, -apple-system, sans-serif;
-  --font-display: "Inter", "Inter Fallback", system-ui, -apple-system, sans-serif;
+  /* Display font for headings - Plus Jakarta Sans for modern, geometric feel */
+  --font-heading: var(--font-display), "Plus Jakarta Sans", system-ui, sans-serif;
+  --font-display: var(--font-display), "Plus Jakarta Sans", system-ui, sans-serif;
+  /* Accent font for stats/numbers - DM Sans for clean numerals */
+  --font-accent: var(--font-accent), "DM Sans", system-ui, sans-serif;
+
+  /* Animation Tokens */
+  --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+  --ease-smooth: cubic-bezier(0.4, 0, 0.2, 1);
+  --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+  --duration-fast: 150ms;
+  --duration-normal: 250ms;
+  --duration-slow: 400ms;
+  --duration-slower: 600ms;
+
+  /* Enhanced Shadow System */
+  --shadow-xs: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+  --shadow-sm: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
+  --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+  --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+  --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
+  --shadow-2xl: 0 25px 50px -12px rgb(0 0 0 / 0.25);
+  --shadow-glow-primary: 0 0 20px rgba(139, 35, 50, 0.3);
+  --shadow-glow-gold: 0 0 20px rgba(212, 175, 55, 0.3);
+  --shadow-lift: 0 10px 40px -10px rgb(0 0 0 / 0.2);
+
+  /* Glass Effect Colors */
+  --glass-white: rgba(255, 255, 255, 0.8);
+  --glass-white-strong: rgba(255, 255, 255, 0.95);
+  --glass-dark: rgba(0, 0, 0, 0.6);
+  --glass-dark-strong: rgba(0, 0, 0, 0.85);
+
+  /* Gradient Tokens */
+  --gradient-primary: linear-gradient(135deg, oklch(0.42 0.14 15) 0%, oklch(0.35 0.12 15) 100%);
+  --gradient-gold: linear-gradient(135deg, oklch(0.72 0.12 85) 0%, oklch(0.65 0.14 80) 100%);
+  --gradient-subtle: linear-gradient(180deg, transparent 0%, oklch(0.96 0.01 20 / 0.5) 100%);
+  --gradient-shine: linear-gradient(120deg, transparent 30%, rgba(255,255,255,0.15) 50%, transparent 70%);
 
   /* GSPN Brand Colors - Extended palette for easy use */
   --color-gspn-maroon-50: #fdf2f4;
@@ -241,19 +281,35 @@
   h5,
   h6,
   .text-heading {
-    @apply font-sans font-semibold text-foreground;
+    font-family: var(--font-heading);
+    @apply font-semibold text-foreground;
+    letter-spacing: -0.02em;
+    text-wrap: balance;
   }
   h1 {
-    @apply text-3xl;
+    @apply text-3xl font-extrabold;
+    letter-spacing: -0.025em;
   }
   h2 {
-    @apply text-2xl;
+    @apply text-2xl font-bold;
+    letter-spacing: -0.02em;
   }
   h3 {
-    @apply text-xl;
+    @apply text-xl font-semibold;
   }
   h4 {
-    @apply text-lg;
+    @apply text-lg font-semibold;
+  }
+
+  /* Accent font for stats and numbers */
+  .font-accent {
+    font-family: var(--font-accent);
+  }
+
+  /* Display font utility */
+  .font-display {
+    font-family: var(--font-heading);
+    letter-spacing: -0.02em;
   }
 
   /* Softer Input Focus */
@@ -406,9 +462,139 @@ div.page-container,
   @apply ring-2 ring-offset-2 ring-accent;
 }
 
-/* Font display class - using Inter for consistency */
-.font-display {
-  font-family: "Inter", "Inter Fallback", system-ui, -apple-system, sans-serif;
+/* Animation Keyframes */
+@keyframes shimmer {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
+}
+
+@keyframes pulse-subtle {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.7; }
+}
+
+@keyframes fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes fade-in-up {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes scale-in {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes slide-in-right {
+  from {
+    opacity: 0;
+    transform: translateX(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes count-up {
+  from { opacity: 0; transform: translateY(5px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0) translateX(0); }
+  25% { transform: translateY(-10px) translateX(5px); }
+  50% { transform: translateY(-5px) translateX(-5px); }
+  75% { transform: translateY(-15px) translateX(3px); }
+}
+
+/* Animation Utilities */
+.animate-shimmer {
+  animation: shimmer 2s infinite;
+}
+
+.animate-pulse-subtle {
+  animation: pulse-subtle 2s ease-in-out infinite;
+}
+
+.animate-fade-in {
+  animation: fade-in var(--duration-normal) var(--ease-smooth);
+}
+
+.animate-fade-in-up {
+  animation: fade-in-up var(--duration-normal) var(--ease-out-expo);
+}
+
+.animate-scale-in {
+  animation: scale-in var(--duration-normal) var(--ease-spring);
+}
+
+.animate-slide-in-right {
+  animation: slide-in-right var(--duration-normal) var(--ease-out-expo);
+}
+
+/* Stagger animation delays for lists */
+.stagger-1 { animation-delay: 50ms; }
+.stagger-2 { animation-delay: 100ms; }
+.stagger-3 { animation-delay: 150ms; }
+.stagger-4 { animation-delay: 200ms; }
+.stagger-5 { animation-delay: 250ms; }
+.stagger-6 { animation-delay: 300ms; }
+
+/* Interactive States */
+.interactive-lift {
+  transition: transform var(--duration-fast) var(--ease-smooth),
+              box-shadow var(--duration-fast) var(--ease-smooth);
+}
+.interactive-lift:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-lift);
+}
+
+.interactive-scale {
+  transition: transform var(--duration-fast) var(--ease-spring);
+}
+.interactive-scale:hover {
+  transform: scale(1.02);
+}
+.interactive-scale:active {
+  transform: scale(0.98);
+}
+
+/* Glow Effects */
+.glow-primary {
+  box-shadow: var(--shadow-glow-primary);
+}
+.glow-gold {
+  box-shadow: var(--shadow-glow-gold);
+}
+
+/* Skeleton loading shimmer */
+.skeleton-shimmer {
+  position: relative;
+  overflow: hidden;
+}
+.skeleton-shimmer::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: var(--gradient-shine);
+  animation: shimmer 1.5s infinite;
 }
 
 /* Navigation border utilities */

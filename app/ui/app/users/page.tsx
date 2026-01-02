@@ -28,6 +28,7 @@ import {
 } from "@/components/ui/dropdown-menu"
 import { useI18n, interpolate } from "@/components/i18n-provider"
 import { PageContainer } from "@/components/layout"
+import { getUserRowStatus } from "@/lib/status-helpers"
 
 interface UserData {
   id: string
@@ -464,7 +465,7 @@ export default function UsersPage() {
                 </TableHeader>
                 <TableBody>
                   {filteredUsers.map((user) => (
-                    <TableRow key={user.id}>
+                    <TableRow key={user.id} status={getUserRowStatus(user.status)}>
                       <TableCell className="font-medium">{user.name}</TableCell>
                       <TableCell className="text-muted-foreground">{user.email}</TableCell>
                       <TableCell>{getRoleBadge(user.role)}</TableCell>

@@ -28,16 +28,60 @@ const badgeVariants = cva(
         gold:
           'border-accent/30 bg-accent/10 text-accent-foreground dark:bg-accent/20 dark:text-accent',
       },
+      size: {
+        default: 'px-2 py-0.5 text-xs',
+        sm: 'px-1.5 py-0 text-[10px]',
+        lg: 'px-2.5 py-1 text-sm',
+      },
+      animate: {
+        none: '',
+        pulse: 'animate-pulse-subtle',
+      },
     },
     defaultVariants: {
       variant: 'default',
+      size: 'default',
+      animate: 'none',
     },
   },
 )
 
+// Dot indicator component for status
+function BadgeDot({
+  className,
+  variant = 'default',
+  pulse = false,
+}: {
+  className?: string
+  variant?: 'default' | 'success' | 'warning' | 'error' | 'info' | 'gold'
+  pulse?: boolean
+}) {
+  const colors = {
+    default: 'bg-primary',
+    success: 'bg-success',
+    warning: 'bg-warning',
+    error: 'bg-destructive',
+    info: 'bg-primary',
+    gold: 'bg-accent',
+  }
+
+  return (
+    <span
+      className={cn(
+        'inline-block size-2 rounded-full',
+        colors[variant],
+        pulse && 'animate-pulse-subtle',
+        className
+      )}
+    />
+  )
+}
+
 function Badge({
   className,
   variant,
+  size,
+  animate,
   asChild = false,
   ...props
 }: React.ComponentProps<'span'> &
@@ -47,10 +91,10 @@ function Badge({
   return (
     <Comp
       data-slot="badge"
-      className={cn(badgeVariants({ variant }), className)}
+      className={cn(badgeVariants({ variant, size, animate }), className)}
       {...props}
     />
   )
 }
 
-export { Badge, badgeVariants }
+export { Badge, BadgeDot, badgeVariants }

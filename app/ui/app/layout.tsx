@@ -1,7 +1,7 @@
 "use client"
 
 import type React from "react"
-import { Inter } from "next/font/google"
+import { Inter, Plus_Jakarta_Sans, DM_Sans } from "next/font/google"
 import { Analytics } from "@vercel/analytics/next"
 import { SessionProvider } from "next-auth/react"
 import "./globals.css"
@@ -22,6 +22,20 @@ const inter = Inter({
   subsets: ["latin"],
   display: "swap",
   variable: "--font-inter",
+})
+
+const plusJakarta = Plus_Jakarta_Sans({
+  subsets: ["latin"],
+  display: "swap",
+  variable: "--font-display",
+  weight: ["400", "500", "600", "700", "800"],
+})
+
+const dmSans = DM_Sans({
+  subsets: ["latin"],
+  display: "swap",
+  variable: "--font-accent",
+  weight: ["400", "500", "600", "700"],
 })
 
 // Main content wrapper that adjusts for sidebar
@@ -91,7 +105,7 @@ export default function RootLayout({
         />
       </head>
       <body
-        className={`${inter.variable} font-sans antialiased text-gray-900 dark:text-gray-50 bg-white dark:bg-gray-900`}
+        className={`${inter.variable} ${plusJakarta.variable} ${dmSans.variable} font-sans antialiased text-gray-900 dark:text-gray-50 bg-white dark:bg-gray-900`}
       >
         <ThemeProvider
           attribute="class"

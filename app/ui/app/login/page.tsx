@@ -33,12 +33,12 @@ interface FeatureCardProps {
 
 function FeatureCard({ icon, title, description }: FeatureCardProps) {
   return (
-    <div className="flex items-start gap-4 p-4 rounded-lg bg-white/10 backdrop-blur-sm border border-white/20">
-      <div className="flex-shrink-0 w-10 h-10 rounded-lg bg-white/20 flex items-center justify-center text-white">
+    <div className="flex items-start gap-4 p-4 rounded-lg bg-white/10 backdrop-blur-sm border border-white/20 transition-all duration-300 hover:bg-white/15 hover:border-white/30 hover:-translate-y-0.5 group">
+      <div className="flex-shrink-0 w-10 h-10 rounded-lg bg-white/20 flex items-center justify-center text-white group-hover:bg-white/30 transition-colors duration-300">
         {icon}
       </div>
       <div>
-        <h3 className="font-semibold text-white text-sm">{title}</h3>
+        <h3 className="font-display font-semibold text-white text-sm">{title}</h3>
         <p className="text-white/70 text-xs mt-1">{description}</p>
       </div>
     </div>
@@ -105,22 +105,28 @@ function LoginInner() {
     <div className="min-h-screen flex flex-col lg:flex-row">
       {/* Left Side - Branding & Features (hidden on mobile, shown on lg+) */}
       <div className="hidden lg:flex lg:w-1/2 xl:w-3/5 bg-gradient-to-br from-primary via-primary/90 to-primary/80 p-8 lg:p-12 flex-col justify-between relative overflow-hidden">
-        {/* Background Pattern */}
+        {/* Animated Background Pattern */}
         <div className="absolute inset-0 opacity-10">
-          <div className="absolute top-0 left-0 w-96 h-96 bg-white rounded-full -translate-x-1/2 -translate-y-1/2" />
-          <div className="absolute bottom-0 right-0 w-[500px] h-[500px] bg-white rounded-full translate-x-1/3 translate-y-1/3" />
-          <div className="absolute top-1/2 left-1/2 w-64 h-64 bg-white rounded-full -translate-x-1/2 -translate-y-1/2" />
+          <div className="absolute top-0 left-0 w-96 h-96 bg-white rounded-full -translate-x-1/2 -translate-y-1/2 animate-[pulse_8s_ease-in-out_infinite]" />
+          <div className="absolute bottom-0 right-0 w-[500px] h-[500px] bg-white rounded-full translate-x-1/3 translate-y-1/3 animate-[pulse_10s_ease-in-out_infinite_1s]" />
+          <div className="absolute top-1/2 left-1/2 w-64 h-64 bg-white rounded-full -translate-x-1/2 -translate-y-1/2 animate-[pulse_6s_ease-in-out_infinite_0.5s]" />
+          {/* Floating accent elements */}
+          <div className="absolute top-1/4 right-1/4 w-32 h-32 bg-accent/30 rounded-full blur-xl animate-[float_12s_ease-in-out_infinite]" />
+          <div className="absolute bottom-1/3 left-1/4 w-24 h-24 bg-accent/20 rounded-full blur-lg animate-[float_10s_ease-in-out_infinite_2s]" />
         </div>
+
+        {/* Subtle grid overlay */}
+        <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.03)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.03)_1px,transparent_1px)] bg-[size:40px_40px]" />
 
         {/* Content */}
         <div className="relative z-10">
           {/* Logo & School Name */}
-          <div className="flex items-center gap-4 mb-12">
-            <div className="w-16 h-16 rounded-2xl bg-white/20 backdrop-blur-sm flex items-center justify-center border border-white/30">
+          <div className="flex items-center gap-4 mb-12 animate-fade-in-up">
+            <div className="w-16 h-16 rounded-2xl bg-white/20 backdrop-blur-sm flex items-center justify-center border border-white/30 group-hover:bg-white/25 transition-colors">
               <GraduationCap className="w-8 h-8 text-white" />
             </div>
             <div>
-              <h1 className="text-2xl font-bold text-white">
+              <h1 className="text-2xl font-display font-bold text-white">
                 {t.login?.schoolName || "Groupe Scolaire Privé N'Diolou"}
               </h1>
               <p className="text-white/80 text-sm">
@@ -130,8 +136,8 @@ function LoginInner() {
           </div>
 
           {/* Welcome Message */}
-          <div className="mb-12">
-            <h2 className="text-4xl xl:text-5xl font-bold text-white mb-4 leading-tight">
+          <div className="mb-12 animate-fade-in-up stagger-2">
+            <h2 className="text-4xl xl:text-5xl font-display font-bold text-white mb-4 leading-tight">
               {t.login?.welcomeTitle || "Welcome to the School Management System"}
             </h2>
             <p className="text-white/80 text-lg max-w-lg">
@@ -140,27 +146,35 @@ function LoginInner() {
           </div>
 
           {/* Feature Cards */}
-          <div className="grid grid-cols-1 xl:grid-cols-2 gap-4 max-w-2xl">
-            <FeatureCard
-              icon={<WifiOff className="w-5 h-5" />}
-              title={t.login?.featureOffline || "Offline Mode"}
-              description={t.login?.featureOfflineDesc || "Work without internet. Data syncs automatically when online."}
-            />
-            <FeatureCard
-              icon={<Users className="w-5 h-5" />}
-              title={t.login?.featureEnrollment || "Student Enrollment"}
-              description={t.login?.featureEnrollmentDesc || "Easy 6-step enrollment wizard with payment tracking."}
-            />
-            <FeatureCard
-              icon={<Calculator className="w-5 h-5" />}
-              title={t.login?.featureAccounting || "Financial Control"}
-              description={t.login?.featureAccountingDesc || "Full payment tracking with receipts and reconciliation."}
-            />
-            <FeatureCard
-              icon={<CalendarCheck className="w-5 h-5" />}
-              title={t.login?.featureAttendance || "Attendance"}
-              description={t.login?.featureAttendanceDesc || "Mobile-first attendance tracking with reports."}
-            />
+          <div className="grid grid-cols-1 xl:grid-cols-2 gap-4 max-w-2xl animate-fade-in-up stagger-3">
+            <div className="animate-fade-in-up stagger-3">
+              <FeatureCard
+                icon={<WifiOff className="w-5 h-5" />}
+                title={t.login?.featureOffline || "Offline Mode"}
+                description={t.login?.featureOfflineDesc || "Work without internet. Data syncs automatically when online."}
+              />
+            </div>
+            <div className="animate-fade-in-up stagger-4">
+              <FeatureCard
+                icon={<Users className="w-5 h-5" />}
+                title={t.login?.featureEnrollment || "Student Enrollment"}
+                description={t.login?.featureEnrollmentDesc || "Easy 6-step enrollment wizard with payment tracking."}
+              />
+            </div>
+            <div className="animate-fade-in-up stagger-5">
+              <FeatureCard
+                icon={<Calculator className="w-5 h-5" />}
+                title={t.login?.featureAccounting || "Financial Control"}
+                description={t.login?.featureAccountingDesc || "Full payment tracking with receipts and reconciliation."}
+              />
+            </div>
+            <div className="animate-fade-in-up stagger-6">
+              <FeatureCard
+                icon={<CalendarCheck className="w-5 h-5" />}
+                title={t.login?.featureAttendance || "Attendance"}
+                description={t.login?.featureAttendanceDesc || "Mobile-first attendance tracking with reports."}
+              />
+            </div>
           </div>
         </div>
 
@@ -187,9 +201,9 @@ function LoginInner() {
             </p>
           </div>
 
-          <Card className="border-0 shadow-xl lg:shadow-2xl">
+          <Card className="border-0 shadow-xl lg:shadow-2xl animate-scale-in">
             <CardHeader className="text-center pb-2">
-              <CardTitle className="text-2xl">
+              <CardTitle className="text-2xl font-display">
                 {t.login?.signInTitle || "Sign In"}
               </CardTitle>
               <CardDescription>
@@ -216,7 +230,8 @@ function LoginInner() {
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     disabled={isLoading}
-                    className="h-11"
+                    size="lg"
+                    glow="primary"
                   />
                 </div>
 
@@ -225,7 +240,7 @@ function LoginInner() {
                     <Label htmlFor="password">{t.login?.password || "Password"}</Label>
                     <a
                       href="/auth/forgot-password"
-                      className="text-xs text-primary hover:underline"
+                      className="text-xs text-primary hover:underline transition-colors"
                     >
                       {t.login?.forgotPassword || "Forgot password?"}
                     </a>
@@ -237,7 +252,8 @@ function LoginInner() {
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     disabled={isLoading}
-                    className="h-11"
+                    size="lg"
+                    glow="primary"
                   />
                 </div>
               </CardContent>
@@ -245,17 +261,12 @@ function LoginInner() {
               <CardFooter className="flex flex-col gap-4">
                 <Button
                   type="submit"
-                  className="w-full h-11"
-                  disabled={isLoading}
+                  size="lg"
+                  glow="primary"
+                  className="w-full"
+                  loading={isLoading}
                 >
-                  {isLoading ? (
-                    <>
-                      <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                      {t.common?.loading || "Loading..."}
-                    </>
-                  ) : (
-                    t.login?.signInButton || "Sign In"
-                  )}
+                  {t.login?.signInButton || "Sign In"}
                 </Button>
 
                 <div className="relative w-full">
@@ -272,7 +283,8 @@ function LoginInner() {
                 <Button
                   type="button"
                   variant="outline"
-                  className="w-full h-11"
+                  size="lg"
+                  className="w-full"
                   onClick={handleGoogleLogin}
                   disabled={isLoading}
                 >
