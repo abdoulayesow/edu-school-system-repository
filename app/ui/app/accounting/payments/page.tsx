@@ -39,6 +39,7 @@ import { PageContainer } from "@/components/layout"
 import { formatDate } from "@/lib/utils"
 import { CashDepositDialog, PaymentReviewDialog } from "@/components/payments"
 import { usePayments, usePaymentStats, useGrades, useCreatePayment, useInvalidateQueries } from "@/lib/hooks/use-api"
+import { getPaymentRowStatus } from "@/lib/status-helpers"
 
 interface Payment {
   id: string
@@ -495,7 +496,7 @@ export default function PaymentsPage() {
             <CardTitle className="text-sm">{t.accounting.filterPayments}</CardTitle>
             <Dialog open={openRecordPayment} onOpenChange={handleRecordPaymentDialogChange}>
               <DialogTrigger asChild>
-                <Button>
+                <Button variant="gold">
                   <Plus className="h-4 w-4 mr-2" />
                   {t.accounting.recordPayment}
                 </Button>
@@ -720,10 +721,6 @@ export default function PaymentsPage() {
         </CardHeader>
         <CardContent className="pt-0 pb-2 px-6">
           <div className="flex flex-wrap items-end gap-4">
-            <div className="flex items-center gap-2 text-muted-foreground">
-              <Filter className="size-4" />
-            </div>
-
             <div className="space-y-1">
               <Label className="text-xs">{t.accounting.filterByStatus}</Label>
               <Select value={statusFilter} onValueChange={setStatusFilter}>
@@ -838,7 +835,7 @@ export default function PaymentsPage() {
                   </TableHeader>
                   <TableBody>
                     {payments.map((payment) => (
-                      <TableRow key={payment.id}>
+                      <TableRow key={payment.id} status={getPaymentRowStatus(payment.status)}>
                         <TableCell className="font-medium font-mono text-sm">
                           {payment.receiptNumber}
                         </TableCell>

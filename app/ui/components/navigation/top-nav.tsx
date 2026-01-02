@@ -1,6 +1,6 @@
 "use client"
 
-import { useMemo, useState, useEffect, useRef } from "react"
+import { useMemo, useState, useEffect, useRef, useCallback } from "react"
 import Link from "next/link"
 import Image from "next/image"
 import { usePathname, useRouter } from "next/navigation"
@@ -32,7 +32,17 @@ export function TopNav() {
   const { data: session } = useSession()
   const { activeMainNav, setActiveMainNav, isSidebarOpen } = useNavigation()
   const [dropdownOpen, setDropdownOpen] = useState(false)
+  const [isScrolled, setIsScrolled] = useState(false)
   const dropdownRef = useRef<HTMLDivElement>(null)
+
+  // Track scroll for shadow effect
+  useEffect(() => {
+    const handleScroll = () => {
+      setIsScrolled(window.scrollY > 10)
+    }
+    window.addEventListener("scroll", handleScroll, { passive: true })
+    return () => window.removeEventListener("scroll", handleScroll)
+  }, [])
 
   // Close dropdown when clicking outside
   useEffect(() => {
@@ -75,7 +85,12 @@ export function TopNav() {
   }
 
   return (
-    <header className="fixed top-0 left-0 right-0 z-[60] h-[91px] border-b border-gspn-gold-300 dark:border-sidebar-border bg-nav-highlight dark:bg-nav-dark-text backdrop-blur-sm bg-opacity-95">
+    <header
+      className={cn(
+        "fixed top-0 left-0 right-0 z-[60] h-[91px] border-b border-gspn-gold-300 dark:border-sidebar-border bg-gspn-gold-50/95 dark:bg-nav-dark-text/95 backdrop-blur-sm transition-shadow duration-300",
+        isScrolled && "shadow-lg shadow-black/5 dark:shadow-black/20"
+      )}
+    >
       <div className="h-full px-4 lg:px-6">
         <div className="flex items-center justify-between h-full">
           {/* Logo Section */}
@@ -170,7 +185,7 @@ export function TopNav() {
 
                 {/* Dropdown Menu */}
                 {dropdownOpen && (
-                  <div className="absolute right-0 mt-2 w-56 bg-popover dark:bg-popover rounded-lg shadow-lg border border-border py-1 z-50">
+                  <div className="absolute right-0 mt-2 w-56 bg-popover dark:bg-popover rounded-lg shadow-lg border border-border py-1 z-50 animate-scale-in origin-top-right">
                     {/* User Info */}
                     <div className="px-4 py-3 border-b border-border">
                       <p className="text-sm font-medium text-foreground">

@@ -59,7 +59,7 @@ export function NavSidebar() {
       {/* Backdrop for mobile only - use JS check for reliability */}
       {!isLargeScreen && (
         <div
-          className="fixed inset-0 bg-black/50 z-30"
+          className="fixed inset-0 bg-black/50 z-30 animate-fade-in"
           onClick={closeSidebar}
         />
       )}
@@ -166,12 +166,16 @@ export function NavSidebar() {
                       key={item.id}
                       href={item.href}
                       className={cn(
-                        "flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all duration-200",
+                        "relative flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all duration-200",
                         isActive
                           ? "bg-gspn-gold-50 text-black dark:bg-gspn-gold-500 dark:text-nav-dark-text shadow-sm font-semibold"
                           : "text-black hover:bg-gspn-gold-300 dark:text-sidebar-foreground dark:hover:bg-nav-dark-hover dark:hover:text-white"
                       )}
                     >
+                      {/* Active indicator */}
+                      {isActive && (
+                        <span className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-6 bg-primary dark:bg-accent rounded-r-full animate-scale-in" />
+                      )}
                       <Icon className={cn(sizing.toolbarIcon, "shrink-0")} />
                       <span>
                         {t.nav[item.translationKey as keyof typeof t.nav] ||

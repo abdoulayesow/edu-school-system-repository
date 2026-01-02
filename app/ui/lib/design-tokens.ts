@@ -82,10 +82,10 @@ export const spacing = {
 
 export const typography = {
   heading: {
-    page: 'text-3xl font-bold',
-    section: 'text-2xl font-semibold',
-    card: 'text-xl font-semibold',
-    label: 'text-lg font-medium',
+    page: 'font-display text-3xl font-extrabold tracking-tight',
+    section: 'font-display text-2xl font-bold tracking-tight',
+    card: 'font-display text-xl font-semibold',
+    label: 'font-display text-lg font-semibold',
   },
   body: {
     lg: 'text-lg',
@@ -93,6 +93,82 @@ export const typography = {
     sm: 'text-sm',
     xs: 'text-xs',
   },
+  // Accent font for stats and numbers
+  stat: {
+    lg: 'font-accent text-4xl font-bold tabular-nums',
+    md: 'font-accent text-2xl font-bold tabular-nums',
+    sm: 'font-accent text-xl font-semibold tabular-nums',
+  },
+} as const
+
+// ============================================================================
+// ANIMATION TOKENS
+// ============================================================================
+
+export const animation = {
+  // Timing functions
+  ease: {
+    spring: 'cubic-bezier(0.34, 1.56, 0.64, 1)',
+    smooth: 'cubic-bezier(0.4, 0, 0.2, 1)',
+    outExpo: 'cubic-bezier(0.16, 1, 0.3, 1)',
+  },
+  // Durations
+  duration: {
+    fast: '150ms',
+    normal: '250ms',
+    slow: '400ms',
+    slower: '600ms',
+  },
+  // Pre-built animation classes
+  classes: {
+    fadeIn: 'animate-fade-in',
+    fadeInUp: 'animate-fade-in-up',
+    scaleIn: 'animate-scale-in',
+    slideInRight: 'animate-slide-in-right',
+    pulseSubtle: 'animate-pulse-subtle',
+  },
+  // Stagger delays for list items
+  stagger: {
+    1: 'stagger-1',
+    2: 'stagger-2',
+    3: 'stagger-3',
+    4: 'stagger-4',
+    5: 'stagger-5',
+    6: 'stagger-6',
+  },
+} as const
+
+// ============================================================================
+// SHADOW TOKENS
+// ============================================================================
+
+export const shadows = {
+  // Elevation levels
+  xs: 'shadow-[0_1px_2px_0_rgb(0_0_0/0.05)]',
+  sm: 'shadow-sm',
+  md: 'shadow-md',
+  lg: 'shadow-lg',
+  xl: 'shadow-xl',
+  '2xl': 'shadow-2xl',
+  // Special effects
+  lift: 'shadow-[0_10px_40px_-10px_rgb(0_0_0/0.2)]',
+  glowPrimary: 'shadow-[0_0_20px_rgba(139,35,50,0.3)]',
+  glowGold: 'shadow-[0_0_20px_rgba(212,175,55,0.3)]',
+} as const
+
+// ============================================================================
+// INTERACTIVE TOKENS
+// ============================================================================
+
+export const interactive = {
+  // Hover lift effect
+  lift: 'interactive-lift',
+  // Scale on hover/active
+  scale: 'interactive-scale',
+  // Card with hover effects
+  card: 'transition-all duration-200 hover:shadow-lg hover:-translate-y-0.5',
+  // Button press effect
+  button: 'active:scale-[0.98] transition-transform duration-100',
 } as const
 
 // ============================================================================
@@ -196,3 +272,6 @@ export type IconSize = keyof typeof sizing.icon
 export type AvatarSize = keyof typeof sizing.avatar
 export type ContainerSize = keyof typeof spacing.container
 export type CardPadding = keyof typeof spacing.card
+export type AnimationClass = keyof typeof animation.classes
+export type StaggerDelay = keyof typeof animation.stagger
+export type ShadowLevel = keyof typeof shadows

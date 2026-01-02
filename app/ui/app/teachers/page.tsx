@@ -25,6 +25,9 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
+import { getTeacherRowStatus } from "@/lib/status-helpers"
+import { Empty, EmptyMedia, EmptyTitle, EmptyDescription } from "@/components/ui/empty"
+import { EmptyTeachersIllustration } from "@/components/illustrations"
 
 // Mock data - TODO: Replace with API call
 const teachers = [
@@ -121,25 +124,21 @@ export default function TeachersPage() {
       {/* Page Header */}
       <div className="mb-6">
         <h1 className="text-3xl font-bold text-foreground mb-2">
-          {locale === "fr" ? "Enseignants" : "Teachers"}
+          {t.teachers.title}
         </h1>
         <p className="text-muted-foreground">
-          {locale === "fr"
-            ? "Gérer les profils et les affectations des enseignants"
-            : "Manage teacher profiles and assignments"}
+          {t.teachers.subtitle}
         </p>
       </div>
 
       {/* Main Content */}
       <ContentCard
-        title={`${locale === "fr" ? "Tous les enseignants" : "All Teachers"} (${filteredTeachers.length})`}
-        description={locale === "fr"
-          ? "Afficher et gérer les informations des enseignants"
-          : "View and manage teacher information"}
+        title={`${t.teachers.allTeachers} (${filteredTeachers.length})`}
+        description={t.teachers.subtitle}
         headerAction={
           <Button>
             <Plus className={`${sizing.icon.sm} mr-2`} />
-            {locale === "fr" ? "Ajouter un enseignant" : "Add Teacher"}
+            {t.teachers.addTeacher}
           </Button>
         }
       >
@@ -148,9 +147,7 @@ export default function TeachersPage() {
           <div className="relative flex-1">
             <Search className={`${sizing.icon.sm} absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground`} />
             <Input
-              placeholder={locale === "fr"
-                ? "Rechercher par nom ou email..."
-                : "Search by name or email..."}
+              placeholder={t.teachers.searchPlaceholder}
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="pl-10"
@@ -158,58 +155,64 @@ export default function TeachersPage() {
           </div>
           <Select value={subjectFilter} onValueChange={setSubjectFilter}>
             <SelectTrigger className="w-full sm:w-[200px]">
-              <SelectValue placeholder={locale === "fr" ? "Filtrer par matière" : "Filter by subject"} />
+              <SelectValue placeholder={t.teachers.filterBySubject} />
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="all">
-                {locale === "fr" ? "Toutes les matières" : "All Subjects"}
+                {t.teachers.allSubjects}
               </SelectItem>
               <SelectItem value="Mathematics">
-                {locale === "fr" ? "Mathématiques" : "Mathematics"}
+                {t.teachers.subjects.mathematics}
               </SelectItem>
               <SelectItem value="Physics">
-                {locale === "fr" ? "Physique" : "Physics"}
+                {t.teachers.subjects.physics}
               </SelectItem>
               <SelectItem value="Chemistry">
-                {locale === "fr" ? "Chimie" : "Chemistry"}
+                {t.teachers.subjects.chemistry}
               </SelectItem>
               <SelectItem value="English">
-                {locale === "fr" ? "Anglais" : "English"}
+                {t.teachers.subjects.english}
               </SelectItem>
               <SelectItem value="French">
-                {locale === "fr" ? "Français" : "French"}
+                {t.teachers.subjects.french}
               </SelectItem>
               <SelectItem value="History">
-                {locale === "fr" ? "Histoire" : "History"}
+                {t.teachers.subjects.history}
               </SelectItem>
             </SelectContent>
           </Select>
         </div>
 
         {/* Teachers Table */}
-        <div className="rounded-md border">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>{locale === "fr" ? "Enseignant" : "Teacher"}</TableHead>
-                <TableHead>{locale === "fr" ? "Contact" : "Contact"}</TableHead>
-                <TableHead>{locale === "fr" ? "Matière" : "Subject"}</TableHead>
-                <TableHead>{locale === "fr" ? "Classes" : "Classes"}</TableHead>
-                <TableHead>{locale === "fr" ? "Date d'embauche" : "Hire Date"}</TableHead>
-                <TableHead>{locale === "fr" ? "Statut" : "Status"}</TableHead>
-                <TableHead className="text-right">{t.common.actions}</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {filteredTeachers.length === 0 ? (
+        {filteredTeachers.length === 0 ? (
+          <Empty className="py-12">
+            <EmptyMedia variant="illustration">
+              <EmptyTeachersIllustration />
+            </EmptyMedia>
+            <EmptyTitle>{t.teachers.noTeachersFound}</EmptyTitle>
+            <EmptyDescription>
+              {searchQuery || subjectFilter !== "all"
+                ? t.common.noData
+                : t.teachers.subtitle}
+            </EmptyDescription>
+          </Empty>
+        ) : (
+          <div className="rounded-md border">
+            <Table>
+              <TableHeader>
                 <TableRow>
-                  <TableCell colSpan={7} className="text-center py-8 text-muted-foreground">
-                    {locale === "fr" ? "Aucun enseignant trouvé" : "No teachers found"}
-                  </TableCell>
+                  <TableHead>{t.common.teacher}</TableHead>
+                  <TableHead>{t.teachers.contact}</TableHead>
+                  <TableHead>{t.common.subjects}</TableHead>
+                  <TableHead>{t.nav.classes}</TableHead>
+                  <TableHead>{t.teachers.hireDate}</TableHead>
+                  <TableHead>{t.common.status}</TableHead>
+                  <TableHead className="text-right">{t.common.actions}</TableHead>
                 </TableRow>
-              ) : (
-                filteredTeachers.map((teacher) => (
-                  <TableRow key={teacher.id}>
+              </TableHeader>
+              <TableBody>
+                {filteredTeachers.map((teacher) => (
+                  <TableRow key={teacher.id} status={getTeacherRowStatus(teacher.status)}>
                     <TableCell>
                       <div className="flex items-center gap-3">
                         <Avatar className={sizing.avatar.md}>
@@ -253,7 +256,7 @@ export default function TeachersPage() {
                     <TableCell>{formatDate(teacher.hireDate)}</TableCell>
                     <TableCell>
                       <Badge variant="default" className="bg-green-600">
-                        {locale === "fr" ? "Actif" : "Active"}
+                        {teacher.status === "active" ? t.teachers.active : t.teachers.inactive}
                       </Badge>
                     </TableCell>
                     <TableCell className="text-right">
@@ -262,11 +265,11 @@ export default function TeachersPage() {
                       </Button>
                     </TableCell>
                   </TableRow>
-                ))
-              )}
-            </TableBody>
-          </Table>
-        </div>
+                ))}
+              </TableBody>
+            </Table>
+          </div>
+        )}
       </ContentCard>
     </PageContainer>
   )

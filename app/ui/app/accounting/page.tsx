@@ -32,6 +32,7 @@ import { useI18n } from "@/components/i18n-provider"
 import { PageContainer } from "@/components/layout"
 import { formatDate } from "@/lib/utils"
 import { CashDepositDialog, PaymentReviewDialog } from "@/components/payments"
+import { getPaymentRowStatus } from "@/lib/status-helpers"
 
 interface Payment {
   id: string
@@ -649,7 +650,7 @@ export default function AccountingPage() {
                       </TableHeader>
                       <TableBody>
                         {filteredTransactions.map((payment) => (
-                          <TableRow key={payment.id}>
+                          <TableRow key={payment.id} status={getPaymentRowStatus(payment.status)}>
                             <TableCell className="font-medium font-mono text-sm">
                               {payment.receiptNumber}
                             </TableCell>
@@ -778,7 +779,7 @@ export default function AccountingPage() {
                       </TableHeader>
                       <TableBody>
                         {pendingReviewItems.map((payment) => (
-                          <TableRow key={payment.id}>
+                          <TableRow key={payment.id} status={getPaymentRowStatus(payment.status)}>
                             <TableCell className="font-medium font-mono text-sm">
                               {payment.receiptNumber}
                             </TableCell>

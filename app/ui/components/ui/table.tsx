@@ -1,10 +1,27 @@
 'use client'
 
 import * as React from 'react'
+import { cva, type VariantProps } from 'class-variance-authority'
 
 import { cn } from '@/lib/utils'
 
-function Table({ className, ...props }: React.ComponentProps<'table'>) {
+const tableVariants = cva('w-full caption-bottom text-sm', {
+  variants: {
+    variant: {
+      default: '',
+      striped: '[&_tbody_tr:nth-child(even)]:bg-muted/30',
+    },
+  },
+  defaultVariants: {
+    variant: 'default',
+  },
+})
+
+function Table({
+  className,
+  variant,
+  ...props
+}: React.ComponentProps<'table'> & VariantProps<typeof tableVariants>) {
   return (
     <div
       data-slot="table-container"
@@ -12,18 +29,26 @@ function Table({ className, ...props }: React.ComponentProps<'table'>) {
     >
       <table
         data-slot="table"
-        className={cn('w-full caption-bottom text-sm', className)}
+        className={cn(tableVariants({ variant }), className)}
         {...props}
       />
     </div>
   )
 }
 
-function TableHeader({ className, ...props }: React.ComponentProps<'thead'>) {
+function TableHeader({
+  className,
+  sticky,
+  ...props
+}: React.ComponentProps<'thead'> & { sticky?: boolean }) {
   return (
     <thead
       data-slot="table-header"
-      className={cn('[&_tr]:border-b', className)}
+      className={cn(
+        '[&_tr]:border-b',
+        sticky && 'sticky top-0 z-10 bg-background/95 backdrop-blur-sm',
+        className
+      )}
       {...props}
     />
   )
@@ -52,12 +77,42 @@ function TableFooter({ className, ...props }: React.ComponentProps<'tfoot'>) {
   )
 }
 
-function TableRow({ className, ...props }: React.ComponentProps<'tr'>) {
+const tableRowVariants = cva(
+  'border-b transition-all duration-150',
+  {
+    variants: {
+      interactive: {
+        true: 'hover:bg-muted/50 cursor-pointer',
+        false: 'hover:bg-muted/30',
+      },
+      status: {
+        none: '',
+        success: 'border-l-2 border-l-success',
+        warning: 'border-l-2 border-l-warning',
+        error: 'border-l-2 border-l-destructive',
+        info: 'border-l-2 border-l-primary',
+        gold: 'border-l-2 border-l-accent',
+      },
+    },
+    defaultVariants: {
+      interactive: false,
+      status: 'none',
+    },
+  }
+)
+
+function TableRow({
+  className,
+  interactive,
+  status,
+  ...props
+}: React.ComponentProps<'tr'> & VariantProps<typeof tableRowVariants>) {
   return (
     <tr
       data-slot="table-row"
       className={cn(
-        'hover:bg-muted/50 data-[state=selected]:bg-muted border-b transition-colors',
+        tableRowVariants({ interactive, status }),
+        'data-[state=selected]:bg-muted',
         className,
       )}
       {...props}
@@ -113,4 +168,6 @@ export {
   TableRow,
   TableCell,
   TableCaption,
+  tableVariants,
+  tableRowVariants,
 }

@@ -10,6 +10,7 @@ import { Users, DollarSign, AlertTriangle, FileText, CheckCircle2, Clock, BarCha
 import { useI18n, interpolate } from "@/components/i18n-provider"
 import { PageContainer } from "@/components/layout"
 import { sizing } from "@/lib/design-tokens"
+import { paymentMethodColors, chartColors } from "@/lib/chart-theme"
 import { cn } from "@/lib/utils"
 import {
   Table,
@@ -94,14 +95,14 @@ export default function DirectorDashboard() {
       data.push({
         category: "Espèces",
         value: byMethod.cash.confirmed,
-        color: "hsl(var(--chart-1))",
+        color: paymentMethodColors.cash,
       })
     }
     if (byMethod.orange_money?.confirmed > 0) {
       data.push({
         category: "Orange Money",
         value: byMethod.orange_money.confirmed,
-        color: "hsl(var(--chart-2))",
+        color: paymentMethodColors.orange_money,
       })
     }
 
@@ -174,26 +175,30 @@ export default function DirectorDashboard() {
       </div>
 
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4 mb-6">
-          <Card className="py-5">
+          <Card variant="stat" glow="gold" animate="fadeInUp" className="py-5 stagger-1">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">{t.dashboard.totalEnrollment}</CardTitle>
-              <Users className={sizing.icon.lg} />
+              <div className="p-2 rounded-lg bg-primary/10 dark:bg-primary/20">
+                <Users className={cn(sizing.icon.md, "text-primary")} />
+              </div>
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{totalEnrollment}</div>
+              <div className="font-accent text-3xl font-bold tabular-nums">{totalEnrollment}</div>
               <p className="text-xs text-muted-foreground">
                 {grades.length} classes
               </p>
             </CardContent>
           </Card>
 
-          <Card className="py-5">
+          <Card variant="stat" glow="gold" animate="fadeInUp" className="py-5 stagger-2">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">{t.dashboard.revenue}</CardTitle>
-              <DollarSign className={sizing.icon.lg} />
+              <div className="p-2 rounded-lg bg-success/10 dark:bg-success/20">
+                <DollarSign className={cn(sizing.icon.md, "text-success")} />
+              </div>
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">
+              <div className="font-accent text-2xl font-bold tabular-nums">
                 {balance ? formatGNF(balance.summary.totalConfirmedPayments) : "0 GNF"}
               </div>
               <p className="text-xs text-muted-foreground">
@@ -202,15 +207,17 @@ export default function DirectorDashboard() {
             </CardContent>
           </Card>
 
-          <Card className="py-5">
+          <Card variant="stat" glow="primary" animate="fadeInUp" className="py-5 stagger-3">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">
                 {t.dashboard.pendingApprovals}
               </CardTitle>
-              <AlertTriangle className={sizing.icon.lg} />
+              <div className="p-2 rounded-lg bg-warning/10 dark:bg-warning/20">
+                <AlertTriangle className={cn(sizing.icon.md, "text-warning")} />
+              </div>
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">
+              <div className="font-accent text-3xl font-bold tabular-nums">
                 {pendingEnrollments.length + pendingPayments.length}
               </div>
               <p className="text-xs text-muted-foreground">
@@ -219,15 +226,25 @@ export default function DirectorDashboard() {
             </CardContent>
           </Card>
 
-          <Card className="py-5">
+          <Card variant="stat" glow="primary" animate="fadeInUp" className="py-5 stagger-4">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">
                 {t.dashboard.reconciliationFlags}
               </CardTitle>
-              <AlertTriangle className={sizing.icon.lg} />
+              <div className={cn(
+                "p-2 rounded-lg",
+                unreconciledDeposits.length > 0
+                  ? "bg-destructive/10 dark:bg-destructive/20"
+                  : "bg-muted"
+              )}>
+                <AlertTriangle className={cn(
+                  sizing.icon.md,
+                  unreconciledDeposits.length > 0 ? "text-destructive" : "text-muted-foreground"
+                )} />
+              </div>
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">
+              <div className="font-accent text-3xl font-bold tabular-nums">
                 {unreconciledDeposits.length}
               </div>
               <p className="text-xs text-muted-foreground">
@@ -417,7 +434,7 @@ export default function DirectorDashboard() {
                 <ChartContainer config={{
                   value: {
                     label: t.dashboard.revenue,
-                    color: "hsl(var(--chart-1))"
+                    color: chartColors.primary
                   }
                 }} className="h-[300px] flex items-center justify-center">
                   <PieChart width={300} height={300}>

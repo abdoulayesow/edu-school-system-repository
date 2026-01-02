@@ -26,6 +26,9 @@ import Link from "next/link"
 import { sizing } from "@/lib/design-tokens"
 import { useGrades, useStudents, type ApiStudent } from "@/lib/hooks/use-api"
 import { useDebounce } from "@/lib/hooks/use-debounce"
+import { getStudentRowStatus } from "@/lib/status-helpers"
+import { Empty, EmptyMedia, EmptyTitle, EmptyDescription } from "@/components/ui/empty"
+import { EmptyStudentsIllustration } from "@/components/illustrations"
 
 const ITEMS_PER_PAGE = 50
 
@@ -263,7 +266,7 @@ export default function StudentsPage() {
             <CardContent>
               <div className="text-2xl font-bold">{stats.total}</div>
               <p className="text-xs text-muted-foreground">
-                {filteredStudents.length !== stats.total ? `${filteredStudents.length} affichés` : ""}
+                {filteredStudents.length !== stats.total ? `${filteredStudents.length} ${t.students.displayed}` : ""}
               </p>
             </CardContent>
           </Card>
@@ -285,13 +288,13 @@ export default function StudentsPage() {
           {/* Attendance Summary */}
           <Card className="py-5">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Présence</CardTitle>
+              <CardTitle className="text-sm font-medium">{t.nav.attendance}</CardTitle>
               <CalendarCheck className={sizing.icon.lg} />
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold text-success">{stats.attendance.good}</div>
               <p className="text-xs text-muted-foreground">
-                {stats.attendance.concerning} préoccupante, {stats.attendance.critical} critique
+                {stats.attendance.concerning} {t.students.attendanceConcerning.toLowerCase()}, {stats.attendance.critical} {t.students.attendanceCritical.toLowerCase()}
               </p>
             </CardContent>
           </Card>
@@ -408,22 +411,30 @@ export default function StudentsPage() {
                       <TableHead>{t.common.level}</TableHead>
                       <TableHead>{t.students.room}</TableHead>
                       <TableHead>{t.enrollments.paymentStatus}</TableHead>
-                      <TableHead>Présence</TableHead>
+                      <TableHead>{t.nav.attendance}</TableHead>
                       <TableHead className="text-right">{t.common.actions}</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
                     {filteredStudents.length === 0 ? (
                       <TableRow>
-                        <TableCell colSpan={8} className="text-center py-8 text-muted-foreground">
-                          {searchQuery || gradeFilter !== "all" || paymentStatusFilter !== "all" || attendanceStatusFilter !== "all"
-                            ? "Aucun élève trouvé avec ces critères"
-                            : "Aucun élève inscrit"}
+                        <TableCell colSpan={8} className="p-0">
+                          <Empty className="py-12">
+                            <EmptyMedia variant="illustration">
+                              <EmptyStudentsIllustration />
+                            </EmptyMedia>
+                            <EmptyTitle>
+                              {searchQuery || gradeFilter !== "all" || paymentStatusFilter !== "all" || attendanceStatusFilter !== "all"
+                                ? t.students.noStudentsFound
+                                : t.students.noStudentsEnrolled}
+                            </EmptyTitle>
+                            <EmptyDescription>{t.students.subtitle}</EmptyDescription>
+                          </Empty>
                         </TableCell>
                       </TableRow>
                     ) : (
                       filteredStudents.map((student) => (
-                        <TableRow key={student.id} className="cursor-pointer hover:bg-muted/50">
+                        <TableRow key={student.id} status={getStudentRowStatus(student.paymentStatus ?? undefined, student.attendanceStatus ?? undefined)} className="cursor-pointer hover:bg-muted/50">
                           <TableCell>
                             <Avatar className="size-10">
                               <AvatarImage src={student.photoUrl ?? undefined} alt={`${student.firstName} ${student.lastName}`} />
