@@ -109,10 +109,10 @@ export const navigationConfig: MainNavItem[] = [
         roles: ["director", "secretary", "academic_director"],
       },
       {
-        id: "classes",
+        id: "timetable",
         name: "Timetable",
         translationKey: "timetable",
-        href: "/classes",
+        href: "/timetable",
         icon: Calendar,
         roles: ["director", "academic_director"],
       },

@@ -31,6 +31,10 @@ import {
   Minus,
   DoorOpen,
   Edit2,
+  BookOpen,
+  Trophy,
+  Palette,
+  Sparkles,
 } from "lucide-react"
 import { useI18n } from "@/components/i18n-provider"
 import { PageContainer } from "@/components/layout/PageContainer"
@@ -131,29 +135,71 @@ interface StudentDetail {
   attendanceSummary?: AttendanceSummary | null
 }
 
+interface ActivityEnrollment {
+  enrollmentId: string
+  status: string
+  enrolledAt: string
+  activity: {
+    id: string
+    name: string
+    description: string | null
+    type: "club" | "sport" | "arts" | "academic" | "other"
+    status: string
+    fee: number
+    startDate: string | null
+    endDate: string | null
+  }
+}
+
+const activityTypeIcons: Record<string, React.ReactNode> = {
+  club: <BookOpen className="size-4" />,
+  sport: <Trophy className="size-4" />,
+  arts: <Palette className="size-4" />,
+  academic: <GraduationCap className="size-4" />,
+  other: <Sparkles className="size-4" />,
+}
+
+const activityTypeColors: Record<string, string> = {
+  club: "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200",
+  sport: "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200",
+  arts: "bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200",
+  academic: "bg-amber-100 text-amber-800 dark:bg-amber-900 dark:text-amber-200",
+  other: "bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200",
+}
+
 export default function StudentDetailPage() {
   const { t, locale } = useI18n()
   const params = useParams()
   const studentId = params.id as string
 
   const [student, setStudent] = useState<StudentDetail | null>(null)
+  const [activities, setActivities] = useState<ActivityEnrollment[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [roomChangeDialogOpen, setRoomChangeDialogOpen] = useState(false)
 
   useEffect(() => {
-    async function fetchStudent() {
+    async function fetchData() {
       try {
         setIsLoading(true)
-        const response = await fetch(`/api/students/${studentId}`)
-        if (!response.ok) {
-          if (response.status === 404) {
+        const [studentRes, activitiesRes] = await Promise.all([
+          fetch(`/api/students/${studentId}`),
+          fetch(`/api/students/${studentId}/activities`),
+        ])
+
+        if (!studentRes.ok) {
+          if (studentRes.status === 404) {
             throw new Error("Student not found")
           }
           throw new Error("Failed to fetch student")
         }
-        const data = await response.json()
-        setStudent(data)
+        const studentData = await studentRes.json()
+        setStudent(studentData)
+
+        if (activitiesRes.ok) {
+          const activitiesData = await activitiesRes.json()
+          setActivities(activitiesData.activities || [])
+        }
       } catch (err) {
         console.error("Error fetching student:", err)
         setError(err instanceof Error ? err.message : "Failed to load student details")
@@ -163,7 +209,7 @@ export default function StudentDetailPage() {
     }
 
     if (studentId) {
-      fetchStudent()
+      fetchData()
     }
   }, [studentId])
 
@@ -457,6 +503,7 @@ export default function StudentDetailPage() {
             <TabsTrigger value="enrollments">Inscriptions ({student.enrollments.length})</TabsTrigger>
             <TabsTrigger value="payments">Paiements ({allPayments.length})</TabsTrigger>
             <TabsTrigger value="attendance">Présence</TabsTrigger>
+            <TabsTrigger value="activities">Activités ({activities.length})</TabsTrigger>
           </TabsList>
 
           {/* Overview Tab */}
@@ -898,6 +945,72 @@ export default function StudentDetailPage() {
                     <CalendarCheck className="size-12 mx-auto mb-4 opacity-50" />
                     <p>Aucun enregistrement de présence disponible</p>
                     <p className="text-sm mt-2">Les données de présence apparaîtront ici une fois enregistrées</p>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          {/* Activities Tab */}
+          <TabsContent value="activities">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <BookOpen className="size-5" />
+                  Activités inscrites
+                </CardTitle>
+                <CardDescription>{activities.length} activité(s)</CardDescription>
+              </CardHeader>
+              <CardContent>
+                {activities.length === 0 ? (
+                  <div className="text-center py-12 text-muted-foreground">
+                    <BookOpen className="size-12 mx-auto mb-4 opacity-50" />
+                    <p>Aucune activité inscrite</p>
+                    <p className="text-sm mt-2">L'élève n'est inscrit à aucune activité pour l'année en cours</p>
+                  </div>
+                ) : (
+                  <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+                    {activities.map((ae) => (
+                      <div
+                        key={ae.enrollmentId}
+                        className="p-4 rounded-lg border bg-card hover:shadow-md transition-shadow"
+                      >
+                        <div className="flex items-start justify-between mb-3">
+                          <div className="flex items-center gap-2">
+                            <div className={`p-1.5 rounded ${activityTypeColors[ae.activity.type]}`}>
+                              {activityTypeIcons[ae.activity.type]}
+                            </div>
+                            <h3 className="font-semibold">{ae.activity.name}</h3>
+                          </div>
+                          <Badge className={activityTypeColors[ae.activity.type]}>
+                            {ae.activity.type}
+                          </Badge>
+                        </div>
+                        {ae.activity.description && (
+                          <p className="text-sm text-muted-foreground mb-3 line-clamp-2">
+                            {ae.activity.description}
+                          </p>
+                        )}
+                        <div className="space-y-2 text-sm">
+                          <div className="flex items-center justify-between">
+                            <span className="text-muted-foreground">Inscrit le</span>
+                            <span>{formatDate(ae.enrolledAt)}</span>
+                          </div>
+                          {ae.activity.fee > 0 && (
+                            <div className="flex items-center justify-between">
+                              <span className="text-muted-foreground">Frais</span>
+                              <span className="font-medium">{formatCurrency(ae.activity.fee)}</span>
+                            </div>
+                          )}
+                          <div className="flex items-center justify-between">
+                            <span className="text-muted-foreground">Statut</span>
+                            <Badge variant={ae.status === "active" ? "default" : "secondary"}>
+                              {ae.status === "active" ? "Actif" : ae.status}
+                            </Badge>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
                   </div>
                 )}
               </CardContent>

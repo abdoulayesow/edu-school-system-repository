@@ -130,7 +130,7 @@ export const authOptions: NextAuthOptions = {
     maxAge: 7 * 24 * 60 * 60, // 7 days
   },
   callbacks: {
-    async signIn({ user }) {
+    async signIn({ user, account, profile }) {
       // Block sign-in if the user is not present in DB (invite-only).
       // Note: for OAuth, NextAuth may call adapter.createUser before callbacks.
       // We handle that in createUser (above) for hard enforcement.
@@ -153,6 +153,30 @@ export const authOptions: NextAuthOptions = {
         }
         console.error("❌ signIn: User not found in database and not an admin email")
         return false
+      }
+
+      // Sync Google profile data to existing user (name and image)
+      if (account?.provider === "google" && profile) {
+        const googleProfile = profile as { name?: string; picture?: string }
+        const updates: { name?: string; image?: string } = {}
+
+        // Always sync name from Google if available
+        if (googleProfile.name && googleProfile.name !== dbUser.name) {
+          updates.name = googleProfile.name
+        }
+
+        // Always sync image from Google if available
+        if (googleProfile.picture && googleProfile.picture !== dbUser.image) {
+          updates.image = googleProfile.picture
+        }
+
+        if (Object.keys(updates).length > 0) {
+          console.log("🔄 signIn: Syncing Google profile data:", updates)
+          await prisma.user.update({
+            where: { id: dbUser.id },
+            data: updates,
+          })
+        }
       }
 
       // Allow invited or active users; block inactive.

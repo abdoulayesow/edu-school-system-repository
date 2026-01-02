@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server"
 import { requireSession } from "@/lib/authz"
 import { prisma } from "@/lib/prisma"
+import { withCache } from "@/lib/cache"
 
 /**
  * GET /api/school-years/active
@@ -49,7 +50,7 @@ export async function GET() {
       enrollmentCount: grade._count.enrollments,
     }))
 
-    return NextResponse.json({
+    const response = NextResponse.json({
       id: activeSchoolYear.id,
       name: activeSchoolYear.name,
       startDate: activeSchoolYear.startDate,
@@ -59,6 +60,8 @@ export async function GET() {
       isActive: activeSchoolYear.isActive,
       grades: gradesWithCount,
     })
+    // Cache for 1 hour with 1 day stale-while-revalidate
+    return withCache(response, "SEMI_STATIC")
   } catch (err) {
     console.error("Error fetching active school year:", err)
     return NextResponse.json(

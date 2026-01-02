@@ -115,104 +115,113 @@ export async function GET(req: NextRequest) {
     // Get total count
     const total = await prisma.student.count({ where })
 
-    // Calculate payment and attendance status for each student
-    const studentsWithStatus = await Promise.all(
-      students.map(async (student) => {
-        const enrollment = student.enrollments[0]
-        let paymentStatusValue = null
-        let attendanceStatusValue = null
-        let balanceInfo = null
+    // Batch query all attendance stats at once (avoids N+1 queries)
+    const profileIds = students
+      .map((s) => s.studentProfile?.id)
+      .filter((id): id is string => Boolean(id))
 
-        if (enrollment) {
-          // Calculate payment status
-          const tuitionFee = enrollment.adjustedTuitionFee || enrollment.originalTuitionFee
-          const totalPaid = enrollment.payments.reduce((sum, p) => sum + p.amount, 0)
-          const remainingBalance = tuitionFee - totalPaid
-          const paymentPercentage = Math.round((totalPaid / tuitionFee) * 100)
+    const allAttendanceStats = profileIds.length > 0
+      ? await prisma.attendanceRecord.groupBy({
+          by: ["studentProfileId", "status"],
+          where: { studentProfileId: { in: profileIds } },
+          _count: true,
+        })
+      : []
 
-          // Determine expected payment based on current month
-          const now = new Date()
-          const enrollmentStart = new Date(enrollment.createdAt)
-          const monthsEnrolled = Math.max(
-            1,
-            (now.getFullYear() - enrollmentStart.getFullYear()) * 12 +
-              (now.getMonth() - enrollmentStart.getMonth()) +
-              1
-          )
-          const expectedPaymentPercentage = Math.min(100, monthsEnrolled * 10) // ~10% per month
+    // Build attendance lookup map: profileId -> { total, present }
+    const attendanceMap = new Map<string, { total: number; present: number }>()
+    for (const stat of allAttendanceStats) {
+      const current = attendanceMap.get(stat.studentProfileId) || { total: 0, present: 0 }
+      current.total += stat._count
+      if (["present", "late", "excused"].includes(stat.status)) {
+        current.present += stat._count
+      }
+      attendanceMap.set(stat.studentProfileId, current)
+    }
 
-          if (paymentPercentage >= 100) {
-            paymentStatusValue = "complete"
-          } else if (paymentPercentage >= expectedPaymentPercentage) {
-            paymentStatusValue = paymentPercentage > expectedPaymentPercentage + 10 ? "in_advance" : "on_time"
+    // Calculate payment and attendance status for each student (synchronous now)
+    const studentsWithStatus = students.map((student) => {
+      const enrollment = student.enrollments[0]
+      let paymentStatusValue = null
+      let attendanceStatusValue = null
+      let balanceInfo = null
+
+      if (enrollment) {
+        // Calculate payment status
+        const tuitionFee = enrollment.adjustedTuitionFee || enrollment.originalTuitionFee
+        const totalPaid = enrollment.payments.reduce((sum, p) => sum + p.amount, 0)
+        const remainingBalance = tuitionFee - totalPaid
+        const paymentPercentage = Math.round((totalPaid / tuitionFee) * 100)
+
+        // Determine expected payment based on current month
+        const now = new Date()
+        const enrollmentStart = new Date(enrollment.createdAt)
+        const monthsEnrolled = Math.max(
+          1,
+          (now.getFullYear() - enrollmentStart.getFullYear()) * 12 +
+            (now.getMonth() - enrollmentStart.getMonth()) +
+            1
+        )
+        const expectedPaymentPercentage = Math.min(100, monthsEnrolled * 10) // ~10% per month
+
+        if (paymentPercentage >= 100) {
+          paymentStatusValue = "complete"
+        } else if (paymentPercentage >= expectedPaymentPercentage) {
+          paymentStatusValue = paymentPercentage > expectedPaymentPercentage + 10 ? "in_advance" : "on_time"
+        } else {
+          paymentStatusValue = "late"
+        }
+
+        balanceInfo = {
+          tuitionFee,
+          totalPaid,
+          remainingBalance,
+          paymentPercentage,
+        }
+      }
+
+      // Calculate attendance status from pre-fetched data
+      if (student.studentProfile) {
+        const stats = attendanceMap.get(student.studentProfile.id)
+        if (stats && stats.total > 0) {
+          const attendanceRate = Math.round((stats.present / stats.total) * 100)
+          if (attendanceRate >= 90) {
+            attendanceStatusValue = "good"
+          } else if (attendanceRate >= 70) {
+            attendanceStatusValue = "concerning"
           } else {
-            paymentStatusValue = "late"
-          }
-
-          balanceInfo = {
-            tuitionFee,
-            totalPaid,
-            remainingBalance,
-            paymentPercentage,
+            attendanceStatusValue = "critical"
           }
         }
+      }
 
-        // Calculate attendance status if student has profile
-        if (student.studentProfile) {
-          const attendanceStats = await prisma.attendanceRecord.groupBy({
-            by: ["status"],
-            where: {
-              studentProfileId: student.studentProfile.id,
-            },
-            _count: true,
-          })
+      // Get room assignment
+      const roomAssignment = student.studentProfile?.roomAssignments?.[0] as
+        | { id: string; gradeRoom: { id: string; name: string; displayName: string | null } }
+        | undefined
 
-          const totalRecords = attendanceStats.reduce((sum, s) => sum + s._count, 0)
-          const presentCount =
-            attendanceStats
-              .filter((s) => ["present", "late", "excused"].includes(s.status))
-              .reduce((sum, s) => sum + s._count, 0)
-
-          if (totalRecords > 0) {
-            const attendanceRate = Math.round((presentCount / totalRecords) * 100)
-            if (attendanceRate >= 90) {
-              attendanceStatusValue = "good"
-            } else if (attendanceRate >= 70) {
-              attendanceStatusValue = "concerning"
-            } else {
-              attendanceStatusValue = "critical"
+      return {
+        id: student.id,
+        studentNumber: student.studentNumber,
+        firstName: student.firstName,
+        lastName: student.lastName,
+        dateOfBirth: student.dateOfBirth,
+        email: student.email,
+        status: student.status,
+        photoUrl: student.studentProfile?.person?.photoUrl,
+        grade: enrollment?.grade,
+        roomAssignment: roomAssignment
+          ? {
+              id: roomAssignment.id,
+              gradeRoom: roomAssignment.gradeRoom,
             }
-          }
-        }
-
-        // Get room assignment
-        const roomAssignment = student.studentProfile?.roomAssignments?.[0] as
-          | { id: string; gradeRoom: { id: string; name: string; displayName: string | null } }
-          | undefined
-
-        return {
-          id: student.id,
-          studentNumber: student.studentNumber,
-          firstName: student.firstName,
-          lastName: student.lastName,
-          dateOfBirth: student.dateOfBirth,
-          email: student.email,
-          status: student.status,
-          photoUrl: student.studentProfile?.person?.photoUrl,
-          grade: enrollment?.grade,
-          roomAssignment: roomAssignment
-            ? {
-                id: roomAssignment.id,
-                gradeRoom: roomAssignment.gradeRoom,
-              }
-            : null,
-          paymentStatus: paymentStatusValue,
-          enrollmentStatus: enrollment?.status || null,
-          attendanceStatus: attendanceStatusValue,
-          balanceInfo,
-        }
-      })
-    )
+          : null,
+        paymentStatus: paymentStatusValue,
+        enrollmentStatus: enrollment?.status || null,
+        attendanceStatus: attendanceStatusValue,
+        balanceInfo,
+      }
+    })
 
     // Apply client-side filters for payment and attendance status
     let filteredStudents = studentsWithStatus

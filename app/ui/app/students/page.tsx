@@ -6,7 +6,6 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { Progress } from "@/components/ui/progress"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import {
@@ -16,53 +15,20 @@ import {
   Users,
   Wallet,
   CalendarCheck,
-  Award,
   CheckCircle,
   AlertCircle,
   XCircle,
-  CircleAlert
 } from "lucide-react"
 import { useI18n } from "@/components/i18n-provider"
 import { PageContainer } from "@/components/layout"
+import { DataPagination } from "@/components/data-pagination"
 import Link from "next/link"
 import { sizing } from "@/lib/design-tokens"
+import { useGrades, useStudents, type ApiStudent } from "@/lib/hooks/use-api"
 
-interface Student {
-  id: string
-  studentNumber: string
-  firstName: string
-  lastName: string
-  photoUrl: string | null
-  grade: { id: string; name: string; level: number; order: number } | null
-  roomAssignment: {
-    id: string
-    gradeRoom: { id: string; name: string; displayName: string | null }
-  } | null
-  paymentStatus: "late" | "on_time" | "in_advance" | "complete" | null
-  enrollmentStatus: "draft" | "submitted" | "needs_review" | "completed" | "rejected" | "cancelled" | null
-  attendanceStatus: "good" | "concerning" | "critical" | null
-  balanceInfo: {
-    tuitionFee: number
-    totalPaid: number
-    remainingBalance: number
-    paymentPercentage: number
-  } | null
-}
+const ITEMS_PER_PAGE = 50
 
-interface Grade {
-  id: string
-  name: string
-  level: number
-  order: number
-}
-
-interface Pagination {
-  total: number
-  filteredTotal: number
-  limit: number
-  offset: number
-  hasMore: boolean
-}
+type Student = ApiStudent
 
 export default function StudentsPage() {
   const { t } = useI18n()
@@ -70,54 +36,37 @@ export default function StudentsPage() {
   // Track if component is mounted to prevent hydration mismatches
   const [isMounted, setIsMounted] = useState(false)
 
-  // Data states
-  const [students, setStudents] = useState<Student[]>([])
-  const [grades, setGrades] = useState<Grade[]>([])
-  const [pagination, setPagination] = useState<Pagination | null>(null)
-  const [isLoading, setIsLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
-
   // Filter states
   const [searchQuery, setSearchQuery] = useState("")
   const [gradeFilter, setGradeFilter] = useState<string>("all")
   const [paymentStatusFilter, setPaymentStatusFilter] = useState<string>("all")
   const [attendanceStatusFilter, setAttendanceStatusFilter] = useState<string>("all")
 
+  // Pagination state
+  const [offset, setOffset] = useState(0)
+
+  // Reset offset when filters change
+  useEffect(() => {
+    setOffset(0)
+  }, [searchQuery, gradeFilter, paymentStatusFilter, attendanceStatusFilter])
+
+  // React Query hooks - fetch data with automatic caching
+  const { data: gradesData, isLoading: gradesLoading } = useGrades()
+  const { data: studentsData, isLoading: studentsLoading, error: studentsError } = useStudents({
+    limit: ITEMS_PER_PAGE,
+    offset,
+  })
+
+  // Extract data with defaults
+  const grades = gradesData?.grades ?? []
+  const students = studentsData?.students ?? []
+  const pagination = studentsData?.pagination ?? null
+  const isLoading = gradesLoading || studentsLoading
+  const error = studentsError ? "Failed to load students" : null
+
   // Set mounted flag after component mounts
   useEffect(() => {
     setIsMounted(true)
-  }, [])
-
-  // Fetch data on mount
-  useEffect(() => {
-    async function fetchData() {
-      try {
-        setIsLoading(true)
-
-        const [gradesRes, studentsRes] = await Promise.all([
-          fetch("/api/grades"),
-          fetch("/api/students")
-        ])
-
-        if (!gradesRes.ok || !studentsRes.ok) {
-          throw new Error("Failed to fetch data")
-        }
-
-        const gradesData = await gradesRes.json()
-        const studentsData = await studentsRes.json()
-
-        setGrades(gradesData.grades || [])
-        setStudents(studentsData.students || [])
-        setPagination(studentsData.pagination || null)
-      } catch (err) {
-        console.error("Error fetching data:", err)
-        setError("Failed to load students")
-      } finally {
-        setIsLoading(false)
-      }
-    }
-
-    fetchData()
   }, [])
 
   // Client-side filtering
@@ -152,6 +101,19 @@ export default function StudentsPage() {
       attendance: { good: goodAttendance, concerning: concerningAttendance, critical: criticalAttendance }
     }
   }, [students])
+
+  // Pagination handlers
+  const handleNextPage = () => {
+    if (pagination?.hasMore) {
+      setOffset(pagination.offset + pagination.limit)
+    }
+  }
+
+  const handlePrevPage = () => {
+    if (pagination && pagination.offset > 0) {
+      setOffset(Math.max(0, pagination.offset - pagination.limit))
+    }
+  }
 
   // Badge helper functions
   const getEnrollmentStatusBadge = (status: string | null) => {
@@ -428,6 +390,7 @@ export default function StudentsPage() {
             ) : error ? (
               <div className="text-center py-8 text-destructive">{error}</div>
             ) : (
+              <>
               <div className="rounded-md border">
                 <Table>
                   <TableHeader>
@@ -494,6 +457,14 @@ export default function StudentsPage() {
                   </TableBody>
                 </Table>
               </div>
+              {pagination && (
+                <DataPagination
+                  pagination={pagination}
+                  onPrevPage={handlePrevPage}
+                  onNextPage={handleNextPage}
+                />
+              )}
+              </>
             )}
           </CardContent>
         </Card>

@@ -50,6 +50,10 @@ export async function GET(req: NextRequest) {
   const search = searchParams.get("search")
   const draftsOnly = searchParams.get("drafts") === "true"
 
+  // Pagination params
+  const limit = Math.min(parseInt(searchParams.get("limit") || "50"), 100)
+  const offset = parseInt(searchParams.get("offset") || "0")
+
   try {
     // Build where clause
     const where: Record<string, unknown> = {}
@@ -85,43 +89,60 @@ export async function GET(req: NextRequest) {
       ]
     }
 
-    const enrollments = await prisma.enrollment.findMany({
-      where,
-      include: {
-        grade: {
-          select: { name: true, level: true, tuitionFee: true },
+    // Run data query and count query in parallel
+    const [enrollments, total] = await Promise.all([
+      prisma.enrollment.findMany({
+        where,
+        include: {
+          grade: {
+            select: { name: true, level: true, tuitionFee: true },
+          },
+          schoolYear: {
+            select: { name: true },
+          },
+          _count: {
+            select: { payments: true },
+          },
         },
-        schoolYear: {
-          select: { name: true },
-        },
-        _count: {
-          select: { payments: true },
-        },
+        orderBy: { updatedAt: "desc" },
+        take: limit,
+        skip: offset,
+      }),
+      prisma.enrollment.count({ where }),
+    ])
+
+    // Batch query all payment totals at once (avoids N+1 queries)
+    const enrollmentIds = enrollments.map((e) => e.id)
+    const paymentTotals = await prisma.payment.groupBy({
+      by: ["enrollmentId"],
+      where: {
+        enrollmentId: { in: enrollmentIds },
+        status: "confirmed",
       },
-      orderBy: { updatedAt: "desc" },
-      take: 100,
+      _sum: { amount: true },
     })
 
-    // Calculate payment totals
-    const enrollmentsWithPayments = await Promise.all(
-      enrollments.map(async (enrollment) => {
-        const payments = await prisma.payment.aggregate({
-          where: {
-            enrollmentId: enrollment.id,
-            status: "confirmed",
-          },
-          _sum: { amount: true },
-        })
-
-        return {
-          ...enrollment,
-          totalPaid: payments._sum.amount || 0,
-          tuitionFee: enrollment.adjustedTuitionFee || enrollment.originalTuitionFee,
-        }
-      })
+    // Build lookup map for O(1) access
+    const totalsMap = new Map(
+      paymentTotals.map((p) => [p.enrollmentId, p._sum.amount || 0])
     )
 
-    return NextResponse.json(enrollmentsWithPayments)
+    // Map enrollments with payment totals
+    const enrollmentsWithPayments = enrollments.map((enrollment) => ({
+      ...enrollment,
+      totalPaid: totalsMap.get(enrollment.id) || 0,
+      tuitionFee: enrollment.adjustedTuitionFee || enrollment.originalTuitionFee,
+    }))
+
+    return NextResponse.json({
+      enrollments: enrollmentsWithPayments,
+      pagination: {
+        total,
+        limit,
+        offset,
+        hasMore: offset + enrollments.length < total,
+      },
+    })
   } catch (err) {
     console.error("Error fetching enrollments:", err)
     return NextResponse.json(

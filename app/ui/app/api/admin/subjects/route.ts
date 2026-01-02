@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server"
 import { requireRole } from "@/lib/authz"
 import { prisma } from "@/lib/prisma"
+import { withCache } from "@/lib/cache"
 import { z } from "zod"
 
 const createSubjectSchema = z.object({
@@ -28,7 +29,9 @@ export async function GET(req: NextRequest) {
       },
     })
 
-    return NextResponse.json(subjects)
+    const response = NextResponse.json(subjects)
+    // Subjects rarely change - cache for 1 day with 7 day stale-while-revalidate
+    return withCache(response, "STATIC_REFERENCE")
   } catch (err) {
     console.error("Error fetching subjects:", err)
     return NextResponse.json(

@@ -38,12 +38,13 @@ import { useI18n } from "@/components/i18n-provider"
 import { PageContainer } from "@/components/layout"
 import { formatDate } from "@/lib/utils"
 import { CashDepositDialog, PaymentReviewDialog } from "@/components/payments"
+import { usePayments, usePaymentStats, useGrades, useCreatePayment, useInvalidateQueries } from "@/lib/hooks/use-api"
 
 interface Payment {
   id: string
   amount: number
   method: "cash" | "orange_money"
-  status: "pending_deposit" | "deposited" | "pending_review" | "confirmed" | "rejected" | "failed"
+  status: string
   receiptNumber: string
   transactionRef: string | null
   recordedAt: string
@@ -105,21 +106,7 @@ interface StudentSearchResult {
 
 export default function PaymentsPage() {
   const { t, locale } = useI18n()
-  const [payments, setPayments] = useState<Payment[]>([])
-  const [pagination, setPagination] = useState<PaginationInfo>({
-    total: 0,
-    limit: 20,
-    offset: 0,
-    hasMore: false,
-  })
-  const [isLoading, setIsLoading] = useState(true)
-
-  // Stats state
-  const [stats, setStats] = useState<PaymentStats | null>(null)
-  const [isLoadingStats, setIsLoadingStats] = useState(true)
-
-  // Grades for filter
-  const [grades, setGrades] = useState<Grade[]>([])
+  const invalidate = useInvalidateQueries()
 
   // Filter state
   const [statusFilter, setStatusFilter] = useState<string>("all")
@@ -127,6 +114,27 @@ export default function PaymentsPage() {
   const [gradeFilter, setGradeFilter] = useState<string>("all")
   const [startDate, setStartDate] = useState("")
   const [endDate, setEndDate] = useState("")
+  const [offset, setOffset] = useState(0)
+
+  // React Query hooks
+  const { data: paymentsData, isLoading } = usePayments({
+    status: statusFilter !== "all" ? statusFilter : undefined,
+    method: methodFilter !== "all" ? methodFilter : undefined,
+    gradeId: gradeFilter !== "all" ? gradeFilter : undefined,
+    startDate: startDate || undefined,
+    endDate: endDate || undefined,
+    limit: 20,
+    offset,
+  })
+  const { data: statsData, isLoading: isLoadingStats } = usePaymentStats()
+  const { data: gradesData } = useGrades()
+  const createPaymentMutation = useCreatePayment()
+
+  // Extract data from query results
+  const payments = paymentsData?.payments ?? []
+  const pagination = paymentsData?.pagination ?? { total: 0, limit: 20, offset: 0, hasMore: false }
+  const stats = statsData ?? null
+  const grades = gradesData?.grades ?? []
 
   // Dialog state
   const [openDepositDialog, setOpenDepositDialog] = useState(false)
@@ -149,81 +157,12 @@ export default function PaymentsPage() {
   const [receiptNumber, setReceiptNumber] = useState("")
   const [transactionRef, setTransactionRef] = useState("")
   const [paymentNotes, setPaymentNotes] = useState("")
-  const [isSubmittingPayment, setIsSubmittingPayment] = useState(false)
+  const isSubmittingPayment = createPaymentMutation.isPending
 
-  // Fetch payments with filters
-  const fetchPayments = useCallback(async (offset: number = 0) => {
-    setIsLoading(true)
-    try {
-      const params = new URLSearchParams()
-      params.set("limit", "20")
-      params.set("offset", offset.toString())
-
-      if (statusFilter && statusFilter !== "all") {
-        params.set("status", statusFilter)
-      }
-      if (methodFilter && methodFilter !== "all") {
-        params.set("method", methodFilter)
-      }
-      if (startDate) {
-        params.set("startDate", startDate)
-      }
-      if (endDate) {
-        params.set("endDate", endDate)
-      }
-
-      const response = await fetch(`/api/payments?${params.toString()}`)
-      if (!response.ok) throw new Error("Failed to fetch payments")
-      const data = await response.json()
-      setPayments(data.payments || [])
-      setPagination(data.pagination || { total: 0, limit: 20, offset: 0, hasMore: false })
-    } catch (err) {
-      console.error("Error fetching payments:", err)
-      setPayments([])
-    } finally {
-      setIsLoading(false)
-    }
-  }, [statusFilter, methodFilter, startDate, endDate])
-
-  // Initial fetch and refetch on filter change
+  // Reset offset when filters change
   useEffect(() => {
-    fetchPayments(0)
-  }, [fetchPayments])
-
-  // Fetch stats
-  useEffect(() => {
-    async function fetchStats() {
-      setIsLoadingStats(true)
-      try {
-        const response = await fetch("/api/payments/stats")
-        if (response.ok) {
-          const data = await response.json()
-          setStats(data)
-        }
-      } catch (err) {
-        console.error("Error fetching stats:", err)
-      } finally {
-        setIsLoadingStats(false)
-      }
-    }
-    fetchStats()
-  }, [])
-
-  // Fetch grades for filter
-  useEffect(() => {
-    async function fetchGrades() {
-      try {
-        const response = await fetch("/api/grades")
-        if (response.ok) {
-          const data = await response.json()
-          setGrades(data.grades || [])
-        }
-      } catch (err) {
-        console.error("Error fetching grades:", err)
-      }
-    }
-    fetchGrades()
-  }, [])
+    setOffset(0)
+  }, [statusFilter, methodFilter, gradeFilter, startDate, endDate])
 
   // Click outside handler for student search
   useEffect(() => {
@@ -239,19 +178,20 @@ export default function PaymentsPage() {
   // Handle pagination
   const handleNextPage = () => {
     if (pagination.hasMore) {
-      fetchPayments(pagination.offset + pagination.limit)
+      setOffset(pagination.offset + pagination.limit)
     }
   }
 
   const handlePrevPage = () => {
     if (pagination.offset > 0) {
-      fetchPayments(Math.max(0, pagination.offset - pagination.limit))
+      setOffset(Math.max(0, pagination.offset - pagination.limit))
     }
   }
 
   // Refresh data after dialog actions
   const refreshData = () => {
-    fetchPayments(pagination.offset)
+    invalidate.payments()
+    invalidate.accounting()
   }
 
   // Handle opening deposit dialog
@@ -338,7 +278,7 @@ export default function PaymentsPage() {
   }, [resetPaymentForm])
 
   // Submit payment
-  const handleSubmitPayment = useCallback(async () => {
+  const handleSubmitPayment = useCallback(() => {
     if (!selectedStudent?.enrollmentId || !paymentAmount || !paymentMethod || !receiptNumber) {
       return
     }
@@ -353,42 +293,22 @@ export default function PaymentsPage() {
       return
     }
 
-    setIsSubmittingPayment(true)
-    try {
-      const response = await fetch("/api/payments", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          enrollmentId: selectedStudent.enrollmentId,
-          amount,
-          method: paymentMethod,
-          receiptNumber,
-          transactionRef: transactionRef || undefined,
-          notes: paymentNotes || undefined,
-        }),
-      })
-
-      if (!response.ok) {
-        const error = await response.json()
-        throw new Error(error.message || "Failed to record payment")
-      }
-
-      // Refresh payments list and stats
-      fetchPayments(0)
-      const statsResponse = await fetch("/api/payments/stats")
-      if (statsResponse.ok) {
-        const statsData = await statsResponse.json()
-        setStats(statsData)
-      }
-
-      handleRecordPaymentDialogChange(false)
-    } catch (err) {
-      console.error("Error recording payment:", err)
-      alert(err instanceof Error ? err.message : "Erreur lors de l'enregistrement du paiement")
-    } finally {
-      setIsSubmittingPayment(false)
-    }
-  }, [selectedStudent, paymentAmount, paymentMethod, receiptNumber, transactionRef, paymentNotes, handleRecordPaymentDialogChange, fetchPayments])
+    createPaymentMutation.mutate({
+      enrollmentId: selectedStudent.enrollmentId,
+      amount,
+      method: paymentMethod,
+      notes: paymentNotes || undefined,
+    }, {
+      onSuccess: () => {
+        setOffset(0) // Reset to first page
+        handleRecordPaymentDialogChange(false)
+      },
+      onError: (err) => {
+        console.error("Error recording payment:", err)
+        alert(err instanceof Error ? err.message : "Erreur lors de l'enregistrement du paiement")
+      },
+    })
+  }, [selectedStudent, paymentAmount, paymentMethod, receiptNumber, paymentNotes, handleRecordPaymentDialogChange, createPaymentMutation])
 
   const getStatusBadge = (status: string) => {
     switch (status) {
