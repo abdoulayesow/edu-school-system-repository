@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server"
 import { requireRole } from "@/lib/authz"
 import { prisma } from "@/lib/prisma"
+import { ActivityStatus } from "@prisma/client"
 
 /**
  * GET /api/activities
@@ -18,6 +19,10 @@ export async function GET(req: NextRequest) {
     const view = searchParams.get("view") || "activities"
     const type = searchParams.get("type")
 
+    // Pagination params
+    const limit = Math.min(parseInt(searchParams.get("limit") || "50"), 100)
+    const offset = parseInt(searchParams.get("offset") || "0")
+
     // Get current school year
     const currentSchoolYear = await prisma.schoolYear.findFirst({
       where: { isActive: true },
@@ -31,48 +36,56 @@ export async function GET(req: NextRequest) {
     }
 
     if (view === "students") {
-      // Get students with completed enrollments who can join activities
-      const students = await prisma.enrollment.findMany({
-        where: {
-          schoolYearId: currentSchoolYear.id,
-          status: "completed",
-          student: {
-            studentProfile: { isNot: null },
-          },
+      // Build where clause for students query
+      const studentsWhere = {
+        schoolYearId: currentSchoolYear.id,
+        status: "completed" as const,
+        student: {
+          studentProfile: { isNot: null },
         },
-        include: {
-          student: {
-            include: {
-              studentProfile: {
-                include: {
-                  person: {
-                    select: { firstName: true, lastName: true },
-                  },
-                  activityEnrollments: {
-                    where: {
-                      activity: { schoolYearId: currentSchoolYear.id },
-                      status: "active",
+      }
+
+      // Get students with completed enrollments who can join activities (with pagination)
+      const [students, total] = await Promise.all([
+        prisma.enrollment.findMany({
+          where: studentsWhere,
+          include: {
+            student: {
+              include: {
+                studentProfile: {
+                  include: {
+                    person: {
+                      select: { firstName: true, lastName: true },
                     },
-                    include: {
-                      activity: {
-                        select: { id: true, name: true, type: true },
+                    activityEnrollments: {
+                      where: {
+                        activity: { schoolYearId: currentSchoolYear.id },
+                        status: "active",
+                      },
+                      include: {
+                        activity: {
+                          select: { id: true, name: true, type: true },
+                        },
                       },
                     },
                   },
                 },
               },
             },
+            grade: {
+              select: { id: true, name: true, order: true },
+            },
           },
-          grade: {
-            select: { id: true, name: true, order: true },
-          },
-        },
-        orderBy: [
-          { grade: { order: "asc" } },
-          { lastName: "asc" },
-          { firstName: "asc" },
-        ],
-      })
+          orderBy: [
+            { grade: { order: "asc" } },
+            { lastName: "asc" },
+            { firstName: "asc" },
+          ],
+          take: limit,
+          skip: offset,
+        }),
+        prisma.enrollment.count({ where: studentsWhere }),
+      ])
 
       // Transform to simpler structure
       const eligibleStudents = students
@@ -87,26 +100,49 @@ export async function GET(req: NextRequest) {
           activityEnrollments: e.student!.studentProfile!.activityEnrollments,
         }))
 
-      return NextResponse.json(eligibleStudents)
+      return NextResponse.json({
+        students: eligibleStudents,
+        pagination: {
+          total,
+          limit,
+          offset,
+          hasMore: offset + students.length < total,
+        },
+      })
     }
 
-    // Default: get activities
-    const activities = await prisma.activity.findMany({
-      where: {
-        schoolYearId: currentSchoolYear.id,
-        status: { in: ["active", "closed"] },
-        isEnabled: true,
-        ...(type && { type: type as "club" | "sport" | "arts" | "academic" | "other" }),
-      },
-      orderBy: [{ type: "asc" }, { name: "asc" }],
-      include: {
-        _count: {
-          select: { enrollments: { where: { status: "active" } } },
+    // Default: get activities with pagination
+    const activitiesWhere = {
+      schoolYearId: currentSchoolYear.id,
+      status: { in: ["active", "closed"] as ActivityStatus[] },
+      isEnabled: true,
+      ...(type && { type: type as "club" | "sport" | "arts" | "academic" | "other" }),
+    }
+
+    const [activities, total] = await Promise.all([
+      prisma.activity.findMany({
+        where: activitiesWhere,
+        orderBy: [{ type: "asc" }, { name: "asc" }],
+        include: {
+          _count: {
+            select: { enrollments: { where: { status: "active" } } },
+          },
         },
+        take: limit,
+        skip: offset,
+      }),
+      prisma.activity.count({ where: activitiesWhere }),
+    ])
+
+    return NextResponse.json({
+      activities,
+      pagination: {
+        total,
+        limit,
+        offset,
+        hasMore: offset + activities.length < total,
       },
     })
-
-    return NextResponse.json(activities)
   } catch (err) {
     console.error("Error fetching activities data:", err)
     return NextResponse.json(

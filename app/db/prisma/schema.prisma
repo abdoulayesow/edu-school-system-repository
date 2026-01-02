@@ -348,6 +348,7 @@ model Enrollment {
   @@index([draftExpiresAt])
   @@index([updatedAt])
   @@index([statusChangedBy])
+  @@index([status, approvedAt]) // Performance: payment processing workflow queries
 }
 
 model PaymentSchedule {
@@ -415,6 +416,7 @@ model Payment {
   @@index([recordedAt])
   @@index([reviewedBy])
   @@index([method])
+  @@index([status, recordedAt]) // Performance: revenue reporting queries
 }
 
 model EnrollmentNote {
@@ -806,6 +808,7 @@ model CashDeposit {
   @@index([bankReference])
   @@index([depositedBy])
   @@index([verifiedBy])
+  @@index([verifiedBy, depositDate]) // Performance: deposit audit trail queries
 }
 
 model BankDeposit {
@@ -831,6 +834,7 @@ model BankDeposit {
   @@index([isReconciled])
   @@index([recordedBy])
   @@index([reconciledBy])
+  @@index([depositDate, isReconciled]) // Performance: reconciliation dashboard queries
 }
 
 model Expense {

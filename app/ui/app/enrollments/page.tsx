@@ -10,9 +10,13 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Plus, Search, Eye, Loader2, FileText, Clock, CheckCircle2, Users } from "lucide-react"
 import { useI18n } from "@/components/i18n-provider"
 import { PageContainer } from "@/components/layout"
+import { DataPagination } from "@/components/data-pagination"
 import { sizing } from "@/lib/design-tokens"
 import { formatDate } from "@/lib/utils"
 import Link from "next/link"
+import { useEnrollments, useGrades } from "@/lib/hooks/use-api"
+
+const ITEMS_PER_PAGE = 50
 
 interface Enrollment {
   id: string
@@ -30,57 +34,72 @@ interface Enrollment {
   tuitionFee: number
 }
 
-interface Grade {
-  id: string
-  name: string
-  level: string
-  order: number
-}
-
 export default function EnrollmentsPage() {
   const { t, locale } = useI18n()
   const [isMounted, setIsMounted] = useState(false)
   const [searchQuery, setSearchQuery] = useState("")
   const [statusFilter, setStatusFilter] = useState<string>("all")
   const [gradeFilter, setGradeFilter] = useState<string>("all")
-  const [enrollments, setEnrollments] = useState<Enrollment[]>([])
-  const [grades, setGrades] = useState<Grade[]>([])
-  const [isLoading, setIsLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
+
+  // Pagination state
+  const [offset, setOffset] = useState(0)
+
+  // Reset offset when filters change
+  useEffect(() => {
+    setOffset(0)
+  }, [searchQuery, statusFilter, gradeFilter])
+
+  // React Query hooks
+  const { data: enrollmentsData, isLoading: enrollmentsLoading, error: enrollmentsError } = useEnrollments({
+    status: statusFilter !== "all" ? statusFilter : undefined,
+    gradeId: gradeFilter !== "all" ? gradeFilter : undefined,
+    limit: ITEMS_PER_PAGE,
+    offset,
+  })
+  const { data: gradesData, isLoading: gradesLoading } = useGrades()
+
+  // Extract data from query results
+  const enrollments: Enrollment[] = useMemo(() => {
+    const data = enrollmentsData?.enrollments ?? []
+    // Map API response to local Enrollment type
+    return data.map(e => ({
+      id: e.id,
+      enrollmentNumber: e.enrollmentNumber ?? "",
+      firstName: e.firstName,
+      lastName: e.lastName,
+      status: e.status,
+      createdAt: e.createdAt,
+      grade: e.grade ? {
+        id: e.gradeId,
+        name: e.grade.name,
+        level: parseInt(e.grade.level) || 0
+      } : null,
+      totalPaid: e.totalPaid ?? 0,
+      tuitionFee: e.tuitionFee
+    }))
+  }, [enrollmentsData])
+
+  const grades = gradesData?.grades ?? []
+  const pagination = enrollmentsData?.pagination ?? null
+  const isLoading = enrollmentsLoading || gradesLoading
+  const error = enrollmentsError ? "Failed to load enrollments" : null
 
   useEffect(() => {
     setIsMounted(true)
   }, [])
 
-  useEffect(() => {
-    async function fetchData() {
-      try {
-        setIsLoading(true)
-        const [enrollmentsRes, gradesRes] = await Promise.all([
-          fetch("/api/enrollments"),
-          fetch("/api/grades")
-        ])
-
-        if (!enrollmentsRes.ok) {
-          throw new Error("Failed to fetch enrollments")
-        }
-        const enrollmentsData = await enrollmentsRes.json()
-        setEnrollments(enrollmentsData)
-
-        if (gradesRes.ok) {
-          const gradesData = await gradesRes.json()
-          setGrades(gradesData.grades || [])
-        }
-      } catch (err) {
-        console.error("Error fetching data:", err)
-        setError("Failed to load enrollments")
-      } finally {
-        setIsLoading(false)
-      }
+  // Pagination handlers
+  const handleNextPage = () => {
+    if (pagination?.hasMore) {
+      setOffset(pagination.offset + pagination.limit)
     }
+  }
 
-    fetchData()
-  }, [])
+  const handlePrevPage = () => {
+    if (pagination && pagination.offset > 0) {
+      setOffset(Math.max(0, pagination.offset - pagination.limit))
+    }
+  }
 
   const getPaymentStatus = (enrollment: Enrollment) => {
     if (enrollment.status === "draft") return "pending"
@@ -252,7 +271,10 @@ export default function EnrollmentsPage() {
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <div>
               <CardTitle>{t.enrollments.allStudents}</CardTitle>
-              <CardDescription>{filteredEnrollments.length} {t.common.students}</CardDescription>
+              <CardDescription>
+                {filteredEnrollments.length} {t.common.students}
+                {pagination && ` sur ${pagination.total}`}
+              </CardDescription>
             </div>
             <Button
               asChild
@@ -274,6 +296,7 @@ export default function EnrollmentsPage() {
             ) : error ? (
               <div className="text-center py-8 text-destructive">{error}</div>
             ) : (
+              <>
               <div className="rounded-md border">
                 <Table>
                   <TableHeader>
@@ -315,6 +338,14 @@ export default function EnrollmentsPage() {
                   </TableBody>
                 </Table>
               </div>
+              {pagination && (
+                <DataPagination
+                  pagination={pagination}
+                  onPrevPage={handlePrevPage}
+                  onNextPage={handleNextPage}
+                />
+              )}
+              </>
             )}
           </CardContent>
         </Card>

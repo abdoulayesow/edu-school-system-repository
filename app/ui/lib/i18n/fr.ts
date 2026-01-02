@@ -39,6 +39,13 @@ export const fr = {
     menu: "Menu",
     select: "Sélectionner",
     viewDetails: "Voir les détails",
+    noData: "Aucune donnée disponible",
+    notAssigned: "Non assigné",
+    week: "semaine",
+    subjects: "Matières",
+    pagination: {
+      pageOf: "Page {current} sur {total} ({count} résultats)",
+    },
   },
 
   // Navigation

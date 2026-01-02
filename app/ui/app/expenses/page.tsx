@@ -5,7 +5,6 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
-import { Progress } from "@/components/ui/progress"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
@@ -41,7 +40,6 @@ import {
   Search,
   Loader2,
   Receipt,
-  Wallet,
   Clock,
   CheckCircle,
   XCircle,
@@ -49,10 +47,8 @@ import {
   MoreHorizontal,
   Check,
   X,
-  DollarSign,
   Trash2,
   FileText,
-  Building,
   Wrench,
   Zap,
   Users,
@@ -62,12 +58,16 @@ import {
 } from "lucide-react"
 import { useI18n } from "@/components/i18n-provider"
 import { PageContainer } from "@/components/layout"
+import { DataPagination } from "@/components/data-pagination"
 import { formatDate as formatDateUtil } from "@/lib/utils"
+import { useExpenses, useCreateExpense, useUpdateExpenseStatus, useDeleteExpense } from "@/lib/hooks/use-api"
+
+const ITEMS_PER_PAGE = 50
 
 interface User {
   id: string
   name: string
-  email: string
+  email?: string
 }
 
 interface Expense {
@@ -108,20 +108,40 @@ export default function ExpensesPage() {
     setIsMounted(true)
   }, [])
 
-  // Data states
-  const [expenses, setExpenses] = useState<Expense[]>([])
-  const [pagination, setPagination] = useState<Pagination | null>(null)
-  const [isLoading, setIsLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
-
   // Filter states
   const [searchQuery, setSearchQuery] = useState("")
   const [statusFilter, setStatusFilter] = useState<string>("all")
   const [categoryFilter, setCategoryFilter] = useState<string>("all")
 
+  // Pagination state
+  const [offset, setOffset] = useState(0)
+
+  // Reset offset when filters change
+  useEffect(() => {
+    setOffset(0)
+  }, [statusFilter, categoryFilter])
+
+  // React Query hooks
+  const { data: expensesData, isLoading, error: queryError } = useExpenses({
+    status: statusFilter !== "all" ? statusFilter : undefined,
+    category: categoryFilter !== "all" ? categoryFilter : undefined,
+    limit: ITEMS_PER_PAGE,
+    offset,
+  })
+  const createExpenseMutation = useCreateExpense()
+  const updateStatusMutation = useUpdateExpenseStatus()
+  const deleteExpenseMutation = useDeleteExpense()
+
+  // Extract data from query results
+  const expenses = expensesData?.expenses ?? []
+  const pagination = expensesData?.pagination ?? null
+  const error = queryError ? "Failed to load expenses" : null
+
+  // Combined mutation pending state
+  const isSubmitting = createExpenseMutation.isPending || updateStatusMutation.isPending || deleteExpenseMutation.isPending
+
   // Dialog states
   const [isNewExpenseOpen, setIsNewExpenseOpen] = useState(false)
-  const [isSubmitting, setIsSubmitting] = useState(false)
   const [selectedExpense, setSelectedExpense] = useState<Expense | null>(null)
   const [actionType, setActionType] = useState<"approve" | "reject" | "mark_paid" | "delete" | null>(null)
   const [rejectionReason, setRejectionReason] = useState("")
@@ -143,32 +163,6 @@ export default function ExpensesPage() {
       date: new Date().toISOString().split("T")[0]
     }))
   }, [])
-
-  // Fetch expenses
-  const fetchExpenses = async () => {
-    try {
-      setIsLoading(true)
-      const params = new URLSearchParams()
-      if (statusFilter !== "all") params.set("status", statusFilter)
-      if (categoryFilter !== "all") params.set("category", categoryFilter)
-
-      const response = await fetch(`/api/expenses?${params.toString()}`)
-      if (!response.ok) throw new Error("Failed to fetch expenses")
-
-      const data = await response.json()
-      setExpenses(data.expenses || [])
-      setPagination(data.pagination || null)
-    } catch (err) {
-      console.error("Error fetching expenses:", err)
-      setError("Failed to load expenses")
-    } finally {
-      setIsLoading(false)
-    }
-  }
-
-  useEffect(() => {
-    fetchExpenses()
-  }, [statusFilter, categoryFilter])
 
   // Client-side search filtering
   const filteredExpenses = useMemo(() => {
@@ -288,79 +282,64 @@ export default function ExpensesPage() {
   }
 
   // Handle create expense
-  const handleCreateExpense = async () => {
+  const handleCreateExpense = () => {
     if (!newExpense.category || !newExpense.description || !newExpense.amount) {
       return
     }
 
-    try {
-      setIsSubmitting(true)
-      const response = await fetch("/api/expenses", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          category: newExpense.category,
-          description: newExpense.description,
-          amount: parseFloat(newExpense.amount),
-          method: newExpense.method,
-          date: newExpense.date,
-          vendorName: newExpense.vendorName || undefined,
-        }),
-      })
-
-      if (!response.ok) throw new Error("Failed to create expense")
-
-      setIsNewExpenseOpen(false)
-      setNewExpense({
-        category: "",
-        description: "",
-        amount: "",
-        method: "cash",
-        date: new Date().toISOString().split("T")[0],
-        vendorName: "",
-      })
-      fetchExpenses()
-    } catch (err) {
-      console.error("Error creating expense:", err)
-    } finally {
-      setIsSubmitting(false)
-    }
+    createExpenseMutation.mutate({
+      category: newExpense.category,
+      description: newExpense.description,
+      amount: parseFloat(newExpense.amount),
+      method: newExpense.method,
+      date: newExpense.date,
+      vendorName: newExpense.vendorName || undefined,
+    }, {
+      onSuccess: () => {
+        setIsNewExpenseOpen(false)
+        setNewExpense({
+          category: "",
+          description: "",
+          amount: "",
+          method: "cash",
+          date: new Date().toISOString().split("T")[0],
+          vendorName: "",
+        })
+      },
+    })
   }
 
   // Handle expense action (approve, reject, mark_paid)
-  const handleExpenseAction = async () => {
+  const handleExpenseAction = () => {
     if (!selectedExpense || !actionType) return
 
-    try {
-      setIsSubmitting(true)
-
-      if (actionType === "delete") {
-        const response = await fetch(`/api/expenses/${selectedExpense.id}`, {
-          method: "DELETE",
-        })
-        if (!response.ok) throw new Error("Failed to delete expense")
-      } else {
-        const body: Record<string, string> = { action: actionType }
-        if (actionType === "reject" && rejectionReason) {
-          body.rejectionReason = rejectionReason
-        }
-
-        const response = await fetch(`/api/expenses/${selectedExpense.id}/approve`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(body),
-        })
-        if (!response.ok) throw new Error(`Failed to ${actionType} expense`)
-      }
-
+    const onSuccess = () => {
       setSelectedExpense(null)
       setActionType(null)
       setRejectionReason("")
-      fetchExpenses()
-    } catch (err) {
-      console.error("Error processing expense action:", err)
-    } finally {
-      setIsSubmitting(false)
+    }
+
+    if (actionType === "delete") {
+      deleteExpenseMutation.mutate(selectedExpense.id, { onSuccess })
+    } else {
+      updateStatusMutation.mutate({
+        id: selectedExpense.id,
+        action: actionType,
+        rejectionReason: actionType === "reject" ? rejectionReason : undefined,
+      }, { onSuccess })
+    }
+  }
+
+  // Pagination handlers
+  const handleNextPage = () => {
+    if (pagination?.hasMore) {
+      setOffset(pagination.offset + pagination.limit)
+    }
+  }
+
+  const handlePrevPage = () => {
+    if (pagination && pagination.offset > 0) {
+      setOffset(Math.max(0, pagination.offset - pagination.limit))
     }
   }
 
@@ -616,6 +595,7 @@ export default function ExpensesPage() {
             ) : error ? (
               <div className="text-center py-8 text-destructive">{error}</div>
             ) : (
+              <>
               <div className="rounded-md border">
                 <Table>
                   <TableHeader>
@@ -745,6 +725,14 @@ export default function ExpensesPage() {
                   </TableBody>
                 </Table>
               </div>
+              {pagination && (
+                <DataPagination
+                  pagination={pagination}
+                  onPrevPage={handlePrevPage}
+                  onNextPage={handleNextPage}
+                />
+              )}
+              </>
             )}
           </CardContent>
         </Card>

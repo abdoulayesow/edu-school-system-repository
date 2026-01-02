@@ -41,6 +41,13 @@ export const en: TranslationKeys = {
     menu: "Menu",
     select: "Select",
     viewDetails: "View details",
+    noData: "No data available",
+    notAssigned: "Not assigned",
+    week: "week",
+    subjects: "Subjects",
+    pagination: {
+      pageOf: "Page {current} of {total} ({count} results)",
+    },
   },
 
   // Navigation

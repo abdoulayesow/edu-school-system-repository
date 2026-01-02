@@ -1,12 +1,12 @@
 "use client"
 
-import { useEffect, useState, useMemo } from "react"
+import { useMemo } from "react"
 import dynamic from "next/dynamic"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { ChartContainer, ChartTooltip, ChartTooltipContent, type ChartConfig } from "@/components/ui/chart"
-import { Users, DollarSign, AlertTriangle, TrendingUp, FileText, CheckCircle2, Clock, BarChart3, Loader2 } from "lucide-react"
+import { Users, DollarSign, AlertTriangle, FileText, CheckCircle2, Clock, BarChart3, Loader2 } from "lucide-react"
 import { useI18n, interpolate } from "@/components/i18n-provider"
 import { PageContainer } from "@/components/layout"
 import { sizing } from "@/lib/design-tokens"
@@ -19,6 +19,13 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table"
+import {
+  useGrades,
+  useAccountingBalance,
+  usePendingEnrollments,
+  useUnreconciledDeposits,
+  usePendingPayments,
+} from "@/lib/hooks/use-api"
 
 // Lazy load heavy chart components
 const BarChart = dynamic(() => import("recharts").then(mod => mod.BarChart) as never, { ssr: false }) as typeof import("recharts").BarChart
@@ -30,57 +37,6 @@ const CartesianGrid = dynamic(() => import("recharts").then(mod => mod.Cartesian
 const XAxis = dynamic(() => import("recharts").then(mod => mod.XAxis) as never, { ssr: false }) as typeof import("recharts").XAxis
 const YAxis = dynamic(() => import("recharts").then(mod => mod.YAxis) as never, { ssr: false }) as typeof import("recharts").YAxis
 
-interface Grade {
-  id: string
-  name: string
-  order: number
-  stats: {
-    studentCount: number
-  }
-}
-
-interface BalanceData {
-  summary: {
-    totalConfirmedPayments: number
-    totalPendingPayments: number
-    totalPaidExpenses: number
-    margin: number
-  }
-  payments: {
-    byStatus: Record<string, { count: number; amount: number }>
-    byMethod: Record<string, { count: number; amount: number; confirmed: number }>
-  }
-}
-
-interface Enrollment {
-  id: string
-  enrollmentNumber: string | null
-  firstName: string
-  lastName: string
-  status: string
-  adjustedTuitionFee: number | null
-  originalTuitionFee: number
-  adjustmentReason: string | null
-  grade: { name: string }
-}
-
-interface BankDeposit {
-  id: string
-  bankReference: string
-  amount: number
-  isReconciled: boolean
-}
-
-interface Payment {
-  id: string
-  amount: number
-  status: string
-  receiptNumber: string
-  enrollment: {
-    student: { firstName: string; lastName: string }
-  }
-  recorder: { name: string } | null
-}
 
 function formatGNF(amount: number): string {
   if (amount >= 1000000) {
@@ -94,67 +50,23 @@ function formatGNF(amount: number): string {
 
 export default function DirectorDashboard() {
   const { t } = useI18n()
-  const [loading, setLoading] = useState(true)
-  const [grades, setGrades] = useState<Grade[]>([])
-  const [balance, setBalance] = useState<BalanceData | null>(null)
-  const [pendingEnrollments, setPendingEnrollments] = useState<Enrollment[]>([])
-  const [unreconciledDeposits, setUnreconciledDeposits] = useState<BankDeposit[]>([])
-  const [pendingPayments, setPendingPayments] = useState<Payment[]>([])
 
-  // Fetch all dashboard data
-  useEffect(() => {
-    async function fetchDashboardData() {
-      try {
-        const [gradesRes, balanceRes, enrollmentsRes, depositsRes, paymentsRes] = await Promise.all([
-          fetch("/api/grades"),
-          fetch("/api/accounting/balance"),
-          fetch("/api/enrollments?status=needs_review"),
-          fetch("/api/bank-deposits?isReconciled=false"),
-          fetch("/api/payments?status=pending_review"),
-        ])
+  // React Query hooks - fetch data in parallel with automatic caching
+  const { data: gradesData, isLoading: gradesLoading } = useGrades()
+  const { data: balanceData, isLoading: balanceLoading } = useAccountingBalance()
+  const { data: enrollmentsData, isLoading: enrollmentsLoading } = usePendingEnrollments()
+  const { data: depositsData, isLoading: depositsLoading } = useUnreconciledDeposits()
+  const { data: paymentsData, isLoading: paymentsLoading } = usePendingPayments()
 
-        if (gradesRes.ok) {
-          const data = await gradesRes.json()
-          setGrades(data.grades || [])
-        }
+  // Extract data with defaults
+  const grades = gradesData?.grades ?? []
+  const balance = balanceData ?? null
+  const pendingEnrollments = enrollmentsData ?? []
+  const unreconciledDeposits = depositsData?.deposits ?? []
+  const pendingPayments = paymentsData?.payments ?? []
 
-        if (balanceRes.ok) {
-          const data = await balanceRes.json()
-          setBalance(data)
-        }
-
-        if (enrollmentsRes.ok) {
-          const data = await enrollmentsRes.json()
-          setPendingEnrollments(Array.isArray(data) ? data : [])
-        }
-
-        if (depositsRes.ok) {
-          const data = await depositsRes.json()
-          setUnreconciledDeposits(data.deposits || [])
-        }
-
-        if (paymentsRes.ok) {
-          const data = await paymentsRes.json()
-          setPendingPayments(data.payments || [])
-        }
-      } catch (err) {
-        console.error("Error fetching dashboard data:", err)
-      } finally {
-        setLoading(false)
-      }
-    }
-
-    fetchDashboardData()
-
-    // Initialize sync manager after dashboard mounts
-    const timer = setTimeout(() => {
-      import("@/lib/sync/manager").then(({ syncManager }) => {
-        syncManager.initialize()
-      })
-    }, 1000)
-
-    return () => clearTimeout(timer)
-  }, [])
+  // Combined loading state for initial render
+  const loading = gradesLoading || balanceLoading || enrollmentsLoading || depositsLoading || paymentsLoading
 
   // Calculate total enrollment
   const totalEnrollment = useMemo(() => {
@@ -223,10 +135,11 @@ export default function DirectorDashboard() {
 
     // Add payments pending review
     pendingPayments.slice(0, 5 - items.length).forEach(payment => {
+      const student = payment.enrollment?.student
       items.push({
         id: payment.id,
         type: t.dashboard.paymentDiscount,
-        student: `${payment.enrollment.student.firstName} ${payment.enrollment.student.lastName}`,
+        student: student ? `${student.firstName} ${student.lastName}` : "N/A",
         submittedBy: payment.recorder?.name || "Système",
         reason: `Paiement ${payment.receiptNumber}`,
         amount: formatGNF(payment.amount),

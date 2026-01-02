@@ -15,6 +15,7 @@ import {
 import { I18nProvider } from "@/components/i18n-provider"
 import { ThemeProvider } from "@/components/theme-provider"
 import { Toaster } from "@/components/ui/toaster"
+import { QueryProvider } from "@/components/query-provider"
 import { cn } from "@/lib/utils"
 
 const inter = Inter({
@@ -99,14 +100,16 @@ export default function RootLayout({
           disableTransitionOnChange
         >
           <SessionProvider>
-            <I18nProvider>
-              <NavigationProvider>
-                <TopNav />
-                <NavSidebar />
-                <MobileNav />
-                <MainContent>{children}</MainContent>
-              </NavigationProvider>
-            </I18nProvider>
+            <QueryProvider>
+              <I18nProvider>
+                <NavigationProvider>
+                  <TopNav />
+                  <NavSidebar />
+                  <MobileNav />
+                  <MainContent>{children}</MainContent>
+                </NavigationProvider>
+              </I18nProvider>
+            </QueryProvider>
           </SessionProvider>
         </ThemeProvider>
         <Analytics />

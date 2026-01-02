@@ -30,21 +30,14 @@
       "Bash(npx tsc --noEmit)",
       "Bash(npx prisma db seed:*)",
       "Skill(summary-generator)",
-      "Skill(summary-generator:*)"
-    ]
-  },
-  "hooks": {
-    "PostToolUse": [
-      {
-        "matcher": "Edit|Write",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "bash \"$CLAUDE_PROJECT_DIR/.claude/hooks/auto-lint.sh\"",
-            "timeout": 30
-          }
-        ]
-      }
+      "Skill(summary-generator:*)",
+      "WebSearch",
+      "Bash(dir \"c:\\\\workspace\\\\sources\\\\edu-school-system-repository\\\\app\\\\ui\\\\lib\\\\auth\")",
+      "Bash(dir \"c:\\\\workspace\\\\sources\\\\edu-school-system-repository\\\\app\\\\ui\\\\app\\\\auth\")",
+      "Bash(dir \"c:\\\\workspace\\\\sources\\\\edu-school-system-repository\\\\app\\\\ui\\\\app\\\\login\")",
+      "Bash(git mv:*)",
+      "Bash(ls:*)",
+      "Bash(npm run build:*)"
     ]
   }
 }
