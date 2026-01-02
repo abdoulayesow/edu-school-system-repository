@@ -662,6 +662,23 @@ export const fr = {
     footerText: "© 2025 GSPN. Tous droits réservés.",
   },
 
+  // Forgot Password
+  forgotPassword: {
+    title: "Mot de passe oublié ?",
+    subtitle: "Entrez votre email et nous vous enverrons un lien pour réinitialiser votre mot de passe.",
+    emailRequired: "Email requis",
+    enterEmail: "Veuillez entrer votre adresse email",
+    sendResetLink: "Envoyer le lien",
+    backToLogin: "Retour à la connexion",
+    emailSent: "Vérifiez votre email",
+    emailSentDescription: "Si un compte avec cet email existe, nous avons envoyé un lien de réinitialisation.",
+    checkSpam: "Vous ne voyez pas l'email ? Vérifiez votre dossier spam.",
+    linkExpiry: "Le lien expirera dans 24 heures.",
+    tryDifferentEmail: "Essayer un autre email",
+    errorSending: "Échec de l'envoi de l'email",
+    networkError: "Veuillez vérifier votre connexion et réessayer",
+  },
+
   // Users
   users: {
     title: "Gestion des utilisateurs",

@@ -34,25 +34,18 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog"
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { DataPagination } from "@/components/data-pagination"
 import { Plus, Pencil, Trash2, Users, Calendar, Banknote } from "lucide-react"
 import type { ActivityType, ActivityStatus } from "@prisma/client"
+import {
+  useAdminActivities,
+  useCreateActivity,
+  useUpdateActivity,
+  useDeleteActivity,
+  type AdminActivity,
+} from "@/lib/hooks/use-api"
 
-interface Activity {
-  id: string
-  name: string
-  nameFr: string | null
-  description: string | null
-  type: ActivityType
-  startDate: string
-  endDate: string
-  fee: number
-  capacity: number
-  status: ActivityStatus
-  isEnabled: boolean
-  schoolYearId: string
-  creator: { id: string; name: string | null; email: string | null }
-  _count: { enrollments: number; payments: number }
-}
+type Activity = AdminActivity
 
 interface SchoolYear {
   id: string
@@ -64,13 +57,14 @@ interface SchoolYear {
 const ACTIVITY_TYPES: ActivityType[] = ["club", "sport", "arts", "academic", "other"]
 const ACTIVITY_STATUSES: ActivityStatus[] = ["draft", "active", "closed", "completed", "cancelled"]
 
+const ITEMS_PER_PAGE = 50
+
 export default function AdminActivitiesPage() {
   const { t, locale } = useI18n()
-  const [activities, setActivities] = useState<Activity[]>([])
   const [schoolYears, setSchoolYears] = useState<SchoolYear[]>([])
   const [selectedSchoolYearId, setSelectedSchoolYearId] = useState<string>("")
   const [selectedType, setSelectedType] = useState<string>("all")
-  const [loading, setLoading] = useState(true)
+  const [offset, setOffset] = useState(0)
 
   // Dialog states
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false)
@@ -90,6 +84,21 @@ export default function AdminActivitiesPage() {
     capacity: 30,
     status: "draft" as ActivityStatus,
   })
+
+  // React Query hooks
+  const { data: activitiesData, isLoading: loading } = useAdminActivities({
+    schoolYearId: selectedSchoolYearId,
+    type: selectedType !== "all" ? selectedType : undefined,
+    limit: ITEMS_PER_PAGE,
+    offset,
+  })
+
+  const createMutation = useCreateActivity()
+  const updateMutation = useUpdateActivity()
+  const deleteMutation = useDeleteActivity()
+
+  const activities = activitiesData?.activities ?? []
+  const pagination = activitiesData?.pagination ?? null
 
   // Load school years
   useEffect(() => {
@@ -111,31 +120,13 @@ export default function AdminActivitiesPage() {
     loadSchoolYears()
   }, [])
 
-  // Load activities
+  // Reset offset when type filter changes
   useEffect(() => {
-    async function loadActivities() {
-      if (!selectedSchoolYearId) return
-      setLoading(true)
-      try {
-        const url = new URL("/api/admin/activities", window.location.origin)
-        url.searchParams.set("schoolYearId", selectedSchoolYearId)
-        const res = await fetch(url.toString())
-        if (res.ok) {
-          const data = await res.json()
-          setActivities(data)
-        }
-      } catch (err) {
-        console.error("Error loading activities:", err)
-      } finally {
-        setLoading(false)
-      }
-    }
-    loadActivities()
-  }, [selectedSchoolYearId])
+    setOffset(0)
+  }, [selectedType])
 
-  const filteredActivities = activities.filter(
-    (a) => selectedType === "all" || a.type === selectedType
-  )
+  // Type filtering is now done server-side
+  const filteredActivities = activities
 
   const resetForm = () => {
     setForm({
@@ -153,20 +144,12 @@ export default function AdminActivitiesPage() {
 
   const handleCreate = async () => {
     try {
-      const res = await fetch("/api/admin/activities", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          ...form,
-          schoolYearId: selectedSchoolYearId,
-        }),
+      await createMutation.mutateAsync({
+        ...form,
+        schoolYearId: selectedSchoolYearId,
       })
-      if (res.ok) {
-        const newActivity = await res.json()
-        setActivities([...activities, newActivity])
-        setIsCreateDialogOpen(false)
-        resetForm()
-      }
+      setIsCreateDialogOpen(false)
+      resetForm()
     } catch (err) {
       console.error("Error creating activity:", err)
     }
@@ -175,18 +158,13 @@ export default function AdminActivitiesPage() {
   const handleEdit = async () => {
     if (!selectedActivity) return
     try {
-      const res = await fetch(`/api/admin/activities/${selectedActivity.id}`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(form),
+      await updateMutation.mutateAsync({
+        id: selectedActivity.id,
+        ...form,
       })
-      if (res.ok) {
-        const updated = await res.json()
-        setActivities(activities.map((a) => (a.id === updated.id ? updated : a)))
-        setIsEditDialogOpen(false)
-        setSelectedActivity(null)
-        resetForm()
-      }
+      setIsEditDialogOpen(false)
+      setSelectedActivity(null)
+      resetForm()
     } catch (err) {
       console.error("Error updating activity:", err)
     }
@@ -195,16 +173,24 @@ export default function AdminActivitiesPage() {
   const handleDelete = async () => {
     if (!selectedActivity) return
     try {
-      const res = await fetch(`/api/admin/activities/${selectedActivity.id}`, {
-        method: "DELETE",
-      })
-      if (res.ok) {
-        setActivities(activities.filter((a) => a.id !== selectedActivity.id))
-        setIsDeleteDialogOpen(false)
-        setSelectedActivity(null)
-      }
+      await deleteMutation.mutateAsync(selectedActivity.id)
+      setIsDeleteDialogOpen(false)
+      setSelectedActivity(null)
     } catch (err) {
       console.error("Error deleting activity:", err)
+    }
+  }
+
+  // Pagination handlers
+  const handleNextPage = () => {
+    if (pagination?.hasMore) {
+      setOffset(pagination.offset + pagination.limit)
+    }
+  }
+
+  const handlePrevPage = () => {
+    if (pagination && pagination.offset > 0) {
+      setOffset(Math.max(0, pagination.offset - pagination.limit))
     }
   }
 
@@ -313,72 +299,81 @@ export default function AdminActivitiesPage() {
         ) : filteredActivities.length === 0 ? (
           <div className="text-center py-8 text-muted-foreground">{t.activities.noActivities}</div>
         ) : (
-          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-            {filteredActivities.map((activity) => (
-              <Card key={activity.id}>
-                <CardHeader className="pb-2">
-                  <div className="flex items-start justify-between">
-                    <div>
-                      <CardTitle className="text-lg">
-                        {locale === "fr" && activity.nameFr ? activity.nameFr : activity.name}
-                      </CardTitle>
-                      <div className="flex gap-2 mt-1">
-                        <Badge variant="outline">{getTypeLabel(activity.type)}</Badge>
-                        <Badge className={getStatusColor(activity.status)}>
-                          {getStatusLabel(activity.status)}
-                        </Badge>
+          <>
+            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+              {filteredActivities.map((activity) => (
+                <Card key={activity.id}>
+                  <CardHeader className="pb-2">
+                    <div className="flex items-start justify-between">
+                      <div>
+                        <CardTitle className="text-lg">
+                          {locale === "fr" && activity.nameFr ? activity.nameFr : activity.name}
+                        </CardTitle>
+                        <div className="flex gap-2 mt-1">
+                          <Badge variant="outline">{getTypeLabel(activity.type)}</Badge>
+                          <Badge className={getStatusColor(activity.status)}>
+                            {getStatusLabel(activity.status)}
+                          </Badge>
+                        </div>
+                      </div>
+                      <div className="flex gap-1">
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => openEditDialog(activity)}
+                        >
+                          <Pencil className="h-4 w-4" />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => {
+                            setSelectedActivity(activity)
+                            setIsDeleteDialogOpen(true)
+                          }}
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
                       </div>
                     </div>
-                    <div className="flex gap-1">
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={() => openEditDialog(activity)}
-                      >
-                        <Pencil className="h-4 w-4" />
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={() => {
-                          setSelectedActivity(activity)
-                          setIsDeleteDialogOpen(true)
-                        }}
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
+                  </CardHeader>
+                  <CardContent>
+                    {activity.description && (
+                      <p className="text-sm text-muted-foreground mb-3 line-clamp-2">
+                        {activity.description}
+                      </p>
+                    )}
+                    <div className="grid grid-cols-2 gap-2 text-sm">
+                      <div className="flex items-center gap-2">
+                        <Users className="h-4 w-4 text-muted-foreground" />
+                        <span>
+                          {activity._count.enrollments}/{activity.capacity} {t.activities.enrolled}
+                        </span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <Banknote className="h-4 w-4 text-muted-foreground" />
+                        <span>{formatCurrency(activity.fee)}</span>
+                      </div>
+                      <div className="flex items-center gap-2 col-span-2">
+                        <Calendar className="h-4 w-4 text-muted-foreground" />
+                        <span>
+                          {new Date(activity.startDate).toLocaleDateString(locale)} -{" "}
+                          {new Date(activity.endDate).toLocaleDateString(locale)}
+                        </span>
+                      </div>
                     </div>
-                  </div>
-                </CardHeader>
-                <CardContent>
-                  {activity.description && (
-                    <p className="text-sm text-muted-foreground mb-3 line-clamp-2">
-                      {activity.description}
-                    </p>
-                  )}
-                  <div className="grid grid-cols-2 gap-2 text-sm">
-                    <div className="flex items-center gap-2">
-                      <Users className="h-4 w-4 text-muted-foreground" />
-                      <span>
-                        {activity._count.enrollments}/{activity.capacity} {t.activities.enrolled}
-                      </span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <Banknote className="h-4 w-4 text-muted-foreground" />
-                      <span>{formatCurrency(activity.fee)}</span>
-                    </div>
-                    <div className="flex items-center gap-2 col-span-2">
-                      <Calendar className="h-4 w-4 text-muted-foreground" />
-                      <span>
-                        {new Date(activity.startDate).toLocaleDateString(locale)} -{" "}
-                        {new Date(activity.endDate).toLocaleDateString(locale)}
-                      </span>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+            {pagination && (
+              <DataPagination
+                pagination={pagination}
+                onPrevPage={handlePrevPage}
+                onNextPage={handleNextPage}
+              />
+            )}
+          </>
         )}
       </div>
 

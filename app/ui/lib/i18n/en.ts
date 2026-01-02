@@ -664,6 +664,23 @@ export const en: TranslationKeys = {
     footerText: "© 2025 GSPN. All rights reserved.",
   },
 
+  // Forgot Password
+  forgotPassword: {
+    title: "Forgot Password?",
+    subtitle: "Enter your email and we'll send you a link to reset your password.",
+    emailRequired: "Email Required",
+    enterEmail: "Please enter your email address",
+    sendResetLink: "Send Reset Link",
+    backToLogin: "Back to Login",
+    emailSent: "Check Your Email",
+    emailSentDescription: "If an account with this email exists, we've sent a password reset link.",
+    checkSpam: "Don't see the email? Check your spam folder.",
+    linkExpiry: "The link will expire in 24 hours.",
+    tryDifferentEmail: "Try a different email",
+    errorSending: "Failed to send reset email",
+    networkError: "Please check your connection and try again",
+  },
+
   // Users
   users: {
     title: "User Management",

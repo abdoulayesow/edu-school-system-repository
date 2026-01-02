@@ -168,3 +168,137 @@ export async function sendInvitationEmail({
     return { success: false, error: "Failed to send email" }
   }
 }
+
+interface SendPasswordResetEmailParams {
+  to: string
+  userName?: string
+  token: string
+  locale?: "en" | "fr"
+}
+
+export async function sendPasswordResetEmail({
+  to,
+  userName,
+  token,
+  locale = "fr",
+}: SendPasswordResetEmailParams): Promise<{ success: boolean; error?: string }> {
+  if (!resend) {
+    console.warn("Resend is not configured. Skipping email send.")
+    return { success: false, error: "Email service not configured" }
+  }
+
+  const resetUrl = `${APP_URL}/auth/reset-password?token=${token}`
+
+  const subject = locale === "fr"
+    ? "Réinitialisation de votre mot de passe - GSPN"
+    : "Reset Your Password - GSPN"
+
+  const html = locale === "fr" ? `
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Réinitialisation du mot de passe</title>
+</head>
+<body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px;">
+  <div style="background: linear-gradient(135deg, #1e40af 0%, #3b82f6 100%); padding: 30px; border-radius: 10px 10px 0 0; text-align: center;">
+    <h1 style="color: white; margin: 0; font-size: 24px;">GSPN Management System</h1>
+  </div>
+
+  <div style="background: #fff; padding: 30px; border: 1px solid #e5e7eb; border-top: none; border-radius: 0 0 10px 10px;">
+    <p style="font-size: 16px;">Bonjour${userName ? ` ${userName}` : ''},</p>
+
+    <p style="font-size: 16px;">Vous avez demandé la réinitialisation de votre mot de passe pour le système de gestion GSPN.</p>
+
+    <p style="font-size: 16px;">Pour créer un nouveau mot de passe, cliquez sur le bouton ci-dessous:</p>
+
+    <div style="text-align: center; margin: 30px 0;">
+      <a href="${resetUrl}" style="display: inline-block; background: #1e40af; color: white; padding: 14px 28px; text-decoration: none; border-radius: 8px; font-weight: bold; font-size: 16px;">
+        Réinitialiser mon mot de passe
+      </a>
+    </div>
+
+    <p style="font-size: 14px; color: #666;">
+      Ce lien expire dans <strong>24 heures</strong>.
+    </p>
+
+    <p style="font-size: 14px; color: #666;">
+      Si le bouton ne fonctionne pas, copiez et collez ce lien dans votre navigateur:<br>
+      <a href="${resetUrl}" style="color: #1e40af; word-break: break-all;">${resetUrl}</a>
+    </p>
+
+    <hr style="border: none; border-top: 1px solid #e5e7eb; margin: 30px 0;">
+
+    <p style="font-size: 12px; color: #999; text-align: center;">
+      Si vous n'avez pas demandé cette réinitialisation, veuillez ignorer cet email.<br>
+      Votre mot de passe restera inchangé.
+    </p>
+  </div>
+</body>
+</html>
+` : `
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Password Reset</title>
+</head>
+<body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px;">
+  <div style="background: linear-gradient(135deg, #1e40af 0%, #3b82f6 100%); padding: 30px; border-radius: 10px 10px 0 0; text-align: center;">
+    <h1 style="color: white; margin: 0; font-size: 24px;">GSPN Management System</h1>
+  </div>
+
+  <div style="background: #fff; padding: 30px; border: 1px solid #e5e7eb; border-top: none; border-radius: 0 0 10px 10px;">
+    <p style="font-size: 16px;">Hello${userName ? ` ${userName}` : ''},</p>
+
+    <p style="font-size: 16px;">You requested a password reset for your GSPN Management System account.</p>
+
+    <p style="font-size: 16px;">To create a new password, click the button below:</p>
+
+    <div style="text-align: center; margin: 30px 0;">
+      <a href="${resetUrl}" style="display: inline-block; background: #1e40af; color: white; padding: 14px 28px; text-decoration: none; border-radius: 8px; font-weight: bold; font-size: 16px;">
+        Reset My Password
+      </a>
+    </div>
+
+    <p style="font-size: 14px; color: #666;">
+      This link expires in <strong>24 hours</strong>.
+    </p>
+
+    <p style="font-size: 14px; color: #666;">
+      If the button doesn't work, copy and paste this link into your browser:<br>
+      <a href="${resetUrl}" style="color: #1e40af; word-break: break-all;">${resetUrl}</a>
+    </p>
+
+    <hr style="border: none; border-top: 1px solid #e5e7eb; margin: 30px 0;">
+
+    <p style="font-size: 12px; color: #999; text-align: center;">
+      If you didn't request this reset, please ignore this email.<br>
+      Your password will remain unchanged.
+    </p>
+  </div>
+</body>
+</html>
+`
+
+  try {
+    const { data, error } = await resend.emails.send({
+      from: EMAIL_FROM,
+      to,
+      subject,
+      html,
+    })
+
+    if (error) {
+      console.error("Failed to send password reset email:", error)
+      return { success: false, error: error.message }
+    }
+
+    return { success: true }
+  } catch (err) {
+    console.error("Error sending password reset email:", err)
+    return { success: false, error: "Failed to send email" }
+  }
+}

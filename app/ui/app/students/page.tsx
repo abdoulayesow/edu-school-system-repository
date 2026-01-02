@@ -25,6 +25,7 @@ import { DataPagination } from "@/components/data-pagination"
 import Link from "next/link"
 import { sizing } from "@/lib/design-tokens"
 import { useGrades, useStudents, type ApiStudent } from "@/lib/hooks/use-api"
+import { useDebounce } from "@/lib/hooks/use-debounce"
 
 const ITEMS_PER_PAGE = 50
 
@@ -42,17 +43,27 @@ export default function StudentsPage() {
   const [paymentStatusFilter, setPaymentStatusFilter] = useState<string>("all")
   const [attendanceStatusFilter, setAttendanceStatusFilter] = useState<string>("all")
 
+  // Debounce search query for server-side filtering (300ms delay)
+  const debouncedSearchQuery = useDebounce(searchQuery, 300)
+
   // Pagination state
   const [offset, setOffset] = useState(0)
 
-  // Reset offset when filters change
+  // Reset offset when server-side filters change
   useEffect(() => {
     setOffset(0)
-  }, [searchQuery, gradeFilter, paymentStatusFilter, attendanceStatusFilter])
+  }, [debouncedSearchQuery, gradeFilter])
+
+  // Also reset offset when client-side filters change
+  useEffect(() => {
+    setOffset(0)
+  }, [paymentStatusFilter, attendanceStatusFilter])
 
   // React Query hooks - fetch data with automatic caching
   const { data: gradesData, isLoading: gradesLoading } = useGrades()
   const { data: studentsData, isLoading: studentsLoading, error: studentsError } = useStudents({
+    search: debouncedSearchQuery || undefined,
+    gradeId: gradeFilter !== "all" ? gradeFilter : undefined,
     limit: ITEMS_PER_PAGE,
     offset,
   })
@@ -69,20 +80,16 @@ export default function StudentsPage() {
     setIsMounted(true)
   }, [])
 
-  // Client-side filtering
+  // Client-side filtering for calculated fields only
+  // (search and grade filtering is now handled server-side)
   const filteredStudents = useMemo(() => {
     return students.filter(student => {
-      const matchesSearch = searchQuery === "" ||
-        `${student.firstName} ${student.lastName}`.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        student.studentNumber?.toLowerCase().includes(searchQuery.toLowerCase())
-
-      const matchesGrade = gradeFilter === "all" || student.grade?.id === gradeFilter
       const matchesPayment = paymentStatusFilter === "all" || student.paymentStatus === paymentStatusFilter
       const matchesAttendance = attendanceStatusFilter === "all" || student.attendanceStatus === attendanceStatusFilter
 
-      return matchesSearch && matchesGrade && matchesPayment && matchesAttendance
+      return matchesPayment && matchesAttendance
     })
-  }, [students, searchQuery, gradeFilter, paymentStatusFilter, attendanceStatusFilter])
+  }, [students, paymentStatusFilter, attendanceStatusFilter])
 
   // Summary statistics
   const stats = useMemo(() => {

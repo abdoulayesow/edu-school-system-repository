@@ -39,51 +39,20 @@ export async function GET(req: NextRequest) {
     const scheduleSlots = await prisma.scheduleSlot.findMany({
       where,
       include: {
-        timePeriod: {
-          select: {
-            id: true,
-            name: true,
-            nameFr: true,
-            startTime: true,
-            endTime: true,
-            order: true,
-          },
-        },
+        timePeriod: true,
         gradeRoom: {
-          select: {
-            id: true,
-            displayName: true,
-            grade: {
-              select: {
-                id: true,
-                name: true,
-              },
-            },
+          include: {
+            grade: true,
           },
         },
         gradeSubject: {
-          select: {
-            id: true,
-            subject: {
-              select: {
-                id: true,
-                name: true,
-                nameFr: true,
-                code: true,
-              },
-            },
+          include: {
+            subject: true,
           },
         },
         teacherProfile: {
-          select: {
-            id: true,
-            person: {
-              select: {
-                id: true,
-                firstName: true,
-                lastName: true,
-              },
-            },
+          include: {
+            person: true,
           },
         },
       },
