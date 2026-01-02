@@ -70,7 +70,10 @@ interface EnrollmentFilters {
 }
 
 interface ActivityFilters {
+  schoolYearId?: string
   type?: string
+  status?: string
+  search?: string
   view?: "activities" | "students"
   limit?: number
   offset?: number
@@ -79,6 +82,7 @@ interface ActivityFilters {
 interface ExpenseFilters {
   status?: string
   category?: string
+  search?: string
   startDate?: string
   endDate?: string
   limit?: number
@@ -549,6 +553,162 @@ export function useEnrollInActivity() {
     },
     onSuccess: () => {
       // Invalidate activities to refresh counts
+      queryClient.invalidateQueries({ queryKey: ["activities"] })
+    },
+  })
+}
+
+// ============================================
+// Admin Activities Hooks
+// ============================================
+
+interface AdminActivityFilters {
+  schoolYearId: string
+  type?: string
+  status?: string
+  search?: string
+  limit?: number
+  offset?: number
+}
+
+export interface AdminActivity {
+  id: string
+  name: string
+  nameFr: string | null
+  description: string | null
+  type: "club" | "sport" | "arts" | "academic" | "other"
+  startDate: string
+  endDate: string
+  fee: number
+  capacity: number
+  status: "draft" | "active" | "closed" | "completed" | "cancelled"
+  isEnabled: boolean
+  schoolYearId: string
+  creator: { id: string; name: string | null; email: string | null }
+  _count: { enrollments: number; payments: number }
+}
+
+interface AdminActivitiesResponse {
+  activities: AdminActivity[]
+  pagination: {
+    total: number
+    limit: number
+    offset: number
+    hasMore: boolean
+  }
+}
+
+/**
+ * Hook: Fetch admin activities with filters
+ */
+export function useAdminActivities(filters: AdminActivityFilters) {
+  const url = buildUrl("/api/admin/activities", { ...filters })
+
+  return useQuery({
+    queryKey: ["admin", "activities", filters],
+    queryFn: () => fetchApi<AdminActivitiesResponse>(url),
+    staleTime: 30 * 1000,
+    enabled: !!filters.schoolYearId,
+  })
+}
+
+interface CreateActivityInput {
+  name: string
+  nameFr?: string
+  description?: string
+  type: string
+  startDate: string
+  endDate: string
+  fee: number
+  capacity: number
+  status: string
+  schoolYearId: string
+}
+
+/**
+ * Hook: Create a new activity (admin)
+ */
+export function useCreateActivity() {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: async (data: CreateActivityInput) => {
+      const res = await fetch("/api/admin/activities", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data),
+      })
+      if (!res.ok) {
+        const error = await res.json().catch(() => ({ message: res.statusText }))
+        throw new Error(error.message || `API error: ${res.status}`)
+      }
+      return res.json()
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["admin", "activities"] })
+      queryClient.invalidateQueries({ queryKey: ["activities"] })
+    },
+  })
+}
+
+interface UpdateActivityInput {
+  id: string
+  name?: string
+  nameFr?: string
+  description?: string
+  type?: string
+  startDate?: string
+  endDate?: string
+  fee?: number
+  capacity?: number
+  status?: string
+}
+
+/**
+ * Hook: Update an activity (admin)
+ */
+export function useUpdateActivity() {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: async ({ id, ...data }: UpdateActivityInput) => {
+      const res = await fetch(`/api/admin/activities/${id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data),
+      })
+      if (!res.ok) {
+        const error = await res.json().catch(() => ({ message: res.statusText }))
+        throw new Error(error.message || `API error: ${res.status}`)
+      }
+      return res.json()
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["admin", "activities"] })
+      queryClient.invalidateQueries({ queryKey: ["activities"] })
+    },
+  })
+}
+
+/**
+ * Hook: Delete an activity (admin)
+ */
+export function useDeleteActivity() {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: async (activityId: string) => {
+      const res = await fetch(`/api/admin/activities/${activityId}`, {
+        method: "DELETE",
+      })
+      if (!res.ok) {
+        const error = await res.json().catch(() => ({ message: res.statusText }))
+        throw new Error(error.message || `API error: ${res.status}`)
+      }
+      return res.json()
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["admin", "activities"] })
       queryClient.invalidateQueries({ queryKey: ["activities"] })
     },
   })

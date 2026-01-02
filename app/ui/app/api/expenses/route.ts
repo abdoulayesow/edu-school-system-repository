@@ -25,6 +25,7 @@ export async function GET(req: NextRequest) {
   const { searchParams } = new URL(req.url)
   const status = searchParams.get("status")
   const category = searchParams.get("category")
+  const search = searchParams.get("search")
   const startDate = searchParams.get("startDate")
   const endDate = searchParams.get("endDate")
   const limit = parseInt(searchParams.get("limit") || "100")
@@ -38,6 +39,13 @@ export async function GET(req: NextRequest) {
     }
     if (category) {
       where.category = category
+    }
+    // Search filter (description, vendorName)
+    if (search) {
+      where.OR = [
+        { description: { contains: search, mode: "insensitive" } },
+        { vendorName: { contains: search, mode: "insensitive" } },
+      ]
     }
     if (startDate || endDate) {
       where.date = {}

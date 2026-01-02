@@ -43,6 +43,7 @@ export default function EnrollmentsPage() {
 
   // Pagination state
   const [offset, setOffset] = useState(0)
+  const [limit, setLimit] = useState(ITEMS_PER_PAGE)
 
   // Reset offset when filters change
   useEffect(() => {
@@ -51,9 +52,10 @@ export default function EnrollmentsPage() {
 
   // React Query hooks
   const { data: enrollmentsData, isLoading: enrollmentsLoading, error: enrollmentsError } = useEnrollments({
+    search: searchQuery || undefined,
     status: statusFilter !== "all" ? statusFilter : undefined,
     gradeId: gradeFilter !== "all" ? gradeFilter : undefined,
-    limit: ITEMS_PER_PAGE,
+    limit,
     offset,
   })
   const { data: gradesData, isLoading: gradesLoading } = useGrades()
@@ -101,6 +103,16 @@ export default function EnrollmentsPage() {
     }
   }
 
+  const handlePageChange = (page: number) => {
+    const newOffset = (page - 1) * limit
+    setOffset(newOffset)
+  }
+
+  const handleLimitChange = (newLimit: number) => {
+    setLimit(newLimit)
+    setOffset(0) // Reset to first page when changing limit
+  }
+
   const getPaymentStatus = (enrollment: Enrollment) => {
     if (enrollment.status === "draft") return "pending"
     if (enrollment.totalPaid >= enrollment.tuitionFee) return "paid"
@@ -136,18 +148,8 @@ export default function EnrollmentsPage() {
     return { total, drafts, submitted, completed }
   }, [enrollments])
 
-  const filteredEnrollments = useMemo(() => {
-    return enrollments.filter((enrollment) => {
-      const matchesSearch = searchQuery === "" ||
-        `${enrollment.firstName} ${enrollment.lastName}`.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        enrollment.enrollmentNumber?.toLowerCase().includes(searchQuery.toLowerCase())
-
-      const matchesStatus = statusFilter === "all" || enrollment.status === statusFilter
-      const matchesGrade = gradeFilter === "all" || enrollment.grade?.id === gradeFilter
-
-      return matchesSearch && matchesStatus && matchesGrade
-    })
-  }, [enrollments, searchQuery, statusFilter, gradeFilter])
+  // Server-side filtering is now handled by the API
+  const filteredEnrollments = enrollments
 
   return (
     <PageContainer maxWidth="full">
@@ -343,6 +345,8 @@ export default function EnrollmentsPage() {
                   pagination={pagination}
                   onPrevPage={handlePrevPage}
                   onNextPage={handleNextPage}
+                  onPageChange={handlePageChange}
+                  onLimitChange={handleLimitChange}
                 />
               )}
               </>

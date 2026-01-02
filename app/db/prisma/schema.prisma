@@ -218,6 +218,15 @@ enum ActivityType {
   other             // Miscellaneous
 }
 
+enum DayOfWeek {
+  monday
+  tuesday
+  wednesday
+  thursday
+  friday
+  saturday
+}
+
 model SchoolYear {
   id              String           @id @default(cuid())
   name            String           // "2025 - 2026"
@@ -237,6 +246,7 @@ model SchoolYear {
   gradeEnrollments  GradeEnrollment[]
   studentRoomAssignments StudentRoomAssignment[]
   activities        Activity[]
+  timePeriods       TimePeriod[]
 
   @@index([isActive])
   @@index([startDate])
@@ -621,6 +631,7 @@ model TeacherProfile {
   person          Person    @relation(fields: [personId], references: [id], onDelete: Cascade)
   classAssignments ClassAssignment[]
   gradeLederships Grade[]   @relation("GradeLeader")
+  scheduleSlots ScheduleSlot[]
 
   @@index([personId])
   @@index([employeeNumber])
@@ -686,6 +697,7 @@ model GradeSubject {
   grade         Grade     @relation(fields: [gradeId], references: [id], onDelete: Cascade)
   subject       Subject   @relation(fields: [subjectId], references: [id])
   classAssignments ClassAssignment[]
+  scheduleSlots ScheduleSlot[]
 
   @@unique([gradeId, subjectId, series])
   @@index([gradeId])
@@ -707,6 +719,55 @@ model ClassAssignment {
   @@unique([gradeSubjectId, schoolYearId])
   @@index([teacherProfileId])
   @@index([schoolYearId])
+}
+
+model TimePeriod {
+  id              String    @id @default(cuid())
+  name            String    // "Period 1", "Period 2"
+  nameFr          String?   // "Période 1"
+  startTime       String    // "08:00" (24-hour)
+  endTime         String    // "09:00"
+  order           Int       // 1, 2, 3... for sorting
+  schoolYearId    String
+  isActive        Boolean   @default(true)
+  syncVersion     Int       @default(0)
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  schoolYear      SchoolYear @relation(fields: [schoolYearId], references: [id], onDelete: Cascade)
+  scheduleSlots   ScheduleSlot[]
+
+  @@unique([schoolYearId, order])
+  @@index([schoolYearId])
+  @@index([order])
+  @@index([isActive])
+}
+
+model ScheduleSlot {
+  id                String      @id @default(cuid())
+  gradeRoomId       String      // 7A, 7B, 7C
+  timePeriodId      String
+  dayOfWeek         DayOfWeek
+  gradeSubjectId    String?     // Nullable for breaks
+  teacherProfileId  String?     // Nullable for breaks
+  roomLocation      String?     // "Room 101", "Lab A"
+  isBreak           Boolean     @default(false)
+  notes             String?
+  syncVersion       Int         @default(0)
+  createdAt         DateTime    @default(now())
+  updatedAt         DateTime    @updatedAt
+
+  gradeRoom         GradeRoom       @relation(fields: [gradeRoomId], references: [id], onDelete: Cascade)
+  timePeriod        TimePeriod      @relation(fields: [timePeriodId], references: [id], onDelete: Cascade)
+  gradeSubject      GradeSubject?   @relation(fields: [gradeSubjectId], references: [id], onDelete: SetNull)
+  teacherProfile    TeacherProfile? @relation(fields: [teacherProfileId], references: [id], onDelete: SetNull)
+
+  @@unique([gradeRoomId, timePeriodId, dayOfWeek])
+  @@index([gradeRoomId])
+  @@index([timePeriodId])
+  @@index([dayOfWeek])
+  @@index([teacherProfileId, dayOfWeek, timePeriodId]) // Conflict detection
+  @@index([roomLocation, dayOfWeek, timePeriodId])     // Room conflicts
 }
 
 model GradeEnrollment {
@@ -883,6 +944,7 @@ model GradeRoom {
 
   grade       Grade     @relation(fields: [gradeId], references: [id], onDelete: Cascade)
   studentAssignments StudentRoomAssignment[]
+  scheduleSlots ScheduleSlot[]
 
   @@unique([gradeId, name])
   @@index([gradeId])

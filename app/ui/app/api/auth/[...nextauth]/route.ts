@@ -189,9 +189,23 @@ export const authOptions: NextAuthOptions = {
       // On sign-in, persist DB id/role into the token.
       if (user) {
         token.id = user.id
-        // `role` is a custom field on our Prisma User model.
-        const role = (user as { role?: string | null }).role
-        token.role = normalizeRole(role ?? null)
+
+        // Fetch fresh user data from DB to get any synced Google profile updates
+        // (signIn callback may have updated name/image before this runs)
+        const freshUser = await prisma.user.findUnique({
+          where: { id: user.id },
+          select: { name: true, role: true, image: true },
+        })
+
+        if (freshUser) {
+          token.name = freshUser.name
+          token.picture = freshUser.image
+          token.role = normalizeRole(freshUser.role ?? null)
+        } else {
+          // Fallback to user object if DB fetch fails
+          const role = (user as { role?: string | null }).role
+          token.role = normalizeRole(role ?? null)
+        }
       }
       return token
     },
@@ -199,6 +213,13 @@ export const authOptions: NextAuthOptions = {
       if (session.user) {
         session.user.id = token.id as string
         session.user.role = token.role ?? "user"
+        // Pass synced name and image from token (fetched from DB in jwt callback)
+        if (token.name) {
+          session.user.name = token.name as string
+        }
+        if (token.picture) {
+          session.user.image = token.picture as string
+        }
       }
       return session
     },

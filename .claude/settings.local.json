@@ -37,7 +37,8 @@
       "Bash(dir \"c:\\\\workspace\\\\sources\\\\edu-school-system-repository\\\\app\\\\ui\\\\app\\\\login\")",
       "Bash(git mv:*)",
       "Bash(ls:*)",
-      "Bash(npm run build:*)"
+      "Bash(npm run build:*)",
+      "Bash(npx prisma migrate:*)"
     ]
   }
 }
