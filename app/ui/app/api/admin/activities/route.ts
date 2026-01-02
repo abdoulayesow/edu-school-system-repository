@@ -21,7 +21,7 @@ const createActivitySchema = z.object({
 /**
  * GET /api/admin/activities
  * List activities for a school year
- * Query params: schoolYearId (required), type (optional), status (optional)
+ * Query params: schoolYearId (required), type (optional), status (optional), search (optional), limit, offset
  */
 export async function GET(req: NextRequest) {
   const { session, error } = await requireRole(["director", "academic_director", "accountant"])
@@ -32,6 +32,9 @@ export async function GET(req: NextRequest) {
     const schoolYearId = searchParams.get("schoolYearId")
     const type = searchParams.get("type") as ActivityType | null
     const status = searchParams.get("status") as ActivityStatus | null
+    const search = searchParams.get("search")
+    const limit = parseInt(searchParams.get("limit") || "50")
+    const offset = parseInt(searchParams.get("offset") || "0")
 
     if (!schoolYearId) {
       return NextResponse.json(
@@ -40,24 +43,48 @@ export async function GET(req: NextRequest) {
       )
     }
 
-    const activities = await prisma.activity.findMany({
-      where: {
-        schoolYearId,
-        ...(type && { type }),
-        ...(status && { status }),
-      },
-      orderBy: [{ status: "asc" }, { name: "asc" }],
-      include: {
-        creator: {
-          select: { id: true, name: true, email: true },
+    const where: Record<string, unknown> = {
+      schoolYearId,
+      ...(type && { type }),
+      ...(status && { status }),
+    }
+
+    // Search filter (name, nameFr, description)
+    if (search) {
+      where.OR = [
+        { name: { contains: search, mode: "insensitive" } },
+        { nameFr: { contains: search, mode: "insensitive" } },
+        { description: { contains: search, mode: "insensitive" } },
+      ]
+    }
+
+    const [activities, total] = await Promise.all([
+      prisma.activity.findMany({
+        where,
+        orderBy: [{ status: "asc" }, { name: "asc" }],
+        include: {
+          creator: {
+            select: { id: true, name: true, email: true },
+          },
+          _count: {
+            select: { enrollments: true, payments: true },
+          },
         },
-        _count: {
-          select: { enrollments: true, payments: true },
-        },
+        take: limit,
+        skip: offset,
+      }),
+      prisma.activity.count({ where }),
+    ])
+
+    return NextResponse.json({
+      activities,
+      pagination: {
+        total,
+        limit,
+        offset,
+        hasMore: offset + activities.length < total,
       },
     })
-
-    return NextResponse.json(activities)
   } catch (err) {
     console.error("Error fetching activities:", err)
     return NextResponse.json(

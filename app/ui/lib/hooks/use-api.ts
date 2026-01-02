@@ -70,7 +70,10 @@ interface EnrollmentFilters {
 }
 
 interface ActivityFilters {
+  schoolYearId?: string
   type?: string
+  status?: string
+  search?: string
   view?: "activities" | "students"
   limit?: number
   offset?: number
@@ -79,6 +82,7 @@ interface ActivityFilters {
 interface ExpenseFilters {
   status?: string
   category?: string
+  search?: string
   startDate?: string
   endDate?: string
   limit?: number

@@ -115,17 +115,19 @@ export default function ExpensesPage() {
 
   // Pagination state
   const [offset, setOffset] = useState(0)
+  const [limit, setLimit] = useState(ITEMS_PER_PAGE)
 
   // Reset offset when filters change
   useEffect(() => {
     setOffset(0)
-  }, [statusFilter, categoryFilter])
+  }, [searchQuery, statusFilter, categoryFilter])
 
   // React Query hooks
   const { data: expensesData, isLoading, error: queryError } = useExpenses({
+    search: searchQuery || undefined,
     status: statusFilter !== "all" ? statusFilter : undefined,
     category: categoryFilter !== "all" ? categoryFilter : undefined,
-    limit: ITEMS_PER_PAGE,
+    limit,
     offset,
   })
   const createExpenseMutation = useCreateExpense()
@@ -164,16 +166,8 @@ export default function ExpensesPage() {
     }))
   }, [])
 
-  // Client-side search filtering
-  const filteredExpenses = useMemo(() => {
-    if (!searchQuery) return expenses
-    const query = searchQuery.toLowerCase()
-    return expenses.filter(expense =>
-      expense.description.toLowerCase().includes(query) ||
-      expense.vendorName?.toLowerCase().includes(query) ||
-      expense.requester?.name.toLowerCase().includes(query)
-    )
-  }, [expenses, searchQuery])
+  // Server-side search is now handled by the API
+  const filteredExpenses = expenses
 
   // Calculate stats
   const stats = useMemo(() => {
@@ -341,6 +335,16 @@ export default function ExpensesPage() {
     if (pagination && pagination.offset > 0) {
       setOffset(Math.max(0, pagination.offset - pagination.limit))
     }
+  }
+
+  const handlePageChange = (page: number) => {
+    const newOffset = (page - 1) * limit
+    setOffset(newOffset)
+  }
+
+  const handleLimitChange = (newLimit: number) => {
+    setLimit(newLimit)
+    setOffset(0) // Reset to first page when changing limit
   }
 
   // Prevent hydration mismatch by not rendering interactive components until mounted
@@ -730,6 +734,8 @@ export default function ExpensesPage() {
                   pagination={pagination}
                   onPrevPage={handlePrevPage}
                   onNextPage={handleNextPage}
+                  onPageChange={handlePageChange}
+                  onLimitChange={handleLimitChange}
                 />
               )}
               </>
