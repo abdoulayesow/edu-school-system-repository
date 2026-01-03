@@ -86,6 +86,13 @@ export const en: TranslationKeys = {
     expandMenu: "Expand Menu",
     closeMenu: "Close Menu",
     gradesClasses: "Grades & Classes",
+    // Grading navigation
+    gradingSection: "Grading",
+    bulletins: "Bulletins",
+    classRankingNav: "Class Ranking",
+    teacherRemarks: "Teacher Remarks",
+    conductEntry: "Conduct & Attendance",
+    trimesters: "Trimesters",
   },
 
   // Homepage
@@ -1587,5 +1594,214 @@ export const en: TranslationKeys = {
     // Placeholders
     emailPlaceholder: "user@example.com",
     namePlaceholder: "John Doe",
+
+    // Trimesters
+    trimesters: "Trimesters",
+    trimester: "Trimester",
+    trimestersTitle: "Trimester Management",
+    trimestersSubtitle: "Manage academic trimesters for grading periods",
+    createTrimester: "Create Trimester",
+    editTrimester: "Edit Trimester",
+    deleteTrimester: "Delete Trimester",
+    activateTrimester: "Activate Trimester",
+    deactivateTrimester: "Deactivate Trimester",
+    trimesterNumber: "Trimester Number",
+    trimester1: "1st Trimester",
+    trimester2: "2nd Trimester",
+    trimester3: "3rd Trimester",
+    activeTrimester: "Active Trimester",
+    noActiveTrimester: "No active trimester",
+    totalTrimesters: "Total Trimesters",
+    evaluationsCount: "Evaluations",
+    trimesterActivated: "Trimester activated successfully",
+    trimesterDeactivated: "Trimester deactivated successfully",
+    deleteTrimesterConfirmation: "Are you sure you want to delete this trimester? This action cannot be undone.",
+    cannotDeleteActiveTrimester: "Cannot delete the active trimester",
+    cannotDeleteTrimesterWithEvaluations: "Cannot delete a trimester with existing evaluations",
+    activateTrimesterConfirmation: "Are you sure you want to activate this trimester? This will deactivate any currently active trimester.",
+    selectTrimester: "Select trimester",
+    noTrimesters: "No trimesters configured",
+    configureTrimesters: "Configure trimesters to enable grading",
+  },
+
+  // Grading System
+  grading: {
+    // Page titles
+    gradeEntry: "Grade Entry",
+    gradeEntrySubtitle: "Enter student grades for the current trimester",
+    evaluations: "Evaluations",
+    evaluationsSubtitle: "View and manage student evaluations",
+
+    // Evaluation types
+    evaluationType: "Evaluation Type",
+    interrogation: "Interrogation",
+    interrogationShort: "Interro",
+    devoirSurveille: "Devoir Surveillé",
+    devoirSurveilleShort: "DS",
+    composition: "Composition",
+    compositionShort: "Compo",
+
+    // Grade entry
+    enterGrades: "Enter Grades",
+    score: "Score",
+    maxScore: "Max Score",
+    outOf: "out of",
+    coefficient: "Coefficient",
+    average: "Average",
+    classAverage: "Class Average",
+    studentAverage: "Student Average",
+    subjectAverage: "Subject Average",
+    generalAverage: "General Average",
+    weightedAverage: "Weighted Average",
+
+    // Evaluation management
+    addEvaluation: "Add Evaluation",
+    editEvaluation: "Edit Evaluation",
+    deleteEvaluation: "Delete Evaluation",
+    deleteEvaluationConfirmation: "Are you sure you want to delete this evaluation?",
+    evaluationDate: "Evaluation Date",
+    noEvaluations: "No evaluations recorded",
+    recordedBy: "Recorded by",
+
+    // Batch entry
+    batchEntry: "Batch Entry",
+    enterScoresForClass: "Enter scores for class",
+    saveAllGrades: "Save All Grades",
+    gradesEntered: "grades entered",
+    gradesSaved: "Grades saved successfully",
+    gradeSaved: "Grade saved",
+
+    // Status and validation
+    passed: "Passed",
+    failed: "Failed",
+    pending: "Pending",
+    invalidScore: "Score must be between 0 and {max}",
+    scoreRequired: "Score is required",
+    allFieldsRequired: "All fields are required",
+
+    // Coefficients by type
+    coefficientInterro: "×1",
+    coefficientDS: "×2",
+    coefficientCompo: "×2",
+
+    // Summary
+    totalEvaluations: "Total Evaluations",
+    studentsGraded: "Students Graded",
+    averageScore: "Average Score",
+    passRate: "Pass Rate",
+    passThreshold: "Pass threshold: 10/20",
+
+    // Filters
+    filterBySubject: "Filter by subject",
+    filterByType: "Filter by type",
+    filterByStudent: "Filter by student",
+    allSubjects: "All subjects",
+    allTypes: "All types",
+    allStudents: "All students",
+
+    // Select prompts
+    selectSubject: "Select subject",
+    selectGrade: "Select grade",
+    selectStudent: "Select student",
+    selectType: "Select type",
+
+    // Remarks
+    teacherRemark: "Teacher Remark",
+    addRemark: "Add remark",
+    remarkPlaceholder: "Enter observation for this student...",
+
+    // Conduct
+    conduct: "Conduct",
+    conductScore: "Conduct Score",
+
+    // Decisions
+    decision: "Decision",
+    admis: "Promoted",
+    rattrapage: "Remediation",
+    redouble: "Repeat Year",
+    decisionPending: "Decision Pending",
+
+    // Rankings
+    rank: "Rank",
+    classRank: "Class Rank",
+    outOfStudents: "out of {total} students",
+
+    // Absences
+    absences: "Absences",
+    lates: "Late Arrivals",
+
+    // Actions
+    calculateAverages: "Calculate Averages",
+    recalculate: "Recalculate",
+    exportGrades: "Export Grades",
+    printBulletin: "Print Report Card",
+    downloadPDF: "Download PDF",
+
+    // Bulletin
+    bulletin: "Report Card",
+    bulletinSubtitle: "View a student's trimester report card",
+    subjectResults: "Subject Results",
+    noDataAvailable: "No data available for this student and trimester",
+    selectToView: "Select a trimester, class, and student to view the report card",
+    generalRemark: "General Remark",
+    classStatistics: "Class Statistics",
+    highest: "Highest",
+    lowest: "Lowest",
+
+    // Class Ranking
+    classRanking: "Class Ranking",
+    classRankingSubtitle: "View student rankings by general average",
+    studentsRanked: "students ranked",
+    noRankingAvailable: "No ranking available for this class and trimester",
+    selectToViewRanking: "Select a trimester and class to view the ranking",
+    progress: "Progress",
+
+    // Decision Override
+    overrideDecision: "Override Decision",
+    decisionOverridden: "Decision was overridden",
+    overriddenBy: "Overridden by",
+    updateDecision: "Update Decision",
+    decisionUpdated: "Decision updated successfully",
+
+    // Bulk Operations
+    calculateSubjectAverages: "Calculate Subject Averages",
+    calculateStudentSummaries: "Calculate Student Summaries",
+    calculateAllNow: "Calculate All Now",
+    calculatingSubjectAverages: "Calculating subject averages...",
+    calculatingStudentSummaries: "Calculating student summaries...",
+    calculationComplete: "Calculation complete",
+    calculationsMenu: "Calculations",
+
+    // Manage Evaluations
+    manageEvaluations: "Manage Evaluations",
+    viewEvaluations: "View Evaluations",
+    recalculateAverages: "Recalculate Averages?",
+    recalculatePromptMessage: "Grade data has changed. Would you like to recalculate averages now?",
+    recalculateNow: "Recalculate Now",
+    skipRecalculate: "Skip for Now",
+    evaluationUpdated: "Evaluation updated successfully",
+    evaluationDeleted: "Evaluation deleted successfully",
+    noEvaluationsFound: "No evaluations found",
+
+    // Teacher Remarks
+    teacherRemarksSubtitle: "Add subject remarks for student report cards",
+    remarksSaved: "Remarks saved successfully",
+    saveRemarks: "Save Remarks",
+    unsavedChanges: "You have unsaved changes",
+    noAveragesFound: "No averages found. Calculate subject averages first.",
+
+    // Conduct Entry
+    conductEntrySubtitle: "Enter conduct scores and attendance data",
+    absencesCount: "Absences",
+    latesCount: "Lates",
+    conductSaved: "Conduct and attendance data saved",
+    saveConductData: "Save Conduct Data",
+    noStudentsFound: "No students found for this class",
+
+    // Batch Bulletin PDF
+    downloadAllBulletins: "Download All Bulletins",
+    generatingBulletins: "Generating bulletins...",
+    bulletinsDownloaded: "All bulletins downloaded",
+    generatingPdfFor: "Generating PDF for {name}...",
   },
 } as const;

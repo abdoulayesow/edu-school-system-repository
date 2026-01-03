@@ -1,5 +1,5 @@
 {
-  "model": "opusplan",
+  "model": "sonnet",
   "enabledPlugins": {
     "hookify@claude-plugins-official": true
   }

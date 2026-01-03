@@ -84,6 +84,13 @@ export const fr = {
     expandMenu: "Agrandir le menu",
     closeMenu: "Fermer le menu",
     gradesClasses: "Niveaux & Classes",
+    // Grading navigation
+    gradingSection: "Notes",
+    bulletins: "Bulletins",
+    classRankingNav: "Classement",
+    teacherRemarks: "Appréciations",
+    conductEntry: "Conduite & Assiduité",
+    trimesters: "Trimestres",
   },
 
   // Homepage
@@ -1585,6 +1592,215 @@ export const fr = {
     // Placeholders
     emailPlaceholder: "utilisateur@exemple.com",
     namePlaceholder: "Jean Dupont",
+
+    // Trimesters
+    trimesters: "Trimestres",
+    trimester: "Trimestre",
+    trimestersTitle: "Gestion des Trimestres",
+    trimestersSubtitle: "Gérer les trimestres académiques pour les périodes de notation",
+    createTrimester: "Créer un Trimestre",
+    editTrimester: "Modifier le Trimestre",
+    deleteTrimester: "Supprimer le Trimestre",
+    activateTrimester: "Activer le Trimestre",
+    deactivateTrimester: "Désactiver le Trimestre",
+    trimesterNumber: "Numéro du Trimestre",
+    trimester1: "1er Trimestre",
+    trimester2: "2ème Trimestre",
+    trimester3: "3ème Trimestre",
+    activeTrimester: "Trimestre Actif",
+    noActiveTrimester: "Aucun trimestre actif",
+    totalTrimesters: "Total des Trimestres",
+    evaluationsCount: "Évaluations",
+    trimesterActivated: "Trimestre activé avec succès",
+    trimesterDeactivated: "Trimestre désactivé avec succès",
+    deleteTrimesterConfirmation: "Êtes-vous sûr de vouloir supprimer ce trimestre ? Cette action est irréversible.",
+    cannotDeleteActiveTrimester: "Impossible de supprimer le trimestre actif",
+    cannotDeleteTrimesterWithEvaluations: "Impossible de supprimer un trimestre avec des évaluations existantes",
+    activateTrimesterConfirmation: "Êtes-vous sûr de vouloir activer ce trimestre ? Cela désactivera tout trimestre actuellement actif.",
+    selectTrimester: "Sélectionner un trimestre",
+    noTrimesters: "Aucun trimestre configuré",
+    configureTrimesters: "Configurer les trimestres pour activer la notation",
+  },
+
+  // Grading System
+  grading: {
+    // Page titles
+    gradeEntry: "Saisie des Notes",
+    gradeEntrySubtitle: "Saisir les notes des élèves pour le trimestre en cours",
+    evaluations: "Évaluations",
+    evaluationsSubtitle: "Consulter et gérer les évaluations des élèves",
+
+    // Evaluation types
+    evaluationType: "Type d'Évaluation",
+    interrogation: "Interrogation",
+    interrogationShort: "Interro",
+    devoirSurveille: "Devoir Surveillé",
+    devoirSurveilleShort: "DS",
+    composition: "Composition",
+    compositionShort: "Compo",
+
+    // Grade entry
+    enterGrades: "Saisir les Notes",
+    score: "Note",
+    maxScore: "Note Max",
+    outOf: "sur",
+    coefficient: "Coefficient",
+    average: "Moyenne",
+    classAverage: "Moyenne de Classe",
+    studentAverage: "Moyenne de l'Élève",
+    subjectAverage: "Moyenne par Matière",
+    generalAverage: "Moyenne Générale",
+    weightedAverage: "Moyenne Pondérée",
+
+    // Evaluation management
+    addEvaluation: "Ajouter une Évaluation",
+    editEvaluation: "Modifier l'Évaluation",
+    deleteEvaluation: "Supprimer l'Évaluation",
+    deleteEvaluationConfirmation: "Êtes-vous sûr de vouloir supprimer cette évaluation ?",
+    evaluationDate: "Date d'Évaluation",
+    noEvaluations: "Aucune évaluation enregistrée",
+    recordedBy: "Enregistré par",
+
+    // Batch entry
+    batchEntry: "Saisie en Lot",
+    enterScoresForClass: "Saisir les notes pour la classe",
+    saveAllGrades: "Enregistrer Toutes les Notes",
+    gradesEntered: "notes saisies",
+    gradesSaved: "Notes enregistrées avec succès",
+    gradeSaved: "Note enregistrée",
+
+    // Status and validation
+    passed: "Admis",
+    failed: "Refusé",
+    pending: "En attente",
+    invalidScore: "La note doit être entre 0 et {max}",
+    scoreRequired: "La note est requise",
+    allFieldsRequired: "Tous les champs sont requis",
+
+    // Coefficients by type
+    coefficientInterro: "×1",
+    coefficientDS: "×2",
+    coefficientCompo: "×2",
+
+    // Summary
+    totalEvaluations: "Total des Évaluations",
+    studentsGraded: "Élèves Notés",
+    averageScore: "Note Moyenne",
+    passRate: "Taux de Réussite",
+    passThreshold: "Seuil de réussite : 10/20",
+
+    // Filters
+    filterBySubject: "Filtrer par matière",
+    filterByType: "Filtrer par type",
+    filterByStudent: "Filtrer par élève",
+    allSubjects: "Toutes les matières",
+    allTypes: "Tous les types",
+    allStudents: "Tous les élèves",
+
+    // Select prompts
+    selectSubject: "Sélectionner une matière",
+    selectGrade: "Sélectionner une classe",
+    selectStudent: "Sélectionner un élève",
+    selectType: "Sélectionner un type",
+
+    // Remarks
+    teacherRemark: "Appréciation du Professeur",
+    addRemark: "Ajouter une appréciation",
+    remarkPlaceholder: "Saisir une observation pour cet élève...",
+
+    // Conduct
+    conduct: "Conduite",
+    conductScore: "Note de Conduite",
+
+    // Decisions
+    decision: "Décision",
+    admis: "Admis",
+    rattrapage: "Rattrapage",
+    redouble: "Redouble",
+    decisionPending: "Décision en Attente",
+
+    // Rankings
+    rank: "Rang",
+    classRank: "Rang de Classe",
+    outOfStudents: "sur {total} élèves",
+
+    // Absences
+    absences: "Absences",
+    lates: "Retards",
+
+    // Actions
+    calculateAverages: "Calculer les Moyennes",
+    recalculate: "Recalculer",
+    exportGrades: "Exporter les Notes",
+    printBulletin: "Imprimer le Bulletin",
+    downloadPDF: "Télécharger PDF",
+
+    // Bulletin
+    bulletin: "Bulletin de Notes",
+    bulletinSubtitle: "Consulter le bulletin trimestriel d'un élève",
+    subjectResults: "Résultats par Matière",
+    noDataAvailable: "Aucune donnée disponible pour cet élève et ce trimestre",
+    selectToView: "Sélectionnez un trimestre, une classe et un élève pour afficher le bulletin",
+    generalRemark: "Appréciation Générale",
+    classStatistics: "Statistiques de Classe",
+    highest: "Meilleure",
+    lowest: "Plus Basse",
+
+    // Class Ranking
+    classRanking: "Classement de la Classe",
+    classRankingSubtitle: "Voir le classement des élèves par moyenne générale",
+    studentsRanked: "élèves classés",
+    noRankingAvailable: "Aucun classement disponible pour cette classe et ce trimestre",
+    selectToViewRanking: "Sélectionnez un trimestre et une classe pour afficher le classement",
+    progress: "Progression",
+
+    // Decision Override
+    overrideDecision: "Modifier la Décision",
+    decisionOverridden: "Décision modifiée",
+    overriddenBy: "Modifié par",
+    updateDecision: "Mettre à jour la Décision",
+    decisionUpdated: "Décision mise à jour avec succès",
+
+    // Bulk Operations
+    calculateSubjectAverages: "Calculer les Moyennes par Matière",
+    calculateStudentSummaries: "Calculer les Bilans des Élèves",
+    calculateAllNow: "Tout Calculer Maintenant",
+    calculatingSubjectAverages: "Calcul des moyennes par matière...",
+    calculatingStudentSummaries: "Calcul des bilans des élèves...",
+    calculationComplete: "Calcul terminé",
+    calculationsMenu: "Calculs",
+
+    // Manage Evaluations
+    manageEvaluations: "Gérer les Évaluations",
+    viewEvaluations: "Voir les Évaluations",
+    recalculateAverages: "Recalculer les Moyennes ?",
+    recalculatePromptMessage: "Les données ont changé. Voulez-vous recalculer les moyennes ?",
+    recalculateNow: "Recalculer Maintenant",
+    skipRecalculate: "Passer",
+    evaluationUpdated: "Évaluation mise à jour avec succès",
+    evaluationDeleted: "Évaluation supprimée avec succès",
+    noEvaluationsFound: "Aucune évaluation trouvée",
+
+    // Teacher Remarks
+    teacherRemarksSubtitle: "Ajouter des appréciations par matière pour les bulletins",
+    remarksSaved: "Appréciations enregistrées avec succès",
+    saveRemarks: "Enregistrer les Appréciations",
+    unsavedChanges: "Vous avez des modifications non enregistrées",
+    noAveragesFound: "Aucune moyenne trouvée. Calculez d'abord les moyennes.",
+
+    // Conduct Entry
+    conductEntrySubtitle: "Saisir les notes de conduite et les données d'assiduité",
+    absencesCount: "Absences",
+    latesCount: "Retards",
+    conductSaved: "Données de conduite et d'assiduité enregistrées",
+    saveConductData: "Enregistrer les Données",
+    noStudentsFound: "Aucun élève trouvé pour cette classe",
+
+    // Batch Bulletin PDF
+    downloadAllBulletins: "Télécharger Tous les Bulletins",
+    generatingBulletins: "Génération des bulletins...",
+    bulletinsDownloaded: "Tous les bulletins téléchargés",
+    generatingPdfFor: "Génération du PDF pour {name}...",
   },
 } as const;
 
