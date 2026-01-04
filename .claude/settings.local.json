@@ -41,7 +41,10 @@
       "Bash(npx prisma migrate:*)",
       "Skill(frontend-design:frontend-design)",
       "Skill(frontend-design:frontend-design:*)",
-      "Bash(find:*)"
+      "Bash(find:*)",
+      "Bash(C:Userscps_cAppDataLocalProgramsPythonPython313python.exe --version)",
+      "Bash(\"/c/Users/cps_c/AppData/Local/Programs/Python/Python313/python.exe\" --version)",
+      "Bash(powershell.exe -Command \"Get-Command python -ErrorAction SilentlyContinue | Select-Object -ExpandProperty Source\")"
     ]
   }
 }

@@ -69,6 +69,74 @@ The resume prompt should include:
 - Current status and immediate next steps
 - Any blockers or decisions that need user input
 
+### Step 4: Analyze Token Usage
+
+Review the conversation for token efficiency opportunities using [analyzers/token-analyzer.md](analyzers/token-analyzer.md) and [guidelines/token-optimization.md](guidelines/token-optimization.md).
+
+**Look for:**
+1. **File Reading Patterns**
+   - Files read multiple times → Suggest caching or using Grep
+   - Large files read fully when Grep would suffice
+   - Reading generated files (node_modules, build artifacts)
+
+2. **Search Inefficiencies**
+   - Redundant searches → Recommend consolidating queries
+   - Overly broad glob patterns
+   - Multiple searches that could be combined
+
+3. **Response Verbosity**
+   - Verbose explanations → Note opportunities for conciseness
+   - Repeated explanations of same concepts
+   - Unnecessary multi-paragraph responses for simple tasks
+
+4. **Good Practices to Acknowledge**
+   - Effective use of Grep before Read
+   - Targeted searches with appropriate scope
+   - Concise, actionable responses
+   - Efficient agent usage
+
+**Generate token usage report with:**
+- Estimated total tokens (use chars/4 approximation)
+- Token breakdown by category (file ops, code gen, explanations, searches)
+- Efficiency score (0-100) using scoring system from token-analyzer.md
+- Top 5 optimization opportunities (prioritized by impact)
+- Notable good practices observed
+
+See [analyzers/token-analyzer.md](analyzers/token-analyzer.md) for detailed analysis methodology.
+
+### Step 5: Analyze Command Accuracy
+
+Review tool calls for accuracy and error patterns using [analyzers/command-analyzer.md](analyzers/command-analyzer.md) and [guidelines/command-accuracy.md](guidelines/command-accuracy.md).
+
+**Look for:**
+1. **Failed Commands and Causes**
+   - Path errors (backslashes, wrong case, file not found)
+   - Import errors (wrong module path, wrong import style)
+   - Type errors (property doesn't exist, type mismatch)
+   - Edit errors (string not found, whitespace issues)
+
+2. **Error Patterns**
+   - Categorize by type: path, syntax, permission, logic
+   - Identify recurring issues (same mistake multiple times)
+   - Note severity: critical, high, medium, low
+   - Calculate time wasted on failures and retries
+
+3. **Recovery and Improvements**
+   - How quickly errors were fixed
+   - Whether verification prevented errors
+   - Improvements from previous sessions
+   - Good patterns that prevented errors
+
+**Generate command accuracy report with:**
+- Total commands executed
+- Success rate percentage
+- Failure breakdown by category
+- Top 3 recurring issues with root cause analysis
+- Actionable recommendations for prevention
+- Improvements observed from past sessions
+
+See [analyzers/command-analyzer.md](analyzers/command-analyzer.md) for detailed analysis methodology.
+
 ## Example Usage
 
 When user says: "Let's wrap up for today"
