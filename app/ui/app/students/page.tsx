@@ -502,7 +502,7 @@ export default function StudentsPage() {
                             </Avatar>
                           </TableCell>
                           <TableCell className="font-medium">
-                            {student.firstName} {student.lastName}
+                            {student.firstName} {student.middleName ? `${student.middleName} ` : ''}{student.lastName}
                           </TableCell>
                           <TableCell className="text-muted-foreground">
                             {student.studentNumber}

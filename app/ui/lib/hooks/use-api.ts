@@ -414,6 +414,7 @@ export interface ApiStudent {
   id: string
   studentNumber: string
   firstName: string
+  middleName?: string | null
   lastName: string
   dateOfBirth?: string
   email?: string | null

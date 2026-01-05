@@ -36,12 +36,19 @@ export async function GET(req: NextRequest) {
       status,
     }
 
-    // Search filter (firstName, lastName, studentNumber)
+    // Search filter (firstName, middleName, lastName, studentNumber)
     if (search) {
       where.OR = [
         { firstName: { contains: search, mode: "insensitive" } },
         { lastName: { contains: search, mode: "insensitive" } },
         { studentNumber: { contains: search, mode: "insensitive" } },
+        {
+          studentProfile: {
+            person: {
+              middleName: { contains: search, mode: "insensitive" },
+            },
+          },
+        },
       ]
     }
 
@@ -72,6 +79,9 @@ export async function GET(req: NextRequest) {
             person: {
               select: {
                 id: true,
+                firstName: true,
+                middleName: true,
+                lastName: true,
                 photoUrl: true,
               },
             },
@@ -203,8 +213,9 @@ export async function GET(req: NextRequest) {
       return {
         id: student.id,
         studentNumber: student.studentNumber,
-        firstName: student.firstName,
-        lastName: student.lastName,
+        firstName: student.studentProfile?.person?.firstName || student.firstName,
+        middleName: student.studentProfile?.person?.middleName,
+        lastName: student.studentProfile?.person?.lastName || student.lastName,
         dateOfBirth: student.dateOfBirth,
         email: student.email,
         status: student.status,
