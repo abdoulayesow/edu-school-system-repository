@@ -1,8 +1,8 @@
 "use client"
 
 import { useState, useEffect, useMemo } from "react"
+import { useRouter } from "next/navigation"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
@@ -10,7 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import {
   Search,
-  Eye,
+  ChevronRight,
   Loader2,
   Users,
   Wallet,
@@ -23,11 +23,9 @@ import {
 import { useI18n } from "@/components/i18n-provider"
 import { PageContainer } from "@/components/layout"
 import { DataPagination } from "@/components/data-pagination"
-import Link from "next/link"
 import { sizing } from "@/lib/design-tokens"
 import { useGrades, useStudents, useActiveSchoolYear, type ApiStudent } from "@/lib/hooks/use-api"
 import { useDebounce } from "@/lib/hooks/use-debounce"
-import { getStudentRowStatus } from "@/lib/status-helpers"
 import { Empty, EmptyMedia, EmptyTitle, EmptyDescription } from "@/components/ui/empty"
 import { EmptyStudentsIllustration } from "@/components/illustrations"
 
@@ -37,6 +35,7 @@ type Student = ApiStudent
 
 export default function StudentsPage() {
   const { t, locale } = useI18n()
+  const router = useRouter()
 
   // Track if component is mounted to prevent hydration mismatches
   const [isMounted, setIsMounted] = useState(false)
@@ -459,7 +458,7 @@ export default function StudentsPage() {
               <div className="rounded-md border">
                 <Table>
                   <TableHeader>
-                    <TableRow>
+                    <TableRow className="bg-muted/50">
                       <TableHead className="w-[50px]"></TableHead>
                       <TableHead>{t.enrollments.fullName}</TableHead>
                       <TableHead>{t.enrollments.studentId}</TableHead>
@@ -467,7 +466,7 @@ export default function StudentsPage() {
                       <TableHead>{t.students.room}</TableHead>
                       <TableHead>{t.enrollments.paymentStatus}</TableHead>
                       <TableHead>{t.nav.attendance}</TableHead>
-                      <TableHead className="text-right">{t.common.actions}</TableHead>
+                      <TableHead className="w-[50px]"></TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -489,7 +488,11 @@ export default function StudentsPage() {
                       </TableRow>
                     ) : (
                       filteredStudents.map((student) => (
-                        <TableRow key={student.id} status={getStudentRowStatus(student.paymentStatus ?? undefined, student.attendanceStatus ?? undefined)} className="cursor-pointer hover:bg-muted/50">
+                        <TableRow
+                          key={student.id}
+                          className="cursor-pointer hover:bg-muted/50"
+                          onClick={() => router.push(`/students/${student.id}`)}
+                        >
                           <TableCell>
                             <Avatar className="size-10">
                               <AvatarImage src={student.photoUrl ?? undefined} alt={`${student.firstName} ${student.lastName}`} />
@@ -516,13 +519,8 @@ export default function StudentsPage() {
                           <TableCell>
                             {getAttendanceBadge(student.attendanceStatus)}
                           </TableCell>
-                          <TableCell className="text-right">
-                            <Button variant="ghost" size="sm" asChild>
-                              <Link href={`/students/${student.id}`}>
-                                <Eye className="h-4 w-4 mr-1" />
-                                {t.common.view}
-                              </Link>
-                            </Button>
+                          <TableCell className="text-right pr-4">
+                            <ChevronRight className="h-4 w-4 text-muted-foreground" />
                           </TableCell>
                         </TableRow>
                       ))
