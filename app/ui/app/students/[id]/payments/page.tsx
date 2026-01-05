@@ -36,6 +36,9 @@ import {
   AlertCircle,
   Calendar,
   CreditCard,
+  ChevronRight,
+  Wallet,
+  Receipt,
 } from "lucide-react"
 import { useI18n } from "@/components/i18n-provider"
 import { PageContainer } from "@/components/layout"
@@ -486,7 +489,10 @@ export default function StudentPaymentsPage() {
       <div className="grid gap-6 md:grid-cols-3 mb-6">
         <Card>
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">Payé</CardTitle>
+            <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
+              <CreditCard className="size-4" />
+              Payé
+            </CardTitle>
           </CardHeader>
           <CardContent>
             <p className="text-2xl font-bold text-success">{formatAmount(totalPaid)}</p>
@@ -496,7 +502,10 @@ export default function StudentPaymentsPage() {
         </Card>
         <Card className={remainingBalance > 0 ? "bg-amber-50/50 dark:bg-amber-950/20" : ""}>
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">{locale === "fr" ? "Restant" : "Remaining"}</CardTitle>
+            <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
+              <Wallet className="size-4" />
+              {locale === "fr" ? "Restant" : "Remaining"}
+            </CardTitle>
           </CardHeader>
           <CardContent>
             <p className={`text-2xl font-bold ${remainingBalance > 0 ? "text-amber-600 dark:text-amber-400" : "text-success"}`}>
@@ -506,7 +515,10 @@ export default function StudentPaymentsPage() {
         </Card>
         <Card>
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">Paiements</CardTitle>
+            <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
+              <Receipt className="size-4" />
+              Paiements
+            </CardTitle>
           </CardHeader>
           <CardContent>
             <p className="text-2xl font-bold">{payments.length}</p>
@@ -528,7 +540,7 @@ export default function StudentPaymentsPage() {
             {schedules.map((schedule) => (
               <div
                 key={schedule.id}
-                className={`p-4 rounded-lg border ${
+                className={`p-4 rounded-lg border transition-shadow hover:shadow-md ${
                   schedule.isPaid
                     ? "bg-success/5 border-success/30"
                     : "bg-muted/30"
@@ -575,18 +587,19 @@ export default function StudentPaymentsPage() {
             <div className="rounded-md border">
               <Table>
                 <TableHeader>
-                  <TableRow>
+                  <TableRow className="bg-muted/50">
                     <TableHead>Date</TableHead>
                     <TableHead>Reçu</TableHead>
                     <TableHead className="text-right">Montant</TableHead>
                     <TableHead>Méthode</TableHead>
                     <TableHead>Statut</TableHead>
                     <TableHead className="text-right">Actions</TableHead>
+                    <TableHead className="w-[50px]"></TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {payments.map((payment) => (
-                    <TableRow key={payment.id}>
+                    <TableRow key={payment.id} className="cursor-pointer hover:bg-muted/50">
                       <TableCell>{formatDate(payment.recordedAt)}</TableCell>
                       <TableCell className="font-mono text-sm">{payment.receiptNumber}</TableCell>
                       <TableCell className="text-right font-mono font-semibold">
@@ -623,6 +636,9 @@ export default function StudentPaymentsPage() {
                         {payment.status === "rejected" && (
                           <span className="text-xs text-destructive">{locale === "fr" ? "Rejeté" : "Rejected"}</span>
                         )}
+                      </TableCell>
+                      <TableCell className="text-right pr-4">
+                        <ChevronRight className="h-4 w-4 text-muted-foreground" />
                       </TableCell>
                     </TableRow>
                   ))}
