@@ -36,6 +36,7 @@ import {
 import { useI18n } from "@/components/i18n-provider"
 import { PageContainer } from "@/components/layout/PageContainer"
 import Link from "next/link"
+import { cn } from "@/lib/utils"
 import type { EnrollmentStatus, PaymentSchedule, Payment, EnrollmentNote } from "@/lib/enrollment/types"
 
 interface EnrollmentDetail {
@@ -91,13 +92,13 @@ interface EnrollmentDetail {
   approver: { name: string; email: string } | null
 }
 
-const statusConfig: Record<EnrollmentStatus, { label: string; labelFr: string; variant: "default" | "secondary" | "destructive" | "outline"; icon: React.ElementType }> = {
+const statusConfig: Record<EnrollmentStatus, { label: string; labelFr: string; variant: "default" | "secondary" | "destructive" | "outline" | "success" | "warning"; icon: React.ElementType; className?: string }> = {
   draft: { label: "Draft", labelFr: "Brouillon", variant: "secondary", icon: FileText },
-  submitted: { label: "Submitted", labelFr: "Soumis", variant: "default", icon: Clock },
-  needs_review: { label: "Needs Review", labelFr: "En attente de validation", variant: "outline", icon: AlertCircle },
-  completed: { label: "Completed", labelFr: "Termine", variant: "default", icon: CheckCircle },
-  rejected: { label: "Rejected", labelFr: "Rejete", variant: "destructive", icon: XCircle },
-  cancelled: { label: "Cancelled", labelFr: "Annule", variant: "secondary", icon: XCircle },
+  submitted: { label: "Submitted", labelFr: "Soumis", variant: "default", icon: Clock, className: "bg-blue-500 text-white dark:bg-blue-600" },
+  needs_review: { label: "Needs Review", labelFr: "En attente de validation", variant: "warning", icon: AlertCircle },
+  completed: { label: "Completed", labelFr: "Terminé", variant: "success", icon: CheckCircle },
+  rejected: { label: "Rejected", labelFr: "Rejeté", variant: "destructive", icon: XCircle },
+  cancelled: { label: "Cancelled", labelFr: "Annulé", variant: "secondary", icon: XCircle },
 }
 
 export default function EnrollmentDetailPage({
@@ -319,7 +320,7 @@ export default function EnrollmentDetailPage({
                 <h1 className="text-2xl font-bold">
                   {enrollment.firstName} {enrollment.lastName}
                 </h1>
-                <Badge variant={status.variant} className="gap-1">
+                <Badge variant={status.variant} className={cn("gap-1", status.className)}>
                   <StatusIcon className="h-3 w-3" />
                   {locale === "fr" ? status.labelFr : status.label}
                 </Badge>
@@ -733,7 +734,11 @@ export default function EnrollmentDetailPage({
                         </div>
                         <div className="w-full bg-secondary rounded-full h-2">
                           <div
-                            className="bg-primary h-2 rounded-full transition-all"
+                            className={`h-2 rounded-full transition-all ${
+                              enrollment.status === "needs_review"
+                                ? "bg-amber-500 dark:bg-amber-400"
+                                : "bg-primary"
+                            }`}
                             style={{ width: `${percentPaid}%` }}
                           />
                         </div>
@@ -803,7 +808,11 @@ export default function EnrollmentDetailPage({
                 <Separator />
                 <div className="w-full bg-secondary rounded-full h-3">
                   <div
-                    className="bg-primary h-3 rounded-full transition-all"
+                    className={`h-3 rounded-full transition-all ${
+                      enrollment.status === "needs_review"
+                        ? "bg-amber-500 dark:bg-amber-400"
+                        : "bg-primary"
+                    }`}
                     style={{ width: `${Math.min(100, (enrollment.totalPaid / enrollment.tuitionFee) * 100)}%` }}
                   />
                 </div>

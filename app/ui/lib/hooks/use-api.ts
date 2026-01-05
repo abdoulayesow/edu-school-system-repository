@@ -67,6 +67,8 @@ interface EnrollmentFilters {
   drafts?: boolean
   limit?: number
   offset?: number
+  startDate?: string
+  endDate?: string
 }
 
 interface ActivityFilters {
@@ -210,6 +212,26 @@ export function useActiveSchoolYear() {
     queryFn: () => fetchApi<{ id: string; name: string; grades: unknown[] }>("/api/school-years/active"),
     // Active school year rarely changes
     staleTime: 60 * 60 * 1000, // 1 hour
+  })
+}
+
+interface SchoolYear {
+  id: string
+  name: string
+  isActive: boolean
+  status: string
+  startDate: string
+  endDate: string
+}
+
+/**
+ * Hook: Fetch all school years (for filtering)
+ */
+export function useSchoolYears() {
+  return useQuery({
+    queryKey: ["school-years"],
+    queryFn: () => fetchApi<SchoolYear[]>("/api/admin/school-years"),
+    staleTime: 60 * 60 * 1000, // 1 hour - school years rarely change
   })
 }
 
@@ -749,6 +771,13 @@ interface EnrollmentsResponse {
     limit: number
     offset: number
     hasMore: boolean
+  }
+  stats: {
+    total: number
+    draft: number
+    submitted: number
+    needsReview: number
+    completed: number
   }
 }
 

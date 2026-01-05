@@ -55,6 +55,8 @@ export async function GET(req: NextRequest) {
   const gradeId = searchParams.get("gradeId")
   const search = searchParams.get("search")
   const draftsOnly = searchParams.get("drafts") === "true"
+  const startDate = searchParams.get("startDate")
+  const endDate = searchParams.get("endDate")
 
   // Pagination params
   const limit = Math.min(parseInt(searchParams.get("limit") || "50"), 100)
@@ -95,8 +97,22 @@ export async function GET(req: NextRequest) {
       ]
     }
 
-    // Run data query and count query in parallel
-    const [enrollments, total] = await Promise.all([
+    // Date filtering (by createdAt)
+    if (startDate || endDate) {
+      where.createdAt = {}
+      if (startDate) {
+        (where.createdAt as Record<string, Date>).gte = new Date(startDate)
+      }
+      if (endDate) {
+        // Add one day to include the entire end date
+        const end = new Date(endDate)
+        end.setDate(end.getDate() + 1)
+        ;(where.createdAt as Record<string, Date>).lt = end
+      }
+    }
+
+    // Run data query, count query, and stats counts in parallel
+    const [enrollments, total, draftCount, submittedCount, needsReviewCount, completedCount] = await Promise.all([
       prisma.enrollment.findMany({
         where,
         include: {
@@ -115,6 +131,11 @@ export async function GET(req: NextRequest) {
         skip: offset,
       }),
       prisma.enrollment.count({ where }),
+      // Stats counts - use base where without status filter for accurate totals
+      prisma.enrollment.count({ where: { ...where, status: "draft" } }),
+      prisma.enrollment.count({ where: { ...where, status: "submitted" } }),
+      prisma.enrollment.count({ where: { ...where, status: "needs_review" } }),
+      prisma.enrollment.count({ where: { ...where, status: "completed" } }),
     ])
 
     // Batch query all payment totals at once (avoids N+1 queries)
@@ -147,6 +168,13 @@ export async function GET(req: NextRequest) {
         limit,
         offset,
         hasMore: offset + enrollments.length < total,
+      },
+      stats: {
+        total,
+        draft: draftCount,
+        submitted: submittedCount,
+        needsReview: needsReviewCount,
+        completed: completedCount,
       },
     })
   } catch (err) {
