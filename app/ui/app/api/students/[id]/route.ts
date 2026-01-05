@@ -76,6 +76,17 @@ export async function GET(req: NextRequest, { params }: RouteParams) {
               },
               orderBy: { recordedAt: "desc" },
             },
+            // Include enrollment creator (staff who created enrollment)
+            creator: {
+              select: { id: true, name: true },
+            },
+            // Include enrollment notes
+            notes: {
+              include: {
+                author: { select: { name: true } },
+              },
+              orderBy: { createdAt: "desc" },
+            },
           },
           orderBy: { schoolYear: { startDate: "desc" } },
         },
@@ -97,8 +108,11 @@ export async function GET(req: NextRequest, { params }: RouteParams) {
     let balanceInfo = null
     if (activeEnrollment) {
       const tuitionFee = activeEnrollment.adjustedTuitionFee || activeEnrollment.originalTuitionFee
-      const confirmedPayments = activeEnrollment.payments.filter((p) => p.status === "confirmed")
-      const totalPaid = confirmedPayments.reduce((sum, p) => sum + p.amount, 0)
+      // Include all payments except rejected and failed (pending_deposit, deposited, pending_review, confirmed)
+      const countablePayments = activeEnrollment.payments.filter(
+        (p) => !["rejected", "failed"].includes(p.status)
+      )
+      const totalPaid = countablePayments.reduce((sum, p) => sum + p.amount, 0)
       const remainingBalance = tuitionFee - totalPaid
       const paymentPercentage = Math.round((totalPaid / tuitionFee) * 100)
 
