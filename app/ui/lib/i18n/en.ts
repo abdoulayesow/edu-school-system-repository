@@ -806,6 +806,12 @@ export const en: TranslationKeys = {
       term2: "Term 2",
       term3: "Term 3",
     },
+    levelLabels: {
+      kindergarten: "Kindergarten",
+      elementary: "Elementary",
+      college: "Middle School",
+      high_school: "High School",
+    },
   },
 
   // Classes
@@ -1147,12 +1153,103 @@ export const en: TranslationKeys = {
     managePayments: "Manage payments",
     enrolledBy: "Enrolled by",
     createdBy: "Created by",
+    enrollingGuardian: "Enrolling Guardian",
+    enrollingSchoolStaff: "Enrolling School Staff",
     enrollmentNotes: "Enrollment notes",
     middleName: "Middle name",
     viewEnrollment: "View enrollment",
     editInfo: "Edit information",
     noNotes: "No notes",
     paymentProgress: "Payment progress",
+
+    // Student detail page - tabs and sections
+    backToStudents: "Back to students",
+    overview: "Overview",
+    enrollmentsTab: "Enrollments",
+    paymentsTab: "Payments",
+    attendanceTab: "Attendance",
+    activitiesTab: "Activities",
+
+    // Stats cards
+    remainingBalanceLabel: "Remaining balance",
+    totalPaid: "Total paid",
+    of: "of",
+    attendanceLabel: "Attendance",
+    paymentProgressLabel: "Payment progress",
+
+    // Personal info
+    firstName: "First name",
+    lastName: "Last name",
+    dateOfBirth: "Date of birth",
+    gender: "Gender",
+    male: "Male",
+    female: "Female",
+    phone: "Phone",
+    email: "Email",
+    address: "Address",
+    familyInformation: "Family Information",
+
+    // Attendance summary
+    totalRecords: "total records",
+    present: "Present",
+    absent: "Absent",
+    lateLabel: "Late",
+    excused: "Excused",
+    attendanceRate: "Attendance rate",
+
+    // Enrollments table
+    enrollmentHistory: "Enrollment history",
+    enrollmentCount: "enrollment(s)",
+    schoolYear: "School year",
+    gradeLabel: "Grade",
+    levelLabel: "Level",
+    tuition: "Tuition",
+    amountPaid: "Paid",
+    status: "Status",
+    actions: "Actions",
+    noEnrollments: "No enrollments",
+    current: "Current",
+
+    // Payment summary
+    paidOf: "paid of",
+    tuitionFee: "Tuition fee",
+    noPaymentsRecorded: "No payments recorded",
+    date: "Date",
+    amount: "Amount",
+    method: "Method",
+    receiptNumber: "Receipt #",
+    recordedBy: "Recorded by",
+    paymentCount: "payment(s)",
+
+    // Attendance tab
+    attendanceHistoryTitle: "Attendance history",
+    totalSessions: "Total sessions",
+    overallAttendanceRate: "Overall attendance rate",
+
+    // Activities tab
+    enrolledActivities: "Enrolled activities",
+    activityCount: "activity(ies)",
+    enrolledOn: "Enrolled on",
+    fee: "Fee",
+    noActivitiesEnrolled: "No activities enrolled",
+    noActivitiesDescription: "The student is not enrolled in any activities for the current year",
+    noAttendanceRecords: "No attendance records available",
+    noAttendanceDescription: "Attendance data will appear here once recorded",
+    activeStatus: "Active",
+
+    // Edit page
+    backToProfile: "Back to profile",
+    editStudent: "Edit Student",
+    basicStudentInfo: "Basic student information",
+    parentInformation: "Parent Information",
+    parentContactDetails: "Parent or guardian contact details",
+    fullName: "Full name",
+    saving: "Saving...",
+    // Status options
+    statusActive: "Active",
+    statusInactive: "Inactive",
+    statusTransferred: "Transferred",
+    statusGraduated: "Graduated",
   },
 
   // Enhanced attendance

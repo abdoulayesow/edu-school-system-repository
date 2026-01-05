@@ -804,6 +804,12 @@ export const fr = {
       term2: "Trimestre 2",
       term3: "Trimestre 3",
     },
+    levelLabels: {
+      kindergarten: "Maternelle",
+      elementary: "Primaire",
+      college: "Collège",
+      high_school: "Lycée",
+    },
   },
 
   // Classes
@@ -1145,12 +1151,103 @@ export const fr = {
     managePayments: "Gérer les paiements",
     enrolledBy: "Inscrit par",
     createdBy: "Créé par",
+    enrollingGuardian: "Tuteur inscripteur",
+    enrollingSchoolStaff: "Personnel scolaire inscripteur",
     enrollmentNotes: "Notes d'inscription",
     middleName: "Deuxième prénom",
     viewEnrollment: "Voir l'inscription",
     editInfo: "Modifier les informations",
     noNotes: "Aucune note",
     paymentProgress: "Progression du paiement",
+
+    // Student detail page - tabs and sections
+    backToStudents: "Retour aux élèves",
+    overview: "Vue d'ensemble",
+    enrollmentsTab: "Inscriptions",
+    paymentsTab: "Paiements",
+    attendanceTab: "Présence",
+    activitiesTab: "Activités",
+
+    // Stats cards
+    remainingBalanceLabel: "Solde restant",
+    totalPaid: "Total payé",
+    of: "sur",
+    attendanceLabel: "Présence",
+    paymentProgressLabel: "Progression paiement",
+
+    // Personal info
+    firstName: "Prénom",
+    lastName: "Nom",
+    dateOfBirth: "Date de naissance",
+    gender: "Genre",
+    male: "Masculin",
+    female: "Féminin",
+    phone: "Téléphone",
+    email: "Email",
+    address: "Adresse",
+    familyInformation: "Informations familiales",
+
+    // Attendance summary
+    totalRecords: "enregistrements au total",
+    present: "Présents",
+    absent: "Absents",
+    lateLabel: "En retard",
+    excused: "Excusés",
+    attendanceRate: "Taux de présence",
+
+    // Enrollments table
+    enrollmentHistory: "Historique des inscriptions",
+    enrollmentCount: "inscription(s)",
+    schoolYear: "Année scolaire",
+    gradeLabel: "Classe",
+    levelLabel: "Niveau",
+    tuition: "Frais de scolarité",
+    amountPaid: "Montant payé",
+    status: "Statut",
+    actions: "Actions",
+    noEnrollments: "Aucune inscription",
+    current: "Actuel",
+
+    // Payment summary
+    paidOf: "payé sur",
+    tuitionFee: "Frais de scolarité",
+    noPaymentsRecorded: "Aucun paiement enregistré",
+    date: "Date",
+    amount: "Montant",
+    method: "Méthode",
+    receiptNumber: "N° Reçu",
+    recordedBy: "Enregistré par",
+    paymentCount: "paiement(s)",
+
+    // Attendance tab
+    attendanceHistoryTitle: "Historique de présence",
+    totalSessions: "Total séances",
+    overallAttendanceRate: "Taux de présence global",
+
+    // Activities tab
+    enrolledActivities: "Activités inscrites",
+    activityCount: "activité(s)",
+    enrolledOn: "Inscrit le",
+    fee: "Frais",
+    noActivitiesEnrolled: "Aucune activité inscrite",
+    noActivitiesDescription: "L'élève n'est inscrit à aucune activité pour l'année en cours",
+    noAttendanceRecords: "Aucun enregistrement de présence disponible",
+    noAttendanceDescription: "Les données de présence apparaîtront ici une fois enregistrées",
+    activeStatus: "Actif",
+
+    // Edit page
+    backToProfile: "Retour au profil",
+    editStudent: "Modifier l'élève",
+    basicStudentInfo: "Informations de base de l'élève",
+    parentInformation: "Informations des parents",
+    parentContactDetails: "Coordonnées des parents ou tuteurs",
+    fullName: "Nom complet",
+    saving: "Enregistrement...",
+    // Status options
+    statusActive: "Actif",
+    statusInactive: "Inactif",
+    statusTransferred: "Transféré",
+    statusGraduated: "Diplômé",
   },
 
   // Enhanced attendance
