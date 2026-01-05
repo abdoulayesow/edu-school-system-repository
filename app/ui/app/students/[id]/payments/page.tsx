@@ -358,9 +358,9 @@ export default function StudentPaymentsPage() {
           if (!open) resetPaymentForm()
         }}>
           <DialogTrigger asChild>
-            <Button disabled={remainingBalance <= 0}>
+            <Button disabled={remainingBalance <= 0} className="bg-amber-500 text-white hover:bg-amber-600 dark:bg-amber-600 dark:hover:bg-amber-700">
               <Plus className="h-4 w-4 mr-2" />
-              Nouveau paiement
+              {locale === "fr" ? "Nouveau paiement" : "New payment"}
             </Button>
           </DialogTrigger>
           <DialogContent className="max-w-md">
@@ -430,7 +430,7 @@ export default function StudentPaymentsPage() {
                   disabled={isSubmittingPayment}
                   className="bg-transparent"
                 >
-                  Annuler
+                  {locale === "fr" ? "Annuler" : "Cancel"}
                 </Button>
                 <Button
                   onClick={handleSubmitPayment}
@@ -441,9 +441,10 @@ export default function StudentPaymentsPage() {
                     !receiptNumber ||
                     parseFloat(paymentAmount) > remainingBalance
                   }
+                  className="bg-amber-500 text-white hover:bg-amber-600 dark:bg-amber-600 dark:hover:bg-amber-700"
                 >
                   {isSubmittingPayment && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
-                  Enregistrer
+                  {locale === "fr" ? "Enregistrer" : "Save"}
                 </Button>
               </div>
             </div>
@@ -493,12 +494,12 @@ export default function StudentPaymentsPage() {
             <p className="text-xs text-muted-foreground mt-1">{paymentPercentage.toFixed(0)}% payé</p>
           </CardContent>
         </Card>
-        <Card>
+        <Card className={remainingBalance > 0 ? "bg-amber-50/50 dark:bg-amber-950/20" : ""}>
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">Restant</CardTitle>
+            <CardTitle className="text-sm font-medium text-muted-foreground">{locale === "fr" ? "Restant" : "Remaining"}</CardTitle>
           </CardHeader>
           <CardContent>
-            <p className={`text-2xl font-bold ${remainingBalance > 0 ? "text-warning" : "text-success"}`}>
+            <p className={`text-2xl font-bold ${remainingBalance > 0 ? "text-amber-600 dark:text-amber-400" : "text-success"}`}>
               {formatAmount(remainingBalance)}
             </p>
           </CardContent>
@@ -598,29 +599,29 @@ export default function StudentPaymentsPage() {
                           <Button
                             size="sm"
                             variant="outline"
-                            className="bg-transparent"
+                            className="bg-amber-50 text-amber-700 border-amber-200 hover:bg-amber-100 dark:bg-amber-950/30 dark:text-amber-400 dark:border-amber-800 dark:hover:bg-amber-950/50"
                             onClick={() => handleOpenDeposit(payment)}
                           >
                             <BanknoteIcon className="h-3 w-3 mr-1" />
-                            Dépôt
+                            {locale === "fr" ? "Dépôt" : "Deposit"}
                           </Button>
                         )}
                         {(payment.status === "pending_review" || payment.status === "deposited") && (
                           <Button
                             size="sm"
                             variant="outline"
-                            className="bg-transparent"
+                            className="bg-amber-50 text-amber-700 border-amber-200 hover:bg-amber-100 dark:bg-amber-950/30 dark:text-amber-400 dark:border-amber-800 dark:hover:bg-amber-950/50"
                             onClick={() => handleOpenReview(payment)}
                           >
                             <CheckCircle2 className="h-3 w-3 mr-1" />
-                            Valider
+                            {locale === "fr" ? "Valider" : "Review"}
                           </Button>
                         )}
                         {payment.status === "confirmed" && (
-                          <span className="text-xs text-success">Confirmé</span>
+                          <span className="text-xs text-success">{locale === "fr" ? "Confirmé" : "Confirmed"}</span>
                         )}
                         {payment.status === "rejected" && (
-                          <span className="text-xs text-destructive">Rejeté</span>
+                          <span className="text-xs text-destructive">{locale === "fr" ? "Rejeté" : "Rejected"}</span>
                         )}
                       </TableCell>
                     </TableRow>

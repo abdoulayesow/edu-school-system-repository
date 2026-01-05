@@ -1133,6 +1133,24 @@ export const fr = {
     displayed: "affichés",
     noStudentsFound: "Aucun élève trouvé avec ces critères",
     noStudentsEnrolled: "Aucun élève inscrit",
+
+    // New keys for improved pages
+    needsAttention: "À surveiller",
+    familyInfo: "Informations familiales",
+    father: "Père",
+    mother: "Mère",
+    guardian: "Tuteur",
+    enrollmentNumber: "N° Inscription",
+    // Student detail page improvements
+    managePayments: "Gérer les paiements",
+    enrolledBy: "Inscrit par",
+    createdBy: "Créé par",
+    enrollmentNotes: "Notes d'inscription",
+    middleName: "Deuxième prénom",
+    viewEnrollment: "Voir l'inscription",
+    editInfo: "Modifier les informations",
+    noNotes: "Aucune note",
+    paymentProgress: "Progression du paiement",
   },
 
   // Enhanced attendance

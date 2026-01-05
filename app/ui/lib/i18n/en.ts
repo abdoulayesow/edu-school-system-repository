@@ -1135,6 +1135,24 @@ export const en: TranslationKeys = {
     displayed: "displayed",
     noStudentsFound: "No students found with these criteria",
     noStudentsEnrolled: "No students enrolled",
+
+    // New keys for improved pages
+    needsAttention: "Needs Attention",
+    familyInfo: "Family Information",
+    father: "Father",
+    mother: "Mother",
+    guardian: "Guardian",
+    enrollmentNumber: "Enrollment #",
+    // Student detail page improvements
+    managePayments: "Manage payments",
+    enrolledBy: "Enrolled by",
+    createdBy: "Created by",
+    enrollmentNotes: "Enrollment notes",
+    middleName: "Middle name",
+    viewEnrollment: "View enrollment",
+    editInfo: "Edit information",
+    noNotes: "No notes",
+    paymentProgress: "Payment progress",
   },
 
   // Enhanced attendance

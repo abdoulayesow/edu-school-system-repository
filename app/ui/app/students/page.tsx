@@ -17,6 +17,7 @@ import {
   CalendarCheck,
   CheckCircle,
   AlertCircle,
+  AlertTriangle,
   XCircle,
 } from "lucide-react"
 import { useI18n } from "@/components/i18n-provider"
@@ -24,7 +25,7 @@ import { PageContainer } from "@/components/layout"
 import { DataPagination } from "@/components/data-pagination"
 import Link from "next/link"
 import { sizing } from "@/lib/design-tokens"
-import { useGrades, useStudents, type ApiStudent } from "@/lib/hooks/use-api"
+import { useGrades, useStudents, useActiveSchoolYear, type ApiStudent } from "@/lib/hooks/use-api"
 import { useDebounce } from "@/lib/hooks/use-debounce"
 import { getStudentRowStatus } from "@/lib/status-helpers"
 import { Empty, EmptyMedia, EmptyTitle, EmptyDescription } from "@/components/ui/empty"
@@ -35,10 +36,13 @@ const ITEMS_PER_PAGE = 50
 type Student = ApiStudent
 
 export default function StudentsPage() {
-  const { t } = useI18n()
+  const { t, locale } = useI18n()
 
   // Track if component is mounted to prevent hydration mismatches
   const [isMounted, setIsMounted] = useState(false)
+
+  // Get active school year
+  const { data: activeSchoolYear } = useActiveSchoolYear()
 
   // Filter states
   const [searchQuery, setSearchQuery] = useState("")
@@ -83,6 +87,17 @@ export default function StudentsPage() {
     setIsMounted(true)
   }, [])
 
+  // Check if any filters are active
+  const hasActiveFilters = searchQuery || gradeFilter !== "all" || paymentStatusFilter !== "all" || attendanceStatusFilter !== "all"
+
+  // Clear all filters
+  const clearFilters = () => {
+    setSearchQuery("")
+    setGradeFilter("all")
+    setPaymentStatusFilter("all")
+    setAttendanceStatusFilter("all")
+  }
+
   // Client-side filtering for calculated fields only
   // (search and grade filtering is now handled server-side)
   const filteredStudents = useMemo(() => {
@@ -108,7 +123,8 @@ export default function StudentsPage() {
     return {
       total: students.length,
       payment: { late: lateCount, onTime: onTimeCount, inAdvance: inAdvanceCount, complete: completeCount },
-      attendance: { good: goodAttendance, concerning: concerningAttendance, critical: criticalAttendance }
+      attendance: { good: goodAttendance, concerning: concerningAttendance, critical: criticalAttendance },
+      needsAttention: lateCount + criticalAttendance
     }
   }, [students])
 
@@ -250,13 +266,26 @@ export default function StudentsPage() {
   return (
     <PageContainer>
       {/* Header */}
-      <div className="mb-6">
+      <div className="mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+        <div>
           <h1 className="text-3xl font-bold text-foreground mb-2">{t.students.title}</h1>
           <p className="text-muted-foreground">{t.students.subtitle}</p>
         </div>
+        {/* Current School Year Indicator */}
+        {activeSchoolYear && (
+          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800">
+            <span className="text-sm text-amber-700 dark:text-amber-400">
+              {locale === "fr" ? "Année scolaire:" : "School Year:"}
+            </span>
+            <span className="text-sm font-semibold text-amber-800 dark:text-amber-300">
+              {activeSchoolYear.name}
+            </span>
+          </div>
+        )}
+      </div>
 
         {/* Summary Cards */}
-        <div className="grid gap-4 md:grid-cols-3 mb-6">
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4 mb-6">
           {/* Total Students */}
           <Card className="py-5">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
@@ -295,6 +324,20 @@ export default function StudentsPage() {
               <div className="text-2xl font-bold text-success">{stats.attendance.good}</div>
               <p className="text-xs text-muted-foreground">
                 {stats.attendance.concerning} {t.students.attendanceConcerning.toLowerCase()}, {stats.attendance.critical} {t.students.attendanceCritical.toLowerCase()}
+              </p>
+            </CardContent>
+          </Card>
+
+          {/* Needs Attention */}
+          <Card className="py-5">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">{locale === "fr" ? "À surveiller" : "Needs Attention"}</CardTitle>
+              <AlertTriangle className={sizing.icon.lg} />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold text-warning">{stats.needsAttention}</div>
+              <p className="text-xs text-muted-foreground">
+                {stats.payment.late} {t.students.late.toLowerCase()}, {stats.attendance.critical} {t.students.attendanceCritical.toLowerCase()}
               </p>
             </CardContent>
           </Card>
@@ -376,6 +419,18 @@ export default function StudentsPage() {
                 </div>
               )}
             </div>
+
+            {/* Clear Filters Link */}
+            {hasActiveFilters && (
+              <div className="mt-2">
+                <button
+                  onClick={clearFilters}
+                  className="text-sm text-primary hover:underline cursor-pointer"
+                >
+                  {locale === "fr" ? "Effacer les filtres" : "Clear filters"}
+                </button>
+              </div>
+            )}
           </CardContent>
         </Card>
 
