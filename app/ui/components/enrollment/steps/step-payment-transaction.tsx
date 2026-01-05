@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useCallback } from "react"
+import { useState, useCallback, useEffect } from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -73,6 +73,25 @@ export function StepPaymentTransaction() {
     }
     return null
   }, [])
+
+  // Auto-generate receipt number when resuming from draft with payment but no receipt
+  useEffect(() => {
+    async function generateReceiptIfNeeded() {
+      if (
+        showPaymentForm &&
+        data.paymentMethod &&
+        data.paymentAmount &&
+        data.paymentAmount > 0 &&
+        !data.receiptNumber
+      ) {
+        const receiptNumber = await fetchNextReceiptNumber(data.paymentMethod)
+        if (receiptNumber) {
+          updateData({ receiptNumber })
+        }
+      }
+    }
+    generateReceiptIfNeeded()
+  }, [showPaymentForm, data.paymentMethod, data.paymentAmount, data.receiptNumber, fetchNextReceiptNumber, updateData])
 
   // Handle payment method change
   const handleMethodChange = async (method: "cash" | "orange_money") => {
@@ -195,9 +214,9 @@ export function StepPaymentTransaction() {
             <Input
               id="amount"
               type="text"
-              value={data.paymentAmount?.toLocaleString() || ""}
+              value={data.paymentAmount?.toString().replace(/\B(?=(\d{3})+(?!\d))/g, " ") || ""}
               onChange={(e) => handleAmountChange(e.target.value)}
-              placeholder="500,000"
+              placeholder="500 000"
             />
             <p className="text-sm text-muted-foreground">
               {t.enrollmentWizard.totalYearlyAmount}: {formatCurrency(totalTuition)}
@@ -259,7 +278,7 @@ export function StepPaymentTransaction() {
                         : "GSPN-2025-CASH-00001"
                   }
                   className={cn(
-                    "font-mono bg-muted cursor-not-allowed",
+                    "font-mono bg-amber-50 dark:bg-muted cursor-not-allowed border-amber-200 dark:border-input",
                     isGeneratingReceipt && "pr-10"
                   )}
                 />

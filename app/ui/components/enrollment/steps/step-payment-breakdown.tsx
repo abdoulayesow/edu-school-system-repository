@@ -113,13 +113,13 @@ export function StepPaymentBreakdown() {
 
       {/* Total Amount Display */}
       <Card>
-        <CardContent className="pt-6">
+        <CardContent className="pt-4">
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm text-muted-foreground">
                 {t.enrollmentWizard.totalYearlyAmount}
               </p>
-              <p className="text-3xl font-bold text-primary">
+              <p className="text-3xl font-bold text-[#e79908] dark:text-gspn-gold-200">
                 {formatCurrency(displayTotal)}
               </p>
               {isAdjusted && (
@@ -134,6 +134,7 @@ export function StepPaymentBreakdown() {
                 id="adjust"
                 checked={hasAdjustment}
                 onCheckedChange={handleAdjustmentToggle}
+                className="data-[state=checked]:bg-[#e79908] dark:data-[state=checked]:bg-gspn-gold-200"
               />
               <Label htmlFor="adjust" className="text-sm">
                 {t.enrollmentWizard.adjustAmount}
@@ -158,7 +159,7 @@ export function StepPaymentBreakdown() {
                       variant={currentPercentage === pct ? "default" : "outline"}
                       size="sm"
                       onClick={() => handlePercentageClick(pct)}
-                      className="min-w-[60px]"
+                      className={`min-w-[60px] ${currentPercentage === pct ? "bg-[#e79908] hover:bg-[#d68907] text-black dark:bg-gspn-gold-200 dark:hover:bg-gspn-gold-300 dark:text-black" : ""}`}
                     >
                       {pct}%
                     </Button>
@@ -170,7 +171,7 @@ export function StepPaymentBreakdown() {
               <div className="space-y-3">
                 <div className="flex items-center justify-between">
                   <Label>{t.enrollmentWizard.adjustPercentage || "Adjust Percentage"}</Label>
-                  <Badge variant="secondary" className="font-mono">
+                  <Badge variant="secondary" className="font-mono bg-amber-100 text-amber-800 border-amber-200 dark:bg-amber-900/30 dark:text-amber-200 dark:border-amber-800">
                     {currentPercentage}%
                   </Badge>
                 </div>
@@ -180,7 +181,7 @@ export function StepPaymentBreakdown() {
                   min={0}
                   max={100}
                   step={1}
-                  className="w-full"
+                  className="w-full [&_[data-slot=slider-range]]:bg-[#e79908] dark:[&_[data-slot=slider-range]]:bg-gspn-gold-200 [&_[data-slot=slider-thumb]]:border-[#e79908] dark:[&_[data-slot=slider-thumb]]:border-gspn-gold-200"
                 />
                 <div className="flex justify-between text-xs text-muted-foreground">
                   <span>0%</span>
@@ -198,9 +199,9 @@ export function StepPaymentBreakdown() {
                   <Input
                     id="adjustedAmount"
                     type="text"
-                    value={data.adjustedTuitionFee?.toLocaleString() || ""}
+                    value={data.adjustedTuitionFee?.toString().replace(/\B(?=(\d{3})+(?!\d))/g, " ") || ""}
                     onChange={(e) => handleAmountChange(e.target.value)}
-                    placeholder="1,000,000"
+                    placeholder="1 000 000"
                   />
                   <p className="text-xs text-muted-foreground">
                     {t.enrollmentWizard.originalAmount || "Original"}: {formatCurrency(data.originalTuitionFee)}
@@ -208,7 +209,7 @@ export function StepPaymentBreakdown() {
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="reason">
-                    {t.enrollmentWizard.adjustmentReason}
+                    {t.enrollmentWizard.adjustmentReason} *
                   </Label>
                   <Input
                     id="reason"
@@ -217,6 +218,7 @@ export function StepPaymentBreakdown() {
                       updateData({ adjustmentReason: e.target.value })
                     }
                     placeholder={t.enrollmentWizard.adjustmentReason}
+                    required
                   />
                 </div>
               </div>
@@ -277,7 +279,7 @@ export function StepPaymentBreakdown() {
       </div>
 
       {/* Summary */}
-      <div className="bg-muted/50 rounded-lg p-4">
+      <div className="bg-amber-50 dark:bg-muted/50 rounded-lg p-4 border border-amber-200 dark:border-border">
         <div className="grid grid-cols-3 gap-4 text-center">
           {schedules.map((schedule) => (
             <div key={schedule.scheduleNumber}>
@@ -294,7 +296,7 @@ export function StepPaymentBreakdown() {
           <p className="text-sm text-muted-foreground">
             {t.enrollmentWizard.totalYearlyAmount}
           </p>
-          <p className="text-2xl font-bold text-primary">
+          <p className="text-2xl font-bold text-[#e79908] dark:text-gspn-gold-200">
             {formatCurrency(displayTotal)}
           </p>
         </div>

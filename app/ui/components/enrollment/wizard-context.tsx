@@ -49,6 +49,13 @@ const initialData: EnrollmentWizardData = {
   address: undefined,
   notes: [],
 
+  // Enrolling person info
+  enrollingPersonType: undefined,
+  enrollingPersonName: undefined,
+  enrollingPersonRelation: undefined,
+  enrollingPersonPhone: undefined,
+  enrollingPersonEmail: undefined,
+
   // Step 3 - Payment Breakdown
   originalTuitionFee: 0,
   adjustedTuitionFee: undefined,
@@ -58,7 +65,7 @@ const initialData: EnrollmentWizardData = {
   // Step 4 - Payment Transaction
   paymentMade: false,
   paymentAmount: undefined,
-  paymentMethod: undefined,
+  paymentMethod: "cash",
   receiptNumber: undefined,
   transactionRef: undefined,
   receiptImageUrl: undefined,
@@ -228,13 +235,34 @@ export function EnrollmentWizardProvider({
         case 1: // Grade Selection
           return !!data.gradeId && !!data.schoolYearId
         case 2: // Student Info
-          return (
-            !!data.firstName &&
+          // Basic requirements
+          const hasBasicInfo = !!data.firstName &&
             !!data.lastName &&
-            !!data.dateOfBirth && // Date of birth is required
+            !!data.dateOfBirth &&
             (!!data.fatherName || !!data.motherName) &&
             (!!data.phone || !!data.fatherPhone || !!data.motherPhone)
-          )
+
+          // Enrolling person requirements
+          const hasEnrollingPerson = !!data.enrollingPersonType
+
+          // Validate enrolling person phone based on type
+          let enrollingPersonValid = false
+          if (data.enrollingPersonType === "father") {
+            // Father must have a valid phone number
+            enrollingPersonValid = !!data.fatherPhone && data.fatherPhone.trim() !== "" && data.fatherPhone.trim() !== "+224"
+          } else if (data.enrollingPersonType === "mother") {
+            // Mother must have a valid phone number
+            enrollingPersonValid = !!data.motherPhone && data.motherPhone.trim() !== "" && data.motherPhone.trim() !== "+224"
+          } else if (data.enrollingPersonType === "other") {
+            // Other person must have name, relation, and phone
+            enrollingPersonValid = !!data.enrollingPersonName &&
+              !!data.enrollingPersonRelation &&
+              !!data.enrollingPersonPhone &&
+              data.enrollingPersonPhone.trim() !== "" &&
+              data.enrollingPersonPhone.trim() !== "+224"
+          }
+
+          return hasBasicInfo && hasEnrollingPerson && enrollingPersonValid
         case 3: // Payment Breakdown
           return data.paymentSchedules.length > 0
         case 4: // Payment Transaction (optional, but if making payment, receipt number is required)

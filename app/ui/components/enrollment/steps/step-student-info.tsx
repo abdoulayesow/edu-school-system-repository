@@ -431,17 +431,38 @@ export function StepStudentInfo() {
           </div>
         </div>
 
+        {/* Birthday Certificate Upload */}
+        <div className="space-y-2">
+          <Label htmlFor="birthCertificate">{t.enrollmentWizard.birthCertificate || "Birthday Certificate"}</Label>
+          <Input
+            id="birthCertificate"
+            type="file"
+            accept="image/*,.pdf"
+            onChange={(e) => {
+              const file = e.target.files?.[0]
+              if (file) {
+                updateData({ birthCertificateUrl: URL.createObjectURL(file) })
+              }
+            }}
+          />
+          {data.birthCertificateUrl && (
+            <p className="text-xs text-green-600">{t.enrollmentWizard.fileUploaded || "File uploaded"}</p>
+          )}
+        </div>
+
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div className="space-y-2">
             <Label htmlFor="phone">{t.enrollmentWizard.phone}</Label>
             <Input
               id="phone"
               type="tel"
-              value={data.phone || "+224 "}
+              value={data.phone || ""}
               onChange={(e) => updateData({ phone: e.target.value })}
               onBlur={(e) => {
-                const formatted = formatGuineaPhone(e.target.value)
-                updateData({ phone: formatted })
+                if (e.target.value && e.target.value.trim() !== "") {
+                  const formatted = formatGuineaPhone(e.target.value)
+                  updateData({ phone: formatted })
+                }
               }}
               placeholder="+224 XXX XX XX XX"
               className={cn(
@@ -482,11 +503,12 @@ export function StepStudentInfo() {
             </h5>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="fatherName">{t.enrollmentWizard.fatherName}</Label>
+                <Label htmlFor="fatherName">{t.enrollmentWizard.fatherName} *</Label>
                 <Input
                   id="fatherName"
                   value={data.fatherName || ""}
                   onChange={(e) => updateData({ fatherName: e.target.value })}
+                  required
                 />
               </div>
               <div className="space-y-2">
@@ -494,11 +516,13 @@ export function StepStudentInfo() {
                 <Input
                   id="fatherPhone"
                   type="tel"
-                  value={data.fatherPhone || "+224 "}
+                  value={data.fatherPhone || ""}
                   onChange={(e) => updateData({ fatherPhone: e.target.value })}
                   onBlur={(e) => {
-                    const formatted = formatGuineaPhone(e.target.value)
-                    updateData({ fatherPhone: formatted })
+                    if (e.target.value && e.target.value.trim() !== "") {
+                      const formatted = formatGuineaPhone(e.target.value)
+                      updateData({ fatherPhone: formatted })
+                    }
                   }}
                   placeholder="+224 XXX XX XX XX"
                   className={cn(
@@ -527,11 +551,12 @@ export function StepStudentInfo() {
             </h5>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="motherName">{t.enrollmentWizard.motherName}</Label>
+                <Label htmlFor="motherName">{t.enrollmentWizard.motherName} *</Label>
                 <Input
                   id="motherName"
                   value={data.motherName || ""}
                   onChange={(e) => updateData({ motherName: e.target.value })}
+                  required
                 />
               </div>
               <div className="space-y-2">
@@ -539,11 +564,13 @@ export function StepStudentInfo() {
                 <Input
                   id="motherPhone"
                   type="tel"
-                  value={data.motherPhone || "+224 "}
+                  value={data.motherPhone || ""}
                   onChange={(e) => updateData({ motherPhone: e.target.value })}
                   onBlur={(e) => {
-                    const formatted = formatGuineaPhone(e.target.value)
-                    updateData({ motherPhone: formatted })
+                    if (e.target.value && e.target.value.trim() !== "") {
+                      const formatted = formatGuineaPhone(e.target.value)
+                      updateData({ motherPhone: formatted })
+                    }
                   }}
                   placeholder="+224 XXX XX XX XX"
                   className={cn(
@@ -574,6 +601,128 @@ export function StepStudentInfo() {
             rows={2}
           />
         </div>
+      </div>
+
+      {/* Enrolling Person Section */}
+      <div className="space-y-4">
+        <h4 className="font-medium">{t.enrollmentWizard.enrollingPerson || "Who is enrolling the student?"} *</h4>
+        <p className="text-sm text-muted-foreground">
+          {t.enrollmentWizard.enrollingPersonDescription || "This person will be the primary contact for school communication."}
+        </p>
+
+        <RadioGroup
+          value={data.enrollingPersonType || ""}
+          onValueChange={(value) => updateData({
+            enrollingPersonType: value as "father" | "mother" | "other",
+            // Clear other fields when changing type
+            ...(value !== "other" ? {
+              enrollingPersonName: undefined,
+              enrollingPersonRelation: undefined,
+              enrollingPersonPhone: undefined,
+              enrollingPersonEmail: undefined,
+            } : {})
+          })}
+          className="grid grid-cols-3 gap-4"
+        >
+          <Label
+            htmlFor="enrolling-father"
+            className={cn(
+              "flex items-center gap-3 p-4 border rounded-lg cursor-pointer transition-colors",
+              data.enrollingPersonType === "father" && "border-amber-500 bg-amber-50 dark:border-amber-400 dark:bg-amber-950/30"
+            )}
+          >
+            <RadioGroupItem value="father" id="enrolling-father" />
+            <span>{t.enrollmentWizard.enrollingAsFather || "Father"}</span>
+          </Label>
+          <Label
+            htmlFor="enrolling-mother"
+            className={cn(
+              "flex items-center gap-3 p-4 border rounded-lg cursor-pointer transition-colors",
+              data.enrollingPersonType === "mother" && "border-amber-500 bg-amber-50 dark:border-amber-400 dark:bg-amber-950/30"
+            )}
+          >
+            <RadioGroupItem value="mother" id="enrolling-mother" />
+            <span>{t.enrollmentWizard.enrollingAsMother || "Mother"}</span>
+          </Label>
+          <Label
+            htmlFor="enrolling-other"
+            className={cn(
+              "flex items-center gap-3 p-4 border rounded-lg cursor-pointer transition-colors",
+              data.enrollingPersonType === "other" && "border-amber-500 bg-amber-50 dark:border-amber-400 dark:bg-amber-950/30"
+            )}
+          >
+            <RadioGroupItem value="other" id="enrolling-other" />
+            <span>{t.enrollmentWizard.enrollingAsOther || "Other"}</span>
+          </Label>
+        </RadioGroup>
+
+        {/* Other Person Details (shown when "Other" is selected) */}
+        {data.enrollingPersonType === "other" && (
+          <Card className="py-4">
+            <CardContent>
+              <h5 className="text-sm font-medium mb-3">
+                {t.enrollmentWizard.otherEnrollingPersonInfo || "Contact Person Details"}
+              </h5>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="enrollingPersonName">
+                    {t.enrollmentWizard.enrollingPersonName || "Full Name"} *
+                  </Label>
+                  <Input
+                    id="enrollingPersonName"
+                    value={data.enrollingPersonName || ""}
+                    onChange={(e) => updateData({ enrollingPersonName: e.target.value })}
+                    placeholder={t.enrollmentWizard.enrollingPersonNamePlaceholder || "Enter full name"}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="enrollingPersonRelation">
+                    {t.enrollmentWizard.enrollingPersonRelation || "Relationship to Student"} *
+                  </Label>
+                  <Input
+                    id="enrollingPersonRelation"
+                    value={data.enrollingPersonRelation || ""}
+                    onChange={(e) => updateData({ enrollingPersonRelation: e.target.value })}
+                    placeholder={t.enrollmentWizard.enrollingPersonRelationPlaceholder || "e.g., Uncle, Aunt, Guardian"}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="enrollingPersonPhone">
+                    {t.enrollmentWizard.enrollingPersonPhone || "Phone Number"} *
+                  </Label>
+                  <Input
+                    id="enrollingPersonPhone"
+                    type="tel"
+                    value={data.enrollingPersonPhone || ""}
+                    onChange={(e) => updateData({ enrollingPersonPhone: e.target.value })}
+                    onBlur={(e) => {
+                      if (e.target.value && e.target.value.trim() !== "") {
+                        const formatted = formatGuineaPhone(e.target.value)
+                        updateData({ enrollingPersonPhone: formatted })
+                      }
+                    }}
+                    placeholder="+224 XXX XX XX XX"
+                    className={cn(
+                      !isPhoneEmpty(data.enrollingPersonPhone) && !isValidGuineaPhone(data.enrollingPersonPhone) && "border-amber-500 focus-visible:ring-amber-500"
+                    )}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="enrollingPersonEmail">
+                    {t.enrollmentWizard.enrollingPersonEmail || "Email Address"}
+                  </Label>
+                  <Input
+                    id="enrollingPersonEmail"
+                    type="email"
+                    value={data.enrollingPersonEmail || ""}
+                    onChange={(e) => updateData({ enrollingPersonEmail: e.target.value })}
+                    placeholder="email@example.com"
+                  />
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        )}
       </div>
 
       {/* Additional Notes */}

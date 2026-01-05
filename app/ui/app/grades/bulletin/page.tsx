@@ -175,7 +175,7 @@ export default function BulletinPage() {
 
         if (gradeRes.ok) {
           const gradeData = await gradeRes.json()
-          setGrades(gradeData)
+          setGrades(gradeData.grades || [])
         }
       } catch (err) {
         console.error("Error fetching initial data:", err)

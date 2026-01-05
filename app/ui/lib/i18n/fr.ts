@@ -27,7 +27,7 @@ export const fr = {
     status: "Statut",
     date: "Date",
     amount: "Montant",
-    students: "élèves",
+    students: "Élèves",
     student: "Élève",
     teacher: "Enseignant",
     user: "Utilisateur",
@@ -279,6 +279,14 @@ export const fr = {
     needsReview: "En attente de validation",
     rejected: "Rejeté",
     cancelled: "Annulé",
+
+    // Enrollment detail view
+    parents: "Parents",
+    enrolledBy: "Inscrit par",
+    enrolledByFather: "Père",
+    enrolledByMother: "Mère",
+    continueEnrollment: "Continuer",
+    relationship: "Lien",
   },
 
   // Activities
@@ -336,7 +344,7 @@ export const fr = {
     removeStudent: "Retirer l'élève",
     enrolled: "Inscrits",
     spotsLeft: "places restantes",
-    noSpots: "Complet",
+    noSpots: "complet",
 
     // Assign dialog
     assignStudentTitle: "Assigner un élève",
@@ -939,6 +947,7 @@ export const fr = {
     birthCertificate: "Extrait de naissance",
     uploadPhoto: "Télécharger une photo",
     uploadDocument: "Télécharger le document",
+    fileUploaded: "Fichier téléchargé",
 
     // Parent info
     parentInfo: "Information des parents",
@@ -951,6 +960,20 @@ export const fr = {
     fatherEmail: "Email du père",
     motherEmail: "Email de la mère",
     address: "Adresse",
+
+    // Enrolling Person
+    enrollingPerson: "Qui inscrit l'élève ?",
+    enrollingPersonDescription: "Cette personne sera le contact principal pour la communication scolaire.",
+    enrollingAsFather: "Père",
+    enrollingAsMother: "Mère",
+    enrollingAsOther: "Autre",
+    otherEnrollingPersonInfo: "Coordonnées de la personne",
+    enrollingPersonName: "Nom complet",
+    enrollingPersonNamePlaceholder: "Entrez le nom complet",
+    enrollingPersonRelation: "Lien avec l'élève",
+    enrollingPersonRelationPlaceholder: "ex: Oncle, Tante, Tuteur",
+    enrollingPersonPhone: "Numéro de téléphone",
+    enrollingPersonEmail: "Email (Optionnel)",
 
     // Notes
     additionalNotes: "Notes additionnelles",
@@ -1017,7 +1040,7 @@ export const fr = {
     pdfDownloadError: "Échec du téléchargement du PDF. Veuillez réessayer.",
     printDocument: "Imprimer",
     statusSubmittedPendingReview: "Soumise - En attente de révision",
-    statusReviewRequired: "Révision requise par le directeur",
+    statusReviewRequired: "Revue requise par le directeur",
     autoApproveIn: "Approbation automatique dans {days} jours",
 
     // Status badges
@@ -1061,6 +1084,7 @@ export const fr = {
     enrollmentSummary: "Résumé de l'inscription",
     backToEnrollments: "Retour aux inscriptions",
     startNewEnrollment: "Nouvelle inscription",
+    enrollmentApproved: "Votre inscription a été approuvée.",
   },
 
   // Students module
@@ -1077,10 +1101,10 @@ export const fr = {
 
     // Status labels
     balanceStatus: "Statut de paiement",
-    late: "En retard",
-    onTime: "À jour",
-    inAdvance: "En avance",
-    complete: "Complet",
+    late: "en retard",
+    onTime: "à jour",
+    inAdvance: "en avance",
+    complete: "complet",
     goldMedal: "Paiement complet",
 
     // Attendance status
@@ -1519,6 +1543,73 @@ export const fr = {
       currentRoom: "Salle Actuelle",
       newRoom: "Nouvelle Salle",
       reassignSuccess: "Salle changée avec succès",
+
+      // Auto-assignment
+      autoAssign: "Attribution Auto",
+      autoAssignDialogTitle: "Attribution Automatique des Élèves aux Salles",
+      autoAssignDialogDescription: "Distribuer automatiquement les élèves avec des ratios équilibrés de genre et d'âge",
+      selectRoomsToAutoAssign: "Sélectionner les salles pour l'attribution automatique",
+      selectAllRooms: "Sélectionner Toutes",
+      deselectAllRooms: "Désélectionner Tout",
+      previewTitle: "Aperçu",
+      studentsToAssign: "{count} élèves à assigner",
+      roomsSelected: "{count} salle(s) sélectionnée(s)",
+      studentsPerRoom: "~{min}-{max} élèves par salle",
+      genderRatio: "Genre: {male}% garçons, {female}% filles",
+      lockedStudentsExcluded: "{count} élève(s) verrouillé(s) (exclus)",
+      noLockedStudents: "Aucun élève verrouillé",
+      autoAssignButton: "Attribution Auto ({count})",
+      autoAssigning: "Attribution en cours...",
+      autoAssignSuccess: "{count} élève(s) assigné(s) automatiquement avec succès",
+      autoAssignError: "Échec de l'attribution automatique",
+      distributionSummary: "Résumé de la Distribution",
+      roomDistribution: "{roomName}: {count} élèves ({male} garçons, {female} filles)",
+      averageAge: "Âge moyen: {age} ans",
+      balanceScore: "Score d'Équilibre: {score}/100",
+      noRoomsSelected: "Veuillez sélectionner au moins une salle",
+
+      // Lock functionality
+      lockStudent: "Verrouiller l'élève (empêcher l'attribution auto)",
+      unlockStudent: "Déverrouiller l'élève (permettre l'attribution auto)",
+      locked: "Verrouillé",
+      lockToggleError: "Échec du verrouillage/déverrouillage",
+      lockedTooltip: "Cet élève est verrouillé et ne sera pas inclus dans l'attribution automatique",
+
+      // View Grade & Navigation
+      viewGrade: "Voir la classe",
+      viewGradeTooltip: "Voir la gestion détaillée des salles de classe",
+      autoAssignTooltip: "Assigner automatiquement avec distribution équilibrée",
+
+      // Attendance
+      takeAttendance: "Prendre les présences",
+      attendanceForRoom: "Présences pour {roomName}",
+      markPresent: "Présent",
+      markAbsent: "Absent",
+      markLate: "En retard",
+      markExcused: "Excusé",
+      saveAttendance: "Enregistrer les présences",
+      attendanceSaved: "Présences enregistrées avec succès",
+      attendanceDate: "Date",
+      attendanceError: "Échec de l'enregistrement des présences",
+
+      // Grade Room View Page
+      inlineAssignment: "Affectation en ligne",
+      dragToAssign: "Glisser l'élève vers la salle pour l'assigner",
+      quickActions: "Actions rapides",
+      bulkOperations: "Opérations groupées",
+      moveToRoom: "Déplacer vers salle",
+      removeAssignment: "Retirer l'affectation",
+      filterByRoom: "Filtrer par salle",
+      allRooms: "Toutes les salles",
+      roomUtilization: "Utilisation des salles",
+      attendanceRate: "Taux de présence",
+      unassignedStudentsPanel: "Élèves non assignés",
+      dropStudentHere: "Déposer l'élève ici pour l'assigner",
+      moveStudent: "Déplacer l'élève",
+      removeStudent: "Retirer l'élève",
+      bulkMoveSuccess: "{count} élève(s) déplacé(s) avec succès",
+      bulkRemoveSuccess: "{count} affectation(s) supprimée(s) avec succès",
+      reassignError: "Échec de la réaffectation de l'élève",
     },
 
     // Common

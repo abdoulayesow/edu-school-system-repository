@@ -121,7 +121,7 @@ export function StepReview() {
                 {t.enrollmentWizard.returningStudent}
               </Badge>
             ) : (
-              <Badge>{t.enrollmentWizard.newStudent}</Badge>
+              <Badge className="bg-amber-100 text-amber-800 border-amber-200 dark:bg-amber-900/30 dark:text-amber-200 dark:border-amber-800">{t.enrollmentWizard.newStudent}</Badge>
             )}
           </div>
           <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
@@ -257,9 +257,62 @@ export function StepReview() {
             </div>
           )}
 
+          {/* Enrolling Person */}
+          {data.enrollingPersonType && (
+            <div>
+              <Separator className="my-4" />
+              <h5 className="text-sm font-medium mb-2">
+                {t.enrollmentWizard.enrollingPerson}
+              </h5>
+              <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                <div>
+                  <p className="text-sm text-muted-foreground">
+                    Type
+                  </p>
+                  <p className="font-medium capitalize">
+                    {data.enrollingPersonType === "father" && t.enrollmentWizard.enrollingAsFather}
+                    {data.enrollingPersonType === "mother" && t.enrollmentWizard.enrollingAsMother}
+                    {data.enrollingPersonType === "other" && t.enrollmentWizard.enrollingAsOther}
+                  </p>
+                </div>
+                {data.enrollingPersonType === "other" && data.enrollingPersonName && (
+                  <>
+                    <div>
+                      <p className="text-sm text-muted-foreground">
+                        {t.enrollmentWizard.enrollingPersonName}
+                      </p>
+                      <p className="font-medium">{data.enrollingPersonName}</p>
+                    </div>
+                    <div>
+                      <p className="text-sm text-muted-foreground">
+                        {t.enrollmentWizard.enrollingPersonRelation}
+                      </p>
+                      <p className="font-medium">{data.enrollingPersonRelation || "-"}</p>
+                    </div>
+                    <div>
+                      <p className="text-sm text-muted-foreground">
+                        {t.enrollmentWizard.enrollingPersonPhone}
+                      </p>
+                      <p className="font-medium">{data.enrollingPersonPhone || "-"}</p>
+                    </div>
+                    {data.enrollingPersonEmail && (
+                      <div>
+                        <p className="text-sm text-muted-foreground">
+                          {t.enrollmentWizard.enrollingPersonEmail}
+                        </p>
+                        <p className="font-medium">{data.enrollingPersonEmail}</p>
+                      </div>
+                    )}
+                  </>
+                )}
+              </div>
+            </div>
+          )}
+
           {/* Address */}
           {data.address && (
             <div>
+              <Separator className="my-4" />
               <p className="text-sm text-muted-foreground">
                 {t.enrollmentWizard.address}
               </p>
@@ -292,7 +345,7 @@ export function StepReview() {
           {/* Payment Schedules */}
           <div className="grid grid-cols-3 gap-4 text-center">
             {data.paymentSchedules.map((schedule) => (
-              <div key={schedule.scheduleNumber} className="p-3 bg-muted/50 rounded-lg">
+              <div key={schedule.scheduleNumber} className="p-3 bg-amber-50 dark:bg-muted/50 rounded-lg border border-amber-200 dark:border-border">
                 <p className="text-lg font-bold">
                   {formatCurrency(schedule.amount)}
                 </p>
@@ -308,7 +361,7 @@ export function StepReview() {
           {/* Total */}
           <div className="flex items-center justify-between">
             <span>{t.enrollmentWizard.totalYearlyAmount}</span>
-            <span className="text-xl font-bold text-primary">
+            <span className="text-xl font-bold text-[#e79908] dark:text-gspn-gold-200">
               {formatCurrency(data.adjustedTuitionFee || data.originalTuitionFee)}
             </span>
           </div>

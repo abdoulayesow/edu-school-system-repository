@@ -94,7 +94,7 @@ const attestationStyles = StyleSheet.create({
   },
   paymentHeader: {
     flexDirection: "row",
-    backgroundColor: colors.navy,
+    backgroundColor: "#000000",  // Black header as requested
     padding: 8,
   },
   paymentHeaderCell: {
@@ -166,13 +166,13 @@ const attestationStyles = StyleSheet.create({
   },
 })
 
-// Format currency in GNF
+// Format currency in GNF (manual formatting for PDF compatibility)
 function formatCurrency(amount: number): string {
-  return new Intl.NumberFormat("fr-GN", {
-    style: "decimal",
-    minimumFractionDigits: 0,
-    maximumFractionDigits: 0,
-  }).format(amount) + " GNF"
+  // Manual formatting with space as thousand separator
+  const formatted = Math.round(amount)
+    .toString()
+    .replace(/\B(?=(\d{3})+(?!\d))/g, " ")
+  return `${formatted} GNF`
 }
 
 // Format date
@@ -191,9 +191,9 @@ const labels = {
   en: {
     title: "ENROLLMENT CERTIFICATE",
     titleAlt: "Attestation d'Inscription",
-    greeting: (name: string) => `Dear ${name} (or Parents/Guardians),`,
-    confirmation: (schoolYear: string, grade: string) =>
-      `We confirm your enrollment at Groupe Scolaire Prive N'Diolou (GSPN) for the academic year ${schoolYear} in ${grade}. A place has been reserved for you.`,
+    greeting: (name: string) => `Mr/Ms ${name},`,
+    confirmation: (studentName: string, dob: string, schoolYear: string, grade: string) =>
+      `We confirm the enrollment of ${studentName} born on ${dob} at Groupe Scolaire Prive N'Diolou (GSPN) for the academic year ${schoolYear} in ${grade}.`,
     details: "Enrollment Details",
     studentId: "Student ID",
     grade: "Grade / Level",
@@ -212,9 +212,9 @@ const labels = {
   fr: {
     title: "ATTESTATION D'INSCRIPTION",
     titleAlt: "Enrollment Certificate",
-    greeting: (name: string) => `Cher/Chere ${name} (ou Parents/Tuteurs),`,
-    confirmation: (schoolYear: string, grade: string) =>
-      `Nous confirmons votre inscription au Groupe Scolaire Prive N'Diolou (GSPN) pour l'annee scolaire ${schoolYear} en ${grade}. Une place vous est reservee.`,
+    greeting: (name: string) => `Mr/Mme ${name},`,
+    confirmation: (studentName: string, dob: string, schoolYear: string, grade: string) =>
+      `Nous confirmons l'inscription de ${studentName} né(e) le ${dob} au Groupe Scolaire Privé N'Diolou (GSPN) pour l'année scolaire ${schoolYear} en ${grade}.`,
     details: "Details de l'inscription",
     studentId: "Identifiant",
     grade: "Niveau",
@@ -242,6 +242,20 @@ export function EnrollmentDocument({ data, language = "fr" }: EnrollmentDocument
     ? `${enrollment.firstName} ${enrollment.middleName} ${enrollment.lastName}`
     : `${enrollment.firstName} ${enrollment.lastName}`
 
+  // Get enrolling person name based on type
+  const enrollingPersonName = enrollment.enrollingPersonType === "father"
+    ? enrollment.fatherName || studentName
+    : enrollment.enrollingPersonType === "mother"
+      ? enrollment.motherName || studentName
+      : enrollment.enrollingPersonType === "other"
+        ? enrollment.enrollingPersonName || studentName
+        : enrollment.fatherName || enrollment.motherName || studentName
+
+  // Format date of birth
+  const dateOfBirthFormatted = enrollment.dateOfBirth
+    ? formatDate(enrollment.dateOfBirth, language)
+    : "-"
+
   // Get the most recent receipt number if available
   const latestReceipt = payments.length > 0 ? payments[0].receiptNumber : "-"
 
@@ -259,12 +273,12 @@ export function EnrollmentDocument({ data, language = "fr" }: EnrollmentDocument
 
         {/* Greeting */}
         <Text style={attestationStyles.greeting}>
-          {t.greeting(studentName)}
+          {t.greeting(enrollingPersonName)}
         </Text>
 
         {/* Confirmation Paragraph */}
         <Text style={attestationStyles.confirmationText}>
-          {t.confirmation(schoolYear.name, grade.name)}
+          {t.confirmation(studentName, dateOfBirthFormatted, schoolYear.name, grade.name)}
         </Text>
 
         {/* Enrollment Details Table */}
@@ -300,12 +314,8 @@ export function EnrollmentDocument({ data, language = "fr" }: EnrollmentDocument
           <View style={attestationStyles.paymentRow}>
             <Text style={attestationStyles.paymentCell}>{latestReceipt}</Text>
             <Text style={attestationStyles.paymentCell}>{formatCurrency(effectiveFee)}</Text>
-            <Text style={[attestationStyles.paymentCell, { color: colors.success }]}>
-              {formatCurrency(totalPaid)}
-            </Text>
-            <Text style={[attestationStyles.paymentCell, { color: totalOwed > 0 ? colors.danger : colors.success }]}>
-              {formatCurrency(totalOwed)}
-            </Text>
+            <Text style={attestationStyles.paymentCell}>{formatCurrency(totalPaid)}</Text>
+            <Text style={attestationStyles.paymentCell}>{formatCurrency(totalOwed)}</Text>
           </View>
         </View>
 

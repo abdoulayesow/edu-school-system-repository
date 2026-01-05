@@ -281,6 +281,14 @@ export const en: TranslationKeys = {
     needsReview: "Needs Review",
     rejected: "Rejected",
     cancelled: "Cancelled",
+
+    // Enrollment detail view
+    parents: "Parents",
+    enrolledBy: "Enrolled By",
+    enrolledByFather: "Father",
+    enrolledByMother: "Mother",
+    continueEnrollment: "Continue",
+    relationship: "Relationship",
   },
 
   // Activities
@@ -941,6 +949,7 @@ export const en: TranslationKeys = {
     birthCertificate: "Birth Certificate",
     uploadPhoto: "Upload Photo",
     uploadDocument: "Upload Document",
+    fileUploaded: "File uploaded",
 
     // Parent info
     parentInfo: "Parent Information",
@@ -953,6 +962,20 @@ export const en: TranslationKeys = {
     fatherEmail: "Father's Email",
     motherEmail: "Mother's Email",
     address: "Address",
+
+    // Enrolling Person
+    enrollingPerson: "Who is enrolling the student?",
+    enrollingPersonDescription: "This person will be the primary contact for school communication.",
+    enrollingAsFather: "Father",
+    enrollingAsMother: "Mother",
+    enrollingAsOther: "Other",
+    otherEnrollingPersonInfo: "Contact Person Details",
+    enrollingPersonName: "Full Name",
+    enrollingPersonNamePlaceholder: "Enter full name",
+    enrollingPersonRelation: "Relationship to Student",
+    enrollingPersonRelationPlaceholder: "e.g., Uncle, Aunt, Guardian",
+    enrollingPersonPhone: "Phone Number",
+    enrollingPersonEmail: "Email (Optional)",
 
     // Notes
     additionalNotes: "Additional Notes",
@@ -1063,6 +1086,7 @@ export const en: TranslationKeys = {
     enrollmentSummary: "Enrollment Summary",
     backToEnrollments: "Back to Enrollments",
     startNewEnrollment: "Start New Enrollment",
+    enrollmentApproved: "Your enrollment has been approved.",
   },
 
   // Students module
@@ -1521,6 +1545,73 @@ export const en: TranslationKeys = {
       currentRoom: "Current Room",
       newRoom: "New Room",
       reassignSuccess: "Room changed successfully",
+
+      // Auto-assignment
+      autoAssign: "Auto-Assign",
+      autoAssignDialogTitle: "Auto-Assign Students to Rooms",
+      autoAssignDialogDescription: "Automatically distribute students with balanced gender and age ratios",
+      selectRoomsToAutoAssign: "Select rooms for auto-assignment",
+      selectAllRooms: "Select All Rooms",
+      deselectAllRooms: "Deselect All",
+      previewTitle: "Preview",
+      studentsToAssign: "{count} students to assign",
+      roomsSelected: "{count} room(s) selected",
+      studentsPerRoom: "~{min}-{max} students per room",
+      genderRatio: "Gender: {male}% male, {female}% female",
+      lockedStudentsExcluded: "{count} student(s) locked (excluded)",
+      noLockedStudents: "No locked students",
+      autoAssignButton: "Auto-Assign ({count})",
+      autoAssigning: "Auto-assigning...",
+      autoAssignSuccess: "Successfully auto-assigned {count} student(s)",
+      autoAssignError: "Failed to auto-assign students",
+      distributionSummary: "Distribution Summary",
+      roomDistribution: "{roomName}: {count} students ({male} male, {female} female)",
+      averageAge: "Average age: {age} years",
+      balanceScore: "Balance Score: {score}/100",
+      noRoomsSelected: "Please select at least one room",
+
+      // Lock functionality
+      lockStudent: "Lock student (prevent auto-assignment)",
+      unlockStudent: "Unlock student (allow auto-assignment)",
+      locked: "Locked",
+      lockToggleError: "Failed to toggle student lock",
+      lockedTooltip: "This student is locked and won't be included in auto-assignment",
+
+      // View Grade & Navigation
+      viewGrade: "View Grade",
+      viewGradeTooltip: "View detailed grade room management",
+      autoAssignTooltip: "Automatically assign students with balanced distribution",
+
+      // Attendance
+      takeAttendance: "Take Attendance",
+      attendanceForRoom: "Attendance for {roomName}",
+      markPresent: "Present",
+      markAbsent: "Absent",
+      markLate: "Late",
+      markExcused: "Excused",
+      saveAttendance: "Save Attendance",
+      attendanceSaved: "Attendance saved successfully",
+      attendanceDate: "Date",
+      attendanceError: "Failed to save attendance",
+
+      // Grade Room View Page
+      inlineAssignment: "Inline Assignment",
+      dragToAssign: "Drag student to room to assign",
+      quickActions: "Quick Actions",
+      bulkOperations: "Bulk Operations",
+      moveToRoom: "Move to Room",
+      removeAssignment: "Remove Assignment",
+      filterByRoom: "Filter by Room",
+      allRooms: "All Rooms",
+      roomUtilization: "Room Utilization",
+      attendanceRate: "Attendance Rate",
+      unassignedStudentsPanel: "Unassigned Students",
+      dropStudentHere: "Drop student here to assign",
+      moveStudent: "Move Student",
+      removeStudent: "Remove Student",
+      bulkMoveSuccess: "Successfully moved {count} student(s)",
+      bulkRemoveSuccess: "Successfully removed {count} assignment(s)",
+      reassignError: "Failed to reassign student",
     },
 
     // Common

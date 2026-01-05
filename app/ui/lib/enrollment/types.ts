@@ -85,6 +85,13 @@ export interface Enrollment {
   motherEmail?: string
   address?: string
 
+  // Enrolling person info
+  enrollingPersonType?: "father" | "mother" | "other"
+  enrollingPersonName?: string
+  enrollingPersonRelation?: string
+  enrollingPersonPhone?: string
+  enrollingPersonEmail?: string
+
   // Financial
   originalTuitionFee: number
   adjustedTuitionFee?: number
@@ -232,6 +239,13 @@ export interface EnrollmentWizardData {
   address?: string
   notes: Array<{ title: string; content: string }>
 
+  // Enrolling person info
+  enrollingPersonType?: "father" | "mother" | "other"
+  enrollingPersonName?: string
+  enrollingPersonRelation?: string
+  enrollingPersonPhone?: string
+  enrollingPersonEmail?: string
+
   // Step 3 - Payment Breakdown
   originalTuitionFee: number
   adjustedTuitionFee?: number
@@ -255,6 +269,7 @@ export interface EnrollmentWizardData {
   enrollmentId?: string
   enrollmentNumber?: string
   studentNumber?: string
+  enrollmentStatus?: EnrollmentStatus
 }
 
 // Wizard state for enrollment wizard context

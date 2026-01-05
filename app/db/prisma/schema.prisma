@@ -333,6 +333,13 @@ model Enrollment {
   motherEmail         String?
   address             String?
 
+  // Enrolling person info (who is enrolling the student)
+  enrollingPersonType     String?   // "father" | "mother" | "other"
+  enrollingPersonName     String?   // Full name (required if "other")
+  enrollingPersonRelation String?   // Relationship to student (if "other")
+  enrollingPersonPhone    String?   // Phone (required if "other")
+  enrollingPersonEmail    String?   // Email (optional, if "other")
+
   // Financial
   originalTuitionFee  Int              // Original fee from Grade
   adjustedTuitionFee  Int?             // If different from original (requires approval)
@@ -611,16 +618,17 @@ model UserProfile {
 }
 
 model StudentProfile {
-  id              String        @id @default(cuid())
-  personId        String        @unique
-  studentId       String?       @unique  // Links to legacy Student table during migration
-  studentNumber   String?       @unique  // STU-00001
-  studentStatus   StudentStatus @default(active)
-  enrollmentDate  DateTime      @default(now())
-  currentGradeId  String?
-  syncVersion     Int           @default(0)
-  createdAt       DateTime      @default(now())
-  updatedAt       DateTime      @updatedAt
+  id                    String        @id @default(cuid())
+  personId              String        @unique
+  studentId             String?       @unique  // Links to legacy Student table during migration
+  studentNumber         String?       @unique  // STU-00001
+  studentStatus         StudentStatus @default(active)
+  enrollmentDate        DateTime      @default(now())
+  currentGradeId        String?
+  isLockedForAutoAssign Boolean       @default(false)  // Prevent auto-assignment if true
+  syncVersion           Int           @default(0)
+  createdAt             DateTime      @default(now())
+  updatedAt             DateTime      @updatedAt
 
   person          Person        @relation(fields: [personId], references: [id], onDelete: Cascade)
   student         Student?      @relation(fields: [studentId], references: [id])

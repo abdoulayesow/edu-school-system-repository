@@ -27,6 +27,12 @@ const createEnrollmentSchema = z.object({
   motherPhone: z.string().optional(),
   motherEmail: z.string().email().optional().or(z.literal("")),
   address: z.string().optional(),
+  // Enrolling person info
+  enrollingPersonType: z.enum(["father", "mother", "other"]).optional(),
+  enrollingPersonName: z.string().optional(),
+  enrollingPersonRelation: z.string().optional(),
+  enrollingPersonPhone: z.string().optional(),
+  enrollingPersonEmail: z.string().email().optional().or(z.literal("")),
   // Returning student
   studentId: z.string().optional(),
   isReturningStudent: z.boolean().default(false),
@@ -227,6 +233,12 @@ export async function POST(req: NextRequest) {
       motherName: validated.motherName,
       motherPhone: validated.motherPhone,
       address: validated.address,
+      // Enrolling person info
+      enrollingPersonType: validated.enrollingPersonType,
+      enrollingPersonName: validated.enrollingPersonName,
+      enrollingPersonRelation: validated.enrollingPersonRelation,
+      enrollingPersonPhone: validated.enrollingPersonPhone,
+      enrollingPersonEmail: validated.enrollingPersonEmail || null,
     }
 
     const enrollment = await prisma.enrollment.create({

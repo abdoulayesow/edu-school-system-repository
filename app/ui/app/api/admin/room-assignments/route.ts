@@ -53,20 +53,24 @@ export async function GET(req: NextRequest) {
         )
       }
 
-      // Get students enrolled in this grade but not assigned to a room
-      const enrolledStudents = await prisma.enrollment.findMany({
+      // Get students enrolled in this grade via GradeEnrollment (direct relationship)
+      const gradeEnrollments = await prisma.gradeEnrollment.findMany({
         where: {
           gradeId,
           schoolYearId,
-          status: "completed", // Only approved enrollments
+          status: "active",
         },
-        select: {
-          studentId: true,
-          firstName: true,
-          lastName: true,
-          student: {
+        include: {
+          studentProfile: {
             include: {
-              studentProfile: true,
+              person: {
+                select: {
+                  firstName: true,
+                  lastName: true,
+                  gender: true,
+                  dateOfBirth: true,
+                },
+              },
             },
           },
         },
@@ -88,25 +92,24 @@ export async function GET(req: NextRequest) {
 
       const assignedIds = new Set(assignedStudentIds.map(a => a.studentProfileId))
 
-      // Filter to get unassigned students, deduplicating by studentProfile.id
-      // (handles edge case where a student has multiple enrollment records)
-      const studentMap = new Map<string, { id: string; firstName: string; lastName: string; studentNumber?: string | null }>()
+      // Filter unassigned students
+      const unassignedStudents = gradeEnrollments
+        .filter(e => e.studentProfile && !assignedIds.has(e.studentProfile.id))
+        .map(e => {
+          const profile = e.studentProfile!
+          const person = profile.person
 
-      enrolledStudents
-        .filter(e => e.student?.studentProfile && !assignedIds.has(e.student.studentProfile.id))
-        .forEach(e => {
-          const profileId = e.student!.studentProfile!.id
-          if (!studentMap.has(profileId)) {
-            studentMap.set(profileId, {
-              id: profileId,
-              firstName: e.firstName,
-              lastName: e.lastName,
-              studentNumber: e.student?.studentProfile?.studentNumber,
-            })
+          return {
+            id: profile.id,
+            firstName: person.firstName,
+            lastName: person.lastName,
+            studentNumber: profile.studentNumber,
+            gender: person.gender,
+            dateOfBirth: person.dateOfBirth,
+            enrollmentDate: e.enrolledAt,
+            isLocked: profile.isLockedForAutoAssign,
           }
         })
-
-      const unassignedStudents = Array.from(studentMap.values())
 
       return NextResponse.json(unassignedStudents)
     }

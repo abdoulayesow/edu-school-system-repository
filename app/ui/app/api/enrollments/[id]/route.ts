@@ -24,6 +24,12 @@ const updateEnrollmentSchema = z.object({
   motherPhone: z.string().optional(),
   motherEmail: z.string().email().optional().or(z.literal("")),
   address: z.string().optional(),
+  // Enrolling person info
+  enrollingPersonType: z.enum(["father", "mother", "other"]).optional(),
+  enrollingPersonName: z.string().optional(),
+  enrollingPersonRelation: z.string().optional(),
+  enrollingPersonPhone: z.string().optional(),
+  enrollingPersonEmail: z.string().email().optional().or(z.literal("")),
   // Financial
   adjustedTuitionFee: z.number().positive().optional(),
   adjustmentReason: z.string().optional(),
@@ -82,8 +88,10 @@ export async function GET(req: NextRequest, { params }: RouteParams) {
     }
 
     // Calculate payment summary
+    // Count all payments except rejected and failed
+    // (includes: pending_deposit, deposited, pending_review, confirmed)
     const totalPaid = enrollment.payments
-      .filter((p) => p.status === "confirmed")
+      .filter((p) => !["rejected", "failed"].includes(p.status))
       .reduce((sum, p) => sum + p.amount, 0)
 
     const tuitionFee = enrollment.adjustedTuitionFee || enrollment.originalTuitionFee
@@ -174,6 +182,12 @@ export async function PUT(req: NextRequest, { params }: RouteParams) {
     if (validated.motherPhone !== undefined) updateData.motherPhone = validated.motherPhone
     if (validated.motherEmail !== undefined) updateData.motherEmail = validated.motherEmail || null
     if (validated.address !== undefined) updateData.address = validated.address
+    // Enrolling person info
+    if (validated.enrollingPersonType !== undefined) updateData.enrollingPersonType = validated.enrollingPersonType
+    if (validated.enrollingPersonName !== undefined) updateData.enrollingPersonName = validated.enrollingPersonName
+    if (validated.enrollingPersonRelation !== undefined) updateData.enrollingPersonRelation = validated.enrollingPersonRelation
+    if (validated.enrollingPersonPhone !== undefined) updateData.enrollingPersonPhone = validated.enrollingPersonPhone
+    if (validated.enrollingPersonEmail !== undefined) updateData.enrollingPersonEmail = validated.enrollingPersonEmail || null
     if (validated.currentStep !== undefined) updateData.currentStep = validated.currentStep
 
     // Handle grade change

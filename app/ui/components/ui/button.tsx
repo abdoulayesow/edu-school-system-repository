@@ -21,7 +21,7 @@ const buttonVariants = cva(
           'hover:bg-accent hover:text-accent-foreground dark:hover:bg-accent/50',
         link: 'text-primary underline-offset-4 hover:underline active:scale-100',
         gold:
-          'bg-accent text-accent-foreground hover:bg-accent/90 hover:shadow-md hover:shadow-amber-500/20',
+          'bg-[#e79908] hover:bg-[#d68907] text-black dark:bg-gspn-maroon-950 dark:hover:bg-gspn-maroon-900 dark:text-white hover:shadow-md',
         'gold-outline':
           'border-2 border-accent text-accent hover:bg-accent hover:text-accent-foreground',
       },

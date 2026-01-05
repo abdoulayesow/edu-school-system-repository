@@ -28,7 +28,9 @@ import {
   TableRow,
 } from "@/components/ui/table"
 import { useI18n } from "@/components/i18n-provider"
-import { Loader2, Users, AlertTriangle, CheckCircle2 } from "lucide-react"
+import { Loader2, Users, AlertTriangle, CheckCircle2, Lock, LockOpen, Eye, Sparkles } from "lucide-react"
+import Link from "next/link"
+import { AutoAssignDialog } from "./auto-assign-dialog"
 
 interface Room {
   id: string
@@ -46,6 +48,7 @@ interface UnassignedStudent {
   firstName: string
   lastName: string
   studentNumber?: string
+  isLocked?: boolean
 }
 
 interface RoomAssignmentDialogProps {
@@ -75,6 +78,7 @@ export function RoomAssignmentDialog({
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [successMessage, setSuccessMessage] = useState<string | null>(null)
+  const [autoAssignDialogOpen, setAutoAssignDialogOpen] = useState(false)
 
   // Get selected room
   const selectedRoom = useMemo(
@@ -158,6 +162,25 @@ export function RoomAssignmentDialog({
     setSelectedStudentIds(new Set())
   }
 
+  async function toggleLock(studentProfileId: string, isLocked: boolean) {
+    try {
+      const response = await fetch(`/api/admin/students/${studentProfileId}/lock`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ isLocked })
+      })
+
+      if (!response.ok) {
+        throw new Error(t.admin.roomAssignments.lockToggleError)
+      }
+
+      // Refresh unassigned students list
+      await fetchUnassignedStudents()
+    } catch (err) {
+      setError(err instanceof Error ? err.message : t.admin.roomAssignments.lockToggleError)
+    }
+  }
+
   async function handleAssign() {
     if (!selectedRoomId || selectedStudentIds.size === 0) return
 
@@ -230,13 +253,44 @@ export function RoomAssignmentDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-2xl max-h-[80vh] flex flex-col">
         <DialogHeader>
-          <DialogTitle className="flex items-center gap-2">
-            <Users className="h-5 w-5 text-primary" />
-            {t.admin.roomAssignments.dialogTitle}
-          </DialogTitle>
-          <DialogDescription>
-            {t.admin.roomAssignments.dialogDescription.replace("{gradeName}", gradeName)}
-          </DialogDescription>
+          <div className="flex items-center justify-between">
+            <div className="space-y-1.5">
+              <DialogTitle className="flex items-center gap-2">
+                <Users className="h-5 w-5 text-primary" />
+                {t.admin.roomAssignments.dialogTitle}
+              </DialogTitle>
+              <DialogDescription>
+                {t.admin.roomAssignments.dialogDescription.replace("{gradeName}", gradeName)}
+              </DialogDescription>
+            </div>
+
+            {/* Action buttons */}
+            <div className="flex gap-2">
+              {/* Auto-Assign button */}
+              <Button
+                variant="default"
+                size="sm"
+                onClick={() => setAutoAssignDialogOpen(true)}
+                className="inline-flex items-center justify-center"
+                title={t.admin.roomAssignments.autoAssignTooltip}
+              >
+                <Sparkles className="h-4 w-4 mr-2" />
+                {t.admin.roomAssignments.autoAssign}
+              </Button>
+
+              {/* View Grade button */}
+              <Button
+                variant="outline"
+                size="icon"
+                asChild
+                title={t.admin.roomAssignments.viewGradeTooltip}
+              >
+                <Link href={`/students/grades/${gradeId}/view?schoolYearId=${schoolYearId}`}>
+                  <Eye className="h-4 w-4" />
+                </Link>
+              </Button>
+            </div>
+          </div>
         </DialogHeader>
 
         <div className="flex-1 overflow-hidden flex flex-col space-y-4 py-4">
@@ -349,6 +403,7 @@ export function RoomAssignmentDialog({
                       <TableHead className="w-12"></TableHead>
                       <TableHead>{t.admin.roomAssignments.studentName}</TableHead>
                       <TableHead>{t.admin.roomAssignments.studentNumber}</TableHead>
+                      <TableHead className="w-12"></TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -369,10 +424,32 @@ export function RoomAssignmentDialog({
                           />
                         </TableCell>
                         <TableCell className="font-medium">
-                          {student.firstName} {student.lastName}
+                          <div className="flex items-center gap-2">
+                            <span>{student.firstName} {student.lastName}</span>
+                            {student.isLocked && (
+                              <Badge variant="outline" className="text-xs">
+                                <Lock className="h-3 w-3 mr-1" />
+                                {t.admin.roomAssignments.locked}
+                              </Badge>
+                            )}
+                          </div>
                         </TableCell>
                         <TableCell className="text-muted-foreground">
                           {student.studentNumber || "-"}
+                        </TableCell>
+                        <TableCell>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => toggleLock(student.id, !student.isLocked)}
+                            title={student.isLocked ? t.admin.roomAssignments.unlockStudent : t.admin.roomAssignments.lockStudent}
+                          >
+                            {student.isLocked ? (
+                              <LockOpen className="h-4 w-4" />
+                            ) : (
+                              <Lock className="h-4 w-4" />
+                            )}
+                          </Button>
                         </TableCell>
                       </TableRow>
                     ))}
@@ -425,6 +502,20 @@ export function RoomAssignmentDialog({
           </Button>
         </DialogFooter>
       </DialogContent>
+
+      {/* Auto-Assign Dialog (nested) */}
+      <AutoAssignDialog
+        open={autoAssignDialogOpen}
+        onOpenChange={setAutoAssignDialogOpen}
+        gradeId={gradeId}
+        gradeName={gradeName}
+        schoolYearId={schoolYearId}
+        rooms={rooms}
+        onSuccess={() => {
+          fetchUnassignedStudents()
+          onSuccess()
+        }}
+      />
     </Dialog>
   )
 }
