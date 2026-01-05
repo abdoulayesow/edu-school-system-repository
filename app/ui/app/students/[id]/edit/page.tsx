@@ -16,6 +16,7 @@ import {
 import { ArrowLeft, Loader2, User, Users, Save } from "lucide-react"
 import { useI18n } from "@/components/i18n-provider"
 import { PageContainer } from "@/components/layout/PageContainer"
+import { formatGuineaPhone } from "@/lib/utils/phone"
 import Link from "next/link"
 
 interface StudentData {
@@ -314,6 +315,10 @@ export default function StudentEditPage() {
                   type="tel"
                   value={phone}
                   onChange={(e) => setPhone(e.target.value)}
+                  onBlur={(e) => {
+                    const formatted = formatGuineaPhone(e.target.value)
+                    setPhone(formatted)
+                  }}
                   placeholder="+224 XXX XX XX XX"
                 />
               </div>
@@ -343,7 +348,7 @@ export default function StudentEditPage() {
           </CardHeader>
           <CardContent className="space-y-6">
             {/* Father */}
-            <div className="p-4 rounded-lg bg-amber-50/50 dark:bg-amber-950/30 space-y-4">
+            <div className="space-y-4">
               <h4 className="font-medium">{t.students.father}</h4>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div className="space-y-2">
@@ -361,6 +366,10 @@ export default function StudentEditPage() {
                     type="tel"
                     value={fatherPhone}
                     onChange={(e) => setFatherPhone(e.target.value)}
+                    onBlur={(e) => {
+                      const formatted = formatGuineaPhone(e.target.value)
+                      setFatherPhone(formatted)
+                    }}
                     placeholder="+224 XXX XX XX XX"
                   />
                 </div>
@@ -377,7 +386,7 @@ export default function StudentEditPage() {
             </div>
 
             {/* Mother */}
-            <div className="p-4 rounded-lg bg-amber-50/50 dark:bg-amber-950/30 space-y-4">
+            <div className="space-y-4">
               <h4 className="font-medium">{t.students.mother}</h4>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div className="space-y-2">
@@ -395,6 +404,10 @@ export default function StudentEditPage() {
                     type="tel"
                     value={motherPhone}
                     onChange={(e) => setMotherPhone(e.target.value)}
+                    onBlur={(e) => {
+                      const formatted = formatGuineaPhone(e.target.value)
+                      setMotherPhone(formatted)
+                    }}
                     placeholder="+224 XXX XX XX XX"
                   />
                 </div>
