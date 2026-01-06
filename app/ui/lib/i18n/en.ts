@@ -86,6 +86,13 @@ export const en: TranslationKeys = {
     expandMenu: "Expand Menu",
     closeMenu: "Close Menu",
     gradesClasses: "Grades & Classes",
+    // Grading navigation
+    gradingSection: "Grading",
+    bulletins: "Bulletins",
+    classRankingNav: "Class Ranking",
+    teacherRemarks: "Teacher Remarks",
+    conductEntry: "Conduct & Attendance",
+    trimesters: "Trimesters",
   },
 
   // Homepage
@@ -274,6 +281,14 @@ export const en: TranslationKeys = {
     needsReview: "Needs Review",
     rejected: "Rejected",
     cancelled: "Cancelled",
+
+    // Enrollment detail view
+    parents: "Parents",
+    enrolledBy: "Enrolled By",
+    enrolledByFather: "Father",
+    enrolledByMother: "Mother",
+    continueEnrollment: "Continue",
+    relationship: "Relationship",
   },
 
   // Activities
@@ -791,6 +806,12 @@ export const en: TranslationKeys = {
       term2: "Term 2",
       term3: "Term 3",
     },
+    levelLabels: {
+      kindergarten: "Kindergarten",
+      elementary: "Elementary",
+      college: "Middle School",
+      high_school: "High School",
+    },
   },
 
   // Classes
@@ -934,6 +955,7 @@ export const en: TranslationKeys = {
     birthCertificate: "Birth Certificate",
     uploadPhoto: "Upload Photo",
     uploadDocument: "Upload Document",
+    fileUploaded: "File uploaded",
 
     // Parent info
     parentInfo: "Parent Information",
@@ -946,6 +968,20 @@ export const en: TranslationKeys = {
     fatherEmail: "Father's Email",
     motherEmail: "Mother's Email",
     address: "Address",
+
+    // Enrolling Person
+    enrollingPerson: "Who is enrolling the student?",
+    enrollingPersonDescription: "This person will be the primary contact for school communication.",
+    enrollingAsFather: "Father",
+    enrollingAsMother: "Mother",
+    enrollingAsOther: "Other",
+    otherEnrollingPersonInfo: "Contact Person Details",
+    enrollingPersonName: "Full Name",
+    enrollingPersonNamePlaceholder: "Enter full name",
+    enrollingPersonRelation: "Relationship to Student",
+    enrollingPersonRelationPlaceholder: "e.g., Uncle, Aunt, Guardian",
+    enrollingPersonPhone: "Phone Number",
+    enrollingPersonEmail: "Email (Optional)",
 
     // Notes
     additionalNotes: "Additional Notes",
@@ -1056,6 +1092,7 @@ export const en: TranslationKeys = {
     enrollmentSummary: "Enrollment Summary",
     backToEnrollments: "Back to Enrollments",
     startNewEnrollment: "Start New Enrollment",
+    enrollmentApproved: "Your enrollment has been approved.",
   },
 
   // Students module
@@ -1104,6 +1141,115 @@ export const en: TranslationKeys = {
     displayed: "displayed",
     noStudentsFound: "No students found with these criteria",
     noStudentsEnrolled: "No students enrolled",
+
+    // New keys for improved pages
+    needsAttention: "Needs Attention",
+    familyInfo: "Family Information",
+    father: "Father",
+    mother: "Mother",
+    guardian: "Guardian",
+    enrollmentNumber: "Enrollment #",
+    // Student detail page improvements
+    managePayments: "Manage payments",
+    enrolledBy: "Enrolled by",
+    createdBy: "Created by",
+    enrollingGuardian: "Enrolling Guardian",
+    enrollingSchoolStaff: "Enrolling School Staff",
+    enrollmentNotes: "Enrollment notes",
+    middleName: "Middle name",
+    viewEnrollment: "View enrollment",
+    editInfo: "Edit information",
+    noNotes: "No notes",
+    paymentProgress: "Payment progress",
+
+    // Student detail page - tabs and sections
+    backToStudents: "Back to students",
+    overview: "Overview",
+    enrollmentsTab: "Enrollments",
+    paymentsTab: "Payments",
+    attendanceTab: "Attendance",
+    activitiesTab: "Activities",
+
+    // Stats cards
+    remainingBalanceLabel: "Remaining balance",
+    totalPaid: "Total paid",
+    of: "of",
+    attendanceLabel: "Attendance",
+    paymentProgressLabel: "Payment progress",
+
+    // Personal info
+    firstName: "First name",
+    lastName: "Last name",
+    dateOfBirth: "Date of birth",
+    gender: "Gender",
+    male: "Male",
+    female: "Female",
+    phone: "Phone",
+    email: "Email",
+    address: "Address",
+    familyInformation: "Family Information",
+
+    // Attendance summary
+    totalRecords: "total records",
+    present: "Present",
+    absent: "Absent",
+    lateLabel: "Late",
+    excused: "Excused",
+    attendanceRate: "Attendance rate",
+
+    // Enrollments table
+    enrollmentHistory: "Enrollment history",
+    enrollmentCount: "enrollment(s)",
+    schoolYear: "School year",
+    gradeLabel: "Grade",
+    levelLabel: "Level",
+    tuition: "Tuition",
+    amountPaid: "Paid",
+    status: "Status",
+    actions: "Actions",
+    noEnrollments: "No enrollments",
+    current: "Current",
+
+    // Payment summary
+    paidOf: "paid of",
+    tuitionFee: "Tuition fee",
+    noPaymentsRecorded: "No payments recorded",
+    date: "Date",
+    amount: "Amount",
+    method: "Method",
+    receiptNumber: "Receipt #",
+    recordedBy: "Recorded by",
+    paymentCount: "payment(s)",
+
+    // Attendance tab
+    attendanceHistoryTitle: "Attendance history",
+    totalSessions: "Total sessions",
+    overallAttendanceRate: "Overall attendance rate",
+
+    // Activities tab
+    enrolledActivities: "Enrolled activities",
+    activityCount: "activity(ies)",
+    enrolledOn: "Enrolled on",
+    fee: "Fee",
+    noActivitiesEnrolled: "No activities enrolled",
+    noActivitiesDescription: "The student is not enrolled in any activities for the current year",
+    noAttendanceRecords: "No attendance records available",
+    noAttendanceDescription: "Attendance data will appear here once recorded",
+    activeStatus: "Active",
+
+    // Edit page
+    backToProfile: "Back to profile",
+    editStudent: "Edit Student",
+    basicStudentInfo: "Basic student information",
+    parentInformation: "Parent Information",
+    parentContactDetails: "Parent or guardian contact details",
+    fullName: "Full name",
+    saving: "Saving...",
+    // Status options
+    statusActive: "Active",
+    statusInactive: "Inactive",
+    statusTransferred: "Transferred",
+    statusGraduated: "Graduated",
   },
 
   // Enhanced attendance
@@ -1514,6 +1660,73 @@ export const en: TranslationKeys = {
       currentRoom: "Current Room",
       newRoom: "New Room",
       reassignSuccess: "Room changed successfully",
+
+      // Auto-assignment
+      autoAssign: "Auto-Assign",
+      autoAssignDialogTitle: "Auto-Assign Students to Rooms",
+      autoAssignDialogDescription: "Automatically distribute students with balanced gender and age ratios",
+      selectRoomsToAutoAssign: "Select rooms for auto-assignment",
+      selectAllRooms: "Select All Rooms",
+      deselectAllRooms: "Deselect All",
+      previewTitle: "Preview",
+      studentsToAssign: "{count} students to assign",
+      roomsSelected: "{count} room(s) selected",
+      studentsPerRoom: "~{min}-{max} students per room",
+      genderRatio: "Gender: {male}% male, {female}% female",
+      lockedStudentsExcluded: "{count} student(s) locked (excluded)",
+      noLockedStudents: "No locked students",
+      autoAssignButton: "Auto-Assign ({count})",
+      autoAssigning: "Auto-assigning...",
+      autoAssignSuccess: "Successfully auto-assigned {count} student(s)",
+      autoAssignError: "Failed to auto-assign students",
+      distributionSummary: "Distribution Summary",
+      roomDistribution: "{roomName}: {count} students ({male} male, {female} female)",
+      averageAge: "Average age: {age} years",
+      balanceScore: "Balance Score: {score}/100",
+      noRoomsSelected: "Please select at least one room",
+
+      // Lock functionality
+      lockStudent: "Lock student (prevent auto-assignment)",
+      unlockStudent: "Unlock student (allow auto-assignment)",
+      locked: "Locked",
+      lockToggleError: "Failed to toggle student lock",
+      lockedTooltip: "This student is locked and won't be included in auto-assignment",
+
+      // View Grade & Navigation
+      viewGrade: "View Grade",
+      viewGradeTooltip: "View detailed grade room management",
+      autoAssignTooltip: "Automatically assign students with balanced distribution",
+
+      // Attendance
+      takeAttendance: "Take Attendance",
+      attendanceForRoom: "Attendance for {roomName}",
+      markPresent: "Present",
+      markAbsent: "Absent",
+      markLate: "Late",
+      markExcused: "Excused",
+      saveAttendance: "Save Attendance",
+      attendanceSaved: "Attendance saved successfully",
+      attendanceDate: "Date",
+      attendanceError: "Failed to save attendance",
+
+      // Grade Room View Page
+      inlineAssignment: "Inline Assignment",
+      dragToAssign: "Drag student to room to assign",
+      quickActions: "Quick Actions",
+      bulkOperations: "Bulk Operations",
+      moveToRoom: "Move to Room",
+      removeAssignment: "Remove Assignment",
+      filterByRoom: "Filter by Room",
+      allRooms: "All Rooms",
+      roomUtilization: "Room Utilization",
+      attendanceRate: "Attendance Rate",
+      unassignedStudentsPanel: "Unassigned Students",
+      dropStudentHere: "Drop student here to assign",
+      moveStudent: "Move Student",
+      removeStudent: "Remove Student",
+      bulkMoveSuccess: "Successfully moved {count} student(s)",
+      bulkRemoveSuccess: "Successfully removed {count} assignment(s)",
+      reassignError: "Failed to reassign student",
     },
 
     // Common
@@ -1587,5 +1800,214 @@ export const en: TranslationKeys = {
     // Placeholders
     emailPlaceholder: "user@example.com",
     namePlaceholder: "John Doe",
+
+    // Trimesters
+    trimesters: "Trimesters",
+    trimester: "Trimester",
+    trimestersTitle: "Trimester Management",
+    trimestersSubtitle: "Manage academic trimesters for grading periods",
+    createTrimester: "Create Trimester",
+    editTrimester: "Edit Trimester",
+    deleteTrimester: "Delete Trimester",
+    activateTrimester: "Activate Trimester",
+    deactivateTrimester: "Deactivate Trimester",
+    trimesterNumber: "Trimester Number",
+    trimester1: "1st Trimester",
+    trimester2: "2nd Trimester",
+    trimester3: "3rd Trimester",
+    activeTrimester: "Active Trimester",
+    noActiveTrimester: "No active trimester",
+    totalTrimesters: "Total Trimesters",
+    evaluationsCount: "Evaluations",
+    trimesterActivated: "Trimester activated successfully",
+    trimesterDeactivated: "Trimester deactivated successfully",
+    deleteTrimesterConfirmation: "Are you sure you want to delete this trimester? This action cannot be undone.",
+    cannotDeleteActiveTrimester: "Cannot delete the active trimester",
+    cannotDeleteTrimesterWithEvaluations: "Cannot delete a trimester with existing evaluations",
+    activateTrimesterConfirmation: "Are you sure you want to activate this trimester? This will deactivate any currently active trimester.",
+    selectTrimester: "Select trimester",
+    noTrimesters: "No trimesters configured",
+    configureTrimesters: "Configure trimesters to enable grading",
+  },
+
+  // Grading System
+  grading: {
+    // Page titles
+    gradeEntry: "Grade Entry",
+    gradeEntrySubtitle: "Enter student grades for the current trimester",
+    evaluations: "Evaluations",
+    evaluationsSubtitle: "View and manage student evaluations",
+
+    // Evaluation types
+    evaluationType: "Evaluation Type",
+    interrogation: "Interrogation",
+    interrogationShort: "Interro",
+    devoirSurveille: "Devoir Surveillé",
+    devoirSurveilleShort: "DS",
+    composition: "Composition",
+    compositionShort: "Compo",
+
+    // Grade entry
+    enterGrades: "Enter Grades",
+    score: "Score",
+    maxScore: "Max Score",
+    outOf: "out of",
+    coefficient: "Coefficient",
+    average: "Average",
+    classAverage: "Class Average",
+    studentAverage: "Student Average",
+    subjectAverage: "Subject Average",
+    generalAverage: "General Average",
+    weightedAverage: "Weighted Average",
+
+    // Evaluation management
+    addEvaluation: "Add Evaluation",
+    editEvaluation: "Edit Evaluation",
+    deleteEvaluation: "Delete Evaluation",
+    deleteEvaluationConfirmation: "Are you sure you want to delete this evaluation?",
+    evaluationDate: "Evaluation Date",
+    noEvaluations: "No evaluations recorded",
+    recordedBy: "Recorded by",
+
+    // Batch entry
+    batchEntry: "Batch Entry",
+    enterScoresForClass: "Enter scores for class",
+    saveAllGrades: "Save All Grades",
+    gradesEntered: "grades entered",
+    gradesSaved: "Grades saved successfully",
+    gradeSaved: "Grade saved",
+
+    // Status and validation
+    passed: "Passed",
+    failed: "Failed",
+    pending: "Pending",
+    invalidScore: "Score must be between 0 and {max}",
+    scoreRequired: "Score is required",
+    allFieldsRequired: "All fields are required",
+
+    // Coefficients by type
+    coefficientInterro: "×1",
+    coefficientDS: "×2",
+    coefficientCompo: "×2",
+
+    // Summary
+    totalEvaluations: "Total Evaluations",
+    studentsGraded: "Students Graded",
+    averageScore: "Average Score",
+    passRate: "Pass Rate",
+    passThreshold: "Pass threshold: 10/20",
+
+    // Filters
+    filterBySubject: "Filter by subject",
+    filterByType: "Filter by type",
+    filterByStudent: "Filter by student",
+    allSubjects: "All subjects",
+    allTypes: "All types",
+    allStudents: "All students",
+
+    // Select prompts
+    selectSubject: "Select subject",
+    selectGrade: "Select grade",
+    selectStudent: "Select student",
+    selectType: "Select type",
+
+    // Remarks
+    teacherRemark: "Teacher Remark",
+    addRemark: "Add remark",
+    remarkPlaceholder: "Enter observation for this student...",
+
+    // Conduct
+    conduct: "Conduct",
+    conductScore: "Conduct Score",
+
+    // Decisions
+    decision: "Decision",
+    admis: "Promoted",
+    rattrapage: "Remediation",
+    redouble: "Repeat Year",
+    decisionPending: "Decision Pending",
+
+    // Rankings
+    rank: "Rank",
+    classRank: "Class Rank",
+    outOfStudents: "out of {total} students",
+
+    // Absences
+    absences: "Absences",
+    lates: "Late Arrivals",
+
+    // Actions
+    calculateAverages: "Calculate Averages",
+    recalculate: "Recalculate",
+    exportGrades: "Export Grades",
+    printBulletin: "Print Report Card",
+    downloadPDF: "Download PDF",
+
+    // Bulletin
+    bulletin: "Report Card",
+    bulletinSubtitle: "View a student's trimester report card",
+    subjectResults: "Subject Results",
+    noDataAvailable: "No data available for this student and trimester",
+    selectToView: "Select a trimester, class, and student to view the report card",
+    generalRemark: "General Remark",
+    classStatistics: "Class Statistics",
+    highest: "Highest",
+    lowest: "Lowest",
+
+    // Class Ranking
+    classRanking: "Class Ranking",
+    classRankingSubtitle: "View student rankings by general average",
+    studentsRanked: "students ranked",
+    noRankingAvailable: "No ranking available for this class and trimester",
+    selectToViewRanking: "Select a trimester and class to view the ranking",
+    progress: "Progress",
+
+    // Decision Override
+    overrideDecision: "Override Decision",
+    decisionOverridden: "Decision was overridden",
+    overriddenBy: "Overridden by",
+    updateDecision: "Update Decision",
+    decisionUpdated: "Decision updated successfully",
+
+    // Bulk Operations
+    calculateSubjectAverages: "Calculate Subject Averages",
+    calculateStudentSummaries: "Calculate Student Summaries",
+    calculateAllNow: "Calculate All Now",
+    calculatingSubjectAverages: "Calculating subject averages...",
+    calculatingStudentSummaries: "Calculating student summaries...",
+    calculationComplete: "Calculation complete",
+    calculationsMenu: "Calculations",
+
+    // Manage Evaluations
+    manageEvaluations: "Manage Evaluations",
+    viewEvaluations: "View Evaluations",
+    recalculateAverages: "Recalculate Averages?",
+    recalculatePromptMessage: "Grade data has changed. Would you like to recalculate averages now?",
+    recalculateNow: "Recalculate Now",
+    skipRecalculate: "Skip for Now",
+    evaluationUpdated: "Evaluation updated successfully",
+    evaluationDeleted: "Evaluation deleted successfully",
+    noEvaluationsFound: "No evaluations found",
+
+    // Teacher Remarks
+    teacherRemarksSubtitle: "Add subject remarks for student report cards",
+    remarksSaved: "Remarks saved successfully",
+    saveRemarks: "Save Remarks",
+    unsavedChanges: "You have unsaved changes",
+    noAveragesFound: "No averages found. Calculate subject averages first.",
+
+    // Conduct Entry
+    conductEntrySubtitle: "Enter conduct scores and attendance data",
+    absencesCount: "Absences",
+    latesCount: "Lates",
+    conductSaved: "Conduct and attendance data saved",
+    saveConductData: "Save Conduct Data",
+    noStudentsFound: "No students found for this class",
+
+    // Batch Bulletin PDF
+    downloadAllBulletins: "Download All Bulletins",
+    generatingBulletins: "Generating bulletins...",
+    bulletinsDownloaded: "All bulletins downloaded",
+    generatingPdfFor: "Generating PDF for {name}...",
   },
 } as const;

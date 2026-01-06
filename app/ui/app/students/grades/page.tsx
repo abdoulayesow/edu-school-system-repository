@@ -28,8 +28,9 @@ import {
   ChevronRight,
   UserPlus,
   ArrowRightLeft,
+  Sparkles,
 } from "lucide-react"
-import { RoomAssignmentDialog, BulkMoveDialog } from "@/components/room-assignments"
+import { RoomAssignmentDialog, BulkMoveDialog, AutoAssignDialog } from "@/components/room-assignments"
 
 interface SchoolYear {
   id: string
@@ -103,6 +104,7 @@ export default function GradesClassesPage() {
 
   // Dialog states
   const [assignDialogOpen, setAssignDialogOpen] = useState(false)
+  const [autoAssignDialogOpen, setAutoAssignDialogOpen] = useState(false)
   const [bulkMoveDialogOpen, setBulkMoveDialogOpen] = useState(false)
   const [selectedGrade, setSelectedGrade] = useState<Grade | null>(null)
 
@@ -182,6 +184,11 @@ export default function GradesClassesPage() {
   function openAssignDialog(grade: Grade) {
     setSelectedGrade(grade)
     setAssignDialogOpen(true)
+  }
+
+  function openAutoAssignDialog(grade: Grade) {
+    setSelectedGrade(grade)
+    setAutoAssignDialogOpen(true)
   }
 
   function openBulkMoveDialog(grade: Grade) {
@@ -430,6 +437,19 @@ export default function GradesClassesPage() {
         <BulkMoveDialog
           open={bulkMoveDialogOpen}
           onOpenChange={setBulkMoveDialogOpen}
+          gradeId={selectedGrade.id}
+          gradeName={selectedGrade.name}
+          schoolYearId={selectedYearId}
+          rooms={selectedGrade.rooms}
+          onSuccess={handleDialogSuccess}
+        />
+      )}
+
+      {/* Auto-Assign Dialog */}
+      {selectedGrade && (
+        <AutoAssignDialog
+          open={autoAssignDialogOpen}
+          onOpenChange={setAutoAssignDialogOpen}
           gradeId={selectedGrade.id}
           gradeName={selectedGrade.name}
           schoolYearId={selectedYearId}

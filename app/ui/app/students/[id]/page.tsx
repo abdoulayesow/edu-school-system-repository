@@ -13,6 +13,7 @@ import {
   Loader2,
   ArrowLeft,
   User,
+  Users,
   Phone,
   Mail,
   MapPin,
@@ -35,10 +36,13 @@ import {
   Trophy,
   Palette,
   Sparkles,
+  ExternalLink,
+  FileText,
+  UserCheck,
 } from "lucide-react"
 import { useI18n } from "@/components/i18n-provider"
 import { PageContainer } from "@/components/layout/PageContainer"
-import { cn, formatDateLong } from "@/lib/utils"
+import { formatDateLong } from "@/lib/utils"
 import Link from "next/link"
 import { StudentRoomChangeDialog } from "@/components/room-assignments"
 
@@ -82,12 +86,34 @@ interface Payment {
   reviewer?: { name: string } | null
 }
 
+interface EnrollmentNote {
+  id: string
+  title: string
+  content: string
+  createdAt: string
+  author?: { name: string } | null
+}
+
 interface Enrollment {
   id: string
+  enrollmentNumber?: string | null
   status: string
   originalTuitionFee: number
   adjustedTuitionFee?: number | null
   createdAt: string
+  middleName?: string | null
+  fatherName?: string | null
+  fatherPhone?: string | null
+  fatherEmail?: string | null
+  motherName?: string | null
+  motherPhone?: string | null
+  motherEmail?: string | null
+  address?: string | null
+  enrollingPersonType?: string | null
+  enrollingPersonName?: string | null
+  enrollingPersonRelation?: string | null
+  enrollingPersonPhone?: string | null
+  enrollingPersonEmail?: string | null
   grade: {
     id: string
     name: string
@@ -100,6 +126,8 @@ interface Enrollment {
     isActive: boolean
   }
   payments: Payment[]
+  creator?: { id: string; name: string } | null
+  notes?: EnrollmentNote[]
 }
 
 interface BalanceInfo {
@@ -257,8 +285,8 @@ export default function StudentDetailPage() {
   }
 
   const getStatusBadge = (status: string) => {
-    const statusConfig: Record<string, { variant: "default" | "secondary" | "destructive" | "outline"; label: string }> = {
-      active: { variant: "default", label: "Actif" },
+    const statusConfig: Record<string, { variant: "default" | "secondary" | "destructive" | "outline" | "success"; label: string }> = {
+      active: { variant: "success", label: "Actif" },
       inactive: { variant: "secondary", label: "Inactif" },
       graduated: { variant: "outline", label: "Diplômé" },
       transferred: { variant: "outline", label: "Transféré" },
@@ -269,14 +297,13 @@ export default function StudentDetailPage() {
   }
 
   const getPaymentStatusBadge = (status: string) => {
-    const statusConfig: Record<string, { color: string; label: string }> = {
-      late: { color: "bg-destructive/10 text-destructive", label: t.students.late },
-      on_time: { color: "bg-success/10 text-success", label: t.students.onTime },
-      in_advance: { color: "bg-primary/10 text-primary", label: t.students.inAdvance },
-      complete: { color: "bg-success/10 text-success", label: t.students.complete }
+    const statusConfig: Record<string, { textColor: string; bgColor: string; label: string }> = {
+      late: { textColor: "text-destructive", bgColor: "bg-destructive/10", label: t.students.late },
+      on_time: { textColor: "text-success", bgColor: "bg-success/10", label: t.students.onTime },
+      in_advance: { textColor: "text-primary", bgColor: "bg-primary/10", label: t.students.inAdvance },
+      complete: { textColor: "text-success", bgColor: "bg-success/10", label: t.students.complete }
     }
-    const config = statusConfig[status] || { color: "bg-muted", label: status }
-    return <Badge className={config.color}>{config.label}</Badge>
+    return statusConfig[status] || { textColor: "text-muted-foreground", bgColor: "bg-muted", label: status }
   }
 
   const getPaymentMethodLabel = (method: string) => {
@@ -301,17 +328,22 @@ export default function StudentDetailPage() {
   }
 
   const getEnrollmentStatusBadge = (status: string) => {
-    const statusConfig: Record<string, { variant: "default" | "secondary" | "destructive" | "outline"; label: string }> = {
+    const statusConfig: Record<string, { variant: "default" | "secondary" | "destructive" | "outline" | "success"; label: string }> = {
       draft: { variant: "secondary", label: "Brouillon" },
       submitted: { variant: "outline", label: "Soumis" },
       needs_review: { variant: "secondary", label: "En attente" },
-      completed: { variant: "default", label: "Complété" },
-      approved: { variant: "default", label: "Approuvé" },
+      completed: { variant: "success", label: "Complété" },
+      approved: { variant: "success", label: "Approuvé" },
       rejected: { variant: "destructive", label: "Rejeté" },
       cancelled: { variant: "destructive", label: "Annulé" }
     }
     const config = statusConfig[status] || { variant: "secondary", label: status }
     return <Badge variant={config.variant}>{config.label}</Badge>
+  }
+
+  const getLevelLabel = (level: string) => {
+    const labels = t.grades.levelLabels as Record<string, string>
+    return labels[level] || level
   }
 
   if (isLoading) {
@@ -344,7 +376,7 @@ export default function StudentDetailPage() {
       {/* Back link */}
       <Link href="/students" className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground mb-4">
         <ArrowLeft className="size-4" />
-        Retour aux élèves
+        {t.students.backToStudents}
       </Link>
 
         {/* Header */}
@@ -352,7 +384,7 @@ export default function StudentDetailPage() {
           <div className="flex items-start gap-4">
             <Avatar className="size-20">
               <AvatarImage src={student.studentProfile?.person?.photoUrl ?? undefined} />
-              <AvatarFallback className="text-xl">
+              <AvatarFallback className="text-xl bg-amber-50 dark:bg-amber-950/30 text-amber-700 dark:text-amber-400">
                 {student.firstName[0]}{student.lastName[0]}
               </AvatarFallback>
             </Avatar>
@@ -405,24 +437,6 @@ export default function StudentDetailPage() {
             </div>
           </div>
 
-          {/* Quick Stats Card */}
-          {student.balanceInfo && (
-            <Card className="w-full md:w-auto">
-              <CardContent className="pt-4 pb-4">
-                <div className="flex items-center gap-4">
-                  <div className="text-center">
-                    <p className="text-2xl font-bold text-primary">{student.balanceInfo.paymentPercentage}%</p>
-                    <p className="text-xs text-muted-foreground">Paiement</p>
-                  </div>
-                  <div className="h-10 w-px bg-border" />
-                  <div className="text-center">
-                    {getPaymentStatusBadge(student.balanceInfo.paymentStatus)}
-                    <p className="text-xs text-muted-foreground mt-1">Statut</p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          )}
         </div>
 
         {/* Stats Cards */}
@@ -431,15 +445,15 @@ export default function StudentDetailPage() {
             <CardHeader className="pb-2">
               <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
                 <Wallet className="size-4" />
-                Solde restant
+                {t.students.remainingBalanceLabel}
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold text-destructive">
+              <div className="text-2xl font-bold text-amber-600 dark:text-amber-400">
                 {student.balanceInfo ? formatCurrency(student.balanceInfo.remainingBalance) : "N/A"}
               </div>
               {student.balanceInfo && (
-                <Progress value={student.balanceInfo.paymentPercentage} className="h-2 mt-2" />
+                <Progress value={student.balanceInfo.paymentPercentage} className="h-2 mt-2 [&>div]:bg-amber-500 dark:[&>div]:bg-amber-400" />
               )}
             </CardContent>
           </Card>
@@ -448,7 +462,7 @@ export default function StudentDetailPage() {
             <CardHeader className="pb-2">
               <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
                 <CreditCard className="size-4" />
-                Total payé
+                {t.students.totalPaid}
               </CardTitle>
             </CardHeader>
             <CardContent>
@@ -456,7 +470,7 @@ export default function StudentDetailPage() {
                 {student.balanceInfo ? formatCurrency(student.balanceInfo.totalPaid) : "N/A"}
               </div>
               <p className="text-xs text-muted-foreground mt-1">
-                sur {student.balanceInfo ? formatCurrency(student.balanceInfo.tuitionFee) : "N/A"}
+                {t.students.of} {student.balanceInfo ? formatCurrency(student.balanceInfo.tuitionFee) : "N/A"}
               </p>
             </CardContent>
           </Card>
@@ -465,19 +479,19 @@ export default function StudentDetailPage() {
             <CardHeader className="pb-2">
               <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
                 <CalendarCheck className="size-4" />
-                Présence
+                {t.students.attendanceLabel}
               </CardTitle>
             </CardHeader>
             <CardContent>
               <div className={`text-2xl font-bold ${
                 (student.attendanceSummary?.attendanceRate ?? 0) >= 80 ? 'text-success' :
-                (student.attendanceSummary?.attendanceRate ?? 0) >= 60 ? 'text-warning' : 'text-destructive'
+                (student.attendanceSummary?.attendanceRate ?? 0) >= 60 ? 'text-warning' : 'text-amber-500 dark:text-amber-400'
               }`}>
                 {student.attendanceSummary?.attendanceRate ?? 0}%
               </div>
               <Progress
                 value={student.attendanceSummary?.attendanceRate ?? 0}
-                className="h-2 mt-2"
+                className="h-2 mt-2 [&>div]:bg-amber-500 dark:[&>div]:bg-amber-400"
               />
             </CardContent>
           </Card>
@@ -486,12 +500,17 @@ export default function StudentDetailPage() {
             <CardHeader className="pb-2">
               <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
                 <Receipt className="size-4" />
-                Inscriptions
+                {t.students.paymentProgressLabel}
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{student.enrollments.length}</div>
-              <p className="text-xs text-muted-foreground mt-1">année(s) scolaire(s)</p>
+              <div className="text-2xl font-bold text-amber-600 dark:text-amber-400">
+                {student.balanceInfo?.paymentPercentage ?? 0}%
+              </div>
+              <Progress
+                value={student.balanceInfo?.paymentPercentage ?? 0}
+                className="h-2 mt-2 [&>div]:bg-amber-500 dark:[&>div]:bg-amber-400"
+              />
             </CardContent>
           </Card>
         </div>
@@ -499,11 +518,11 @@ export default function StudentDetailPage() {
         {/* Tabs */}
         <Tabs defaultValue="overview" className="space-y-4">
           <TabsList>
-            <TabsTrigger value="overview">Vue d'ensemble</TabsTrigger>
-            <TabsTrigger value="enrollments">Inscriptions ({student.enrollments.length})</TabsTrigger>
-            <TabsTrigger value="payments">Paiements ({allPayments.length})</TabsTrigger>
-            <TabsTrigger value="attendance">Présence</TabsTrigger>
-            <TabsTrigger value="activities">Activités ({activities.length})</TabsTrigger>
+            <TabsTrigger value="overview">{t.students.overview}</TabsTrigger>
+            <TabsTrigger value="enrollments">{t.students.enrollmentsTab} ({student.enrollments.length})</TabsTrigger>
+            <TabsTrigger value="payments">{t.students.paymentsTab} ({allPayments.length})</TabsTrigger>
+            <TabsTrigger value="attendance">{t.students.attendanceTab}</TabsTrigger>
+            <TabsTrigger value="activities">{t.students.activitiesTab} ({activities.length})</TabsTrigger>
           </TabsList>
 
           {/* Overview Tab */}
@@ -511,20 +530,29 @@ export default function StudentDetailPage() {
             <div className="grid gap-4 md:grid-cols-2">
               {/* Personal Info Card */}
               <Card>
-                <CardHeader>
+                <CardHeader className="flex flex-row items-start justify-between">
                   <CardTitle className="flex items-center gap-2">
                     <User className="size-5" />
                     {t.students.personalInfo}
                   </CardTitle>
+                  <Link href={`/students/${student.id}/edit`}>
+                    <Button variant="outline" size="sm" className="gap-1 bg-amber-50 text-amber-700 border-amber-200 hover:bg-amber-100 dark:bg-amber-950/30 dark:text-amber-400 dark:border-amber-800 dark:hover:bg-amber-950/50">
+                      <Edit2 className="size-3" />
+                      {t.students.editInfo}
+                    </Button>
+                  </Link>
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <div className="grid grid-cols-2 gap-4">
                     <div>
-                      <p className="text-sm text-muted-foreground">Prénom</p>
-                      <p className="font-medium">{student.firstName}</p>
+                      <p className="text-sm text-muted-foreground">{t.students.firstName}</p>
+                      <p className="font-medium">
+                        {student.firstName}
+                        {activeEnrollment?.middleName && ` ${activeEnrollment.middleName}`}
+                      </p>
                     </div>
                     <div>
-                      <p className="text-sm text-muted-foreground">Nom</p>
+                      <p className="text-sm text-muted-foreground">{t.students.lastName}</p>
                       <p className="font-medium">{student.lastName}</p>
                     </div>
                   </div>
@@ -533,7 +561,7 @@ export default function StudentDetailPage() {
                     <div className="flex items-center gap-3">
                       <Calendar className="size-4 text-muted-foreground" />
                       <div>
-                        <p className="text-sm text-muted-foreground">Date de naissance</p>
+                        <p className="text-sm text-muted-foreground">{t.students.dateOfBirth}</p>
                         <p className="font-medium">{formatDate(student.dateOfBirth)}</p>
                       </div>
                     </div>
@@ -543,9 +571,11 @@ export default function StudentDetailPage() {
                     <div className="flex items-center gap-3">
                       <User className="size-4 text-muted-foreground" />
                       <div>
-                        <p className="text-sm text-muted-foreground">Genre</p>
+                        <p className="text-sm text-muted-foreground">{t.students.gender}</p>
                         <p className="font-medium">
-                          {student.studentProfile.person.gender === 'male' ? 'Masculin' : 'Féminin'}
+                          {student.studentProfile.person.gender === 'male'
+                            ? t.students.male
+                            : t.students.female}
                         </p>
                       </div>
                     </div>
@@ -565,150 +595,206 @@ export default function StudentDetailPage() {
                     <div className="flex items-center gap-3">
                       <Phone className="size-4 text-muted-foreground" />
                       <div>
-                        <p className="text-sm text-muted-foreground">Téléphone</p>
+                        <p className="text-sm text-muted-foreground">{t.students.phone}</p>
                         <p className="font-medium">{student.studentProfile.person.phone}</p>
                       </div>
                     </div>
                   )}
 
-                  {student.studentProfile?.person?.address && (
+                  {(student.studentProfile?.person?.address || activeEnrollment?.address) && (
                     <div className="flex items-center gap-3">
                       <MapPin className="size-4 text-muted-foreground" />
                       <div>
-                        <p className="text-sm text-muted-foreground">Adresse</p>
-                        <p className="font-medium">{student.studentProfile.person.address}</p>
+                        <p className="text-sm text-muted-foreground">{t.students.address}</p>
+                        <p className="font-medium">{student.studentProfile?.person?.address || activeEnrollment?.address}</p>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Enrolling Guardian */}
+                  {activeEnrollment?.enrollingPersonName && (
+                    <div className="pt-3 border-t">
+                      <div className="flex items-center gap-3">
+                        <Users className="size-4 text-muted-foreground" />
+                        <div>
+                          <p className="text-sm text-muted-foreground">{t.students.enrollingGuardian}</p>
+                          <p className="font-medium">
+                            {activeEnrollment.enrollingPersonName}
+                            {activeEnrollment.enrollingPersonRelation && (
+                              <span className="text-sm text-muted-foreground ml-1">
+                                ({activeEnrollment.enrollingPersonRelation})
+                              </span>
+                            )}
+                          </p>
+                          {activeEnrollment.enrollingPersonPhone && (
+                            <p className="text-xs text-muted-foreground flex items-center gap-1 mt-1">
+                              <Phone className="size-3" />
+                              {activeEnrollment.enrollingPersonPhone}
+                            </p>
+                          )}
+                          {activeEnrollment.enrollingPersonEmail && (
+                            <p className="text-xs text-muted-foreground flex items-center gap-1">
+                              <Mail className="size-3" />
+                              {activeEnrollment.enrollingPersonEmail}
+                            </p>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Enrolling School Staff */}
+                  {activeEnrollment?.creator && (
+                    <div className="pt-3 border-t">
+                      <div className="flex items-center gap-3">
+                        <UserCheck className="size-4 text-muted-foreground" />
+                        <div>
+                          <p className="text-sm text-muted-foreground">{t.students.enrollingSchoolStaff}</p>
+                          <p className="font-medium">{activeEnrollment.creator.name}</p>
+                          <p className="text-xs text-muted-foreground">{formatDate(activeEnrollment.createdAt)}</p>
+                        </div>
                       </div>
                     </div>
                   )}
                 </CardContent>
               </Card>
 
-              {/* Attendance Summary Card */}
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <CalendarCheck className="size-5" />
-                    {t.students.attendanceHistory}
-                  </CardTitle>
-                  <CardDescription>
-                    {student.attendanceSummary?.total ?? 0} enregistrements au total
-                  </CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  {student.attendanceSummary && student.attendanceSummary.total > 0 ? (
-                    <>
-                      <div className="grid grid-cols-2 gap-4">
-                        <div className="flex items-center gap-3 p-3 rounded-lg bg-success/10">
-                          <CheckCircle className="size-5 text-success" />
-                          <div>
-                            <p className="text-2xl font-bold text-success">{student.attendanceSummary.present}</p>
-                            <p className="text-xs text-muted-foreground">Présents</p>
-                          </div>
-                        </div>
-                        <div className="flex items-center gap-3 p-3 rounded-lg bg-destructive/10">
-                          <XCircle className="size-5 text-destructive" />
-                          <div>
-                            <p className="text-2xl font-bold text-destructive">{student.attendanceSummary.absent}</p>
-                            <p className="text-xs text-muted-foreground">Absents</p>
-                          </div>
-                        </div>
-                        <div className="flex items-center gap-3 p-3 rounded-lg bg-warning/10">
-                          <Clock className="size-5 text-warning" />
-                          <div>
-                            <p className="text-2xl font-bold text-warning">{student.attendanceSummary.late}</p>
-                            <p className="text-xs text-muted-foreground">En retard</p>
-                          </div>
-                        </div>
-                        <div className="flex items-center gap-3 p-3 rounded-lg bg-muted">
-                          <AlertCircle className="size-5 text-muted-foreground" />
-                          <div>
-                            <p className="text-2xl font-bold">{student.attendanceSummary.excused}</p>
-                            <p className="text-xs text-muted-foreground">Excusés</p>
-                          </div>
-                        </div>
-                      </div>
-                      <div className="pt-2 border-t">
-                        <div className="flex justify-between items-center">
-                          <span className="text-sm text-muted-foreground">Taux de présence</span>
-                          <span className={`text-lg font-bold ${
-                            student.attendanceSummary.attendanceRate >= 80 ? 'text-success' :
-                            student.attendanceSummary.attendanceRate >= 60 ? 'text-warning' : 'text-destructive'
-                          }`}>
-                            {student.attendanceSummary.attendanceRate}%
-                          </span>
-                        </div>
-                        <Progress value={student.attendanceSummary.attendanceRate} className="h-2 mt-2" />
-                      </div>
-                    </>
-                  ) : (
-                    <div className="text-center py-8 text-muted-foreground">
-                      Aucun enregistrement de présence
-                    </div>
-                  )}
-                </CardContent>
-              </Card>
-
-              {/* Payment Summary Card */}
-              <Card className="md:col-span-2">
-                <CardHeader className="flex flex-row items-start justify-between">
-                  <div>
+              {/* Family Information Card */}
+              {activeEnrollment && (activeEnrollment.fatherName || activeEnrollment.motherName) && (
+                <Card>
+                  <CardHeader>
                     <CardTitle className="flex items-center gap-2">
-                      <Wallet className="size-5" />
-                      {t.students.paymentHistory}
+                      <Users className="size-5" />
+                      {t.students.familyInformation}
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    {/* Father */}
+                    {activeEnrollment.fatherName && (
+                      <div className="p-3 rounded-lg bg-amber-50/50 dark:bg-amber-950/30">
+                        <p className="text-sm font-medium mb-2">{t.students.father}</p>
+                        <p className="font-medium">{activeEnrollment.fatherName}</p>
+                        {activeEnrollment.fatherPhone && (
+                          <div className="flex items-center gap-2 mt-1 text-sm text-muted-foreground">
+                            <Phone className="size-3" />
+                            {activeEnrollment.fatherPhone}
+                          </div>
+                        )}
+                        {activeEnrollment.fatherEmail && (
+                          <div className="flex items-center gap-2 mt-1 text-sm text-muted-foreground">
+                            <Mail className="size-3" />
+                            {activeEnrollment.fatherEmail}
+                          </div>
+                        )}
+                      </div>
+                    )}
+
+                    {/* Mother */}
+                    {activeEnrollment.motherName && (
+                      <div className="p-3 rounded-lg bg-amber-50/50 dark:bg-amber-950/30">
+                        <p className="text-sm font-medium mb-2">{t.students.mother}</p>
+                        <p className="font-medium">{activeEnrollment.motherName}</p>
+                        {activeEnrollment.motherPhone && (
+                          <div className="flex items-center gap-2 mt-1 text-sm text-muted-foreground">
+                            <Phone className="size-3" />
+                            {activeEnrollment.motherPhone}
+                          </div>
+                        )}
+                        {activeEnrollment.motherEmail && (
+                          <div className="flex items-center gap-2 mt-1 text-sm text-muted-foreground">
+                            <Mail className="size-3" />
+                            {activeEnrollment.motherEmail}
+                          </div>
+                        )}
+                      </div>
+                    )}
+                  </CardContent>
+                </Card>
+              )}
+
+              {/* Attendance Summary Card - only show if has data */}
+              {student.attendanceSummary && student.attendanceSummary.total > 0 && (
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <CalendarCheck className="size-5" />
+                      {t.students.attendanceHistory}
                     </CardTitle>
                     <CardDescription>
-                      {student.balanceInfo ?
-                        `${formatCurrency(student.balanceInfo.totalPaid)} payé sur ${formatCurrency(student.balanceInfo.tuitionFee)}` :
-                        "Aucune inscription active"
-                      }
+                      {student.attendanceSummary.total} {t.students.totalRecords}
                     </CardDescription>
-                  </div>
-                  <Link href={`/students/${student.id}/payments`}>
-                    <Button variant="outline" size="sm">
-                      {t.common.viewDetails}
-                    </Button>
-                  </Link>
-                </CardHeader>
-                <CardContent>
-                  {student.balanceInfo ? (
-                    <div className="space-y-4">
-                      <div>
-                        <div className="flex justify-between text-sm mb-2">
-                          <span>Progression des paiements</span>
-                          <span className="font-medium">{student.balanceInfo.paymentPercentage}%</span>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="flex items-center gap-3 p-3 rounded-lg bg-success/10">
+                        <CheckCircle className="size-5 text-success" />
+                        <div>
+                          <p className="text-2xl font-bold text-success">{student.attendanceSummary.present}</p>
+                          <p className="text-xs text-muted-foreground">{t.students.present}</p>
                         </div>
-                        <Progress value={student.balanceInfo.paymentPercentage} className="h-3" />
                       </div>
+                      <div className="flex items-center gap-3 p-3 rounded-lg bg-destructive/10">
+                        <XCircle className="size-5 text-destructive" />
+                        <div>
+                          <p className="text-2xl font-bold text-destructive">{student.attendanceSummary.absent}</p>
+                          <p className="text-xs text-muted-foreground">{t.students.absent}</p>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-3 p-3 rounded-lg bg-warning/10">
+                        <Clock className="size-5 text-warning" />
+                        <div>
+                          <p className="text-2xl font-bold text-warning">{student.attendanceSummary.late}</p>
+                          <p className="text-xs text-muted-foreground">{t.students.lateLabel}</p>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-3 p-3 rounded-lg bg-muted">
+                        <AlertCircle className="size-5 text-muted-foreground" />
+                        <div>
+                          <p className="text-2xl font-bold">{student.attendanceSummary.excused}</p>
+                          <p className="text-xs text-muted-foreground">{t.students.excused}</p>
+                        </div>
+                      </div>
+                    </div>
+                    <div className="pt-2 border-t">
+                      <div className="flex justify-between items-center">
+                        <span className="text-sm text-muted-foreground">{t.students.attendanceRate}</span>
+                        <span className={`text-lg font-bold ${
+                          student.attendanceSummary.attendanceRate >= 80 ? 'text-success' :
+                          student.attendanceSummary.attendanceRate >= 60 ? 'text-warning' : 'text-destructive'
+                        }`}>
+                          {student.attendanceSummary.attendanceRate}%
+                        </span>
+                      </div>
+                      <Progress value={student.attendanceSummary.attendanceRate} className="h-2 mt-2" />
+                    </div>
+                  </CardContent>
+                </Card>
+              )}
 
-                      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 pt-4">
-                        <div className="text-center p-3 rounded-lg bg-muted">
-                          <p className="text-lg font-bold">{formatCurrency(student.balanceInfo.tuitionFee)}</p>
-                          <p className="text-xs text-muted-foreground">Frais de scolarité</p>
-                        </div>
-                        <div className="text-center p-3 rounded-lg bg-success/10">
-                          <p className="text-lg font-bold text-success">{formatCurrency(student.balanceInfo.totalPaid)}</p>
-                          <p className="text-xs text-muted-foreground">Montant payé</p>
-                        </div>
-                        <div className="text-center p-3 rounded-lg bg-destructive/10">
-                          <p className="text-lg font-bold text-destructive">{formatCurrency(student.balanceInfo.remainingBalance)}</p>
-                          <p className="text-xs text-muted-foreground">{t.students.remainingBalance}</p>
-                        </div>
-                        <div className={cn(
-                          "text-center p-3 rounded-lg",
-                          student.balanceInfo.paymentStatus === "complete" && "bg-success/10"
-                        )}>
-                          {getPaymentStatusBadge(student.balanceInfo.paymentStatus)}
-                          <p className="text-xs text-muted-foreground mt-2">Statut</p>
-                        </div>
+              {/* Enrollment Notes Card */}
+              {activeEnrollment?.notes && activeEnrollment.notes.length > 0 && (
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <FileText className="size-5" />
+                      {t.students.enrollmentNotes}
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-3">
+                    {activeEnrollment.notes.map((note) => (
+                      <div key={note.id} className="p-3 rounded-lg bg-muted/50 border-l-2 border-primary">
+                        <p className="font-medium text-sm">{note.title}</p>
+                        <p className="text-sm text-muted-foreground mt-1">{note.content}</p>
+                        <p className="text-xs text-muted-foreground mt-2">
+                          {note.author?.name && `${note.author.name} • `}
+                          {formatDate(note.createdAt)}
+                        </p>
                       </div>
-                    </div>
-                  ) : (
-                    <div className="text-center py-8 text-muted-foreground">
-                      Aucune inscription active avec informations de paiement
-                    </div>
-                  )}
-                </CardContent>
-              </Card>
+                    ))}
+                  </CardContent>
+                </Card>
+              )}
+
             </div>
           </TabsContent>
 
@@ -716,49 +802,55 @@ export default function StudentDetailPage() {
           <TabsContent value="enrollments">
             <Card>
               <CardHeader>
-                <CardTitle>Historique des inscriptions</CardTitle>
-                <CardDescription>{student.enrollments.length} inscription(s)</CardDescription>
+                <CardTitle>{t.students.enrollmentHistory}</CardTitle>
+                <CardDescription>{student.enrollments.length} {t.students.enrollmentCount}</CardDescription>
               </CardHeader>
               <CardContent>
                 <div className="rounded-md border">
                   <Table>
                     <TableHeader>
                       <TableRow>
-                        <TableHead>Année scolaire</TableHead>
-                        <TableHead>Classe</TableHead>
-                        <TableHead>Niveau</TableHead>
-                        <TableHead className="text-right">Frais de scolarité</TableHead>
-                        <TableHead className="text-right">Montant payé</TableHead>
-                        <TableHead className="text-center">Statut</TableHead>
+                        <TableHead>{t.students.enrollmentNumber}</TableHead>
+                        <TableHead>{t.students.schoolYear}</TableHead>
+                        <TableHead>{t.students.gradeLabel}</TableHead>
+                        <TableHead>{t.students.levelLabel}</TableHead>
+                        <TableHead className="text-right">{t.students.tuition}</TableHead>
+                        <TableHead className="text-right">{t.students.amountPaid}</TableHead>
+                        <TableHead className="text-center">{t.students.status}</TableHead>
+                        <TableHead className="text-center">{t.students.actions}</TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
                       {student.enrollments.length === 0 ? (
                         <TableRow>
-                          <TableCell colSpan={6} className="text-center py-8 text-muted-foreground">
-                            Aucune inscription
+                          <TableCell colSpan={8} className="text-center py-8 text-muted-foreground">
+                            {t.students.noEnrollments}
                           </TableCell>
                         </TableRow>
                       ) : (
                         student.enrollments.map((enrollment) => {
                           const tuition = enrollment.adjustedTuitionFee ?? enrollment.originalTuitionFee
-                          const confirmedPayments = enrollment.payments.filter(p => p.status === 'confirmed')
-                          const totalPaid = confirmedPayments.reduce((sum, p) => sum + p.amount, 0)
+                          // Include all payments except rejected and failed
+                          const countablePayments = enrollment.payments.filter(p => !['rejected', 'failed'].includes(p.status))
+                          const totalPaid = countablePayments.reduce((sum, p) => sum + p.amount, 0)
                           const percentage = Math.round((totalPaid / tuition) * 100)
 
                           return (
                             <TableRow key={enrollment.id}>
+                              <TableCell className="text-muted-foreground text-sm">
+                                {enrollment.enrollmentNumber || "-"}
+                              </TableCell>
                               <TableCell>
                                 <div className="flex items-center gap-2">
                                   <span className="font-medium">{enrollment.schoolYear.name}</span>
                                   {enrollment.schoolYear.isActive && (
-                                    <Badge variant="outline" className="text-xs">Actuel</Badge>
+                                    <Badge variant="outline" className="text-xs">{t.students.current}</Badge>
                                   )}
                                 </div>
                               </TableCell>
                               <TableCell className="font-medium">{enrollment.grade.name}</TableCell>
                               <TableCell>
-                                <Badge variant="secondary">{enrollment.grade.level}</Badge>
+                                <Badge variant="secondary">{getLevelLabel(enrollment.grade.level)}</Badge>
                               </TableCell>
                               <TableCell className="text-right">
                                 {formatCurrency(tuition)}
@@ -779,6 +871,14 @@ export default function StudentDetailPage() {
                               <TableCell className="text-center">
                                 {getEnrollmentStatusBadge(enrollment.status)}
                               </TableCell>
+                              <TableCell className="text-center">
+                                <Link href={`/enrollments/${enrollment.id}`}>
+                                  <Button variant="ghost" size="sm" className="gap-1 text-amber-600 hover:text-amber-700 hover:bg-amber-50 dark:text-amber-400 dark:hover:bg-amber-950/30">
+                                    <ExternalLink className="size-3" />
+                                    {t.students.viewEnrollment}
+                                  </Button>
+                                </Link>
+                              </TableCell>
                             </TableRow>
                           )
                         })
@@ -791,31 +891,90 @@ export default function StudentDetailPage() {
           </TabsContent>
 
           {/* Payments Tab */}
-          <TabsContent value="payments">
+          <TabsContent value="payments" className="space-y-4">
+            {/* Payment Summary Card */}
+            {student.balanceInfo && (
+              <Card>
+                <CardHeader className="flex flex-row items-start justify-between">
+                  <div>
+                    <CardTitle className="flex items-center gap-2">
+                      <Wallet className="size-5" />
+                      {t.students.paymentHistory}
+                    </CardTitle>
+                    <CardDescription>
+                      {formatCurrency(student.balanceInfo.totalPaid)} {t.students.paidOf} {formatCurrency(student.balanceInfo.tuitionFee)}
+                    </CardDescription>
+                  </div>
+                  <Link href={`/students/${student.id}/payments`}>
+                    <Button size="sm" variant="gold" className="gap-1">
+                      <CreditCard className="size-4" />
+                      {t.students.managePayments}
+                    </Button>
+                  </Link>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
+                    <div>
+                      <div className="flex justify-between text-sm mb-2">
+                        <span>{t.students.paymentProgress}</span>
+                        <span className="font-medium">{student.balanceInfo.paymentPercentage}%</span>
+                      </div>
+                      <Progress value={student.balanceInfo.paymentPercentage} className="h-3 [&>div]:bg-amber-500 dark:[&>div]:bg-amber-400" />
+                    </div>
+
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4 pt-4">
+                      <div className="text-center p-3 rounded-lg bg-amber-50/50 dark:bg-amber-950/30">
+                        <p className="text-lg font-bold">{formatCurrency(student.balanceInfo.tuitionFee)}</p>
+                        <p className="text-xs text-muted-foreground">{t.students.tuitionFee}</p>
+                      </div>
+                      <div className="text-center p-3 rounded-lg bg-success/10">
+                        <p className="text-lg font-bold text-success">{formatCurrency(student.balanceInfo.totalPaid)}</p>
+                        <p className="text-xs text-muted-foreground">{t.students.amountPaid}</p>
+                      </div>
+                      <div className="text-center p-3 rounded-lg bg-amber-50 dark:bg-amber-950/30">
+                        <p className="text-lg font-bold text-amber-600 dark:text-amber-400">{formatCurrency(student.balanceInfo.remainingBalance)}</p>
+                        <p className="text-xs text-muted-foreground">{t.students.remainingBalance}</p>
+                      </div>
+                      {(() => {
+                        const statusConfig = getPaymentStatusBadge(student.balanceInfo.paymentStatus)
+                        return (
+                          <div className={`text-center p-3 rounded-lg ${statusConfig.bgColor}`}>
+                            <p className={`text-lg font-bold ${statusConfig.textColor}`}>{statusConfig.label}</p>
+                            <p className="text-xs text-muted-foreground">{t.students.status}</p>
+                          </div>
+                        )
+                      })()}
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+
+            {/* Payment History Table */}
             <Card>
               <CardHeader>
-                <CardTitle>Historique des paiements</CardTitle>
-                <CardDescription>{allPayments.length} paiement(s)</CardDescription>
+                <CardTitle>{t.students.paymentHistory}</CardTitle>
+                <CardDescription>{allPayments.length} {t.students.paymentCount}</CardDescription>
               </CardHeader>
               <CardContent>
                 <div className="rounded-md border">
                   <Table>
                     <TableHeader>
                       <TableRow>
-                        <TableHead>Date</TableHead>
-                        <TableHead>Année scolaire</TableHead>
-                        <TableHead className="text-right">Montant</TableHead>
-                        <TableHead>Méthode</TableHead>
-                        <TableHead>N° Reçu</TableHead>
-                        <TableHead>Enregistré par</TableHead>
-                        <TableHead className="text-center">Statut</TableHead>
+                        <TableHead>{t.students.date}</TableHead>
+                        <TableHead>{t.students.schoolYear}</TableHead>
+                        <TableHead className="text-right">{t.students.amount}</TableHead>
+                        <TableHead>{t.students.method}</TableHead>
+                        <TableHead>{t.students.receiptNumber}</TableHead>
+                        <TableHead>{t.students.recordedBy}</TableHead>
+                        <TableHead className="text-center">{t.students.status}</TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
                       {allPayments.length === 0 ? (
                         <TableRow>
                           <TableCell colSpan={7} className="text-center py-8 text-muted-foreground">
-                            Aucun paiement enregistré
+                            {t.students.noPaymentsRecorded}
                           </TableCell>
                         </TableRow>
                       ) : (
@@ -858,9 +1017,9 @@ export default function StudentDetailPage() {
           <TabsContent value="attendance">
             <Card>
               <CardHeader>
-                <CardTitle>Historique de présence</CardTitle>
+                <CardTitle>{t.students.attendanceHistoryTitle}</CardTitle>
                 <CardDescription>
-                  Taux de présence: {student.attendanceSummary?.attendanceRate ?? 0}%
+                  {t.students.attendanceRate}: {student.attendanceSummary?.attendanceRate ?? 0}%
                 </CardDescription>
               </CardHeader>
               <CardContent>
@@ -870,42 +1029,42 @@ export default function StudentDetailPage() {
                     <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
                       <div className="text-center p-4 rounded-lg bg-muted">
                         <p className="text-3xl font-bold">{student.attendanceSummary.total}</p>
-                        <p className="text-sm text-muted-foreground">Total séances</p>
+                        <p className="text-sm text-muted-foreground">{t.students.totalSessions}</p>
                       </div>
                       <div className="text-center p-4 rounded-lg bg-success/10">
                         <div className="flex items-center justify-center gap-2">
                           <CheckCircle className="size-5 text-success" />
                           <p className="text-3xl font-bold text-success">{student.attendanceSummary.present}</p>
                         </div>
-                        <p className="text-sm text-muted-foreground">Présent</p>
+                        <p className="text-sm text-muted-foreground">{t.students.present}</p>
                       </div>
                       <div className="text-center p-4 rounded-lg bg-destructive/10">
                         <div className="flex items-center justify-center gap-2">
                           <XCircle className="size-5 text-destructive" />
                           <p className="text-3xl font-bold text-destructive">{student.attendanceSummary.absent}</p>
                         </div>
-                        <p className="text-sm text-muted-foreground">Absent</p>
+                        <p className="text-sm text-muted-foreground">{t.students.absent}</p>
                       </div>
                       <div className="text-center p-4 rounded-lg bg-warning/10">
                         <div className="flex items-center justify-center gap-2">
                           <Clock className="size-5 text-warning" />
                           <p className="text-3xl font-bold text-warning">{student.attendanceSummary.late}</p>
                         </div>
-                        <p className="text-sm text-muted-foreground">En retard</p>
+                        <p className="text-sm text-muted-foreground">{t.students.lateLabel}</p>
                       </div>
                       <div className="text-center p-4 rounded-lg bg-blue-500/10">
                         <div className="flex items-center justify-center gap-2">
                           <AlertCircle className="size-5 text-blue-500" />
                           <p className="text-3xl font-bold text-blue-500">{student.attendanceSummary.excused}</p>
                         </div>
-                        <p className="text-sm text-muted-foreground">Excusé</p>
+                        <p className="text-sm text-muted-foreground">{t.students.excused}</p>
                       </div>
                     </div>
 
                     {/* Attendance Rate Visual */}
                     <div className="p-6 rounded-lg bg-muted/50">
                       <div className="flex items-center justify-between mb-4">
-                        <h3 className="font-medium">Taux de présence global</h3>
+                        <h3 className="font-medium">{t.students.overallAttendanceRate}</h3>
                         <span className={`text-2xl font-bold ${
                           student.attendanceSummary.attendanceRate >= 80 ? 'text-success' :
                           student.attendanceSummary.attendanceRate >= 60 ? 'text-warning' : 'text-destructive'
@@ -943,8 +1102,8 @@ export default function StudentDetailPage() {
                 ) : (
                   <div className="text-center py-12 text-muted-foreground">
                     <CalendarCheck className="size-12 mx-auto mb-4 opacity-50" />
-                    <p>Aucun enregistrement de présence disponible</p>
-                    <p className="text-sm mt-2">Les données de présence apparaîtront ici une fois enregistrées</p>
+                    <p>{t.students.noAttendanceRecords}</p>
+                    <p className="text-sm mt-2">{t.students.noAttendanceDescription}</p>
                   </div>
                 )}
               </CardContent>
@@ -957,16 +1116,16 @@ export default function StudentDetailPage() {
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <BookOpen className="size-5" />
-                  Activités inscrites
+                  {t.students.enrolledActivities}
                 </CardTitle>
-                <CardDescription>{activities.length} activité(s)</CardDescription>
+                <CardDescription>{activities.length} {t.students.activityCount}</CardDescription>
               </CardHeader>
               <CardContent>
                 {activities.length === 0 ? (
                   <div className="text-center py-12 text-muted-foreground">
                     <BookOpen className="size-12 mx-auto mb-4 opacity-50" />
-                    <p>Aucune activité inscrite</p>
-                    <p className="text-sm mt-2">L'élève n'est inscrit à aucune activité pour l'année en cours</p>
+                    <p>{t.students.noActivitiesEnrolled}</p>
+                    <p className="text-sm mt-2">{t.students.noActivitiesDescription}</p>
                   </div>
                 ) : (
                   <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
@@ -993,19 +1152,19 @@ export default function StudentDetailPage() {
                         )}
                         <div className="space-y-2 text-sm">
                           <div className="flex items-center justify-between">
-                            <span className="text-muted-foreground">Inscrit le</span>
+                            <span className="text-muted-foreground">{t.students.enrolledOn}</span>
                             <span>{formatDate(ae.enrolledAt)}</span>
                           </div>
                           {ae.activity.fee > 0 && (
                             <div className="flex items-center justify-between">
-                              <span className="text-muted-foreground">Frais</span>
+                              <span className="text-muted-foreground">{t.students.fee}</span>
                               <span className="font-medium">{formatCurrency(ae.activity.fee)}</span>
                             </div>
                           )}
                           <div className="flex items-center justify-between">
-                            <span className="text-muted-foreground">Statut</span>
+                            <span className="text-muted-foreground">{t.students.status}</span>
                             <Badge variant={ae.status === "active" ? "default" : "secondary"}>
-                              {ae.status === "active" ? "Actif" : ae.status}
+                              {ae.status === "active" ? t.students.activeStatus : ae.status}
                             </Badge>
                           </div>
                         </div>

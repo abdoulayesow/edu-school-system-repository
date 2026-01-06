@@ -81,6 +81,10 @@ model User {
   activityEnrollments       ActivityEnrollment[] @relation("ActivityEnroller")
   recordedActivityPayments  ActivityPayment[]    @relation("ActivityPaymentRecorder")
   confirmedActivityPayments ActivityPayment[]    @relation("ActivityPaymentConfirmer")
+
+  // Grading system relations
+  recordedEvaluations       Evaluation[]         @relation("EvaluationRecorder")
+  trimesterDecisionOverrides StudentTrimester[]  @relation("TrimesterDecisionOverrider")
 }
 
 model Address {
@@ -227,6 +231,20 @@ enum DayOfWeek {
   saturday
 }
 
+// Grading System Enums
+enum EvaluationType {
+  interrogation    // Coefficient 1 - Quick class tests
+  devoir_surveille // Coefficient 2 - Supervised homework/quiz (DS)
+  composition      // Coefficient 2 - End of trimester exam
+}
+
+enum TrimesterDecision {
+  pending     // Not yet decided
+  admis       // Passed (average >= 10)
+  rattrapage  // Needs remediation (average 8-10)
+  redouble    // Must repeat (average < 8)
+}
+
 model SchoolYear {
   id              String           @id @default(cuid())
   name            String           // "2025 - 2026"
@@ -247,6 +265,7 @@ model SchoolYear {
   studentRoomAssignments StudentRoomAssignment[]
   activities        Activity[]
   timePeriods       TimePeriod[]
+  trimesters        Trimester[]
 
   @@index([isActive])
   @@index([startDate])
@@ -277,6 +296,7 @@ model Grade {
   gradeEnrollments GradeEnrollment[]
   attendanceSessions AttendanceSession[]
   rooms           GradeRoom[]
+  trimesterStats  ClassTrimesterStats[]
 
   @@unique([schoolYearId, order, series])
   @@index([schoolYearId])
@@ -312,6 +332,13 @@ model Enrollment {
   motherPhone         String?
   motherEmail         String?
   address             String?
+
+  // Enrolling person info (who is enrolling the student)
+  enrollingPersonType     String?   // "father" | "mother" | "other"
+  enrollingPersonName     String?   // Full name (required if "other")
+  enrollingPersonRelation String?   // Relationship to student (if "other")
+  enrollingPersonPhone    String?   // Phone (required if "other")
+  enrollingPersonEmail    String?   // Email (optional, if "other")
 
   // Financial
   originalTuitionFee  Int              // Original fee from Grade
@@ -591,16 +618,17 @@ model UserProfile {
 }
 
 model StudentProfile {
-  id              String        @id @default(cuid())
-  personId        String        @unique
-  studentId       String?       @unique  // Links to legacy Student table during migration
-  studentNumber   String?       @unique  // STU-00001
-  studentStatus   StudentStatus @default(active)
-  enrollmentDate  DateTime      @default(now())
-  currentGradeId  String?
-  syncVersion     Int           @default(0)
-  createdAt       DateTime      @default(now())
-  updatedAt       DateTime      @updatedAt
+  id                    String        @id @default(cuid())
+  personId              String        @unique
+  studentId             String?       @unique  // Links to legacy Student table during migration
+  studentNumber         String?       @unique  // STU-00001
+  studentStatus         StudentStatus @default(active)
+  enrollmentDate        DateTime      @default(now())
+  currentGradeId        String?
+  isLockedForAutoAssign Boolean       @default(false)  // Prevent auto-assignment if true
+  syncVersion           Int           @default(0)
+  createdAt             DateTime      @default(now())
+  updatedAt             DateTime      @updatedAt
 
   person          Person        @relation(fields: [personId], references: [id], onDelete: Cascade)
   student         Student?      @relation(fields: [studentId], references: [id])
@@ -610,6 +638,9 @@ model StudentProfile {
   parentLinks     StudentParent[]
   roomAssignments StudentRoomAssignment[]
   activityEnrollments ActivityEnrollment[]
+  evaluations     Evaluation[]
+  subjectAverages SubjectTrimesterAverage[]
+  studentTrimesters StudentTrimester[]
 
   @@index([personId])
   @@index([studentNumber])
@@ -698,6 +729,8 @@ model GradeSubject {
   subject       Subject   @relation(fields: [subjectId], references: [id])
   classAssignments ClassAssignment[]
   scheduleSlots ScheduleSlot[]
+  evaluations   Evaluation[]
+  subjectAverages SubjectTrimesterAverage[]
 
   @@unique([gradeId, subjectId, series])
   @@index([gradeId])
@@ -1084,4 +1117,138 @@ model ActivityPayment {
   @@index([status])
   @@index([recordedBy])
   @@index([confirmedBy])
+}
+
+// ============================================================================
+// Grading System - Trimesters, Evaluations, Averages
+// ============================================================================
+
+model Trimester {
+  id            String    @id @default(cuid())
+  schoolYearId  String
+  number        Int       // 1, 2, or 3
+  name          String    // "Trimester 1"
+  nameFr        String    // "1er Trimestre"
+  nameEn        String    // "1st Trimester"
+  startDate     DateTime
+  endDate       DateTime
+  isActive      Boolean   @default(false)
+  syncVersion   Int       @default(0)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  schoolYear      SchoolYear              @relation(fields: [schoolYearId], references: [id], onDelete: Cascade)
+  evaluations     Evaluation[]
+  subjectAverages SubjectTrimesterAverage[]
+  studentTrimesters StudentTrimester[]
+  classStats      ClassTrimesterStats[]
+
+  @@unique([schoolYearId, number])
+  @@index([schoolYearId])
+  @@index([isActive])
+}
+
+model Evaluation {
+  id                String         @id @default(cuid())
+  studentProfileId  String
+  gradeSubjectId    String
+  trimesterId       String
+  type              EvaluationType
+  score             Float          // 0-20 scale
+  maxScore          Float          @default(20)
+  date              DateTime
+  notes             String?
+  recordedBy        String
+  syncVersion       Int            @default(0)
+  createdAt         DateTime       @default(now())
+  updatedAt         DateTime       @updatedAt
+
+  studentProfile    StudentProfile @relation(fields: [studentProfileId], references: [id], onDelete: Cascade)
+  gradeSubject      GradeSubject   @relation(fields: [gradeSubjectId], references: [id], onDelete: Cascade)
+  trimester         Trimester      @relation(fields: [trimesterId], references: [id], onDelete: Cascade)
+  recorder          User           @relation("EvaluationRecorder", fields: [recordedBy], references: [id])
+
+  @@index([studentProfileId])
+  @@index([gradeSubjectId])
+  @@index([trimesterId])
+  @@index([type])
+  @@index([recordedBy])
+  @@index([studentProfileId, gradeSubjectId, trimesterId])
+}
+
+model SubjectTrimesterAverage {
+  id                String    @id @default(cuid())
+  studentProfileId  String
+  gradeSubjectId    String
+  trimesterId       String
+  average           Float?    // Calculated weighted average (0-20)
+  teacherRemark     String?   // Observation from subject teacher
+  calculatedAt      DateTime?
+  syncVersion       Int       @default(0)
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+
+  studentProfile    StudentProfile @relation(fields: [studentProfileId], references: [id], onDelete: Cascade)
+  gradeSubject      GradeSubject   @relation(fields: [gradeSubjectId], references: [id], onDelete: Cascade)
+  trimester         Trimester      @relation(fields: [trimesterId], references: [id], onDelete: Cascade)
+
+  @@unique([studentProfileId, gradeSubjectId, trimesterId])
+  @@index([studentProfileId])
+  @@index([gradeSubjectId])
+  @@index([trimesterId])
+}
+
+model StudentTrimester {
+  id                  String            @id @default(cuid())
+  studentProfileId    String
+  trimesterId         String
+  generalAverage      Float?            // Weighted average of all subjects (0-20)
+  rank                Int?              // Class rank (1st, 2nd, etc.)
+  totalStudents       Int?              // Total students for rank context
+  conduct             Float?            // Conduct score (0-20)
+  decision            TrimesterDecision @default(pending)
+  decisionOverride    Boolean           @default(false)
+  decisionOverrideBy  String?
+  decisionOverrideAt  DateTime?
+  overrideReason      String?
+  generalRemark       String?           // Overall remark
+  absences            Int               @default(0)
+  lates               Int               @default(0)
+  calculatedAt        DateTime?
+  syncVersion         Int               @default(0)
+  createdAt           DateTime          @default(now())
+  updatedAt           DateTime          @updatedAt
+
+  studentProfile      StudentProfile @relation(fields: [studentProfileId], references: [id], onDelete: Cascade)
+  trimester           Trimester      @relation(fields: [trimesterId], references: [id], onDelete: Cascade)
+  overrider           User?          @relation("TrimesterDecisionOverrider", fields: [decisionOverrideBy], references: [id])
+
+  @@unique([studentProfileId, trimesterId])
+  @@index([studentProfileId])
+  @@index([trimesterId])
+  @@index([decision])
+  @@index([decisionOverrideBy])
+}
+
+model ClassTrimesterStats {
+  id              String    @id @default(cuid())
+  gradeId         String
+  trimesterId     String
+  totalStudents   Int
+  classAverage    Float?
+  highestAverage  Float?
+  lowestAverage   Float?
+  passCount       Int       @default(0)
+  passRate        Float?
+  calculatedAt    DateTime?
+  syncVersion     Int       @default(0)
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  grade           Grade     @relation(fields: [gradeId], references: [id], onDelete: Cascade)
+  trimester       Trimester @relation(fields: [trimesterId], references: [id], onDelete: Cascade)
+
+  @@unique([gradeId, trimesterId])
+  @@index([gradeId])
+  @@index([trimesterId])
 }

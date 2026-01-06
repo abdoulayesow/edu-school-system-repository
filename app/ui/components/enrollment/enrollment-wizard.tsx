@@ -4,6 +4,7 @@ import { useCallback, useEffect, useState } from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { EnrollmentWizardProvider, useEnrollmentWizard } from "./wizard-context"
+import type { EnrollmentWizardState } from "@/lib/enrollment/types"
 import { WizardProgress } from "./wizard-progress"
 import { WizardNavigation } from "./wizard-navigation"
 import { StepGradeSelection } from "./steps/step-grade-selection"
@@ -21,6 +22,7 @@ import { isPhoneEmpty } from "@/lib/utils/phone"
 interface EnrollmentWizardProps {
   schoolYearId?: string
   schoolYearName?: string
+  initialState?: EnrollmentWizardState
 }
 
 function WizardContent({ schoolYearId, schoolYearName }: EnrollmentWizardProps) {
@@ -89,6 +91,14 @@ function WizardContent({ schoolYearId, schoolYearName }: EnrollmentWizardProps) 
       if (data.motherPhone && !isPhoneEmpty(data.motherPhone)) payload.motherPhone = data.motherPhone
       if (data.motherEmail) payload.motherEmail = data.motherEmail
       if (data.address) payload.address = data.address
+
+      // Enrolling person info
+      if (data.enrollingPersonType) payload.enrollingPersonType = data.enrollingPersonType
+      if (data.enrollingPersonName) payload.enrollingPersonName = data.enrollingPersonName
+      if (data.enrollingPersonRelation) payload.enrollingPersonRelation = data.enrollingPersonRelation
+      if (data.enrollingPersonPhone && !isPhoneEmpty(data.enrollingPersonPhone)) payload.enrollingPersonPhone = data.enrollingPersonPhone
+      if (data.enrollingPersonEmail) payload.enrollingPersonEmail = data.enrollingPersonEmail
+
       if (data.studentId) payload.studentId = data.studentId
       if (data.adjustedTuitionFee !== undefined) payload.adjustedTuitionFee = data.adjustedTuitionFee
       if (data.adjustmentReason) payload.adjustmentReason = data.adjustmentReason
@@ -136,6 +146,15 @@ function WizardContent({ schoolYearId, schoolYearName }: EnrollmentWizardProps) 
       // Derive paymentMade from amount to ensure consistency
       const submitPayload: Record<string, unknown> = {}
       const hasPayment = data.paymentAmount && data.paymentAmount > 0 && data.paymentMethod && data.receiptNumber
+
+      // Log for debugging payment issues
+      console.log("[Wizard] Submit payment check:", {
+        hasPayment,
+        paymentAmount: data.paymentAmount,
+        paymentMethod: data.paymentMethod,
+        receiptNumber: data.receiptNumber
+      })
+
       if (hasPayment) {
         submitPayload.paymentMade = true
         submitPayload.paymentAmount = data.paymentAmount
@@ -143,6 +162,17 @@ function WizardContent({ schoolYearId, schoolYearName }: EnrollmentWizardProps) 
         submitPayload.receiptNumber = data.receiptNumber
         if (data.transactionRef) submitPayload.transactionRef = data.transactionRef
         if (data.receiptImageUrl) submitPayload.receiptImageUrl = data.receiptImageUrl
+      }
+
+      // Include enrolling person data
+      if (data.enrollingPersonType) {
+        submitPayload.enrollingPersonType = data.enrollingPersonType
+        if (data.enrollingPersonType === "other") {
+          submitPayload.enrollingPersonName = data.enrollingPersonName
+          submitPayload.enrollingPersonRelation = data.enrollingPersonRelation
+          submitPayload.enrollingPersonPhone = data.enrollingPersonPhone
+          submitPayload.enrollingPersonEmail = data.enrollingPersonEmail
+        }
       }
 
       const response = await fetch(`/api/enrollments/${state.enrollmentId}/submit`, {
@@ -162,6 +192,7 @@ function WizardContent({ schoolYearId, schoolYearName }: EnrollmentWizardProps) 
       updateData({
         enrollmentNumber: result.enrollmentNumber,
         studentNumber: result.student?.studentNumber,
+        enrollmentStatus: result.status,
       })
 
       // Go to confirmation step
@@ -225,7 +256,7 @@ function WizardContent({ schoolYearId, schoolYearName }: EnrollmentWizardProps) 
         <CardContent>
           {/* Selected Grade Header - shown on steps 2-6 */}
           {currentStep > 1 && data.gradeName && (
-            <div className="mb-6 p-3 bg-muted/50 rounded-lg border">
+            <div className="mb-6 p-3 bg-amber-50 dark:bg-muted/50 rounded-lg border border-amber-200 dark:border-border">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   <GraduationCap className={sizing.icon.sm + " text-amber-500"} />
@@ -260,9 +291,9 @@ function WizardContent({ schoolYearId, schoolYearName }: EnrollmentWizardProps) 
   )
 }
 
-export function EnrollmentWizard(props: EnrollmentWizardProps) {
+export function EnrollmentWizard({ initialState, ...props }: EnrollmentWizardProps) {
   return (
-    <EnrollmentWizardProvider>
+    <EnrollmentWizardProvider initialState={initialState}>
       <WizardContent {...props} />
     </EnrollmentWizardProvider>
   )

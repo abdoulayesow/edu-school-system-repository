@@ -87,7 +87,7 @@ export function TopNav() {
   return (
     <header
       className={cn(
-        "fixed top-0 left-0 right-0 z-[60] h-[91px] border-b border-gspn-gold-300 dark:border-sidebar-border bg-gspn-gold-50/95 dark:bg-nav-dark-text/95 backdrop-blur-sm transition-shadow duration-300",
+        "fixed top-0 left-0 right-0 z-[60] h-[91px] border-b border-gspn-gold-300 dark:border-sidebar-border bg-nav-highlight/95 dark:bg-nav-dark-text/95 backdrop-blur-sm transition-shadow duration-300",
         isScrolled && "shadow-lg shadow-black/5 dark:shadow-black/20"
       )}
     >

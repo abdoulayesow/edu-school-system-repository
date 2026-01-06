@@ -14,7 +14,7 @@ import { DataPagination } from "@/components/data-pagination"
 import { sizing } from "@/lib/design-tokens"
 import { formatDate } from "@/lib/utils"
 import Link from "next/link"
-import { useEnrollments, useGrades } from "@/lib/hooks/use-api"
+import { useEnrollments, useGrades, useActiveSchoolYear } from "@/lib/hooks/use-api"
 import { getEnrollmentRowStatus } from "@/lib/status-helpers"
 import { Empty, EmptyMedia, EmptyTitle, EmptyDescription } from "@/components/ui/empty"
 import { EmptyEnrollmentsIllustration } from "@/components/illustrations"
@@ -43,21 +43,41 @@ export default function EnrollmentsPage() {
   const [searchQuery, setSearchQuery] = useState("")
   const [statusFilter, setStatusFilter] = useState<string>("all")
   const [gradeFilter, setGradeFilter] = useState<string>("all")
+  const [startDate, setStartDate] = useState("")
+  const [endDate, setEndDate] = useState("")
 
   // Pagination state
   const [offset, setOffset] = useState(0)
   const [limit, setLimit] = useState(ITEMS_PER_PAGE)
 
+  // Get active school year
+  const { data: activeSchoolYear } = useActiveSchoolYear()
+
   // Reset offset when filters change
   useEffect(() => {
     setOffset(0)
-  }, [searchQuery, statusFilter, gradeFilter])
+  }, [searchQuery, statusFilter, gradeFilter, startDate, endDate])
+
+  // Check if any filters are active (excluding school year which is always set)
+  const hasActiveFilters = searchQuery || statusFilter !== "all" || gradeFilter !== "all" || startDate || endDate
+
+  // Clear all filters (but keep school year)
+  const clearFilters = () => {
+    setSearchQuery("")
+    setStatusFilter("all")
+    setGradeFilter("all")
+    setStartDate("")
+    setEndDate("")
+  }
 
   // React Query hooks
   const { data: enrollmentsData, isLoading: enrollmentsLoading, error: enrollmentsError } = useEnrollments({
     search: searchQuery || undefined,
     status: statusFilter !== "all" ? statusFilter : undefined,
     gradeId: gradeFilter !== "all" ? gradeFilter : undefined,
+    schoolYearId: activeSchoolYear?.id,
+    startDate: startDate || undefined,
+    endDate: endDate || undefined,
     limit,
     offset,
   })
@@ -142,23 +162,38 @@ export default function EnrollmentsPage() {
     }
   }
 
-  // Calculate summary stats
+  // Get stats from API response (accurate totals, not just current page)
   const stats = useMemo(() => {
-    const total = enrollments.length
-    const drafts = enrollments.filter(e => e.status === "draft").length
-    const submitted = enrollments.filter(e => e.status === "submitted").length
-    const completed = enrollments.filter(e => e.status === "completed").length
-    return { total, drafts, submitted, completed }
-  }, [enrollments])
+    const apiStats = enrollmentsData?.stats
+    return {
+      total: apiStats?.total ?? 0,
+      drafts: apiStats?.draft ?? 0,
+      submitted: apiStats?.submitted ?? 0,
+      completed: apiStats?.completed ?? 0,
+    }
+  }, [enrollmentsData?.stats])
 
   // Server-side filtering is now handled by the API
   const filteredEnrollments = enrollments
 
   return (
     <PageContainer maxWidth="full">
-      <div className="mb-6">
-        <h1 className="text-3xl font-bold text-foreground mb-2">{t.enrollments.title}</h1>
-        <p className="text-muted-foreground">{t.enrollments.subtitle}</p>
+      <div className="mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+        <div>
+          <h1 className="text-3xl font-bold text-foreground mb-2">{t.enrollments.title}</h1>
+          <p className="text-muted-foreground">{t.enrollments.subtitle}</p>
+        </div>
+        {/* Current School Year Indicator */}
+        {activeSchoolYear && (
+          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800">
+            <span className="text-sm text-amber-700 dark:text-amber-400">
+              {locale === "fr" ? "Année scolaire:" : "School Year:"}
+            </span>
+            <span className="text-sm font-semibold text-amber-800 dark:text-amber-300">
+              {activeSchoolYear.name}
+            </span>
+          </div>
+        )}
       </div>
 
       {/* Summary Cards */}
@@ -266,7 +301,37 @@ export default function EnrollmentsPage() {
                 {t.enrollments.allGrades}
               </div>
             )}
+
+            {/* Start Date Filter */}
+            <Input
+              type="date"
+              value={startDate}
+              onChange={(e) => setStartDate(e.target.value)}
+              className="w-full sm:w-[160px]"
+              placeholder={locale === "fr" ? "Date début" : "Start date"}
+            />
+
+            {/* End Date Filter */}
+            <Input
+              type="date"
+              value={endDate}
+              onChange={(e) => setEndDate(e.target.value)}
+              className="w-full sm:w-[160px]"
+              placeholder={locale === "fr" ? "Date fin" : "End date"}
+            />
           </div>
+
+          {/* Clear Filters Link */}
+          {hasActiveFilters && (
+            <div className="mt-2">
+              <button
+                onClick={clearFilters}
+                className="text-sm text-primary hover:underline cursor-pointer"
+              >
+                {locale === "fr" ? "Effacer les filtres" : "Clear filters"}
+              </button>
+            </div>
+          )}
         </CardContent>
       </Card>
 

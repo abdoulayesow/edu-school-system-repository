@@ -27,7 +27,7 @@ export const fr = {
     status: "Statut",
     date: "Date",
     amount: "Montant",
-    students: "élèves",
+    students: "Élèves",
     student: "Élève",
     teacher: "Enseignant",
     user: "Utilisateur",
@@ -84,6 +84,13 @@ export const fr = {
     expandMenu: "Agrandir le menu",
     closeMenu: "Fermer le menu",
     gradesClasses: "Niveaux & Classes",
+    // Grading navigation
+    gradingSection: "Notes",
+    bulletins: "Bulletins",
+    classRankingNav: "Classement",
+    teacherRemarks: "Appréciations",
+    conductEntry: "Conduite & Assiduité",
+    trimesters: "Trimestres",
   },
 
   // Homepage
@@ -272,6 +279,14 @@ export const fr = {
     needsReview: "En attente de validation",
     rejected: "Rejeté",
     cancelled: "Annulé",
+
+    // Enrollment detail view
+    parents: "Parents",
+    enrolledBy: "Inscrit par",
+    enrolledByFather: "Père",
+    enrolledByMother: "Mère",
+    continueEnrollment: "Continuer",
+    relationship: "Lien",
   },
 
   // Activities
@@ -329,7 +344,7 @@ export const fr = {
     removeStudent: "Retirer l'élève",
     enrolled: "Inscrits",
     spotsLeft: "places restantes",
-    noSpots: "Complet",
+    noSpots: "complet",
 
     // Assign dialog
     assignStudentTitle: "Assigner un élève",
@@ -789,6 +804,12 @@ export const fr = {
       term2: "Trimestre 2",
       term3: "Trimestre 3",
     },
+    levelLabels: {
+      kindergarten: "Maternelle",
+      elementary: "Primaire",
+      college: "Collège",
+      high_school: "Lycée",
+    },
   },
 
   // Classes
@@ -932,6 +953,7 @@ export const fr = {
     birthCertificate: "Extrait de naissance",
     uploadPhoto: "Télécharger une photo",
     uploadDocument: "Télécharger le document",
+    fileUploaded: "Fichier téléchargé",
 
     // Parent info
     parentInfo: "Information des parents",
@@ -944,6 +966,20 @@ export const fr = {
     fatherEmail: "Email du père",
     motherEmail: "Email de la mère",
     address: "Adresse",
+
+    // Enrolling Person
+    enrollingPerson: "Qui inscrit l'élève ?",
+    enrollingPersonDescription: "Cette personne sera le contact principal pour la communication scolaire.",
+    enrollingAsFather: "Père",
+    enrollingAsMother: "Mère",
+    enrollingAsOther: "Autre",
+    otherEnrollingPersonInfo: "Coordonnées de la personne",
+    enrollingPersonName: "Nom complet",
+    enrollingPersonNamePlaceholder: "Entrez le nom complet",
+    enrollingPersonRelation: "Lien avec l'élève",
+    enrollingPersonRelationPlaceholder: "ex: Oncle, Tante, Tuteur",
+    enrollingPersonPhone: "Numéro de téléphone",
+    enrollingPersonEmail: "Email (Optionnel)",
 
     // Notes
     additionalNotes: "Notes additionnelles",
@@ -1010,7 +1046,7 @@ export const fr = {
     pdfDownloadError: "Échec du téléchargement du PDF. Veuillez réessayer.",
     printDocument: "Imprimer",
     statusSubmittedPendingReview: "Soumise - En attente de révision",
-    statusReviewRequired: "Révision requise par le directeur",
+    statusReviewRequired: "Revue requise par le directeur",
     autoApproveIn: "Approbation automatique dans {days} jours",
 
     // Status badges
@@ -1054,6 +1090,7 @@ export const fr = {
     enrollmentSummary: "Résumé de l'inscription",
     backToEnrollments: "Retour aux inscriptions",
     startNewEnrollment: "Nouvelle inscription",
+    enrollmentApproved: "Votre inscription a été approuvée.",
   },
 
   // Students module
@@ -1070,10 +1107,10 @@ export const fr = {
 
     // Status labels
     balanceStatus: "Statut de paiement",
-    late: "En retard",
-    onTime: "À jour",
-    inAdvance: "En avance",
-    complete: "Complet",
+    late: "en retard",
+    onTime: "à jour",
+    inAdvance: "en avance",
+    complete: "complet",
     goldMedal: "Paiement complet",
 
     // Attendance status
@@ -1102,6 +1139,115 @@ export const fr = {
     displayed: "affichés",
     noStudentsFound: "Aucun élève trouvé avec ces critères",
     noStudentsEnrolled: "Aucun élève inscrit",
+
+    // New keys for improved pages
+    needsAttention: "À surveiller",
+    familyInfo: "Informations familiales",
+    father: "Père",
+    mother: "Mère",
+    guardian: "Tuteur",
+    enrollmentNumber: "N° Inscription",
+    // Student detail page improvements
+    managePayments: "Gérer les paiements",
+    enrolledBy: "Inscrit par",
+    createdBy: "Créé par",
+    enrollingGuardian: "Tuteur inscripteur",
+    enrollingSchoolStaff: "Personnel scolaire inscripteur",
+    enrollmentNotes: "Notes d'inscription",
+    middleName: "Deuxième prénom",
+    viewEnrollment: "Voir l'inscription",
+    editInfo: "Modifier les informations",
+    noNotes: "Aucune note",
+    paymentProgress: "Progression du paiement",
+
+    // Student detail page - tabs and sections
+    backToStudents: "Retour aux élèves",
+    overview: "Vue d'ensemble",
+    enrollmentsTab: "Inscriptions",
+    paymentsTab: "Paiements",
+    attendanceTab: "Présence",
+    activitiesTab: "Activités",
+
+    // Stats cards
+    remainingBalanceLabel: "Solde restant",
+    totalPaid: "Total payé",
+    of: "sur",
+    attendanceLabel: "Présence",
+    paymentProgressLabel: "Progression paiement",
+
+    // Personal info
+    firstName: "Prénom",
+    lastName: "Nom",
+    dateOfBirth: "Date de naissance",
+    gender: "Genre",
+    male: "Masculin",
+    female: "Féminin",
+    phone: "Téléphone",
+    email: "Email",
+    address: "Adresse",
+    familyInformation: "Informations familiales",
+
+    // Attendance summary
+    totalRecords: "enregistrements au total",
+    present: "Présents",
+    absent: "Absents",
+    lateLabel: "En retard",
+    excused: "Excusés",
+    attendanceRate: "Taux de présence",
+
+    // Enrollments table
+    enrollmentHistory: "Historique des inscriptions",
+    enrollmentCount: "inscription(s)",
+    schoolYear: "Année scolaire",
+    gradeLabel: "Classe",
+    levelLabel: "Niveau",
+    tuition: "Frais de scolarité",
+    amountPaid: "Montant payé",
+    status: "Statut",
+    actions: "Actions",
+    noEnrollments: "Aucune inscription",
+    current: "Actuel",
+
+    // Payment summary
+    paidOf: "payé sur",
+    tuitionFee: "Frais de scolarité",
+    noPaymentsRecorded: "Aucun paiement enregistré",
+    date: "Date",
+    amount: "Montant",
+    method: "Méthode",
+    receiptNumber: "N° Reçu",
+    recordedBy: "Enregistré par",
+    paymentCount: "paiement(s)",
+
+    // Attendance tab
+    attendanceHistoryTitle: "Historique de présence",
+    totalSessions: "Total séances",
+    overallAttendanceRate: "Taux de présence global",
+
+    // Activities tab
+    enrolledActivities: "Activités inscrites",
+    activityCount: "activité(s)",
+    enrolledOn: "Inscrit le",
+    fee: "Frais",
+    noActivitiesEnrolled: "Aucune activité inscrite",
+    noActivitiesDescription: "L'élève n'est inscrit à aucune activité pour l'année en cours",
+    noAttendanceRecords: "Aucun enregistrement de présence disponible",
+    noAttendanceDescription: "Les données de présence apparaîtront ici une fois enregistrées",
+    activeStatus: "Actif",
+
+    // Edit page
+    backToProfile: "Retour au profil",
+    editStudent: "Modifier l'élève",
+    basicStudentInfo: "Informations de base de l'élève",
+    parentInformation: "Informations des parents",
+    parentContactDetails: "Coordonnées des parents ou tuteurs",
+    fullName: "Nom complet",
+    saving: "Enregistrement...",
+    // Status options
+    statusActive: "Actif",
+    statusInactive: "Inactif",
+    statusTransferred: "Transféré",
+    statusGraduated: "Diplômé",
   },
 
   // Enhanced attendance
@@ -1512,6 +1658,73 @@ export const fr = {
       currentRoom: "Salle Actuelle",
       newRoom: "Nouvelle Salle",
       reassignSuccess: "Salle changée avec succès",
+
+      // Auto-assignment
+      autoAssign: "Attribution Auto",
+      autoAssignDialogTitle: "Attribution Automatique des Élèves aux Salles",
+      autoAssignDialogDescription: "Distribuer automatiquement les élèves avec des ratios équilibrés de genre et d'âge",
+      selectRoomsToAutoAssign: "Sélectionner les salles pour l'attribution automatique",
+      selectAllRooms: "Sélectionner Toutes",
+      deselectAllRooms: "Désélectionner Tout",
+      previewTitle: "Aperçu",
+      studentsToAssign: "{count} élèves à assigner",
+      roomsSelected: "{count} salle(s) sélectionnée(s)",
+      studentsPerRoom: "~{min}-{max} élèves par salle",
+      genderRatio: "Genre: {male}% garçons, {female}% filles",
+      lockedStudentsExcluded: "{count} élève(s) verrouillé(s) (exclus)",
+      noLockedStudents: "Aucun élève verrouillé",
+      autoAssignButton: "Attribution Auto ({count})",
+      autoAssigning: "Attribution en cours...",
+      autoAssignSuccess: "{count} élève(s) assigné(s) automatiquement avec succès",
+      autoAssignError: "Échec de l'attribution automatique",
+      distributionSummary: "Résumé de la Distribution",
+      roomDistribution: "{roomName}: {count} élèves ({male} garçons, {female} filles)",
+      averageAge: "Âge moyen: {age} ans",
+      balanceScore: "Score d'Équilibre: {score}/100",
+      noRoomsSelected: "Veuillez sélectionner au moins une salle",
+
+      // Lock functionality
+      lockStudent: "Verrouiller l'élève (empêcher l'attribution auto)",
+      unlockStudent: "Déverrouiller l'élève (permettre l'attribution auto)",
+      locked: "Verrouillé",
+      lockToggleError: "Échec du verrouillage/déverrouillage",
+      lockedTooltip: "Cet élève est verrouillé et ne sera pas inclus dans l'attribution automatique",
+
+      // View Grade & Navigation
+      viewGrade: "Voir la classe",
+      viewGradeTooltip: "Voir la gestion détaillée des salles de classe",
+      autoAssignTooltip: "Assigner automatiquement avec distribution équilibrée",
+
+      // Attendance
+      takeAttendance: "Prendre les présences",
+      attendanceForRoom: "Présences pour {roomName}",
+      markPresent: "Présent",
+      markAbsent: "Absent",
+      markLate: "En retard",
+      markExcused: "Excusé",
+      saveAttendance: "Enregistrer les présences",
+      attendanceSaved: "Présences enregistrées avec succès",
+      attendanceDate: "Date",
+      attendanceError: "Échec de l'enregistrement des présences",
+
+      // Grade Room View Page
+      inlineAssignment: "Affectation en ligne",
+      dragToAssign: "Glisser l'élève vers la salle pour l'assigner",
+      quickActions: "Actions rapides",
+      bulkOperations: "Opérations groupées",
+      moveToRoom: "Déplacer vers salle",
+      removeAssignment: "Retirer l'affectation",
+      filterByRoom: "Filtrer par salle",
+      allRooms: "Toutes les salles",
+      roomUtilization: "Utilisation des salles",
+      attendanceRate: "Taux de présence",
+      unassignedStudentsPanel: "Élèves non assignés",
+      dropStudentHere: "Déposer l'élève ici pour l'assigner",
+      moveStudent: "Déplacer l'élève",
+      removeStudent: "Retirer l'élève",
+      bulkMoveSuccess: "{count} élève(s) déplacé(s) avec succès",
+      bulkRemoveSuccess: "{count} affectation(s) supprimée(s) avec succès",
+      reassignError: "Échec de la réaffectation de l'élève",
     },
 
     // Common
@@ -1585,6 +1798,215 @@ export const fr = {
     // Placeholders
     emailPlaceholder: "utilisateur@exemple.com",
     namePlaceholder: "Jean Dupont",
+
+    // Trimesters
+    trimesters: "Trimestres",
+    trimester: "Trimestre",
+    trimestersTitle: "Gestion des Trimestres",
+    trimestersSubtitle: "Gérer les trimestres académiques pour les périodes de notation",
+    createTrimester: "Créer un Trimestre",
+    editTrimester: "Modifier le Trimestre",
+    deleteTrimester: "Supprimer le Trimestre",
+    activateTrimester: "Activer le Trimestre",
+    deactivateTrimester: "Désactiver le Trimestre",
+    trimesterNumber: "Numéro du Trimestre",
+    trimester1: "1er Trimestre",
+    trimester2: "2ème Trimestre",
+    trimester3: "3ème Trimestre",
+    activeTrimester: "Trimestre Actif",
+    noActiveTrimester: "Aucun trimestre actif",
+    totalTrimesters: "Total des Trimestres",
+    evaluationsCount: "Évaluations",
+    trimesterActivated: "Trimestre activé avec succès",
+    trimesterDeactivated: "Trimestre désactivé avec succès",
+    deleteTrimesterConfirmation: "Êtes-vous sûr de vouloir supprimer ce trimestre ? Cette action est irréversible.",
+    cannotDeleteActiveTrimester: "Impossible de supprimer le trimestre actif",
+    cannotDeleteTrimesterWithEvaluations: "Impossible de supprimer un trimestre avec des évaluations existantes",
+    activateTrimesterConfirmation: "Êtes-vous sûr de vouloir activer ce trimestre ? Cela désactivera tout trimestre actuellement actif.",
+    selectTrimester: "Sélectionner un trimestre",
+    noTrimesters: "Aucun trimestre configuré",
+    configureTrimesters: "Configurer les trimestres pour activer la notation",
+  },
+
+  // Grading System
+  grading: {
+    // Page titles
+    gradeEntry: "Saisie des Notes",
+    gradeEntrySubtitle: "Saisir les notes des élèves pour le trimestre en cours",
+    evaluations: "Évaluations",
+    evaluationsSubtitle: "Consulter et gérer les évaluations des élèves",
+
+    // Evaluation types
+    evaluationType: "Type d'Évaluation",
+    interrogation: "Interrogation",
+    interrogationShort: "Interro",
+    devoirSurveille: "Devoir Surveillé",
+    devoirSurveilleShort: "DS",
+    composition: "Composition",
+    compositionShort: "Compo",
+
+    // Grade entry
+    enterGrades: "Saisir les Notes",
+    score: "Note",
+    maxScore: "Note Max",
+    outOf: "sur",
+    coefficient: "Coefficient",
+    average: "Moyenne",
+    classAverage: "Moyenne de Classe",
+    studentAverage: "Moyenne de l'Élève",
+    subjectAverage: "Moyenne par Matière",
+    generalAverage: "Moyenne Générale",
+    weightedAverage: "Moyenne Pondérée",
+
+    // Evaluation management
+    addEvaluation: "Ajouter une Évaluation",
+    editEvaluation: "Modifier l'Évaluation",
+    deleteEvaluation: "Supprimer l'Évaluation",
+    deleteEvaluationConfirmation: "Êtes-vous sûr de vouloir supprimer cette évaluation ?",
+    evaluationDate: "Date d'Évaluation",
+    noEvaluations: "Aucune évaluation enregistrée",
+    recordedBy: "Enregistré par",
+
+    // Batch entry
+    batchEntry: "Saisie en Lot",
+    enterScoresForClass: "Saisir les notes pour la classe",
+    saveAllGrades: "Enregistrer Toutes les Notes",
+    gradesEntered: "notes saisies",
+    gradesSaved: "Notes enregistrées avec succès",
+    gradeSaved: "Note enregistrée",
+
+    // Status and validation
+    passed: "Admis",
+    failed: "Refusé",
+    pending: "En attente",
+    invalidScore: "La note doit être entre 0 et {max}",
+    scoreRequired: "La note est requise",
+    allFieldsRequired: "Tous les champs sont requis",
+
+    // Coefficients by type
+    coefficientInterro: "×1",
+    coefficientDS: "×2",
+    coefficientCompo: "×2",
+
+    // Summary
+    totalEvaluations: "Total des Évaluations",
+    studentsGraded: "Élèves Notés",
+    averageScore: "Note Moyenne",
+    passRate: "Taux de Réussite",
+    passThreshold: "Seuil de réussite : 10/20",
+
+    // Filters
+    filterBySubject: "Filtrer par matière",
+    filterByType: "Filtrer par type",
+    filterByStudent: "Filtrer par élève",
+    allSubjects: "Toutes les matières",
+    allTypes: "Tous les types",
+    allStudents: "Tous les élèves",
+
+    // Select prompts
+    selectSubject: "Sélectionner une matière",
+    selectGrade: "Sélectionner une classe",
+    selectStudent: "Sélectionner un élève",
+    selectType: "Sélectionner un type",
+
+    // Remarks
+    teacherRemark: "Appréciation du Professeur",
+    addRemark: "Ajouter une appréciation",
+    remarkPlaceholder: "Saisir une observation pour cet élève...",
+
+    // Conduct
+    conduct: "Conduite",
+    conductScore: "Note de Conduite",
+
+    // Decisions
+    decision: "Décision",
+    admis: "Admis",
+    rattrapage: "Rattrapage",
+    redouble: "Redouble",
+    decisionPending: "Décision en Attente",
+
+    // Rankings
+    rank: "Rang",
+    classRank: "Rang de Classe",
+    outOfStudents: "sur {total} élèves",
+
+    // Absences
+    absences: "Absences",
+    lates: "Retards",
+
+    // Actions
+    calculateAverages: "Calculer les Moyennes",
+    recalculate: "Recalculer",
+    exportGrades: "Exporter les Notes",
+    printBulletin: "Imprimer le Bulletin",
+    downloadPDF: "Télécharger PDF",
+
+    // Bulletin
+    bulletin: "Bulletin de Notes",
+    bulletinSubtitle: "Consulter le bulletin trimestriel d'un élève",
+    subjectResults: "Résultats par Matière",
+    noDataAvailable: "Aucune donnée disponible pour cet élève et ce trimestre",
+    selectToView: "Sélectionnez un trimestre, une classe et un élève pour afficher le bulletin",
+    generalRemark: "Appréciation Générale",
+    classStatistics: "Statistiques de Classe",
+    highest: "Meilleure",
+    lowest: "Plus Basse",
+
+    // Class Ranking
+    classRanking: "Classement de la Classe",
+    classRankingSubtitle: "Voir le classement des élèves par moyenne générale",
+    studentsRanked: "élèves classés",
+    noRankingAvailable: "Aucun classement disponible pour cette classe et ce trimestre",
+    selectToViewRanking: "Sélectionnez un trimestre et une classe pour afficher le classement",
+    progress: "Progression",
+
+    // Decision Override
+    overrideDecision: "Modifier la Décision",
+    decisionOverridden: "Décision modifiée",
+    overriddenBy: "Modifié par",
+    updateDecision: "Mettre à jour la Décision",
+    decisionUpdated: "Décision mise à jour avec succès",
+
+    // Bulk Operations
+    calculateSubjectAverages: "Calculer les Moyennes par Matière",
+    calculateStudentSummaries: "Calculer les Bilans des Élèves",
+    calculateAllNow: "Tout Calculer Maintenant",
+    calculatingSubjectAverages: "Calcul des moyennes par matière...",
+    calculatingStudentSummaries: "Calcul des bilans des élèves...",
+    calculationComplete: "Calcul terminé",
+    calculationsMenu: "Calculs",
+
+    // Manage Evaluations
+    manageEvaluations: "Gérer les Évaluations",
+    viewEvaluations: "Voir les Évaluations",
+    recalculateAverages: "Recalculer les Moyennes ?",
+    recalculatePromptMessage: "Les données ont changé. Voulez-vous recalculer les moyennes ?",
+    recalculateNow: "Recalculer Maintenant",
+    skipRecalculate: "Passer",
+    evaluationUpdated: "Évaluation mise à jour avec succès",
+    evaluationDeleted: "Évaluation supprimée avec succès",
+    noEvaluationsFound: "Aucune évaluation trouvée",
+
+    // Teacher Remarks
+    teacherRemarksSubtitle: "Ajouter des appréciations par matière pour les bulletins",
+    remarksSaved: "Appréciations enregistrées avec succès",
+    saveRemarks: "Enregistrer les Appréciations",
+    unsavedChanges: "Vous avez des modifications non enregistrées",
+    noAveragesFound: "Aucune moyenne trouvée. Calculez d'abord les moyennes.",
+
+    // Conduct Entry
+    conductEntrySubtitle: "Saisir les notes de conduite et les données d'assiduité",
+    absencesCount: "Absences",
+    latesCount: "Retards",
+    conductSaved: "Données de conduite et d'assiduité enregistrées",
+    saveConductData: "Enregistrer les Données",
+    noStudentsFound: "Aucun élève trouvé pour cette classe",
+
+    // Batch Bulletin PDF
+    downloadAllBulletins: "Télécharger Tous les Bulletins",
+    generatingBulletins: "Génération des bulletins...",
+    bulletinsDownloaded: "Tous les bulletins téléchargés",
+    generatingPdfFor: "Génération du PDF pour {name}...",
   },
 } as const;
 

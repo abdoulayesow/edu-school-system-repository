@@ -18,8 +18,15 @@ import {
   Settings,
   CalendarDays,
   UserCog,
+  BookMarked,
+  PenLine,
+  FileText,
+  Trophy,
+  MessageSquare,
+  CalendarRange,
 } from "lucide-react"
 import type { UserRole } from "./nav-links"
+import { isGradingFeaturesEnabled } from "./feature-flags"
 
 export interface SubNavItem {
   id: string
@@ -135,6 +142,55 @@ export const navigationConfig: MainNavItem[] = [
     ],
   },
   {
+    id: "grading",
+    name: "Grading",
+    translationKey: "gradingSection",
+    icon: BookMarked,
+    roles: ["director", "academic_director", "teacher"],
+    subItems: [
+      {
+        id: "grade-entry",
+        name: "Grade Entry",
+        translationKey: "gradeEntry",
+        href: "/grades/entry",
+        icon: PenLine,
+        roles: ["director", "academic_director", "teacher"],
+      },
+      {
+        id: "bulletins",
+        name: "Bulletins",
+        translationKey: "bulletins",
+        href: "/grades/bulletin",
+        icon: FileText,
+        roles: ["director", "academic_director", "teacher"],
+      },
+      {
+        id: "rankings",
+        name: "Class Ranking",
+        translationKey: "classRankingNav",
+        href: "/grades/ranking",
+        icon: Trophy,
+        roles: ["director", "academic_director"],
+      },
+      {
+        id: "remarks",
+        name: "Teacher Remarks",
+        translationKey: "teacherRemarks",
+        href: "/grades/remarks",
+        icon: MessageSquare,
+        roles: ["director", "academic_director", "teacher"],
+      },
+      {
+        id: "conduct",
+        name: "Conduct & Attendance",
+        translationKey: "conductEntry",
+        href: "/grades/conduct",
+        icon: ClipboardCheck,
+        roles: ["director", "academic_director"],
+      },
+    ],
+  },
+  {
     id: "accounting",
     name: "Accounting",
     translationKey: "accountingSection",
@@ -239,6 +295,14 @@ export const navigationConfig: MainNavItem[] = [
         icon: BookOpen,
         roles: ["director", "academic_director"],
       },
+      {
+        id: "trimesters",
+        name: "Trimesters",
+        translationKey: "trimesters",
+        href: "/admin/trimesters",
+        icon: CalendarRange,
+        roles: ["director", "academic_director"],
+      },
     ],
   },
 ]
@@ -251,6 +315,7 @@ export function getNavigationForRole(role: UserRole | undefined): MainNavItem[] 
 
   return navigationConfig
     .filter((item) => item.roles.includes(role))
+    .filter((item) => item.id !== "grading" || isGradingFeaturesEnabled)
     .map((item) => ({
       ...item,
       subItems: item.subItems.filter((sub) => sub.roles.includes(role)),

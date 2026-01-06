@@ -10,12 +10,6 @@ import {
   selectPendingCount,
   selectFailedCount,
 } from "@/lib/stores/offline-store"
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip"
 import { Badge } from "@/components/ui/badge"
 
 // ============================================================================
@@ -127,61 +121,48 @@ export function OfflineIndicator({
   }
 
   return (
-    <TooltipProvider>
-      <Tooltip>
-        <TooltipTrigger asChild>
-          <button
-            onClick={handleClick}
-            disabled={!isOnline || variant === "syncing"}
-            data-testid="offline-indicator"
-            data-status={variant}
-            className={cn(
-              "inline-flex items-center gap-1.5 rounded-full px-2 h-9",
-              "transition-colors duration-200",
-              config.bgColor,
-              isOnline && pendingCount > 0 && "cursor-pointer hover:opacity-80",
-              !isOnline && "cursor-default",
-              className
-            )}
-          >
-            <Icon
-              className={cn(
-                sizeClasses[size],
-                config.color,
-                variant === "syncing" && "animate-spin"
-              )}
-            />
-            {showLabel && (
-              <span
-                className={cn(
-                  "text-xs font-medium",
-                  config.color
-                )}
-              >
-                {config.label}
-              </span>
-            )}
-            {(pendingCount > 0 || failedCount > 0) && variant !== "syncing" && (
-              <Badge
-                variant={failedCount > 0 ? "destructive" : "secondary"}
-                className="h-4 min-w-4 px-1 text-[10px]"
-                data-testid="offline-indicator-badge"
-              >
-                {failedCount > 0 ? failedCount : pendingCount}
-              </Badge>
-            )}
-          </button>
-        </TooltipTrigger>
-        <TooltipContent side="bottom">
-          <p>{config.tooltip}</p>
-          {isOnline && pendingCount > 0 && variant !== "syncing" && (
-            <p className="text-xs text-muted-foreground mt-1">
-              Click to sync now
-            </p>
+    <button
+      onClick={handleClick}
+      disabled={!isOnline || variant === "syncing"}
+      data-testid="offline-indicator"
+      data-status={variant}
+      aria-label={config.tooltip}
+      className={cn(
+        "inline-flex items-center gap-1.5 rounded-full px-2 h-9",
+        "transition-colors duration-200",
+        config.bgColor,
+        isOnline && pendingCount > 0 && "cursor-pointer hover:opacity-80",
+        !isOnline && "cursor-default",
+        className
+      )}
+    >
+      <Icon
+        className={cn(
+          sizeClasses[size],
+          config.color,
+          variant === "syncing" && "animate-spin"
+        )}
+      />
+      {showLabel && (
+        <span
+          className={cn(
+            "text-xs font-medium",
+            config.color
           )}
-        </TooltipContent>
-      </Tooltip>
-    </TooltipProvider>
+        >
+          {config.label}
+        </span>
+      )}
+      {(pendingCount > 0 || failedCount > 0) && variant !== "syncing" && (
+        <Badge
+          variant={failedCount > 0 ? "destructive" : "secondary"}
+          className="h-4 min-w-4 px-1 text-[10px]"
+          data-testid="offline-indicator-badge"
+        >
+          {failedCount > 0 ? failedCount : pendingCount}
+        </Badge>
+      )}
+    </button>
   )
 }
 

@@ -18,21 +18,24 @@ import {
   Loader2,
 } from "lucide-react"
 import Link from "next/link"
+import { useRouter } from "next/navigation"
 import { sizing } from "@/lib/design-tokens"
 
 export function StepConfirmation() {
   const { t, locale } = useI18n()
-  const { state } = useEnrollmentWizard()
+  const { state, reset } = useEnrollmentWizard()
+  const router = useRouter()
   const { data, enrollmentId } = state
   const [isDownloading, setIsDownloading] = useState(false)
   const [downloadError, setDownloadError] = useState<string | null>(null)
 
-  const hasAdjustment =
-    data.adjustedTuitionFee !== undefined &&
-    data.adjustedTuitionFee !== data.originalTuitionFee
+  // Use actual status from API response
+  const status = data.enrollmentStatus || "submitted"
+  const isCompleted = status === "completed"
+  const needsReview = status === "needs_review"
 
   // Calculate days until auto-approval (3 days from submission)
-  const daysUntilApproval = hasAdjustment ? null : 3
+  const daysUntilApproval = needsReview ? null : 3
 
   // Handle PDF download
   const handleDownloadPdf = async () => {
@@ -71,15 +74,38 @@ export function StepConfirmation() {
     window.print()
   }
 
+  // Handle starting a new enrollment
+  const handleNewEnrollment = () => {
+    reset()
+    router.push("/enrollments/new")
+  }
+
+  // Get icon styling based on status
+  const iconBgClass = isCompleted
+    ? "bg-green-100 dark:bg-green-900/30"
+    : needsReview
+    ? "bg-amber-100 dark:bg-amber-900/30"
+    : "bg-primary/10"
+
+  const iconClass = isCompleted
+    ? "text-green-600 dark:text-green-500"
+    : needsReview
+    ? "text-amber-600 dark:text-amber-500"
+    : "text-primary"
+
+  const badgeClass = isCompleted
+    ? "bg-green-600 hover:bg-green-700 text-white border-green-600"
+    : ""
+
   return (
     <div className="space-y-6">
       {/* Success Message */}
       <div className="text-center py-8">
-        <div className="inline-flex items-center justify-center w-20 h-20 rounded-full bg-primary/10 mb-4">
-          <CheckCircle2 className="h-10 w-10 text-primary" />
+        <div className={`inline-flex items-center justify-center w-20 h-20 rounded-full ${iconBgClass} mb-4`}>
+          <CheckCircle2 className={`h-10 w-10 ${iconClass}`} />
         </div>
         <h2 className="text-2xl font-bold text-foreground">
-          {t.enrollmentWizard.enrollmentComplete}
+          {isCompleted ? (t.enrollmentWizard.statusCompleted || "Enrollment Completed!") : t.enrollmentWizard.enrollmentComplete}
         </h2>
         <p className="text-muted-foreground mt-2">
           {data.firstName} {data.lastName} - {data.gradeName}
@@ -87,12 +113,20 @@ export function StepConfirmation() {
       </div>
 
       {/* Status Alert */}
-      {hasAdjustment ? (
+      {needsReview ? (
         <Alert variant="destructive">
           <AlertTriangle className={sizing.icon.sm} />
           <AlertTitle>{t.enrollmentWizard.statusReviewRequired}</AlertTitle>
           <AlertDescription>
             {t.enrollmentWizard.requiresApproval}
+          </AlertDescription>
+        </Alert>
+      ) : isCompleted ? (
+        <Alert className="border-green-200 bg-green-50 dark:border-green-800 dark:bg-green-900/20">
+          <CheckCircle2 className={`${sizing.icon.sm} text-green-600 dark:text-green-500`} />
+          <AlertTitle className="text-green-800 dark:text-green-200">{t.enrollmentWizard.statusCompleted || "Completed"}</AlertTitle>
+          <AlertDescription className="text-green-700 dark:text-green-300">
+            {t.enrollmentWizard.enrollmentApproved || "Your enrollment has been approved."}
           </AlertDescription>
         </Alert>
       ) : (
@@ -113,7 +147,7 @@ export function StepConfirmation() {
               <p className="text-sm text-muted-foreground">
                 {t.enrollmentWizard.enrollmentNumber}
               </p>
-              <p className="text-2xl font-mono font-bold text-primary">
+              <p className={`text-2xl font-mono font-bold ${isCompleted ? "text-green-600 dark:text-green-500" : "text-[#e79908] dark:text-gspn-gold-200"}`}>
                 {data.enrollmentNumber || "ENR-XXXX-XXXXX"}
               </p>
             </div>
@@ -121,7 +155,7 @@ export function StepConfirmation() {
               <p className="text-sm text-muted-foreground">
                 {t.enrollmentWizard.studentNumber}
               </p>
-              <p className="text-2xl font-mono font-bold">
+              <p className={`text-2xl font-mono font-bold ${isCompleted ? "text-green-600 dark:text-green-500" : "text-[#e79908] dark:text-gspn-gold-200"}`}>
                 {data.studentNumber || "STU-XXXXX"}
               </p>
             </div>
@@ -132,11 +166,13 @@ export function StepConfirmation() {
       {/* Status Badge */}
       <div className="flex justify-center">
         <Badge
-          variant={hasAdjustment ? "destructive" : "default"}
-          className="text-base px-4 py-2"
+          variant={needsReview ? "destructive" : "default"}
+          className={`text-base px-4 py-2 ${badgeClass}`}
         >
-          {hasAdjustment
+          {needsReview
             ? t.enrollmentWizard.statusReviewRequired
+            : isCompleted
+            ? (t.enrollmentWizard.statusCompleted || "Completed")
             : t.enrollmentWizard.statusSubmitted}
         </Badge>
       </div>
@@ -218,11 +254,9 @@ export function StepConfirmation() {
             {t.enrollmentWizard.backToEnrollments}
           </Link>
         </Button>
-        <Button variant="outline" asChild className="gap-2 bg-transparent">
-          <Link href="/enrollments/new">
-            <ArrowRight className={sizing.icon.sm} />
-            {t.enrollmentWizard.startNewEnrollment}
-          </Link>
+        <Button variant="outline" onClick={handleNewEnrollment} className="gap-2 bg-transparent">
+          <ArrowRight className={sizing.icon.sm} />
+          {t.enrollmentWizard.startNewEnrollment}
         </Button>
       </div>
     </div>

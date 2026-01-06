@@ -31,10 +31,12 @@ import {
   MapPin,
   AlertCircle,
   Trash2,
+  UserCheck,
 } from "lucide-react"
 import { useI18n } from "@/components/i18n-provider"
 import { PageContainer } from "@/components/layout/PageContainer"
 import Link from "next/link"
+import { cn } from "@/lib/utils"
 import type { EnrollmentStatus, PaymentSchedule, Payment, EnrollmentNote } from "@/lib/enrollment/types"
 
 interface EnrollmentDetail {
@@ -54,6 +56,11 @@ interface EnrollmentDetail {
   motherPhone: string | null
   motherEmail: string | null
   address: string | null
+  enrollingPersonType: string | null
+  enrollingPersonName: string | null
+  enrollingPersonRelation: string | null
+  enrollingPersonPhone: string | null
+  enrollingPersonEmail: string | null
   status: EnrollmentStatus
   currentStep: number
   isReturningStudent: boolean
@@ -85,13 +92,13 @@ interface EnrollmentDetail {
   approver: { name: string; email: string } | null
 }
 
-const statusConfig: Record<EnrollmentStatus, { label: string; labelFr: string; variant: "default" | "secondary" | "destructive" | "outline"; icon: React.ElementType }> = {
+const statusConfig: Record<EnrollmentStatus, { label: string; labelFr: string; variant: "default" | "secondary" | "destructive" | "outline" | "success" | "warning"; icon: React.ElementType; className?: string }> = {
   draft: { label: "Draft", labelFr: "Brouillon", variant: "secondary", icon: FileText },
-  submitted: { label: "Submitted", labelFr: "Soumis", variant: "default", icon: Clock },
-  needs_review: { label: "Needs Review", labelFr: "En attente de validation", variant: "outline", icon: AlertCircle },
-  completed: { label: "Completed", labelFr: "Termine", variant: "default", icon: CheckCircle },
-  rejected: { label: "Rejected", labelFr: "Rejete", variant: "destructive", icon: XCircle },
-  cancelled: { label: "Cancelled", labelFr: "Annule", variant: "secondary", icon: XCircle },
+  submitted: { label: "Submitted", labelFr: "Soumis", variant: "default", icon: Clock, className: "bg-blue-500 text-white dark:bg-blue-600" },
+  needs_review: { label: "Needs Review", labelFr: "En attente de validation", variant: "warning", icon: AlertCircle },
+  completed: { label: "Completed", labelFr: "Terminé", variant: "success", icon: CheckCircle },
+  rejected: { label: "Rejected", labelFr: "Rejeté", variant: "destructive", icon: XCircle },
+  cancelled: { label: "Cancelled", labelFr: "Annulé", variant: "secondary", icon: XCircle },
 }
 
 export default function EnrollmentDetailPage({
@@ -278,7 +285,7 @@ export default function EnrollmentDetailPage({
 
   if (error || !enrollment) {
     return (
-      <PageContainer maxWidth="lg">
+      <PageContainer maxWidth="full">
         <div className="text-center py-8">
           <p className="text-destructive mb-4">{error || "Enrollment not found"}</p>
           <Button asChild>
@@ -299,7 +306,7 @@ export default function EnrollmentDetailPage({
   const canCancel = enrollment.status === "draft"
 
   return (
-    <PageContainer maxWidth="lg">
+    <PageContainer maxWidth="full">
       {/* Header */}
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
           <div className="flex items-center gap-4">
@@ -313,7 +320,7 @@ export default function EnrollmentDetailPage({
                 <h1 className="text-2xl font-bold">
                   {enrollment.firstName} {enrollment.lastName}
                 </h1>
-                <Badge variant={status.variant} className="gap-1">
+                <Badge variant={status.variant} className={cn("gap-1", status.className)}>
                   <StatusIcon className="h-3 w-3" />
                   {locale === "fr" ? status.labelFr : status.label}
                 </Badge>
@@ -325,18 +332,6 @@ export default function EnrollmentDetailPage({
           </div>
 
           <div className="flex gap-2">
-            {canApproveReject && (
-              <>
-                <Button variant="default" onClick={() => setShowApproveDialog(true)}>
-                  <CheckCircle className="h-4 w-4 mr-2" />
-                  {locale === "fr" ? "Approuver" : "Approve"}
-                </Button>
-                <Button variant="destructive" onClick={() => setShowRejectDialog(true)}>
-                  <XCircle className="h-4 w-4 mr-2" />
-                  {locale === "fr" ? "Rejeter" : "Reject"}
-                </Button>
-              </>
-            )}
             {canCancel && (
               <Button variant="outline" onClick={() => setShowCancelDialog(true)}>
                 <XCircle className="h-4 w-4 mr-2" />
@@ -344,15 +339,25 @@ export default function EnrollmentDetailPage({
               </Button>
             )}
             {(enrollment.status === "draft" || enrollment.status === "cancelled") && (
-              <Button variant="destructive" onClick={() => setShowDeleteDialog(true)}>
+              <Button
+                variant="outline"
+                onClick={() => setShowDeleteDialog(true)}
+                className="bg-amber-500 hover:bg-amber-600 text-white border-amber-500 hover:border-amber-600 dark:bg-amber-600 dark:hover:bg-amber-700"
+              >
                 <Trash2 className="h-4 w-4 mr-2" />
                 {t.common.delete}
               </Button>
             )}
             {["draft", "submitted", "needs_review"].includes(enrollment.status) && (
-              <Button asChild>
-                <Link href={`/enrollments/new?draft=${enrollment.id}`}>
-                  {t.common.edit}
+              <Button
+                asChild
+                className="bg-amber-500 hover:bg-amber-600 text-white dark:bg-amber-600 dark:hover:bg-amber-700"
+              >
+                <Link href={enrollment.status === "draft"
+                  ? `/enrollments/new?draft=${enrollment.id}&step=${enrollment.currentStep || 1}`
+                  : `/enrollments/new?draft=${enrollment.id}&step=5`
+                }>
+                  {enrollment.status === "draft" ? t.enrollments.continueEnrollment : t.common.edit}
                 </Link>
               </Button>
             )}
@@ -380,6 +385,135 @@ export default function EnrollmentDetailPage({
             </CardContent>
           </Card>
         )}
+
+        {/* Review Section Card */}
+        {canApproveReject && (() => {
+          const hasTuitionAdjustment = enrollment.adjustedTuitionFee &&
+            enrollment.adjustedTuitionFee !== enrollment.originalTuitionFee
+          const minimumPayment = Math.floor(enrollment.tuitionFee / 9)
+          const hasLowInitialPayment = enrollment.status === "needs_review" &&
+            !hasTuitionAdjustment &&
+            enrollment.totalPaid < minimumPayment
+
+          return (
+            <Card className="mb-6 border-l-4 border-l-amber-500">
+              <CardHeader className="pb-2">
+                <CardTitle className="flex items-center gap-2 text-amber-600 dark:text-amber-400">
+                  <AlertCircle className="h-5 w-5" />
+                  {hasTuitionAdjustment
+                    ? (locale === "fr" ? "Validation requise - Ajustement des frais" : "Review Required - Tuition Adjustment")
+                    : hasLowInitialPayment
+                      ? (locale === "fr" ? "Validation requise - Paiement initial insuffisant" : "Review Required - Low Initial Payment")
+                      : (locale === "fr" ? "En attente de validation" : "Pending Review")
+                  }
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                {hasTuitionAdjustment && (
+                  <>
+                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                      <div>
+                        <p className="text-sm text-muted-foreground">
+                          {locale === "fr" ? "Frais original" : "Original Fee"}
+                        </p>
+                        <p className="font-medium">{formatCurrency(enrollment.originalTuitionFee)}</p>
+                      </div>
+                      <div>
+                        <p className="text-sm text-muted-foreground">
+                          {locale === "fr" ? "Frais ajusté" : "Adjusted Fee"}
+                        </p>
+                        <p className="font-medium">{formatCurrency(enrollment.adjustedTuitionFee!)}</p>
+                      </div>
+                      <div>
+                        <p className="text-sm text-muted-foreground">
+                          {locale === "fr" ? "Réduction" : "Discount"}
+                        </p>
+                        <p className="font-medium text-green-600">
+                          {formatCurrency(enrollment.originalTuitionFee - enrollment.adjustedTuitionFee!)}
+                          {" "}
+                          ({((1 - enrollment.adjustedTuitionFee! / enrollment.originalTuitionFee) * 100).toFixed(0)}%)
+                        </p>
+                      </div>
+                    </div>
+                    <Separator />
+                    <div>
+                      <p className="text-sm text-muted-foreground mb-2">
+                        {locale === "fr" ? "Raison de l'ajustement" : "Reason for Adjustment"}
+                      </p>
+                      <div className="bg-muted/50 rounded-lg p-3 border">
+                        <p className="text-sm italic">
+                          "{enrollment.adjustmentReason || (locale === "fr" ? "Aucune raison fournie" : "No reason provided")}"
+                        </p>
+                      </div>
+                    </div>
+                  </>
+                )}
+
+                {hasLowInitialPayment && (
+                  <>
+                    <p className="text-sm text-muted-foreground">
+                      {locale === "fr"
+                        ? "Le paiement initial est inférieur au seuil minimum."
+                        : "The initial payment is below the minimum threshold."}
+                    </p>
+                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                      <div>
+                        <p className="text-sm text-muted-foreground">
+                          {locale === "fr" ? "Frais de scolarité" : "Tuition Fee"}
+                        </p>
+                        <p className="font-medium">{formatCurrency(enrollment.tuitionFee)}</p>
+                      </div>
+                      <div>
+                        <p className="text-sm text-muted-foreground">
+                          {locale === "fr" ? "Minimum (1/9)" : "Minimum (1/9)"}
+                        </p>
+                        <p className="font-medium">{formatCurrency(minimumPayment)}</p>
+                      </div>
+                      <div>
+                        <p className="text-sm text-muted-foreground">
+                          {locale === "fr" ? "Montant payé" : "Amount Paid"}
+                        </p>
+                        <p className="font-medium text-orange-600">{formatCurrency(enrollment.totalPaid)}</p>
+                      </div>
+                      <div>
+                        <p className="text-sm text-muted-foreground">
+                          {locale === "fr" ? "Manque" : "Shortfall"}
+                        </p>
+                        <p className="font-medium text-red-600">{formatCurrency(minimumPayment - enrollment.totalPaid)}</p>
+                      </div>
+                    </div>
+                  </>
+                )}
+
+                {!hasTuitionAdjustment && !hasLowInitialPayment && (
+                  <p className="text-sm text-muted-foreground">
+                    {locale === "fr"
+                      ? "Cette inscription est en attente d'approbation du directeur."
+                      : "This enrollment is awaiting director approval."}
+                  </p>
+                )}
+
+                <Separator />
+                <div className="flex gap-3 justify-end">
+                  <Button
+                    onClick={() => setShowApproveDialog(true)}
+                    className="bg-green-600 hover:bg-green-700 text-white"
+                  >
+                    <CheckCircle className="h-4 w-4 mr-2" />
+                    {locale === "fr" ? "Approuver" : "Approve"}
+                  </Button>
+                  <Button
+                    onClick={() => setShowRejectDialog(true)}
+                    className="bg-red-600 hover:bg-red-700 text-white"
+                  >
+                    <XCircle className="h-4 w-4 mr-2" />
+                    {locale === "fr" ? "Rejeter" : "Reject"}
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          )
+        })()}
 
         <div className="grid gap-6 lg:grid-cols-3">
           {/* Main Content */}
@@ -435,12 +569,12 @@ export default function EnrollmentDetailPage({
               </CardContent>
             </Card>
 
-            {/* Parent Information */}
+            {/* Parents Information */}
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <Users className="h-5 w-5" />
-                  {t.enrollments.guardianInfo}
+                  {t.enrollments.parents}
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
@@ -448,7 +582,7 @@ export default function EnrollmentDetailPage({
                 {(enrollment.fatherName || enrollment.fatherPhone) && (
                   <div className="grid gap-2 sm:grid-cols-3">
                     <div>
-                      <p className="text-sm text-muted-foreground">{locale === "fr" ? "Pere" : "Father"}</p>
+                      <p className="text-sm text-muted-foreground">{locale === "fr" ? "Père" : "Father"}</p>
                       <p className="font-medium">{enrollment.fatherName || "-"}</p>
                     </div>
                     <div>
@@ -465,10 +599,10 @@ export default function EnrollmentDetailPage({
                 {/* Mother */}
                 {(enrollment.motherName || enrollment.motherPhone) && (
                   <>
-                    <Separator />
+                    {(enrollment.fatherName || enrollment.fatherPhone) && <Separator />}
                     <div className="grid gap-2 sm:grid-cols-3">
                       <div>
-                        <p className="text-sm text-muted-foreground">{locale === "fr" ? "Mere" : "Mother"}</p>
+                        <p className="text-sm text-muted-foreground">{locale === "fr" ? "Mère" : "Mother"}</p>
                         <p className="font-medium">{enrollment.motherName || "-"}</p>
                       </div>
                       <div>
@@ -498,6 +632,68 @@ export default function EnrollmentDetailPage({
                 )}
               </CardContent>
             </Card>
+
+            {/* Enrolled By */}
+            {enrollment.enrollingPersonType && (
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <UserCheck className="h-5 w-5" />
+                    {t.enrollments.enrolledBy}
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  {enrollment.enrollingPersonType === "father" && (
+                    <div className="flex items-center gap-3">
+                      <div className="h-10 w-10 rounded-full bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center">
+                        <User className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+                      </div>
+                      <div>
+                        <p className="font-medium">{t.enrollments.enrolledByFather}</p>
+                        <p className="text-sm text-muted-foreground">{enrollment.fatherName}</p>
+                      </div>
+                    </div>
+                  )}
+                  {enrollment.enrollingPersonType === "mother" && (
+                    <div className="flex items-center gap-3">
+                      <div className="h-10 w-10 rounded-full bg-pink-100 dark:bg-pink-900/30 flex items-center justify-center">
+                        <User className="h-5 w-5 text-pink-600 dark:text-pink-400" />
+                      </div>
+                      <div>
+                        <p className="font-medium">{t.enrollments.enrolledByMother}</p>
+                        <p className="text-sm text-muted-foreground">{enrollment.motherName}</p>
+                      </div>
+                    </div>
+                  )}
+                  {enrollment.enrollingPersonType === "other" && (
+                    <div className="space-y-4">
+                      <div className="flex items-center gap-3">
+                        <div className="h-10 w-10 rounded-full bg-amber-100 dark:bg-amber-900/30 flex items-center justify-center">
+                          <User className="h-5 w-5 text-amber-600 dark:text-amber-400" />
+                        </div>
+                        <div>
+                          <p className="font-medium">{enrollment.enrollingPersonName}</p>
+                          <p className="text-sm text-muted-foreground">{enrollment.enrollingPersonRelation}</p>
+                        </div>
+                      </div>
+                      <Separator />
+                      <div className="grid gap-2 sm:grid-cols-2">
+                        <div>
+                          <p className="text-sm text-muted-foreground">{t.enrollments.phone}</p>
+                          <p className="font-medium">{enrollment.enrollingPersonPhone || "-"}</p>
+                        </div>
+                        {enrollment.enrollingPersonEmail && (
+                          <div>
+                            <p className="text-sm text-muted-foreground">{t.enrollments.email}</p>
+                            <p className="font-medium">{enrollment.enrollingPersonEmail}</p>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            )}
 
             {/* Payment Schedules */}
             <Card>
@@ -538,7 +734,11 @@ export default function EnrollmentDetailPage({
                         </div>
                         <div className="w-full bg-secondary rounded-full h-2">
                           <div
-                            className="bg-primary h-2 rounded-full transition-all"
+                            className={`h-2 rounded-full transition-all ${
+                              enrollment.status === "needs_review"
+                                ? "bg-amber-500 dark:bg-amber-400"
+                                : "bg-primary"
+                            }`}
                             style={{ width: `${percentPaid}%` }}
                           />
                         </div>
@@ -608,7 +808,11 @@ export default function EnrollmentDetailPage({
                 <Separator />
                 <div className="w-full bg-secondary rounded-full h-3">
                   <div
-                    className="bg-primary h-3 rounded-full transition-all"
+                    className={`h-3 rounded-full transition-all ${
+                      enrollment.status === "needs_review"
+                        ? "bg-amber-500 dark:bg-amber-400"
+                        : "bg-primary"
+                    }`}
                     style={{ width: `${Math.min(100, (enrollment.totalPaid / enrollment.tuitionFee) * 100)}%` }}
                   />
                 </div>

@@ -29,20 +29,26 @@ export async function POST(req: NextRequest, { params }: RouteParams) {
     receiptImageUrl?: string
   } | null = null
 
-  try {
-    const body = await req.json().catch(() => ({}))
-    if (body.paymentMade && body.paymentAmount && body.paymentMethod && body.receiptNumber) {
-      paymentData = {
-        paymentMade: body.paymentMade,
-        paymentAmount: body.paymentAmount,
-        paymentMethod: body.paymentMethod,
-        receiptNumber: body.receiptNumber,
-        transactionRef: body.transactionRef,
-        receiptImageUrl: body.receiptImageUrl,
-      }
+  // Parse body - FIX: Remove silent error handling that was swallowing payment data
+  const body = await req.json().catch(() => ({}))
+  if (body.paymentMade && body.paymentAmount && body.paymentMethod && body.receiptNumber) {
+    paymentData = {
+      paymentMade: true,
+      paymentAmount: body.paymentAmount,
+      paymentMethod: body.paymentMethod,
+      receiptNumber: body.receiptNumber,
+      transactionRef: body.transactionRef,
+      receiptImageUrl: body.receiptImageUrl,
     }
-  } catch {
-    // No payment data in request, continue
+    console.log("[Submit] Payment data extracted:", paymentData)
+  } else if (body.paymentMade) {
+    // User indicated payment but missing required fields - log for debugging
+    console.warn("[Submit] Payment indicated but missing required fields:", {
+      paymentMade: body.paymentMade,
+      hasAmount: !!body.paymentAmount,
+      hasMethod: !!body.paymentMethod,
+      hasReceipt: !!body.receiptNumber
+    })
   }
 
   try {
@@ -95,35 +101,79 @@ export async function POST(req: NextRequest, { params }: RouteParams) {
       )
     }
 
-    // Determine status based on whether fee was adjusted
-    const requiresReview = enrollment.adjustedTuitionFee !== null &&
+    // Determine status based on fee adjustment and payment amount
+    const feeWasAdjusted = enrollment.adjustedTuitionFee !== null &&
       enrollment.adjustedTuitionFee !== enrollment.originalTuitionFee
 
-    const newStatus = requiresReview ? "needs_review" : "submitted"
+    // Calculate minimum payment threshold (~11% of total tuition)
+    const tuitionFee = enrollment.adjustedTuitionFee || enrollment.originalTuitionFee
+    const minimumPaymentThreshold = Math.ceil(tuitionFee / 9)
 
-    // Calculate auto-approval date (3 days from now) if not requiring review
-    const autoApproveAt = requiresReview
-      ? null
-      : new Date(Date.now() + 3 * 24 * 60 * 60 * 1000)
+    // Check if payment meets minimum threshold for auto-complete
+    const paymentMeetsThreshold = paymentData &&
+      paymentData.paymentAmount &&
+      paymentData.paymentAmount >= minimumPaymentThreshold
+
+    // Determine status:
+    // - If fee was adjusted -> needs_review (requires director approval)
+    // - If payment meets threshold (~11%) AND no fee adjustment -> completed (auto-complete)
+    // - Otherwise -> submitted (pending)
+    let newStatus: "submitted" | "needs_review" | "completed"
+    if (feeWasAdjusted) {
+      newStatus = "needs_review"
+    } else if (paymentMeetsThreshold) {
+      newStatus = "completed"  // Auto-complete when paid enough and no fee adjustment
+    } else {
+      newStatus = "submitted"
+    }
+
+    console.log("[Submit] Status determination:", {
+      feeWasAdjusted,
+      tuitionFee,
+      minimumPaymentThreshold,
+      paymentAmount: paymentData?.paymentAmount,
+      paymentMeetsThreshold,
+      newStatus
+    })
+
+    // Calculate auto-approval date (3 days from now) only if status is submitted
+    const autoApproveAt = newStatus === "submitted"
+      ? new Date(Date.now() + 3 * 24 * 60 * 60 * 1000)
+      : null
 
     // Calculate payment schedules
-    const tuitionFee = enrollment.adjustedTuitionFee || enrollment.originalTuitionFee
     const schedules = calculatePaymentSchedules(
       tuitionFee,
       enrollment.schoolYear.startDate
     )
-
-    // Generate student number if this is a new student
-    let studentNumber: string | undefined
-    if (!enrollment.studentId) {
-      studentNumber = await generateStudentNumber(enrollment.dateOfBirth)
-    }
 
     // Use transaction to update enrollment and create schedules
     const updated = await prisma.$transaction(async (tx) => {
       // Create or update student record if new student
       let studentId = enrollment.studentId
       if (!studentId) {
+        // Generate student number INSIDE transaction with retry logic
+        let studentNumber: string | undefined
+        let retryCount = 0
+        const maxRetries = 5
+
+        while (retryCount < maxRetries) {
+          // Pass offset for retries to increment beyond existing numbers
+          studentNumber = await generateStudentNumber(enrollment.dateOfBirth, tx, retryCount)
+
+          // Check if number already exists
+          const existing = await tx.student.findUnique({
+            where: { studentNumber }
+          })
+
+          if (!existing) break
+          retryCount++
+        }
+
+        if (retryCount >= maxRetries) {
+          throw new Error("Failed to generate unique student number after multiple attempts")
+        }
+
         const student = await tx.student.create({
           data: {
             studentNumber,
@@ -149,6 +199,19 @@ export async function POST(req: NextRequest, { params }: RouteParams) {
           submittedAt: new Date(),
           autoApproveAt,
           draftExpiresAt: null, // Clear draft expiration
+          // Set approvedAt if auto-completing
+          ...(newStatus === "completed" ? {
+            approvedAt: new Date(),
+            approvedBy: session.user.id,
+          } : {}),
+          // Save enrolling person info if provided in body
+          ...(body.enrollingPersonType ? {
+            enrollingPersonType: body.enrollingPersonType,
+            enrollingPersonName: body.enrollingPersonName,
+            enrollingPersonRelation: body.enrollingPersonRelation,
+            enrollingPersonPhone: body.enrollingPersonPhone,
+            enrollingPersonEmail: body.enrollingPersonEmail,
+          } : {}),
         },
         include: {
           grade: true,
@@ -183,7 +246,7 @@ export async function POST(req: NextRequest, { params }: RouteParams) {
         // Link to first payment schedule
         const firstScheduleId = createdSchedules[0]?.id
 
-        await tx.payment.create({
+        const payment = await tx.payment.create({
           data: {
             enrollmentId: id,
             paymentScheduleId: firstScheduleId,
@@ -197,6 +260,7 @@ export async function POST(req: NextRequest, { params }: RouteParams) {
             autoConfirmAt,
           },
         })
+        console.log("[Submit] Payment created successfully:", payment.id, payment.receiptNumber)
       }
 
       return updatedEnrollment
@@ -234,8 +298,16 @@ export async function POST(req: NextRequest, { params }: RouteParams) {
 /**
  * Generate unique student number: STD-YYYY-DDMMYYYY-XXXX
  * where YYYY is current year, DDMMYYYY is student's birthday, XXXX is sequence
+ * @param dateOfBirth - Student's date of birth for the birthday component
+ * @param tx - Optional transaction client to use for database queries (for atomicity)
+ * @param offset - Additional offset to add to sequence number (for retry logic)
  */
-async function generateStudentNumber(dateOfBirth: Date | null): Promise<string> {
+async function generateStudentNumber(
+  dateOfBirth: Date | null,
+  tx?: { student: { findFirst: typeof prisma.student.findFirst } },
+  offset: number = 0
+): Promise<string> {
+  const db = tx || prisma
   const year = new Date().getFullYear()
 
   // Format birthday as DDMMYYYY, use default if not provided
@@ -251,7 +323,7 @@ async function generateStudentNumber(dateOfBirth: Date | null): Promise<string> 
 
   // Get the last student number for this year
   const yearPrefix = `STD-${year}-`
-  const lastStudent = await prisma.student.findFirst({
+  const lastStudent = await db.student.findFirst({
     where: {
       studentNumber: { startsWith: yearPrefix },
     },
@@ -268,5 +340,6 @@ async function generateStudentNumber(dateOfBirth: Date | null): Promise<string> 
     }
   }
 
-  return `${prefix}${nextNumber.toString().padStart(4, "0")}`
+  // Add offset for retry attempts (in case of collisions)
+  return `${prefix}${(nextNumber + offset).toString().padStart(4, "0")}`
 }
