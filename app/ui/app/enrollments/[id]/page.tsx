@@ -43,6 +43,7 @@ interface EnrollmentDetail {
   id: string
   enrollmentNumber: string | null
   firstName: string
+  middleName: string | null
   lastName: string
   dateOfBirth: string | null
   gender: string | null
@@ -318,7 +319,7 @@ export default function EnrollmentDetailPage({
             <div>
               <div className="flex items-center gap-2">
                 <h1 className="text-2xl font-bold">
-                  {enrollment.firstName} {enrollment.lastName}
+                  {enrollment.firstName}{enrollment.middleName ? ` ${enrollment.middleName}` : ""} {enrollment.lastName}
                 </h1>
                 <Badge variant={status.variant} className={cn("gap-1", status.className)}>
                   <StatusIcon className="h-3 w-3" />
@@ -531,6 +532,12 @@ export default function EnrollmentDetailPage({
                   <p className="text-sm text-muted-foreground">{t.enrollments.firstName}</p>
                   <p className="font-medium">{enrollment.firstName}</p>
                 </div>
+                {enrollment.middleName && (
+                  <div>
+                    <p className="text-sm text-muted-foreground">{t.enrollments.middleName}</p>
+                    <p className="font-medium">{enrollment.middleName}</p>
+                  </div>
+                )}
                 <div>
                   <p className="text-sm text-muted-foreground">{t.enrollments.lastName}</p>
                   <p className="font-medium">{enrollment.lastName}</p>

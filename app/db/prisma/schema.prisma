@@ -1,90 +1,52 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
+generator client {
+  provider = "prisma-client-js"
+}
 
 datasource db {
   provider     = "postgresql"
   relationMode = "prisma"
 }
 
-generator client {
-  provider = "prisma-client-js"
-}
-
-enum Role {
-  user
-  director
-  academic_director
-  secretary
-  accountant
-  teacher
-  parent
-  student
-}
-
-enum UserStatus {
-  invited
-  active
-  inactive
-}
-
 model User {
-  id            String    @id @default(cuid())
-  name          String?
-  email         String?   @unique
-  emailVerified DateTime?
-  image         String?
-  passwordHash  String?
-  dateOfBirth   DateTime?
-  phone         String?
-  role          Role       @default(user)
-  status        UserStatus @default(active)
-  accounts      Account[]
-  sessions      Session[]
-  address       Address?
-  passwordResetTokens  PasswordResetToken[]
-  recordedAttendance   Attendance[]
-  teachingClasses      Class[]
-
-  // Enrollment relations
-  createdEnrollments   Enrollment[]     @relation("EnrollmentCreator")
-  approvedEnrollments  Enrollment[]     @relation("EnrollmentApprover")
-  statusChangedEnrollments Enrollment[] @relation("EnrollmentStatusChanger")
-  recordedPayments     Payment[]        @relation("PaymentRecorder")
-  confirmedPayments    Payment[]        @relation("PaymentConfirmer")
-  reviewedPayments     Payment[]        @relation("PaymentReviewer")
-  enrollmentNotes      EnrollmentNote[]
-
-  // Attendance relations
-  attendanceSessions   AttendanceSession[] @relation("AttendanceSessionRecorder")
-  attendanceRecords    AttendanceRecord[]  @relation("AttendanceRecordRecorder")
-
-  // Cash deposit relations
-  depositedCash        CashDeposit[]    @relation("CashDepositor")
-  verifiedDeposits     CashDeposit[]    @relation("DepositVerifier")
-
-  // Bank deposit relations
-  recordedBankDeposits BankDeposit[]    @relation("BankDepositRecorder")
-  reconciledBankDeposits BankDeposit[]  @relation("BankDepositReconciler")
-
-  // Expense relations
-  requestedExpenses    Expense[]        @relation("ExpenseRequester")
-  approvedExpenses     Expense[]        @relation("ExpenseApprover")
-
-  // Room assignment relations
-  assignedRoomAssignments StudentRoomAssignment[] @relation("RoomAssigner")
-
-  // User invitation relations
-  sentInvitations      UserInvitation[] @relation("InvitationSender")
-
-  // Activity relations
-  createdActivities         Activity[]           @relation("ActivityCreator")
-  activityEnrollments       ActivityEnrollment[] @relation("ActivityEnroller")
-  recordedActivityPayments  ActivityPayment[]    @relation("ActivityPaymentRecorder")
-  confirmedActivityPayments ActivityPayment[]    @relation("ActivityPaymentConfirmer")
-
-  // Grading system relations
-  recordedEvaluations       Evaluation[]         @relation("EvaluationRecorder")
-  trimesterDecisionOverrides StudentTrimester[]  @relation("TrimesterDecisionOverrider")
+  id                         String                  @id @default(cuid())
+  name                       String?
+  email                      String?                 @unique
+  emailVerified              DateTime?
+  image                      String?
+  passwordHash               String?
+  dateOfBirth                DateTime?
+  phone                      String?
+  role                       Role                    @default(user)
+  status                     UserStatus              @default(active)
+  accounts                   Account[]
+  sessions                   Session[]
+  address                    Address?
+  passwordResetTokens        PasswordResetToken[]
+  recordedAttendance         Attendance[]
+  teachingClasses            Class[]
+  createdEnrollments         Enrollment[]            @relation("EnrollmentCreator")
+  approvedEnrollments        Enrollment[]            @relation("EnrollmentApprover")
+  statusChangedEnrollments   Enrollment[]            @relation("EnrollmentStatusChanger")
+  recordedPayments           Payment[]               @relation("PaymentRecorder")
+  confirmedPayments          Payment[]               @relation("PaymentConfirmer")
+  reviewedPayments           Payment[]               @relation("PaymentReviewer")
+  enrollmentNotes            EnrollmentNote[]
+  attendanceSessions         AttendanceSession[]     @relation("AttendanceSessionRecorder")
+  attendanceRecords          AttendanceRecord[]      @relation("AttendanceRecordRecorder")
+  depositedCash              CashDeposit[]           @relation("CashDepositor")
+  verifiedDeposits           CashDeposit[]           @relation("DepositVerifier")
+  recordedBankDeposits       BankDeposit[]           @relation("BankDepositRecorder")
+  reconciledBankDeposits     BankDeposit[]           @relation("BankDepositReconciler")
+  requestedExpenses          Expense[]               @relation("ExpenseRequester")
+  approvedExpenses           Expense[]               @relation("ExpenseApprover")
+  assignedRoomAssignments    StudentRoomAssignment[] @relation("RoomAssigner")
+  sentInvitations            UserInvitation[]        @relation("InvitationSender")
+  createdActivities          Activity[]              @relation("ActivityCreator")
+  activityEnrollments        ActivityEnrollment[]    @relation("ActivityEnroller")
+  recordedActivityPayments   ActivityPayment[]       @relation("ActivityPaymentRecorder")
+  confirmedActivityPayments  ActivityPayment[]       @relation("ActivityPaymentConfirmer")
+  recordedEvaluations        Evaluation[]            @relation("EvaluationRecorder")
+  trimesterDecisionOverrides StudentTrimester[]      @relation("TrimesterDecisionOverrider")
 }
 
 model Address {
@@ -94,8 +56,8 @@ model Address {
   state   String?
   zip     String?
   country String?
-  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
   userId  String  @unique
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 model Account {
@@ -104,15 +66,14 @@ model Account {
   type              String
   provider          String
   providerAccountId String
-  refresh_token     String? @db.Text
-  access_token      String? @db.Text
+  refresh_token     String?
+  access_token      String?
   expires_at        Int?
   token_type        String?
   scope             String?
-  id_token          String? @db.Text
+  id_token          String?
   session_state     String?
-
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user              User    @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([provider, providerAccountId])
   @@index([userId])
@@ -142,130 +103,32 @@ model PasswordResetToken {
   token     String   @unique
   expiresAt DateTime
   createdAt DateTime @default(now())
-
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId])
   @@index([token])
 }
 
-// ============================================================================
-// School Year & Enrollment System
-// ============================================================================
-
-enum SchoolLevel {
-  kindergarten  // Maternelle (PS, MS, GS)
-  elementary    // Primaire (Grades 1-6)
-  college       // College (Grades 7-10)
-  high_school   // Lycee (Grades 11-12 + Terminal)
-}
-
-enum EnrollmentStatus {
-  draft              // In-progress enrollment
-  submitted          // Submitted, awaiting auto-approval (3 days)
-  needs_review       // Needs director review (payment amount changed)
-  completed          // Approved and finalized
-  rejected           // Rejected by director (returned for changes)
-  cancelled          // Cancelled by user
-}
-
-enum PaymentMethod {
-  cash
-  orange_money
-}
-
-enum PaymentStatus {
-  pending_deposit   // Cash payment awaiting bank deposit
-  deposited         // Cash deposited at bank, awaiting review
-  pending_review    // Orange Money or deposited cash awaiting final review
-  confirmed         // Payment fully confirmed
-  rejected          // Payment rejected during review
-  failed            // Payment failed
-}
-
-enum ExpenseStatus {
-  pending           // Awaiting approval
-  approved          // Approved by director
-  rejected          // Rejected by director
-  paid              // Expense has been paid
-}
-
-enum ExpenseCategory {
-  supplies          // School supplies
-  maintenance       // Building/equipment maintenance
-  utilities         // Electricity, water, etc.
-  salary            // Staff salaries
-  transport         // Transportation costs
-  communication     // Phone, internet
-  other             // Miscellaneous
-}
-
-enum SchoolYearStatus {
-  new               // Newly created, not yet started
-  active            // Currently active
-  passed            // Past school year
-}
-
-enum ActivityStatus {
-  draft             // Creation in progress
-  active            // Open for enrollment
-  closed            // No more enrollments
-  completed         // Activity finished
-  cancelled         // Cancelled
-}
-
-enum ActivityType {
-  club              // Student clubs
-  sport             // Sports activities
-  arts              // Arts/music
-  academic          // Academic enrichment
-  other             // Miscellaneous
-}
-
-enum DayOfWeek {
-  monday
-  tuesday
-  wednesday
-  thursday
-  friday
-  saturday
-}
-
-// Grading System Enums
-enum EvaluationType {
-  interrogation    // Coefficient 1 - Quick class tests
-  devoir_surveille // Coefficient 2 - Supervised homework/quiz (DS)
-  composition      // Coefficient 2 - End of trimester exam
-}
-
-enum TrimesterDecision {
-  pending     // Not yet decided
-  admis       // Passed (average >= 10)
-  rattrapage  // Needs remediation (average 8-10)
-  redouble    // Must repeat (average < 8)
-}
-
 model SchoolYear {
-  id              String           @id @default(cuid())
-  name            String           // "2025 - 2026"
-  startDate       DateTime         // September 1, 2025
-  endDate         DateTime         // June 30, 2026
-  enrollmentStart DateTime         // July 1, 2025
-  enrollmentEnd   DateTime         // June 15, 2026
-  isActive        Boolean          @default(false)
-  status          SchoolYearStatus @default(new)
-  syncVersion     Int              @default(0)
-  createdAt       DateTime         @default(now())
-  updatedAt       DateTime         @updatedAt
-
-  grades            Grade[]
-  enrollments       Enrollment[]
-  classAssignments  ClassAssignment[]
-  gradeEnrollments  GradeEnrollment[]
+  id                     String                  @id @default(cuid())
+  name                   String
+  startDate              DateTime
+  endDate                DateTime
+  enrollmentStart        DateTime
+  enrollmentEnd          DateTime
+  isActive               Boolean                 @default(false)
+  syncVersion            Int                     @default(0)
+  createdAt              DateTime                @default(now())
+  updatedAt              DateTime                @updatedAt
+  status                 SchoolYearStatus        @default(new)
+  grades                 Grade[]
+  enrollments            Enrollment[]
+  classAssignments       ClassAssignment[]
+  gradeEnrollments       GradeEnrollment[]
   studentRoomAssignments StudentRoomAssignment[]
-  activities        Activity[]
-  timePeriods       TimePeriod[]
-  trimesters        Trimester[]
+  activities             Activity[]
+  timePeriods            TimePeriod[]
+  trimesters             Trimester[]
 
   @@index([isActive])
   @@index([startDate])
@@ -273,30 +136,29 @@ model SchoolYear {
 }
 
 model Grade {
-  id              String      @id @default(cuid())
-  name            String      // "7eme Annee"
-  code            String?     // "7EME" - Short code for the grade
-  level           SchoolLevel
-  order           Int         // 1-13 for sorting (extended to 19 for high school specializations)
-  tuitionFee      Int         // Annual fee in GNF
-  capacity        Int         @default(70) // Maximum students per grade (soft limit)
-  schoolYearId    String
-  gradeLeaderId   String?     // Teacher who leads this grade (responsable de classe)
-  series          String?     // For high school specializations: "SM", "SS", "SE"
-  isEnabled       Boolean     @default(true) // Enable/disable grade for enrollment
-  syncVersion     Int         @default(0)
-  createdAt       DateTime    @default(now())
-  updatedAt       DateTime    @updatedAt
-
-  schoolYear      SchoolYear  @relation(fields: [schoolYearId], references: [id], onDelete: Cascade)
-  gradeLeader     TeacherProfile? @relation("GradeLeader", fields: [gradeLeaderId], references: [id])
-  enrollments     Enrollment[]
-  subjects        GradeSubject[]
-  currentStudents StudentProfile[] @relation("CurrentGradeStudents")
-  gradeEnrollments GradeEnrollment[]
+  id                 String                @id @default(cuid())
+  name               String
+  code               String?
+  level              SchoolLevel
+  order              Int
+  tuitionFee         Int
+  schoolYearId       String
+  gradeLeaderId      String?
+  syncVersion        Int                   @default(0)
+  createdAt          DateTime              @default(now())
+  updatedAt          DateTime              @updatedAt
+  capacity           Int                   @default(70)
+  isEnabled          Boolean               @default(true)
+  series             String?
+  schoolYear         SchoolYear            @relation(fields: [schoolYearId], references: [id], onDelete: Cascade)
+  gradeLeader        TeacherProfile?       @relation("GradeLeader", fields: [gradeLeaderId], references: [id])
+  enrollments        Enrollment[]
+  subjects           GradeSubject[]
+  currentStudents    StudentProfile[]      @relation("CurrentGradeStudents")
+  gradeEnrollments   GradeEnrollment[]
   attendanceSessions AttendanceSession[]
-  rooms           GradeRoom[]
-  trimesterStats  ClassTrimesterStats[]
+  rooms              GradeRoom[]
+  trimesterStats     ClassTrimesterStats[]
 
   @@unique([schoolYearId, order, series])
   @@index([schoolYearId])
@@ -307,75 +169,59 @@ model Grade {
 }
 
 model Enrollment {
-  id                  String           @id @default(cuid())
-  enrollmentNumber    String?          @unique // ENR-2025-00001
-  studentId           String?          // For returning students
-  schoolYearId        String
-  gradeId             String
-
-  // Student info (denormalized for new students)
-  firstName           String
-  middleName          String?
-  lastName            String
-  dateOfBirth         DateTime?
-  gender              String?          // "male" | "female"
-  phone               String?
-  email               String?
-  photoUrl            String?
-  birthCertificateUrl String?
-
-  // Parent info
-  fatherName          String?
-  fatherPhone         String?
-  fatherEmail         String?
-  motherName          String?
-  motherPhone         String?
-  motherEmail         String?
-  address             String?
-
-  // Enrolling person info (who is enrolling the student)
-  enrollingPersonType     String?   // "father" | "mother" | "other"
-  enrollingPersonName     String?   // Full name (required if "other")
-  enrollingPersonRelation String?   // Relationship to student (if "other")
-  enrollingPersonPhone    String?   // Phone (required if "other")
-  enrollingPersonEmail    String?   // Email (optional, if "other")
-
-  // Financial
-  originalTuitionFee  Int              // Original fee from Grade
-  adjustedTuitionFee  Int?             // If different from original (requires approval)
-  adjustmentReason    String?          // Why fee was adjusted
-
-  // Status tracking
-  status              EnrollmentStatus @default(draft)
-  currentStep         Int              @default(1) // 1-6 wizard step
-  isReturningStudent  Boolean          @default(false)
-  draftExpiresAt      DateTime?        // 10 days from last update
-  submittedAt         DateTime?
-  approvedAt          DateTime?
-  approvedBy          String?          // User ID who approved
-  autoApproveAt       DateTime?        // 3 days after submission
-
-  // Status change tracking (for completed/rejected/cancelled)
-  statusComment       String?          // Required comment when completing/rejecting/cancelling
-  statusChangedAt     DateTime?        // When status was last changed
-  statusChangedBy     String?          // User ID who changed status
-
-  // Sync & audit
-  createdBy           String           // User ID who created
-  syncVersion         Int              @default(0)
-  createdAt           DateTime         @default(now())
-  updatedAt           DateTime         @updatedAt
-
-  // Relations
-  schoolYear          SchoolYear       @relation(fields: [schoolYearId], references: [id])
-  grade               Grade            @relation(fields: [gradeId], references: [id])
-  student             Student?         @relation(fields: [studentId], references: [id])
-  creator             User             @relation("EnrollmentCreator", fields: [createdBy], references: [id])
-  approver            User?            @relation("EnrollmentApprover", fields: [approvedBy], references: [id])
-  statusChanger       User?            @relation("EnrollmentStatusChanger", fields: [statusChangedBy], references: [id])
-  paymentSchedules    PaymentSchedule[]
-  payments            Payment[]
-  notes               EnrollmentNote[]
+  id                      String            @id @default(cuid())
+  enrollmentNumber        String?           @unique
+  studentId               String?
+  schoolYearId            String
+  gradeId                 String
+  firstName               String
+  lastName                String
+  dateOfBirth             DateTime?
+  gender                  String?
+  phone                   String?
+  email                   String?
+  photoUrl                String?
+  birthCertificateUrl     String?
+  fatherName              String?
+  fatherPhone             String?
+  fatherEmail             String?
+  motherName              String?
+  motherPhone             String?
+  motherEmail             String?
+  address                 String?
+  originalTuitionFee      Int
+  adjustedTuitionFee      Int?
+  adjustmentReason        String?
+  status                  EnrollmentStatus  @default(draft)
+  currentStep             Int               @default(1)
+  isReturningStudent      Boolean           @default(false)
+  draftExpiresAt          DateTime?
+  submittedAt             DateTime?
+  approvedAt              DateTime?
+  approvedBy              String?
+  autoApproveAt           DateTime?
+  statusComment           String?
+  statusChangedAt         DateTime?
+  statusChangedBy         String?
+  createdBy               String
+  syncVersion             Int               @default(0)
+  createdAt               DateTime          @default(now())
+  updatedAt               DateTime          @updatedAt
+  middleName              String?
+  enrollingPersonEmail    String?
+  enrollingPersonName     String?
+  enrollingPersonPhone    String?
+  enrollingPersonRelation String?
+  enrollingPersonType     String?
+  schoolYear              SchoolYear        @relation(fields: [schoolYearId], references: [id])
+  grade                   Grade             @relation(fields: [gradeId], references: [id])
+  student                 Student?          @relation(fields: [studentId], references: [id])
+  creator                 User              @relation("EnrollmentCreator", fields: [createdBy], references: [id])
+  approver                User?             @relation("EnrollmentApprover", fields: [approvedBy], references: [id])
+  statusChanger           User?             @relation("EnrollmentStatusChanger", fields: [statusChangedBy], references: [id])
+  paymentSchedules        PaymentSchedule[]
+  payments                Payment[]
+  notes                   EnrollmentNote[]
 
   @@index([status, schoolYearId])
   @@index([schoolYearId])
@@ -385,24 +231,23 @@ model Enrollment {
   @@index([draftExpiresAt])
   @@index([updatedAt])
   @@index([statusChangedBy])
-  @@index([status, approvedAt]) // Performance: payment processing workflow queries
+  @@index([status, approvedAt])
 }
 
 model PaymentSchedule {
-  id              String     @id @default(cuid())
-  enrollmentId    String
-  scheduleNumber  Int        // 1, 2, or 3
-  amount          Int        // Amount in GNF
-  months          String[]   // ["September", "October", "May"]
-  dueDate         DateTime
-  isPaid          Boolean    @default(false)
-  paidAt          DateTime?
-  syncVersion     Int        @default(0)
-  createdAt       DateTime   @default(now())
-  updatedAt       DateTime   @updatedAt
-
-  enrollment      Enrollment @relation(fields: [enrollmentId], references: [id], onDelete: Cascade)
-  payments        Payment[]
+  id             String     @id @default(cuid())
+  enrollmentId   String
+  scheduleNumber Int
+  amount         Int
+  months         String[]
+  dueDate        DateTime
+  isPaid         Boolean    @default(false)
+  paidAt         DateTime?
+  syncVersion    Int        @default(0)
+  createdAt      DateTime   @default(now())
+  updatedAt      DateTime   @updatedAt
+  enrollment     Enrollment @relation(fields: [enrollmentId], references: [id], onDelete: Cascade)
+  payments       Payment[]
 
   @@unique([enrollmentId, scheduleNumber])
   @@index([enrollmentId])
@@ -410,41 +255,33 @@ model PaymentSchedule {
 }
 
 model Payment {
-  id                  String          @id @default(cuid())
-  enrollmentId        String
-  paymentScheduleId   String?
-  amount              Int             // Amount in GNF
-  method              PaymentMethod
-  status              PaymentStatus   @default(pending_deposit)
-
-  // Transaction details
-  receiptNumber       String   @unique // Required: GSPN-YYYY-CASH-XXXXX or GSPN-YYYY-OM-XXXXX - MUST be unique
-  transactionRef      String?         // Orange Money transaction ID
-  receiptImageUrl     String?         // Uploaded receipt image
-
-  // Recording info
-  recordedBy          String          // User ID
-  recordedAt          DateTime        @default(now())
-  confirmedBy         String?         // User ID
-  confirmedAt         DateTime?
-  notes               String?
-
-  // Review tracking
-  reviewedBy          String?         // User ID who reviewed
-  reviewedAt          DateTime?
-  reviewNotes         String?         // Notes from reviewer (especially for rejection)
-  autoConfirmAt       DateTime?       // 24h after Orange Money payment for auto-confirmation
-
-  syncVersion         Int             @default(0)
-  createdAt           DateTime        @default(now())
-  updatedAt           DateTime        @updatedAt
-
-  enrollment          Enrollment      @relation(fields: [enrollmentId], references: [id], onDelete: Cascade)
-  paymentSchedule     PaymentSchedule? @relation(fields: [paymentScheduleId], references: [id])
-  recorder            User            @relation("PaymentRecorder", fields: [recordedBy], references: [id])
-  confirmer           User?           @relation("PaymentConfirmer", fields: [confirmedBy], references: [id])
-  reviewer            User?           @relation("PaymentReviewer", fields: [reviewedBy], references: [id])
-  cashDeposit         CashDeposit?    // For cash payments - deposit info
+  id                String           @id @default(cuid())
+  enrollmentId      String
+  paymentScheduleId String?
+  amount            Int
+  method            PaymentMethod
+  status            PaymentStatus    @default(pending_deposit)
+  receiptNumber     String           @unique
+  transactionRef    String?
+  receiptImageUrl   String?
+  recordedBy        String
+  recordedAt        DateTime         @default(now())
+  confirmedBy       String?
+  confirmedAt       DateTime?
+  notes             String?
+  reviewedBy        String?
+  reviewedAt        DateTime?
+  reviewNotes       String?
+  autoConfirmAt     DateTime?
+  syncVersion       Int              @default(0)
+  createdAt         DateTime         @default(now())
+  updatedAt         DateTime         @updatedAt
+  enrollment        Enrollment       @relation(fields: [enrollmentId], references: [id], onDelete: Cascade)
+  paymentSchedule   PaymentSchedule? @relation(fields: [paymentScheduleId], references: [id])
+  recorder          User             @relation("PaymentRecorder", fields: [recordedBy], references: [id])
+  confirmer         User?            @relation("PaymentConfirmer", fields: [confirmedBy], references: [id])
+  reviewer          User?            @relation("PaymentReviewer", fields: [reviewedBy], references: [id])
+  cashDeposit       CashDeposit?
 
   @@index([enrollmentId])
   @@index([paymentScheduleId])
@@ -453,48 +290,28 @@ model Payment {
   @@index([recordedAt])
   @@index([reviewedBy])
   @@index([method])
-  @@index([status, recordedAt]) // Performance: revenue reporting queries
+  @@index([status, recordedAt])
 }
 
 model EnrollmentNote {
-  id            String     @id @default(cuid())
-  enrollmentId  String
-  title         String
-  content       String
-  createdBy     String     // User ID
-  syncVersion   Int        @default(0)
-  createdAt     DateTime   @default(now())
-  updatedAt     DateTime   @updatedAt
-
-  enrollment    Enrollment @relation(fields: [enrollmentId], references: [id], onDelete: Cascade)
-  author        User       @relation(fields: [createdBy], references: [id])
+  id           String     @id @default(cuid())
+  enrollmentId String
+  title        String
+  content      String
+  createdBy    String
+  syncVersion  Int        @default(0)
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+  enrollment   Enrollment @relation(fields: [enrollmentId], references: [id], onDelete: Cascade)
+  author       User       @relation(fields: [createdBy], references: [id])
 
   @@index([enrollmentId])
   @@index([createdBy])
 }
 
-// ============================================================================
-// Student Management (Offline-First Priority)
-// ============================================================================
-
-enum StudentStatus {
-  active
-  inactive
-  graduated
-  transferred
-  suspended
-}
-
-enum AttendanceStatus {
-  present
-  absent
-  late
-  excused
-}
-
 model Student {
-  id             String        @id @default(cuid())
-  studentNumber  String?       @unique // STU-00001
+  id             String          @id @default(cuid())
+  studentNumber  String?         @unique
   firstName      String
   lastName       String
   email          String?
@@ -504,14 +321,13 @@ model Student {
   guardianEmail  String?
   grade          String?
   classId        String?
-  status         StudentStatus @default(active)
-  enrollmentDate DateTime      @default(now())
-  syncVersion    Int           @default(0)
-  createdAt      DateTime      @default(now())
-  updatedAt      DateTime      @updatedAt
-
+  status         StudentStatus   @default(active)
+  enrollmentDate DateTime        @default(now())
+  syncVersion    Int             @default(0)
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
   attendance     Attendance[]
-  class          Class?        @relation(fields: [classId], references: [id])
+  class          Class?          @relation(fields: [classId], references: [id])
   enrollments    Enrollment[]
   studentProfile StudentProfile?
 
@@ -533,7 +349,6 @@ model Attendance {
   syncVersion Int              @default(0)
   createdAt   DateTime         @default(now())
   updatedAt   DateTime         @updatedAt
-
   student     Student          @relation(fields: [studentId], references: [id], onDelete: Cascade)
   recorder    User             @relation(fields: [recordedBy], references: [id])
 
@@ -552,7 +367,6 @@ model Class {
   year      Int
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
-
   students  Student[]
   teacher   User?     @relation(fields: [teacherId], references: [id])
 
@@ -560,41 +374,25 @@ model Class {
   @@index([year])
 }
 
-// ============================================================================
-// Person System - Unified Identity Management
-// ============================================================================
-
-enum Gender {
-  male
-  female
-}
-
-enum PersonStatus {
-  active
-  inactive
-  archived
-}
-
 model Person {
-  id             String        @id @default(cuid())
+  id             String          @id @default(cuid())
   firstName      String
+  middleName     String?
   lastName       String
-  email          String?       @unique
+  email          String?         @unique
   phone          String?
   dateOfBirth    DateTime?
   gender         Gender?
   photoUrl       String?
   address        String?
-  status         PersonStatus  @default(active)
-  syncVersion    Int           @default(0)
-  createdAt      DateTime      @default(now())
-  updatedAt      DateTime      @updatedAt
-
-  // Role-specific profiles (one person can have multiple roles)
-  userProfile      UserProfile?
-  studentProfile   StudentProfile?
-  teacherProfile   TeacherProfile?
-  parentProfile    ParentProfile?
+  status         PersonStatus    @default(active)
+  syncVersion    Int             @default(0)
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
+  userProfile    UserProfile?
+  studentProfile StudentProfile?
+  teacherProfile TeacherProfile?
+  parentProfile  ParentProfile?
 
   @@index([email])
   @@index([firstName, lastName])
@@ -602,45 +400,43 @@ model Person {
 }
 
 model UserProfile {
-  id            String      @id @default(cuid())
-  personId      String      @unique
-  userId        String?     @unique  // Links to legacy User table during migration
-  role          Role        @default(user)
-  userStatus    UserStatus  @default(active)
-  syncVersion   Int         @default(0)
-  createdAt     DateTime    @default(now())
-  updatedAt     DateTime    @updatedAt
-
-  person        Person      @relation(fields: [personId], references: [id], onDelete: Cascade)
+  id          String     @id @default(cuid())
+  personId    String     @unique
+  userId      String?    @unique
+  role        Role       @default(user)
+  userStatus  UserStatus @default(active)
+  syncVersion Int        @default(0)
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+  person      Person     @relation(fields: [personId], references: [id], onDelete: Cascade)
 
   @@index([personId])
   @@index([role])
 }
 
 model StudentProfile {
-  id                    String        @id @default(cuid())
-  personId              String        @unique
-  studentId             String?       @unique  // Links to legacy Student table during migration
-  studentNumber         String?       @unique  // STU-00001
-  studentStatus         StudentStatus @default(active)
-  enrollmentDate        DateTime      @default(now())
+  id                    String                    @id @default(cuid())
+  personId              String                    @unique
+  studentId             String?                   @unique
+  studentNumber         String?                   @unique
+  studentStatus         StudentStatus             @default(active)
+  enrollmentDate        DateTime                  @default(now())
   currentGradeId        String?
-  isLockedForAutoAssign Boolean       @default(false)  // Prevent auto-assignment if true
-  syncVersion           Int           @default(0)
-  createdAt             DateTime      @default(now())
-  updatedAt             DateTime      @updatedAt
-
-  person          Person        @relation(fields: [personId], references: [id], onDelete: Cascade)
-  student         Student?      @relation(fields: [studentId], references: [id])
-  currentGrade    Grade?        @relation("CurrentGradeStudents", fields: [currentGradeId], references: [id])
-  gradeEnrollments GradeEnrollment[]
-  attendanceRecords AttendanceRecord[]
-  parentLinks     StudentParent[]
-  roomAssignments StudentRoomAssignment[]
-  activityEnrollments ActivityEnrollment[]
-  evaluations     Evaluation[]
-  subjectAverages SubjectTrimesterAverage[]
-  studentTrimesters StudentTrimester[]
+  syncVersion           Int                       @default(0)
+  createdAt             DateTime                  @default(now())
+  updatedAt             DateTime                  @updatedAt
+  isLockedForAutoAssign Boolean                   @default(false)
+  person                Person                    @relation(fields: [personId], references: [id], onDelete: Cascade)
+  student               Student?                  @relation(fields: [studentId], references: [id])
+  currentGrade          Grade?                    @relation("CurrentGradeStudents", fields: [currentGradeId], references: [id])
+  gradeEnrollments      GradeEnrollment[]
+  attendanceRecords     AttendanceRecord[]
+  parentLinks           StudentParent[]
+  roomAssignments       StudentRoomAssignment[]
+  activityEnrollments   ActivityEnrollment[]
+  evaluations           Evaluation[]
+  subjectAverages       SubjectTrimesterAverage[]
+  studentTrimesters     StudentTrimester[]
 
   @@index([personId])
   @@index([studentNumber])
@@ -649,88 +445,79 @@ model StudentProfile {
 }
 
 model TeacherProfile {
-  id              String    @id @default(cuid())
-  personId        String    @unique
-  userId          String?   @unique  // Links to legacy User with role=teacher during migration
-  employeeNumber  String?   @unique
-  hireDate        DateTime?
-  specialization  String?
-  syncVersion     Int       @default(0)
-  createdAt       DateTime  @default(now())
-  updatedAt       DateTime  @updatedAt
-
-  person          Person    @relation(fields: [personId], references: [id], onDelete: Cascade)
+  id               String            @id @default(cuid())
+  personId         String            @unique
+  userId           String?           @unique
+  employeeNumber   String?           @unique
+  hireDate         DateTime?
+  specialization   String?
+  syncVersion      Int               @default(0)
+  createdAt        DateTime          @default(now())
+  updatedAt        DateTime          @updatedAt
+  person           Person            @relation(fields: [personId], references: [id], onDelete: Cascade)
   classAssignments ClassAssignment[]
-  gradeLederships Grade[]   @relation("GradeLeader")
-  scheduleSlots ScheduleSlot[]
+  gradeLederships  Grade[]           @relation("GradeLeader")
+  scheduleSlots    ScheduleSlot[]
 
   @@index([personId])
   @@index([employeeNumber])
 }
 
 model ParentProfile {
-  id            String    @id @default(cuid())
-  personId      String    @unique
-  relationship  String?   // "father", "mother", "guardian"
-  syncVersion   Int       @default(0)
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
-
-  person        Person    @relation(fields: [personId], references: [id], onDelete: Cascade)
-  studentLinks  StudentParent[]
+  id           String          @id @default(cuid())
+  personId     String          @unique
+  relationship String?
+  syncVersion  Int             @default(0)
+  createdAt    DateTime        @default(now())
+  updatedAt    DateTime        @updatedAt
+  person       Person          @relation(fields: [personId], references: [id], onDelete: Cascade)
+  studentLinks StudentParent[]
 
   @@index([personId])
 }
 
 model StudentParent {
-  id              String    @id @default(cuid())
+  id               String         @id @default(cuid())
   studentProfileId String
   parentProfileId  String
-  isPrimary       Boolean   @default(false)
-  createdAt       DateTime  @default(now())
-
-  studentProfile  StudentProfile  @relation(fields: [studentProfileId], references: [id], onDelete: Cascade)
-  parentProfile   ParentProfile   @relation(fields: [parentProfileId], references: [id], onDelete: Cascade)
+  isPrimary        Boolean        @default(false)
+  createdAt        DateTime       @default(now())
+  studentProfile   StudentProfile @relation(fields: [studentProfileId], references: [id], onDelete: Cascade)
+  parentProfile    ParentProfile  @relation(fields: [parentProfileId], references: [id], onDelete: Cascade)
 
   @@unique([studentProfileId, parentProfileId])
   @@index([studentProfileId])
   @@index([parentProfileId])
 }
 
-// ============================================================================
-// Subject & Curriculum Management
-// ============================================================================
-
 model Subject {
-  id          String    @id @default(cuid())
-  code        String    @unique  // "MATH", "FRANCAIS", "ANGLAIS"
-  nameFr      String    // "Mathematiques"
-  nameEn      String    // "Mathematics"
-  isOptional  Boolean   @default(false)
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
-
+  id            String         @id @default(cuid())
+  code          String         @unique
+  nameFr        String
+  nameEn        String
+  isOptional    Boolean        @default(false)
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
   gradeSubjects GradeSubject[]
 
   @@index([code])
 }
 
 model GradeSubject {
-  id            String    @id @default(cuid())
-  gradeId       String
-  subjectId     String
-  coefficient   Int       @default(1)
-  hoursPerWeek  Int?
-  series        String?   // NULL for grades 1-11, "A"/"B"/"C" for Terminal (grade 13)
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
-
-  grade         Grade     @relation(fields: [gradeId], references: [id], onDelete: Cascade)
-  subject       Subject   @relation(fields: [subjectId], references: [id])
+  id               String                    @id @default(cuid())
+  gradeId          String
+  subjectId        String
+  coefficient      Int                       @default(1)
+  hoursPerWeek     Int?
+  series           String?
+  createdAt        DateTime                  @default(now())
+  updatedAt        DateTime                  @updatedAt
+  grade            Grade                     @relation(fields: [gradeId], references: [id], onDelete: Cascade)
+  subject          Subject                   @relation(fields: [subjectId], references: [id])
   classAssignments ClassAssignment[]
-  scheduleSlots ScheduleSlot[]
-  evaluations   Evaluation[]
-  subjectAverages SubjectTrimesterAverage[]
+  scheduleSlots    ScheduleSlot[]
+  evaluations      Evaluation[]
+  subjectAverages  SubjectTrimesterAverage[]
 
   @@unique([gradeId, subjectId, series])
   @@index([gradeId])
@@ -738,16 +525,15 @@ model GradeSubject {
 }
 
 model ClassAssignment {
-  id              String    @id @default(cuid())
-  gradeSubjectId  String
+  id               String          @id @default(cuid())
+  gradeSubjectId   String
   teacherProfileId String?
-  schoolYearId    String
-  createdAt       DateTime  @default(now())
-  updatedAt       DateTime  @updatedAt
-
-  gradeSubject    GradeSubject    @relation(fields: [gradeSubjectId], references: [id], onDelete: Cascade)
-  teacherProfile  TeacherProfile?  @relation(fields: [teacherProfileId], references: [id], onDelete: SetNull)
-  schoolYear      SchoolYear      @relation(fields: [schoolYearId], references: [id], onDelete: Cascade)
+  schoolYearId     String
+  createdAt        DateTime        @default(now())
+  updatedAt        DateTime        @updatedAt
+  gradeSubject     GradeSubject    @relation(fields: [gradeSubjectId], references: [id], onDelete: Cascade)
+  teacherProfile   TeacherProfile? @relation(fields: [teacherProfileId], references: [id], onDelete: SetNull)
+  schoolYear       SchoolYear      @relation(fields: [schoolYearId], references: [id], onDelete: Cascade)
 
   @@unique([gradeSubjectId, schoolYearId])
   @@index([teacherProfileId])
@@ -755,20 +541,19 @@ model ClassAssignment {
 }
 
 model TimePeriod {
-  id              String    @id @default(cuid())
-  name            String    // "Period 1", "Period 2"
-  nameFr          String?   // "Période 1"
-  startTime       String    // "08:00" (24-hour)
-  endTime         String    // "09:00"
-  order           Int       // 1, 2, 3... for sorting
-  schoolYearId    String
-  isActive        Boolean   @default(true)
-  syncVersion     Int       @default(0)
-  createdAt       DateTime  @default(now())
-  updatedAt       DateTime  @updatedAt
-
-  schoolYear      SchoolYear @relation(fields: [schoolYearId], references: [id], onDelete: Cascade)
-  scheduleSlots   ScheduleSlot[]
+  id            String         @id @default(cuid())
+  name          String
+  nameFr        String?
+  startTime     String
+  endTime       String
+  order         Int
+  schoolYearId  String
+  isActive      Boolean        @default(true)
+  syncVersion   Int            @default(0)
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+  schoolYear    SchoolYear     @relation(fields: [schoolYearId], references: [id], onDelete: Cascade)
+  scheduleSlots ScheduleSlot[]
 
   @@unique([schoolYearId, order])
   @@index([schoolYearId])
@@ -777,45 +562,43 @@ model TimePeriod {
 }
 
 model ScheduleSlot {
-  id                String      @id @default(cuid())
-  gradeRoomId       String      // 7A, 7B, 7C
-  timePeriodId      String
-  dayOfWeek         DayOfWeek
-  gradeSubjectId    String?     // Nullable for breaks
-  teacherProfileId  String?     // Nullable for breaks
-  roomLocation      String?     // "Room 101", "Lab A"
-  isBreak           Boolean     @default(false)
-  notes             String?
-  syncVersion       Int         @default(0)
-  createdAt         DateTime    @default(now())
-  updatedAt         DateTime    @updatedAt
-
-  gradeRoom         GradeRoom       @relation(fields: [gradeRoomId], references: [id], onDelete: Cascade)
-  timePeriod        TimePeriod      @relation(fields: [timePeriodId], references: [id], onDelete: Cascade)
-  gradeSubject      GradeSubject?   @relation(fields: [gradeSubjectId], references: [id], onDelete: SetNull)
-  teacherProfile    TeacherProfile? @relation(fields: [teacherProfileId], references: [id], onDelete: SetNull)
+  id               String          @id @default(cuid())
+  gradeRoomId      String
+  timePeriodId     String
+  dayOfWeek        DayOfWeek
+  gradeSubjectId   String?
+  teacherProfileId String?
+  roomLocation     String?
+  isBreak          Boolean         @default(false)
+  notes            String?
+  syncVersion      Int             @default(0)
+  createdAt        DateTime        @default(now())
+  updatedAt        DateTime        @updatedAt
+  gradeRoom        GradeRoom       @relation(fields: [gradeRoomId], references: [id], onDelete: Cascade)
+  timePeriod       TimePeriod      @relation(fields: [timePeriodId], references: [id], onDelete: Cascade)
+  gradeSubject     GradeSubject?   @relation(fields: [gradeSubjectId], references: [id], onDelete: SetNull)
+  teacherProfile   TeacherProfile? @relation(fields: [teacherProfileId], references: [id], onDelete: SetNull)
 
   @@unique([gradeRoomId, timePeriodId, dayOfWeek])
   @@index([gradeRoomId])
   @@index([timePeriodId])
   @@index([dayOfWeek])
-  @@index([teacherProfileId, dayOfWeek, timePeriodId]) // Conflict detection
-  @@index([roomLocation, dayOfWeek, timePeriodId])     // Room conflicts
+  @@index([teacherProfileId, dayOfWeek, timePeriodId])
+  @@index([roomLocation, dayOfWeek, timePeriodId])
 }
 
 model GradeEnrollment {
-  id              String    @id @default(cuid())
+  id               String         @id @default(cuid())
   studentProfileId String
-  gradeId         String
-  schoolYearId    String
-  enrolledAt      DateTime  @default(now())
-  status          String    @default("active")  // active, transferred, withdrawn
-  createdAt       DateTime  @default(now())
-  updatedAt       DateTime  @updatedAt
-
-  studentProfile  StudentProfile @relation(fields: [studentProfileId], references: [id], onDelete: Cascade)
-  grade           Grade          @relation(fields: [gradeId], references: [id])
-  schoolYear      SchoolYear     @relation(fields: [schoolYearId], references: [id])
+  gradeId          String
+  schoolYearId     String
+  enrolledAt       DateTime       @default(now())
+  status           String         @default("active")
+  createdAt        DateTime       @default(now())
+  updatedAt        DateTime       @updatedAt
+  studentProfile   StudentProfile @relation(fields: [studentProfileId], references: [id], onDelete: Cascade)
+  grade            Grade          @relation(fields: [gradeId], references: [id])
+  schoolYear       SchoolYear     @relation(fields: [schoolYearId], references: [id])
 
   @@unique([studentProfileId, gradeId, schoolYearId])
   @@index([studentProfileId])
@@ -823,30 +606,20 @@ model GradeEnrollment {
   @@index([schoolYearId])
 }
 
-// ============================================================================
-// Enhanced Attendance System
-// ============================================================================
-
-enum AttendanceEntryMode {
-  checklist       // Full checklist - mark each student
-  absences_only   // Only mark absences/late
-}
-
 model AttendanceSession {
-  id              String              @id @default(cuid())
-  gradeId         String
-  date            DateTime            @db.Date
-  entryMode       AttendanceEntryMode
-  isComplete      Boolean             @default(false)
-  completedAt     DateTime?
-  recordedBy      String
-  syncVersion     Int                 @default(0)
-  createdAt       DateTime            @default(now())
-  updatedAt       DateTime            @updatedAt
-
-  grade           Grade               @relation(fields: [gradeId], references: [id], onDelete: Cascade)
-  recorder        User                @relation("AttendanceSessionRecorder", fields: [recordedBy], references: [id])
-  records         AttendanceRecord[]
+  id          String              @id @default(cuid())
+  gradeId     String
+  date        DateTime            @db.Date
+  entryMode   AttendanceEntryMode
+  isComplete  Boolean             @default(false)
+  completedAt DateTime?
+  recordedBy  String
+  syncVersion Int                 @default(0)
+  createdAt   DateTime            @default(now())
+  updatedAt   DateTime            @updatedAt
+  grade       Grade               @relation(fields: [gradeId], references: [id], onDelete: Cascade)
+  recorder    User                @relation("AttendanceSessionRecorder", fields: [recordedBy], references: [id])
+  records     AttendanceRecord[]
 
   @@unique([gradeId, date])
   @@index([gradeId])
@@ -856,19 +629,18 @@ model AttendanceSession {
 }
 
 model AttendanceRecord {
-  id              String            @id @default(cuid())
-  sessionId       String
+  id               String            @id @default(cuid())
+  sessionId        String
   studentProfileId String
-  status          AttendanceStatus
-  notes           String?
-  recordedBy      String
-  syncVersion     Int               @default(0)
-  createdAt       DateTime          @default(now())
-  updatedAt       DateTime          @updatedAt
-
-  session         AttendanceSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
-  studentProfile  StudentProfile    @relation(fields: [studentProfileId], references: [id], onDelete: Cascade)
-  recorder        User              @relation("AttendanceRecordRecorder", fields: [recordedBy], references: [id])
+  status           AttendanceStatus
+  notes            String?
+  recordedBy       String
+  syncVersion      Int               @default(0)
+  createdAt        DateTime          @default(now())
+  updatedAt        DateTime          @updatedAt
+  session          AttendanceSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  studentProfile   StudentProfile    @relation(fields: [studentProfileId], references: [id], onDelete: Cascade)
+  recorder         User              @relation("AttendanceRecordRecorder", fields: [recordedBy], references: [id])
 
   @@unique([sessionId, studentProfileId])
   @@index([studentProfileId])
@@ -876,33 +648,28 @@ model AttendanceRecord {
   @@index([recordedBy])
 }
 
-// ============================================================================
-// Enhanced Payment & Accounting System
-// ============================================================================
-
 model CashDeposit {
-  id                String    @id @default(cuid())
-  paymentId         String    @unique
-  bankReference     String
-  depositDate       DateTime
-  depositedBy       String
-  depositedByName   String?   // "Me" or specific name if different
-  bankName          String?
-  verifiedBy        String?
-  verifiedAt        DateTime?
-  syncVersion       Int       @default(0)
-  createdAt         DateTime  @default(now())
-  updatedAt         DateTime  @updatedAt
-
-  payment           Payment   @relation(fields: [paymentId], references: [id], onDelete: Cascade)
-  depositor         User      @relation("CashDepositor", fields: [depositedBy], references: [id])
-  verifier          User?     @relation("DepositVerifier", fields: [verifiedBy], references: [id])
+  id              String    @id @default(cuid())
+  paymentId       String    @unique
+  bankReference   String
+  depositDate     DateTime
+  depositedBy     String
+  depositedByName String?
+  bankName        String?
+  verifiedBy      String?
+  verifiedAt      DateTime?
+  syncVersion     Int       @default(0)
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+  payment         Payment   @relation(fields: [paymentId], references: [id], onDelete: Cascade)
+  depositor       User      @relation("CashDepositor", fields: [depositedBy], references: [id])
+  verifier        User?     @relation("DepositVerifier", fields: [verifiedBy], references: [id])
 
   @@index([depositDate])
   @@index([bankReference])
   @@index([depositedBy])
   @@index([verifiedBy])
-  @@index([verifiedBy, depositDate]) // Performance: deposit audit trail queries
+  @@index([verifiedBy, depositDate])
 }
 
 model BankDeposit {
@@ -920,7 +687,6 @@ model BankDeposit {
   syncVersion         Int       @default(0)
   createdAt           DateTime  @default(now())
   updatedAt           DateTime  @updatedAt
-
   recorder            User      @relation("BankDepositRecorder", fields: [recordedBy], references: [id])
   reconciler          User?     @relation("BankDepositReconciler", fields: [reconciledBy], references: [id])
 
@@ -928,7 +694,7 @@ model BankDeposit {
   @@index([isReconciled])
   @@index([recordedBy])
   @@index([reconciledBy])
-  @@index([depositDate, isReconciled]) // Performance: reconciliation dashboard queries
+  @@index([depositDate, isReconciled])
 }
 
 model Expense {
@@ -949,7 +715,6 @@ model Expense {
   syncVersion     Int             @default(0)
   createdAt       DateTime        @default(now())
   updatedAt       DateTime        @updatedAt
-
   requester       User            @relation("ExpenseRequester", fields: [requestedBy], references: [id])
   approver        User?           @relation("ExpenseApprover", fields: [approvedBy], references: [id])
 
@@ -960,24 +725,19 @@ model Expense {
   @@index([approvedBy])
 }
 
-// ============================================================================
-// Grade Rooms & Student Room Assignments
-// ============================================================================
-
 model GradeRoom {
-  id          String    @id @default(cuid())
-  gradeId     String
-  name        String    // "A", "B", "C"
-  displayName String    // "7A", "7B", "7C"
-  capacity    Int       @default(35)
-  isActive    Boolean   @default(true)
-  syncVersion Int       @default(0)
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
-
-  grade       Grade     @relation(fields: [gradeId], references: [id], onDelete: Cascade)
+  id                 String                  @id @default(cuid())
+  gradeId            String
+  name               String
+  displayName        String
+  capacity           Int                     @default(35)
+  isActive           Boolean                 @default(true)
+  syncVersion        Int                     @default(0)
+  createdAt          DateTime                @default(now())
+  updatedAt          DateTime                @updatedAt
+  grade              Grade                   @relation(fields: [gradeId], references: [id], onDelete: Cascade)
   studentAssignments StudentRoomAssignment[]
-  scheduleSlots ScheduleSlot[]
+  scheduleSlots      ScheduleSlot[]
 
   @@unique([gradeId, name])
   @@index([gradeId])
@@ -985,17 +745,16 @@ model GradeRoom {
 }
 
 model StudentRoomAssignment {
-  id               String   @id @default(cuid())
+  id               String         @id @default(cuid())
   studentProfileId String
   gradeRoomId      String
   schoolYearId     String
-  assignedAt       DateTime @default(now())
+  assignedAt       DateTime       @default(now())
   assignedBy       String
-  isActive         Boolean  @default(true)
-  syncVersion      Int      @default(0)
-  createdAt        DateTime @default(now())
-  updatedAt        DateTime @updatedAt
-
+  isActive         Boolean        @default(true)
+  syncVersion      Int            @default(0)
+  createdAt        DateTime       @default(now())
+  updatedAt        DateTime       @updatedAt
   studentProfile   StudentProfile @relation(fields: [studentProfileId], references: [id], onDelete: Cascade)
   gradeRoom        GradeRoom      @relation(fields: [gradeRoomId], references: [id], onDelete: Cascade)
   schoolYear       SchoolYear     @relation(fields: [schoolYearId], references: [id], onDelete: Cascade)
@@ -1008,14 +767,10 @@ model StudentRoomAssignment {
   @@index([isActive])
 }
 
-// ============================================================================
-// User Invitations
-// ============================================================================
-
 model UserInvitation {
   id         String    @id @default(cuid())
   email      String
-  name       String?   // Optional name for the invitee
+  name       String?
   role       Role
   token      String    @unique
   expiresAt  DateTime
@@ -1023,7 +778,6 @@ model UserInvitation {
   acceptedAt DateTime?
   createdAt  DateTime  @default(now())
   updatedAt  DateTime  @updatedAt
-
   inviter    User      @relation("InvitationSender", fields: [invitedBy], references: [id])
 
   @@index([email])
@@ -1032,32 +786,27 @@ model UserInvitation {
   @@index([expiresAt])
 }
 
-// ============================================================================
-// Activities (Extracurricular)
-// ============================================================================
-
 model Activity {
-  id              String          @id @default(cuid())
-  name            String          // e.g., "Football Club"
-  nameFr          String?         // French translation
-  description     String?
-  type            ActivityType
-  schoolYearId    String
-  startDate       DateTime
-  endDate         DateTime
-  fee             Int             // Activity fee in GNF
-  capacity        Int             @default(30)
-  status          ActivityStatus  @default(draft)
-  isEnabled       Boolean         @default(true)
-  createdBy       String
-  syncVersion     Int             @default(0)
-  createdAt       DateTime        @default(now())
-  updatedAt       DateTime        @updatedAt
-
-  schoolYear      SchoolYear      @relation(fields: [schoolYearId], references: [id], onDelete: Cascade)
-  creator         User            @relation("ActivityCreator", fields: [createdBy], references: [id])
-  enrollments     ActivityEnrollment[]
-  payments        ActivityPayment[]
+  id           String               @id @default(cuid())
+  name         String
+  nameFr       String?
+  description  String?
+  type         ActivityType
+  schoolYearId String
+  startDate    DateTime
+  endDate      DateTime
+  fee          Int
+  capacity     Int                  @default(30)
+  status       ActivityStatus       @default(draft)
+  isEnabled    Boolean              @default(true)
+  createdBy    String
+  syncVersion  Int                  @default(0)
+  createdAt    DateTime             @default(now())
+  updatedAt    DateTime             @updatedAt
+  schoolYear   SchoolYear           @relation(fields: [schoolYearId], references: [id], onDelete: Cascade)
+  creator      User                 @relation("ActivityCreator", fields: [createdBy], references: [id])
+  enrollments  ActivityEnrollment[]
+  payments     ActivityPayment[]
 
   @@index([schoolYearId])
   @@index([type])
@@ -1067,20 +816,19 @@ model Activity {
 }
 
 model ActivityEnrollment {
-  id                String          @id @default(cuid())
-  activityId        String
-  studentProfileId  String
-  status            String          @default("active")  // active, transferred, withdrawn
-  enrolledBy        String          // User ID who recorded
-  enrolledAt        DateTime        @default(now())
-  syncVersion       Int             @default(0)
-  createdAt         DateTime        @default(now())
-  updatedAt         DateTime        @updatedAt
-
-  activity          Activity        @relation(fields: [activityId], references: [id], onDelete: Cascade)
-  studentProfile    StudentProfile  @relation(fields: [studentProfileId], references: [id], onDelete: Cascade)
-  enroller          User            @relation("ActivityEnroller", fields: [enrolledBy], references: [id])
-  payments          ActivityPayment[]
+  id               String            @id @default(cuid())
+  activityId       String
+  studentProfileId String
+  status           String            @default("active")
+  enrolledBy       String
+  enrolledAt       DateTime          @default(now())
+  syncVersion      Int               @default(0)
+  createdAt        DateTime          @default(now())
+  updatedAt        DateTime          @updatedAt
+  activity         Activity          @relation(fields: [activityId], references: [id], onDelete: Cascade)
+  studentProfile   StudentProfile    @relation(fields: [studentProfileId], references: [id], onDelete: Cascade)
+  enroller         User              @relation("ActivityEnroller", fields: [enrolledBy], references: [id])
+  payments         ActivityPayment[]
 
   @@unique([activityId, studentProfileId])
   @@index([activityId])
@@ -1089,28 +837,27 @@ model ActivityEnrollment {
 }
 
 model ActivityPayment {
-  id                    String          @id @default(cuid())
-  activityId            String
-  activityEnrollmentId  String?
-  amount                Int             // Amount in GNF
-  method                PaymentMethod
-  status                PaymentStatus   @default(pending_deposit)
-  receiptNumber         String          @unique
-  transactionRef        String?
-  receiptImageUrl       String?
-  recordedBy            String
-  recordedAt            DateTime        @default(now())
-  confirmedBy           String?
-  confirmedAt           DateTime?
-  notes                 String?
-  syncVersion           Int             @default(0)
-  createdAt             DateTime        @default(now())
-  updatedAt             DateTime        @updatedAt
-
-  activity              Activity        @relation(fields: [activityId], references: [id], onDelete: Cascade)
-  activityEnrollment    ActivityEnrollment? @relation(fields: [activityEnrollmentId], references: [id], onDelete: SetNull)
-  recorder              User            @relation("ActivityPaymentRecorder", fields: [recordedBy], references: [id])
-  confirmer             User?           @relation("ActivityPaymentConfirmer", fields: [confirmedBy], references: [id])
+  id                   String              @id @default(cuid())
+  activityId           String
+  activityEnrollmentId String?
+  amount               Int
+  method               PaymentMethod
+  status               PaymentStatus       @default(pending_deposit)
+  receiptNumber        String              @unique
+  transactionRef       String?
+  receiptImageUrl      String?
+  recordedBy           String
+  recordedAt           DateTime            @default(now())
+  confirmedBy          String?
+  confirmedAt          DateTime?
+  notes                String?
+  syncVersion          Int                 @default(0)
+  createdAt            DateTime            @default(now())
+  updatedAt            DateTime            @updatedAt
+  activity             Activity            @relation(fields: [activityId], references: [id], onDelete: Cascade)
+  activityEnrollment   ActivityEnrollment? @relation(fields: [activityEnrollmentId], references: [id], onDelete: SetNull)
+  recorder             User                @relation("ActivityPaymentRecorder", fields: [recordedBy], references: [id])
+  confirmer            User?               @relation("ActivityPaymentConfirmer", fields: [confirmedBy], references: [id])
 
   @@index([activityId])
   @@index([activityEnrollmentId])
@@ -1119,29 +866,24 @@ model ActivityPayment {
   @@index([confirmedBy])
 }
 
-// ============================================================================
-// Grading System - Trimesters, Evaluations, Averages
-// ============================================================================
-
 model Trimester {
-  id            String    @id @default(cuid())
-  schoolYearId  String
-  number        Int       // 1, 2, or 3
-  name          String    // "Trimester 1"
-  nameFr        String    // "1er Trimestre"
-  nameEn        String    // "1st Trimester"
-  startDate     DateTime
-  endDate       DateTime
-  isActive      Boolean   @default(false)
-  syncVersion   Int       @default(0)
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
-
-  schoolYear      SchoolYear              @relation(fields: [schoolYearId], references: [id], onDelete: Cascade)
-  evaluations     Evaluation[]
-  subjectAverages SubjectTrimesterAverage[]
+  id                String                    @id @default(cuid())
+  schoolYearId      String
+  number            Int
+  name              String
+  nameFr            String
+  nameEn            String
+  startDate         DateTime
+  endDate           DateTime
+  isActive          Boolean                   @default(false)
+  syncVersion       Int                       @default(0)
+  createdAt         DateTime                  @default(now())
+  updatedAt         DateTime                  @updatedAt
+  schoolYear        SchoolYear                @relation(fields: [schoolYearId], references: [id], onDelete: Cascade)
+  evaluations       Evaluation[]
+  subjectAverages   SubjectTrimesterAverage[]
   studentTrimesters StudentTrimester[]
-  classStats      ClassTrimesterStats[]
+  classStats        ClassTrimesterStats[]
 
   @@unique([schoolYearId, number])
   @@index([schoolYearId])
@@ -1149,24 +891,23 @@ model Trimester {
 }
 
 model Evaluation {
-  id                String         @id @default(cuid())
-  studentProfileId  String
-  gradeSubjectId    String
-  trimesterId       String
-  type              EvaluationType
-  score             Float          // 0-20 scale
-  maxScore          Float          @default(20)
-  date              DateTime
-  notes             String?
-  recordedBy        String
-  syncVersion       Int            @default(0)
-  createdAt         DateTime       @default(now())
-  updatedAt         DateTime       @updatedAt
-
-  studentProfile    StudentProfile @relation(fields: [studentProfileId], references: [id], onDelete: Cascade)
-  gradeSubject      GradeSubject   @relation(fields: [gradeSubjectId], references: [id], onDelete: Cascade)
-  trimester         Trimester      @relation(fields: [trimesterId], references: [id], onDelete: Cascade)
-  recorder          User           @relation("EvaluationRecorder", fields: [recordedBy], references: [id])
+  id               String         @id @default(cuid())
+  studentProfileId String
+  gradeSubjectId   String
+  trimesterId      String
+  type             EvaluationType
+  score            Float
+  maxScore         Float          @default(20)
+  date             DateTime
+  notes            String?
+  recordedBy       String
+  syncVersion      Int            @default(0)
+  createdAt        DateTime       @default(now())
+  updatedAt        DateTime       @updatedAt
+  studentProfile   StudentProfile @relation(fields: [studentProfileId], references: [id], onDelete: Cascade)
+  gradeSubject     GradeSubject   @relation(fields: [gradeSubjectId], references: [id], onDelete: Cascade)
+  trimester        Trimester      @relation(fields: [trimesterId], references: [id], onDelete: Cascade)
+  recorder         User           @relation("EvaluationRecorder", fields: [recordedBy], references: [id])
 
   @@index([studentProfileId])
   @@index([gradeSubjectId])
@@ -1177,20 +918,19 @@ model Evaluation {
 }
 
 model SubjectTrimesterAverage {
-  id                String    @id @default(cuid())
-  studentProfileId  String
-  gradeSubjectId    String
-  trimesterId       String
-  average           Float?    // Calculated weighted average (0-20)
-  teacherRemark     String?   // Observation from subject teacher
-  calculatedAt      DateTime?
-  syncVersion       Int       @default(0)
-  createdAt         DateTime  @default(now())
-  updatedAt         DateTime  @updatedAt
-
-  studentProfile    StudentProfile @relation(fields: [studentProfileId], references: [id], onDelete: Cascade)
-  gradeSubject      GradeSubject   @relation(fields: [gradeSubjectId], references: [id], onDelete: Cascade)
-  trimester         Trimester      @relation(fields: [trimesterId], references: [id], onDelete: Cascade)
+  id               String         @id @default(cuid())
+  studentProfileId String
+  gradeSubjectId   String
+  trimesterId      String
+  average          Float?
+  teacherRemark    String?
+  calculatedAt     DateTime?
+  syncVersion      Int            @default(0)
+  createdAt        DateTime       @default(now())
+  updatedAt        DateTime       @updatedAt
+  studentProfile   StudentProfile @relation(fields: [studentProfileId], references: [id], onDelete: Cascade)
+  gradeSubject     GradeSubject   @relation(fields: [gradeSubjectId], references: [id], onDelete: Cascade)
+  trimester        Trimester      @relation(fields: [trimesterId], references: [id], onDelete: Cascade)
 
   @@unique([studentProfileId, gradeSubjectId, trimesterId])
   @@index([studentProfileId])
@@ -1199,29 +939,28 @@ model SubjectTrimesterAverage {
 }
 
 model StudentTrimester {
-  id                  String            @id @default(cuid())
-  studentProfileId    String
-  trimesterId         String
-  generalAverage      Float?            // Weighted average of all subjects (0-20)
-  rank                Int?              // Class rank (1st, 2nd, etc.)
-  totalStudents       Int?              // Total students for rank context
-  conduct             Float?            // Conduct score (0-20)
-  decision            TrimesterDecision @default(pending)
-  decisionOverride    Boolean           @default(false)
-  decisionOverrideBy  String?
-  decisionOverrideAt  DateTime?
-  overrideReason      String?
-  generalRemark       String?           // Overall remark
-  absences            Int               @default(0)
-  lates               Int               @default(0)
-  calculatedAt        DateTime?
-  syncVersion         Int               @default(0)
-  createdAt           DateTime          @default(now())
-  updatedAt           DateTime          @updatedAt
-
-  studentProfile      StudentProfile @relation(fields: [studentProfileId], references: [id], onDelete: Cascade)
-  trimester           Trimester      @relation(fields: [trimesterId], references: [id], onDelete: Cascade)
-  overrider           User?          @relation("TrimesterDecisionOverrider", fields: [decisionOverrideBy], references: [id])
+  id                 String            @id @default(cuid())
+  studentProfileId   String
+  trimesterId        String
+  generalAverage     Float?
+  rank               Int?
+  totalStudents      Int?
+  conduct            Float?
+  decision           TrimesterDecision @default(pending)
+  decisionOverride   Boolean           @default(false)
+  decisionOverrideBy String?
+  decisionOverrideAt DateTime?
+  overrideReason     String?
+  generalRemark      String?
+  absences           Int               @default(0)
+  lates              Int               @default(0)
+  calculatedAt       DateTime?
+  syncVersion        Int               @default(0)
+  createdAt          DateTime          @default(now())
+  updatedAt          DateTime          @updatedAt
+  studentProfile     StudentProfile    @relation(fields: [studentProfileId], references: [id], onDelete: Cascade)
+  trimester          Trimester         @relation(fields: [trimesterId], references: [id], onDelete: Cascade)
+  overrider          User?             @relation("TrimesterDecisionOverrider", fields: [decisionOverrideBy], references: [id])
 
   @@unique([studentProfileId, trimesterId])
   @@index([studentProfileId])
@@ -1231,24 +970,162 @@ model StudentTrimester {
 }
 
 model ClassTrimesterStats {
-  id              String    @id @default(cuid())
-  gradeId         String
-  trimesterId     String
-  totalStudents   Int
-  classAverage    Float?
-  highestAverage  Float?
-  lowestAverage   Float?
-  passCount       Int       @default(0)
-  passRate        Float?
-  calculatedAt    DateTime?
-  syncVersion     Int       @default(0)
-  createdAt       DateTime  @default(now())
-  updatedAt       DateTime  @updatedAt
-
-  grade           Grade     @relation(fields: [gradeId], references: [id], onDelete: Cascade)
-  trimester       Trimester @relation(fields: [trimesterId], references: [id], onDelete: Cascade)
+  id             String    @id @default(cuid())
+  gradeId        String
+  trimesterId    String
+  totalStudents  Int
+  classAverage   Float?
+  highestAverage Float?
+  lowestAverage  Float?
+  passCount      Int       @default(0)
+  passRate       Float?
+  calculatedAt   DateTime?
+  syncVersion    Int       @default(0)
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+  grade          Grade     @relation(fields: [gradeId], references: [id], onDelete: Cascade)
+  trimester      Trimester @relation(fields: [trimesterId], references: [id], onDelete: Cascade)
 
   @@unique([gradeId, trimesterId])
   @@index([gradeId])
   @@index([trimesterId])
+}
+
+enum Role {
+  user
+  director
+  academic_director
+  secretary
+  accountant
+  teacher
+  parent
+  student
+}
+
+enum UserStatus {
+  invited
+  active
+  inactive
+}
+
+enum SchoolLevel {
+  elementary
+  college
+  high_school
+  kindergarten
+}
+
+enum EnrollmentStatus {
+  draft
+  submitted
+  needs_review
+  completed
+  rejected
+  cancelled
+}
+
+enum PaymentMethod {
+  cash
+  orange_money
+}
+
+enum PaymentStatus {
+  pending_deposit
+  deposited
+  pending_review
+  confirmed
+  rejected
+  failed
+}
+
+enum ExpenseStatus {
+  pending
+  approved
+  rejected
+  paid
+}
+
+enum ExpenseCategory {
+  supplies
+  maintenance
+  utilities
+  salary
+  transport
+  communication
+  other
+}
+
+enum SchoolYearStatus {
+  new
+  active
+  passed
+}
+
+enum ActivityStatus {
+  draft
+  active
+  closed
+  completed
+  cancelled
+}
+
+enum ActivityType {
+  club
+  sport
+  arts
+  academic
+  other
+}
+
+enum DayOfWeek {
+  monday
+  tuesday
+  wednesday
+  thursday
+  friday
+  saturday
+}
+
+enum EvaluationType {
+  interrogation
+  devoir_surveille
+  composition
+}
+
+enum TrimesterDecision {
+  pending
+  admis
+  rattrapage
+  redouble
+}
+
+enum StudentStatus {
+  active
+  inactive
+  graduated
+  transferred
+  suspended
+}
+
+enum AttendanceStatus {
+  present
+  absent
+  late
+  excused
+}
+
+enum Gender {
+  male
+  female
+}
+
+enum PersonStatus {
+  active
+  inactive
+  archived
+}
+
+enum AttendanceEntryMode {
+  checklist
+  absences_only
 }
