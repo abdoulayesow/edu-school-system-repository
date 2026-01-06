@@ -43,6 +43,7 @@ interface EnrollmentDetail {
   id: string
   enrollmentNumber: string | null
   firstName: string
+  middleName: string | null
   lastName: string
   dateOfBirth: string | null
   gender: string | null
@@ -318,7 +319,7 @@ export default function EnrollmentDetailPage({
             <div>
               <div className="flex items-center gap-2">
                 <h1 className="text-2xl font-bold">
-                  {enrollment.firstName} {enrollment.lastName}
+                  {enrollment.firstName}{enrollment.middleName ? ` ${enrollment.middleName}` : ""} {enrollment.lastName}
                 </h1>
                 <Badge variant={status.variant} className={cn("gap-1", status.className)}>
                   <StatusIcon className="h-3 w-3" />
@@ -366,10 +367,10 @@ export default function EnrollmentDetailPage({
 
         {/* Status Comment Alert */}
         {enrollment.statusComment && enrollment.status !== "draft" && (
-          <Card className="mb-6 border-l-4 border-l-primary">
+          <Card className="mb-6 border-l-4 border-l-amber-500">
             <CardContent className="pt-4">
               <div className="flex items-start gap-3">
-                <AlertCircle className="h-5 w-5 text-primary mt-0.5" />
+                <AlertCircle className="h-5 w-5 text-amber-500 mt-0.5" />
                 <div>
                   <p className="font-medium">
                     {locale === "fr" ? "Commentaire de statut" : "Status Comment"}
@@ -531,6 +532,12 @@ export default function EnrollmentDetailPage({
                   <p className="text-sm text-muted-foreground">{t.enrollments.firstName}</p>
                   <p className="font-medium">{enrollment.firstName}</p>
                 </div>
+                {enrollment.middleName && (
+                  <div>
+                    <p className="text-sm text-muted-foreground">{t.enrollments.middleName}</p>
+                    <p className="font-medium">{enrollment.middleName}</p>
+                  </div>
+                )}
                 <div>
                   <p className="text-sm text-muted-foreground">{t.enrollments.lastName}</p>
                   <p className="font-medium">{enrollment.lastName}</p>
@@ -734,11 +741,7 @@ export default function EnrollmentDetailPage({
                         </div>
                         <div className="w-full bg-secondary rounded-full h-2">
                           <div
-                            className={`h-2 rounded-full transition-all ${
-                              enrollment.status === "needs_review"
-                                ? "bg-amber-500 dark:bg-amber-400"
-                                : "bg-primary"
-                            }`}
+                            className="h-2 rounded-full transition-all bg-amber-500 dark:bg-amber-400"
                             style={{ width: `${percentPaid}%` }}
                           />
                         </div>
@@ -764,7 +767,7 @@ export default function EnrollmentDetailPage({
                 <CardContent>
                   <div className="space-y-4">
                     {enrollment.notes.map((note) => (
-                      <div key={note.id} className="border-l-2 border-primary pl-4">
+                      <div key={note.id} className="border-l-2 border-amber-500 pl-4">
                         <p className="font-medium">{note.title}</p>
                         <p className="text-muted-foreground">{note.content}</p>
                         <p className="text-xs text-muted-foreground mt-1">
@@ -808,11 +811,7 @@ export default function EnrollmentDetailPage({
                 <Separator />
                 <div className="w-full bg-secondary rounded-full h-3">
                   <div
-                    className={`h-3 rounded-full transition-all ${
-                      enrollment.status === "needs_review"
-                        ? "bg-amber-500 dark:bg-amber-400"
-                        : "bg-primary"
-                    }`}
+                    className="h-3 rounded-full transition-all bg-amber-500 dark:bg-amber-400"
                     style={{ width: `${Math.min(100, (enrollment.totalPaid / enrollment.tuitionFee) * 100)}%` }}
                   />
                 </div>
@@ -829,7 +828,7 @@ export default function EnrollmentDetailPage({
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="flex items-start gap-3">
-                  <div className="w-2 h-2 rounded-full bg-primary mt-2" />
+                  <div className="w-2 h-2 rounded-full bg-amber-500 mt-2" />
                   <div>
                     <p className="font-medium">{locale === "fr" ? "Cree" : "Created"}</p>
                     <p className="text-sm text-muted-foreground">{formatDate(enrollment.createdAt)}</p>
@@ -883,7 +882,10 @@ export default function EnrollmentDetailPage({
                           <p className="font-medium">{formatCurrency(payment.amount)}</p>
                           <p className="text-xs text-muted-foreground">{payment.receiptNumber}</p>
                         </div>
-                        <Badge variant={payment.status === "confirmed" ? "default" : "outline"}>
+                        <Badge
+                          variant={payment.status === "confirmed" ? "default" : "outline"}
+                          className={payment.status === "confirmed" ? "bg-green-500 text-white hover:bg-green-600 border-transparent" : ""}
+                        >
                           {payment.status}
                         </Badge>
                       </div>

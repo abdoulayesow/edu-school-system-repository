@@ -424,7 +424,7 @@ export function StepReview() {
           <CardContent>
             <div className="space-y-3">
               {data.notes.map((note, index) => (
-                <div key={index} className="p-3 bg-muted/50 rounded-lg">
+                <div key={index} className="p-3 bg-yellow-50 dark:bg-muted/50 rounded-lg">
                   <p className="font-medium">{note.title}</p>
                   <p className="text-sm text-muted-foreground">{note.content}</p>
                 </div>

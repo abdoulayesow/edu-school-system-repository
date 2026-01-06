@@ -414,6 +414,7 @@ export interface ApiStudent {
   id: string
   studentNumber: string
   firstName: string
+  middleName?: string | null
   lastName: string
   dateOfBirth?: string
   email?: string | null
@@ -744,7 +745,9 @@ export interface ApiEnrollment {
   id: string
   enrollmentNumber: string | null
   firstName: string
+  middleName?: string | null
   lastName: string
+  photoUrl?: string | null
   status: string
   gradeId: string
   adjustedTuitionFee: number | null

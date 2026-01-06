@@ -391,7 +391,7 @@ export default function StudentDetailPage() {
             <div>
               <div className="flex items-center gap-3 mb-1">
                 <h1 className="text-3xl font-bold text-foreground">
-                  {student.firstName} {student.lastName}
+                  {student.firstName}{activeEnrollment?.middleName ? ` ${activeEnrollment.middleName}` : ""} {student.lastName}
                 </h1>
                 {getStatusBadge(student.status)}
               </div>
@@ -1183,7 +1183,7 @@ export default function StudentDetailPage() {
             open={roomChangeDialogOpen}
             onOpenChange={setRoomChangeDialogOpen}
             studentId={student.id}
-            studentName={`${student.firstName} ${student.lastName}`}
+            studentName={`${student.firstName}${activeEnrollment?.middleName ? ` ${activeEnrollment.middleName}` : ""} ${student.lastName}`}
             studentProfileId={student.studentProfile.id}
             gradeId={student.studentProfile.currentGrade.id}
             gradeName={student.studentProfile.currentGrade.name}

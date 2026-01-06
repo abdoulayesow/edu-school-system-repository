@@ -16,6 +16,7 @@ import {
   ArrowRight,
   Home,
   Loader2,
+  Eye,
 } from "lucide-react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
@@ -229,9 +230,19 @@ export function StepConfirmation() {
       {/* Actions */}
       <div className="flex flex-col sm:flex-row gap-3 justify-center">
         <Button
+          asChild
+          className="gap-2 bg-[#e79908] hover:bg-[#d68907] text-black dark:bg-gspn-maroon-950 dark:hover:bg-gspn-maroon-900 dark:text-white"
+        >
+          <Link href={`/enrollments/${enrollmentId}`}>
+            <Eye className={sizing.icon.sm} />
+            {t.enrollmentWizard.viewEnrollment}
+          </Link>
+        </Button>
+        <Button
           onClick={handleDownloadPdf}
           disabled={isDownloading}
-          className="gap-2 bg-[#e79908] hover:bg-[#d68907] text-black dark:bg-gspn-maroon-950 dark:hover:bg-gspn-maroon-900 dark:text-white"
+          variant="outline"
+          className="gap-2 bg-transparent"
         >
           {isDownloading ? (
             <Loader2 className={sizing.icon.sm + " animate-spin"} />

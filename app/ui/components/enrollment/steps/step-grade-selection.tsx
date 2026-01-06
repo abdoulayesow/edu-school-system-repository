@@ -213,8 +213,8 @@ export function StepGradeSelection() {
                         "transition-all",
                         disabled
                           ? "opacity-50 cursor-not-allowed bg-muted/50"
-                          : "cursor-pointer hover:border-primary",
-                        isSelected && !disabled && "border-primary ring-2 ring-primary/20"
+                          : "cursor-pointer hover:border-amber-500",
+                        isSelected && !disabled && "border-amber-500 ring-2 ring-amber-500/20"
                       )}
                       onClick={() => handleSelectGrade(grade)}
                     >
@@ -228,8 +228,8 @@ export function StepGradeSelection() {
                               <Lock className={sizing.icon.sm + " text-muted-foreground"} />
                             </div>
                           ) : isSelected ? (
-                            <div className="h-6 w-6 rounded-full bg-primary flex items-center justify-center">
-                              <Check className={sizing.icon.sm + " text-primary-foreground"} />
+                            <div className="h-6 w-6 rounded-full bg-amber-500 flex items-center justify-center">
+                              <Check className={sizing.icon.sm + " text-white"} />
                             </div>
                           ) : null}
                         </div>
@@ -313,7 +313,7 @@ export function StepGradeSelection() {
               <p className="text-sm text-muted-foreground">
                 {t.enrollmentWizard.yearlyTuition}
               </p>
-              <p className="font-semibold text-primary">
+              <p className="font-semibold text-amber-500 dark:text-amber-400">
                 {formatCurrency(data.tuitionFee)}
                 <span className="text-sm font-normal text-muted-foreground">
                   {t.enrollmentWizard.perYear}

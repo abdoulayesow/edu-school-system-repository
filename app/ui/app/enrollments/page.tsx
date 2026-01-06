@@ -1,13 +1,15 @@
 "use client"
 
 import { useState, useEffect, useMemo } from "react"
+import { useRouter } from "next/navigation"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-import { Plus, Search, Eye, Loader2, FileText, Clock, CheckCircle2, Users } from "lucide-react"
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { Plus, Search, ChevronRight, Loader2, FileText, Clock, CheckCircle2, Users } from "lucide-react"
 import { useI18n } from "@/components/i18n-provider"
 import { PageContainer } from "@/components/layout"
 import { DataPagination } from "@/components/data-pagination"
@@ -25,7 +27,9 @@ interface Enrollment {
   id: string
   enrollmentNumber: string
   firstName: string
+  middleName?: string | null
   lastName: string
+  photoUrl?: string | null
   status: string
   createdAt: string
   grade: {
@@ -39,6 +43,7 @@ interface Enrollment {
 
 export default function EnrollmentsPage() {
   const { t, locale } = useI18n()
+  const router = useRouter()
   const [isMounted, setIsMounted] = useState(false)
   const [searchQuery, setSearchQuery] = useState("")
   const [statusFilter, setStatusFilter] = useState<string>("all")
@@ -91,7 +96,9 @@ export default function EnrollmentsPage() {
       id: e.id,
       enrollmentNumber: e.enrollmentNumber ?? "",
       firstName: e.firstName,
+      middleName: e.middleName,
       lastName: e.lastName,
+      photoUrl: e.photoUrl,
       status: e.status,
       createdAt: e.createdAt,
       grade: e.grade ? {
@@ -371,19 +378,20 @@ export default function EnrollmentsPage() {
               <div className="rounded-md border">
                 <Table>
                   <TableHeader>
-                    <TableRow>
-                      <TableHead>{t.enrollments.enrollmentDate}</TableHead>
+                    <TableRow className="bg-yellow-50">
+                      <TableHead className="w-[50px]"></TableHead>
                       <TableHead>{t.enrollments.fullName}</TableHead>
                       <TableHead>{t.enrollments.enrollmentId}</TableHead>
                       <TableHead>{t.common.level}</TableHead>
+                      <TableHead>{t.enrollments.enrollmentDate}</TableHead>
                       <TableHead>{t.enrollments.enrollmentStatus}</TableHead>
-                      <TableHead className="text-right">{t.common.actions}</TableHead>
+                      <TableHead className="w-[50px]"></TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
                     {filteredEnrollments.length === 0 ? (
                       <TableRow>
-                        <TableCell colSpan={6} className="p-0">
+                        <TableCell colSpan={7} className="p-0">
                           <Empty className="py-12">
                             <EmptyMedia variant="illustration">
                               <EmptyEnrollmentsIllustration />
@@ -399,19 +407,33 @@ export default function EnrollmentsPage() {
                       </TableRow>
                     ) : (
                       filteredEnrollments.map((enrollment) => (
-                        <TableRow key={enrollment.id} status={getEnrollmentRowStatus(enrollment.status)}>
-                          <TableCell>{formatDate(enrollment.createdAt, locale)}</TableCell>
-                          <TableCell className="font-medium">{enrollment.firstName} {enrollment.lastName}</TableCell>
+                        <TableRow
+                          key={enrollment.id}
+                          className="cursor-pointer hover:bg-muted/50"
+                          onClick={() => router.push(`/enrollments/${enrollment.id}`)}
+                        >
+                          <TableCell>
+                            <Avatar className="size-10">
+                              <AvatarImage
+                                src={enrollment.photoUrl ?? undefined}
+                                alt={`${enrollment.firstName} ${enrollment.lastName}`}
+                              />
+                              <AvatarFallback>
+                                {enrollment.firstName?.[0]}{enrollment.lastName?.[0]}
+                              </AvatarFallback>
+                            </Avatar>
+                          </TableCell>
+                          <TableCell className="font-medium">
+                            {enrollment.firstName}
+                            {enrollment.middleName && ` ${enrollment.middleName}`}
+                            {' '}{enrollment.lastName}
+                          </TableCell>
                           <TableCell className="text-muted-foreground">{enrollment.enrollmentNumber}</TableCell>
                           <TableCell>{enrollment.grade?.name}</TableCell>
+                          <TableCell>{formatDate(enrollment.createdAt, locale)}</TableCell>
                           <TableCell>{getEnrollmentStatusBadge(enrollment.status)}</TableCell>
-                          <TableCell className="text-right">
-                            <Button variant="ghost" size="sm" asChild>
-                              <Link href={`/enrollments/${enrollment.id}`}>
-                                <Eye className="h-4 w-4 mr-1" />
-                                {t.common.view}
-                              </Link>
-                            </Button>
+                          <TableCell className="text-right pr-4">
+                            <ChevronRight className="h-4 w-4 text-muted-foreground" />
                           </TableCell>
                         </TableRow>
                       ))
