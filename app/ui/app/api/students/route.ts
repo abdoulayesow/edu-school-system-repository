@@ -43,8 +43,8 @@ export async function GET(req: NextRequest) {
         { lastName: { contains: search, mode: "insensitive" } },
         { studentNumber: { contains: search, mode: "insensitive" } },
         {
-          studentProfile: {
-            person: {
+          enrollments: {
+            some: {
               middleName: { contains: search, mode: "insensitive" },
             },
           },
@@ -80,7 +80,6 @@ export async function GET(req: NextRequest) {
               select: {
                 id: true,
                 firstName: true,
-                middleName: true,
                 lastName: true,
                 photoUrl: true,
               },
@@ -214,7 +213,7 @@ export async function GET(req: NextRequest) {
         id: student.id,
         studentNumber: student.studentNumber,
         firstName: student.studentProfile?.person?.firstName || student.firstName,
-        middleName: student.studentProfile?.person?.middleName,
+        middleName: enrollment?.middleName,
         lastName: student.studentProfile?.person?.lastName || student.lastName,
         dateOfBirth: student.dateOfBirth,
         email: student.email,

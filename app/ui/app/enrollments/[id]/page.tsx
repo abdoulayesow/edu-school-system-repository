@@ -875,7 +875,10 @@ export default function EnrollmentDetailPage({
                           <p className="font-medium">{formatCurrency(payment.amount)}</p>
                           <p className="text-xs text-muted-foreground">{payment.receiptNumber}</p>
                         </div>
-                        <Badge variant={payment.status === "confirmed" ? "default" : "outline"}>
+                        <Badge
+                          variant={payment.status === "confirmed" ? "default" : "outline"}
+                          className={payment.status === "confirmed" ? "bg-green-500 text-white hover:bg-green-600 border-transparent" : ""}
+                        >
                           {payment.status}
                         </Badge>
                       </div>
