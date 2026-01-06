@@ -745,7 +745,9 @@ export interface ApiEnrollment {
   id: string
   enrollmentNumber: string | null
   firstName: string
+  middleName?: string | null
   lastName: string
+  photoUrl?: string | null
   status: string
   gradeId: string
   adjustedTuitionFee: number | null

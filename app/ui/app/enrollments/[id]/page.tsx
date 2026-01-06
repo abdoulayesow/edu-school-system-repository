@@ -366,10 +366,10 @@ export default function EnrollmentDetailPage({
 
         {/* Status Comment Alert */}
         {enrollment.statusComment && enrollment.status !== "draft" && (
-          <Card className="mb-6 border-l-4 border-l-primary">
+          <Card className="mb-6 border-l-4 border-l-amber-500">
             <CardContent className="pt-4">
               <div className="flex items-start gap-3">
-                <AlertCircle className="h-5 w-5 text-primary mt-0.5" />
+                <AlertCircle className="h-5 w-5 text-amber-500 mt-0.5" />
                 <div>
                   <p className="font-medium">
                     {locale === "fr" ? "Commentaire de statut" : "Status Comment"}
@@ -734,11 +734,7 @@ export default function EnrollmentDetailPage({
                         </div>
                         <div className="w-full bg-secondary rounded-full h-2">
                           <div
-                            className={`h-2 rounded-full transition-all ${
-                              enrollment.status === "needs_review"
-                                ? "bg-amber-500 dark:bg-amber-400"
-                                : "bg-primary"
-                            }`}
+                            className="h-2 rounded-full transition-all bg-amber-500 dark:bg-amber-400"
                             style={{ width: `${percentPaid}%` }}
                           />
                         </div>
@@ -764,7 +760,7 @@ export default function EnrollmentDetailPage({
                 <CardContent>
                   <div className="space-y-4">
                     {enrollment.notes.map((note) => (
-                      <div key={note.id} className="border-l-2 border-primary pl-4">
+                      <div key={note.id} className="border-l-2 border-amber-500 pl-4">
                         <p className="font-medium">{note.title}</p>
                         <p className="text-muted-foreground">{note.content}</p>
                         <p className="text-xs text-muted-foreground mt-1">
@@ -808,11 +804,7 @@ export default function EnrollmentDetailPage({
                 <Separator />
                 <div className="w-full bg-secondary rounded-full h-3">
                   <div
-                    className={`h-3 rounded-full transition-all ${
-                      enrollment.status === "needs_review"
-                        ? "bg-amber-500 dark:bg-amber-400"
-                        : "bg-primary"
-                    }`}
+                    className="h-3 rounded-full transition-all bg-amber-500 dark:bg-amber-400"
                     style={{ width: `${Math.min(100, (enrollment.totalPaid / enrollment.tuitionFee) * 100)}%` }}
                   />
                 </div>
@@ -829,7 +821,7 @@ export default function EnrollmentDetailPage({
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="flex items-start gap-3">
-                  <div className="w-2 h-2 rounded-full bg-primary mt-2" />
+                  <div className="w-2 h-2 rounded-full bg-amber-500 mt-2" />
                   <div>
                     <p className="font-medium">{locale === "fr" ? "Cree" : "Created"}</p>
                     <p className="text-sm text-muted-foreground">{formatDate(enrollment.createdAt)}</p>

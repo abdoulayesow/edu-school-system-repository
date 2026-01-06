@@ -458,7 +458,7 @@ export default function StudentsPage() {
               <div className="rounded-md border">
                 <Table>
                   <TableHeader>
-                    <TableRow className="bg-muted/50">
+                    <TableRow className="bg-yellow-50">
                       <TableHead className="w-[50px]"></TableHead>
                       <TableHead>{t.enrollments.fullName}</TableHead>
                       <TableHead>{t.enrollments.studentId}</TableHead>
