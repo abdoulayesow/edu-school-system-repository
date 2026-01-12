@@ -1,7 +1,8 @@
 "use client"
 
-import { useState, useEffect, useCallback, useRef } from "react"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { useState, useEffect, useRef } from "react"
+import { useRouter } from "next/navigation"
+import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -9,17 +10,8 @@ import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog"
-import {
   CheckCircle2,
   Clock,
-  AlertCircle,
   Loader2,
   BanknoteIcon,
   Smartphone,
@@ -30,8 +22,6 @@ import {
   Wallet,
   Search,
   X,
-  User,
-  Upload,
   TrendingUp,
   ArrowUpRight,
   Sparkles,
@@ -40,10 +30,10 @@ import {
 } from "lucide-react"
 import { useI18n } from "@/components/i18n-provider"
 import { PageContainer } from "@/components/layout"
-import { formatDate } from "@/lib/utils"
-import { usePayments, usePaymentStats, useGrades, useCreatePayment, useInvalidateQueries } from "@/lib/hooks/use-api"
+import { formatDate, cn } from "@/lib/utils"
+import { usePayments, usePaymentStats, useGrades } from "@/lib/hooks/use-api"
 import { getPaymentRowStatus } from "@/lib/status-helpers"
-import { cn } from "@/lib/utils"
+import { typography } from "@/lib/design-tokens"
 
 // Custom hook for counting animation
 function useCountUp(end: number, duration: number = 800, enabled: boolean = true) {
@@ -146,25 +136,9 @@ interface Grade {
   name: string
 }
 
-interface StudentSearchResult {
-  id: string
-  studentNumber: string
-  firstName: string
-  lastName: string
-  fullName: string
-  photoUrl?: string
-  grade?: { id: string; name: string }
-  enrollmentId?: string
-  balanceInfo?: {
-    tuitionFee: number
-    totalPaid: number
-    remainingBalance: number
-  }
-}
-
 export default function PaymentsPage() {
+  const router = useRouter()
   const { t, locale } = useI18n()
-  const invalidate = useInvalidateQueries()
 
   // Animation state
   const [hasAnimated, setHasAnimated] = useState(false)
@@ -190,33 +164,12 @@ export default function PaymentsPage() {
   })
   const { data: statsData, isLoading: isLoadingStats } = usePaymentStats()
   const { data: gradesData } = useGrades()
-  const createPaymentMutation = useCreatePayment()
 
   // Extract data from query results
   const payments = paymentsData?.payments ?? []
   const pagination = paymentsData?.pagination ?? { total: 0, limit: 20, offset: 0, hasMore: false }
   const stats = statsData ?? null
   const grades = gradesData?.grades ?? []
-
-  // Dialog state
-  const [openRecordPayment, setOpenRecordPayment] = useState(false)
-
-  // Student search state for Record Payment
-  const [studentSearchQuery, setStudentSearchQuery] = useState("")
-  const [studentSearchResults, setStudentSearchResults] = useState<StudentSearchResult[]>([])
-  const [isSearchingStudents, setIsSearchingStudents] = useState(false)
-  const [showSearchResults, setShowSearchResults] = useState(false)
-  const [selectedStudent, setSelectedStudent] = useState<StudentSearchResult | null>(null)
-  const searchTimeoutRef = useRef<NodeJS.Timeout | null>(null)
-  const searchContainerRef = useRef<HTMLDivElement>(null)
-
-  // Payment form state
-  const [paymentAmount, setPaymentAmount] = useState("")
-  const [paymentMethod, setPaymentMethod] = useState<"cash" | "orange_money" | "">("")
-  const [receiptNumber, setReceiptNumber] = useState("")
-  const [transactionRef, setTransactionRef] = useState("")
-  const [paymentNotes, setPaymentNotes] = useState("")
-  const isSubmittingPayment = createPaymentMutation.isPending
 
   // Trigger animations on mount
   useEffect(() => {
@@ -232,17 +185,6 @@ export default function PaymentsPage() {
     setOffset(0)
   }, [statusFilter, methodFilter, gradeFilter, startDate, endDate])
 
-  // Click outside handler for student search
-  useEffect(() => {
-    function handleClickOutside(event: MouseEvent) {
-      if (searchContainerRef.current && !searchContainerRef.current.contains(event.target as Node)) {
-        setShowSearchResults(false)
-      }
-    }
-    document.addEventListener("mousedown", handleClickOutside)
-    return () => document.removeEventListener("mousedown", handleClickOutside)
-  }, [])
-
   // Handle pagination
   const handleNextPage = () => {
     if (pagination.hasMore) {
@@ -255,110 +197,6 @@ export default function PaymentsPage() {
       setOffset(Math.max(0, pagination.offset - pagination.limit))
     }
   }
-
-  // Search students with debounce
-  const searchStudents = useCallback(async (query: string) => {
-    if (query.length < 2) {
-      setStudentSearchResults([])
-      setShowSearchResults(false)
-      return
-    }
-
-    setIsSearchingStudents(true)
-    try {
-      const response = await fetch(`/api/students/search?q=${encodeURIComponent(query)}&limit=10`)
-      if (!response.ok) throw new Error("Failed to search students")
-      const data = await response.json()
-      const activeStudents = (data.students || []).filter(
-        (s: StudentSearchResult) => s.enrollmentId && s.balanceInfo
-      )
-      setStudentSearchResults(activeStudents)
-      setShowSearchResults(true)
-    } catch (err) {
-      console.error("Error searching students:", err)
-      setStudentSearchResults([])
-    } finally {
-      setIsSearchingStudents(false)
-    }
-  }, [])
-
-  // Handle search input change with debounce
-  const handleSearchChange = useCallback((value: string) => {
-    setStudentSearchQuery(value)
-    if (searchTimeoutRef.current) {
-      clearTimeout(searchTimeoutRef.current)
-    }
-    searchTimeoutRef.current = setTimeout(() => {
-      searchStudents(value)
-    }, 300)
-  }, [searchStudents])
-
-  // Handle student selection
-  const handleSelectStudent = useCallback((student: StudentSearchResult) => {
-    setSelectedStudent(student)
-    setStudentSearchQuery("")
-    setShowSearchResults(false)
-    setStudentSearchResults([])
-  }, [])
-
-  // Clear selected student
-  const handleClearStudent = useCallback(() => {
-    setSelectedStudent(null)
-    setStudentSearchQuery("")
-  }, [])
-
-  // Reset payment form
-  const resetPaymentForm = useCallback(() => {
-    setSelectedStudent(null)
-    setStudentSearchQuery("")
-    setStudentSearchResults([])
-    setPaymentAmount("")
-    setPaymentMethod("")
-    setReceiptNumber("")
-    setTransactionRef("")
-    setPaymentNotes("")
-  }, [])
-
-  // Handle dialog close
-  const handleRecordPaymentDialogChange = useCallback((open: boolean) => {
-    setOpenRecordPayment(open)
-    if (!open) {
-      resetPaymentForm()
-    }
-  }, [resetPaymentForm])
-
-  // Submit payment
-  const handleSubmitPayment = useCallback(() => {
-    if (!selectedStudent?.enrollmentId || !paymentAmount || !paymentMethod || !receiptNumber) {
-      return
-    }
-
-    const amount = parseFloat(paymentAmount)
-    if (isNaN(amount) || amount <= 0) {
-      return
-    }
-
-    if (selectedStudent.balanceInfo && amount > selectedStudent.balanceInfo.remainingBalance) {
-      alert(`Le montant dépasse le solde restant de ${formatAmount(selectedStudent.balanceInfo.remainingBalance)}`)
-      return
-    }
-
-    createPaymentMutation.mutate({
-      enrollmentId: selectedStudent.enrollmentId,
-      amount,
-      method: paymentMethod,
-      notes: paymentNotes || undefined,
-    }, {
-      onSuccess: () => {
-        setOffset(0) // Reset to first page
-        handleRecordPaymentDialogChange(false)
-      },
-      onError: (err) => {
-        console.error("Error recording payment:", err)
-        alert(err instanceof Error ? err.message : "Erreur lors de l'enregistrement du paiement")
-      },
-    })
-  }, [selectedStudent, paymentAmount, paymentMethod, receiptNumber, paymentNotes, handleRecordPaymentDialogChange, createPaymentMutation])
 
   const getStatusBadge = (status: string) => {
     switch (status) {
@@ -461,229 +299,15 @@ export default function PaymentsPage() {
           </h1>
           <p className="text-muted-foreground mt-1">{t.accounting.paymentsPageSubtitle}</p>
         </div>
-        <Dialog open={openRecordPayment} onOpenChange={handleRecordPaymentDialogChange}>
-          <DialogTrigger asChild>
-            <Button variant="gold" size="lg" className="shadow-lg hover:shadow-xl transition-all duration-200 hover:-translate-y-0.5">
-              <Plus className="h-5 w-5 mr-2" />
-              {t.accounting.recordPayment}
-            </Button>
-          </DialogTrigger>
-          <DialogContent className="max-w-2xl">
-            <DialogHeader>
-              <DialogTitle>{t.accounting.recordNewPayment}</DialogTitle>
-              <DialogDescription>
-                {t.accounting.allFieldsRequired}
-              </DialogDescription>
-            </DialogHeader>
-            <div className="space-y-4 py-4">
-              {/* Student Search */}
-              <div className="space-y-2">
-                <Label>{t.common.student} *</Label>
-                {selectedStudent ? (
-                  <div className="p-4 rounded-lg border bg-primary/5 border-primary/30">
-                    <div className="flex items-start justify-between">
-                      <div className="flex items-center gap-3">
-                        <div className="size-10 rounded-full bg-primary/20 flex items-center justify-center">
-                          <User className="size-5 text-primary" />
-                        </div>
-                        <div>
-                          <p className="font-medium text-foreground">
-                            {selectedStudent.firstName} {selectedStudent.lastName}
-                          </p>
-                          <p className="text-sm text-muted-foreground">
-                            {selectedStudent.studentNumber} • {selectedStudent.grade?.name || "N/A"}
-                          </p>
-                        </div>
-                      </div>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={handleClearStudent}
-                        className="h-8 w-8 text-muted-foreground hover:text-foreground"
-                      >
-                        <X className="h-4 w-4" />
-                      </Button>
-                    </div>
-                    {selectedStudent.balanceInfo && (
-                      <div className="mt-3 pt-3 border-t grid grid-cols-3 gap-4 text-sm">
-                        <div>
-                          <p className="text-muted-foreground">Scolarité</p>
-                          <p className="font-medium">{formatAmount(selectedStudent.balanceInfo.tuitionFee)}</p>
-                        </div>
-                        <div>
-                          <p className="text-muted-foreground">Payé</p>
-                          <p className="font-medium text-success">{formatAmount(selectedStudent.balanceInfo.totalPaid)}</p>
-                        </div>
-                        <div>
-                          <p className="text-muted-foreground">Reste</p>
-                          <p className="font-medium text-warning">{formatAmount(selectedStudent.balanceInfo.remainingBalance)}</p>
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                ) : (
-                  <div ref={searchContainerRef} className="relative">
-                    <div className="relative">
-                      <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                      <Input
-                        placeholder={t.accounting.searchStudent}
-                        value={studentSearchQuery}
-                        onChange={(e) => handleSearchChange(e.target.value)}
-                        className="pl-10"
-                      />
-                      {isSearchingStudents && (
-                        <Loader2 className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 animate-spin text-muted-foreground" />
-                      )}
-                    </div>
-                    {showSearchResults && (
-                      <div className="absolute z-50 w-full mt-1 bg-popover border rounded-lg shadow-lg max-h-64 overflow-auto">
-                        {studentSearchResults.length === 0 ? (
-                          <div className="p-4 text-center text-sm text-muted-foreground">
-                            {studentSearchQuery.length < 2
-                              ? "Tapez au moins 2 caractères pour rechercher"
-                              : "Aucun élève actif trouvé"}
-                          </div>
-                        ) : (
-                          studentSearchResults.map((student) => (
-                            <button
-                              key={student.id}
-                              onClick={() => handleSelectStudent(student)}
-                              className="w-full p-3 text-left hover:bg-muted/50 flex items-center gap-3 border-b last:border-b-0"
-                            >
-                              <div className="size-8 rounded-full bg-muted flex items-center justify-center shrink-0">
-                                <User className="size-4 text-muted-foreground" />
-                              </div>
-                              <div className="flex-1 min-w-0">
-                                <p className="font-medium text-foreground truncate">
-                                  {student.firstName} {student.lastName}
-                                </p>
-                                <p className="text-xs text-muted-foreground">
-                                  {student.studentNumber} • {student.grade?.name || "N/A"}
-                                </p>
-                              </div>
-                              {student.balanceInfo && (
-                                <div className="text-right shrink-0">
-                                  <p className="text-xs text-muted-foreground">Reste</p>
-                                  <p className="text-sm font-medium text-warning">
-                                    {formatAmount(student.balanceInfo.remainingBalance)}
-                                  </p>
-                                </div>
-                              )}
-                            </button>
-                          ))
-                        )}
-                      </div>
-                    )}
-                  </div>
-                )}
-              </div>
-
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="amount">{t.accounting.amountGNF} *</Label>
-                  <Input
-                    id="amount"
-                    type="number"
-                    placeholder="800000"
-                    value={paymentAmount}
-                    onChange={(e) => setPaymentAmount(e.target.value)}
-                  />
-                  {selectedStudent?.balanceInfo && paymentAmount && parseFloat(paymentAmount) > selectedStudent.balanceInfo.remainingBalance && (
-                    <p className="text-xs text-destructive">
-                      Dépasse le solde restant de {formatAmount(selectedStudent.balanceInfo.remainingBalance)}
-                    </p>
-                  )}
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="paymentType">{t.accounting.paymentType} *</Label>
-                  <Select value={paymentMethod} onValueChange={(v) => setPaymentMethod(v as "cash" | "orange_money")}>
-                    <SelectTrigger id="paymentType">
-                      <SelectValue placeholder={t.common.select} />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="cash">{t.accounting.cash}</SelectItem>
-                      <SelectItem value="orange_money">{t.accounting.mobileMoney}</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="reference">{t.accounting.documentReference} *</Label>
-                <Input
-                  id="reference"
-                  placeholder={t.accounting.documentReferencePlaceholder}
-                  value={receiptNumber}
-                  onChange={(e) => setReceiptNumber(e.target.value)}
-                />
-                <p className="text-xs text-muted-foreground">
-                  {t.accounting.documentReferenceHint}
-                </p>
-              </div>
-
-              {paymentMethod === "orange_money" && (
-                <div className="space-y-2">
-                  <Label htmlFor="transactionRef">Référence transaction Orange Money</Label>
-                  <Input
-                    id="transactionRef"
-                    placeholder="Ex: OM123456789"
-                    value={transactionRef}
-                    onChange={(e) => setTransactionRef(e.target.value)}
-                  />
-                </div>
-              )}
-
-              <div className="space-y-2">
-                <Label htmlFor="document">{t.accounting.supportingDocument}</Label>
-                <div className="flex items-center gap-2">
-                  <Input id="document" type="file" accept=".pdf,.jpg,.jpeg,.png" className="flex-1" />
-                  <Button variant="outline" size="icon" className="bg-transparent shrink-0">
-                    <Upload className="h-4 w-4" />
-                  </Button>
-                </div>
-                <p className="text-xs text-muted-foreground flex items-center gap-1">
-                  <AlertCircle className="h-3 w-3" />
-                  {t.accounting.supportingDocumentHint}
-                </p>
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="notes">{t.accounting.notesOptional}</Label>
-                <Input
-                  id="notes"
-                  placeholder={t.accounting.notesPlaceholder}
-                  value={paymentNotes}
-                  onChange={(e) => setPaymentNotes(e.target.value)}
-                />
-              </div>
-
-              <div className="flex justify-end gap-3 pt-4">
-                <Button
-                  variant="outline"
-                  onClick={() => handleRecordPaymentDialogChange(false)}
-                  className="bg-transparent"
-                  disabled={isSubmittingPayment}
-                >
-                  {t.common.cancel}
-                </Button>
-                <Button
-                  onClick={handleSubmitPayment}
-                  disabled={
-                    isSubmittingPayment ||
-                    !selectedStudent?.enrollmentId ||
-                    !paymentAmount ||
-                    !paymentMethod ||
-                    !receiptNumber ||
-                    (selectedStudent?.balanceInfo && parseFloat(paymentAmount) > selectedStudent.balanceInfo.remainingBalance)
-                  }
-                >
-                  {isSubmittingPayment && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
-                  {t.accounting.savePayment}
-                </Button>
-              </div>
-            </div>
-          </DialogContent>
-        </Dialog>
+        <Button
+          variant="gold"
+          size="lg"
+          className="shadow-lg hover:shadow-xl transition-all duration-200 hover:-translate-y-0.5"
+          onClick={() => router.push("/payments/new")}
+        >
+          <Plus className="h-5 w-5 mr-2" />
+          {t.accounting.recordPayment}
+        </Button>
       </div>
 
       {/* Hero Stats Section - Redesigned with Animations */}
@@ -1180,7 +804,10 @@ export default function PaymentsPage() {
                             </div>
                           </TableCell>
                           <TableCell className="text-right">
-                            <span className="font-accent text-lg font-bold tabular-nums transition-colors duration-200 group-hover:text-primary">
+                            <span className={cn(
+                              typography.currency.sm,
+                              "transition-colors duration-200 group-hover:text-primary drop-shadow-sm"
+                            )}>
                               {formatAmount(payment.amount)}
                             </span>
                           </TableCell>

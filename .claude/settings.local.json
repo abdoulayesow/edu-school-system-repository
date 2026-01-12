@@ -51,7 +51,8 @@
       "Bash(git commit -m \"$\\(cat <<''EOF''\nfeat\\(ui\\): Complete yellow theme for enrollment wizard\n\n- Update grade selection cards to use amber theme \\(border, ring, checkmark\\)\n- Change tuition fee text in grade summary to amber\n- Update notes section background to light yellow in review step\n\n🤖 Generated with [Claude Code]\\(https://claude.com/claude-code\\)\n\nCo-Authored-By: Claude Sonnet 4.5 <noreply@anthropic.com>\nEOF\n\\)\")",
       "Skill(frontend-design)",
       "Skill(frontend-design:*)",
-      "Bash(npx ts-node:*)"
+      "Bash(npx ts-node:*)",
+      "Bash(git -C \"c:/workspace/sources/edu-school-system-repository\" status --short)"
     ],
     "additionalDirectories": [
       "c:\\workspace\\sources\\edu-school-system-repository"

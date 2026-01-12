@@ -1278,6 +1278,9 @@ export const fr = {
     statusInactive: "Inactif",
     statusTransferred: "Transféré",
     statusGraduated: "Diplômé",
+
+    // Actions
+    makePayment: "Effectuer un paiement",
   },
 
   // Enhanced attendance
@@ -2305,6 +2308,67 @@ export const fr = {
 
   // Navigation
   safe: "Caisse",
+
+  // Payment Wizard
+  paymentWizard: {
+    // Page
+    title: "Nouveau paiement",
+    description: "Enregistrer un paiement de scolarité",
+
+    // Steps
+    step1: "Élève",
+    step2: "Échéancier",
+    step3: "Paiement",
+    step4: "Vérification",
+    step5: "Terminé",
+
+    // Step 1 - Student Selection
+    searchStudent: "Rechercher un élève",
+    searchPlaceholder: "Entrez le nom ou le numéro de l'élève...",
+    noStudentSelected: "Aucun élève sélectionné",
+    searchToSelect: "Recherchez ci-dessus pour trouver et sélectionner un élève",
+    remainingBalance: "Solde restant",
+    totalPaid: "Total payé",
+
+    // Step 2 - Payment Schedule
+    paymentSchedules: "Échéancier de paiement",
+    paymentHistory: "Historique des paiements",
+
+    // Step 3 - Payment Entry
+    paymentMethod: "Mode de paiement",
+    amount: "Montant",
+    receiptNumber: "Numéro de reçu",
+    transactionRef: "Référence de transaction",
+    payerInfo: "Informations du payeur",
+    payerType: "Relation",
+    payerName: "Nom du payeur",
+    payerPhone: "Téléphone",
+    payerEmail: "Email",
+    notes: "Notes",
+
+    // Step 4 - Review
+    reviewTitle: "Vérification du paiement",
+    student: "Élève",
+    payment: "Paiement",
+    payer: "Payeur",
+    grade: "Classe",
+
+    // Step 5 - Completion
+    paymentSummary: "Résumé du paiement",
+    newBalance: "Nouveau solde",
+    downloadReceipt: "Télécharger le reçu",
+    printReceipt: "Imprimer le reçu",
+    recordAnother: "Enregistrer un autre paiement",
+    viewStudent: "Voir le profil de l'élève",
+    date: "Date",
+
+    // Navigation
+    back: "Retour",
+    next: "Continuer",
+    submit: "Soumettre le paiement",
+    submitting: "Enregistrement...",
+    cancel: "Annuler",
+  },
 } as const;
 
 type TranslationTree = { [key: string]: string | TranslationTree };

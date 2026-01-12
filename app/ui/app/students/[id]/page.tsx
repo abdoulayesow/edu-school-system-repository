@@ -39,6 +39,7 @@ import {
   ExternalLink,
   FileText,
   UserCheck,
+  Banknote,
 } from "lucide-react"
 import { useI18n } from "@/components/i18n-provider"
 import { PageContainer } from "@/components/layout/PageContainer"
@@ -430,6 +431,20 @@ export default function StudentDetailPage() {
             </div>
           </div>
 
+          {/* Action Buttons */}
+          <div className="flex gap-2">
+            <Link href={`/payments/new?studentId=${student.id}`}>
+              <Button
+                variant="gold"
+                size="lg"
+                className="gap-2 shadow-md hover:shadow-lg transition-all"
+                disabled={!student.balanceInfo || student.balanceInfo.remainingBalance <= 0}
+              >
+                <Banknote className="size-5" />
+                {t.students.makePayment}
+              </Button>
+            </Link>
+          </div>
         </div>
 
         {/* Stats Cards */}

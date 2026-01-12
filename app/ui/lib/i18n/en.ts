@@ -1280,6 +1280,9 @@ export const en: TranslationKeys = {
     statusInactive: "Inactive",
     statusTransferred: "Transferred",
     statusGraduated: "Graduated",
+
+    // Actions
+    makePayment: "Make Payment",
   },
 
   // Enhanced attendance
@@ -2307,4 +2310,65 @@ export const en: TranslationKeys = {
 
   // Navigation
   safe: "Safe",
+
+  // Payment Wizard
+  paymentWizard: {
+    // Page
+    title: "New Payment",
+    description: "Record a tuition payment",
+
+    // Steps
+    step1: "Student",
+    step2: "Schedule",
+    step3: "Payment",
+    step4: "Review",
+    step5: "Complete",
+
+    // Step 1 - Student Selection
+    searchStudent: "Search for a student",
+    searchPlaceholder: "Enter student name or number...",
+    noStudentSelected: "No student selected",
+    searchToSelect: "Search above to find and select a student",
+    remainingBalance: "Remaining Balance",
+    totalPaid: "Total Paid",
+
+    // Step 2 - Payment Schedule
+    paymentSchedules: "Payment Schedules",
+    paymentHistory: "Payment History",
+
+    // Step 3 - Payment Entry
+    paymentMethod: "Payment Method",
+    amount: "Amount",
+    receiptNumber: "Receipt Number",
+    transactionRef: "Transaction Reference",
+    payerInfo: "Payer Information",
+    payerType: "Relationship",
+    payerName: "Payer Name",
+    payerPhone: "Phone",
+    payerEmail: "Email",
+    notes: "Notes",
+
+    // Step 4 - Review
+    reviewTitle: "Review Payment Details",
+    student: "Student",
+    payment: "Payment",
+    payer: "Payer",
+    grade: "Grade",
+
+    // Step 5 - Completion
+    paymentSummary: "Payment Summary",
+    newBalance: "New Balance",
+    downloadReceipt: "Download Receipt",
+    printReceipt: "Print Receipt",
+    recordAnother: "Record Another Payment",
+    viewStudent: "View Student Profile",
+    date: "Date",
+
+    // Navigation
+    back: "Back",
+    next: "Continue",
+    submit: "Submit Payment",
+    submitting: "Submitting...",
+    cancel: "Cancel",
+  },
 } as const;

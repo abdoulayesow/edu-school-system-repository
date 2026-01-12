@@ -19,7 +19,7 @@ export async function GET(req: NextRequest, { params }: RouteParams) {
   const schoolYearId = searchParams.get("schoolYearId")
 
   try {
-    // Get student with enrollments
+    // Get student basic info (middleName, gender, phone come from enrollment)
     const student = await prisma.student.findUnique({
       where: { id },
       select: {
@@ -27,6 +27,8 @@ export async function GET(req: NextRequest, { params }: RouteParams) {
         firstName: true,
         lastName: true,
         studentNumber: true,
+        dateOfBirth: true,
+        email: true,
       },
     })
 
@@ -133,12 +135,34 @@ export async function GET(req: NextRequest, { params }: RouteParams) {
     })
 
     return NextResponse.json({
-      student,
+      // Merge student basic info with enrollment-specific info (middleName, gender, phone, photoUrl)
+      student: {
+        ...student,
+        middleName: enrollment.middleName,
+        gender: enrollment.gender,
+        phone: enrollment.phone,
+        photoUrl: enrollment.photoUrl,
+        dateOfBirth: enrollment.dateOfBirth || student.dateOfBirth,
+      },
       enrollment: {
         id: enrollment.id,
         enrollmentNumber: enrollment.enrollmentNumber,
         grade: enrollment.grade,
         schoolYear: enrollment.schoolYear,
+        // Parent/Guardian information
+        fatherName: enrollment.fatherName,
+        fatherPhone: enrollment.fatherPhone,
+        fatherEmail: enrollment.fatherEmail,
+        motherName: enrollment.motherName,
+        motherPhone: enrollment.motherPhone,
+        motherEmail: enrollment.motherEmail,
+        address: enrollment.address,
+        // Enrolling person
+        enrollingPersonType: enrollment.enrollingPersonType,
+        enrollingPersonName: enrollment.enrollingPersonName,
+        enrollingPersonRelation: enrollment.enrollingPersonRelation,
+        enrollingPersonPhone: enrollment.enrollingPersonPhone,
+        enrollingPersonEmail: enrollment.enrollingPersonEmail,
       },
       balance: {
         tuitionFee,

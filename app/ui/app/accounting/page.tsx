@@ -9,7 +9,6 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import {
   CheckCircle2,
   Clock,
-  AlertCircle,
   Loader2,
   Wallet,
   TrendingUp,
@@ -35,7 +34,7 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import Link from "next/link"
-import { PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip } from "recharts"
+import { PieChart, Pie, ResponsiveContainer, Legend, Tooltip } from "recharts"
 import { useI18n } from "@/components/i18n-provider"
 import { PageContainer } from "@/components/layout"
 import { formatDate } from "@/lib/utils"
@@ -47,6 +46,8 @@ import { MobileMoneyFeeDialog } from "@/components/treasury/mobile-money-fee-dia
 import { DailyOpeningDialog } from "@/components/treasury/daily-opening-dialog"
 import { DailyClosingDialog } from "@/components/treasury/daily-closing-dialog"
 import { SafeTransferDialog } from "@/components/treasury/safe-transfer-dialog"
+import { typography, gradients, interactive } from "@/lib/design-tokens"
+import { cn } from "@/lib/utils"
 
 // =============================================================================
 // CUSTOM HOOK: useCountUp - Animated number counting
@@ -464,9 +465,9 @@ export default function AccountingPage() {
         </Button>
       </div>
 
-      {/* KPI Cards - Always visible */}
+      {/* KPI Cards - Enhanced with gradients */}
       <div
-        className="grid gap-4 md:grid-cols-4 mb-6"
+        className="grid gap-5 md:grid-cols-4 mb-8"
         style={{
           opacity: isMounted ? 1 : 0,
           transform: isMounted ? "translateY(0)" : "translateY(10px)",
@@ -474,23 +475,31 @@ export default function AccountingPage() {
         }}
       >
         <Card
+          className={cn(
+            "border shadow-md overflow-hidden relative",
+            interactive.card,
+            "hover:shadow-emerald-500/10"
+          )}
           style={{
             opacity: isMounted ? 1 : 0,
             transform: isMounted ? "translateY(0)" : "translateY(10px)",
             transition: "opacity 0.5s ease-out 0.1s, transform 0.5s ease-out 0.1s",
           }}
         >
-          <CardHeader className="pb-3">
-            <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
-              <TrendingUp className="size-4 text-success" />
+          <div className="absolute inset-0 bg-gradient-to-br from-emerald-50/50 to-transparent dark:from-emerald-950/20 pointer-events-none" />
+          <CardHeader className="pb-3 relative">
+            <CardTitle className="text-xs font-semibold text-muted-foreground flex items-center gap-2 uppercase tracking-wider">
+              <div className="p-1.5 rounded-lg bg-emerald-100 dark:bg-emerald-900/30">
+                <TrendingUp className="size-3.5 text-emerald-600 dark:text-emerald-400" />
+              </div>
               Paiements confirmés
             </CardTitle>
           </CardHeader>
-          <CardContent>
+          <CardContent className="relative">
             {isLoadingBalance ? (
               <Loader2 className="size-5 animate-spin text-muted-foreground" />
             ) : (
-              <div className="text-2xl font-bold text-success">
+              <div className={cn(typography.currency.md, "text-emerald-600 dark:text-emerald-400")}>
                 {formatAmount(balanceData?.summary.totalConfirmedPayments || 0)}
               </div>
             )}
@@ -498,23 +507,31 @@ export default function AccountingPage() {
         </Card>
 
         <Card
+          className={cn(
+            "border shadow-md overflow-hidden relative",
+            interactive.card,
+            "hover:shadow-amber-500/10"
+          )}
           style={{
             opacity: isMounted ? 1 : 0,
             transform: isMounted ? "translateY(0)" : "translateY(10px)",
             transition: "opacity 0.5s ease-out 0.2s, transform 0.5s ease-out 0.2s",
           }}
         >
-          <CardHeader className="pb-3">
-            <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
-              <Clock className="size-4 text-warning" />
-              Paiements en attente
+          <div className="absolute inset-0 bg-gradient-to-br from-amber-50/50 to-transparent dark:from-amber-950/20 pointer-events-none" />
+          <CardHeader className="pb-3 relative">
+            <CardTitle className="text-xs font-semibold text-muted-foreground flex items-center gap-2 uppercase tracking-wider">
+              <div className="p-1.5 rounded-lg bg-amber-100 dark:bg-amber-900/30">
+                <Clock className="size-3.5 text-amber-600 dark:text-amber-400" />
+              </div>
+              En attente
             </CardTitle>
           </CardHeader>
-          <CardContent>
+          <CardContent className="relative">
             {isLoadingBalance ? (
               <Loader2 className="size-5 animate-spin text-muted-foreground" />
             ) : (
-              <div className="text-2xl font-bold text-warning">
+              <div className={cn(typography.currency.md, "text-amber-600 dark:text-amber-400")}>
                 {formatAmount(balanceData?.summary.totalPendingPayments || 0)}
               </div>
             )}
@@ -522,23 +539,31 @@ export default function AccountingPage() {
         </Card>
 
         <Card
+          className={cn(
+            "border shadow-md overflow-hidden relative",
+            interactive.card,
+            "hover:shadow-red-500/10"
+          )}
           style={{
             opacity: isMounted ? 1 : 0,
             transform: isMounted ? "translateY(0)" : "translateY(10px)",
             transition: "opacity 0.5s ease-out 0.3s, transform 0.5s ease-out 0.3s",
           }}
         >
-          <CardHeader className="pb-3">
-            <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
-              <TrendingDown className="size-4 text-destructive" />
-              Dépenses payées
+          <div className="absolute inset-0 bg-gradient-to-br from-red-50/50 to-transparent dark:from-red-950/20 pointer-events-none" />
+          <CardHeader className="pb-3 relative">
+            <CardTitle className="text-xs font-semibold text-muted-foreground flex items-center gap-2 uppercase tracking-wider">
+              <div className="p-1.5 rounded-lg bg-red-100 dark:bg-red-900/30">
+                <TrendingDown className="size-3.5 text-red-600 dark:text-red-400" />
+              </div>
+              Dépenses
             </CardTitle>
           </CardHeader>
-          <CardContent>
+          <CardContent className="relative">
             {isLoadingBalance ? (
               <Loader2 className="size-5 animate-spin text-muted-foreground" />
             ) : (
-              <div className="text-2xl font-bold text-destructive">
+              <div className={cn(typography.currency.md, "text-red-600 dark:text-red-400")}>
                 {formatAmount(balanceData?.summary.totalPaidExpenses || 0)}
               </div>
             )}
@@ -546,24 +571,31 @@ export default function AccountingPage() {
         </Card>
 
         <Card
-          className="border-primary/30 bg-primary/5"
+          className={cn(
+            "border-2 border-primary/40 shadow-lg overflow-hidden relative",
+            interactive.cardEnhanced,
+            "hover:shadow-primary/20"
+          )}
           style={{
             opacity: isMounted ? 1 : 0,
             transform: isMounted ? "translateY(0)" : "translateY(10px)",
             transition: "opacity 0.5s ease-out 0.4s, transform 0.5s ease-out 0.4s",
           }}
         >
-          <CardHeader className="pb-3">
-            <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
-              <Wallet className="size-4 text-primary" />
+          <div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-primary/5 to-transparent pointer-events-none" />
+          <CardHeader className="pb-3 relative">
+            <CardTitle className="text-xs font-semibold text-muted-foreground flex items-center gap-2 uppercase tracking-wider">
+              <div className="p-1.5 rounded-lg bg-primary/20">
+                <Wallet className="size-3.5 text-primary" />
+              </div>
               Marge nette
             </CardTitle>
           </CardHeader>
-          <CardContent>
+          <CardContent className="relative">
             {isLoadingBalance ? (
               <Loader2 className="size-5 animate-spin text-muted-foreground" />
             ) : (
-              <div className="text-2xl font-bold text-primary">
+              <div className={cn(typography.currency.md, "text-primary")}>
                 {formatAmount(balanceData?.summary.margin || 0)}
               </div>
             )}
@@ -609,36 +641,61 @@ export default function AccountingPage() {
           {/* REGISTRY (CAISSE) TAB - Daily working cash */}
           {/* ================================================================= */}
           <TabsContent value="registry" className="space-y-6">
-            {/* Big Registry Balance Display */}
-            <Card className="border-green-200 dark:border-green-800 bg-green-50 dark:bg-green-950/20 border-2">
-              <CardContent className="pt-6 pb-6">
-                <div className="text-center space-y-3">
-                  {/* Registry Status Indicator */}
-                  <div className="flex items-center justify-center gap-2">
-                    <Wallet className="h-5 w-5 text-green-600" />
-                    <span className="text-sm font-medium text-green-600 dark:text-green-400">
+            {/* Big Registry Balance Display - Enhanced */}
+            <Card className={cn(
+              "border-2 shadow-xl overflow-hidden relative",
+              gradients.registry.light,
+              gradients.registry.dark,
+              gradients.registry.border,
+              interactive.cardEnhanced,
+              gradients.registry.glow
+            )}>
+              {/* Decorative gradient overlay */}
+              <div className="absolute inset-0 bg-gradient-to-br from-emerald-500/5 via-transparent to-teal-500/5 pointer-events-none" />
+
+              <CardContent className="pt-8 pb-8 relative">
+                <div className="text-center space-y-4">
+                  {/* Registry Status Indicator - Enhanced */}
+                  <div className="flex items-center justify-center gap-3">
+                    <div className={cn(
+                      "p-2.5 rounded-xl bg-emerald-100 dark:bg-emerald-900/30",
+                      "ring-2 ring-emerald-200 dark:ring-emerald-800",
+                      "transition-transform duration-300 hover:scale-110"
+                    )}>
+                      <Wallet className="h-6 w-6 text-emerald-600 dark:text-emerald-400" />
+                    </div>
+                    <span className={cn(
+                      "text-sm font-semibold uppercase tracking-wider",
+                      gradients.registry.text
+                    )}>
                       {reg.registryOfTheDay}
                     </span>
                   </div>
 
-                  {/* THE BIG NUMBER with animation */}
-                  <div className="space-y-1">
+                  {/* THE BIG NUMBER with enhanced animation */}
+                  <div className="space-y-2">
                     {isLoadingTreasury ? (
                       <Loader2 className="h-12 w-12 mx-auto animate-spin text-muted-foreground" />
                     ) : (
                       <>
-                        <p className="text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight tabular-nums text-green-600">
+                        <p className={cn(
+                          typography.currency.hero,
+                          "text-emerald-600 dark:text-emerald-400",
+                          "drop-shadow-sm"
+                        )}>
                           {formatCurrency(animatedRegistryBalance)}
                         </p>
-                        <p className="text-lg text-muted-foreground">GNF</p>
+                        <p className="text-xl font-medium text-emerald-600/60 dark:text-emerald-400/60">GNF</p>
                       </>
                     )}
                   </div>
 
-                  {/* Label */}
-                  <p className="text-base font-medium text-muted-foreground">
-                    {reg.registryBalance} ({reg.workingCash})
-                  </p>
+                  {/* Label - Enhanced */}
+                  <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-emerald-100/50 dark:bg-emerald-900/20 border border-emerald-200 dark:border-emerald-800">
+                    <p className="text-sm font-semibold text-emerald-700 dark:text-emerald-300">
+                      {reg.registryBalance} ({reg.workingCash})
+                    </p>
+                  </div>
 
                   {/* Float Information */}
                   {!isLoadingTreasury && treasuryBalance && treasuryBalance.registryBalance > 0 && (
@@ -862,33 +919,61 @@ export default function AccountingPage() {
           {/* SAFE (COFFRE FORT) TAB - Secure storage */}
           {/* ================================================================= */}
           <TabsContent value="safe" className="space-y-6">
-            {/* Safe Balance Display */}
-            <Card className="border-amber-200 dark:border-amber-800 bg-amber-50 dark:bg-amber-950/20 border-2">
-              <CardContent className="pt-6 pb-6">
-                <div className="text-center space-y-3">
-                  <div className="flex items-center justify-center gap-2">
-                    <BanknoteIcon className="h-5 w-5 text-amber-600" />
-                    <span className="text-sm font-medium text-amber-600 dark:text-amber-400">
+            {/* Safe Balance Display - Enhanced */}
+            <Card className={cn(
+              "border-2 shadow-xl overflow-hidden relative",
+              gradients.safe.light,
+              gradients.safe.dark,
+              gradients.safe.border,
+              interactive.cardEnhanced,
+              gradients.safe.glow
+            )}>
+              {/* Decorative gradient overlay */}
+              <div className="absolute inset-0 bg-gradient-to-br from-amber-500/5 via-transparent to-yellow-500/5 pointer-events-none" />
+
+              <CardContent className="pt-8 pb-8 relative">
+                <div className="text-center space-y-4">
+                  {/* Safe Header - Enhanced */}
+                  <div className="flex items-center justify-center gap-3">
+                    <div className={cn(
+                      "p-2.5 rounded-xl bg-amber-100 dark:bg-amber-900/30",
+                      "ring-2 ring-amber-200 dark:ring-amber-800",
+                      "transition-transform duration-300 hover:scale-110"
+                    )}>
+                      <BanknoteIcon className="h-6 w-6 text-amber-600 dark:text-amber-400" />
+                    </div>
+                    <span className={cn(
+                      "text-sm font-semibold uppercase tracking-wider",
+                      gradients.safe.text
+                    )}>
                       {locale === "fr" ? "Coffre Fort" : "Safe"}
                     </span>
                   </div>
 
-                  <div className="space-y-1">
+                  {/* THE BIG NUMBER with enhanced animation */}
+                  <div className="space-y-2">
                     {isLoadingTreasury ? (
                       <Loader2 className="h-12 w-12 mx-auto animate-spin text-muted-foreground" />
                     ) : (
                       <>
-                        <p className="text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight tabular-nums text-amber-600">
+                        <p className={cn(
+                          typography.currency.hero,
+                          "text-amber-600 dark:text-amber-400",
+                          "drop-shadow-sm"
+                        )}>
                           {formatCurrency(animatedSafeBalance)}
                         </p>
-                        <p className="text-lg text-muted-foreground">GNF</p>
+                        <p className="text-xl font-medium text-amber-600/60 dark:text-amber-400/60">GNF</p>
                       </>
                     )}
                   </div>
 
-                  <p className="text-base font-medium text-muted-foreground">
-                    {locale === "fr" ? "Solde Coffre Fort" : "Safe Balance"}
-                  </p>
+                  {/* Label - Enhanced */}
+                  <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-amber-100/50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800">
+                    <p className="text-sm font-semibold text-amber-700 dark:text-amber-300">
+                      {locale === "fr" ? "Solde Coffre Fort" : "Safe Balance"}
+                    </p>
+                  </div>
 
                   {/* Safe status indicator */}
                   {!isLoadingTreasury && treasuryBalance && (
@@ -1113,33 +1198,61 @@ export default function AccountingPage() {
           {/* BANK TAB - Bank balance and transfers */}
           {/* ================================================================= */}
           <TabsContent value="bank" className="space-y-6">
-            {/* Bank Balance Display */}
-            <Card className="border-blue-200 dark:border-blue-800 bg-blue-50 dark:bg-blue-950/20 border-2">
-              <CardContent className="pt-6 pb-6">
-                <div className="text-center space-y-3">
-                  <div className="flex items-center justify-center gap-2">
-                    <Building2 className="h-5 w-5 text-blue-600" />
-                    <span className="text-sm font-medium text-blue-600 dark:text-blue-400">
+            {/* Bank Balance Display - Enhanced */}
+            <Card className={cn(
+              "border-2 shadow-xl overflow-hidden relative",
+              gradients.bank.light,
+              gradients.bank.dark,
+              gradients.bank.border,
+              interactive.cardEnhanced,
+              gradients.bank.glow
+            )}>
+              {/* Decorative gradient overlay */}
+              <div className="absolute inset-0 bg-gradient-to-br from-blue-500/5 via-transparent to-indigo-500/5 pointer-events-none" />
+
+              <CardContent className="pt-8 pb-8 relative">
+                <div className="text-center space-y-4">
+                  {/* Bank Header - Enhanced */}
+                  <div className="flex items-center justify-center gap-3">
+                    <div className={cn(
+                      "p-2.5 rounded-xl bg-blue-100 dark:bg-blue-900/30",
+                      "ring-2 ring-blue-200 dark:ring-blue-800",
+                      "transition-transform duration-300 hover:scale-110"
+                    )}>
+                      <Building2 className="h-6 w-6 text-blue-600 dark:text-blue-400" />
+                    </div>
+                    <span className={cn(
+                      "text-sm font-semibold uppercase tracking-wider",
+                      gradients.bank.text
+                    )}>
                       Compte Bancaire
                     </span>
                   </div>
 
-                  <div className="space-y-1">
+                  {/* THE BIG NUMBER with enhanced animation */}
+                  <div className="space-y-2">
                     {isLoadingTreasury ? (
                       <Loader2 className="h-12 w-12 mx-auto animate-spin text-muted-foreground" />
                     ) : (
                       <>
-                        <p className="text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight tabular-nums text-blue-600">
+                        <p className={cn(
+                          typography.currency.hero,
+                          "text-blue-600 dark:text-blue-400",
+                          "drop-shadow-sm"
+                        )}>
                           {formatCurrency(animatedBankBalance)}
                         </p>
-                        <p className="text-lg text-muted-foreground">GNF</p>
+                        <p className="text-xl font-medium text-blue-600/60 dark:text-blue-400/60">GNF</p>
                       </>
                     )}
                   </div>
 
-                  <p className="text-base font-medium text-muted-foreground">
-                    Solde Banque
-                  </p>
+                  {/* Label - Enhanced */}
+                  <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-blue-100/50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800">
+                    <p className="text-sm font-semibold text-blue-700 dark:text-blue-300">
+                      Solde Banque
+                    </p>
+                  </div>
                 </div>
               </CardContent>
             </Card>
@@ -1221,33 +1334,61 @@ export default function AccountingPage() {
           {/* MOBILE MONEY TAB - New tab for Orange Money balance and transactions */}
           {/* ================================================================= */}
           <TabsContent value="mobile-money" className="space-y-6">
-            {/* Mobile Money Balance Display */}
-            <Card className="border-orange-200 dark:border-orange-800 bg-orange-50 dark:bg-orange-950/20 border-2">
-              <CardContent className="pt-6 pb-6">
-                <div className="text-center space-y-3">
-                  <div className="flex items-center justify-center gap-2">
-                    <Smartphone className="h-5 w-5 text-orange-600" />
-                    <span className="text-sm font-medium text-orange-600 dark:text-orange-400">
+            {/* Mobile Money Balance Display - Enhanced */}
+            <Card className={cn(
+              "border-2 shadow-xl overflow-hidden relative",
+              gradients.mobileMoney.light,
+              gradients.mobileMoney.dark,
+              gradients.mobileMoney.border,
+              interactive.cardEnhanced,
+              gradients.mobileMoney.glow
+            )}>
+              {/* Decorative gradient overlay */}
+              <div className="absolute inset-0 bg-gradient-to-br from-orange-500/5 via-transparent to-amber-500/5 pointer-events-none" />
+
+              <CardContent className="pt-8 pb-8 relative">
+                <div className="text-center space-y-4">
+                  {/* Mobile Money Header - Enhanced */}
+                  <div className="flex items-center justify-center gap-3">
+                    <div className={cn(
+                      "p-2.5 rounded-xl bg-orange-100 dark:bg-orange-900/30",
+                      "ring-2 ring-orange-200 dark:ring-orange-800",
+                      "transition-transform duration-300 hover:scale-110"
+                    )}>
+                      <Smartphone className="h-6 w-6 text-orange-600 dark:text-orange-400" />
+                    </div>
+                    <span className={cn(
+                      "text-sm font-semibold uppercase tracking-wider",
+                      gradients.mobileMoney.text
+                    )}>
                       Orange Money
                     </span>
                   </div>
 
-                  <div className="space-y-1">
+                  {/* THE BIG NUMBER with enhanced animation */}
+                  <div className="space-y-2">
                     {isLoadingTreasury ? (
                       <Loader2 className="h-12 w-12 mx-auto animate-spin text-muted-foreground" />
                     ) : (
                       <>
-                        <p className="text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight tabular-nums text-orange-600">
+                        <p className={cn(
+                          typography.currency.hero,
+                          "text-orange-600 dark:text-orange-400",
+                          "drop-shadow-sm"
+                        )}>
                           {formatCurrency(animatedMobileMoneyBalance)}
                         </p>
-                        <p className="text-lg text-muted-foreground">GNF</p>
+                        <p className="text-xl font-medium text-orange-600/60 dark:text-orange-400/60">GNF</p>
                       </>
                     )}
                   </div>
 
-                  <p className="text-base font-medium text-muted-foreground">
-                    Solde Orange Money
-                  </p>
+                  {/* Label - Enhanced */}
+                  <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-orange-100/50 dark:bg-orange-900/20 border border-orange-200 dark:border-orange-800">
+                    <p className="text-sm font-semibold text-orange-700 dark:text-orange-300">
+                      Solde Orange Money
+                    </p>
+                  </div>
                 </div>
               </CardContent>
             </Card>
