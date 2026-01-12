@@ -28,6 +28,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog"
+import { Alert, AlertDescription } from "@/components/ui/alert"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -54,7 +55,8 @@ import {
   Users,
   Truck,
   Phone,
-  HelpCircle
+  HelpCircle,
+  AlertCircle
 } from "lucide-react"
 import { useI18n } from "@/components/i18n-provider"
 import { PageContainer } from "@/components/layout"
@@ -111,6 +113,22 @@ export default function ExpensesPage() {
     setIsMounted(true)
   }, [])
 
+  // Fetch safe balance
+  useEffect(() => {
+    async function fetchSafeBalance() {
+      try {
+        const res = await fetch('/api/treasury/balance')
+        if (res.ok) {
+          const data = await res.json()
+          setSafeBalance(data.safeBalance)
+        }
+      } catch (error) {
+        console.error('Failed to fetch safe balance:', error)
+      }
+    }
+    fetchSafeBalance()
+  }, [])
+
   // Filter states
   const [searchQuery, setSearchQuery] = useState("")
   const [statusFilter, setStatusFilter] = useState<string>("all")
@@ -119,6 +137,9 @@ export default function ExpensesPage() {
   // Pagination state
   const [offset, setOffset] = useState(0)
   const [limit, setLimit] = useState(ITEMS_PER_PAGE)
+
+  // Safe balance state
+  const [safeBalance, setSafeBalance] = useState<number | null>(null)
 
   // Reset offset when filters change
   useEffect(() => {
@@ -794,11 +815,47 @@ export default function ExpensesPage() {
                   </div>
                 )}
                 {actionType === "mark_paid" && (
-                  <>
-                    {t.expenses.confirmMarkPaidExpenseAmount}{" "}
-                    <strong>{selectedExpense && formatCurrency(selectedExpense.amount)}</strong>{" "}
-                    {t.expenses.confirmMarkPaidExpenseAmountEnd}
-                  </>
+                  <div className="space-y-3">
+                    <p>
+                      {t.expenses.confirmMarkPaidExpenseAmount}{" "}
+                      <strong>{selectedExpense && formatCurrency(selectedExpense.amount)}</strong>{" "}
+                      {t.expenses.confirmMarkPaidExpenseAmountEnd}
+                    </p>
+
+                    {safeBalance !== null && selectedExpense && (
+                      <div className="rounded-md border p-3 space-y-2 bg-muted/50">
+                        <div className="flex justify-between text-sm">
+                          <span className="text-muted-foreground">Solde caisse actuel:</span>
+                          <span className="font-medium">{formatCurrency(safeBalance)}</span>
+                        </div>
+                        <div className="flex justify-between text-sm">
+                          <span className="text-muted-foreground">Montant à déduire:</span>
+                          <span className="font-medium text-destructive">
+                            -{formatCurrency(selectedExpense.amount)}
+                          </span>
+                        </div>
+                        <div className="border-t pt-2 flex justify-between text-sm font-semibold">
+                          <span>Nouveau solde:</span>
+                          <span className={
+                            safeBalance - selectedExpense.amount < 0
+                              ? 'text-destructive'
+                              : 'text-success'
+                          }>
+                            {formatCurrency(safeBalance - selectedExpense.amount)}
+                          </span>
+                        </div>
+
+                        {safeBalance < selectedExpense.amount && (
+                          <Alert variant="destructive" className="mt-2">
+                            <AlertCircle className="h-4 w-4" />
+                            <AlertDescription className="text-xs">
+                              Fonds insuffisants dans la caisse. Ajoutez des fonds avant de payer.
+                            </AlertDescription>
+                          </Alert>
+                        )}
+                      </div>
+                    )}
+                  </div>
                 )}
                 {actionType === "delete" && (
                   <>
@@ -811,7 +868,12 @@ export default function ExpensesPage() {
               <AlertDialogCancel>{t.common.cancel}</AlertDialogCancel>
               <AlertDialogAction
                 onClick={handleExpenseAction}
-                disabled={isSubmitting || (actionType === "reject" && !rejectionReason)}
+                disabled={
+                  isSubmitting ||
+                  (actionType === "reject" && !rejectionReason) ||
+                  (actionType === "mark_paid" && safeBalance !== null && selectedExpense !== null && safeBalance < selectedExpense.amount) ||
+                  false
+                }
                 className={actionType === "delete" ? "bg-destructive hover:bg-destructive/90" : ""}
               >
                 {isSubmitting && <Loader2 className="size-4 mr-2 animate-spin" />}

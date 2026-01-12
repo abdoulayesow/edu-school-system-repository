@@ -38,8 +38,14 @@ export const fr = {
     offlineMode: "Mode hors ligne",
     menu: "Menu",
     select: "Sélectionner",
+    selected: "Sélectionné",
     viewDetails: "Voir les détails",
     noData: "Aucune donnée disponible",
+    today: "aujourd'hui",
+    refresh: "Actualiser",
+    description: "Description",
+    notes: "Notes",
+    recordedBy: "Enregistré par",
     notAssigned: "Non assigné",
     week: "semaine",
     subjects: "Matières",
@@ -75,6 +81,7 @@ export const fr = {
     balance: "Solde",
     payments: "Paiements",
     expenses: "Dépenses",
+    treasury: "Caisse",
     classes: "Classes",
     timetable: "Emploi du temps",
     audit: "Audit",
@@ -429,6 +436,8 @@ export const fr = {
     pendingReview: "En attente de validation",
     confirmed: "Confirmé",
     rejected: "Rejeté",
+    reversed: "Annulé",
+    failed: "Échoué",
 
     // Payments page
     paymentsPageTitle: "Gestion des paiements",
@@ -530,6 +539,25 @@ export const fr = {
     itemsToReview: "éléments à revoir",
     noItemsToReview: "Aucun élément à revoir. Toutes les transactions sont à jour !",
     approve: "Approuver",
+
+    // Mobile Money features
+    mobileMoneyBalance: "Solde Orange Money",
+    totalLiquidAssets: "Total Actifs Liquides",
+    receivedToday: "Reçu aujourd'hui",
+    spentToday: "Dépensé aujourd'hui",
+    reverseTransaction: "Annuler la transaction",
+    reversalReason: "Raison de l'annulation",
+    confirmReversal: "Confirmer l'annulation",
+    reversalSuccess: "Transaction annulée avec succès",
+    reversalWarning: "Cette action créera une transaction d'annulation. L'opération est irréversible.",
+    insufficientMobileMoneyBalance: "Solde Orange Money insuffisant",
+    tabMobileMoney: "Mobile Money",
+    noMobileMoneyTransactions: "Aucune transaction Orange Money",
+    recordFee: "Enregistrer Frais",
+    mobileMoneyFee: "Frais Orange Money",
+    paymentMethodBreakdown: "Répartition par Méthode",
+    safeLevel: "Niveau de Caisse",
+    optimalLevel: "Niveau optimal",
   },
 
   // Attendance
@@ -2010,6 +2038,273 @@ export const fr = {
     bulletinsDownloaded: "Tous les bulletins téléchargés",
     generatingPdfFor: "Génération du PDF pour {name}...",
   },
+
+  // Treasury / Caisse
+  treasury: {
+    // Navigation & titles
+    title: "Gestion de la Caisse",
+    subtitle: "Suivi des mouvements de trésorerie",
+    safeBalance: "Solde Caisse",
+    bankBalance: "Solde Banque",
+
+    // Status levels
+    statusOptimal: "Niveau optimal",
+    statusWarning: "Attention",
+    statusCritical: "Critique",
+    statusExcess: "Excédent",
+
+    // Verification
+    lastVerification: "Dernière vérification",
+    verifyNow: "Vérifier la caisse",
+    verifyDesc: "Comptez l'argent physique dans la caisse et entrez le montant",
+    expectedBalance: "Solde attendu",
+    countedBalance: "Solde compté",
+    discrepancy: "Écart",
+    verificationMatch: "Conforme",
+    verificationDiscrepancy: "Écart détecté",
+    explanationRequired: "Explication requise",
+    noVerificationToday: "Pas encore vérifiée aujourd'hui",
+    confirmVerification: "Confirmer vérification",
+    recordDiscrepancy: "Enregistrer l'écart",
+    excessCash: "Il y a plus d'argent que prévu dans la caisse",
+    missingCash: "Il manque de l'argent dans la caisse",
+    discrepancyWarning: "Si vous confirmez, le solde de la caisse sera ajusté au montant compté.",
+    explanationPlaceholder: "Expliquez la raison de cet écart...",
+
+    // Actions
+    recordPayment: "Enregistrer un paiement",
+    recordPaymentDesc: "Enregistrer une entrée d'argent dans la caisse",
+    recordExpense: "Enregistrer une dépense",
+    recordExpenseDesc: "Enregistrer une sortie d'argent de la caisse",
+    bankTransfer: "Transfert bancaire",
+    bankTransferDesc: "Transférer de l'argent entre la caisse et la banque",
+
+    // Payment types
+    paymentType: "Type de paiement",
+    paymentTypes: {
+      scolarite: "Scolarité",
+      inscription: "Inscription",
+      activites: "Activités",
+      remboursement: "Remboursement de dette",
+      autre: "Autre",
+    },
+
+    // Expense categories
+    expenseCategory: "Catégorie",
+    expenseCategories: {
+      salaires: "Salaires",
+      fournituresScolaires: "Fournitures scolaires",
+      fournituresBureau: "Fournitures de bureau",
+      electriciteEau: "Électricité / Eau",
+      entretien: "Entretien / Réparations",
+      transport: "Transport",
+      alimentation: "Alimentation / Cantine",
+      evenements: "Événements",
+      autre: "Autre",
+    },
+
+    // Bank transfers
+    depositToBank: "Dépôt en banque",
+    withdrawFromBank: "Retrait de banque",
+    carriedBy: "Effectué par",
+    carriedByPlaceholder: "Qui va déposer ?",
+    bankReference: "Référence bancaire",
+    bankRefPlaceholder: "Numéro de bordereau",
+    bankName: "Nom de la banque",
+    newSafeBalance: "Nouvelle caisse",
+    newBankBalance: "Nouvelle banque",
+
+    // Form fields
+    payerName: "Nom du payeur",
+    payerNamePlaceholder: "Qui a remis l'argent ?",
+    payerNameRequired: "Nom du payeur requis",
+    beneficiary: "Bénéficiaire",
+    beneficiaryPlaceholder: "Ex: Papeterie Central",
+    selectStudent: "Sélectionner un élève",
+    receiptPhoto: "Photo du reçu",
+    descriptionPlaceholder: "Description du paiement",
+    descriptionRequired: "Description requise",
+    expenseDescPlaceholder: "Ex: Achat de craies et cahiers",
+    notesPlaceholder: "Notes supplémentaires",
+    invalidAmount: "Montant invalide",
+
+    // Validation
+    insufficientFunds: "Fonds insuffisants dans la caisse",
+    insufficientFundsSafe: "Fonds insuffisants dans la caisse",
+    insufficientFundsBank: "Fonds insuffisants en banque",
+    confirmTransaction: "Confirmer",
+    balanceAfter: "Solde après",
+
+    // Summary
+    todaySummary: "Résumé du jour",
+    moneyIn: "Entrées",
+    moneyOut: "Sorties",
+    netChange: "Variation nette",
+
+    // History
+    transactionHistory: "Historique des mouvements",
+    recentTransactions: "Mouvements récents",
+    allTransactions: "Voir tout",
+    transactions: "transactions",
+
+    // Reports
+    dailyReport: "Rapport journalier",
+    startingBalance: "Solde d'ouverture",
+    endingBalance: "Solde de clôture",
+    verificationStatus: "Statut de vérification",
+
+    // Direction
+    income: "Entrée",
+    expense: "Sortie",
+
+    // Errors
+    verificationAlreadyDone: "La vérification d'aujourd'hui a déjà été effectuée",
+    balanceNotInitialized: "Le solde de la caisse n'est pas initialisé",
+
+    // Transaction reversal
+    reverseTransaction: "Annuler la Transaction",
+    reversalReason: "Raison de l'annulation",
+    reversalReasonPlaceholder: "Expliquez pourquoi cette transaction doit être annulée...",
+    reversalReasonTooShort: "La raison doit contenir au moins 10 caractères",
+    reversalWarning: "Cela créera une transaction d'annulation. La transaction originale restera dans l'historique.",
+    reversalSuccess: "Transaction annulée avec succès",
+    reversalFailed: "Échec de l'annulation de la transaction",
+    reversedBy: "Annulé par",
+    reversing: "Annulation...",
+    confirmReversal: "Confirmer l'annulation",
+    includeCorrection: "Inclure une correction (ré-enregistrer avec le bon montant/méthode)",
+    correctAmount: "Montant Correct",
+    correctMethod: "Méthode de Paiement Correcte",
+    keepOriginalMethod: "Garder la méthode originale",
+    correctionExplanation: "Une nouvelle transaction sera créée avec le montant/méthode correct après l'annulation.",
+    invalidCorrectionAmount: "Montant de correction invalide",
+    minimumCharacters: "Minimum {count} caractères",
+
+    // Transaction types
+    transactionTypes: {
+      studentPayment: "Paiement Scolarité",
+      expensePayment: "Paiement Dépense",
+      mobileMoneyIncome: "Entrée Orange Money",
+      mobileMoneyPayment: "Paiement Orange Money",
+      bankDeposit: "Dépôt Bancaire",
+      bankWithdrawal: "Retrait Bancaire",
+      adjustment: "Ajustement",
+      otherIncome: "Autre Entrée",
+    },
+
+    // Direction labels
+    amount: "Montant",
+    direction: "Direction",
+    incoming: "Entrée",
+    outgoing: "Sortie",
+
+    // Daily verification warning
+    dailyVerificationNeeded: "Vérification Quotidienne Requise",
+    dailyVerificationWarning: "La vérification quotidienne de la caisse n'a pas été effectuée aujourd'hui.",
+    verificationRecommendation: "Il est recommandé de vérifier le solde de la caisse avant d'enregistrer des transactions.",
+    continueAnyway: "Continuer Quand Même",
+
+    // Registry (Caisse) - Daily Operations
+    registry: {
+      // Balance display
+      registryBalance: "Solde Caisse",
+      registryOfTheDay: "Caisse du jour",
+      workingCash: "Fonds de roulement",
+      floatAmount: "Fond de caisse",
+      standardFloat: "Montant standard",
+      registryClosed: "Caisse fermée - Ouvrir la journée",
+      registryOpen: "Caisse ouverte",
+
+      // Daily opening
+      dailyOpening: "Ouverture journalière",
+      dailyOpeningDesc: "Étape {step}/2 - {description}",
+      stepSafeCounting: "Comptage du coffre",
+      stepFloatTransfer: "Transfert du fond de caisse",
+      expectedSafeBalance: "Solde coffre attendu",
+      countedSafeAmount: "Montant compté dans le coffre",
+      countedSafeAmountPlaceholder: "Entrez le montant compté",
+      countedSafeAmountHint: "Comptez physiquement l'argent dans le coffre et entrez le montant exact",
+      floatAmountLabel: "Montant du fond de caisse",
+      floatAmountMustBePositive: "Le montant du fond de caisse doit être supérieur à zéro",
+      insufficientFundsForFloat: "Fonds insuffisants dans le coffre pour le fond de caisse",
+      enterCountedSafeAmount: "Veuillez entrer le montant compté dans le coffre",
+      registryAlreadyHasBalance: "La caisse contient déjà {amount}. Veuillez d'abord effectuer la fermeture du jour précédent.",
+      safeAfterTransfer: "Coffre après transfert",
+      registryAfterTransfer: "Caisse après transfert",
+      openTheDay: "Ouvrir la journée",
+      opening: "Ouverture...",
+      openingFailed: "Échec de l'ouverture journalière",
+
+      // Daily closing
+      dailyClosing: "Fermeture journalière",
+      dailyClosingDesc: "Comptez la caisse et transférez tout au coffre",
+      expectedRegistryBalance: "Solde caisse attendu",
+      countedRegistryAmount: "Montant compté dans la caisse",
+      countedRegistryAmountPlaceholder: "Entrez le montant compté",
+      countedRegistryAmountHint: "Comptez physiquement l'argent dans la caisse et entrez le montant exact",
+      registryAlreadyEmpty: "La caisse est déjà vide. Aucune fermeture nécessaire.",
+      safeAfterClosing: "Coffre après fermeture",
+      closeTheDay: "Fermer la journée",
+      closing: "Fermeture...",
+      closingFailed: "Échec de la fermeture journalière",
+      alreadyOpen: "Déjà ouvert",
+      alreadyClosed: "Déjà fermé",
+
+      // Discrepancy
+      surplus: "Surplus",
+      shortage: "Manque",
+      adjustmentWillBeCreated: "Un ajustement sera créé automatiquement.",
+      noDiscrepancy: "Pas d'écart détecté",
+      countMatchesExpected: "Le montant compté correspond au solde attendu.",
+
+      // Safe Transfer
+      safeTransfer: "Transfert Coffre ↔ Caisse",
+      safeTransferDesc: "Transfert ad-hoc en dehors des opérations d'ouverture/fermeture",
+      transferDirection: "Direction du transfert",
+      safeToRegistry: "Coffre → Caisse",
+      safeToRegistryDesc: "Retirer du coffre pour alimenter la caisse",
+      registryToSafe: "Caisse → Coffre",
+      registryToSafeDesc: "Déposer au coffre depuis la caisse",
+      amountToTransfer: "Montant à transférer",
+      available: "Disponible",
+      previewAfterTransfer: "Aperçu après transfert",
+      notesRequired: "Les notes sont obligatoires (minimum 10 caractères)",
+      notesMinChars: "{count}/10 caractères minimum",
+      adHocTransferNote: "Ce transfert est un mouvement ad-hoc qui sera enregistré dans l'historique des transactions. Utilisez les opérations d'ouverture/fermeture journalière pour les transferts quotidiens standards.",
+      performTransfer: "Effectuer le transfert",
+      transferring: "Transfert...",
+      transferFailed: "Échec du transfert",
+      insufficientFundsInRegistry: "Fonds insuffisants dans la caisse",
+
+      // Notes
+      notesOptional: "Notes (optionnel)",
+      notesPlaceholder: "Remarques ou observations...",
+      transferReasonPlaceholder: "Raison du transfert (minimum 10 caractères)...",
+
+      // Buttons
+      cancel: "Annuler",
+      back: "Retour",
+      next: "Suivant",
+
+      // Accounting page labels
+      openDay: "Ouvrir la journée",
+      closeDay: "Fermer la journée",
+      safeRegistryTransfer: "Transfert Coffre/Caisse",
+      recordExpense: "Enregistrer une dépense",
+      bankTransfer: "Transfert bancaire",
+      verifyCash: "Vérifier la caisse",
+      alreadyVerified: "Déjà vérifié",
+      todaysEntries: "Entrées aujourd'hui",
+      todaysExits: "Sorties aujourd'hui",
+      todaysTransactions: "Transactions aujourd'hui",
+      recentMovements: "Mouvements récents",
+      noRecentTransactions: "Aucune transaction récente",
+      viewAll: "Voir tout",
+    },
+  },
+
+  // Navigation
+  safe: "Caisse",
 } as const;
 
 type TranslationTree = { [key: string]: string | TranslationTree };

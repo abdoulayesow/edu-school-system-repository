@@ -27,7 +27,7 @@ export async function GET() {
     // Fetch all stats in parallel
     const [
       todayPayments,
-      pendingPayments,
+      reversedPayments,
       confirmedThisWeek,
       cashPayments,
       orangeMoneyPayments,
@@ -41,10 +41,10 @@ export async function GET() {
         _sum: { amount: true },
       }),
 
-      // Pending payments (pending_deposit, deposited, pending_review)
+      // Reversed payments (errors that were corrected)
       prisma.payment.aggregate({
         where: {
-          status: { in: ["pending_deposit", "deposited", "pending_review"] },
+          status: "reversed",
         },
         _count: true,
         _sum: { amount: true },
@@ -80,9 +80,9 @@ export async function GET() {
         count: todayPayments._count,
         amount: todayPayments._sum.amount || 0,
       },
-      pending: {
-        count: pendingPayments._count,
-        amount: pendingPayments._sum.amount || 0,
+      reversed: {
+        count: reversedPayments._count,
+        amount: reversedPayments._sum.amount || 0,
       },
       confirmedThisWeek: {
         count: confirmedThisWeek._count,

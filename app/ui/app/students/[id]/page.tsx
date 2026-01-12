@@ -316,12 +316,10 @@ export default function StudentDetailPage() {
   }
 
   const getPaymentStatusLabel = (status: string) => {
-    const statuses: Record<string, { label: string; variant: "default" | "secondary" | "destructive" | "outline" }> = {
-      pending_deposit: { label: "En attente de dépôt", variant: "secondary" },
-      deposited: { label: "Déposé", variant: "outline" },
-      pending_review: { label: "En attente de validation", variant: "secondary" },
-      confirmed: { label: "Confirmé", variant: "default" },
-      rejected: { label: "Rejeté", variant: "destructive" }
+    const statuses: Record<string, { label: string; variant: "default" | "secondary" | "destructive" | "outline" | "success" }> = {
+      confirmed: { label: "Confirmé", variant: "success" },
+      reversed: { label: "Annulé", variant: "outline" },
+      failed: { label: "Échoué", variant: "destructive" }
     }
     const config = statuses[status] || { label: status, variant: "secondary" }
     return <Badge variant={config.variant}>{config.label}</Badge>
@@ -400,26 +398,21 @@ export default function StudentDetailPage() {
               </p>
               <div className="flex items-center gap-2 flex-wrap">
                 {student.studentProfile?.currentGrade && (
-                  <Badge variant="outline" className="gap-1">
+                  <Badge variant="outline" className="gap-1 h-6">
                     <GraduationCap className="size-3" />
                     {student.studentProfile.currentGrade.name}
                   </Badge>
                 )}
                 {currentRoomName ? (
-                  <Badge variant="secondary" className="gap-1">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="gap-1 h-6"
+                    onClick={() => setRoomChangeDialogOpen(true)}
+                  >
                     <DoorOpen className="size-3" />
-                    {currentRoomName}
-                    {activeSchoolYearId && student.studentProfile?.currentGrade && (
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="h-4 w-4 ml-1 hover:bg-primary/10"
-                        onClick={() => setRoomChangeDialogOpen(true)}
-                      >
-                        <Edit2 className="size-3" />
-                      </Button>
-                    )}
-                  </Badge>
+                    {t.students.room}
+                  </Button>
                 ) : (
                   activeSchoolYearId && student.studentProfile?.currentGrade && (
                     <Button
@@ -453,7 +446,7 @@ export default function StudentDetailPage() {
                 {student.balanceInfo ? formatCurrency(student.balanceInfo.remainingBalance) : "N/A"}
               </div>
               {student.balanceInfo && (
-                <Progress value={student.balanceInfo.paymentPercentage} className="h-2 mt-2 [&>div]:bg-amber-500 dark:[&>div]:bg-amber-400" />
+                <Progress value={student.balanceInfo.paymentPercentage} className="h-2 mt-2 bg-yellow-200 dark:bg-yellow-900/30 [&>div]:bg-yellow-500 dark:[&>div]:bg-yellow-400" />
               )}
             </CardContent>
           </Card>
@@ -491,7 +484,7 @@ export default function StudentDetailPage() {
               </div>
               <Progress
                 value={student.attendanceSummary?.attendanceRate ?? 0}
-                className="h-2 mt-2 [&>div]:bg-amber-500 dark:[&>div]:bg-amber-400"
+                className="h-2 mt-2 bg-yellow-200 dark:bg-yellow-900/30 [&>div]:bg-yellow-500 dark:[&>div]:bg-yellow-400"
               />
             </CardContent>
           </Card>
@@ -509,7 +502,7 @@ export default function StudentDetailPage() {
               </div>
               <Progress
                 value={student.balanceInfo?.paymentPercentage ?? 0}
-                className="h-2 mt-2 [&>div]:bg-amber-500 dark:[&>div]:bg-amber-400"
+                className="h-2 mt-2 bg-yellow-200 dark:bg-yellow-900/30 [&>div]:bg-yellow-500 dark:[&>div]:bg-yellow-400"
               />
             </CardContent>
           </Card>
@@ -671,7 +664,7 @@ export default function StudentDetailPage() {
                   <CardContent className="space-y-4">
                     {/* Father */}
                     {activeEnrollment.fatherName && (
-                      <div className="p-3 rounded-lg bg-amber-50/50 dark:bg-amber-950/30">
+                      <div>
                         <p className="text-sm font-medium mb-2">{t.students.father}</p>
                         <p className="font-medium">{activeEnrollment.fatherName}</p>
                         {activeEnrollment.fatherPhone && (
@@ -691,7 +684,7 @@ export default function StudentDetailPage() {
 
                     {/* Mother */}
                     {activeEnrollment.motherName && (
-                      <div className="p-3 rounded-lg bg-amber-50/50 dark:bg-amber-950/30">
+                      <div>
                         <p className="text-sm font-medium mb-2">{t.students.mother}</p>
                         <p className="font-medium">{activeEnrollment.motherName}</p>
                         {activeEnrollment.motherPhone && (
@@ -765,7 +758,7 @@ export default function StudentDetailPage() {
                           {student.attendanceSummary.attendanceRate}%
                         </span>
                       </div>
-                      <Progress value={student.attendanceSummary.attendanceRate} className="h-2 mt-2" />
+                      <Progress value={student.attendanceSummary.attendanceRate} className="h-2 mt-2 bg-yellow-200 dark:bg-yellow-900/30 [&>div]:bg-yellow-500 dark:[&>div]:bg-yellow-400" />
                     </div>
                   </CardContent>
                 </Card>
@@ -830,8 +823,8 @@ export default function StudentDetailPage() {
                       ) : (
                         student.enrollments.map((enrollment) => {
                           const tuition = enrollment.adjustedTuitionFee ?? enrollment.originalTuitionFee
-                          // Include all payments except rejected and failed
-                          const countablePayments = enrollment.payments.filter(p => !['rejected', 'failed'].includes(p.status))
+                          // Include all payments except reversed and failed
+                          const countablePayments = enrollment.payments.filter(p => !['reversed', 'failed'].includes(p.status))
                           const totalPaid = countablePayments.reduce((sum, p) => sum + p.amount, 0)
                           const percentage = Math.round((totalPaid / tuition) * 100)
 
@@ -919,7 +912,7 @@ export default function StudentDetailPage() {
                         <span>{t.students.paymentProgress}</span>
                         <span className="font-medium">{student.balanceInfo.paymentPercentage}%</span>
                       </div>
-                      <Progress value={student.balanceInfo.paymentPercentage} className="h-3 [&>div]:bg-amber-500 dark:[&>div]:bg-amber-400" />
+                      <Progress value={student.balanceInfo.paymentPercentage} className="h-3 bg-yellow-200 dark:bg-yellow-900/30 [&>div]:bg-yellow-500 dark:[&>div]:bg-yellow-400" />
                     </div>
 
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-4 pt-4">
@@ -1072,7 +1065,7 @@ export default function StudentDetailPage() {
                           {student.attendanceSummary.attendanceRate}%
                         </span>
                       </div>
-                      <Progress value={student.attendanceSummary.attendanceRate} className="h-4" />
+                      <Progress value={student.attendanceSummary.attendanceRate} className="h-4 bg-yellow-200 dark:bg-yellow-900/30 [&>div]:bg-yellow-500 dark:[&>div]:bg-yellow-400" />
                       <div className="flex justify-between mt-2 text-xs text-muted-foreground">
                         <span>0%</span>
                         <span className="text-warning">60%</span>

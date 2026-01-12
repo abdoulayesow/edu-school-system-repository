@@ -176,45 +176,154 @@ export async function POST(req: NextRequest) {
       }
     }
 
-    // Determine initial status based on payment method
-    // Cash: pending_deposit (needs bank deposit first)
-    // Orange Money: pending_review (can be reviewed immediately, auto-confirm after 24h)
-    const initialStatus = validated.method === "cash" ? "pending_deposit" : "pending_review"
-    const autoConfirmAt = validated.method === "orange_money"
-      ? new Date(Date.now() + 24 * 60 * 60 * 1000) // 24 hours from now
-      : null
+    // All payments are confirmed immediately upon recording
+    // The money is physically received (cash) or confirmed in account (Orange Money)
+    // Parent receives receipt on the spot - payment is complete
+    const initialStatus = "confirmed"
 
-    // Create the payment
-    const payment = await prisma.payment.create({
-      data: {
-        enrollmentId: validated.enrollmentId,
-        paymentScheduleId,
-        amount: validated.amount,
-        method: validated.method,
-        receiptNumber: validated.receiptNumber,
-        transactionRef: validated.transactionRef,
-        receiptImageUrl: validated.receiptImageUrl,
-        notes: validated.notes,
-        recordedBy: session!.user.id,
-        status: initialStatus,
-        autoConfirmAt,
-      },
-      include: {
-        recorder: { select: { id: true, name: true, email: true } },
-        enrollment: {
-          select: {
-            id: true,
-            enrollmentNumber: true,
-            student: {
-              select: {
-                id: true,
-                firstName: true,
-                lastName: true,
+    // Create payment in a transaction
+    // For cash payments: immediately add to registry balance (cash is physically received in registry box)
+    // For Orange Money: immediately add to mobile money balance
+    const payment = await prisma.$transaction(async (tx) => {
+      // For cash payments, update registry balance immediately
+      if (validated.method === "cash") {
+        const currentBalance = await tx.treasuryBalance.findFirst()
+        if (!currentBalance) {
+          throw new Error("TreasuryBalance not initialized. Please contact administrator.")
+        }
+
+        const newRegistryBalance = currentBalance.registryBalance + validated.amount
+
+        // Create safe transaction for audit trail
+        await tx.safeTransaction.create({
+          data: {
+            type: "student_payment",
+            direction: "in",
+            amount: validated.amount,
+            registryBalanceAfter: newRegistryBalance,
+            safeBalanceAfter: currentBalance.safeBalance,
+            bankBalanceAfter: currentBalance.bankBalance,
+            mobileMoneyBalanceAfter: currentBalance.mobileMoneyBalance,
+            description: `Paiement scolarité - ${validated.receiptNumber}`,
+            receiptNumber: validated.receiptNumber,
+            referenceType: "payment",
+            studentId: enrollment.studentId,
+            recordedBy: session!.user.id,
+          },
+        })
+
+        // Update registry balance
+        await tx.treasuryBalance.update({
+          where: { id: currentBalance.id },
+          data: {
+            registryBalance: newRegistryBalance,
+            updatedAt: new Date(),
+          },
+        })
+      }
+
+      // For Orange Money payments, update mobile money balance immediately
+      if (validated.method === "orange_money") {
+        const currentBalance = await tx.treasuryBalance.findFirst()
+        if (!currentBalance) {
+          throw new Error("TreasuryBalance not initialized. Please contact administrator.")
+        }
+
+        const newMobileMoneyBalance = currentBalance.mobileMoneyBalance + validated.amount
+
+        // Create safe transaction for audit trail
+        await tx.safeTransaction.create({
+          data: {
+            type: "mobile_money_income",
+            direction: "in",
+            amount: validated.amount,
+            registryBalanceAfter: currentBalance.registryBalance,
+            safeBalanceAfter: currentBalance.safeBalance,
+            bankBalanceAfter: currentBalance.bankBalance,
+            mobileMoneyBalanceAfter: newMobileMoneyBalance,
+            description: `Paiement Orange Money - ${validated.receiptNumber}`,
+            receiptNumber: validated.receiptNumber,
+            referenceType: "payment",
+            studentId: enrollment.studentId,
+            recordedBy: session!.user.id,
+          },
+        })
+
+        // Update mobile money balance
+        await tx.treasuryBalance.update({
+          where: { id: currentBalance.id },
+          data: {
+            mobileMoneyBalance: newMobileMoneyBalance,
+            updatedAt: new Date(),
+          },
+        })
+      }
+
+      // Create the payment record
+      const newPayment = await tx.payment.create({
+        data: {
+          enrollmentId: validated.enrollmentId,
+          paymentScheduleId,
+          amount: validated.amount,
+          method: validated.method,
+          receiptNumber: validated.receiptNumber,
+          transactionRef: validated.transactionRef,
+          receiptImageUrl: validated.receiptImageUrl,
+          notes: validated.notes,
+          recordedBy: session!.user.id,
+          status: initialStatus,
+          confirmedBy: session!.user.id,
+          confirmedAt: new Date(),
+        },
+        include: {
+          recorder: { select: { id: true, name: true, email: true } },
+          enrollment: {
+            select: {
+              id: true,
+              enrollmentNumber: true,
+              student: {
+                select: {
+                  id: true,
+                  firstName: true,
+                  lastName: true,
+                },
               },
             },
           },
         },
-      },
+      })
+
+      // Update the SafeTransaction with the payment reference ID
+      if (validated.method === "cash" || validated.method === "orange_money") {
+        await tx.safeTransaction.updateMany({
+          where: {
+            receiptNumber: validated.receiptNumber,
+            referenceType: "payment",
+            referenceId: null,
+          },
+          data: {
+            referenceId: newPayment.id,
+          },
+        })
+      }
+
+      // Mark payment schedules as paid based on total confirmed payments
+      // Payment is confirmed immediately, so we update schedules now
+      const allConfirmedPayments = [...enrollment.payments, { amount: validated.amount }]
+      const newTotalPaid = allConfirmedPayments.reduce((sum, p) => sum + p.amount, 0)
+
+      let runningTotal = 0
+      for (const schedule of enrollment.paymentSchedules) {
+        runningTotal += schedule.amount
+        if (runningTotal <= newTotalPaid && !schedule.isPaid) {
+          await tx.paymentSchedule.update({
+            where: { id: schedule.id },
+            data: { isPaid: true },
+          })
+        }
+      }
+
+      return newPayment
     })
 
     return NextResponse.json(payment, { status: 201 })

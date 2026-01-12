@@ -47,6 +47,14 @@ model User {
   confirmedActivityPayments  ActivityPayment[]       @relation("ActivityPaymentConfirmer")
   recordedEvaluations        Evaluation[]            @relation("EvaluationRecorder")
   trimesterDecisionOverrides StudentTrimester[]      @relation("TrimesterDecisionOverrider")
+  // Treasury relations
+  treasuryVerifications      TreasuryBalance[]       @relation("SafeVerifier")
+  safeTransactions           SafeTransaction[]       @relation("SafeTransactionRecorder")
+  bankTransfers              BankTransfer[]          @relation("BankTransferRecorder")
+  dailyVerifications         DailyVerification[]     @relation("DailyVerifier")
+  discrepancyReviews         DailyVerification[]     @relation("DiscrepancyReviewer")
+  reconciliationsPerformed   ReconciliationEvent[]   @relation("ReconciliationPerformer")
+  reconciliationsReviewed    ReconciliationEvent[]   @relation("ReconciliationReviewer")
 }
 
 model Address {
@@ -260,7 +268,7 @@ model Payment {
   paymentScheduleId String?
   amount            Int
   method            PaymentMethod
-  status            PaymentStatus    @default(pending_deposit)
+  status            PaymentStatus    @default(confirmed)
   receiptNumber     String           @unique
   transactionRef    String?
   receiptImageUrl   String?
@@ -310,26 +318,27 @@ model EnrollmentNote {
 }
 
 model Student {
-  id             String          @id @default(cuid())
-  studentNumber  String?         @unique
-  firstName      String
-  lastName       String
-  email          String?
-  dateOfBirth    DateTime?
-  guardianName   String?
-  guardianPhone  String?
-  guardianEmail  String?
-  grade          String?
-  classId        String?
-  status         StudentStatus   @default(active)
-  enrollmentDate DateTime        @default(now())
-  syncVersion    Int             @default(0)
-  createdAt      DateTime        @default(now())
-  updatedAt      DateTime        @updatedAt
-  attendance     Attendance[]
-  class          Class?          @relation(fields: [classId], references: [id])
-  enrollments    Enrollment[]
-  studentProfile StudentProfile?
+  id               String            @id @default(cuid())
+  studentNumber    String?           @unique
+  firstName        String
+  lastName         String
+  email            String?
+  dateOfBirth      DateTime?
+  guardianName     String?
+  guardianPhone    String?
+  guardianEmail    String?
+  grade            String?
+  classId          String?
+  status           StudentStatus     @default(active)
+  enrollmentDate   DateTime          @default(now())
+  syncVersion      Int               @default(0)
+  createdAt        DateTime          @default(now())
+  updatedAt        DateTime          @updatedAt
+  attendance       Attendance[]
+  class            Class?            @relation(fields: [classId], references: [id])
+  enrollments      Enrollment[]
+  studentProfile   StudentProfile?
+  safeTransactions SafeTransaction[]
 
   @@index([status])
   @@index([classId])
@@ -842,7 +851,7 @@ model ActivityPayment {
   activityEnrollmentId String?
   amount               Int
   method               PaymentMethod
-  status               PaymentStatus       @default(pending_deposit)
+  status               PaymentStatus       @default(confirmed)
   receiptNumber        String              @unique
   transactionRef       String?
   receiptImageUrl      String?
@@ -991,6 +1000,147 @@ model ClassTrimesterStats {
   @@index([trimesterId])
 }
 
+// === TREASURY MODELS ===
+
+model TreasuryBalance {
+  id                  String    @id @default(cuid())
+  registryBalance     Int       @default(0)
+  registryFloatAmount Int       @default(2000000)
+  safeBalance         Int       @default(0)
+  bankBalance         Int       @default(0)
+  mobileMoneyBalance  Int       @default(0)
+  safeThresholdMin    Int       @default(5000000)
+  safeThresholdMax    Int       @default(20000000)
+  lastVerifiedAt      DateTime?
+  lastVerifiedBy      String?
+  syncVersion         Int       @default(0)
+  createdAt           DateTime  @default(now())
+  updatedAt           DateTime  @updatedAt
+  verifier            User?     @relation("SafeVerifier", fields: [lastVerifiedBy], references: [id])
+
+  @@index([lastVerifiedBy])
+}
+
+model SafeTransaction {
+  id                      String              @id @default(cuid())
+  type                    SafeTransactionType
+  direction               CashDirection
+  amount                  Int
+  registryBalanceAfter    Int?
+  safeBalanceAfter        Int
+  bankBalanceAfter        Int?
+  mobileMoneyBalanceAfter Int?
+  description             String?
+  referenceType           String?
+  referenceId             String?
+  studentId               String?
+  payerName               String?
+  beneficiaryName         String?
+  category                String?
+  receiptNumber           String?             @unique
+  recordedBy              String
+  recordedAt              DateTime            @default(now())
+  notes                   String?
+  isReversal              Boolean             @default(false)
+  reversalReason          String?
+  reversedBy              String?
+  reversedAt              DateTime?
+  originalTransactionId   String?
+  syncVersion             Int                 @default(0)
+  createdAt               DateTime            @default(now())
+  updatedAt               DateTime            @updatedAt
+  recorder                User                @relation("SafeTransactionRecorder", fields: [recordedBy], references: [id])
+  student                 Student?            @relation(fields: [studentId], references: [id])
+  originalTransaction     SafeTransaction?    @relation("ReversalOriginal", fields: [originalTransactionId], references: [id], onDelete: Restrict, onUpdate: Restrict)
+  reversals               SafeTransaction[]   @relation("ReversalOriginal")
+
+  @@index([recordedAt])
+  @@index([type])
+  @@index([direction])
+  @@index([referenceType, referenceId])
+  @@index([recordedBy])
+  @@index([studentId])
+  @@index([isReversal])
+  @@index([originalTransactionId])
+}
+
+model BankTransfer {
+  id                String           @id @default(cuid())
+  type              BankTransferType
+  amount            Int
+  bankName          String?
+  bankReference     String?
+  transferDate      DateTime         @default(now())
+  safeBalanceBefore Int
+  safeBalanceAfter  Int
+  bankBalanceBefore Int
+  bankBalanceAfter  Int
+  carriedBy         String?
+  recordedBy        String
+  recordedAt        DateTime         @default(now())
+  notes             String?
+  syncVersion       Int              @default(0)
+  createdAt         DateTime         @default(now())
+  updatedAt         DateTime         @updatedAt
+  recorder          User             @relation("BankTransferRecorder", fields: [recordedBy], references: [id])
+
+  @@index([type])
+  @@index([transferDate])
+  @@index([recordedBy])
+}
+
+model DailyVerification {
+  id               String             @id @default(cuid())
+  verificationDate DateTime           @db.Date
+  expectedBalance  Int
+  countedBalance   Int
+  discrepancy      Int
+  status           VerificationStatus @default(matched)
+  explanation      String?
+  verifiedBy       String
+  verifiedAt       DateTime           @default(now())
+  reviewedBy       String?
+  reviewedAt       DateTime?
+  reviewNotes      String?
+  syncVersion      Int                @default(0)
+  createdAt        DateTime           @default(now())
+  updatedAt        DateTime           @updatedAt
+  verifier         User               @relation("DailyVerifier", fields: [verifiedBy], references: [id])
+  reviewer         User?              @relation("DiscrepancyReviewer", fields: [reviewedBy], references: [id])
+
+  @@unique([verificationDate])
+  @@index([verifiedBy])
+  @@index([reviewedBy])
+  @@index([status])
+}
+
+model ReconciliationEvent {
+  id              String               @id @default(cuid())
+  type            ReconciliationType
+  periodStart     DateTime
+  periodEnd       DateTime
+  expectedTotal   Int
+  actualTotal     Int
+  discrepancy     Int
+  status          ReconciliationStatus @default(pending)
+  resolutionNotes String?
+  performedBy     String
+  performedAt     DateTime             @default(now())
+  reviewedBy      String?
+  reviewedAt      DateTime?
+  syncVersion     Int                  @default(0)
+  createdAt       DateTime             @default(now())
+  updatedAt       DateTime             @updatedAt
+  performer       User                 @relation("ReconciliationPerformer", fields: [performedBy], references: [id])
+  reviewer        User?                @relation("ReconciliationReviewer", fields: [reviewedBy], references: [id])
+
+  @@index([type])
+  @@index([periodStart])
+  @@index([status])
+  @@index([performedBy])
+  @@index([reviewedBy])
+}
+
 enum Role {
   user
   director
@@ -1030,11 +1180,8 @@ enum PaymentMethod {
 }
 
 enum PaymentStatus {
-  pending_deposit
-  deposited
-  pending_review
   confirmed
-  rejected
+  reversed
   failed
 }
 
@@ -1128,4 +1275,57 @@ enum PersonStatus {
 enum AttendanceEntryMode {
   checklist
   absences_only
+}
+
+// === TREASURY ENUMS ===
+
+enum SafeTransactionType {
+  student_payment
+  activity_payment
+  other_income
+  expense_payment
+  bank_deposit
+  bank_withdrawal
+  adjustment
+  mobile_money_income
+  mobile_money_payment
+  mobile_money_fee
+  reversal_student_payment
+  reversal_expense_payment
+  reversal_bank_deposit
+  reversal_mobile_money
+  safe_to_registry
+  registry_to_safe
+  registry_adjustment
+}
+
+enum CashDirection {
+  in
+  out
+}
+
+enum BankTransferType {
+  deposit
+  withdrawal
+}
+
+enum VerificationStatus {
+  matched
+  discrepancy
+  reviewed
+}
+
+enum ReconciliationType {
+  monthly_payments
+  monthly_expenses
+  bank_statement
+  safe_to_bank
+  full_audit
+}
+
+enum ReconciliationStatus {
+  pending
+  matched
+  discrepancies_found
+  resolved
 }

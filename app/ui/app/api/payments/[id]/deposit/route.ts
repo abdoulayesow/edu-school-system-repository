@@ -47,10 +47,10 @@ export async function POST(req: NextRequest, { params }: RouteParams) {
       )
     }
 
-    // Only allow deposit for pending_deposit status
-    if (existingPayment.status !== "pending_deposit") {
+    // Only allow deposit for confirmed cash payments (cash in safe, moving to bank)
+    if (existingPayment.status !== "confirmed") {
       return NextResponse.json(
-        { message: "Payment is not in pending_deposit status" },
+        { message: "Payment must be confirmed before bank deposit" },
         { status: 400 }
       )
     }
@@ -68,6 +68,23 @@ export async function POST(req: NextRequest, { params }: RouteParams) {
 
     // Create deposit and update payment status in transaction
     const result = await prisma.$transaction(async (tx) => {
+      // Get current safe balance
+      const currentBalance = await tx.safeBalance.findFirst()
+      if (!currentBalance) {
+        throw new Error("SafeBalance not initialized. Please contact administrator.")
+      }
+
+      // Validate sufficient funds in safe
+      if (currentBalance.safeBalance < existingPayment.amount) {
+        throw new Error(
+          `Insufficient funds in safe. Available: ${currentBalance.safeBalance} GNF, Required: ${existingPayment.amount} GNF`
+        )
+      }
+
+      // Calculate new balances
+      const newSafeBalance = currentBalance.safeBalance - existingPayment.amount
+      const newBankBalance = currentBalance.bankBalance + existingPayment.amount
+
       // Create cash deposit record
       const deposit = await tx.cashDeposit.create({
         data: {
@@ -80,10 +97,66 @@ export async function POST(req: NextRequest, { params }: RouteParams) {
         },
       })
 
-      // Update payment status to deposited (awaiting review)
+      // Create BankTransfer record
+      const bankTransfer = await tx.bankTransfer.create({
+        data: {
+          type: "deposit",
+          amount: existingPayment.amount,
+          bankName: validated.bankName || "Banque",
+          bankReference: validated.bankReference,
+          safeBalanceBefore: currentBalance.safeBalance,
+          safeBalanceAfter: newSafeBalance,
+          bankBalanceBefore: currentBalance.bankBalance,
+          bankBalanceAfter: newBankBalance,
+          transferDate: validated.depositDate,
+          recordedBy: session!.user.id,
+          carriedBy: validated.depositedByName || session!.user.name || "Unknown",
+          notes: `Dépôt banque - Paiement ${existingPayment.receiptNumber}`,
+        },
+      })
+
+      // Create SafeTransaction for audit trail
+      const datePrefix = new Date().toISOString().split("T")[0].replace(/-/g, "")
+      const existingCount = await tx.safeTransaction.count({
+        where: {
+          receiptNumber: {
+            startsWith: `DEPOT-${datePrefix}`,
+          },
+        },
+      })
+      const receiptNumber = `DEPOT-${datePrefix}-${String(existingCount + 1).padStart(4, "0")}`
+
+      await tx.safeTransaction.create({
+        data: {
+          type: "bank_deposit",
+          direction: "out",
+          amount: existingPayment.amount,
+          safeBalanceAfter: newSafeBalance,
+          bankBalanceAfter: newBankBalance,
+          description: `Dépôt banque - Paiement ${existingPayment.receiptNumber}`,
+          receiptNumber: receiptNumber,
+          recordedBy: session!.user.id,
+          referenceType: "payment",
+          referenceId: existingPayment.id,
+          notes: `Référence banque: ${validated.bankReference}`,
+        },
+      })
+
+      // Update SafeBalance
+      await tx.safeBalance.update({
+        where: { id: currentBalance.id },
+        data: {
+          safeBalance: newSafeBalance,
+          bankBalance: newBankBalance,
+          updatedAt: new Date(),
+        },
+      })
+
+      // Payment stays confirmed - bank deposit is just a treasury operation
+      // (moving cash from safe to bank account)
       const payment = await tx.payment.update({
         where: { id },
-        data: { status: "deposited" },
+        data: { status: "confirmed" }, // Keep as confirmed
         include: {
           recorder: { select: { id: true, name: true, email: true } },
           cashDeposit: {

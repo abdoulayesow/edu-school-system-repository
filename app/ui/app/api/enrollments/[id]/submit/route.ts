@@ -237,14 +237,78 @@ export async function POST(req: NextRequest, { params }: RouteParams) {
 
       // Create payment record if payment was made during enrollment
       if (paymentData && paymentData.paymentMade && paymentData.paymentAmount && paymentData.paymentMethod && paymentData.receiptNumber) {
-        // Determine initial status based on payment method
-        const initialStatus = paymentData.paymentMethod === "cash" ? "pending_deposit" : "pending_review"
-        const autoConfirmAt = paymentData.paymentMethod === "orange_money"
-          ? new Date(Date.now() + 24 * 60 * 60 * 1000) // 24 hours from now
-          : null
+        // Payments are confirmed immediately - money is received
+        const initialStatus = "confirmed"
 
         // Link to first payment schedule
         const firstScheduleId = createdSchedules[0]?.id
+
+        // Get current treasury balance for tracking
+        const currentBalance = await tx.treasuryBalance.findFirst()
+        if (!currentBalance) {
+          throw new Error("TreasuryBalance not initialized. Please contact administrator.")
+        }
+
+        // Update balances based on payment method
+        if (paymentData.paymentMethod === "cash") {
+          const newRegistryBalance = currentBalance.registryBalance + paymentData.paymentAmount
+
+          // Create safe transaction for audit trail
+          await tx.safeTransaction.create({
+            data: {
+              type: "student_payment",
+              direction: "in",
+              amount: paymentData.paymentAmount,
+              registryBalanceAfter: newRegistryBalance,
+              safeBalanceAfter: currentBalance.safeBalance,
+              bankBalanceAfter: currentBalance.bankBalance,
+              mobileMoneyBalanceAfter: currentBalance.mobileMoneyBalance,
+              description: `Paiement scolarité - ${paymentData.receiptNumber}`,
+              receiptNumber: paymentData.receiptNumber,
+              referenceType: "payment",
+              studentId: studentId,
+              recordedBy: session.user.id,
+            },
+          })
+
+          // Update registry balance
+          await tx.treasuryBalance.update({
+            where: { id: currentBalance.id },
+            data: {
+              registryBalance: newRegistryBalance,
+              updatedAt: new Date(),
+            },
+          })
+        } else if (paymentData.paymentMethod === "orange_money") {
+          const newMobileMoneyBalance = currentBalance.mobileMoneyBalance + paymentData.paymentAmount
+
+          // Create safe transaction for audit trail
+          await tx.safeTransaction.create({
+            data: {
+              type: "mobile_money_income",
+              direction: "in",
+              amount: paymentData.paymentAmount,
+              registryBalanceAfter: currentBalance.registryBalance,
+              safeBalanceAfter: currentBalance.safeBalance,
+              bankBalanceAfter: currentBalance.bankBalance,
+              mobileMoneyBalanceAfter: newMobileMoneyBalance,
+              description: `Paiement Orange Money - ${paymentData.receiptNumber}`,
+              receiptNumber: paymentData.receiptNumber,
+              referenceType: "payment",
+              studentId: studentId,
+              recordedBy: session.user.id,
+            },
+          })
+
+          // Update mobile money balance
+          await tx.treasuryBalance.update({
+            where: { id: currentBalance.id },
+            data: {
+              mobileMoneyBalance: newMobileMoneyBalance,
+              updatedAt: new Date(),
+            },
+          })
+        }
 
         const payment = await tx.payment.create({
           data: {
@@ -257,10 +321,19 @@ export async function POST(req: NextRequest, { params }: RouteParams) {
             receiptImageUrl: paymentData.receiptImageUrl,
             recordedBy: session.user.id,
             status: initialStatus,
-            autoConfirmAt,
+            confirmedBy: session.user.id,
+            confirmedAt: new Date(),
           },
         })
         console.log("[Submit] Payment created successfully:", payment.id, payment.receiptNumber)
+
+        // Mark first schedule as paid if amount covers it
+        if (firstScheduleId && createdSchedules[0] && paymentData.paymentAmount >= createdSchedules[0].amount) {
+          await tx.paymentSchedule.update({
+            where: { id: firstScheduleId },
+            data: { isPaid: true },
+          })
+        }
       }
 
       return updatedEnrollment

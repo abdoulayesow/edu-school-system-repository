@@ -40,8 +40,14 @@ export const en: TranslationKeys = {
     offlineMode: "Offline Mode",
     menu: "Menu",
     select: "Select",
+    selected: "Selected",
     viewDetails: "View details",
     noData: "No data available",
+    today: "today",
+    refresh: "Refresh",
+    description: "Description",
+    notes: "Notes",
+    recordedBy: "Recorded by",
     notAssigned: "Not assigned",
     week: "week",
     subjects: "Subjects",
@@ -77,6 +83,7 @@ export const en: TranslationKeys = {
     balance: "Balance",
     payments: "Payments",
     expenses: "Expenses",
+    treasury: "Treasury",
     classes: "Classes",
     timetable: "Timetable",
     audit: "Audit",
@@ -431,6 +438,8 @@ export const en: TranslationKeys = {
     pendingReview: "Pending Review",
     confirmed: "Confirmed",
     rejected: "Rejected",
+    reversed: "Reversed",
+    failed: "Failed",
 
     // Payments page
     paymentsPageTitle: "Payments Management",
@@ -532,6 +541,25 @@ export const en: TranslationKeys = {
     itemsToReview: "items to review",
     noItemsToReview: "No items to review. All transactions are up to date!",
     approve: "Approve",
+
+    // Mobile Money features
+    mobileMoneyBalance: "Mobile Money Balance",
+    totalLiquidAssets: "Total Liquid Assets",
+    receivedToday: "Received today",
+    spentToday: "Spent today",
+    reverseTransaction: "Reverse Transaction",
+    reversalReason: "Reversal Reason",
+    confirmReversal: "Confirm Reversal",
+    reversalSuccess: "Transaction reversed successfully",
+    reversalWarning: "This action will create a reversal transaction. This operation is irreversible.",
+    insufficientMobileMoneyBalance: "Insufficient mobile money balance",
+    tabMobileMoney: "Mobile Money",
+    noMobileMoneyTransactions: "No Mobile Money transactions",
+    recordFee: "Record Fee",
+    mobileMoneyFee: "Mobile Money Fee",
+    paymentMethodBreakdown: "Payment Method Breakdown",
+    safeLevel: "Safe Level",
+    optimalLevel: "Optimal level",
   },
 
   // Attendance
@@ -2012,4 +2040,271 @@ export const en: TranslationKeys = {
     bulletinsDownloaded: "All bulletins downloaded",
     generatingPdfFor: "Generating PDF for {name}...",
   },
+
+  // Treasury / Safe
+  treasury: {
+    // Navigation & titles
+    title: "Cash Management",
+    subtitle: "Track treasury movements",
+    safeBalance: "Safe Balance",
+    bankBalance: "Bank Balance",
+
+    // Status levels
+    statusOptimal: "Optimal level",
+    statusWarning: "Warning",
+    statusCritical: "Critical",
+    statusExcess: "Excess",
+
+    // Verification
+    lastVerification: "Last verification",
+    verifyNow: "Verify cash",
+    verifyDesc: "Count the physical cash in the safe and enter the amount",
+    expectedBalance: "Expected balance",
+    countedBalance: "Counted balance",
+    discrepancy: "Discrepancy",
+    verificationMatch: "Match",
+    verificationDiscrepancy: "Discrepancy detected",
+    explanationRequired: "Explanation required",
+    noVerificationToday: "Not verified today",
+    confirmVerification: "Confirm verification",
+    recordDiscrepancy: "Record discrepancy",
+    excessCash: "There is more cash than expected in the safe",
+    missingCash: "There is cash missing from the safe",
+    discrepancyWarning: "If you confirm, the safe balance will be adjusted to the counted amount.",
+    explanationPlaceholder: "Explain the reason for this discrepancy...",
+
+    // Actions
+    recordPayment: "Record payment",
+    recordPaymentDesc: "Record money coming into the safe",
+    recordExpense: "Record expense",
+    recordExpenseDesc: "Record money going out of the safe",
+    bankTransfer: "Bank transfer",
+    bankTransferDesc: "Transfer money between safe and bank",
+
+    // Payment types
+    paymentType: "Payment type",
+    paymentTypes: {
+      scolarite: "Tuition",
+      inscription: "Registration",
+      activites: "Activities",
+      remboursement: "Debt repayment",
+      autre: "Other",
+    },
+
+    // Expense categories
+    expenseCategory: "Category",
+    expenseCategories: {
+      salaires: "Salaries",
+      fournituresScolaires: "School supplies",
+      fournituresBureau: "Office supplies",
+      electriciteEau: "Utilities",
+      entretien: "Maintenance / Repairs",
+      transport: "Transport",
+      alimentation: "Food / Cafeteria",
+      evenements: "Events",
+      autre: "Other",
+    },
+
+    // Bank transfers
+    depositToBank: "Deposit to bank",
+    withdrawFromBank: "Withdraw from bank",
+    carriedBy: "Carried by",
+    carriedByPlaceholder: "Who will deposit?",
+    bankReference: "Bank reference",
+    bankRefPlaceholder: "Deposit slip number",
+    bankName: "Bank name",
+    newSafeBalance: "New safe balance",
+    newBankBalance: "New bank balance",
+
+    // Form fields
+    payerName: "Payer name",
+    payerNamePlaceholder: "Who handed over the money?",
+    payerNameRequired: "Payer name required",
+    beneficiary: "Beneficiary",
+    beneficiaryPlaceholder: "Ex: Central Stationery",
+    selectStudent: "Select student",
+    receiptPhoto: "Receipt photo",
+    descriptionPlaceholder: "Payment description",
+    descriptionRequired: "Description required",
+    expenseDescPlaceholder: "Ex: Purchase of chalk and notebooks",
+    notesPlaceholder: "Additional notes",
+    invalidAmount: "Invalid amount",
+
+    // Validation
+    insufficientFunds: "Insufficient funds in safe",
+    insufficientFundsSafe: "Insufficient funds in safe",
+    insufficientFundsBank: "Insufficient funds in bank",
+    confirmTransaction: "Confirm",
+    balanceAfter: "Balance after",
+
+    // Summary
+    todaySummary: "Today's summary",
+    moneyIn: "Money in",
+    moneyOut: "Money out",
+    netChange: "Net change",
+
+    // History
+    transactionHistory: "Transaction history",
+    recentTransactions: "Recent transactions",
+    allTransactions: "View all",
+    transactions: "transactions",
+
+    // Reports
+    dailyReport: "Daily report",
+    startingBalance: "Opening balance",
+    endingBalance: "Closing balance",
+    verificationStatus: "Verification status",
+
+    // Direction
+    income: "Income",
+    expense: "Expense",
+
+    // Errors
+    verificationAlreadyDone: "Today's verification has already been recorded",
+    balanceNotInitialized: "Safe balance is not initialized",
+
+    // Transaction reversal
+    reverseTransaction: "Reverse Transaction",
+    reversalReason: "Reason for reversal",
+    reversalReasonPlaceholder: "Explain why this transaction needs to be reversed...",
+    reversalReasonTooShort: "Reason must be at least 10 characters",
+    reversalWarning: "This will create a reversal transaction. The original transaction will remain in the audit trail.",
+    reversalSuccess: "Transaction reversed successfully",
+    reversalFailed: "Failed to reverse transaction",
+    reversedBy: "Reversed by",
+    reversing: "Reversing...",
+    confirmReversal: "Confirm Reversal",
+    includeCorrection: "Include correction (re-record with correct amount/method)",
+    correctAmount: "Correct Amount",
+    correctMethod: "Correct Payment Method",
+    keepOriginalMethod: "Keep original method",
+    correctionExplanation: "A new transaction will be created with the correct amount/method after the reversal.",
+    invalidCorrectionAmount: "Invalid correction amount",
+    minimumCharacters: "Minimum {count} characters",
+
+    // Transaction types
+    transactionTypes: {
+      studentPayment: "Student Payment",
+      expensePayment: "Expense Payment",
+      mobileMoneyIncome: "Orange Money Income",
+      mobileMoneyPayment: "Orange Money Payment",
+      bankDeposit: "Bank Deposit",
+      bankWithdrawal: "Bank Withdrawal",
+      adjustment: "Adjustment",
+      otherIncome: "Other Income",
+    },
+
+    // Direction labels
+    amount: "Amount",
+    direction: "Direction",
+    incoming: "Incoming",
+    outgoing: "Outgoing",
+
+    // Daily verification warning
+    dailyVerificationNeeded: "Daily Verification Needed",
+    dailyVerificationWarning: "The daily cash verification has not been completed today.",
+    verificationRecommendation: "It is recommended to verify the safe balance before recording transactions.",
+    continueAnyway: "Continue Anyway",
+
+    // Registry (Caisse) - Daily Operations
+    registry: {
+      // Balance display
+      registryBalance: "Registry Balance",
+      registryOfTheDay: "Today's Registry",
+      workingCash: "Working Cash",
+      floatAmount: "Float Amount",
+      standardFloat: "Standard amount",
+      registryClosed: "Registry closed - Open the day",
+      registryOpen: "Registry open",
+
+      // Daily opening
+      dailyOpening: "Daily Opening",
+      dailyOpeningDesc: "Step {step}/2 - {description}",
+      stepSafeCounting: "Safe counting",
+      stepFloatTransfer: "Float transfer",
+      expectedSafeBalance: "Expected safe balance",
+      countedSafeAmount: "Amount counted in safe",
+      countedSafeAmountPlaceholder: "Enter the counted amount",
+      countedSafeAmountHint: "Physically count the money in the safe and enter the exact amount",
+      floatAmountLabel: "Float amount",
+      floatAmountMustBePositive: "Float amount must be greater than zero",
+      insufficientFundsForFloat: "Insufficient funds in safe for float",
+      enterCountedSafeAmount: "Please enter the amount counted in safe",
+      registryAlreadyHasBalance: "The registry already has {amount}. Please close the previous day first.",
+      safeAfterTransfer: "Safe after transfer",
+      registryAfterTransfer: "Registry after transfer",
+      openTheDay: "Open the day",
+      opening: "Opening...",
+      openingFailed: "Daily opening failed",
+
+      // Daily closing
+      dailyClosing: "Daily Closing",
+      dailyClosingDesc: "Count the registry and transfer all to safe",
+      expectedRegistryBalance: "Expected registry balance",
+      countedRegistryAmount: "Amount counted in registry",
+      countedRegistryAmountPlaceholder: "Enter the counted amount",
+      countedRegistryAmountHint: "Physically count the money in the registry and enter the exact amount",
+      registryAlreadyEmpty: "The registry is already empty. No closing needed.",
+      safeAfterClosing: "Safe after closing",
+      closeTheDay: "Close the day",
+      closing: "Closing...",
+      closingFailed: "Daily closing failed",
+      alreadyOpen: "Already open",
+      alreadyClosed: "Already closed",
+
+      // Discrepancy
+      surplus: "Surplus",
+      shortage: "Shortage",
+      adjustmentWillBeCreated: "An adjustment will be created automatically.",
+      noDiscrepancy: "No discrepancy detected",
+      countMatchesExpected: "The counted amount matches the expected balance.",
+
+      // Safe Transfer
+      safeTransfer: "Safe ↔ Registry Transfer",
+      safeTransferDesc: "Ad-hoc transfer outside daily opening/closing operations",
+      transferDirection: "Transfer direction",
+      safeToRegistry: "Safe → Registry",
+      safeToRegistryDesc: "Withdraw from safe to fund the registry",
+      registryToSafe: "Registry → Safe",
+      registryToSafeDesc: "Deposit to safe from registry",
+      amountToTransfer: "Amount to transfer",
+      available: "Available",
+      previewAfterTransfer: "Preview after transfer",
+      notesRequired: "Notes are required (minimum 10 characters)",
+      notesMinChars: "{count}/10 characters minimum",
+      adHocTransferNote: "This transfer is an ad-hoc movement that will be recorded in the transaction history. Use daily opening/closing operations for standard daily transfers.",
+      performTransfer: "Perform transfer",
+      transferring: "Transferring...",
+      transferFailed: "Transfer failed",
+      insufficientFundsInRegistry: "Insufficient funds in registry",
+
+      // Notes
+      notesOptional: "Notes (optional)",
+      notesPlaceholder: "Remarks or observations...",
+      transferReasonPlaceholder: "Reason for transfer (minimum 10 characters)...",
+
+      // Buttons
+      cancel: "Cancel",
+      back: "Back",
+      next: "Next",
+
+      // Accounting page labels
+      openDay: "Open the day",
+      closeDay: "Close the day",
+      safeRegistryTransfer: "Safe/Registry Transfer",
+      recordExpense: "Record an expense",
+      bankTransfer: "Bank transfer",
+      verifyCash: "Verify cash",
+      alreadyVerified: "Already verified",
+      todaysEntries: "Today's entries",
+      todaysExits: "Today's exits",
+      todaysTransactions: "Today's transactions",
+      recentMovements: "Recent movements",
+      noRecentTransactions: "No recent transactions",
+      viewAll: "View all",
+    },
+  },
+
+  // Navigation
+  safe: "Safe",
 } as const;
