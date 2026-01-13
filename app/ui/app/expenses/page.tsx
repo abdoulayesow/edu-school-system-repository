@@ -60,6 +60,7 @@ import {
 } from "lucide-react"
 import { useI18n } from "@/components/i18n-provider"
 import { PageContainer } from "@/components/layout"
+import { PermissionGuard, usePermissions } from "@/components/permission-guard"
 import { DataPagination } from "@/components/data-pagination"
 import { formatDate as formatDateUtil } from "@/lib/utils"
 import { useExpenses, useCreateExpense, useUpdateExpenseStatus, useDeleteExpense } from "@/lib/hooks/use-api"
@@ -157,6 +158,13 @@ export default function ExpensesPage() {
   const createExpenseMutation = useCreateExpense()
   const updateStatusMutation = useUpdateExpenseStatus()
   const deleteExpenseMutation = useDeleteExpense()
+
+  // Permission checks for expense actions
+  const { can: canExpense, loading: loadingPermissions } = usePermissions([
+    { resource: "safe_expense", action: "approve" },
+    { resource: "safe_expense", action: "delete" },
+    { resource: "safe_expense", action: "update" },
+  ])
 
   // Extract data from query results
   const expenses = expensesData?.expenses ?? []
@@ -397,13 +405,18 @@ export default function ExpensesPage() {
             <p className="text-muted-foreground">{t.expenses.subtitle}</p>
           </div>
 
-          <Dialog open={isNewExpenseOpen} onOpenChange={setIsNewExpenseOpen}>
-            <DialogTrigger asChild>
-              <Button variant="gold">
-                <Plus className="size-4 mr-2" />
-                {t.expenses.newExpense}
-              </Button>
-            </DialogTrigger>
+          <PermissionGuard
+            resource="safe_expense"
+            action="create"
+            loading={<div className="h-9 w-36 animate-pulse bg-muted rounded-md" />}
+          >
+            <Dialog open={isNewExpenseOpen} onOpenChange={setIsNewExpenseOpen}>
+              <DialogTrigger asChild>
+                <Button variant="gold">
+                  <Plus className="size-4 mr-2" />
+                  {t.expenses.newExpense}
+                </Button>
+              </DialogTrigger>
             <DialogContent className="sm:max-w-[500px]">
               <DialogHeader>
                 <DialogTitle>{t.expenses.newExpense}</DialogTitle>
@@ -502,7 +515,8 @@ export default function ExpensesPage() {
                 </Button>
               </DialogFooter>
             </DialogContent>
-          </Dialog>
+            </Dialog>
+          </PermissionGuard>
         </div>
 
         {/* Summary Cards */}
@@ -696,38 +710,46 @@ export default function ExpensesPage() {
                               <DropdownMenuContent align="end">
                                 {expense.status === "pending" && (
                                   <>
-                                    <DropdownMenuItem
-                                      onClick={() => {
-                                        setSelectedExpense(expense)
-                                        setActionType("approve")
-                                      }}
-                                    >
-                                      <Check className="size-4 mr-2" />
-                                      {t.expenses.approveExpense}
-                                    </DropdownMenuItem>
-                                    <DropdownMenuItem
-                                      onClick={() => {
-                                        setSelectedExpense(expense)
-                                        setActionType("reject")
-                                      }}
-                                    >
-                                      <X className="size-4 mr-2" />
-                                      {t.expenses.rejectExpense}
-                                    </DropdownMenuItem>
-                                    <DropdownMenuSeparator />
-                                    <DropdownMenuItem
-                                      className="text-destructive"
-                                      onClick={() => {
-                                        setSelectedExpense(expense)
-                                        setActionType("delete")
-                                      }}
-                                    >
-                                      <Trash2 className="size-4 mr-2" />
-                                      {t.common.delete}
-                                    </DropdownMenuItem>
+                                    {canExpense("safe_expense", "approve") && (
+                                      <DropdownMenuItem
+                                        onClick={() => {
+                                          setSelectedExpense(expense)
+                                          setActionType("approve")
+                                        }}
+                                      >
+                                        <Check className="size-4 mr-2" />
+                                        {t.expenses.approveExpense}
+                                      </DropdownMenuItem>
+                                    )}
+                                    {canExpense("safe_expense", "approve") && (
+                                      <DropdownMenuItem
+                                        onClick={() => {
+                                          setSelectedExpense(expense)
+                                          setActionType("reject")
+                                        }}
+                                      >
+                                        <X className="size-4 mr-2" />
+                                        {t.expenses.rejectExpense}
+                                      </DropdownMenuItem>
+                                    )}
+                                    {canExpense("safe_expense", "delete") && (
+                                      <>
+                                        <DropdownMenuSeparator />
+                                        <DropdownMenuItem
+                                          className="text-destructive"
+                                          onClick={() => {
+                                            setSelectedExpense(expense)
+                                            setActionType("delete")
+                                          }}
+                                        >
+                                          <Trash2 className="size-4 mr-2" />
+                                          {t.common.delete}
+                                        </DropdownMenuItem>
+                                      </>
+                                    )}
                                   </>
                                 )}
-                                {expense.status === "approved" && (
+                                {expense.status === "approved" && canExpense("safe_expense", "update") && (
                                   <DropdownMenuItem
                                     onClick={() => {
                                       setSelectedExpense(expense)
@@ -745,7 +767,7 @@ export default function ExpensesPage() {
                                     </span>
                                   </DropdownMenuItem>
                                 )}
-                                {(expense.status === "paid" || expense.status === "rejected") && (
+                                {(expense.status === "paid" || (expense.status === "rejected" && !expense.rejectionReason)) && (
                                   <DropdownMenuItem disabled>
                                     <span className="text-xs text-muted-foreground">
                                       Aucune action disponible

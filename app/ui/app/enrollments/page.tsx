@@ -12,6 +12,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Plus, Search, ChevronRight, Loader2, FileText, Clock, CheckCircle2, Users } from "lucide-react"
 import { useI18n } from "@/components/i18n-provider"
 import { PageContainer } from "@/components/layout"
+import { PermissionGuard } from "@/components/permission-guard"
 import { DataPagination } from "@/components/data-pagination"
 import { sizing } from "@/lib/design-tokens"
 import { formatDate } from "@/lib/utils"
@@ -353,16 +354,22 @@ export default function EnrollmentsPage() {
                 {pagination && ` sur ${pagination.total}`}
               </CardDescription>
             </div>
-            <Button
-              asChild
-              variant="gold"
-              className="w-full sm:w-auto"
+            <PermissionGuard
+              resource="enrollments"
+              action="create"
+              loading={<div className="h-9 w-40 animate-pulse bg-muted rounded-md" />}
             >
-              <Link href="/enrollments/new">
-                <Plus className="h-4 w-4 mr-2" />
-                {t.enrollments.newEnrollment}
-              </Link>
-            </Button>
+              <Button
+                asChild
+                variant="gold"
+                className="w-full sm:w-auto"
+              >
+                <Link href="/enrollments/new">
+                  <Plus className="h-4 w-4 mr-2" />
+                  {t.enrollments.newEnrollment}
+                </Link>
+              </Button>
+            </PermissionGuard>
           </div>
         </CardHeader>
         <CardContent>

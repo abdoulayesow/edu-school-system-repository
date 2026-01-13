@@ -43,6 +43,7 @@ import {
 } from "lucide-react"
 import { useI18n } from "@/components/i18n-provider"
 import { PageContainer } from "@/components/layout/PageContainer"
+import { PermissionGuard } from "@/components/permission-guard"
 import { formatDateLong } from "@/lib/utils"
 import Link from "next/link"
 import { StudentRoomChangeDialog } from "@/components/room-assignments"
@@ -404,18 +405,8 @@ export default function StudentDetailPage() {
                     {student.studentProfile.currentGrade.name}
                   </Badge>
                 )}
-                {currentRoomName ? (
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    className="gap-1 h-6"
-                    onClick={() => setRoomChangeDialogOpen(true)}
-                  >
-                    <DoorOpen className="size-3" />
-                    {t.students.room}
-                  </Button>
-                ) : (
-                  activeSchoolYearId && student.studentProfile?.currentGrade && (
+                <PermissionGuard resource="room_assignments" action="update" inline>
+                  {currentRoomName ? (
                     <Button
                       variant="outline"
                       size="sm"
@@ -425,25 +416,43 @@ export default function StudentDetailPage() {
                       <DoorOpen className="size-3" />
                       {t.students.room}
                     </Button>
-                  )
-                )}
+                  ) : (
+                    activeSchoolYearId && student.studentProfile?.currentGrade && (
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="gap-1 h-6"
+                        onClick={() => setRoomChangeDialogOpen(true)}
+                      >
+                        <DoorOpen className="size-3" />
+                        {t.students.room}
+                      </Button>
+                    )
+                  )}
+                </PermissionGuard>
               </div>
             </div>
           </div>
 
           {/* Action Buttons */}
           <div className="flex gap-2">
-            <Link href={`/payments/new?studentId=${student.id}`}>
-              <Button
-                variant="gold"
-                size="lg"
-                className="gap-2 shadow-md hover:shadow-lg transition-all"
-                disabled={!student.balanceInfo || student.balanceInfo.remainingBalance <= 0}
-              >
-                <Banknote className="size-5" />
-                {t.students.makePayment}
-              </Button>
-            </Link>
+            <PermissionGuard
+              resource="payments"
+              action="create"
+              loading={<div className="h-11 w-40 animate-pulse bg-muted rounded-md" />}
+            >
+              <Link href={`/payments/new?studentId=${student.id}`}>
+                <Button
+                  variant="gold"
+                  size="lg"
+                  className="gap-2 shadow-md hover:shadow-lg transition-all"
+                  disabled={!student.balanceInfo || student.balanceInfo.remainingBalance <= 0}
+                >
+                  <Banknote className="size-5" />
+                  {t.students.makePayment}
+                </Button>
+              </Link>
+            </PermissionGuard>
           </div>
         </div>
 
@@ -543,12 +552,14 @@ export default function StudentDetailPage() {
                     <User className="size-5" />
                     {t.students.personalInfo}
                   </CardTitle>
-                  <Link href={`/students/${student.id}/edit`}>
-                    <Button variant="outline" size="sm" className="gap-1 bg-amber-50 text-amber-700 border-amber-200 hover:bg-amber-100 dark:bg-amber-950/30 dark:text-amber-400 dark:border-amber-800 dark:hover:bg-amber-950/50">
-                      <Edit2 className="size-3" />
-                      {t.students.editInfo}
-                    </Button>
-                  </Link>
+                  <PermissionGuard resource="students" action="update" inline>
+                    <Link href={`/students/${student.id}/edit`}>
+                      <Button variant="outline" size="sm" className="gap-1 bg-amber-50 text-amber-700 border-amber-200 hover:bg-amber-100 dark:bg-amber-950/30 dark:text-amber-400 dark:border-amber-800 dark:hover:bg-amber-950/50">
+                        <Edit2 className="size-3" />
+                        {t.students.editInfo}
+                      </Button>
+                    </Link>
+                  </PermissionGuard>
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <div className="grid grid-cols-2 gap-4">

@@ -46,6 +46,7 @@ import { MobileMoneyFeeDialog } from "@/components/treasury/mobile-money-fee-dia
 import { DailyOpeningDialog } from "@/components/treasury/daily-opening-dialog"
 import { DailyClosingDialog } from "@/components/treasury/daily-closing-dialog"
 import { SafeTransferDialog } from "@/components/treasury/safe-transfer-dialog"
+import { PermissionGuard } from "@/components/permission-guard"
 import { typography, gradients, interactive } from "@/lib/design-tokens"
 import { cn } from "@/lib/utils"
 
@@ -777,74 +778,86 @@ export default function AccountingPage() {
 
             {/* Quick Actions */}
             <div className="grid gap-4 grid-cols-2 md:grid-cols-3">
-              <Button
-                size="lg"
-                variant={treasuryBalance?.registryBalance === 0 ? "default" : "outline"}
-                className="h-16 flex-col gap-2"
-                onClick={() => setShowDailyOpeningDialog(true)}
-                disabled={treasuryBalance?.registryBalance !== 0}
-              >
-                <ArrowDownToLine className="h-6 w-6" />
-                <span className="text-sm font-medium">
-                  {treasuryBalance?.registryBalance === 0 ? reg.openDay : reg.alreadyOpen}
-                </span>
-              </Button>
+              <PermissionGuard resource="safe_balance" action="update" loading={<div className="h-16 animate-pulse bg-muted rounded-lg" />}>
+                <Button
+                  size="lg"
+                  variant={treasuryBalance?.registryBalance === 0 ? "default" : "outline"}
+                  className="h-16 flex-col gap-2 w-full"
+                  onClick={() => setShowDailyOpeningDialog(true)}
+                  disabled={treasuryBalance?.registryBalance !== 0}
+                >
+                  <ArrowDownToLine className="h-6 w-6" />
+                  <span className="text-sm font-medium">
+                    {treasuryBalance?.registryBalance === 0 ? reg.openDay : reg.alreadyOpen}
+                  </span>
+                </Button>
+              </PermissionGuard>
 
-              <Button
-                size="lg"
-                variant={(treasuryBalance?.registryBalance ?? 0) > 0 ? "default" : "outline"}
-                className="h-16 flex-col gap-2"
-                onClick={() => setShowDailyClosingDialog(true)}
-                disabled={(treasuryBalance?.registryBalance ?? 0) === 0}
-              >
-                <ArrowUpFromLine className="h-6 w-6" />
-                <span className="text-sm font-medium">
-                  {(treasuryBalance?.registryBalance ?? 0) > 0 ? reg.closeDay : reg.alreadyClosed}
-                </span>
-              </Button>
+              <PermissionGuard resource="safe_balance" action="update" loading={<div className="h-16 animate-pulse bg-muted rounded-lg" />}>
+                <Button
+                  size="lg"
+                  variant={(treasuryBalance?.registryBalance ?? 0) > 0 ? "default" : "outline"}
+                  className="h-16 flex-col gap-2 w-full"
+                  onClick={() => setShowDailyClosingDialog(true)}
+                  disabled={(treasuryBalance?.registryBalance ?? 0) === 0}
+                >
+                  <ArrowUpFromLine className="h-6 w-6" />
+                  <span className="text-sm font-medium">
+                    {(treasuryBalance?.registryBalance ?? 0) > 0 ? reg.closeDay : reg.alreadyClosed}
+                  </span>
+                </Button>
+              </PermissionGuard>
 
-              <Button
-                size="lg"
-                variant="outline"
-                className="h-16 flex-col gap-2"
-                onClick={() => setShowSafeTransferDialog(true)}
-              >
-                <ArrowRight className="h-6 w-6" />
-                <span className="text-sm font-medium">{reg.safeRegistryTransfer}</span>
-              </Button>
+              <PermissionGuard resource="safe_balance" action="update" loading={<div className="h-16 animate-pulse bg-muted rounded-lg" />}>
+                <Button
+                  size="lg"
+                  variant="outline"
+                  className="h-16 flex-col gap-2 w-full"
+                  onClick={() => setShowSafeTransferDialog(true)}
+                >
+                  <ArrowRight className="h-6 w-6" />
+                  <span className="text-sm font-medium">{reg.safeRegistryTransfer}</span>
+                </Button>
+              </PermissionGuard>
 
-              <Button
-                size="lg"
-                variant="destructive"
-                className="h-16 flex-col gap-2"
-                onClick={() => setShowExpenseDialog(true)}
-              >
-                <ArrowUpFromLine className="h-6 w-6" />
-                <span className="text-sm font-medium">{reg.recordExpense}</span>
-              </Button>
+              <PermissionGuard resource="safe_expense" action="create" loading={<div className="h-16 animate-pulse bg-muted rounded-lg" />}>
+                <Button
+                  size="lg"
+                  variant="destructive"
+                  className="h-16 flex-col gap-2 w-full"
+                  onClick={() => setShowExpenseDialog(true)}
+                >
+                  <ArrowUpFromLine className="h-6 w-6" />
+                  <span className="text-sm font-medium">{reg.recordExpense}</span>
+                </Button>
+              </PermissionGuard>
 
-              <Button
-                size="lg"
-                variant="outline"
-                className="h-16 flex-col gap-2"
-                onClick={() => setShowTransferDialog(true)}
-              >
-                <Building2 className="h-6 w-6" />
-                <span className="text-sm font-medium">{reg.bankTransfer}</span>
-              </Button>
+              <PermissionGuard resource="bank_transfers" action="create" loading={<div className="h-16 animate-pulse bg-muted rounded-lg" />}>
+                <Button
+                  size="lg"
+                  variant="outline"
+                  className="h-16 flex-col gap-2 w-full"
+                  onClick={() => setShowTransferDialog(true)}
+                >
+                  <Building2 className="h-6 w-6" />
+                  <span className="text-sm font-medium">{reg.bankTransfer}</span>
+                </Button>
+              </PermissionGuard>
 
-              <Button
-                size="lg"
-                variant="secondary"
-                className="h-16 flex-col gap-2"
-                onClick={() => setShowVerifyDialog(true)}
-                disabled={!!treasuryBalance?.todayVerification}
-              >
-                <ClipboardCheck className="h-6 w-6" />
-                <span className="text-sm font-medium">
-                  {treasuryBalance?.todayVerification ? reg.alreadyVerified : reg.verifyCash}
-                </span>
-              </Button>
+              <PermissionGuard resource="daily_verification" action="create" loading={<div className="h-16 animate-pulse bg-muted rounded-lg" />}>
+                <Button
+                  size="lg"
+                  variant="secondary"
+                  className="h-16 flex-col gap-2 w-full"
+                  onClick={() => setShowVerifyDialog(true)}
+                  disabled={!!treasuryBalance?.todayVerification}
+                >
+                  <ClipboardCheck className="h-6 w-6" />
+                  <span className="text-sm font-medium">
+                    {treasuryBalance?.todayVerification ? reg.alreadyVerified : reg.verifyCash}
+                  </span>
+                </Button>
+              </PermissionGuard>
             </div>
 
             {/* Recent Transactions */}
@@ -1040,38 +1053,44 @@ export default function AccountingPage() {
 
             {/* Quick Actions */}
             <div className="grid gap-4 grid-cols-2 md:grid-cols-3">
-              <Button
-                size="lg"
-                variant="outline"
-                className="h-16 flex-col gap-2"
-                onClick={() => setShowSafeTransferDialog(true)}
-              >
-                <ArrowRight className="h-6 w-6" />
-                <span className="text-sm font-medium">{reg.safeRegistryTransfer}</span>
-              </Button>
+              <PermissionGuard resource="safe_balance" action="update" loading={<div className="h-16 animate-pulse bg-muted rounded-lg" />}>
+                <Button
+                  size="lg"
+                  variant="outline"
+                  className="h-16 flex-col gap-2 w-full"
+                  onClick={() => setShowSafeTransferDialog(true)}
+                >
+                  <ArrowRight className="h-6 w-6" />
+                  <span className="text-sm font-medium">{reg.safeRegistryTransfer}</span>
+                </Button>
+              </PermissionGuard>
 
-              <Button
-                size="lg"
-                variant="outline"
-                className="h-16 flex-col gap-2"
-                onClick={() => setShowTransferDialog(true)}
-              >
-                <Building2 className="h-6 w-6" />
-                <span className="text-sm font-medium">{reg.bankTransfer}</span>
-              </Button>
+              <PermissionGuard resource="bank_transfers" action="create" loading={<div className="h-16 animate-pulse bg-muted rounded-lg" />}>
+                <Button
+                  size="lg"
+                  variant="outline"
+                  className="h-16 flex-col gap-2 w-full"
+                  onClick={() => setShowTransferDialog(true)}
+                >
+                  <Building2 className="h-6 w-6" />
+                  <span className="text-sm font-medium">{reg.bankTransfer}</span>
+                </Button>
+              </PermissionGuard>
 
-              <Button
-                size="lg"
-                variant="secondary"
-                className="h-16 flex-col gap-2"
-                onClick={() => setShowVerifyDialog(true)}
-                disabled={!!treasuryBalance?.todayVerification}
-              >
-                <ClipboardCheck className="h-6 w-6" />
-                <span className="text-sm font-medium">
-                  {treasuryBalance?.todayVerification ? reg.alreadyVerified : reg.verifyCash}
-                </span>
-              </Button>
+              <PermissionGuard resource="daily_verification" action="create" loading={<div className="h-16 animate-pulse bg-muted rounded-lg" />}>
+                <Button
+                  size="lg"
+                  variant="secondary"
+                  className="h-16 flex-col gap-2 w-full"
+                  onClick={() => setShowVerifyDialog(true)}
+                  disabled={!!treasuryBalance?.todayVerification}
+                >
+                  <ClipboardCheck className="h-6 w-6" />
+                  <span className="text-sm font-medium">
+                    {treasuryBalance?.todayVerification ? reg.alreadyVerified : reg.verifyCash}
+                  </span>
+                </Button>
+              </PermissionGuard>
             </div>
 
             {/* Today's Verification Status */}
@@ -1259,15 +1278,21 @@ export default function AccountingPage() {
 
             {/* Quick Transfer Action */}
             <div className="flex justify-center">
-              <Button
-                size="lg"
-                variant="outline"
-                className="h-16 px-8 flex items-center gap-3"
-                onClick={() => setShowTransferDialog(true)}
+              <PermissionGuard
+                resource="bank_transfers"
+                action="create"
+                loading={<div className="h-16 w-72 animate-pulse bg-muted rounded-lg" />}
               >
-                <Building2 className="h-5 w-5" />
-                <span className="font-medium">Nouveau transfert bancaire</span>
-              </Button>
+                <Button
+                  size="lg"
+                  variant="outline"
+                  className="h-16 px-8 flex items-center gap-3"
+                  onClick={() => setShowTransferDialog(true)}
+                >
+                  <Building2 className="h-5 w-5" />
+                  <span className="font-medium">Nouveau transfert bancaire</span>
+                </Button>
+              </PermissionGuard>
             </div>
 
             {/* Recent Bank Transfers */}
@@ -1395,15 +1420,21 @@ export default function AccountingPage() {
 
             {/* Quick Fee Action */}
             <div className="flex justify-center">
-              <Button
-                size="lg"
-                variant="outline"
-                className="h-16 px-8 flex items-center gap-3"
-                onClick={() => setShowFeeDialog(true)}
+              <PermissionGuard
+                resource="mobile_money"
+                action="create"
+                loading={<div className="h-16 w-72 animate-pulse bg-muted rounded-lg" />}
               >
-                <Smartphone className="h-5 w-5" />
-                <span className="font-medium">Enregistrer frais de transaction</span>
-              </Button>
+                <Button
+                  size="lg"
+                  variant="outline"
+                  className="h-16 px-8 flex items-center gap-3"
+                  onClick={() => setShowFeeDialog(true)}
+                >
+                  <Smartphone className="h-5 w-5" />
+                  <span className="font-medium">Enregistrer frais de transaction</span>
+                </Button>
+              </PermissionGuard>
             </div>
 
             {/* Recent Mobile Money Transactions */}

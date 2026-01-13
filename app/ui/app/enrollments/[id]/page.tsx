@@ -35,6 +35,7 @@ import {
 } from "lucide-react"
 import { useI18n } from "@/components/i18n-provider"
 import { PageContainer } from "@/components/layout/PageContainer"
+import { PermissionGuard } from "@/components/permission-guard"
 import Link from "next/link"
 import { cn } from "@/lib/utils"
 import type { EnrollmentStatus, PaymentSchedule, Payment, EnrollmentNote } from "@/lib/enrollment/types"
@@ -334,33 +335,39 @@ export default function EnrollmentDetailPage({
 
           <div className="flex gap-2">
             {canCancel && (
-              <Button variant="outline" onClick={() => setShowCancelDialog(true)}>
-                <XCircle className="h-4 w-4 mr-2" />
-                {locale === "fr" ? "Annuler" : "Cancel"}
-              </Button>
+              <PermissionGuard resource="enrollments" action="update" inline>
+                <Button variant="outline" onClick={() => setShowCancelDialog(true)}>
+                  <XCircle className="h-4 w-4 mr-2" />
+                  {locale === "fr" ? "Annuler" : "Cancel"}
+                </Button>
+              </PermissionGuard>
             )}
             {(enrollment.status === "draft" || enrollment.status === "cancelled") && (
-              <Button
-                variant="outline"
-                onClick={() => setShowDeleteDialog(true)}
-                className="bg-amber-500 hover:bg-amber-600 text-white border-amber-500 hover:border-amber-600 dark:bg-amber-600 dark:hover:bg-amber-700"
-              >
-                <Trash2 className="h-4 w-4 mr-2" />
-                {t.common.delete}
-              </Button>
+              <PermissionGuard resource="enrollments" action="delete" inline>
+                <Button
+                  variant="outline"
+                  onClick={() => setShowDeleteDialog(true)}
+                  className="bg-amber-500 hover:bg-amber-600 text-white border-amber-500 hover:border-amber-600 dark:bg-amber-600 dark:hover:bg-amber-700"
+                >
+                  <Trash2 className="h-4 w-4 mr-2" />
+                  {t.common.delete}
+                </Button>
+              </PermissionGuard>
             )}
             {["draft", "submitted", "needs_review"].includes(enrollment.status) && (
-              <Button
-                asChild
-                className="bg-amber-500 hover:bg-amber-600 text-white dark:bg-amber-600 dark:hover:bg-amber-700"
-              >
-                <Link href={enrollment.status === "draft"
-                  ? `/enrollments/new?draft=${enrollment.id}&step=${enrollment.currentStep || 1}`
-                  : `/enrollments/new?draft=${enrollment.id}&step=5`
-                }>
-                  {enrollment.status === "draft" ? t.enrollments.continueEnrollment : t.common.edit}
-                </Link>
-              </Button>
+              <PermissionGuard resource="enrollments" action="update" inline>
+                <Button
+                  asChild
+                  className="bg-amber-500 hover:bg-amber-600 text-white dark:bg-amber-600 dark:hover:bg-amber-700"
+                >
+                  <Link href={enrollment.status === "draft"
+                    ? `/enrollments/new?draft=${enrollment.id}&step=${enrollment.currentStep || 1}`
+                    : `/enrollments/new?draft=${enrollment.id}&step=5`
+                  }>
+                    {enrollment.status === "draft" ? t.enrollments.continueEnrollment : t.common.edit}
+                  </Link>
+                </Button>
+              </PermissionGuard>
             )}
           </div>
         </div>
@@ -496,20 +503,24 @@ export default function EnrollmentDetailPage({
 
                 <Separator />
                 <div className="flex gap-3 justify-end">
-                  <Button
-                    onClick={() => setShowApproveDialog(true)}
-                    className="bg-green-600 hover:bg-green-700 text-white"
-                  >
-                    <CheckCircle className="h-4 w-4 mr-2" />
-                    {locale === "fr" ? "Approuver" : "Approve"}
-                  </Button>
-                  <Button
-                    onClick={() => setShowRejectDialog(true)}
-                    className="bg-red-600 hover:bg-red-700 text-white"
-                  >
-                    <XCircle className="h-4 w-4 mr-2" />
-                    {locale === "fr" ? "Rejeter" : "Reject"}
-                  </Button>
+                  <PermissionGuard resource="enrollments" action="approve" inline>
+                    <Button
+                      onClick={() => setShowApproveDialog(true)}
+                      className="bg-green-600 hover:bg-green-700 text-white"
+                    >
+                      <CheckCircle className="h-4 w-4 mr-2" />
+                      {locale === "fr" ? "Approuver" : "Approve"}
+                    </Button>
+                  </PermissionGuard>
+                  <PermissionGuard resource="enrollments" action="approve" inline>
+                    <Button
+                      onClick={() => setShowRejectDialog(true)}
+                      className="bg-red-600 hover:bg-red-700 text-white"
+                    >
+                      <XCircle className="h-4 w-4 mr-2" />
+                      {locale === "fr" ? "Rejeter" : "Reject"}
+                    </Button>
+                  </PermissionGuard>
                 </div>
               </CardContent>
             </Card>
