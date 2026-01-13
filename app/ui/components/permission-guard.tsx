@@ -37,6 +37,8 @@ import { ReactNode, useEffect, useState, useMemo, useCallback } from "react"
 import { useSession } from "next-auth/react"
 import { cn } from "@/lib/utils"
 import { Skeleton } from "@/components/ui/skeleton"
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
+import { useI18n } from "@/components/i18n-provider"
 import { LockKeyhole, ShieldAlert } from "lucide-react"
 
 interface PermissionCheck {
@@ -95,6 +97,7 @@ export function PermissionGuard({
   skip = false,
 }: PermissionGuardProps) {
   const { status } = useSession()
+  const { t } = useI18n()
   const [granted, setGranted] = useState<boolean | null>(null)
   const [isLoading, setIsLoading] = useState(true)
 
@@ -211,16 +214,25 @@ export function PermissionGuard({
   // Show disabled state if requested
   if (showDisabled) {
     return (
-      <Wrapper
-        className={cn(
-          "relative cursor-not-allowed opacity-50",
-          inline ? "inline-flex" : "block",
-          className
-        )}
-        title="You don't have permission for this action"
-      >
-        <div className="pointer-events-none">{children}</div>
-      </Wrapper>
+      <TooltipProvider>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Wrapper
+              className={cn(
+                "relative cursor-not-allowed",
+                inline ? "inline-flex" : "block",
+                className
+              )}
+              aria-disabled="true"
+            >
+              <div className="pointer-events-none opacity-50">{children}</div>
+            </Wrapper>
+          </TooltipTrigger>
+          <TooltipContent>
+            <p>{t.permissions?.noAccess || "You don't have permission for this action"}</p>
+          </TooltipContent>
+        </Tooltip>
+      </TooltipProvider>
     )
   }
 

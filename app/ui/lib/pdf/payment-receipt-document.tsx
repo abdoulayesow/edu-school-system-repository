@@ -61,29 +61,30 @@ const receiptStyles = StyleSheet.create({
     color: colors.text,
   },
   letterhead: {
-    marginBottom: 15,
+    marginBottom: 10,
   },
   letterheadImage: {
     width: "100%",
-    height: "auto",
+    maxHeight: 80,
+    objectFit: "contain",
   },
   title: {
     fontSize: 18,
     fontFamily: "Helvetica-Bold",
     color: colors.primary,
     textAlign: "center",
-    marginTop: 25,
-    marginBottom: 5,
+    marginTop: 15,
+    marginBottom: 3,
   },
   titleAlt: {
     fontSize: 12,
     color: colors.secondary,
     textAlign: "center",
-    marginBottom: 20,
+    marginBottom: 12,
   },
   receiptNumber: {
     textAlign: "center",
-    marginBottom: 25,
+    marginBottom: 15,
   },
   receiptNumberLabel: {
     fontSize: 10,
@@ -102,17 +103,17 @@ const receiptStyles = StyleSheet.create({
     fontSize: 11,
     fontFamily: "Helvetica-Bold",
     color: colors.primary,
-    marginBottom: 10,
-    marginTop: 20,
+    marginBottom: 6,
+    marginTop: 12,
   },
   detailsTable: {
-    marginBottom: 15,
+    marginBottom: 10,
   },
   detailRow: {
     flexDirection: "row",
     borderBottomWidth: 1,
     borderBottomColor: colors.border,
-    paddingVertical: 8,
+    paddingVertical: 5,
   },
   detailLabel: {
     width: 150,
@@ -125,9 +126,9 @@ const receiptStyles = StyleSheet.create({
     fontSize: 11,
   },
   amountSection: {
-    marginTop: 20,
-    marginBottom: 20,
-    padding: 15,
+    marginTop: 12,
+    marginBottom: 12,
+    padding: 12,
     backgroundColor: "#f8f9fa",
     borderRadius: 4,
     borderWidth: 1,
@@ -165,7 +166,7 @@ const receiptStyles = StyleSheet.create({
     color: colors.primary,
   },
   signatureSection: {
-    marginTop: 40,
+    marginTop: 25,
     flexDirection: "row",
     justifyContent: "space-between",
   },
@@ -176,7 +177,7 @@ const receiptStyles = StyleSheet.create({
   signatureLabel: {
     fontSize: 10,
     fontFamily: "Helvetica-Bold",
-    marginBottom: 35,
+    marginBottom: 25,
     textAlign: "center",
   },
   signatureLine: {

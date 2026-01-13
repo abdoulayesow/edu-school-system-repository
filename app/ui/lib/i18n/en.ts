@@ -59,6 +59,11 @@ export const en: TranslationKeys = {
     },
   },
 
+  // Permissions
+  permissions: {
+    noAccess: "You don't have permission for this action",
+  },
+
   // Navigation
   nav: {
     dashboard: "Dashboard",

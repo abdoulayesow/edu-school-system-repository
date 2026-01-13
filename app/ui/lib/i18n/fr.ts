@@ -57,6 +57,11 @@ export const fr = {
     },
   },
 
+  // Permissions
+  permissions: {
+    noAccess: "Vous n'avez pas la permission pour cette action",
+  },
+
   // Navigation
   nav: {
     dashboard: "Tableau de bord",

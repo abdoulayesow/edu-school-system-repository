@@ -57,8 +57,8 @@ export function WizardProgress({ currentStep, isFullyPaid }: WizardProgressProps
                   className={cn(
                     "relative z-10 flex items-center justify-center rounded-full border-2 transition-all duration-300",
                     sizing.avatar.md,
-                    isCompleted && "bg-primary border-primary text-primary-foreground",
-                    isCurrent && "border-primary bg-primary/10 text-primary ring-4 ring-primary/20",
+                    isCompleted && "bg-[#e79908] border-[#e79908] text-black dark:bg-gspn-gold-500 dark:border-gspn-gold-500 dark:text-gspn-maroon-950",
+                    isCurrent && "border-[#e79908] bg-gspn-gold-50 text-black dark:border-gspn-gold-500 dark:bg-gspn-gold-500/30 dark:text-gspn-gold-200 ring-4 ring-[#e79908]/20 dark:ring-gspn-gold-500/20",
                     !isCompleted && !isCurrent && "border-muted bg-muted/50 text-muted-foreground"
                   )}
                 >
@@ -73,8 +73,8 @@ export function WizardProgress({ currentStep, isFullyPaid }: WizardProgressProps
                 <span
                   className={cn(
                     "mt-2 text-xs font-medium text-center transition-colors duration-200",
-                    isCurrent && "text-primary font-semibold",
-                    isCompleted && "text-primary",
+                    isCurrent && "text-black dark:text-gspn-gold-200 font-semibold",
+                    isCompleted && "text-black dark:text-gspn-gold-200",
                     !isCompleted && !isCurrent && "text-muted-foreground"
                   )}
                 >
@@ -88,7 +88,7 @@ export function WizardProgress({ currentStep, isFullyPaid }: WizardProgressProps
                   className={cn(
                     "absolute top-4 left-1/2 w-full h-0.5 -translate-y-1/2",
                     "transition-colors duration-300",
-                    isCompleted ? "bg-primary" : "bg-muted"
+                    isCompleted ? "bg-[#e79908] dark:bg-gspn-gold-500" : "bg-muted"
                   )}
                   style={{ left: "calc(50% + 16px)", width: "calc(100% - 32px)" }}
                 />
