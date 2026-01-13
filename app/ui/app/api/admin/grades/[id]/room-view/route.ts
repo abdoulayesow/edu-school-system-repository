@@ -1,13 +1,13 @@
 import { NextRequest, NextResponse } from "next/server"
 import { prisma } from "@db/prisma"
-import { requireRole } from "@/lib/authz"
+import { requirePerm } from "@/lib/authz"
 
 type RouteParams = {
   params: Promise<{ id: string }>
 }
 
 export async function GET(req: NextRequest, { params }: RouteParams) {
-  const { error } = await requireRole(["director", "academic_director", "secretary"])
+  const { error } = await requirePerm("classes", "view")
   if (error) return error
 
   const { id: gradeId } = await params

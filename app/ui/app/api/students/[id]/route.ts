@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server"
-import { requireSession, requireRole } from "@/lib/authz"
+import { requirePerm } from "@/lib/authz"
 import { prisma } from "@/lib/prisma"
 import { z } from "zod"
 
@@ -23,7 +23,7 @@ const updateStudentSchema = z.object({
  * Get a single student with full details
  */
 export async function GET(req: NextRequest, { params }: RouteParams) {
-  const { error } = await requireSession()
+  const { error } = await requirePerm("students", "view")
   if (error) return error
 
   const { id } = await params
@@ -202,7 +202,7 @@ export async function GET(req: NextRequest, { params }: RouteParams) {
  * Update student information
  */
 export async function PATCH(req: NextRequest, { params }: RouteParams) {
-  const { session, error } = await requireRole(["director", "secretary"])
+  const { error } = await requirePerm("students", "update")
   if (error) return error
 
   const { id } = await params

@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server"
-import { requireRole } from "@/lib/authz"
+import { requirePerm } from "@/lib/authz"
 import { prisma } from "@/lib/prisma"
 import { z } from "zod"
 
@@ -16,7 +16,7 @@ const updateAssignmentSchema = z.object({
  * Get a specific class assignment
  */
 export async function GET(req: NextRequest, { params }: RouteParams) {
-  const { error } = await requireRole(["director", "academic_director"])
+  const { error } = await requirePerm("teachers_assignment", "view")
   if (error) return error
 
   const { id } = await params
@@ -66,7 +66,7 @@ export async function GET(req: NextRequest, { params }: RouteParams) {
  * Update a class assignment (change teacher)
  */
 export async function PUT(req: NextRequest, { params }: RouteParams) {
-  const { error } = await requireRole(["director", "academic_director"])
+  const { error } = await requirePerm("teachers_assignment", "update")
   if (error) return error
 
   const { id } = await params
@@ -149,7 +149,7 @@ export async function PUT(req: NextRequest, { params }: RouteParams) {
  * Delete a class assignment
  */
 export async function DELETE(req: NextRequest, { params }: RouteParams) {
-  const { error } = await requireRole(["director", "academic_director"])
+  const { error } = await requirePerm("teachers_assignment", "delete")
   if (error) return error
 
   const { id } = await params

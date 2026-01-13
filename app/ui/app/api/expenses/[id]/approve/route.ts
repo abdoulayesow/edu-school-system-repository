@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server"
-import { requireRole } from "@/lib/authz"
+import { requirePerm } from "@/lib/authz"
 import { prisma } from "@/lib/prisma"
 import { z } from "zod"
 
@@ -18,7 +18,7 @@ const approveExpenseSchema = z.object({
  * Approve, reject, or mark an expense as paid
  */
 export async function POST(req: NextRequest, { params }: RouteParams) {
-  const { session, error } = await requireRole(["director"])
+  const { session, error } = await requirePerm("safe_expense", "approve")
   if (error) return error
 
   const { id } = await params

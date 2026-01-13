@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server"
-import { requireRole } from "@/lib/authz"
+import { requirePerm } from "@/lib/authz"
 import { prisma } from "@/lib/prisma"
 import { z } from "zod"
 import type { ActivityType, ActivityStatus } from "@prisma/client"
@@ -24,7 +24,7 @@ const createActivitySchema = z.object({
  * Query params: schoolYearId (required), type (optional), status (optional), search (optional), limit, offset
  */
 export async function GET(req: NextRequest) {
-  const { session, error } = await requireRole(["director", "academic_director", "accountant"])
+  const { session, error } = await requirePerm("schedule", "view")
   if (error) return error
 
   try {
@@ -99,7 +99,7 @@ export async function GET(req: NextRequest) {
  * Create a new activity
  */
 export async function POST(req: NextRequest) {
-  const { session, error } = await requireRole(["director", "academic_director"])
+  const { session, error } = await requirePerm("schedule", "create")
   if (error) return error
 
   try {

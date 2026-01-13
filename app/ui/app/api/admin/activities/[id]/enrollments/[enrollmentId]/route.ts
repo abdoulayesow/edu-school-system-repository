@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server"
-import { requireRole } from "@/lib/authz"
+import { requirePerm } from "@/lib/authz"
 import { prisma } from "@/lib/prisma"
 
 type RouteParams = { params: Promise<{ id: string; enrollmentId: string }> }
@@ -9,7 +9,7 @@ type RouteParams = { params: Promise<{ id: string; enrollmentId: string }> }
  * Remove a student from an activity
  */
 export async function DELETE(req: NextRequest, { params }: RouteParams) {
-  const { error } = await requireRole(["director", "academic_director"])
+  const { error } = await requirePerm("schedule", "delete")
   if (error) return error
 
   try {

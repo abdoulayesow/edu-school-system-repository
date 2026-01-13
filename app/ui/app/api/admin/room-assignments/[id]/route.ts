@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server"
-import { requireRole } from "@/lib/authz"
+import { requirePerm } from "@/lib/authz"
 import { prisma } from "@/lib/prisma"
 import { z } from "zod"
 
@@ -16,7 +16,7 @@ const updateAssignmentSchema = z.object({
  * Get a specific room assignment
  */
 export async function GET(req: NextRequest, { params }: RouteParams) {
-  const { error } = await requireRole(["director", "academic_director", "secretary"])
+  const { error } = await requirePerm("schedule", "view")
   if (error) return error
 
   const { id } = await params
@@ -71,11 +71,8 @@ export async function GET(req: NextRequest, { params }: RouteParams) {
  * Change a student's room assignment
  */
 export async function PUT(req: NextRequest, { params }: RouteParams) {
-  const { session, error } = await requireRole(["director", "secretary"])
+  const { session, error } = await requirePerm("schedule", "update")
   if (error) return error
-  if (!session?.user?.id) {
-    return NextResponse.json({ message: "Unauthorized" }, { status: 401 })
-  }
 
   const { id } = await params
 
@@ -146,7 +143,7 @@ export async function PUT(req: NextRequest, { params }: RouteParams) {
       where: { id },
       data: {
         gradeRoomId: validated.gradeRoomId,
-        assignedBy: session.user.id,
+        assignedBy: session!.user.id,
         assignedAt: new Date(),
       },
       include: {
@@ -180,7 +177,7 @@ export async function PUT(req: NextRequest, { params }: RouteParams) {
  * Remove a room assignment
  */
 export async function DELETE(req: NextRequest, { params }: RouteParams) {
-  const { error } = await requireRole(["director", "secretary"])
+  const { error } = await requirePerm("schedule", "delete")
   if (error) return error
 
   const { id } = await params

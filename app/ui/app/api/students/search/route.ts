@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server"
-import { requireSession } from "@/lib/authz"
+import { requirePerm } from "@/lib/authz"
 import { prisma } from "@/lib/prisma"
 
 /**
@@ -7,7 +7,7 @@ import { prisma } from "@/lib/prisma"
  * Quick search for students (for autocomplete, etc.)
  */
 export async function GET(req: NextRequest) {
-  const { error } = await requireSession()
+  const { error } = await requirePerm("students", "view")
   if (error) return error
 
   const { searchParams } = new URL(req.url)

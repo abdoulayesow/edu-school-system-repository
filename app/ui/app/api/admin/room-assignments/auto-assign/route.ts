@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server"
 import { z } from "zod"
 import { prisma } from "@/lib/prisma"
-import { requireRole } from "@/lib/authz"
+import { requirePerm } from "@/lib/authz"
 import { autoAssignStudents, StudentForAssignment, RoomForAssignment } from "@/lib/utils/room-auto-assignment"
 
 // ============================================================================
@@ -18,7 +18,7 @@ const autoAssignSchema = z.object({
 export async function POST(req: NextRequest) {
   try {
     // Require director or secretary role
-    const { session, error } = await requireRole(['director', 'secretary'])
+    const { session, error } = await requirePerm("schedule", "create")
     if (error) return error
 
     const body = await req.json()
@@ -229,7 +229,7 @@ export async function POST(req: NextRequest) {
           studentProfileId: assignment.studentProfileId,
           gradeRoomId: assignment.gradeRoomId,
           schoolYearId,
-          assignedBy: session.user.id,
+          assignedBy: session!.user.id,
           assignedAt: new Date(),
           isActive: true
         })),

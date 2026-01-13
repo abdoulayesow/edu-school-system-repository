@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server"
-import { requireRole } from "@/lib/authz"
+import { requirePerm } from "@/lib/authz"
 import { prisma } from "@/lib/prisma"
 import { z } from "zod"
 import { BankTransferType } from "@prisma/client"
@@ -9,7 +9,7 @@ import { BankTransferType } from "@prisma/client"
  * List bank transfers with pagination and filtering
  */
 export async function GET(req: NextRequest) {
-  const { error } = await requireRole(["director", "accountant"])
+  const { error } = await requirePerm("bank_transfers", "view")
   if (error) return error
 
   const { searchParams } = new URL(req.url)
@@ -84,7 +84,7 @@ const createBankTransferSchema = z.object({
  * Withdrawal: Bank → Safe (decreases bank, increases safe)
  */
 export async function POST(req: NextRequest) {
-  const { session, error } = await requireRole(["director", "accountant"])
+  const { session, error } = await requirePerm("bank_transfers", "create")
   if (error) return error
 
   try {

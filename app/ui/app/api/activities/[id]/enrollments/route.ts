@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server"
-import { requireRole } from "@/lib/authz"
+import { requirePerm } from "@/lib/authz"
 import { prisma } from "@/lib/prisma"
 import { z } from "zod"
 
@@ -14,7 +14,7 @@ type RouteParams = { params: Promise<{ id: string }> }
  * Enroll a student in an activity (from the activities page)
  */
 export async function POST(req: NextRequest, { params }: RouteParams) {
-  const { session, error } = await requireRole(["director", "academic_director", "accountant", "secretary"])
+  const { session, error } = await requirePerm("classes", "create")
   if (error) return error
 
   try {

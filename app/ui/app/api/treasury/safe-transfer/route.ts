@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server"
-import { requireRole } from "@/lib/authz"
+import { requirePerm } from "@/lib/authz"
 import { prisma } from "@/lib/prisma"
 import { z } from "zod"
 
@@ -15,7 +15,7 @@ const safeTransferSchema = z.object({
  * Perform ad-hoc transfer between safe and registry
  */
 export async function POST(req: NextRequest) {
-  const { session, error } = await requireRole(["director"])
+  const { session, error } = await requirePerm("safe_balance", "create")
   if (error) return error
 
   try {

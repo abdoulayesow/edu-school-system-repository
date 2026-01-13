@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server"
-import { requireRole } from "@/lib/authz"
+import { requirePerm } from "@/lib/authz"
 import { prisma } from "@/lib/prisma"
 import { z } from "zod"
 
@@ -8,7 +8,7 @@ import { z } from "zod"
  * Get current safe and bank balances with status indicators
  */
 export async function GET(req: NextRequest) {
-  const { error } = await requireRole(["director", "accountant"])
+  const { error } = await requirePerm("safe_balance", "view")
   if (error) return error
 
   try {
@@ -148,7 +148,7 @@ const adjustBalanceSchema = z.object({
  * Initialize or adjust safe/bank balances (Director only)
  */
 export async function PUT(req: NextRequest) {
-  const { session, error } = await requireRole(["director"])
+  const { session, error } = await requirePerm("safe_balance", "update")
   if (error) return error
 
   try {

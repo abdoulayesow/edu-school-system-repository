@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server"
-import { requireSession, requireRole } from "@/lib/authz"
+import { requirePerm } from "@/lib/authz"
 import { prisma } from "@/lib/prisma"
 import { z } from "zod"
 
@@ -23,7 +23,7 @@ const updateExpenseSchema = z.object({
  * Get a single expense by ID
  */
 export async function GET(req: NextRequest, { params }: RouteParams) {
-  const { error } = await requireRole(["director", "accountant"])
+  const { error } = await requirePerm("safe_expense", "view")
   if (error) return error
 
   const { id } = await params
@@ -59,7 +59,7 @@ export async function GET(req: NextRequest, { params }: RouteParams) {
  * Update an expense (only if pending)
  */
 export async function PATCH(req: NextRequest, { params }: RouteParams) {
-  const { session, error } = await requireRole(["director", "accountant", "secretary"])
+  const { error } = await requirePerm("safe_expense", "update")
   if (error) return error
 
   const { id } = await params
@@ -117,7 +117,7 @@ export async function PATCH(req: NextRequest, { params }: RouteParams) {
  * Delete an expense (only if pending)
  */
 export async function DELETE(req: NextRequest, { params }: RouteParams) {
-  const { session, error } = await requireRole(["director", "accountant"])
+  const { error } = await requirePerm("safe_expense", "delete")
   if (error) return error
 
   const { id } = await params

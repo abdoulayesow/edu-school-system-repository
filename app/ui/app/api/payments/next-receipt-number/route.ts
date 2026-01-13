@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server"
-import { requireSession } from "@/lib/authz"
+import { requirePerm } from "@/lib/authz"
 import { prisma } from "@/lib/prisma"
 
 /**
@@ -8,7 +8,7 @@ import { prisma } from "@/lib/prisma"
  * Format: GSPN-2025-CASH-00001 or GSPN-2025-OM-00001
  */
 export async function GET(req: NextRequest) {
-  const { error } = await requireSession()
+  const { error } = await requirePerm("receipts", "view")
   if (error) return error
 
   const { searchParams } = new URL(req.url)

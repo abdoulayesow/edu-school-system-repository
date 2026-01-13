@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server"
-import { requireRole } from "@/lib/authz"
+import { requirePerm } from "@/lib/authz"
 import { prisma } from "@/lib/prisma"
 import { z } from "zod"
 
@@ -25,7 +25,7 @@ const TYPE_COEFFICIENTS: Record<string, number> = {
  * Average = Sum(score × typeCoefficient) / Sum(typeCoefficient)
  */
 export async function POST(req: NextRequest) {
-  const { session, error } = await requireRole(["director", "academic_director", "teacher"])
+  const { error } = await requirePerm("grades", "update")
   if (error) return error
 
   try {
@@ -172,7 +172,7 @@ export async function POST(req: NextRequest) {
  * Get calculated subject averages
  */
 export async function GET(req: NextRequest) {
-  const { error } = await requireRole(["director", "academic_director", "teacher"])
+  const { error } = await requirePerm("grades", "view")
   if (error) return error
 
   const { searchParams } = new URL(req.url)

@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server"
-import { requireRole } from "@/lib/authz"
+import { requirePerm } from "@/lib/authz"
 import { prisma } from "@/lib/prisma"
 import { randomBytes } from "crypto"
 import { sendInvitationEmail } from "@/lib/email/resend"
@@ -13,11 +13,8 @@ interface RouteParams {
  * Resend an invitation email
  */
 export async function POST(req: NextRequest, { params }: RouteParams) {
-  const { session, error } = await requireRole(["director"])
+  const { session, error } = await requirePerm("user_accounts", "update")
   if (error) return error
-  if (!session?.user?.id) {
-    return NextResponse.json({ message: "Unauthorized" }, { status: 401 })
-  }
 
   const { id } = await params
 
@@ -58,13 +55,13 @@ export async function POST(req: NextRequest, { params }: RouteParams) {
       data: {
         token,
         expiresAt,
-        invitedBy: session.user.id, // Update to current user
+        invitedBy: session!.user.id, // Update to current user
       },
     })
 
     // Get the current user's name for the email
     const currentUser = await prisma.user.findUnique({
-      where: { id: session.user.id },
+      where: { id: session!.user.id },
       select: { name: true },
     })
 

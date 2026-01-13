@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server"
-import { requireSession } from "@/lib/authz"
+import { requirePerm } from "@/lib/authz"
 import { prisma } from "@/lib/prisma"
 
 /**
@@ -8,7 +8,7 @@ import { prisma } from "@/lib/prisma"
  * Query params: schoolYearId (optional, defaults to active year)
  */
 export async function GET(req: NextRequest) {
-  const { error } = await requireSession()
+  const { error } = await requirePerm("schedule", "view")
   if (error) return error
 
   const { searchParams } = new URL(req.url)
@@ -50,7 +50,7 @@ export async function GET(req: NextRequest) {
  * Body: { name, nameFr?, startTime, endTime, order, schoolYearId, isActive? }
  */
 export async function POST(req: NextRequest) {
-  const { error } = await requireSession()
+  const { error } = await requirePerm("schedule", "view")
   if (error) return error
 
   try {

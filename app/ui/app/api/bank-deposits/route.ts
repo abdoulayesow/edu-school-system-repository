@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server"
-import { requireRole } from "@/lib/authz"
+import { requirePerm } from "@/lib/authz"
 import { prisma } from "@/lib/prisma"
 import { z } from "zod"
 
@@ -17,7 +17,7 @@ const createBankDepositSchema = z.object({
  * List bank deposits
  */
 export async function GET(req: NextRequest) {
-  const { error } = await requireRole(["director", "accountant"])
+  const { error } = await requirePerm("bank_transfers", "view")
   if (error) return error
 
   const { searchParams } = new URL(req.url)
@@ -80,7 +80,7 @@ export async function GET(req: NextRequest) {
  * Record a bank deposit
  */
 export async function POST(req: NextRequest) {
-  const { session, error } = await requireRole(["director", "accountant"])
+  const { session, error } = await requirePerm("bank_transfers", "create")
   if (error) return error
 
   try {

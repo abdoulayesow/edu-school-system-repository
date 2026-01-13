@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server"
-import { requireRole } from "@/lib/authz"
+import { requirePerm } from "@/lib/authz"
 import { prisma } from "@/lib/prisma"
 import { z } from "zod"
 import { SafeTransactionType, CashDirection } from "@prisma/client"
@@ -14,7 +14,7 @@ const recordFeeSchema = z.object({
  * Record a Mobile Money transaction fee
  */
 export async function POST(req: NextRequest) {
-  const { session, error } = await requireRole(["director", "accountant"])
+  const { session, error } = await requirePerm("safe_balance", "update")
   if (error) return error
 
   try {
@@ -22,7 +22,7 @@ export async function POST(req: NextRequest) {
     const validated = recordFeeSchema.parse(body)
 
     const result = await prisma.$transaction(async (tx) => {
-      const currentBalance = await tx.safeBalance.findFirst()
+      const currentBalance = await tx.treasuryBalance.findFirst()
       if (!currentBalance) {
         throw new Error("SafeBalance not initialized")
       }
@@ -47,7 +47,7 @@ export async function POST(req: NextRequest) {
       })
 
       // Update balance
-      await tx.safeBalance.update({
+      await tx.treasuryBalance.update({
         where: { id: currentBalance.id },
         data: {
           mobileMoneyBalance: newMobileMoneyBalance,

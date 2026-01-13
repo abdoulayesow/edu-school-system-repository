@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server"
-import { requireRole } from "@/lib/authz"
+import { requirePerm } from "@/lib/authz"
 import { prisma } from "@/lib/prisma"
 import { z } from "zod"
 import { SafeTransactionType, CashDirection } from "@prisma/client"
@@ -9,7 +9,7 @@ import { SafeTransactionType, CashDirection } from "@prisma/client"
  * List safe transactions with pagination and filtering
  */
 export async function GET(req: NextRequest) {
-  const { error } = await requireRole(["director", "accountant"])
+  const { error } = await requirePerm("safe_income", "view")
   if (error) return error
 
   const { searchParams } = new URL(req.url)
@@ -108,7 +108,7 @@ const createTransactionSchema = z.object({
  * Record a new safe transaction (income or expense)
  */
 export async function POST(req: NextRequest) {
-  const { session, error } = await requireRole(["director", "accountant", "secretary"])
+  const { session, error } = await requirePerm("safe_income", "create")
   if (error) return error
 
   try {

@@ -13,6 +13,7 @@
 
 import { prisma } from "./prisma"
 import {
+  Prisma,
   StaffRole,
   PermissionResource,
   PermissionAction,
@@ -37,6 +38,11 @@ export interface PermissionContext {
   // For own_children scope: list of student IDs that are the user's children
   childrenIds?: string[]
 }
+
+/**
+ * Minimum user fields required to build a permission context
+ */
+export type PermissionUser = Pick<User, "id" | "staffRole" | "schoolLevel" | "staffProfileId">
 
 export interface PermissionCheckResult {
   granted: boolean
@@ -269,7 +275,7 @@ function getScopeLevelFilter(
   const levelMap: Record<SchoolLevel, string[]> = {
     kindergarten: ["kindergarten"],
     elementary: ["elementary"],
-    middle: ["college"], // Middle school is called "college" in French system
+    college: ["college"], // Middle school is called "college" in French system
     high_school: ["high_school"],
   }
 
@@ -362,7 +368,7 @@ function getScopeClassesFilter(
  * @param user - User object from database
  * @returns PermissionContext with all necessary fields populated
  */
-export async function buildPermissionContext(user: User): Promise<PermissionContext> {
+export async function buildPermissionContext(user: PermissionUser): Promise<PermissionContext> {
   const context: PermissionContext = {
     userId: user.id,
     staffRole: user.staffRole,
@@ -464,7 +470,7 @@ export async function logPermissionCheck(
       resourceId,
       granted,
       reason,
-      metadata: metadata || null,
+      metadata: metadata as Prisma.InputJsonValue | undefined,
     },
   })
 }

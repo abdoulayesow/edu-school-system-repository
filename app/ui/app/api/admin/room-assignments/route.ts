@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server"
-import { requireRole } from "@/lib/authz"
+import { requirePerm } from "@/lib/authz"
 import { prisma } from "@/lib/prisma"
 import { z } from "zod"
 import type { Prisma } from "@prisma/client"
@@ -28,7 +28,7 @@ const bulkAssignSchema = z.object({
  *   - roomId: Filter by room
  */
 export async function GET(req: NextRequest) {
-  const { error } = await requireRole(["director", "academic_director", "secretary"])
+  const { error } = await requirePerm("schedule", "view")
   if (error) return error
 
   try {
@@ -168,7 +168,7 @@ export async function GET(req: NextRequest) {
  * Assign student(s) to a room
  */
 export async function POST(req: NextRequest) {
-  const { session, error } = await requireRole(["director", "secretary"])
+  const { session, error } = await requirePerm("schedule", "create")
   if (error) return error
   if (!session?.user?.id) {
     return NextResponse.json({ message: "Unauthorized" }, { status: 401 })
@@ -253,7 +253,7 @@ export async function POST(req: NextRequest) {
             studentProfileId: assignment.studentProfileId,
             gradeRoomId: assignment.gradeRoomId,
             schoolYearId: validated.schoolYearId,
-            assignedBy: session.user.id,
+            assignedBy: session!.user.id,
           },
         })
 
@@ -332,7 +332,7 @@ export async function POST(req: NextRequest) {
           studentProfileId: validated.studentProfileId,
           gradeRoomId: validated.gradeRoomId,
           schoolYearId: validated.schoolYearId,
-          assignedBy: session.user.id,
+          assignedBy: session!.user.id,
         },
         include: {
           studentProfile: {

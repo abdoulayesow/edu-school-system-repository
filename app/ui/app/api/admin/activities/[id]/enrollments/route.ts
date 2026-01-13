@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server"
-import { requireRole } from "@/lib/authz"
+import { requirePerm } from "@/lib/authz"
 import { prisma } from "@/lib/prisma"
 import { z } from "zod"
 
@@ -14,7 +14,7 @@ type RouteParams = { params: Promise<{ id: string }> }
  * Get all enrollments for an activity
  */
 export async function GET(req: NextRequest, { params }: RouteParams) {
-  const { error } = await requireRole(["director", "academic_director", "accountant"])
+  const { error } = await requirePerm("schedule", "view")
   if (error) return error
 
   try {
@@ -55,7 +55,7 @@ export async function GET(req: NextRequest, { params }: RouteParams) {
  * Enroll a student in an activity
  */
 export async function POST(req: NextRequest, { params }: RouteParams) {
-  const { session, error } = await requireRole(["director", "academic_director", "accountant"])
+  const { session, error } = await requirePerm("schedule", "create")
   if (error) return error
 
   try {

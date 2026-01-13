@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server"
-import { requireRole } from "@/lib/authz"
+import { requirePerm } from "@/lib/authz"
 import { prisma } from "@/lib/prisma"
 import { ActivityStatus } from "@prisma/client"
 
@@ -7,16 +7,16 @@ import { ActivityStatus } from "@prisma/client"
  * GET /api/activities
  * List active activities and eligible students for enrollment
  * Query params:
- *   - view: "activities" | "students" (default: activities)
+ *   - view: "classes" | "students" (default: activities)
  *   - type: filter by activity type
  */
 export async function GET(req: NextRequest) {
-  const { error } = await requireRole(["director", "academic_director", "accountant", "secretary"])
+  const { error } = await requirePerm("classes", "view")
   if (error) return error
 
   try {
     const { searchParams } = new URL(req.url)
-    const view = searchParams.get("view") || "activities"
+    const view = searchParams.get("view") || "classes"
     const type = searchParams.get("type")
 
     // Pagination params

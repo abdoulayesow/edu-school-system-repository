@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server"
-import { requireRole } from "@/lib/authz"
+import { requirePerm } from "@/lib/authz"
 import { prisma } from "@/lib/prisma"
 import { z } from "zod"
 
@@ -19,7 +19,7 @@ const updateRoomSchema = z.object({
  * Get a specific room with student count
  */
 export async function GET(req: NextRequest, { params }: RouteParams) {
-  const { error } = await requireRole(["director", "academic_director"])
+  const { error } = await requirePerm("classes", "view")
   if (error) return error
 
   const { id: gradeId, roomId } = await params
@@ -74,7 +74,7 @@ export async function GET(req: NextRequest, { params }: RouteParams) {
  * Update a room
  */
 export async function PUT(req: NextRequest, { params }: RouteParams) {
-  const { error } = await requireRole(["director", "academic_director"])
+  const { error } = await requirePerm("classes", "update")
   if (error) return error
 
   const { id: gradeId, roomId } = await params
@@ -196,7 +196,7 @@ export async function PUT(req: NextRequest, { params }: RouteParams) {
  * If room has students and neither param is provided, returns error with student count
  */
 export async function DELETE(req: NextRequest, { params }: RouteParams) {
-  const { session, error } = await requireRole(["director"])
+  const { session, error } = await requirePerm("classes", "delete")
   if (error) return error
 
   const { id: gradeId, roomId } = await params

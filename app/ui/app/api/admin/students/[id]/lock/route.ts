@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server"
 import { z } from "zod"
 import { prisma } from "@/lib/prisma"
-import { requireRole } from "@/lib/authz"
+import { requirePerm } from "@/lib/authz"
 
 // ============================================================================
 // PATCH /api/admin/students/[id]/lock
@@ -22,7 +22,7 @@ export async function PATCH(
 ) {
   try {
     // Require director or secretary role
-    const { error } = await requireRole(['director', 'secretary'])
+    const { error } = await requirePerm("students", "update")
     if (error) return error
 
     const { id } = await params

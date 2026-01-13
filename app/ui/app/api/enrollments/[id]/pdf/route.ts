@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server"
-import { requireSession } from "@/lib/authz"
+import { requirePerm } from "@/lib/authz"
 import { prisma } from "@/lib/prisma"
 import { renderToBuffer } from "@react-pdf/renderer"
 import { EnrollmentDocument } from "@/lib/pdf/enrollment-document"
@@ -15,7 +15,7 @@ interface RouteParams {
  * Generate and return a PDF document for the enrollment
  */
 export async function GET(req: NextRequest, { params }: RouteParams) {
-  const { error } = await requireSession()
+  const { error } = await requirePerm("student_enrollment", "export")
   if (error) return error
 
   const { id } = await params

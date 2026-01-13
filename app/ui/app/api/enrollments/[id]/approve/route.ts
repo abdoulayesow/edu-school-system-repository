@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server"
-import { requireRole } from "@/lib/authz"
+import { requirePerm } from "@/lib/authz"
 import { prisma } from "@/lib/prisma"
 
 interface RouteParams {
@@ -11,7 +11,7 @@ interface RouteParams {
  * Approve an enrollment (director only)
  */
 export async function POST(req: NextRequest, { params }: RouteParams) {
-  const { session, error } = await requireRole(["director"])
+  const { session, error } = await requirePerm("student_enrollment", "approve")
   if (error) return error
 
   const { id } = await params
@@ -53,9 +53,9 @@ export async function POST(req: NextRequest, { params }: RouteParams) {
       data: {
         status: "completed",
         approvedAt: now,
-        approvedBy: session.user.id,
+        approvedBy: session!.user.id,
         statusChangedAt: now,
-        statusChangedBy: session.user.id,
+        statusChangedBy: session!.user.id,
         statusComment: comment.trim(),
         autoApproveAt: null, // Clear auto-approval since manually approved
       },
@@ -84,7 +84,7 @@ export async function POST(req: NextRequest, { params }: RouteParams) {
  * Reject an enrollment (director only)
  */
 export async function DELETE(req: NextRequest, { params }: RouteParams) {
-  const { session, error } = await requireRole(["director"])
+  const { session, error } = await requirePerm("student_enrollment", "approve")
   if (error) return error
 
   const { id } = await params
@@ -126,7 +126,7 @@ export async function DELETE(req: NextRequest, { params }: RouteParams) {
         enrollmentId: id,
         title: "Enrollment Rejected",
         content: reason,
-        createdBy: session.user.id,
+        createdBy: session!.user.id,
       },
     })
 
@@ -136,7 +136,7 @@ export async function DELETE(req: NextRequest, { params }: RouteParams) {
       data: {
         status: "rejected",
         statusChangedAt: now,
-        statusChangedBy: session.user.id,
+        statusChangedBy: session!.user.id,
         statusComment: reason.trim(),
         autoApproveAt: null,
       },

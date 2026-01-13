@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server"
-import { requireRole } from "@/lib/authz"
+import { requirePerm } from "@/lib/authz"
 import { prisma } from "@/lib/prisma"
 import { z } from "zod"
 
@@ -16,7 +16,7 @@ const reassignSchema = z.object({
  * - Creates new assignment if none exists
  */
 export async function POST(req: NextRequest) {
-  const { session, error } = await requireRole(["director", "secretary"])
+  const { session, error } = await requirePerm("schedule", "create")
   if (error) return error
 
   try {

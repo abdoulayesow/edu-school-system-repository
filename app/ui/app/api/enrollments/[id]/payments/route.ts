@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server"
-import { requireSession } from "@/lib/authz"
+import { requirePerm } from "@/lib/authz"
 import { prisma } from "@/lib/prisma"
 import { z } from "zod"
 
@@ -23,7 +23,7 @@ interface RouteParams {
  * Get all payments for an enrollment
  */
 export async function GET(req: NextRequest, { params }: RouteParams) {
-  const { error } = await requireSession()
+  const { error } = await requirePerm("student_enrollment", "view")
   if (error) return error
 
   const { id } = await params
@@ -54,7 +54,7 @@ export async function GET(req: NextRequest, { params }: RouteParams) {
  * Record a new payment for an enrollment
  */
 export async function POST(req: NextRequest, { params }: RouteParams) {
-  const { session, error } = await requireSession()
+  const { session, error } = await requirePerm("student_enrollment", "update")
   if (error) return error
 
   const { id } = await params
@@ -119,7 +119,7 @@ export async function POST(req: NextRequest, { params }: RouteParams) {
     // Create the payment with treasury tracking
     const payment = await prisma.$transaction(async (tx) => {
       // Get current safe balance for treasury tracking
-      const currentBalance = await tx.safeBalance.findFirst()
+      const currentBalance = await tx.treasuryBalance.findFirst()
       if (currentBalance) {
         // Update balances based on payment method
         if (validated.method === "cash") {
@@ -136,10 +136,10 @@ export async function POST(req: NextRequest, { params }: RouteParams) {
               receiptNumber: validated.receiptNumber,
               referenceType: "payment",
               studentId: enrollment.studentId,
-              recordedBy: session.user.id,
+              recordedBy: session!.user.id,
             },
           })
-          await tx.safeBalance.update({
+          await tx.treasuryBalance.update({
             where: { id: currentBalance.id },
             data: { safeBalance: newSafeBalance, updatedAt: new Date() },
           })
@@ -157,10 +157,10 @@ export async function POST(req: NextRequest, { params }: RouteParams) {
               receiptNumber: validated.receiptNumber,
               referenceType: "payment",
               studentId: enrollment.studentId,
-              recordedBy: session.user.id,
+              recordedBy: session!.user.id,
             },
           })
-          await tx.safeBalance.update({
+          await tx.treasuryBalance.update({
             where: { id: currentBalance.id },
             data: { mobileMoneyBalance: newMobileMoneyBalance, updatedAt: new Date() },
           })
@@ -178,9 +178,9 @@ export async function POST(req: NextRequest, { params }: RouteParams) {
           transactionRef: validated.transactionRef,
           receiptImageUrl: validated.receiptImageUrl,
           notes: validated.notes,
-          recordedBy: session.user.id,
+          recordedBy: session!.user.id,
           status: initialStatus,
-          confirmedBy: session.user.id,
+          confirmedBy: session!.user.id,
           confirmedAt: new Date(),
         },
         include: {

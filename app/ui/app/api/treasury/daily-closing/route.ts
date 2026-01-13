@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server"
-import { requireRole } from "@/lib/authz"
+import { requirePerm } from "@/lib/authz"
 import { prisma } from "@/lib/prisma"
 import { z } from "zod"
 
@@ -14,7 +14,7 @@ const dailyClosingSchema = z.object({
  * Perform daily closing: count registry, transfer all cash to safe
  */
 export async function POST(req: NextRequest) {
-  const { session, error } = await requireRole(["director", "accountant"])
+  const { session, error } = await requirePerm("safe_balance", "update")
   if (error) return error
 
   try {

@@ -27,7 +27,6 @@ import { getNavigationForRole } from "@/lib/nav-config"
 import type { UserRole } from "@/lib/nav-links"
 import { useI18n } from "@/components/i18n-provider"
 import { LanguageSwitcher } from "@/components/language-switcher"
-import { OfflineIndicator } from "@/components/offline-indicator"
 import { useUserInitials } from "@/hooks/use-user-initials"
 import { useMediaQuery } from "@/hooks/use-media-query"
 import { ThemeToggleButton } from "@/components/theme-toggle-button"
@@ -136,9 +135,6 @@ export function MobileNav() {
                     {session.user.email}
                   </p>
                 </div>
-              </div>
-              <div className="mt-3">
-                <OfflineIndicator showLabel size="sm" />
               </div>
             </div>
           )}

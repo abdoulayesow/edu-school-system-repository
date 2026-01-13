@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server"
-import { requireRole } from "@/lib/authz"
+import { requirePerm } from "@/lib/authz"
 import { prisma } from "@/lib/prisma"
 import { z } from "zod"
 
@@ -20,7 +20,7 @@ const cashDepositSchema = z.object({
  * Record a cash deposit for a payment
  */
 export async function POST(req: NextRequest, { params }: RouteParams) {
-  const { session, error } = await requireRole(["director", "accountant"])
+  const { session, error } = await requirePerm("payment_recording", "update")
   if (error) return error
 
   const { id } = await params
@@ -69,7 +69,7 @@ export async function POST(req: NextRequest, { params }: RouteParams) {
     // Create deposit and update payment status in transaction
     const result = await prisma.$transaction(async (tx) => {
       // Get current safe balance
-      const currentBalance = await tx.safeBalance.findFirst()
+      const currentBalance = await tx.treasuryBalance.findFirst()
       if (!currentBalance) {
         throw new Error("SafeBalance not initialized. Please contact administrator.")
       }
@@ -143,7 +143,7 @@ export async function POST(req: NextRequest, { params }: RouteParams) {
       })
 
       // Update SafeBalance
-      await tx.safeBalance.update({
+      await tx.treasuryBalance.update({
         where: { id: currentBalance.id },
         data: {
           safeBalance: newSafeBalance,

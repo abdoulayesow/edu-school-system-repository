@@ -52,7 +52,9 @@
       "Skill(frontend-design)",
       "Skill(frontend-design:*)",
       "Bash(npx ts-node:*)",
-      "Bash(git -C \"c:/workspace/sources/edu-school-system-repository\" status --short)"
+      "Bash(git -C \"c:/workspace/sources/edu-school-system-repository\" status --short)",
+      "Bash(powershell -Command \"\\(Get-Content lib/permissions.ts\\) -replace ''import \\\\{'', ''import {\\\\r\\\\n  Prisma,'' | Set-Content lib/permissions.ts -Encoding UTF8\")",
+      "Bash(git checkout:*)"
     ],
     "additionalDirectories": [
       "c:\\workspace\\sources\\edu-school-system-repository"

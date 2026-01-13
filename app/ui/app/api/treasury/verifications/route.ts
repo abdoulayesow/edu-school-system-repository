@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server"
-import { requireRole } from "@/lib/authz"
+import { requirePerm } from "@/lib/authz"
 import { prisma } from "@/lib/prisma"
 import { z } from "zod"
 import { VerificationStatus } from "@prisma/client"
@@ -10,7 +10,7 @@ import { VerificationStatus } from "@prisma/client"
  * Also returns whether today's verification has been done (for soft-block warnings)
  */
 export async function GET(req: NextRequest) {
-  const { error } = await requireRole(["director", "accountant", "secretary"])
+  const { error } = await requirePerm("daily_verification", "view")
   if (error) return error
 
   const { searchParams } = new URL(req.url)
@@ -111,7 +111,7 @@ const createVerificationSchema = z.object({
  * Record a daily cash verification
  */
 export async function POST(req: NextRequest) {
-  const { session, error } = await requireRole(["director", "accountant"])
+  const { session, error } = await requirePerm("daily_verification", "create")
   if (error) return error
 
   try {

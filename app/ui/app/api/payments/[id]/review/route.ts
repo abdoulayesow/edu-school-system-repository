@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server"
-import { requireRole } from "@/lib/authz"
+import { requirePerm } from "@/lib/authz"
 import { prisma } from "@/lib/prisma"
 import { z } from "zod"
 
@@ -21,7 +21,7 @@ const reversePaymentSchema = z.object({
  * The original payment remains in history, a reversal entry is created.
  */
 export async function POST(req: NextRequest, { params }: RouteParams) {
-  const { session, error } = await requireRole(["director"])
+  const { session, error } = await requirePerm("payment_recording", "update")
   if (error) return error
 
   const { id } = await params
@@ -65,7 +65,7 @@ export async function POST(req: NextRequest, { params }: RouteParams) {
     // Reverse the payment in a transaction
     const result = await prisma.$transaction(async (tx) => {
       // Get current balances
-      const currentBalance = await tx.safeBalance.findFirst()
+      const currentBalance = await tx.treasuryBalance.findFirst()
       if (!currentBalance) {
         throw new Error("SafeBalance not initialized")
       }
@@ -118,7 +118,7 @@ export async function POST(req: NextRequest, { params }: RouteParams) {
       })
 
       // Update balances
-      await tx.safeBalance.update({
+      await tx.treasuryBalance.update({
         where: { id: currentBalance.id },
         data: {
           safeBalance: newSafeBalance,

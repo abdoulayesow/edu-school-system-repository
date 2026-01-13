@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server"
-import { requireRole } from "@/lib/authz"
+import { requirePerm } from "@/lib/authz"
 import { prisma } from "@/lib/prisma"
 
 /**
@@ -8,7 +8,7 @@ import { prisma } from "@/lib/prisma"
  * Query params: schoolYearId (optional)
  */
 export async function GET(req: NextRequest) {
-  const { error } = await requireRole(["director", "academic_director"])
+  const { error } = await requirePerm("staff_assignment", "view")
   if (error) return error
 
   try {

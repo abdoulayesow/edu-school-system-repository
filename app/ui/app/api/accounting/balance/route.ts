@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server"
-import { requireRole } from "@/lib/authz"
+import { requirePerm } from "@/lib/authz"
 import { prisma } from "@/lib/prisma"
 
 /**
@@ -7,7 +7,7 @@ import { prisma } from "@/lib/prisma"
  * Get accounting balance summary (payments, expenses, margins)
  */
 export async function GET(req: NextRequest) {
-  const { error } = await requireRole(["director", "accountant"])
+  const { error } = await requirePerm("financial_reports", "view")
   if (error) return error
 
   const { searchParams } = new URL(req.url)

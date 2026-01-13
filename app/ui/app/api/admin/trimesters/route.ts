@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server"
-import { requireRole } from "@/lib/authz"
+import { requirePerm } from "@/lib/authz"
 import { prisma } from "@/lib/prisma"
 import { z } from "zod"
 
@@ -15,7 +15,7 @@ const createTrimesterSchema = z.object({
  * List all trimesters, optionally filtered by school year
  */
 export async function GET(req: NextRequest) {
-  const { error } = await requireRole(["director", "academic_director", "teacher"])
+  const { error } = await requirePerm("academic_year", "view")
   if (error) return error
 
   const { searchParams } = new URL(req.url)
@@ -75,7 +75,7 @@ export async function GET(req: NextRequest) {
  * Create a new trimester for a school year
  */
 export async function POST(req: NextRequest) {
-  const { error } = await requireRole(["director", "academic_director"])
+  const { error } = await requirePerm("academic_year", "create")
   if (error) return error
 
   try {

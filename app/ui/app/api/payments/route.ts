@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server"
-import { requireSession, requireRole } from "@/lib/authz"
+import { requirePerm } from "@/lib/authz"
 import { prisma } from "@/lib/prisma"
 import { z } from "zod"
 
@@ -20,7 +20,7 @@ const createPaymentSchema = z.object({
  * List all payments with filters
  */
 export async function GET(req: NextRequest) {
-  const { error } = await requireSession()
+  const { error } = await requirePerm("payment_recording", "view")
   if (error) return error
 
   const { searchParams } = new URL(req.url)
@@ -119,7 +119,7 @@ export async function GET(req: NextRequest) {
  * Create a new payment
  */
 export async function POST(req: NextRequest) {
-  const { session, error } = await requireRole(["director", "accountant", "secretary"])
+  const { session, error } = await requirePerm("payment_recording", "create")
   if (error) return error
 
   try {

@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server"
-import { requireRole } from "@/lib/authz"
+import { requirePerm } from "@/lib/authz"
 import { prisma } from "@/lib/prisma"
 
 /**
@@ -7,7 +7,7 @@ import { prisma } from "@/lib/prisma"
  * Get daily treasury report with all transactions
  */
 export async function GET(req: NextRequest) {
-  const { error } = await requireRole(["director", "accountant"])
+  const { error } = await requirePerm("financial_reports", "export")
   if (error) return error
 
   const { searchParams } = new URL(req.url)

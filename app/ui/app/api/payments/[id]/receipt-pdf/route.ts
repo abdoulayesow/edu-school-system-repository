@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server"
-import { requireSession } from "@/lib/authz"
+import { requirePerm } from "@/lib/authz"
 import { prisma } from "@/lib/prisma"
 import { renderToBuffer } from "@react-pdf/renderer"
 import { PaymentReceiptDocument } from "@/lib/pdf/payment-receipt-document"
@@ -13,7 +13,7 @@ interface RouteParams {
  * Generate and return a PDF receipt for a payment
  */
 export async function GET(req: NextRequest, { params }: RouteParams) {
-  const { session, error } = await requireSession()
+  const { error } = await requirePerm("receipts", "export")
   if (error) return error
 
   const { id } = await params

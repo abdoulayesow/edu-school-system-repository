@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server"
-import { requireRole } from "@/lib/authz"
+import { requirePerm } from "@/lib/authz"
 import { prisma } from "@/lib/prisma"
 
 interface RouteParams {
@@ -11,7 +11,7 @@ interface RouteParams {
  * Mark an attendance session as complete
  */
 export async function POST(req: NextRequest, { params }: RouteParams) {
-  const { session, error } = await requireRole(["director", "academic_director", "teacher"])
+  const { session, error } = await requirePerm("attendance", "update")
   if (error) return error
 
   const { id } = await params

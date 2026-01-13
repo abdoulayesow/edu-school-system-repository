@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server"
-import { requireSession } from "@/lib/authz"
+import { requirePerm } from "@/lib/authz"
 import { prisma } from "@/lib/prisma"
 import { calculatePaymentSchedules } from "@/lib/enrollment/calculations"
 
@@ -14,7 +14,7 @@ interface RouteParams {
  * Optionally creates payment record if payment was made during enrollment
  */
 export async function POST(req: NextRequest, { params }: RouteParams) {
-  const { session, error } = await requireSession()
+  const { session, error } = await requirePerm("student_enrollment", "update")
   if (error) return error
 
   const { id } = await params
@@ -76,7 +76,7 @@ export async function POST(req: NextRequest, { params }: RouteParams) {
     }
 
     // Only the creator can submit
-    if (enrollment.createdBy !== session.user.id) {
+    if (enrollment.createdBy !== session!.user.id) {
       return NextResponse.json(
         { message: "Cannot submit this enrollment" },
         { status: 403 }
@@ -202,7 +202,7 @@ export async function POST(req: NextRequest, { params }: RouteParams) {
           // Set approvedAt if auto-completing
           ...(newStatus === "completed" ? {
             approvedAt: new Date(),
-            approvedBy: session.user.id,
+            approvedBy: session!.user.id,
           } : {}),
           // Save enrolling person info if provided in body
           ...(body.enrollingPersonType ? {
@@ -267,7 +267,7 @@ export async function POST(req: NextRequest, { params }: RouteParams) {
               receiptNumber: paymentData.receiptNumber,
               referenceType: "payment",
               studentId: studentId,
-              recordedBy: session.user.id,
+              recordedBy: session!.user.id,
             },
           })
 
@@ -296,7 +296,7 @@ export async function POST(req: NextRequest, { params }: RouteParams) {
               receiptNumber: paymentData.receiptNumber,
               referenceType: "payment",
               studentId: studentId,
-              recordedBy: session.user.id,
+              recordedBy: session!.user.id,
             },
           })
 
@@ -319,9 +319,9 @@ export async function POST(req: NextRequest, { params }: RouteParams) {
             receiptNumber: paymentData.receiptNumber,
             transactionRef: paymentData.transactionRef,
             receiptImageUrl: paymentData.receiptImageUrl,
-            recordedBy: session.user.id,
+            recordedBy: session!.user.id,
             status: initialStatus,
-            confirmedBy: session.user.id,
+            confirmedBy: session!.user.id,
             confirmedAt: new Date(),
           },
         })

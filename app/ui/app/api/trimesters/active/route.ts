@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server"
-import { requireSession } from "@/lib/authz"
+import { requirePerm } from "@/lib/authz"
 import { prisma } from "@/lib/prisma"
 
 /**
@@ -7,7 +7,7 @@ import { prisma } from "@/lib/prisma"
  * Get the currently active trimester
  */
 export async function GET() {
-  const { error } = await requireSession()
+  const { error } = await requirePerm("grades", "view")
   if (error) return error
 
   try {

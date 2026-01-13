@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server"
-import { requireSession, requireRole } from "@/lib/authz"
+import { requirePerm } from "@/lib/authz"
 import { prisma } from "@/lib/prisma"
 import { z } from "zod"
 
@@ -22,7 +22,7 @@ const updatePaymentSchema = z.object({
  * Get a single payment by ID
  */
 export async function GET(req: NextRequest, { params }: RouteParams) {
-  const { error } = await requireSession()
+  const { error } = await requirePerm("payment_recording", "view")
   if (error) return error
 
   const { id } = await params
@@ -104,7 +104,7 @@ export async function GET(req: NextRequest, { params }: RouteParams) {
  * Update a payment (only if not confirmed)
  */
 export async function PATCH(req: NextRequest, { params }: RouteParams) {
-  const { session, error } = await requireRole(["director", "accountant", "secretary"])
+  const { error } = await requirePerm("payment_recording", "update")
   if (error) return error
 
   const { id } = await params

@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server"
-import { requireRole } from "@/lib/authz"
+import { requirePerm } from "@/lib/authz"
 import { prisma } from "@/lib/prisma"
 import { z } from "zod"
 import { SafeTransactionType, CashDirection } from "@prisma/client"
@@ -31,7 +31,7 @@ const reverseTransactionSchema = z.object({
  */
 export async function POST(req: NextRequest, { params }: RouteParams) {
   // Only directors and accountants can reverse transactions
-  const { session, error } = await requireRole(["director", "accountant"])
+  const { session, error } = await requirePerm("safe_income", "update")
   if (error) return error
 
   const { id } = await params
@@ -68,7 +68,7 @@ export async function POST(req: NextRequest, { params }: RouteParams) {
       }
 
       // Get current balance
-      const currentBalance = await tx.safeBalance.findFirst()
+      const currentBalance = await tx.treasuryBalance.findFirst()
       if (!currentBalance) {
         throw new Error("SafeBalance not initialized")
       }
@@ -195,7 +195,7 @@ export async function POST(req: NextRequest, { params }: RouteParams) {
       }
 
       // Update balances
-      await tx.safeBalance.update({
+      await tx.treasuryBalance.update({
         where: { id: currentBalance.id },
         data: {
           safeBalance: newSafeBalance,
@@ -246,7 +246,7 @@ export async function POST(req: NextRequest, { params }: RouteParams) {
  * Get reversal history for a transaction
  */
 export async function GET(req: NextRequest, { params }: RouteParams) {
-  const { error } = await requireRole(["director", "accountant", "secretary"])
+  const { error } = await requirePerm("safe_income", "view")
   if (error) return error
 
   const { id } = await params

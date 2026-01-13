@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server"
-import { requireSession } from "@/lib/authz"
+import { requirePerm } from "@/lib/authz"
 import { prisma } from "@/lib/prisma"
 import { withCache } from "@/lib/cache"
 
@@ -8,7 +8,7 @@ import { withCache } from "@/lib/cache"
  * Returns the active school year with all its grades
  */
 export async function GET() {
-  const { error } = await requireSession()
+  const { error } = await requirePerm("grades", "view")
   if (error) return error
 
   try {

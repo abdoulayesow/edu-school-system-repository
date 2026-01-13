@@ -29,6 +29,8 @@ model User {
   sessions                   Session[]
   address                    Address?
   passwordResetTokens        PasswordResetToken[]
+  recordedAttendance         Attendance[]
+  teachingClasses            Class[]
   createdEnrollments         Enrollment[]            @relation("EnrollmentCreator")
   approvedEnrollments        Enrollment[]            @relation("EnrollmentApprover")
   statusChangedEnrollments   Enrollment[]            @relation("EnrollmentStatusChanger")
@@ -63,6 +65,8 @@ model User {
   // Permission & audit relations
   permissionOverrides        PermissionOverride[]    @relation("UserPermissionOverrides")
   grantedOverrides           PermissionOverride[]    @relation("GrantedPermissionOverrides")
+  collectedPaymentIntents    PaymentIntent[]         @relation("PaymentIntentCollector")
+  confirmedPaymentIntents    PaymentIntent[]         @relation("PaymentIntentConfirmer")
   auditLogs                  AuditLog[]
 
   // Link to staff profile for teachers
@@ -246,6 +250,7 @@ model Enrollment {
   paymentSchedules        PaymentSchedule[]
   payments                Payment[]
   notes                   EnrollmentNote[]
+  paymentIntents          PaymentIntent[]
 
   @@index([status, schoolYearId])
   @@index([schoolYearId])
@@ -259,19 +264,20 @@ model Enrollment {
 }
 
 model PaymentSchedule {
-  id             String     @id @default(cuid())
+  id             String          @id @default(cuid())
   enrollmentId   String
   scheduleNumber Int
   amount         Int
   months         String[]
   dueDate        DateTime
-  isPaid         Boolean    @default(false)
+  isPaid         Boolean         @default(false)
   paidAt         DateTime?
-  syncVersion    Int        @default(0)
-  createdAt      DateTime   @default(now())
-  updatedAt      DateTime   @updatedAt
-  enrollment     Enrollment @relation(fields: [enrollmentId], references: [id], onDelete: Cascade)
+  syncVersion    Int             @default(0)
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
+  enrollment     Enrollment      @relation(fields: [enrollmentId], references: [id], onDelete: Cascade)
   payments       Payment[]
+  paymentIntents PaymentIntent[]
 
   @@unique([enrollmentId, scheduleNumber])
   @@index([enrollmentId])
@@ -306,6 +312,7 @@ model Payment {
   confirmer         User?            @relation("PaymentConfirmer", fields: [confirmedBy], references: [id])
   reviewer          User?            @relation("PaymentReviewer", fields: [reviewedBy], references: [id])
   cashDeposit       CashDeposit?
+  paymentIntent     PaymentIntent? // Link back to PaymentIntent that created this payment
 
   @@index([enrollmentId])
   @@index([paymentScheduleId])
@@ -344,20 +351,59 @@ model Student {
   guardianPhone    String?
   guardianEmail    String?
   grade            String?
+  classId          String?
   status           StudentStatus     @default(active)
   enrollmentDate   DateTime          @default(now())
   syncVersion      Int               @default(0)
   createdAt        DateTime          @default(now())
   updatedAt        DateTime          @updatedAt
+  attendance       Attendance[]
+  class            Class?            @relation(fields: [classId], references: [id])
   enrollments      Enrollment[]
   studentProfile   StudentProfile?
   safeTransactions SafeTransaction[]
 
   @@index([status])
+  @@index([classId])
   @@index([grade])
   @@index([updatedAt])
   @@index([studentNumber])
   @@index([firstName, lastName])
+}
+
+model Attendance {
+  id          String           @id @default(cuid())
+  studentId   String
+  date        DateTime         @db.Date
+  status      AttendanceStatus
+  notes       String?
+  recordedBy  String
+  syncVersion Int              @default(0)
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @updatedAt
+  student     Student          @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  recorder    User             @relation(fields: [recordedBy], references: [id])
+
+  @@unique([studentId, date])
+  @@index([studentId])
+  @@index([date])
+  @@index([recordedBy])
+  @@index([updatedAt])
+}
+
+model Class {
+  id        String    @id @default(cuid())
+  name      String
+  grade     String?
+  teacherId String?
+  year      Int
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  students  Student[]
+  teacher   User?     @relation(fields: [teacherId], references: [id])
+
+  @@index([teacherId])
+  @@index([year])
 }
 
 model Person {
@@ -375,6 +421,7 @@ model Person {
   syncVersion    Int             @default(0)
   createdAt      DateTime        @default(now())
   updatedAt      DateTime        @updatedAt
+  userProfile    UserProfile?
   studentProfile StudentProfile?
   teacherProfile TeacherProfile?
   parentProfile  ParentProfile?
@@ -382,6 +429,21 @@ model Person {
   @@index([email])
   @@index([firstName, lastName])
   @@index([status])
+}
+
+model UserProfile {
+  id          String     @id @default(cuid())
+  personId    String     @unique
+  userId      String?    @unique
+  role        Role       @default(user)
+  userStatus  UserStatus @default(active)
+  syncVersion Int        @default(0)
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+  person      Person     @relation(fields: [personId], references: [id], onDelete: Cascade)
+
+  @@index([personId])
+  @@index([role])
 }
 
 model StudentProfile {
@@ -1351,6 +1413,7 @@ enum PermissionResource {
   fee_assignment
   student_balance
   payment_recording
+  payment_intent
   receipts
 
   // Cash & Treasury
@@ -1409,6 +1472,14 @@ enum PermissionScope {
   none // No access
 }
 
+// Payment intent status for two-step payment workflow
+enum PaymentIntentStatus {
+  pending_confirmation // Collected by agent, awaiting comptable confirmation
+  confirmed // Confirmed by comptable, payment created
+  rejected // Rejected by comptable (e.g., cash mismatch)
+  cancelled // Cancelled by agent before confirmation
+}
+
 // === STAFF ROLES & PERMISSIONS MODELS ===
 
 // Default permissions for each role (seeded data)
@@ -1452,6 +1523,55 @@ model PermissionOverride {
   @@index([userId])
   @@index([grantedBy])
   @@index([resource, action])
+}
+
+// Payment Intent for two-step payment workflow (Agent collects → Comptable confirms)
+model PaymentIntent {
+  id                String        @id @default(cuid())
+  enrollmentId      String
+  paymentScheduleId String?
+  amount            Int
+  method            PaymentMethod
+  receiptNumber     String        @unique // Temporary receipt number
+
+  // Collection info (Agent de Recouvrement)
+  collectedBy String
+  collectedAt DateTime @default(now())
+
+  // Payer info
+  payerName     String?
+  payerPhone    String?
+  payerRelation String? // father, mother, other
+
+  // Status tracking
+  status PaymentIntentStatus @default(pending_confirmation)
+
+  // Confirmation info (Comptable)
+  confirmedBy     String?
+  confirmedAt     DateTime?
+  rejectionReason String?
+
+  // Link to actual payment (after confirmation)
+  paymentId String? @unique
+
+  notes       String?
+  syncVersion Int      @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relations
+  enrollment      Enrollment       @relation(fields: [enrollmentId], references: [id], onDelete: Cascade)
+  paymentSchedule PaymentSchedule? @relation(fields: [paymentScheduleId], references: [id])
+  collector       User             @relation("PaymentIntentCollector", fields: [collectedBy], references: [id])
+  confirmer       User?            @relation("PaymentIntentConfirmer", fields: [confirmedBy], references: [id])
+  payment         Payment?         @relation(fields: [paymentId], references: [id])
+
+  @@index([enrollmentId])
+  @@index([paymentScheduleId])
+  @@index([status])
+  @@index([collectedBy])
+  @@index([confirmedBy])
+  @@index([collectedAt])
 }
 
 // Audit log for tracking all permission-checked actions
