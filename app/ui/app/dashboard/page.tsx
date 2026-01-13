@@ -25,7 +25,7 @@ import {
   useAccountingBalance,
   usePendingEnrollments,
   useUnreconciledDeposits,
-  usePendingPayments,
+  useCashNeedingDeposit,
 } from "@/lib/hooks/use-api"
 
 // Lazy load heavy chart components
@@ -57,17 +57,17 @@ export default function DirectorDashboard() {
   const { data: balanceData, isLoading: balanceLoading } = useAccountingBalance()
   const { data: enrollmentsData, isLoading: enrollmentsLoading } = usePendingEnrollments()
   const { data: depositsData, isLoading: depositsLoading } = useUnreconciledDeposits()
-  const { data: paymentsData, isLoading: paymentsLoading } = usePendingPayments()
+  const { data: cashToDepositData, isLoading: cashToDepositLoading } = useCashNeedingDeposit()
 
   // Extract data with defaults
   const grades = gradesData?.grades ?? []
   const balance = balanceData ?? null
   const pendingEnrollments = enrollmentsData ?? []
   const unreconciledDeposits = depositsData?.deposits ?? []
-  const pendingPayments = paymentsData?.payments ?? []
+  const cashNeedingDeposit = cashToDepositData?.payments ?? []
 
   // Combined loading state for initial render
-  const loading = gradesLoading || balanceLoading || enrollmentsLoading || depositsLoading || paymentsLoading
+  const loading = gradesLoading || balanceLoading || enrollmentsLoading || depositsLoading || cashToDepositLoading
 
   // Calculate total enrollment
   const totalEnrollment = useMemo(() => {
@@ -134,21 +134,21 @@ export default function DirectorDashboard() {
       })
     })
 
-    // Add payments pending review
-    pendingPayments.slice(0, 5 - items.length).forEach(payment => {
+    // Add cash payments needing deposit to bank
+    cashNeedingDeposit.slice(0, 5 - items.length).forEach(payment => {
       const student = payment.enrollment?.student
       items.push({
         id: payment.id,
-        type: t.dashboard.paymentDiscount,
+        type: t.dashboard.cashToDeposit || "Espèces à déposer",
         student: student ? `${student.firstName} ${student.lastName}` : "N/A",
         submittedBy: payment.recorder?.name || "Système",
-        reason: `Paiement ${payment.receiptNumber}`,
+        reason: `Reçu ${payment.receiptNumber}`,
         amount: formatGNF(payment.amount),
       })
     })
 
     return items
-  }, [pendingEnrollments, pendingPayments, t])
+  }, [pendingEnrollments, cashNeedingDeposit, t])
 
   const chartConfig = {
     count: {
@@ -218,10 +218,10 @@ export default function DirectorDashboard() {
             </CardHeader>
             <CardContent>
               <div className="font-accent text-3xl font-bold tabular-nums">
-                {pendingEnrollments.length + pendingPayments.length}
+                {pendingEnrollments.length + cashNeedingDeposit.length}
               </div>
               <p className="text-xs text-muted-foreground">
-                {pendingEnrollments.length} inscriptions, {pendingPayments.length} paiements
+                {pendingEnrollments.length} inscriptions, {cashNeedingDeposit.length} espèces à déposer
               </p>
             </CardContent>
           </Card>
@@ -347,18 +347,19 @@ export default function DirectorDashboard() {
                         </div>
                       </div>
                     </div>
-                    <div className="flex items-start gap-3 p-3 rounded-lg border bg-card">
-                      <div className="mt-0.5 h-2 w-2 rounded-full bg-warning" />
-                      <div className="flex-1 space-y-1">
-                        <p className="text-sm font-medium text-foreground">
-                          Paiements en attente: {formatGNF(balance.summary.totalPendingPayments)}
-                        </p>
-                        <div className="text-xs text-muted-foreground">
-                          {(balance.payments.byStatus.pending_deposit?.count || 0) +
-                           (balance.payments.byStatus.pending_review?.count || 0)} transactions
+                    {cashNeedingDeposit.length > 0 && (
+                      <div className="flex items-start gap-3 p-3 rounded-lg border bg-card">
+                        <div className="mt-0.5 h-2 w-2 rounded-full bg-warning" />
+                        <div className="flex-1 space-y-1">
+                          <p className="text-sm font-medium text-foreground">
+                            Espèces à déposer: {formatGNF(cashNeedingDeposit.reduce((sum, p) => sum + p.amount, 0))}
+                          </p>
+                          <div className="text-xs text-muted-foreground">
+                            {cashNeedingDeposit.length} paiements en espèces
+                          </div>
                         </div>
                       </div>
-                    </div>
+                    )}
                     <div className="flex items-start gap-3 p-3 rounded-lg border bg-card">
                       <div className="mt-0.5 h-2 w-2 rounded-full bg-primary" />
                       <div className="flex-1 space-y-1">

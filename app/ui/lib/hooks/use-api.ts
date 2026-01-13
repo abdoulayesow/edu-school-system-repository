@@ -372,6 +372,7 @@ export function useUnreconciledDeposits() {
 interface PendingPayment {
   id: string
   amount: number
+  method: string
   status: string
   receiptNumber: string
   createdAt: string
@@ -380,8 +381,9 @@ interface PendingPayment {
       firstName: string
       lastName: string
     }
-  }
+  } | null
   recorder: { name: string } | null
+  cashDeposit: { id: string } | null
 }
 
 interface PaymentsResponse {
@@ -395,13 +397,25 @@ interface PaymentsResponse {
 }
 
 /**
- * Hook: Fetch payments pending review
+ * Hook: Fetch cash payments that haven't been deposited to bank yet
+ * These are confirmed payments where method=cash and no cashDeposit record exists
  */
-export function usePendingPayments() {
+export function useCashNeedingDeposit() {
   return useQuery({
-    queryKey: ["payments", { status: "pending_review" }],
-    queryFn: () =>
-      fetchApi<PaymentsResponse>("/api/payments?status=pending_review"),
+    queryKey: ["payments", { method: "cash", needsDeposit: true }],
+    queryFn: async () => {
+      const response = await fetchApi<PaymentsResponse>("/api/payments?method=cash")
+      // Filter to only cash payments without a deposit
+      const needingDeposit = response.payments.filter(p => !p.cashDeposit)
+      return {
+        ...response,
+        payments: needingDeposit,
+        pagination: {
+          ...response.pagination,
+          total: needingDeposit.length,
+        },
+      }
+    },
     staleTime: 30 * 1000, // 30 seconds - action items
   })
 }

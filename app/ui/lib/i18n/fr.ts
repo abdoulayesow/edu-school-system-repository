@@ -176,6 +176,7 @@ export const fr = {
     feeWaiver: "Annulation de frais",
     paymentPlan: "Plan de paiement",
     activityModification: "Modification d'activité",
+    cashToDeposit: "Espèces à déposer",
 
     // Recent activity
     recentActivity: "Activité récente",

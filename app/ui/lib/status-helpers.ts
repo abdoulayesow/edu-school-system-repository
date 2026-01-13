@@ -27,16 +27,13 @@ export function getEnrollmentRowStatus(status: string): RowStatus {
 /**
  * Get row status for payment records
  * - confirmed → success (green)
- * - pending_deposit, deposited, pending_review → warning (amber)
- * - rejected → error (red)
+ * - reversed, failed → error (red)
  */
 export function getPaymentRowStatus(status: string): RowStatus {
   const map: Record<string, RowStatus> = {
     confirmed: 'success',
-    pending_deposit: 'warning',
-    deposited: 'warning',
-    pending_review: 'warning',
-    rejected: 'error',
+    reversed: 'error',
+    failed: 'error',
   }
   return map[status] || 'none'
 }

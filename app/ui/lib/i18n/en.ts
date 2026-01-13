@@ -178,6 +178,7 @@ export const en: TranslationKeys = {
     feeWaiver: "Fee Waiver",
     paymentPlan: "Payment Plan",
     activityModification: "Activity Modification",
+    cashToDeposit: "Cash to Deposit",
 
     // Recent activity
     recentActivity: "Recent Activity",
