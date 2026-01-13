@@ -42,6 +42,7 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog"
 import { useI18n } from "@/components/i18n-provider"
+import { PermissionGuard, usePermissions } from "@/components/permission-guard"
 import { formatDateLong } from "@/lib/utils"
 import {
   Plus,
@@ -306,13 +307,14 @@ export default function SchoolYearsPage() {
           <h1 className="text-3xl font-bold">{t.admin.schoolYearsTitle}</h1>
           <p className="text-muted-foreground">{t.admin.schoolYearsSubtitle}</p>
         </div>
-        <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
-          <DialogTrigger asChild>
-            <Button disabled={!!newYear}>
-              <Plus className="h-4 w-4 mr-2" />
-              {t.admin.createSchoolYear}
-            </Button>
-          </DialogTrigger>
+        <PermissionGuard resource="academic_year" action="create" inline>
+          <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
+            <DialogTrigger asChild>
+              <Button disabled={!!newYear}>
+                <Plus className="h-4 w-4 mr-2" />
+                {t.admin.createSchoolYear}
+              </Button>
+            </DialogTrigger>
           <DialogContent>
             <DialogHeader>
               <DialogTitle>{t.admin.createSchoolYear}</DialogTitle>
@@ -381,7 +383,8 @@ export default function SchoolYearsPage() {
               </Button>
             </DialogFooter>
           </DialogContent>
-        </Dialog>
+          </Dialog>
+        </PermissionGuard>
       </div>
 
       {/* Summary Cards */}
@@ -481,49 +484,57 @@ export default function SchoolYearsPage() {
                       <div className="flex justify-end gap-2">
                         {year.status === "new" && (
                           <>
+                            <PermissionGuard resource="academic_year" action="update" inline>
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => openCopyDialog(year)}
+                                title={t.admin.copyFromPreviousYear}
+                              >
+                                <Copy className="h-4 w-4" />
+                              </Button>
+                            </PermissionGuard>
+                            <PermissionGuard resource="academic_year" action="update" inline>
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => {
+                                  setSelectedYear(year)
+                                  setIsActivateDialogOpen(true)
+                                }}
+                                title={t.admin.activateSchoolYear}
+                              >
+                                <Play className="h-4 w-4" />
+                              </Button>
+                            </PermissionGuard>
+                          </>
+                        )}
+                        {year.status !== "passed" && (
+                          <PermissionGuard resource="academic_year" action="update" inline>
                             <Button
                               variant="outline"
                               size="sm"
-                              onClick={() => openCopyDialog(year)}
-                              title={t.admin.copyFromPreviousYear}
+                              onClick={() => openEditDialog(year)}
+                              title={t.common.edit}
                             >
-                              <Copy className="h-4 w-4" />
+                              <Edit className="h-4 w-4" />
                             </Button>
+                          </PermissionGuard>
+                        )}
+                        {year.status === "new" && (
+                          <PermissionGuard resource="academic_year" action="delete" inline>
                             <Button
                               variant="outline"
                               size="sm"
                               onClick={() => {
                                 setSelectedYear(year)
-                                setIsActivateDialogOpen(true)
+                                setIsDeleteDialogOpen(true)
                               }}
-                              title={t.admin.activateSchoolYear}
+                              title={t.common.delete}
                             >
-                              <Play className="h-4 w-4" />
+                              <Trash2 className="h-4 w-4" />
                             </Button>
-                          </>
-                        )}
-                        {year.status !== "passed" && (
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => openEditDialog(year)}
-                            title={t.common.edit}
-                          >
-                            <Edit className="h-4 w-4" />
-                          </Button>
-                        )}
-                        {year.status === "new" && (
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => {
-                              setSelectedYear(year)
-                              setIsDeleteDialogOpen(true)
-                            }}
-                            title={t.common.delete}
-                          >
-                            <Trash2 className="h-4 w-4" />
-                          </Button>
+                          </PermissionGuard>
                         )}
                       </div>
                     </TableCell>

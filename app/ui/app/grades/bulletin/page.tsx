@@ -23,6 +23,7 @@ import {
   Download,
 } from "lucide-react"
 import { useI18n } from "@/components/i18n-provider"
+import { PermissionGuard } from "@/components/permission-guard"
 import { PageContainer } from "@/components/layout/PageContainer"
 import { downloadBulletinPDF } from "@/components/bulletin-pdf"
 import Link from "next/link"
@@ -444,18 +445,20 @@ export default function BulletinPage() {
 
               {/* PDF Download Button */}
               <div className="mt-4 pt-4 border-t flex justify-end">
-                <Button
-                  onClick={handleDownloadPDF}
-                  disabled={downloadingPDF}
-                  variant="outline"
-                >
-                  {downloadingPDF ? (
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  ) : (
-                    <Download className="mr-2 h-4 w-4" />
-                  )}
-                  {locale === "fr" ? "Télécharger PDF" : "Download PDF"}
-                </Button>
+                <PermissionGuard resource="report_cards" action="export" inline>
+                  <Button
+                    onClick={handleDownloadPDF}
+                    disabled={downloadingPDF}
+                    variant="outline"
+                  >
+                    {downloadingPDF ? (
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    ) : (
+                      <Download className="mr-2 h-4 w-4" />
+                    )}
+                    {locale === "fr" ? "Télécharger PDF" : "Download PDF"}
+                  </Button>
+                </PermissionGuard>
               </div>
             </CardContent>
           </Card>

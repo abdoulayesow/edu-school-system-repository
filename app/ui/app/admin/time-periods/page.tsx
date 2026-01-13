@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react"
 import { useI18n } from "@/components/i18n-provider"
+import { PermissionGuard } from "@/components/permission-guard"
 import { PageContainer } from "@/components/layout"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
@@ -275,10 +276,12 @@ export default function AdminTimePeriodsPage() {
                 : 'Manage time periods for the timetable'}
             </p>
           </div>
-          <Button onClick={openCreateDialog}>
-            <Plus className="mr-2 h-4 w-4" />
-            {locale === 'fr' ? 'Nouvelle Période' : 'New Period'}
-          </Button>
+          <PermissionGuard resource="academic_year" action="create" inline>
+            <Button onClick={openCreateDialog}>
+              <Plus className="mr-2 h-4 w-4" />
+              {locale === 'fr' ? 'Nouvelle Période' : 'New Period'}
+            </Button>
+          </PermissionGuard>
         </div>
 
         {/* School Year Selector */}
@@ -368,20 +371,24 @@ export default function AdminTimePeriodsPage() {
                         )}
                       </TableCell>
                       <TableCell className="text-right space-x-2">
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => openEditDialog(period)}
-                        >
-                          <Pencil className="h-4 w-4" />
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => openDeleteDialog(period)}
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
+                        <PermissionGuard resource="academic_year" action="update" inline>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => openEditDialog(period)}
+                          >
+                            <Pencil className="h-4 w-4" />
+                          </Button>
+                        </PermissionGuard>
+                        <PermissionGuard resource="academic_year" action="delete" inline>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => openDeleteDialog(period)}
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </PermissionGuard>
                       </TableCell>
                     </TableRow>
                   ))}

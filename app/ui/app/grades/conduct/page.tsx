@@ -24,6 +24,7 @@ import {
 } from "@/components/ui/table"
 import { useI18n } from "@/components/i18n-provider"
 import { useToast } from "@/components/ui/use-toast"
+import { PermissionGuard } from "@/components/permission-guard"
 import {
   Save,
   Loader2,
@@ -383,17 +384,19 @@ export default function ConductEntryPage() {
                 )}
               </CardDescription>
             </div>
-            <Button
-              onClick={handleSave}
-              disabled={!hasChanges || isSubmitting}
-            >
-              {isSubmitting ? (
-                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-              ) : (
-                <Save className="h-4 w-4 mr-2" />
-              )}
-              {t.grading.saveConductData}
-            </Button>
+            <PermissionGuard resource="grades" action="update" inline>
+              <Button
+                onClick={handleSave}
+                disabled={!hasChanges || isSubmitting}
+              >
+                {isSubmitting ? (
+                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                ) : (
+                  <Save className="h-4 w-4 mr-2" />
+                )}
+                {t.grading.saveConductData}
+              </Button>
+            </PermissionGuard>
           </CardHeader>
           <CardContent>
             {isLoadingSummaries ? (

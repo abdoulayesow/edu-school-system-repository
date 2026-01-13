@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react"
 import { useI18n } from "@/components/i18n-provider"
+import { PermissionGuard } from "@/components/permission-guard"
 import { PageContainer } from "@/components/layout"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
@@ -274,10 +275,12 @@ export default function AdminActivitiesPage() {
                 ))}
               </SelectContent>
             </Select>
-            <Button onClick={() => { resetForm(); setIsCreateDialogOpen(true) }}>
-              <Plus className="h-4 w-4 mr-2" />
-              {t.activities.addActivity}
-            </Button>
+            <PermissionGuard resource="academic_year" action="create" inline>
+              <Button onClick={() => { resetForm(); setIsCreateDialogOpen(true) }}>
+                <Plus className="h-4 w-4 mr-2" />
+                {t.activities.addActivity}
+              </Button>
+            </PermissionGuard>
           </div>
         </div>
 
@@ -317,23 +320,27 @@ export default function AdminActivitiesPage() {
                         </div>
                       </div>
                       <div className="flex gap-1">
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          onClick={() => openEditDialog(activity)}
-                        >
-                          <Pencil className="h-4 w-4" />
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          onClick={() => {
-                            setSelectedActivity(activity)
-                            setIsDeleteDialogOpen(true)
-                          }}
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
+                        <PermissionGuard resource="academic_year" action="update" inline>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => openEditDialog(activity)}
+                          >
+                            <Pencil className="h-4 w-4" />
+                          </Button>
+                        </PermissionGuard>
+                        <PermissionGuard resource="academic_year" action="delete" inline>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => {
+                              setSelectedActivity(activity)
+                              setIsDeleteDialogOpen(true)
+                            }}
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </PermissionGuard>
                       </div>
                     </div>
                   </CardHeader>

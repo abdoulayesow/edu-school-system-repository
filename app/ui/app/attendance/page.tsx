@@ -26,6 +26,7 @@ import {
   CircleAlert
 } from "lucide-react"
 import { useI18n } from "@/components/i18n-provider"
+import { PermissionGuard } from "@/components/permission-guard"
 import { PageContainer } from "@/components/layout"
 import { sizing } from "@/lib/design-tokens"
 import { formatDateWithDay } from "@/lib/utils"
@@ -522,23 +523,25 @@ export default function AttendancePage() {
             )}
 
             {/* Start Button */}
-            <Button
-              className="w-full"
-              size="lg"
-              disabled={!selectedGradeId || selectedGradeId === "all" || isLoadingAttendance}
-              onClick={startRecording}
-            >
-              {isLoadingAttendance ? (
-                <>
-                  <Loader2 className="size-4 mr-2 animate-spin" />
-                  Chargement...
-                </>
-              ) : attendanceData?.session ? (
-                <>Continuer la présence</>
-              ) : (
-                <>Commencer la présence</>
-              )}
-            </Button>
+            <PermissionGuard resource="attendance" action="create">
+              <Button
+                className="w-full"
+                size="lg"
+                disabled={!selectedGradeId || selectedGradeId === "all" || isLoadingAttendance}
+                onClick={startRecording}
+              >
+                {isLoadingAttendance ? (
+                  <>
+                    <Loader2 className="size-4 mr-2 animate-spin" />
+                    Chargement...
+                  </>
+                ) : attendanceData?.session ? (
+                  <>Continuer la présence</>
+                ) : (
+                  <>Commencer la présence</>
+                )}
+              </Button>
+            </PermissionGuard>
 
             {/* Recent Sessions Preview */}
             {attendanceData && !attendanceData.session && (
@@ -584,21 +587,23 @@ export default function AttendancePage() {
                       {formatDateWithDay(selectedDate, locale)}
                     </p>
                   </div>
-                  <Button
-                    onClick={() => saveAttendance(false)}
-                    disabled={isSaving}
-                    variant="outline"
-                    size="sm"
-                  >
-                    {isSaving ? (
-                      <Loader2 className="size-4 animate-spin" />
-                    ) : (
-                      <>
-                        <Save className="size-4 mr-1" />
-                        Sauvegarder
-                      </>
-                    )}
-                  </Button>
+                  <PermissionGuard resource="attendance" action="update" inline>
+                    <Button
+                      onClick={() => saveAttendance(false)}
+                      disabled={isSaving}
+                      variant="outline"
+                      size="sm"
+                    >
+                      {isSaving ? (
+                        <Loader2 className="size-4 animate-spin" />
+                      ) : (
+                        <>
+                          <Save className="size-4 mr-1" />
+                          Sauvegarder
+                        </>
+                      )}
+                    </Button>
+                  </PermissionGuard>
                 </div>
               </CardContent>
             </Card>
@@ -700,19 +705,21 @@ export default function AttendancePage() {
             </Card>
 
             {/* Submit Button */}
-            <Button
-              size="lg"
-              className="w-full h-14 text-lg"
-              onClick={() => saveAttendance(true)}
-              disabled={isSaving}
-            >
-              {isSaving ? (
-                <Loader2 className="size-5 mr-2 animate-spin" />
-              ) : (
-                <CheckCircle2 className="size-5 mr-2" />
-              )}
-              {t.attendance.submitAttendance}
-            </Button>
+            <PermissionGuard resource="attendance" action="update">
+              <Button
+                size="lg"
+                className="w-full h-14 text-lg"
+                onClick={() => saveAttendance(true)}
+                disabled={isSaving}
+              >
+                {isSaving ? (
+                  <Loader2 className="size-5 mr-2 animate-spin" />
+                ) : (
+                  <CheckCircle2 className="size-5 mr-2" />
+                )}
+                {t.attendance.submitAttendance}
+              </Button>
+            </PermissionGuard>
 
             {/* Instructions */}
             <Card className="border-primary/30 bg-primary/5">

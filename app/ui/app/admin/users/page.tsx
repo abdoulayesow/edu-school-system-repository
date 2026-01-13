@@ -32,6 +32,7 @@ import {
 } from "@/components/ui/table"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { useI18n } from "@/components/i18n-provider"
+import { PermissionGuard } from "@/components/permission-guard"
 import { formatDateLong } from "@/lib/utils"
 import {
   UserPlus,
@@ -236,10 +237,12 @@ export default function AdminUsersPage() {
           <h1 className="text-3xl font-bold">{t.admin.usersManagement}</h1>
           <p className="text-muted-foreground">{t.admin.usersPageSubtitle}</p>
         </div>
-        <Button onClick={() => setIsInviteDialogOpen(true)}>
-          <UserPlus className="h-4 w-4 mr-2" />
-          {t.admin.inviteUser}
-        </Button>
+        <PermissionGuard resource="user_accounts" action="create" inline>
+          <Button onClick={() => setIsInviteDialogOpen(true)}>
+            <UserPlus className="h-4 w-4 mr-2" />
+            {t.admin.inviteUser}
+          </Button>
+        </PermissionGuard>
       </div>
 
       {/* Summary Cards */}
@@ -348,14 +351,16 @@ export default function AdminUsersPage() {
                         <TableCell className="text-right">
                           {invitation.status === "pending" && (
                             <div className="flex justify-end gap-2">
-                              <Button
-                                variant="outline"
-                                size="sm"
-                                onClick={() => handleResendInvitation(invitation.id)}
-                                title={t.admin.resendInvitation}
-                              >
-                                <RefreshCw className="h-4 w-4" />
-                              </Button>
+                              <PermissionGuard resource="user_accounts" action="create" inline>
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  onClick={() => handleResendInvitation(invitation.id)}
+                                  title={t.admin.resendInvitation}
+                                >
+                                  <RefreshCw className="h-4 w-4" />
+                                </Button>
+                              </PermissionGuard>
                               <Button
                                 variant="outline"
                                 size="sm"
@@ -367,15 +372,17 @@ export default function AdminUsersPage() {
                             </div>
                           )}
                           {invitation.status === "expired" && (
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              onClick={() => handleResendInvitation(invitation.id)}
-                              title={t.admin.resendInvitation}
-                            >
-                              <RefreshCw className="h-4 w-4 mr-1" />
-                              {t.admin.resend}
-                            </Button>
+                            <PermissionGuard resource="user_accounts" action="create" inline>
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => handleResendInvitation(invitation.id)}
+                                title={t.admin.resendInvitation}
+                              >
+                                <RefreshCw className="h-4 w-4 mr-1" />
+                                {t.admin.resend}
+                              </Button>
+                            </PermissionGuard>
                           )}
                         </TableCell>
                       </TableRow>

@@ -22,6 +22,7 @@ import {
 } from "lucide-react"
 import { useI18n } from "@/components/i18n-provider"
 import { useToast } from "@/components/ui/use-toast"
+import { PermissionGuard } from "@/components/permission-guard"
 import { PageContainer } from "@/components/layout/PageContainer"
 import { BulletinPDFDocument } from "@/components/bulletin-pdf"
 import { pdf } from "@react-pdf/renderer"
@@ -362,23 +363,25 @@ export default function ClassRankingPage() {
           </div>
         </div>
         {students.length > 0 && (
-          <Button
-            onClick={handleDownloadAllBulletins}
-            disabled={isDownloading}
-            variant="outline"
-          >
-            {isDownloading ? (
-              <>
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                {downloadProgress || t.grading.generatingBulletins}
-              </>
-            ) : (
-              <>
-                <Download className="mr-2 h-4 w-4" />
-                {t.grading.downloadAllBulletins}
-              </>
-            )}
-          </Button>
+          <PermissionGuard resource="report_cards" action="export" inline>
+            <Button
+              onClick={handleDownloadAllBulletins}
+              disabled={isDownloading}
+              variant="outline"
+            >
+              {isDownloading ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  {downloadProgress || t.grading.generatingBulletins}
+                </>
+              ) : (
+                <>
+                  <Download className="mr-2 h-4 w-4" />
+                  {t.grading.downloadAllBulletins}
+                </>
+              )}
+            </Button>
+          </PermissionGuard>
         )}
       </div>
 

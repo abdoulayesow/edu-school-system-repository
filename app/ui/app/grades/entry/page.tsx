@@ -44,6 +44,7 @@ import {
 } from "@/components/ui/alert-dialog"
 import { useI18n } from "@/components/i18n-provider"
 import { useToast } from "@/components/ui/use-toast"
+import { PermissionGuard, usePermissions } from "@/components/permission-guard"
 import { formatDateLong } from "@/lib/utils"
 import {
   Plus,
@@ -743,17 +744,19 @@ export default function GradeEntryPage() {
               <span className="text-sm text-muted-foreground">
                 {entriesWithScores.length} / {students.length} {t.grading.gradesEntered}
               </span>
-              <Button
-                onClick={handleSubmit}
-                disabled={!canSubmit || isSubmitting}
-              >
-                {isSubmitting ? (
-                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                ) : (
-                  <Save className="h-4 w-4 mr-2" />
-                )}
-                {t.grading.saveAllGrades}
-              </Button>
+              <PermissionGuard resource="grades" action="create" inline>
+                <Button
+                  onClick={handleSubmit}
+                  disabled={!canSubmit || isSubmitting}
+                >
+                  {isSubmitting ? (
+                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                  ) : (
+                    <Save className="h-4 w-4 mr-2" />
+                  )}
+                  {t.grading.saveAllGrades}
+                </Button>
+              </PermissionGuard>
             </div>
           </CardHeader>
           <CardContent>
@@ -1004,25 +1007,29 @@ export default function GradeEntryPage() {
                         </TableCell>
                         <TableCell className="text-right">
                           <div className="flex justify-end gap-2">
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              onClick={() => openEditDialog(evaluation)}
-                              title={t.common.edit}
-                            >
-                              <Edit className="h-4 w-4" />
-                            </Button>
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              onClick={() => {
-                                setSelectedEvaluation(evaluation)
-                                setIsDeleteDialogOpen(true)
-                              }}
-                              title={t.common.delete}
-                            >
-                              <Trash2 className="h-4 w-4" />
-                            </Button>
+                            <PermissionGuard resource="grades" action="update" inline>
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => openEditDialog(evaluation)}
+                                title={t.common.edit}
+                              >
+                                <Edit className="h-4 w-4" />
+                              </Button>
+                            </PermissionGuard>
+                            <PermissionGuard resource="grades" action="delete" inline>
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => {
+                                  setSelectedEvaluation(evaluation)
+                                  setIsDeleteDialogOpen(true)
+                                }}
+                                title={t.common.delete}
+                              >
+                                <Trash2 className="h-4 w-4" />
+                              </Button>
+                            </PermissionGuard>
                           </div>
                         </TableCell>
                       </TableRow>

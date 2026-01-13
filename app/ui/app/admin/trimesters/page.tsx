@@ -42,6 +42,7 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog"
 import { useI18n } from "@/components/i18n-provider"
+import { PermissionGuard } from "@/components/permission-guard"
 import { formatDateLong } from "@/lib/utils"
 import {
   DropdownMenu,
@@ -566,13 +567,15 @@ export default function TrimestersPage() {
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
-          <Button
-            onClick={openCreateDialog}
-            disabled={!selectedSchoolYearId || availableTrimesterNumbers.length === 0}
-          >
-            <Plus className="h-4 w-4 mr-2" />
-            {t.admin.createTrimester}
-          </Button>
+          <PermissionGuard resource="academic_year" action="create" inline>
+            <Button
+              onClick={openCreateDialog}
+              disabled={!selectedSchoolYearId || availableTrimesterNumbers.length === 0}
+            >
+              <Plus className="h-4 w-4 mr-2" />
+              {t.admin.createTrimester}
+            </Button>
+          </PermissionGuard>
         </div>
       </div>
 
@@ -680,48 +683,56 @@ export default function TrimestersPage() {
                       <TableCell className="text-right">
                         <div className="flex justify-end gap-2">
                           {!trimester.isActive && selectedSchoolYear?.isActive && (
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              onClick={() => {
-                                setSelectedTrimester(trimester)
-                                setIsActivateDialogOpen(true)
-                              }}
-                              title={t.admin.activateTrimester}
-                            >
-                              <Play className="h-4 w-4" />
-                            </Button>
+                            <PermissionGuard resource="academic_year" action="update" inline>
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => {
+                                  setSelectedTrimester(trimester)
+                                  setIsActivateDialogOpen(true)
+                                }}
+                                title={t.admin.activateTrimester}
+                              >
+                                <Play className="h-4 w-4" />
+                              </Button>
+                            </PermissionGuard>
                           )}
                           {trimester.isActive && (
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              onClick={() => handleDeactivate(trimester)}
-                              title={t.admin.deactivateTrimester}
-                            >
-                              <Pause className="h-4 w-4" />
-                            </Button>
+                            <PermissionGuard resource="academic_year" action="update" inline>
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => handleDeactivate(trimester)}
+                                title={t.admin.deactivateTrimester}
+                              >
+                                <Pause className="h-4 w-4" />
+                              </Button>
+                            </PermissionGuard>
                           )}
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => openEditDialog(trimester)}
-                            title={t.common.edit}
-                          >
-                            <Edit className="h-4 w-4" />
-                          </Button>
-                          {!trimester.isActive && trimester.evaluationsCount === 0 && (
+                          <PermissionGuard resource="academic_year" action="update" inline>
                             <Button
                               variant="outline"
                               size="sm"
-                              onClick={() => {
-                                setSelectedTrimester(trimester)
-                                setIsDeleteDialogOpen(true)
-                              }}
-                              title={t.common.delete}
+                              onClick={() => openEditDialog(trimester)}
+                              title={t.common.edit}
                             >
-                              <Trash2 className="h-4 w-4" />
+                              <Edit className="h-4 w-4" />
                             </Button>
+                          </PermissionGuard>
+                          {!trimester.isActive && trimester.evaluationsCount === 0 && (
+                            <PermissionGuard resource="academic_year" action="delete" inline>
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => {
+                                  setSelectedTrimester(trimester)
+                                  setIsDeleteDialogOpen(true)
+                                }}
+                                title={t.common.delete}
+                              >
+                                <Trash2 className="h-4 w-4" />
+                              </Button>
+                            </PermissionGuard>
                           )}
                         </div>
                       </TableCell>
