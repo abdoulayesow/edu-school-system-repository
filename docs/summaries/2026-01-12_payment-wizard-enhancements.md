@@ -107,6 +107,12 @@ After fix:
 ```
 I'm continuing work on the Payment Wizard for the edu-school-system-repository.
 
+IMPORTANT: Follow token optimization patterns from `.claude/skills/summary-generator/guidelines/token-optimization.md`:
+- Use Grep before Read for searches
+- Use Explore agent for multi-file exploration
+- Reference this summary instead of re-reading files
+- Keep responses concise
+
 Previous session summary: docs/summaries/2026-01-12_payment-wizard-enhancements.md
 
 Key context:

@@ -64,10 +64,20 @@ Key sections to include:
 ### Step 3: Create Resume Prompt
 
 The resume prompt should include:
+- **Token optimization directive**: Reference to token-optimization.md guidelines (MANDATORY - include at the top)
 - Context reference to the summary file
 - Specific file paths to review first
 - Current status and immediate next steps
 - Any blockers or decisions that need user input
+
+**IMPORTANT**: Always start the resume prompt with:
+```
+IMPORTANT: Follow token optimization patterns from `.claude/skills/summary-generator/guidelines/token-optimization.md`:
+- Use Grep before Read for searches
+- Use Explore agent for multi-file exploration
+- Reference this summary instead of re-reading files
+- Keep responses concise
+```
 
 ### Step 4: Analyze Token Usage
 
@@ -144,8 +154,28 @@ When user says: "Let's wrap up for today"
 Response:
 1. Analyze git changes and conversation history
 2. Create `docs/summaries/2025-12-30_enrollment-improvements.md`
-3. Provide the resume prompt for the next session
-4. Suggest: "When context gets long, consider starting a new chat with the resume prompt"
+3. Provide the resume prompt with token optimization directive
+4. Suggest: "When context gets long (~40% tokens), start a new chat with this resume prompt"
+
+Example resume prompt output:
+```
+Resume enrollment improvements session.
+
+IMPORTANT: Follow token optimization patterns from `.claude/skills/summary-generator/guidelines/token-optimization.md`:
+- Use Grep before Read for searches
+- Use Explore agent for multi-file exploration
+- Reference this summary instead of re-reading files
+- Keep responses concise
+
+## Context
+Previous session completed:
+- Added middle name support to enrollment form
+- Updated validation for optional middle name field
+- Added i18n translations for new field
+
+Session summary: docs/summaries/2025-12-30_enrollment-improvements.md
+...
+```
 
 ## Tips
 

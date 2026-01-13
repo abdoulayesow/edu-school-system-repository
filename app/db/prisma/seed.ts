@@ -3,7 +3,12 @@
  * subjects, teachers, attendance, and expenses.
  * Run this to initialize the full system data.
  *
- * Usage: npx tsx app/db/prisma/seed.ts
+ * Usage:
+ *   npx tsx app/db/prisma/seed.ts               # Seed all data
+ *   npx tsx app/db/prisma/seed.ts --permissions # Only seed permissions
+ *
+ * To seed permissions separately:
+ *   npx tsx app/db/prisma/seeds/seed-permissions.ts
  */
 
 import { PrismaPg } from "@prisma/adapter-pg"
@@ -11,6 +16,7 @@ import { PrismaClient, PaymentMethod, PaymentStatus, EnrollmentStatus, Attendanc
 import pg from "pg"
 import fs from "fs"
 import path from "path"
+import { execSync } from "child_process"
 
 const { Pool } = pg
 
@@ -329,6 +335,16 @@ function generateTeacherEmail(firstName: string, lastName: string): string {
 }
 
 async function main() {
+  // Check if --permissions flag is passed
+  const args = process.argv.slice(2)
+  const permissionsOnly = args.includes("--permissions")
+
+  if (permissionsOnly) {
+    console.log("🔐 Seeding permissions only...")
+    execSync("npx tsx app/db/prisma/seeds/seed-permissions.ts", { stdio: "inherit" })
+    return
+  }
+
   console.log("🌱 Seeding school years, grades, students, and enrollments...")
 
   // Create Prisma client with pg adapter

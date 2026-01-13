@@ -183,6 +183,12 @@ Use this template when generating session summaries. Copy and adapt as needed.
 ```
 Resume [FEATURE_NAME] session.
 
+IMPORTANT: Follow token optimization patterns from `.claude/skills/summary-generator/guidelines/token-optimization.md`:
+- Use Grep before Read for searches
+- Use Explore agent for multi-file exploration
+- Reference this summary instead of re-reading files
+- Keep responses concise
+
 ## Context
 Previous session completed:
 - [Key accomplishment 1]
@@ -206,6 +212,7 @@ Session summary: docs/summaries/YYYY-MM-DD_feature-name.md
 ## Important Notes
 - [Any critical context]
 - [Environment setup if needed]
+- [Blockers or decisions needed]
 ```
 
 ---

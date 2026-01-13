@@ -8,16 +8,23 @@ datasource db {
 }
 
 model User {
-  id                         String                  @id @default(cuid())
-  name                       String?
-  email                      String?                 @unique
-  emailVerified              DateTime?
-  image                      String?
-  passwordHash               String?
-  dateOfBirth                DateTime?
-  phone                      String?
-  role                       Role                    @default(user)
-  status                     UserStatus              @default(active)
+  id            String     @id @default(cuid())
+  name          String?
+  email         String?    @unique
+  emailVerified DateTime?
+  image         String?
+  passwordHash  String?
+  dateOfBirth   DateTime?
+  phone         String?
+  role          Role       @default(user)
+  status        UserStatus @default(active)
+
+  // === STAFF ROLE & PERMISSIONS ===
+  staffRole          StaffRole? // Staff role for RBAC (null for legacy users)
+  staffProfileId     String?      @unique // Link to TeacherProfile for scope checking
+  schoolLevel        SchoolLevel? // Primary school level (for scope filtering)
+  mustChangePassword Boolean      @default(false) // Force password change on first login
+
   accounts                   Account[]
   sessions                   Session[]
   address                    Address?
@@ -55,6 +62,17 @@ model User {
   discrepancyReviews         DailyVerification[]     @relation("DiscrepancyReviewer")
   reconciliationsPerformed   ReconciliationEvent[]   @relation("ReconciliationPerformer")
   reconciliationsReviewed    ReconciliationEvent[]   @relation("ReconciliationReviewer")
+  // Permission & audit relations
+  permissionOverrides        PermissionOverride[]    @relation("UserPermissionOverrides")
+  grantedOverrides           PermissionOverride[]    @relation("GrantedPermissionOverrides")
+  auditLogs                  AuditLog[]
+
+  // Link to staff profile for teachers
+  staffProfile TeacherProfile? @relation("UserStaffProfile", fields: [staffProfileId], references: [id])
+
+  @@index([staffRole])
+  @@index([schoolLevel])
+  @@index([staffProfileId])
 }
 
 model Address {
@@ -467,6 +485,7 @@ model TeacherProfile {
   classAssignments ClassAssignment[]
   gradeLederships  Grade[]           @relation("GradeLeader")
   scheduleSlots    ScheduleSlot[]
+  linkedUser       User?             @relation("UserStaffProfile") // Link to User for RBAC
 
   @@index([personId])
   @@index([employeeNumber])
@@ -1328,4 +1347,197 @@ enum ReconciliationStatus {
   matched
   discrepancies_found
   resolved
+}
+
+// === STAFF ROLES & PERMISSIONS SYSTEM ===
+
+// Staff role enum - 13 distinct roles for RBAC
+enum StaffRole {
+  // Secondary School (Secondaire)
+  proviseur // Principal - Full oversight of secondary education
+  censeur // Vice Principal - Academic programs and teacher management
+  surveillant_general // Dean of Students - Discipline and daily supervision
+
+  // Primary School (Primaire & Maternelle)
+  directeur // Director - Full oversight of primary education
+  secretariat // Secretary - Administrative support, enrollment processing
+
+  // Finance Team
+  comptable // Accountant - Financial management, safe/bank oversight
+  agent_recouvrement // Collections Agent - Fee collection, payment intents
+  coordinateur // Operations Coordinator - Cross-level operations
+
+  // Teaching Staff
+  enseignant // Teacher - Teaching, grading own classes
+  professeur_principal // Homeroom Teacher - Teacher + class oversight
+
+  // Security (minimal system access)
+  gardien // Day/Night Guard - Campus security
+
+  // Leadership
+  proprietaire // Owner - Strategic oversight, financial visibility
+  admin_systeme // System Admin - Technical management, full access
+}
+
+// Permission resources - what can be accessed
+enum PermissionResource {
+  // Student Management
+  students
+  student_enrollment
+  student_transfer
+  student_documents
+
+  // Academic Management
+  classes
+  subjects
+  academic_year
+  teachers_assignment
+  schedule
+
+  // Grades & Report Cards
+  grades
+  report_cards
+  grade_approval
+
+  // Attendance
+  attendance
+  attendance_justification
+
+  // Fee Management
+  fee_structure
+  fee_assignment
+  student_balance
+  payment_recording
+  receipts
+
+  // Cash & Treasury
+  safe_balance
+  safe_income
+  safe_expense
+  bank_transfers
+  daily_verification
+  financial_reports
+
+  // Staff Management
+  staff
+  staff_assignment
+
+  // User & Access Management
+  user_accounts
+  role_assignment
+  permission_overrides
+
+  // Discipline
+  discipline_records
+  sanctions
+
+  // Communication
+  sms
+  announcements
+
+  // Reports & Analytics
+  academic_reports
+  attendance_reports
+  financial_analytics
+  data_export
+
+  // System Settings
+  school_settings
+  system_settings
+  audit_logs
+}
+
+// Permission actions - what can be done
+enum PermissionAction {
+  view
+  create
+  update
+  delete
+  approve
+  export
+}
+
+// Permission scope - which records can be accessed
+enum PermissionScope {
+  all // All records in system
+  own_level // Only records from user's school level
+  own_classes // Only records from user's assigned classes
+  own_children // Only user's own children (for parents)
+  none // No access
+}
+
+// === STAFF ROLES & PERMISSIONS MODELS ===
+
+// Default permissions for each role (seeded data)
+model RolePermission {
+  id       String             @id @default(cuid())
+  role     StaffRole
+  resource PermissionResource
+  action   PermissionAction
+  scope    PermissionScope    @default(all)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([role, resource, action])
+  @@index([role])
+  @@index([resource])
+}
+
+// Permission overrides for specific users (exceptions to role defaults)
+model PermissionOverride {
+  id       String             @id @default(cuid())
+  userId   String
+  resource PermissionResource
+  action   PermissionAction
+  scope    PermissionScope
+
+  granted Boolean @default(true) // true=GRANT, false=DENY
+  reason  String? // Why this override exists
+
+  grantedBy String // Admin who created override
+  grantedAt DateTime  @default(now())
+  expiresAt DateTime? // Optional expiration
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user    User @relation("UserPermissionOverrides", fields: [userId], references: [id], onDelete: Cascade)
+  grantor User @relation("GrantedPermissionOverrides", fields: [grantedBy], references: [id])
+
+  @@unique([userId, resource, action])
+  @@index([userId])
+  @@index([grantedBy])
+  @@index([resource, action])
+}
+
+// Audit log for tracking all permission-checked actions
+model AuditLog {
+  id         String  @id @default(cuid())
+  userId     String
+  action     String // "view_student", "edit_grade", etc.
+  resource   String // "student", "grade", "payment", etc.
+  resourceId String? // ID of specific record
+
+  granted Boolean // Was access granted or denied?
+  reason  String? // Reason for denial (if applicable)
+
+  // Request context
+  ipAddress     String?
+  userAgent     String?
+  requestPath   String?
+  requestMethod String?
+
+  // Additional context (JSON for flexibility)
+  metadata Json?
+
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, createdAt])
+  @@index([action, createdAt])
+  @@index([resource, resourceId])
+  @@index([granted, createdAt])
+  @@index([createdAt])
 }
