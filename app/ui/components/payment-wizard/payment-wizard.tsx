@@ -12,7 +12,8 @@ import { StepPaymentEntry } from "./steps/step-payment-entry"
 import { StepReview } from "./steps/step-review"
 import { StepCompletion } from "./steps/step-completion"
 import { useI18n } from "@/components/i18n-provider"
-import { AlertCircle, Wallet } from "lucide-react"
+import { usePermission, NoPermission } from "@/components/permission-guard"
+import { AlertCircle, Wallet, Loader2 } from "lucide-react"
 import { sizing } from "@/lib/design-tokens"
 
 interface PaymentWizardProps {
@@ -178,6 +179,30 @@ function WizardContent({ onComplete, onCancel }: Omit<PaymentWizardProps, "initi
 }
 
 export function PaymentWizard({ initialStudentId, onComplete, onCancel }: PaymentWizardProps) {
+  const { t } = useI18n()
+  const { granted, loading } = usePermission("payment_recording", "create")
+
+  // Show loading state while checking permissions
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-[400px]">
+        <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+      </div>
+    )
+  }
+
+  // Show access denied message if user doesn't have permission
+  if (!granted) {
+    return (
+      <NoPermission
+        resource="payment_recording"
+        action="create"
+        title={t?.permissions?.accessDenied || "Access Denied"}
+        description={t?.permissions?.noPaymentPermission || "You don't have permission to record payments. Please contact your administrator if you need access."}
+      />
+    )
+  }
+
   return (
     <PaymentWizardProvider initialStudentId={initialStudentId}>
       <WizardContent onComplete={onComplete} onCancel={onCancel} />

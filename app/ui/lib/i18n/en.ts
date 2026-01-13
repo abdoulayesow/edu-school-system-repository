@@ -62,6 +62,8 @@ export const en: TranslationKeys = {
   // Permissions
   permissions: {
     noAccess: "You don't have permission for this action",
+    accessDenied: "Access Denied",
+    noPaymentPermission: "You don't have permission to record payments. Please contact your administrator if you need access.",
   },
 
   // Navigation

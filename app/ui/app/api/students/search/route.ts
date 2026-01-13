@@ -26,13 +26,50 @@ export async function GET(req: NextRequest) {
       select: { id: true },
     })
 
-    const where: Record<string, unknown> = {
-      status: "active",
-      OR: [
+    // Split search query into words for multi-word search
+    // "Abdoulaye Sow" -> search firstName contains "Abdoulaye" AND lastName contains "Sow"
+    const words = q.trim().split(/\s+/).filter(w => w.length >= 2)
+
+    let searchConditions: Record<string, unknown>[]
+
+    if (words.length >= 2) {
+      // Multi-word search: try firstName + lastName combinations
+      // Search for: (firstName contains word1 AND lastName contains word2)
+      //          OR (firstName contains word2 AND lastName contains word1)
+      //          OR any word matches studentNumber
+      searchConditions = [
+        // First word in firstName, second word in lastName
+        {
+          AND: [
+            { firstName: { contains: words[0], mode: "insensitive" } },
+            { lastName: { contains: words[1], mode: "insensitive" } },
+          ],
+        },
+        // Reverse: second word in firstName, first word in lastName
+        {
+          AND: [
+            { firstName: { contains: words[1], mode: "insensitive" } },
+            { lastName: { contains: words[0], mode: "insensitive" } },
+          ],
+        },
+        // Also try each word individually (for partial matches)
+        ...words.map(word => ({ firstName: { contains: word, mode: "insensitive" } })),
+        ...words.map(word => ({ lastName: { contains: word, mode: "insensitive" } })),
+        // Student number match
+        { studentNumber: { contains: q, mode: "insensitive" } },
+      ]
+    } else {
+      // Single word search: match any field
+      searchConditions = [
         { firstName: { contains: q, mode: "insensitive" } },
         { lastName: { contains: q, mode: "insensitive" } },
         { studentNumber: { contains: q, mode: "insensitive" } },
-      ],
+      ]
+    }
+
+    const where: Record<string, unknown> = {
+      status: "active",
+      OR: searchConditions,
     }
 
     // Add grade filter if provided

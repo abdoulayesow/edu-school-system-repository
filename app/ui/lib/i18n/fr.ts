@@ -60,6 +60,8 @@ export const fr = {
   // Permissions
   permissions: {
     noAccess: "Vous n'avez pas la permission pour cette action",
+    accessDenied: "Accès refusé",
+    noPaymentPermission: "Vous n'avez pas la permission d'enregistrer des paiements. Veuillez contacter votre administrateur si vous avez besoin d'accès.",
   },
 
   // Navigation
