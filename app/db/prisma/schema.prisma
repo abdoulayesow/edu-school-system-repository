@@ -46,10 +46,10 @@ model User {
   approvedExpenses           Expense[]               @relation("ExpenseApprover")
   assignedRoomAssignments    StudentRoomAssignment[] @relation("RoomAssigner")
   sentInvitations            UserInvitation[]        @relation("InvitationSender")
-  createdActivities          Activity[]              @relation("ActivityCreator")
-  activityEnrollments        ActivityEnrollment[]    @relation("ActivityEnroller")
-  recordedActivityPayments   ActivityPayment[]       @relation("ActivityPaymentRecorder")
-  confirmedActivityPayments  ActivityPayment[]       @relation("ActivityPaymentConfirmer")
+  createdClubs               Club[]                  @relation("ClubCreator")
+  clubEnrollments            ClubEnrollment[]        @relation("ClubEnroller")
+  recordedClubPayments       ClubPayment[]           @relation("ClubPaymentRecorder")
+  confirmedClubPayments      ClubPayment[]           @relation("ClubPaymentConfirmer")
   recordedEvaluations        Evaluation[]            @relation("EvaluationRecorder")
   trimesterDecisionOverrides StudentTrimester[]      @relation("TrimesterDecisionOverrider")
   // Treasury relations
@@ -150,7 +150,7 @@ model SchoolYear {
   classAssignments       ClassAssignment[]
   gradeEnrollments       GradeEnrollment[]
   studentRoomAssignments StudentRoomAssignment[]
-  activities             Activity[]
+  clubs                  Club[]
   timePeriods            TimePeriod[]
   trimesters             Trimester[]
 
@@ -183,6 +183,7 @@ model Grade {
   attendanceSessions AttendanceSession[]
   rooms              GradeRoom[]
   trimesterStats     ClassTrimesterStats[]
+  clubGradeRules     ClubGradeRule[]
 
   @@unique([schoolYearId, order, series])
   @@index([schoolYearId])
@@ -403,7 +404,7 @@ model StudentProfile {
   attendanceRecords     AttendanceRecord[]
   parentLinks           StudentParent[]
   roomAssignments       StudentRoomAssignment[]
-  activityEnrollments   ActivityEnrollment[]
+  clubEnrollments       ClubEnrollment[]
   evaluations           Evaluation[]
   subjectAverages       SubjectTrimesterAverage[]
   studentTrimesters     StudentTrimester[]
@@ -429,6 +430,7 @@ model TeacherProfile {
   gradeLederships  Grade[]           @relation("GradeLeader")
   scheduleSlots    ScheduleSlot[]
   linkedUser       User?             @relation("UserStaffProfile") // Link to User for RBAC
+  ledClubs         Club[]            @relation("ClubLeader")
 
   @@index([personId])
   @@index([employeeNumber])
@@ -757,81 +759,169 @@ model UserInvitation {
   @@index([expiresAt])
 }
 
-model Activity {
-  id           String               @id @default(cuid())
-  name         String
-  nameFr       String?
-  description  String?
-  type         ActivityType
-  schoolYearId String
-  startDate    DateTime
-  endDate      DateTime
-  fee          Int
-  capacity     Int                  @default(30)
-  status       ActivityStatus       @default(draft)
-  isEnabled    Boolean              @default(true)
-  createdBy    String
-  syncVersion  Int                  @default(0)
-  createdAt    DateTime             @default(now())
-  updatedAt    DateTime             @updatedAt
-  schoolYear   SchoolYear           @relation(fields: [schoolYearId], references: [id], onDelete: Cascade)
-  creator      User                 @relation("ActivityCreator", fields: [createdBy], references: [id])
-  enrollments  ActivityEnrollment[]
-  payments     ActivityPayment[]
+// === CLUB MODELS ===
+
+model ClubCategory {
+  id          String         @id @default(cuid())
+  name        String         // English name
+  nameFr      String         // French name
+  description String?
+  status      CategoryStatus @default(active)
+  order       Int            @default(0)
+  syncVersion Int            @default(0)
+  createdAt   DateTime       @default(now())
+  updatedAt   DateTime       @updatedAt
+  clubs       Club[]
+
+  @@index([status])
+  @@index([order])
+}
+
+model Club {
+  id              String               @id @default(cuid())
+  name            String
+  nameFr          String?
+  description     String?
+  schoolYearId    String
+  startDate       DateTime
+  endDate         DateTime
+  fee             Int                  // One-time fee (for backwards compat)
+  monthlyFee      Int?                 // Monthly fee for recurring charges
+  capacity        Int                  @default(30)
+  status          ClubStatus           @default(draft)
+  isEnabled       Boolean              @default(true)
+  createdBy       String
+  categoryId      String?              // Link to ClubCategory
+  leaderId        String?              // Teacher/staff leader
+  syncVersion     Int                  @default(0)
+  createdAt       DateTime             @default(now())
+  updatedAt       DateTime             @updatedAt
+  schoolYear      SchoolYear           @relation(fields: [schoolYearId], references: [id], onDelete: Cascade)
+  creator         User                 @relation("ClubCreator", fields: [createdBy], references: [id])
+  category        ClubCategory?        @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+  leader          TeacherProfile?      @relation("ClubLeader", fields: [leaderId], references: [id], onDelete: SetNull)
+  enrollments     ClubEnrollment[]
+  payments        ClubPayment[]
+  eligibilityRule ClubEligibilityRule?
 
   @@index([schoolYearId])
-  @@index([type])
+  @@index([categoryId])
   @@index([status])
   @@index([createdBy])
+  @@index([leaderId])
   @@index([isEnabled])
 }
 
-model ActivityEnrollment {
-  id               String            @id @default(cuid())
-  activityId       String
-  studentProfileId String
-  status           String            @default("active")
-  enrolledBy       String
-  enrolledAt       DateTime          @default(now())
-  syncVersion      Int               @default(0)
-  createdAt        DateTime          @default(now())
-  updatedAt        DateTime          @updatedAt
-  activity         Activity          @relation(fields: [activityId], references: [id], onDelete: Cascade)
-  studentProfile   StudentProfile    @relation(fields: [studentProfileId], references: [id], onDelete: Cascade)
-  enroller         User              @relation("ActivityEnroller", fields: [enrolledBy], references: [id])
-  payments         ActivityPayment[]
+model ClubEligibilityRule {
+  id          String              @id @default(cuid())
+  clubId      String              @unique
+  ruleType    EligibilityRuleType
+  createdAt   DateTime            @default(now())
+  updatedAt   DateTime            @updatedAt
+  club        Club                @relation(fields: [clubId], references: [id], onDelete: Cascade)
+  gradeRules  ClubGradeRule[]
+  seriesRules ClubSeriesRule[]
 
-  @@unique([activityId, studentProfileId])
-  @@index([activityId])
+  @@index([clubId])
+}
+
+model ClubGradeRule {
+  id                String              @id @default(cuid())
+  eligibilityRuleId String
+  gradeId           String
+  createdAt         DateTime            @default(now())
+  eligibilityRule   ClubEligibilityRule @relation(fields: [eligibilityRuleId], references: [id], onDelete: Cascade)
+  grade             Grade               @relation(fields: [gradeId], references: [id], onDelete: Cascade)
+
+  @@unique([eligibilityRuleId, gradeId])
+  @@index([eligibilityRuleId])
+  @@index([gradeId])
+}
+
+model ClubSeriesRule {
+  id                String              @id @default(cuid())
+  eligibilityRuleId String
+  series            String              // "Sciences", "Lettres", etc.
+  createdAt         DateTime            @default(now())
+  eligibilityRule   ClubEligibilityRule @relation(fields: [eligibilityRuleId], references: [id], onDelete: Cascade)
+
+  @@unique([eligibilityRuleId, series])
+  @@index([eligibilityRuleId])
+}
+
+model ClubEnrollment {
+  id               String               @id @default(cuid())
+  clubId           String
+  studentProfileId String
+  status           String               @default("active")
+  enrolledBy       String
+  enrolledAt       DateTime             @default(now())
+  // Monthly enrollment tracking
+  startMonth       Int?                 // 1-12 (October=10)
+  startYear        Int?                 // 2024
+  totalMonths      Int?                 // Number of months enrolled
+  totalFee         Int?                 // Pre-calculated total fee
+  syncVersion      Int                  @default(0)
+  createdAt        DateTime             @default(now())
+  updatedAt        DateTime             @updatedAt
+  club             Club                 @relation(fields: [clubId], references: [id], onDelete: Cascade)
+  studentProfile   StudentProfile       @relation(fields: [studentProfileId], references: [id], onDelete: Cascade)
+  enroller         User                 @relation("ClubEnroller", fields: [enrolledBy], references: [id])
+  payments         ClubPayment[]
+  monthlyPayments  ClubMonthlyPayment[]
+
+  @@unique([clubId, studentProfileId])
+  @@index([clubId])
   @@index([studentProfileId])
   @@index([enrolledBy])
 }
 
-model ActivityPayment {
-  id                   String              @id @default(cuid())
-  activityId           String
-  activityEnrollmentId String?
-  amount               Int
-  method               PaymentMethod
-  status               PaymentStatus       @default(confirmed)
-  receiptNumber        String              @unique
-  transactionRef       String?
-  receiptImageUrl      String?
-  recordedBy           String
-  recordedAt           DateTime            @default(now())
-  confirmedBy          String?
-  confirmedAt          DateTime?
-  notes                String?
-  syncVersion          Int                 @default(0)
-  createdAt            DateTime            @default(now())
-  updatedAt            DateTime            @updatedAt
-  activity             Activity            @relation(fields: [activityId], references: [id], onDelete: Cascade)
-  activityEnrollment   ActivityEnrollment? @relation(fields: [activityEnrollmentId], references: [id], onDelete: SetNull)
-  recorder             User                @relation("ActivityPaymentRecorder", fields: [recordedBy], references: [id])
-  confirmer            User?               @relation("ActivityPaymentConfirmer", fields: [confirmedBy], references: [id])
+model ClubMonthlyPayment {
+  id               String          @id @default(cuid())
+  clubEnrollmentId String
+  month            Int             // 1-12
+  year             Int             // 2024
+  amount           Int             // Amount for this month
+  isPaid           Boolean         @default(false)
+  paidAt           DateTime?
+  clubPaymentId    String?         // Links to actual payment record
+  createdAt        DateTime        @default(now())
+  updatedAt        DateTime        @updatedAt
+  clubEnrollment   ClubEnrollment  @relation(fields: [clubEnrollmentId], references: [id], onDelete: Cascade)
+  clubPayment      ClubPayment?    @relation(fields: [clubPaymentId], references: [id], onDelete: SetNull)
 
-  @@index([activityId])
-  @@index([activityEnrollmentId])
+  @@unique([clubEnrollmentId, month, year])
+  @@index([clubEnrollmentId])
+  @@index([isPaid])
+  @@index([clubPaymentId])
+}
+
+model ClubPayment {
+  id               String               @id @default(cuid())
+  clubId           String
+  clubEnrollmentId String?
+  amount           Int
+  method           PaymentMethod
+  status           PaymentStatus        @default(confirmed)
+  receiptNumber    String               @unique
+  transactionRef   String?
+  receiptImageUrl  String?
+  recordedBy       String
+  recordedAt       DateTime             @default(now())
+  confirmedBy      String?
+  confirmedAt      DateTime?
+  notes            String?
+  syncVersion      Int                  @default(0)
+  createdAt        DateTime             @default(now())
+  updatedAt        DateTime             @updatedAt
+  club             Club                 @relation(fields: [clubId], references: [id], onDelete: Cascade)
+  clubEnrollment   ClubEnrollment?      @relation(fields: [clubEnrollmentId], references: [id], onDelete: SetNull)
+  recorder         User                 @relation("ClubPaymentRecorder", fields: [recordedBy], references: [id])
+  confirmer        User?                @relation("ClubPaymentConfirmer", fields: [confirmedBy], references: [id])
+  monthlyPayments  ClubMonthlyPayment[]
+
+  @@index([clubId])
+  @@index([clubEnrollmentId])
   @@index([status])
   @@index([recordedBy])
   @@index([confirmedBy])
@@ -1170,7 +1260,7 @@ enum SchoolYearStatus {
   passed
 }
 
-enum ActivityStatus {
+enum ClubStatus {
   draft
   active
   closed
@@ -1178,12 +1268,15 @@ enum ActivityStatus {
   cancelled
 }
 
-enum ActivityType {
-  club
-  sport
-  arts
-  academic
-  other
+enum CategoryStatus {
+  active
+  inactive
+}
+
+enum EligibilityRuleType {
+  all_grades
+  include_only
+  exclude_only
 }
 
 enum DayOfWeek {
@@ -1243,7 +1336,7 @@ enum AttendanceEntryMode {
 
 enum SafeTransactionType {
   student_payment
-  activity_payment
+  club_payment
   other_income
   expense_payment
   bank_deposit

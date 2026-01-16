@@ -4,7 +4,6 @@ import {
   Users,
   GraduationCap,
   School,
-  BookOpen,
   Receipt,
   ClipboardCheck,
   BarChart3,
@@ -24,6 +23,7 @@ import {
   Trophy,
   MessageSquare,
   CalendarRange,
+  Sparkles,
 } from "lucide-react"
 import type { UserRole } from "./nav-links"
 import { isGradingFeaturesEnabled } from "./feature-flags"
@@ -124,11 +124,11 @@ export const navigationConfig: MainNavItem[] = [
         roles: ["director", "academic_director"],
       },
       {
-        id: "activities",
-        name: "Activities",
-        translationKey: "activities",
-        href: "/activities",
-        icon: BookOpen,
+        id: "clubs",
+        name: "Clubs",
+        translationKey: "clubs",
+        href: "/clubs",
+        icon: Sparkles,
         roles: ["director", "academic_director", "teacher"],
       },
       {
@@ -288,11 +288,11 @@ export const navigationConfig: MainNavItem[] = [
         roles: ["director"],
       },
       {
-        id: "activities-config",
-        name: "Activities",
-        translationKey: "activitiesManagement",
-        href: "/admin/activities",
-        icon: BookOpen,
+        id: "clubs-config",
+        name: "Clubs",
+        translationKey: "clubsManagement",
+        href: "/admin/clubs",
+        icon: Sparkles,
         roles: ["director", "academic_director"],
       },
       {

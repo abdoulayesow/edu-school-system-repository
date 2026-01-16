@@ -23,11 +23,12 @@ export const queryKeys = {
       ? (["enrollments", filters] as const)
       : (["enrollments"] as const),
 
-  // Activities
-  activities: (filters?: ActivityFilters) =>
+  // Clubs
+  clubs: (filters?: ClubFilters) =>
     filters
-      ? (["activities", filters] as const)
-      : (["activities"] as const),
+      ? (["clubs", filters] as const)
+      : (["clubs"] as const),
+  clubCategories: () => ["club-categories"] as const,
 
   // School year
   schoolYearActive: () => ["school-year", "active"] as const,
@@ -71,12 +72,12 @@ interface EnrollmentFilters {
   endDate?: string
 }
 
-interface ActivityFilters {
+interface ClubFilters {
   schoolYearId?: string
-  type?: string
+  categoryId?: string
   status?: string
   search?: string
-  view?: "activities" | "students"
+  view?: "clubs" | "students"
   limit?: number
   offset?: number
 }
@@ -484,24 +485,47 @@ export function useStudents(filters?: StudentFilters) {
 }
 
 // ============================================
-// Activities Hooks
+// Clubs Hooks
 // ============================================
 
-export interface ApiActivity {
+export interface ApiClubCategory {
   id: string
   name: string
+  nameFr: string
+}
+
+export interface ApiClubEligibilityRule {
+  id: string
+  ruleType: "all_grades" | "include_only" | "exclude_only"
+  gradeRules: Array<{
+    gradeId: string
+    grade: { id: string; name: string; order: number }
+  }>
+}
+
+export interface ApiClub {
+  id: string
+  name: string
+  nameFr: string | null
   description: string | null
-  type: "club" | "sport" | "arts" | "academic" | "other"
+  categoryId: string | null
+  category: ApiClubCategory | null
   status: string
   fee: number
+  monthlyFee: number | null
   capacity: number | null
+  leader: {
+    id: string
+    person: { firstName: string; lastName: string }
+  } | null
+  eligibilityRule: ApiClubEligibilityRule | null
   _count: {
     enrollments: number
   }
 }
 
-interface ActivitiesResponse {
-  activities: ApiActivity[]
+interface ClubsResponse {
+  clubs: ApiClub[]
   pagination: {
     total: number
     limit: number
@@ -521,8 +545,8 @@ export interface ApiEligibleStudent {
     name: string
     order: number
   }
-  activityEnrollments: Array<{
-    activity: { id: string; name: string; type: string }
+  clubEnrollments: Array<{
+    club: { id: string; name: string; categoryId: string | null }
   }>
 }
 
@@ -537,141 +561,51 @@ interface EligibleStudentsResponse {
 }
 
 /**
- * Hook: Fetch activities with optional filters
+ * Hook: Fetch clubs with optional filters
  */
-export function useActivities(filters?: ActivityFilters) {
-  const url = buildUrl("/api/activities", { ...filters })
+export function useClubs(filters?: ClubFilters) {
+  const url = buildUrl("/api/clubs", { ...filters })
 
   return useQuery({
-    queryKey: queryKeys.activities(filters),
-    queryFn: () => fetchApi<ActivitiesResponse>(url),
+    queryKey: queryKeys.clubs(filters),
+    queryFn: () => fetchApi<ClubsResponse>(url),
     staleTime: 60 * 1000, // 1 minute
   })
 }
 
 /**
- * Hook: Fetch students eligible for activity enrollment
+ * Hook: Fetch students eligible for club enrollment
  */
 export function useEligibleStudents() {
   return useQuery({
-    queryKey: queryKeys.activities({ view: "students" }),
+    queryKey: queryKeys.clubs({ view: "students" }),
     queryFn: () =>
-      fetchApi<EligibleStudentsResponse>("/api/activities?view=students"),
+      fetchApi<EligibleStudentsResponse>("/api/clubs?view=students"),
     staleTime: 30 * 1000, // 30 seconds
   })
 }
 
-interface EnrollInActivityParams {
-  activityId: string
+interface EnrollInClubParams {
+  clubId: string
   studentProfileId: string
+  startMonth?: number
+  startYear?: number
+  totalMonths?: number
 }
 
 /**
- * Hook: Enroll a student in an activity (mutation)
+ * Hook: Enroll a student in a club (mutation)
  *
  * @example
- * const { mutate, isPending } = useEnrollInActivity()
- * mutate({ activityId: 'a-123', studentProfileId: 'sp-456' })
+ * const { mutate, isPending } = useEnrollInClub()
+ * mutate({ clubId: 'c-123', studentProfileId: 'sp-456' })
  */
-export function useEnrollInActivity() {
+export function useEnrollInClub() {
   const queryClient = useQueryClient()
 
   return useMutation({
-    mutationFn: async ({ activityId, studentProfileId }: EnrollInActivityParams) => {
-      const res = await fetch(`/api/activities/${activityId}/enrollments`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ studentProfileId }),
-      })
-      if (!res.ok) {
-        const error = await res.json().catch(() => ({ message: res.statusText }))
-        throw new Error(error.message || `API error: ${res.status}`)
-      }
-      return res.json()
-    },
-    onSuccess: () => {
-      // Invalidate activities to refresh counts
-      queryClient.invalidateQueries({ queryKey: ["activities"] })
-    },
-  })
-}
-
-// ============================================
-// Admin Activities Hooks
-// ============================================
-
-interface AdminActivityFilters {
-  schoolYearId: string
-  type?: string
-  status?: string
-  search?: string
-  limit?: number
-  offset?: number
-}
-
-export interface AdminActivity {
-  id: string
-  name: string
-  nameFr: string | null
-  description: string | null
-  type: "club" | "sport" | "arts" | "academic" | "other"
-  startDate: string
-  endDate: string
-  fee: number
-  capacity: number
-  status: "draft" | "active" | "closed" | "completed" | "cancelled"
-  isEnabled: boolean
-  schoolYearId: string
-  creator: { id: string; name: string | null; email: string | null }
-  _count: { enrollments: number; payments: number }
-}
-
-interface AdminActivitiesResponse {
-  activities: AdminActivity[]
-  pagination: {
-    total: number
-    limit: number
-    offset: number
-    hasMore: boolean
-  }
-}
-
-/**
- * Hook: Fetch admin activities with filters
- */
-export function useAdminActivities(filters: AdminActivityFilters) {
-  const url = buildUrl("/api/admin/activities", { ...filters })
-
-  return useQuery({
-    queryKey: ["admin", "activities", filters],
-    queryFn: () => fetchApi<AdminActivitiesResponse>(url),
-    staleTime: 30 * 1000,
-    enabled: !!filters.schoolYearId,
-  })
-}
-
-interface CreateActivityInput {
-  name: string
-  nameFr?: string
-  description?: string
-  type: string
-  startDate: string
-  endDate: string
-  fee: number
-  capacity: number
-  status: string
-  schoolYearId: string
-}
-
-/**
- * Hook: Create a new activity (admin)
- */
-export function useCreateActivity() {
-  const queryClient = useQueryClient()
-
-  return useMutation({
-    mutationFn: async (data: CreateActivityInput) => {
-      const res = await fetch("/api/admin/activities", {
+    mutationFn: async ({ clubId, ...data }: EnrollInClubParams) => {
+      const res = await fetch(`/api/admin/clubs/${clubId}/enrollments`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(data),
@@ -683,34 +617,91 @@ export function useCreateActivity() {
       return res.json()
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["admin", "activities"] })
-      queryClient.invalidateQueries({ queryKey: ["activities"] })
+      // Invalidate clubs to refresh counts
+      queryClient.invalidateQueries({ queryKey: ["clubs"] })
+      queryClient.invalidateQueries({ queryKey: ["admin", "clubs"] })
     },
   })
 }
 
-interface UpdateActivityInput {
+// ============================================
+// Club Categories Hooks
+// ============================================
+
+export interface ClubCategory {
+  id: string
+  name: string
+  nameFr: string
+  description: string | null
+  status: "active" | "inactive"
+  order: number
+  _count: { clubs: number }
+}
+
+/**
+ * Hook: Fetch all club categories
+ */
+export function useClubCategories(status?: "active" | "inactive") {
+  const url = buildUrl("/api/admin/club-categories", { status })
+
+  return useQuery({
+    queryKey: queryKeys.clubCategories(),
+    queryFn: () => fetchApi<ClubCategory[]>(url),
+    staleTime: 5 * 60 * 1000, // 5 minutes
+  })
+}
+
+interface CreateClubCategoryInput {
+  name: string
+  nameFr: string
+  description?: string
+  status?: "active" | "inactive"
+  order?: number
+}
+
+/**
+ * Hook: Create a new club category
+ */
+export function useCreateClubCategory() {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: async (data: CreateClubCategoryInput) => {
+      const res = await fetch("/api/admin/club-categories", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data),
+      })
+      if (!res.ok) {
+        const error = await res.json().catch(() => ({ message: res.statusText }))
+        throw new Error(error.message || `API error: ${res.status}`)
+      }
+      return res.json()
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["club-categories"] })
+    },
+  })
+}
+
+interface UpdateClubCategoryInput {
   id: string
   name?: string
   nameFr?: string
   description?: string
-  type?: string
-  startDate?: string
-  endDate?: string
-  fee?: number
-  capacity?: number
-  status?: string
+  status?: "active" | "inactive"
+  order?: number
 }
 
 /**
- * Hook: Update an activity (admin)
+ * Hook: Update a club category
  */
-export function useUpdateActivity() {
+export function useUpdateClubCategory() {
   const queryClient = useQueryClient()
 
   return useMutation({
-    mutationFn: async ({ id, ...data }: UpdateActivityInput) => {
-      const res = await fetch(`/api/admin/activities/${id}`, {
+    mutationFn: async ({ id, ...data }: UpdateClubCategoryInput) => {
+      const res = await fetch(`/api/admin/club-categories/${id}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(data),
@@ -722,21 +713,20 @@ export function useUpdateActivity() {
       return res.json()
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["admin", "activities"] })
-      queryClient.invalidateQueries({ queryKey: ["activities"] })
+      queryClient.invalidateQueries({ queryKey: ["club-categories"] })
     },
   })
 }
 
 /**
- * Hook: Delete an activity (admin)
+ * Hook: Delete a club category
  */
-export function useDeleteActivity() {
+export function useDeleteClubCategory() {
   const queryClient = useQueryClient()
 
   return useMutation({
-    mutationFn: async (activityId: string) => {
-      const res = await fetch(`/api/admin/activities/${activityId}`, {
+    mutationFn: async (categoryId: string) => {
+      const res = await fetch(`/api/admin/club-categories/${categoryId}`, {
         method: "DELETE",
       })
       if (!res.ok) {
@@ -746,8 +736,306 @@ export function useDeleteActivity() {
       return res.json()
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["admin", "activities"] })
-      queryClient.invalidateQueries({ queryKey: ["activities"] })
+      queryClient.invalidateQueries({ queryKey: ["club-categories"] })
+    },
+  })
+}
+
+// ============================================
+// Admin Clubs Hooks
+// ============================================
+
+interface AdminClubFilters {
+  schoolYearId: string
+  categoryId?: string
+  status?: string
+  search?: string
+  limit?: number
+  offset?: number
+}
+
+export interface AdminClub {
+  id: string
+  name: string
+  nameFr: string | null
+  description: string | null
+  categoryId: string | null
+  category: ApiClubCategory | null
+  leaderId: string | null
+  leader: {
+    id: string
+    person: { firstName: string; lastName: string }
+  } | null
+  startDate: string
+  endDate: string
+  fee: number
+  monthlyFee: number | null
+  capacity: number
+  status: "draft" | "active" | "closed" | "completed" | "cancelled"
+  isEnabled: boolean
+  schoolYearId: string
+  creator: { id: string; name: string | null; email: string | null }
+  eligibilityRule: ApiClubEligibilityRule | null
+  _count: { enrollments: number; payments: number }
+}
+
+interface AdminClubsResponse {
+  clubs: AdminClub[]
+  pagination: {
+    total: number
+    limit: number
+    offset: number
+    hasMore: boolean
+  }
+}
+
+/**
+ * Hook: Fetch admin clubs with filters
+ */
+export function useAdminClubs(filters: AdminClubFilters) {
+  const url = buildUrl("/api/admin/clubs", { ...filters })
+
+  return useQuery({
+    queryKey: ["admin", "clubs", filters],
+    queryFn: () => fetchApi<AdminClubsResponse>(url),
+    staleTime: 30 * 1000,
+    enabled: !!filters.schoolYearId,
+  })
+}
+
+interface CreateClubInput {
+  name: string
+  nameFr?: string
+  description?: string
+  categoryId?: string
+  leaderId?: string
+  startDate: string
+  endDate: string
+  fee: number
+  monthlyFee?: number
+  capacity: number
+  status: string
+  schoolYearId: string
+}
+
+/**
+ * Hook: Create a new club (admin)
+ */
+export function useCreateClub() {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: async (data: CreateClubInput) => {
+      const res = await fetch("/api/admin/clubs", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data),
+      })
+      if (!res.ok) {
+        const error = await res.json().catch(() => ({ message: res.statusText }))
+        throw new Error(error.message || `API error: ${res.status}`)
+      }
+      return res.json()
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["admin", "clubs"] })
+      queryClient.invalidateQueries({ queryKey: ["clubs"] })
+    },
+  })
+}
+
+interface UpdateClubInput {
+  id: string
+  name?: string
+  nameFr?: string
+  description?: string
+  categoryId?: string | null
+  leaderId?: string | null
+  startDate?: string
+  endDate?: string
+  fee?: number
+  monthlyFee?: number | null
+  capacity?: number
+  status?: string
+}
+
+/**
+ * Hook: Update a club (admin)
+ */
+export function useUpdateClub() {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: async ({ id, ...data }: UpdateClubInput) => {
+      const res = await fetch(`/api/admin/clubs/${id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data),
+      })
+      if (!res.ok) {
+        const error = await res.json().catch(() => ({ message: res.statusText }))
+        throw new Error(error.message || `API error: ${res.status}`)
+      }
+      return res.json()
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["admin", "clubs"] })
+      queryClient.invalidateQueries({ queryKey: ["clubs"] })
+    },
+  })
+}
+
+/**
+ * Hook: Delete a club (admin)
+ */
+export function useDeleteClub() {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: async (clubId: string) => {
+      const res = await fetch(`/api/admin/clubs/${clubId}`, {
+        method: "DELETE",
+      })
+      if (!res.ok) {
+        const error = await res.json().catch(() => ({ message: res.statusText }))
+        throw new Error(error.message || `API error: ${res.status}`)
+      }
+      return res.json()
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["admin", "clubs"] })
+      queryClient.invalidateQueries({ queryKey: ["clubs"] })
+    },
+  })
+}
+
+// ============================================
+// Club Eligibility Rules Hooks
+// ============================================
+
+interface UpdateEligibilityRuleInput {
+  clubId: string
+  ruleType: "all_grades" | "include_only" | "exclude_only"
+  gradeIds: string[]
+}
+
+/**
+ * Hook: Update eligibility rule for a club
+ */
+export function useUpdateClubEligibilityRule() {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: async ({ clubId, ruleType, gradeIds }: UpdateEligibilityRuleInput) => {
+      const res = await fetch(`/api/admin/clubs/${clubId}/eligibility-rules`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ ruleType, gradeIds }),
+      })
+      if (!res.ok) {
+        const error = await res.json().catch(() => ({ message: res.statusText }))
+        throw new Error(error.message || `API error: ${res.status}`)
+      }
+      return res.json()
+    },
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({ queryKey: ["admin", "clubs"] })
+      queryClient.invalidateQueries({ queryKey: ["clubs"] })
+      queryClient.invalidateQueries({ queryKey: ["admin", "clubs", variables.clubId] })
+    },
+  })
+}
+
+// ============================================
+// Club Enrollments Hooks
+// ============================================
+
+export interface ClubMonthlyPayment {
+  id: string
+  month: number
+  year: number
+  amount: number
+  isPaid: boolean
+  paidAt: string | null
+  clubPaymentId: string | null
+}
+
+export interface ClubEnrollmentWithPayments {
+  id: string
+  clubId: string
+  status: string
+  enrolledAt: string
+  startMonth: number | null
+  startYear: number | null
+  totalMonths: number | null
+  totalFee: number | null
+  studentProfile: {
+    id: string
+    person: {
+      firstName: string
+      lastName: string
+    }
+  }
+  enroller: {
+    id: string
+    name: string | null
+  }
+  payments: Array<{
+    id: string
+    amount: number
+    method: string
+    status: string
+    receiptNumber: string
+    recordedAt: string
+  }>
+  monthlyPayments: ClubMonthlyPayment[]
+}
+
+/**
+ * Hook: Fetch enrollments for a specific club
+ */
+export function useClubEnrollments(clubId: string | null) {
+  return useQuery({
+    queryKey: ["admin", "clubs", clubId, "enrollments"],
+    queryFn: () => fetchApi<ClubEnrollmentWithPayments[]>(`/api/admin/clubs/${clubId}/enrollments`),
+    staleTime: 30 * 1000,
+    enabled: !!clubId,
+  })
+}
+
+interface MarkMonthlyPaymentPaidInput {
+  clubId: string
+  enrollmentId: string
+  paymentId: string
+  method: "cash" | "orange_money"
+  notes?: string
+}
+
+/**
+ * Hook: Mark a monthly payment as paid
+ */
+export function useMarkMonthlyPaymentPaid() {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: async ({ clubId, enrollmentId, paymentId, method, notes }: MarkMonthlyPaymentPaidInput) => {
+      const res = await fetch(
+        `/api/admin/clubs/${clubId}/enrollments/${enrollmentId}/monthly-payments/${paymentId}`,
+        {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ method, notes }),
+        }
+      )
+      if (!res.ok) {
+        const error = await res.json().catch(() => ({ message: res.statusText }))
+        throw new Error(error.message || `API error: ${res.status}`)
+      }
+      return res.json()
+    },
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({ queryKey: ["admin", "clubs", variables.clubId, "enrollments"] })
+      queryClient.invalidateQueries({ queryKey: ["admin", "clubs"] })
     },
   })
 }

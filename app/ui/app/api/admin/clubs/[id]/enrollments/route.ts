@@ -5,13 +5,16 @@ import { z } from "zod"
 
 const enrollStudentSchema = z.object({
   studentProfileId: z.string().min(1, "Student profile ID is required"),
+  startMonth: z.number().int().min(1).max(12).optional(),
+  startYear: z.number().int().min(2020).max(2100).optional(),
+  totalMonths: z.number().int().min(1).max(12).optional(),
 })
 
 type RouteParams = { params: Promise<{ id: string }> }
 
 /**
- * GET /api/admin/activities/[id]/enrollments
- * Get all enrollments for an activity
+ * GET /api/admin/clubs/[id]/enrollments
+ * Get all enrollments for a club
  */
 export async function GET(req: NextRequest, { params }: RouteParams) {
   const { error } = await requirePerm("schedule", "view")
@@ -20,8 +23,8 @@ export async function GET(req: NextRequest, { params }: RouteParams) {
   try {
     const { id } = await params
 
-    const enrollments = await prisma.activityEnrollment.findMany({
-      where: { activityId: id },
+    const enrollments = await prisma.clubEnrollment.findMany({
+      where: { clubId: id },
       include: {
         studentProfile: {
           include: {
@@ -35,6 +38,9 @@ export async function GET(req: NextRequest, { params }: RouteParams) {
         },
         payments: {
           orderBy: { recordedAt: "desc" },
+        },
+        monthlyPayments: {
+          orderBy: [{ year: "asc" }, { month: "asc" }],
         },
       },
       orderBy: { enrolledAt: "desc" },
@@ -51,8 +57,8 @@ export async function GET(req: NextRequest, { params }: RouteParams) {
 }
 
 /**
- * POST /api/admin/activities/[id]/enrollments
- * Enroll a student in an activity
+ * POST /api/admin/clubs/[id]/enrollments
+ * Enroll a student in a club
  */
 export async function POST(req: NextRequest, { params }: RouteParams) {
   const { session, error } = await requirePerm("schedule", "create")
@@ -63,31 +69,37 @@ export async function POST(req: NextRequest, { params }: RouteParams) {
     const body = await req.json()
     const validated = enrollStudentSchema.parse(body)
 
-    // Check activity exists and is active
-    const activity = await prisma.activity.findUnique({
+    // Check club exists and is active
+    const club = await prisma.club.findUnique({
       where: { id },
       include: {
         _count: { select: { enrollments: true } },
+        eligibilityRule: {
+          include: {
+            gradeRules: true,
+            seriesRules: true,
+          },
+        },
       },
     })
 
-    if (!activity) {
+    if (!club) {
       return NextResponse.json(
-        { message: "Activity not found" },
+        { message: "Club not found" },
         { status: 404 }
       )
     }
 
-    if (activity.status !== "active") {
+    if (club.status !== "active") {
       return NextResponse.json(
-        { message: "Activity is not open for enrollment" },
+        { message: "Club is not open for enrollment" },
         { status: 400 }
       )
     }
 
-    if (activity._count.enrollments >= activity.capacity) {
+    if (club._count.enrollments >= club.capacity) {
       return NextResponse.json(
-        { message: "Activity is at full capacity" },
+        { message: "Club is at full capacity" },
         { status: 400 }
       )
     }
@@ -119,20 +131,50 @@ export async function POST(req: NextRequest, { params }: RouteParams) {
         schoolYear: { isActive: true },
         status: "completed",
       },
+      include: {
+        grade: true,
+      },
     })
 
     if (!hasCompletedEnrollment) {
       return NextResponse.json(
-        { message: "Student must have a completed enrollment to join activities" },
+        { message: "Student must have a completed enrollment to join clubs" },
         { status: 400 }
       )
     }
 
+    // Check eligibility rules if they exist
+    if (club.eligibilityRule) {
+      const rule = club.eligibilityRule
+      const studentGradeId = hasCompletedEnrollment.gradeId
+
+      if (rule.ruleType === "include_only") {
+        // Student's grade must be in the list
+        const allowedGradeIds = rule.gradeRules.map((gr) => gr.gradeId)
+        if (!allowedGradeIds.includes(studentGradeId)) {
+          return NextResponse.json(
+            { message: "Student's grade is not eligible for this club" },
+            { status: 400 }
+          )
+        }
+      } else if (rule.ruleType === "exclude_only") {
+        // Student's grade must NOT be in the list
+        const excludedGradeIds = rule.gradeRules.map((gr) => gr.gradeId)
+        if (excludedGradeIds.includes(studentGradeId)) {
+          return NextResponse.json(
+            { message: "Student's grade is excluded from this club" },
+            { status: 400 }
+          )
+        }
+      }
+      // all_grades means no grade restriction
+    }
+
     // Check if already enrolled
-    const existingEnrollment = await prisma.activityEnrollment.findUnique({
+    const existingEnrollment = await prisma.clubEnrollment.findUnique({
       where: {
-        activityId_studentProfileId: {
-          activityId: id,
+        clubId_studentProfileId: {
+          clubId: id,
           studentProfileId: validated.studentProfileId,
         },
       },
@@ -140,17 +182,27 @@ export async function POST(req: NextRequest, { params }: RouteParams) {
 
     if (existingEnrollment) {
       return NextResponse.json(
-        { message: "Student is already enrolled in this activity" },
+        { message: "Student is already enrolled in this club" },
         { status: 400 }
       )
     }
 
-    const enrollment = await prisma.activityEnrollment.create({
+    // Calculate total fee if monthly fee and duration provided
+    let totalFee: number | null = null
+    if (club.monthlyFee && validated.totalMonths) {
+      totalFee = club.monthlyFee * validated.totalMonths
+    }
+
+    const enrollment = await prisma.clubEnrollment.create({
       data: {
-        activityId: id,
+        clubId: id,
         studentProfileId: validated.studentProfileId,
         enrolledBy: session!.user.id,
         status: "active",
+        startMonth: validated.startMonth,
+        startYear: validated.startYear,
+        totalMonths: validated.totalMonths,
+        totalFee,
       },
       include: {
         studentProfile: {
@@ -165,6 +217,34 @@ export async function POST(req: NextRequest, { params }: RouteParams) {
         },
       },
     })
+
+    // Create monthly payment records if monthly fee is set
+    if (club.monthlyFee && validated.startMonth && validated.startYear && validated.totalMonths) {
+      const monthlyPayments = []
+      let month = validated.startMonth
+      let year = validated.startYear
+
+      for (let i = 0; i < validated.totalMonths; i++) {
+        monthlyPayments.push({
+          clubEnrollmentId: enrollment.id,
+          month,
+          year,
+          amount: club.monthlyFee,
+          isPaid: false,
+        })
+
+        // Move to next month
+        month++
+        if (month > 12) {
+          month = 1
+          year++
+        }
+      }
+
+      await prisma.clubMonthlyPayment.createMany({
+        data: monthlyPayments,
+      })
+    }
 
     return NextResponse.json(enrollment, { status: 201 })
   } catch (err) {

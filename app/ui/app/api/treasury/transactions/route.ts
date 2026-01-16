@@ -90,7 +90,7 @@ export async function GET(req: NextRequest) {
 const createTransactionSchema = z.object({
   type: z.enum([
     "student_payment",
-    "activity_payment",
+    "club_payment",
     "other_income",
     "expense_payment",
   ]),

@@ -2,36 +2,38 @@ import { NextRequest, NextResponse } from "next/server"
 import { requirePerm } from "@/lib/authz"
 import { prisma } from "@/lib/prisma"
 import { z } from "zod"
-import type { ActivityType, ActivityStatus } from "@prisma/client"
+import type { ClubStatus } from "@prisma/client"
 
-const createActivitySchema = z.object({
+const createClubSchema = z.object({
   name: z.string().min(1, "Name is required"),
   nameFr: z.string().optional().nullable(),
   description: z.string().optional().nullable(),
-  type: z.enum(["club", "sport", "arts", "academic", "other"]),
+  categoryId: z.string().optional().nullable(),
+  leaderId: z.string().optional().nullable(),
   schoolYearId: z.string().min(1, "School year ID is required"),
   startDate: z.string().transform((s) => new Date(s)),
   endDate: z.string().transform((s) => new Date(s)),
   fee: z.number().int().min(0),
+  monthlyFee: z.number().int().min(0).optional().nullable(),
   capacity: z.number().int().min(1).default(30),
   status: z.enum(["draft", "active", "closed", "completed", "cancelled"]).default("draft"),
   isEnabled: z.boolean().default(true),
 })
 
 /**
- * GET /api/admin/activities
- * List activities for a school year
- * Query params: schoolYearId (required), type (optional), status (optional), search (optional), limit, offset
+ * GET /api/admin/clubs
+ * List clubs for a school year
+ * Query params: schoolYearId (required), categoryId (optional), status (optional), search (optional), limit, offset
  */
 export async function GET(req: NextRequest) {
-  const { session, error } = await requirePerm("schedule", "view")
+  const { error } = await requirePerm("schedule", "view")
   if (error) return error
 
   try {
     const { searchParams } = new URL(req.url)
     const schoolYearId = searchParams.get("schoolYearId")
-    const type = searchParams.get("type") as ActivityType | null
-    const status = searchParams.get("status") as ActivityStatus | null
+    const categoryId = searchParams.get("categoryId")
+    const status = searchParams.get("status") as ClubStatus | null
     const search = searchParams.get("search")
     const limit = parseInt(searchParams.get("limit") || "50")
     const offset = parseInt(searchParams.get("offset") || "0")
@@ -45,7 +47,7 @@ export async function GET(req: NextRequest) {
 
     const where: Record<string, unknown> = {
       schoolYearId,
-      ...(type && { type }),
+      ...(categoryId && { categoryId }),
       ...(status && { status }),
     }
 
@@ -58,13 +60,35 @@ export async function GET(req: NextRequest) {
       ]
     }
 
-    const [activities, total] = await Promise.all([
-      prisma.activity.findMany({
+    const [clubs, total] = await Promise.all([
+      prisma.club.findMany({
         where,
         orderBy: [{ status: "asc" }, { name: "asc" }],
         include: {
           creator: {
             select: { id: true, name: true, email: true },
+          },
+          category: {
+            select: { id: true, name: true, nameFr: true },
+          },
+          leader: {
+            include: {
+              person: {
+                select: { firstName: true, lastName: true },
+              },
+            },
+          },
+          eligibilityRule: {
+            include: {
+              gradeRules: {
+                include: {
+                  grade: {
+                    select: { id: true, name: true, order: true },
+                  },
+                },
+              },
+              seriesRules: true,
+            },
           },
           _count: {
             select: { enrollments: true, payments: true },
@@ -73,30 +97,30 @@ export async function GET(req: NextRequest) {
         take: limit,
         skip: offset,
       }),
-      prisma.activity.count({ where }),
+      prisma.club.count({ where }),
     ])
 
     return NextResponse.json({
-      activities,
+      clubs,
       pagination: {
         total,
         limit,
         offset,
-        hasMore: offset + activities.length < total,
+        hasMore: offset + clubs.length < total,
       },
     })
   } catch (err) {
-    console.error("Error fetching activities:", err)
+    console.error("Error fetching clubs:", err)
     return NextResponse.json(
-      { message: "Failed to fetch activities" },
+      { message: "Failed to fetch clubs" },
       { status: 500 }
     )
   }
 }
 
 /**
- * POST /api/admin/activities
- * Create a new activity
+ * POST /api/admin/clubs
+ * Create a new club
  */
 export async function POST(req: NextRequest) {
   const { session, error } = await requirePerm("schedule", "create")
@@ -104,7 +128,7 @@ export async function POST(req: NextRequest) {
 
   try {
     const body = await req.json()
-    const validated = createActivitySchema.parse(body)
+    const validated = createClubSchema.parse(body)
 
     // Verify school year exists
     const schoolYear = await prisma.schoolYear.findUnique({
@@ -126,16 +150,44 @@ export async function POST(req: NextRequest) {
       )
     }
 
-    const activity = await prisma.activity.create({
+    // Verify category exists if provided
+    if (validated.categoryId) {
+      const category = await prisma.clubCategory.findUnique({
+        where: { id: validated.categoryId },
+      })
+      if (!category) {
+        return NextResponse.json(
+          { message: "Category not found" },
+          { status: 404 }
+        )
+      }
+    }
+
+    // Verify leader exists if provided
+    if (validated.leaderId) {
+      const leader = await prisma.teacherProfile.findUnique({
+        where: { id: validated.leaderId },
+      })
+      if (!leader) {
+        return NextResponse.json(
+          { message: "Leader not found" },
+          { status: 404 }
+        )
+      }
+    }
+
+    const club = await prisma.club.create({
       data: {
         name: validated.name,
         nameFr: validated.nameFr,
         description: validated.description,
-        type: validated.type,
+        categoryId: validated.categoryId,
+        leaderId: validated.leaderId,
         schoolYearId: validated.schoolYearId,
         startDate: validated.startDate,
         endDate: validated.endDate,
         fee: validated.fee,
+        monthlyFee: validated.monthlyFee,
         capacity: validated.capacity,
         status: validated.status,
         isEnabled: validated.isEnabled,
@@ -145,13 +197,23 @@ export async function POST(req: NextRequest) {
         creator: {
           select: { id: true, name: true, email: true },
         },
+        category: {
+          select: { id: true, name: true, nameFr: true },
+        },
+        leader: {
+          include: {
+            person: {
+              select: { firstName: true, lastName: true },
+            },
+          },
+        },
         _count: {
           select: { enrollments: true, payments: true },
         },
       },
     })
 
-    return NextResponse.json(activity, { status: 201 })
+    return NextResponse.json(club, { status: 201 })
   } catch (err) {
     if (err instanceof z.ZodError) {
       return NextResponse.json(
@@ -159,9 +221,9 @@ export async function POST(req: NextRequest) {
         { status: 400 }
       )
     }
-    console.error("Error creating activity:", err)
+    console.error("Error creating club:", err)
     return NextResponse.json(
-      { message: "Failed to create activity" },
+      { message: "Failed to create club" },
       { status: 500 }
     )
   }

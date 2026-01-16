@@ -1,14 +1,14 @@
 import { NextRequest, NextResponse } from "next/server"
 import { requirePerm } from "@/lib/authz"
 import { prisma } from "@/lib/prisma"
-import { ActivityStatus } from "@prisma/client"
+import { ClubStatus } from "@prisma/client"
 
 /**
- * GET /api/activities
- * List active activities and eligible students for enrollment
+ * GET /api/clubs
+ * List active clubs and eligible students for enrollment
  * Query params:
- *   - view: "classes" | "students" (default: activities)
- *   - type: filter by activity type
+ *   - view: "clubs" | "students" (default: clubs)
+ *   - categoryId: filter by category
  */
 export async function GET(req: NextRequest) {
   const { error } = await requirePerm("classes", "view")
@@ -16,8 +16,8 @@ export async function GET(req: NextRequest) {
 
   try {
     const { searchParams } = new URL(req.url)
-    const view = searchParams.get("view") || "classes"
-    const type = searchParams.get("type")
+    const view = searchParams.get("view") || "clubs"
+    const categoryId = searchParams.get("categoryId")
 
     // Pagination params
     const limit = Math.min(parseInt(searchParams.get("limit") || "50"), 100)
@@ -45,7 +45,7 @@ export async function GET(req: NextRequest) {
         },
       }
 
-      // Get students with completed enrollments who can join activities (with pagination)
+      // Get students with completed enrollments who can join clubs (with pagination)
       const [students, total] = await Promise.all([
         prisma.enrollment.findMany({
           where: studentsWhere,
@@ -57,14 +57,14 @@ export async function GET(req: NextRequest) {
                     person: {
                       select: { firstName: true, lastName: true },
                     },
-                    activityEnrollments: {
+                    clubEnrollments: {
                       where: {
-                        activity: { schoolYearId: currentSchoolYear.id },
+                        club: { schoolYearId: currentSchoolYear.id },
                         status: "active",
                       },
                       include: {
-                        activity: {
-                          select: { id: true, name: true, type: true },
+                        club: {
+                          select: { id: true, name: true, categoryId: true },
                         },
                       },
                     },
@@ -97,7 +97,7 @@ export async function GET(req: NextRequest) {
           lastName: e.lastName,
           studentNumber: e.student?.studentProfile?.studentNumber,
           grade: e.grade,
-          activityEnrollments: e.student!.studentProfile!.activityEnrollments,
+          clubEnrollments: e.student!.studentProfile!.clubEnrollments,
         }))
 
       return NextResponse.json({
@@ -111,19 +111,40 @@ export async function GET(req: NextRequest) {
       })
     }
 
-    // Default: get activities with pagination
-    const activitiesWhere = {
+    // Default: get clubs with pagination
+    const clubsWhere = {
       schoolYearId: currentSchoolYear.id,
-      status: { in: ["active", "closed"] as ActivityStatus[] },
+      status: { in: ["active", "closed"] as ClubStatus[] },
       isEnabled: true,
-      ...(type && { type: type as "club" | "sport" | "arts" | "academic" | "other" }),
+      ...(categoryId && { categoryId }),
     }
 
-    const [activities, total] = await Promise.all([
-      prisma.activity.findMany({
-        where: activitiesWhere,
-        orderBy: [{ type: "asc" }, { name: "asc" }],
+    const [clubs, total] = await Promise.all([
+      prisma.club.findMany({
+        where: clubsWhere,
+        orderBy: [{ category: { order: "asc" } }, { name: "asc" }],
         include: {
+          category: {
+            select: { id: true, name: true, nameFr: true },
+          },
+          leader: {
+            include: {
+              person: {
+                select: { firstName: true, lastName: true },
+              },
+            },
+          },
+          eligibilityRule: {
+            include: {
+              gradeRules: {
+                include: {
+                  grade: {
+                    select: { id: true, name: true, order: true },
+                  },
+                },
+              },
+            },
+          },
           _count: {
             select: { enrollments: { where: { status: "active" } } },
           },
@@ -131,20 +152,20 @@ export async function GET(req: NextRequest) {
         take: limit,
         skip: offset,
       }),
-      prisma.activity.count({ where: activitiesWhere }),
+      prisma.club.count({ where: clubsWhere }),
     ])
 
     return NextResponse.json({
-      activities,
+      clubs,
       pagination: {
         total,
         limit,
         offset,
-        hasMore: offset + activities.length < total,
+        hasMore: offset + clubs.length < total,
       },
     })
   } catch (err) {
-    console.error("Error fetching activities data:", err)
+    console.error("Error fetching clubs data:", err)
     return NextResponse.json(
       { message: "Failed to fetch data" },
       { status: 500 }

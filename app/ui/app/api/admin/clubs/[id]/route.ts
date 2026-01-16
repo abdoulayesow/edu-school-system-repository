@@ -3,14 +3,16 @@ import { requirePerm } from "@/lib/authz"
 import { prisma } from "@/lib/prisma"
 import { z } from "zod"
 
-const updateActivitySchema = z.object({
+const updateClubSchema = z.object({
   name: z.string().min(1).optional(),
   nameFr: z.string().optional().nullable(),
   description: z.string().optional().nullable(),
-  type: z.enum(["club", "sport", "arts", "academic", "other"]).optional(),
+  categoryId: z.string().optional().nullable(),
+  leaderId: z.string().optional().nullable(),
   startDate: z.string().transform((s) => new Date(s)).optional(),
   endDate: z.string().transform((s) => new Date(s)).optional(),
   fee: z.number().int().min(0).optional(),
+  monthlyFee: z.number().int().min(0).optional().nullable(),
   capacity: z.number().int().min(1).optional(),
   status: z.enum(["draft", "active", "closed", "completed", "cancelled"]).optional(),
   isEnabled: z.boolean().optional(),
@@ -19,8 +21,8 @@ const updateActivitySchema = z.object({
 type RouteParams = { params: Promise<{ id: string }> }
 
 /**
- * GET /api/admin/activities/[id]
- * Get a single activity with enrollments and payments
+ * GET /api/admin/clubs/[id]
+ * Get a single club with enrollments and payments
  */
 export async function GET(req: NextRequest, { params }: RouteParams) {
   const { error } = await requirePerm("schedule", "view")
@@ -29,11 +31,33 @@ export async function GET(req: NextRequest, { params }: RouteParams) {
   try {
     const { id } = await params
 
-    const activity = await prisma.activity.findUnique({
+    const club = await prisma.club.findUnique({
       where: { id },
       include: {
         creator: {
           select: { id: true, name: true, email: true },
+        },
+        category: {
+          select: { id: true, name: true, nameFr: true },
+        },
+        leader: {
+          include: {
+            person: {
+              select: { firstName: true, lastName: true },
+            },
+          },
+        },
+        eligibilityRule: {
+          include: {
+            gradeRules: {
+              include: {
+                grade: {
+                  select: { id: true, name: true, order: true },
+                },
+              },
+            },
+            seriesRules: true,
+          },
         },
         enrollments: {
           include: {
@@ -48,6 +72,9 @@ export async function GET(req: NextRequest, { params }: RouteParams) {
               select: { id: true, name: true },
             },
             payments: true,
+            monthlyPayments: {
+              orderBy: [{ year: "asc" }, { month: "asc" }],
+            },
           },
           orderBy: { enrolledAt: "desc" },
         },
@@ -68,26 +95,26 @@ export async function GET(req: NextRequest, { params }: RouteParams) {
       },
     })
 
-    if (!activity) {
+    if (!club) {
       return NextResponse.json(
-        { message: "Activity not found" },
+        { message: "Club not found" },
         { status: 404 }
       )
     }
 
-    return NextResponse.json(activity)
+    return NextResponse.json(club)
   } catch (err) {
-    console.error("Error fetching activity:", err)
+    console.error("Error fetching club:", err)
     return NextResponse.json(
-      { message: "Failed to fetch activity" },
+      { message: "Failed to fetch club" },
       { status: 500 }
     )
   }
 }
 
 /**
- * PUT /api/admin/activities/[id]
- * Update an activity
+ * PUT /api/admin/clubs/[id]
+ * Update a club
  */
 export async function PUT(req: NextRequest, { params }: RouteParams) {
   const { error } = await requirePerm("schedule", "update")
@@ -96,16 +123,16 @@ export async function PUT(req: NextRequest, { params }: RouteParams) {
   try {
     const { id } = await params
     const body = await req.json()
-    const validated = updateActivitySchema.parse(body)
+    const validated = updateClubSchema.parse(body)
 
-    // Check activity exists
-    const existing = await prisma.activity.findUnique({
+    // Check club exists
+    const existing = await prisma.club.findUnique({
       where: { id },
     })
 
     if (!existing) {
       return NextResponse.json(
-        { message: "Activity not found" },
+        { message: "Club not found" },
         { status: 404 }
       )
     }
@@ -120,16 +147,44 @@ export async function PUT(req: NextRequest, { params }: RouteParams) {
       )
     }
 
-    const activity = await prisma.activity.update({
+    // Verify category exists if provided
+    if (validated.categoryId) {
+      const category = await prisma.clubCategory.findUnique({
+        where: { id: validated.categoryId },
+      })
+      if (!category) {
+        return NextResponse.json(
+          { message: "Category not found" },
+          { status: 404 }
+        )
+      }
+    }
+
+    // Verify leader exists if provided
+    if (validated.leaderId) {
+      const leader = await prisma.teacherProfile.findUnique({
+        where: { id: validated.leaderId },
+      })
+      if (!leader) {
+        return NextResponse.json(
+          { message: "Leader not found" },
+          { status: 404 }
+        )
+      }
+    }
+
+    const club = await prisma.club.update({
       where: { id },
       data: {
         ...(validated.name && { name: validated.name }),
         ...(validated.nameFr !== undefined && { nameFr: validated.nameFr }),
         ...(validated.description !== undefined && { description: validated.description }),
-        ...(validated.type && { type: validated.type }),
+        ...(validated.categoryId !== undefined && { categoryId: validated.categoryId }),
+        ...(validated.leaderId !== undefined && { leaderId: validated.leaderId }),
         ...(validated.startDate && { startDate: validated.startDate }),
         ...(validated.endDate && { endDate: validated.endDate }),
         ...(validated.fee !== undefined && { fee: validated.fee }),
+        ...(validated.monthlyFee !== undefined && { monthlyFee: validated.monthlyFee }),
         ...(validated.capacity !== undefined && { capacity: validated.capacity }),
         ...(validated.status && { status: validated.status }),
         ...(validated.isEnabled !== undefined && { isEnabled: validated.isEnabled }),
@@ -138,13 +193,23 @@ export async function PUT(req: NextRequest, { params }: RouteParams) {
         creator: {
           select: { id: true, name: true, email: true },
         },
+        category: {
+          select: { id: true, name: true, nameFr: true },
+        },
+        leader: {
+          include: {
+            person: {
+              select: { firstName: true, lastName: true },
+            },
+          },
+        },
         _count: {
           select: { enrollments: true, payments: true },
         },
       },
     })
 
-    return NextResponse.json(activity)
+    return NextResponse.json(club)
   } catch (err) {
     if (err instanceof z.ZodError) {
       return NextResponse.json(
@@ -152,17 +217,17 @@ export async function PUT(req: NextRequest, { params }: RouteParams) {
         { status: 400 }
       )
     }
-    console.error("Error updating activity:", err)
+    console.error("Error updating club:", err)
     return NextResponse.json(
-      { message: "Failed to update activity" },
+      { message: "Failed to update club" },
       { status: 500 }
     )
   }
 }
 
 /**
- * DELETE /api/admin/activities/[id]
- * Delete an activity (only if no enrollments)
+ * DELETE /api/admin/clubs/[id]
+ * Delete a club (only if no enrollments)
  */
 export async function DELETE(req: NextRequest, { params }: RouteParams) {
   const { error } = await requirePerm("schedule", "delete")
@@ -171,37 +236,37 @@ export async function DELETE(req: NextRequest, { params }: RouteParams) {
   try {
     const { id } = await params
 
-    // Check activity exists and has no enrollments
-    const activity = await prisma.activity.findUnique({
+    // Check club exists and has no enrollments
+    const club = await prisma.club.findUnique({
       where: { id },
       include: {
         _count: { select: { enrollments: true } },
       },
     })
 
-    if (!activity) {
+    if (!club) {
       return NextResponse.json(
-        { message: "Activity not found" },
+        { message: "Club not found" },
         { status: 404 }
       )
     }
 
-    if (activity._count.enrollments > 0) {
+    if (club._count.enrollments > 0) {
       return NextResponse.json(
-        { message: "Cannot delete activity with enrollments. Set status to cancelled instead." },
+        { message: "Cannot delete club with enrollments. Set status to cancelled instead." },
         { status: 400 }
       )
     }
 
-    await prisma.activity.delete({
+    await prisma.club.delete({
       where: { id },
     })
 
-    return NextResponse.json({ message: "Activity deleted" })
+    return NextResponse.json({ message: "Club deleted" })
   } catch (err) {
-    console.error("Error deleting activity:", err)
+    console.error("Error deleting club:", err)
     return NextResponse.json(
-      { message: "Failed to delete activity" },
+      { message: "Failed to delete club" },
       { status: 500 }
     )
   }
