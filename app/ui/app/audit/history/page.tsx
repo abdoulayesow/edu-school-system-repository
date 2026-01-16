@@ -6,11 +6,24 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { useI18n } from "@/components/i18n-provider"
 import { PageContainer } from "@/components/layout/PageContainer"
+import { PermissionGuard, NoPermission } from "@/components/permission-guard"
 
 export default function DataHistoryPage() {
   const { t } = useI18n()
 
   return (
+    <PermissionGuard
+      resource="audit_logs"
+      action="view"
+      fallback={
+        <PageContainer maxWidth="full">
+          <NoPermission
+            title={t.permissions?.accessDenied || "Access Denied"}
+            description={t.permissions?.noAuditPermission || "You don't have permission to view audit logs."}
+          />
+        </PageContainer>
+      }
+    >
     <PageContainer maxWidth="full">
       <div className="space-y-6">
         {/* Header */}
@@ -114,5 +127,6 @@ export default function DataHistoryPage() {
       </Card>
       </div>
     </PageContainer>
+    </PermissionGuard>
   )
 }

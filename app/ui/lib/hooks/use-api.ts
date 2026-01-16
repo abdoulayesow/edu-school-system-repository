@@ -95,6 +95,7 @@ interface PaymentFilters {
   status?: string
   method?: string
   gradeId?: string
+  balanceStatus?: string // "outstanding" (still owes) or "paid_up" (fully paid)
   startDate?: string
   endDate?: string
   limit?: number

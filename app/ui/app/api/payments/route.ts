@@ -28,8 +28,10 @@ export async function GET(req: NextRequest) {
   const method = searchParams.get("method")
   const enrollmentId = searchParams.get("enrollmentId")
   const studentId = searchParams.get("studentId")
+  const gradeId = searchParams.get("gradeId")
   const startDate = searchParams.get("startDate")
   const endDate = searchParams.get("endDate")
+  const balanceStatus = searchParams.get("balanceStatus") // "outstanding" or "paid_up"
   const limit = parseInt(searchParams.get("limit") || "100")
   const offset = parseInt(searchParams.get("offset") || "0")
 
@@ -47,7 +49,10 @@ export async function GET(req: NextRequest) {
       where.enrollmentId = enrollmentId
     }
     if (studentId) {
-      where.enrollment = { studentId }
+      where.enrollment = { ...(where.enrollment as object || {}), studentId }
+    }
+    if (gradeId) {
+      where.enrollment = { ...(where.enrollment as object || {}), gradeId }
     }
     if (startDate || endDate) {
       where.recordedAt = {}
@@ -57,6 +62,48 @@ export async function GET(req: NextRequest) {
       if (endDate) {
         (where.recordedAt as Record<string, Date>).lte = new Date(endDate)
       }
+    }
+
+    // If filtering by balance status, we need to get enrollments first
+    // then filter payments based on those enrollments
+    let enrollmentIdsWithBalance: string[] | null = null
+
+    if (balanceStatus) {
+      // Get all enrollments with their payment totals
+      const enrollmentsWithPayments = await prisma.enrollment.findMany({
+        where: {
+          status: "completed", // Only active enrollments
+          ...(gradeId && { gradeId }),
+        },
+        select: {
+          id: true,
+          originalTuitionFee: true,
+          adjustedTuitionFee: true,
+          payments: {
+            where: { status: "confirmed" },
+            select: { amount: true },
+          },
+        },
+      })
+
+      // Calculate which enrollments have outstanding balance
+      enrollmentIdsWithBalance = enrollmentsWithPayments
+        .filter((enrollment) => {
+          const tuition = enrollment.adjustedTuitionFee || enrollment.originalTuitionFee
+          const paid = enrollment.payments.reduce((sum, p) => sum + p.amount, 0)
+          const hasOutstanding = paid < tuition
+
+          if (balanceStatus === "outstanding") {
+            return hasOutstanding
+          } else if (balanceStatus === "paid_up") {
+            return !hasOutstanding
+          }
+          return true
+        })
+        .map((e) => e.id)
+
+      // Add enrollment filter
+      where.enrollmentId = { in: enrollmentIdsWithBalance }
     }
 
     const [payments, total] = await Promise.all([
@@ -72,6 +119,8 @@ export async function GET(req: NextRequest) {
             select: {
               id: true,
               enrollmentNumber: true,
+              originalTuitionFee: true,
+              adjustedTuitionFee: true,
               student: {
                 select: {
                   id: true,
@@ -86,6 +135,10 @@ export async function GET(req: NextRequest) {
                   name: true,
                 },
               },
+              payments: {
+                where: { status: "confirmed" },
+                select: { amount: true },
+              },
             },
           },
         },
@@ -96,8 +149,36 @@ export async function GET(req: NextRequest) {
       prisma.payment.count({ where }),
     ])
 
+    // Add balance info to each payment response
+    const paymentsWithBalance = payments.map((payment) => {
+      const enrollment = payment.enrollment
+      if (!enrollment) return { ...payment, balanceInfo: null }
+
+      const tuition = enrollment.adjustedTuitionFee || enrollment.originalTuitionFee
+      const totalPaid = enrollment.payments.reduce((sum, p) => sum + p.amount, 0)
+      const remaining = tuition - totalPaid
+      const percentage = Math.round((totalPaid / tuition) * 100)
+
+      return {
+        ...payment,
+        enrollment: {
+          id: enrollment.id,
+          enrollmentNumber: enrollment.enrollmentNumber,
+          student: enrollment.student,
+          grade: enrollment.grade,
+        },
+        balanceInfo: {
+          tuitionFee: tuition,
+          totalPaid,
+          remaining,
+          percentage,
+          isPaidUp: remaining <= 0,
+        },
+      }
+    })
+
     return NextResponse.json({
-      payments,
+      payments: paymentsWithBalance,
       pagination: {
         total,
         limit,

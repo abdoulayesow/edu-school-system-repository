@@ -3,10 +3,9 @@
 import { useState, useCallback, useEffect, useRef } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
 import { Badge } from "@/components/ui/badge"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { Separator } from "@/components/ui/separator"
+import { Select, SelectContent, SelectItem, SelectTrigger } from "@/components/ui/select"
 import {
   Loader2,
   Search,
@@ -22,12 +21,15 @@ import {
   UserCircle,
   Users,
   Sparkles,
+  X,
 } from "lucide-react"
 import { usePaymentWizard } from "../wizard-context"
 import { useI18n } from "@/components/i18n-provider"
+import { useGrades } from "@/lib/hooks/use-api"
 import { cn, formatDateLong } from "@/lib/utils"
 import { formatCurrency } from "@/lib/utils/currency"
 import { sizing, typography, gradients, interactive } from "@/lib/design-tokens"
+import { Button } from "@/components/ui/button"
 
 interface StudentSearchResult {
   id: string
@@ -49,14 +51,20 @@ export function StepStudentSelection() {
   const { t, locale } = useI18n()
   const { state, loadStudent, updateData } = usePaymentWizard()
   const { data, isFullyPaid } = state
+  const { data: gradesData } = useGrades()
 
   const [searchQuery, setSearchQuery] = useState("")
   const [searchResults, setSearchResults] = useState<StudentSearchResult[]>([])
   const [isSearching, setIsSearching] = useState(false)
   const [isLoadingBalance, setIsLoadingBalance] = useState(false)
   const [showDropdown, setShowDropdown] = useState(false)
+  const [gradeFilter, setGradeFilter] = useState<string>("all")
+  const [balanceStatusFilter, setBalanceStatusFilter] = useState<string>("outstanding")
   const searchTimeoutRef = useRef<NodeJS.Timeout | null>(null)
   const dropdownRef = useRef<HTMLDivElement>(null)
+
+  // Get grades list
+  const grades = gradesData?.grades || []
 
   // Close dropdown when clicking outside
   useEffect(() => {
@@ -69,19 +77,30 @@ export function StepStudentSelection() {
     return () => document.removeEventListener("mousedown", handleClickOutside)
   }, [])
 
-  // Debounced search
-  const handleSearch = useCallback(async (query: string) => {
+  // Perform search with current filters
+  const performSearch = useCallback(async (query: string, grade: string, balanceStatus: string) => {
     if (query.length < 2) {
       setSearchResults([])
+      setShowDropdown(false)
       return
     }
 
     setIsSearching(true)
     try {
-      const response = await fetch(`/api/students/search?q=${encodeURIComponent(query)}&limit=8`)
+      const params = new URLSearchParams({
+        q: query,
+        limit: "10",
+      })
+      if (grade && grade !== "all") {
+        params.set("gradeId", grade)
+      }
+      if (balanceStatus && balanceStatus !== "all") {
+        params.set("balanceStatus", balanceStatus)
+      }
+      const response = await fetch(`/api/students/search?${params.toString()}`)
       if (response.ok) {
-        const data = await response.json()
-        setSearchResults(data.students || [])
+        const responseData = await response.json()
+        setSearchResults(responseData.students || [])
         setShowDropdown(true)
       }
     } catch (err) {
@@ -98,8 +117,29 @@ export function StepStudentSelection() {
       clearTimeout(searchTimeoutRef.current)
     }
     searchTimeoutRef.current = setTimeout(() => {
-      handleSearch(value)
+      performSearch(value, gradeFilter, balanceStatusFilter)
     }, 300)
+  }
+
+  // Re-search when filters change (only if there's a search query)
+  useEffect(() => {
+    if (searchQuery.length >= 2) {
+      // Clear timeout to avoid duplicate searches
+      if (searchTimeoutRef.current) {
+        clearTimeout(searchTimeoutRef.current)
+      }
+      performSearch(searchQuery, gradeFilter, balanceStatusFilter)
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [gradeFilter, balanceStatusFilter])
+
+  // Check if any filter is active
+  const hasActiveFilters = gradeFilter !== "all" || balanceStatusFilter !== "all"
+
+  // Clear all filters
+  const clearFilters = () => {
+    setGradeFilter("all")
+    setBalanceStatusFilter("all")
   }
 
   // Load full balance data when student is selected
@@ -254,14 +294,13 @@ export function StepStudentSelection() {
 
   return (
     <div className="space-y-6">
-      {/* Search Section */}
-      <div className="space-y-3">
-        <Label htmlFor="student-search" className="text-sm font-medium">
-          {t?.paymentWizard?.searchStudent || "Search for a student"}
-        </Label>
-        <div className="relative" ref={dropdownRef}>
-          <div className="relative">
-            <Search className={`absolute left-3 top-1/2 -translate-y-1/2 ${sizing.icon.sm} text-muted-foreground`} />
+      {/* Unified Search & Filter Bar */}
+      <div className="relative" ref={dropdownRef}>
+        {/* Single-line search + filters - unified surface */}
+        <div className="flex items-center h-12 rounded-lg border bg-background shadow-sm overflow-hidden transition-shadow focus-within:shadow-md focus-within:ring-2 focus-within:ring-primary/20">
+          {/* Search Input - primary action area */}
+          <div className="relative flex-1 min-w-0 h-full">
+            <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 size-4 text-muted-foreground/70" />
             <Input
               id="student-search"
               type="text"
@@ -269,68 +308,156 @@ export function StepStudentSelection() {
               onChange={(e) => handleSearchChange(e.target.value)}
               onFocus={() => searchResults.length > 0 && setShowDropdown(true)}
               placeholder={t?.paymentWizard?.searchPlaceholder || "Enter student name or number..."}
-              className="pl-10 pr-10 h-12 text-base"
+              className="h-full pl-10 pr-3 border-0 bg-transparent focus-visible:ring-0 focus-visible:ring-offset-0 text-sm"
             />
             {isSearching && (
-              <Loader2 className={`absolute right-3 top-1/2 -translate-y-1/2 ${sizing.icon.sm} animate-spin text-muted-foreground`} />
+              <Loader2 className="absolute right-3 top-1/2 -translate-y-1/2 size-4 animate-spin text-primary" />
             )}
           </div>
 
-          {/* Search Results Dropdown */}
-          {showDropdown && searchResults.length > 0 && (
-            <Card className="absolute z-50 w-full mt-1 shadow-lg border max-h-[320px] overflow-auto">
-              <CardContent className="p-1">
-                {searchResults.map((student) => (
-                  <button
-                    key={student.id}
-                    onClick={() => handleSelectStudent(student)}
-                    className={cn(
-                      "w-full flex items-center gap-3 p-3 rounded-md text-left",
-                      "hover:bg-accent transition-colors",
-                      student.id === data.studentId && "bg-accent"
-                    )}
-                  >
-                    <Avatar className={sizing.avatar.md}>
-                      <AvatarImage src={student.photoUrl} alt={student.fullName} />
-                      <AvatarFallback className="bg-primary/10 text-primary">
-                        {student.firstName[0]}{student.lastName[0]}
-                      </AvatarFallback>
-                    </Avatar>
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2">
-                        <span className="font-medium truncate">{student.fullName}</span>
-                        <Badge variant="outline" className="text-xs shrink-0">
-                          {student.studentNumber}
-                        </Badge>
-                      </div>
-                      <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                        {student.grade && (
-                          <span className="flex items-center gap-1">
-                            <GraduationCap className={sizing.icon.xs} />
-                            {student.grade.name}
-                          </span>
-                        )}
-                        {student.balanceInfo && (
-                          <span className={cn(
-                            "flex items-center gap-1",
-                            student.balanceInfo.remainingBalance === 0
-                              ? "text-emerald-600 dark:text-emerald-400"
-                              : "text-amber-600 dark:text-amber-400"
-                          )}>
-                            <Wallet className={sizing.icon.xs} />
-                            {student.balanceInfo.remainingBalance === 0
-                              ? (locale === "fr" ? "Payé" : "Paid")
-                              : formatCurrency(student.balanceInfo.remainingBalance)}
-                          </span>
-                        )}
-                      </div>
-                    </div>
-                  </button>
+          {/* Filters section - grouped with subtle separator */}
+          <div className="flex items-center h-full border-l bg-muted/30">
+            {/* Grade Filter */}
+            <Select value={gradeFilter} onValueChange={setGradeFilter}>
+              <SelectTrigger className={cn(
+                "h-full w-[120px] rounded-none border-0 bg-transparent px-3 text-xs font-medium transition-colors",
+                "focus:ring-0 focus:ring-offset-0 focus:bg-muted/50",
+                "[&>svg:last-child]:size-3 [&>svg:last-child]:opacity-50",
+                gradeFilter !== "all" && "bg-primary/5 text-primary"
+              )}>
+                <GraduationCap className={cn(
+                  "size-3.5 mr-1.5 shrink-0",
+                  gradeFilter !== "all" ? "text-primary" : "text-muted-foreground"
+                )} />
+                <span className="truncate">
+                  {gradeFilter === "all"
+                    ? (t?.accounting?.allGrades || "Grade")
+                    : grades.find(g => g.id === gradeFilter)?.name || "Grade"}
+                </span>
+              </SelectTrigger>
+              <SelectContent align="end">
+                <SelectItem value="all">{t?.accounting?.allGrades || "All grades"}</SelectItem>
+                {grades.map((grade) => (
+                  <SelectItem key={grade.id} value={grade.id}>{grade.name}</SelectItem>
                 ))}
-              </CardContent>
-            </Card>
-          )}
+              </SelectContent>
+            </Select>
+
+            {/* Subtle divider between filters */}
+            <div className="h-5 w-px bg-border/50" />
+
+            {/* Balance Filter */}
+            <Select value={balanceStatusFilter} onValueChange={setBalanceStatusFilter}>
+              <SelectTrigger className={cn(
+                "h-full w-[130px] rounded-none border-0 bg-transparent px-3 text-xs font-medium transition-colors",
+                "focus:ring-0 focus:ring-offset-0 focus:bg-muted/50",
+                "[&>svg:last-child]:size-3 [&>svg:last-child]:opacity-50",
+                balanceStatusFilter === "outstanding" && "bg-amber-50 text-amber-700 dark:bg-amber-950/30 dark:text-amber-400",
+                balanceStatusFilter === "paid_up" && "bg-emerald-50 text-emerald-700 dark:bg-emerald-950/30 dark:text-emerald-400"
+              )}>
+                {balanceStatusFilter === "outstanding" ? (
+                  <span className="size-2 rounded-full bg-amber-500 mr-1.5 shrink-0" />
+                ) : balanceStatusFilter === "paid_up" ? (
+                  <span className="size-2 rounded-full bg-emerald-500 mr-1.5 shrink-0" />
+                ) : (
+                  <Wallet className="size-3.5 mr-1.5 text-muted-foreground shrink-0" />
+                )}
+                <span className="truncate">
+                  {balanceStatusFilter === "all"
+                    ? (t?.accounting?.allBalances || "Balance")
+                    : balanceStatusFilter === "outstanding"
+                      ? (t?.accounting?.outstandingBalance || "Outstanding")
+                      : (t?.accounting?.paidUp || "Paid")}
+                </span>
+              </SelectTrigger>
+              <SelectContent align="end">
+                <SelectItem value="all">{t?.accounting?.allBalances || "All balances"}</SelectItem>
+                <SelectItem value="outstanding">
+                  <span className="flex items-center gap-2">
+                    <span className="size-2 rounded-full bg-amber-500 shrink-0" />
+                    {t?.accounting?.outstandingBalance || "Outstanding"}
+                  </span>
+                </SelectItem>
+                <SelectItem value="paid_up">
+                  <span className="flex items-center gap-2">
+                    <span className="size-2 rounded-full bg-emerald-500 shrink-0" />
+                    {t?.accounting?.paidUp || "Paid up"}
+                  </span>
+                </SelectItem>
+              </SelectContent>
+            </Select>
+
+            {/* Clear filters - only when active */}
+            {hasActiveFilters && (
+              <>
+                <div className="h-5 w-px bg-border/50" />
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={clearFilters}
+                  className="h-full px-3 rounded-none text-muted-foreground hover:text-destructive hover:bg-destructive/5 transition-colors"
+                >
+                  <X className="size-3.5" />
+                </Button>
+              </>
+            )}
+          </div>
         </div>
+
+        {/* Search Results Dropdown */}
+        {showDropdown && searchResults.length > 0 && (
+          <Card className="absolute left-0 right-0 top-full mt-2 z-50 shadow-xl border max-h-[320px] overflow-auto animate-in fade-in-0 slide-in-from-top-2 duration-200">
+            <CardContent className="p-1">
+              {searchResults.map((student) => (
+                <button
+                  key={student.id}
+                  onClick={() => handleSelectStudent(student)}
+                  className={cn(
+                    "w-full flex items-center gap-3 p-3 rounded-md text-left",
+                    "hover:bg-accent transition-colors",
+                    student.id === data.studentId && "bg-accent"
+                  )}
+                >
+                  <Avatar className={sizing.avatar.md}>
+                    <AvatarImage src={student.photoUrl} alt={student.fullName} />
+                    <AvatarFallback className="bg-primary/10 text-primary">
+                      {student.firstName[0]}{student.lastName[0]}
+                    </AvatarFallback>
+                  </Avatar>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2">
+                      <span className="font-medium truncate">{student.fullName}</span>
+                      <Badge variant="outline" className="text-xs shrink-0">
+                        {student.studentNumber}
+                      </Badge>
+                    </div>
+                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                      {student.grade && (
+                        <span className="flex items-center gap-1">
+                          <GraduationCap className={sizing.icon.xs} />
+                          {student.grade.name}
+                        </span>
+                      )}
+                      {student.balanceInfo && (
+                        <span className={cn(
+                          "flex items-center gap-1",
+                          student.balanceInfo.remainingBalance === 0
+                            ? "text-emerald-600 dark:text-emerald-400"
+                            : "text-amber-600 dark:text-amber-400"
+                        )}>
+                          <Wallet className={sizing.icon.xs} />
+                          {student.balanceInfo.remainingBalance === 0
+                            ? (locale === "fr" ? "Payé" : "Paid")
+                            : formatCurrency(student.balanceInfo.remainingBalance)}
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                </button>
+              ))}
+            </CardContent>
+          </Card>
+        )}
       </div>
 
       {/* Loading Balance */}

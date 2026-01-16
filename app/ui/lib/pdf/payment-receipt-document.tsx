@@ -49,173 +49,221 @@ interface PaymentReceiptDocumentProps {
   language?: "en" | "fr"
 }
 
-// Styles for receipt document
+// Styles for receipt document - Compact single-page layout
 const receiptStyles = StyleSheet.create({
   page: {
     flexDirection: "column",
     backgroundColor: "#ffffff",
-    padding: 40,
-    paddingBottom: 60,
+    paddingHorizontal: 32,
+    paddingTop: 24,
+    paddingBottom: 40,
     fontFamily: "Helvetica",
-    fontSize: 11,
+    fontSize: 9,
     color: colors.text,
   },
   letterhead: {
-    marginBottom: 10,
+    marginBottom: 6,
   },
   letterheadImage: {
     width: "100%",
-    maxHeight: 80,
+    maxHeight: 65,
     objectFit: "contain",
   },
+  // Header row with title and receipt number side by side
+  headerRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginTop: 8,
+    marginBottom: 10,
+    paddingBottom: 8,
+    borderBottomWidth: 2,
+    borderBottomColor: colors.primary,
+  },
+  titleBlock: {
+    flex: 1,
+  },
   title: {
-    fontSize: 18,
-    fontFamily: "Helvetica-Bold",
-    color: colors.primary,
-    textAlign: "center",
-    marginTop: 15,
-    marginBottom: 3,
-  },
-  titleAlt: {
-    fontSize: 12,
-    color: colors.secondary,
-    textAlign: "center",
-    marginBottom: 12,
-  },
-  receiptNumber: {
-    textAlign: "center",
-    marginBottom: 15,
-  },
-  receiptNumberLabel: {
-    fontSize: 10,
-    color: colors.textLight,
-    marginBottom: 4,
-  },
-  receiptNumberValue: {
     fontSize: 14,
     fontFamily: "Helvetica-Bold",
     color: colors.primary,
-    padding: 8,
-    backgroundColor: "#f5f5f5",
-    borderRadius: 4,
   },
-  sectionTitle: {
+  titleAlt: {
+    fontSize: 9,
+    color: colors.secondary,
+    marginTop: 1,
+  },
+  receiptNumberBlock: {
+    alignItems: "flex-end",
+  },
+  receiptNumberLabel: {
+    fontSize: 8,
+    color: colors.textLight,
+    marginBottom: 2,
+  },
+  receiptNumberValue: {
     fontSize: 11,
     fontFamily: "Helvetica-Bold",
     color: colors.primary,
-    marginBottom: 6,
-    marginTop: 12,
+    paddingVertical: 4,
+    paddingHorizontal: 8,
+    backgroundColor: "#f0f4f8",
+    borderRadius: 3,
+  },
+  // Two-column layout for student + payment details
+  twoColumnRow: {
+    flexDirection: "row",
+    gap: 16,
+    marginBottom: 8,
+  },
+  column: {
+    flex: 1,
+  },
+  sectionTitle: {
+    fontSize: 9,
+    fontFamily: "Helvetica-Bold",
+    color: colors.primary,
+    marginBottom: 4,
+    paddingBottom: 2,
+    borderBottomWidth: 1,
+    borderBottomColor: colors.border,
   },
   detailsTable: {
-    marginBottom: 10,
+    marginBottom: 0,
   },
   detailRow: {
     flexDirection: "row",
-    borderBottomWidth: 1,
-    borderBottomColor: colors.border,
-    paddingVertical: 5,
+    paddingVertical: 2,
   },
   detailLabel: {
-    width: 150,
-    fontSize: 10,
-    fontFamily: "Helvetica-Bold",
+    width: 70,
+    fontSize: 8,
     color: colors.textLight,
   },
   detailValue: {
     flex: 1,
-    fontSize: 11,
+    fontSize: 9,
   },
+  // Payer section - compact inline
+  payerSection: {
+    marginBottom: 8,
+  },
+  payerRow: {
+    flexDirection: "row",
+    paddingVertical: 2,
+    gap: 16,
+  },
+  payerItem: {
+    flexDirection: "row",
+    flex: 1,
+  },
+  payerLabel: {
+    fontSize: 8,
+    color: colors.textLight,
+    marginRight: 4,
+  },
+  payerValue: {
+    fontSize: 9,
+  },
+  // Amount section - prominent but compact
   amountSection: {
-    marginTop: 12,
-    marginBottom: 12,
-    padding: 12,
+    marginTop: 4,
+    marginBottom: 8,
+    padding: 10,
     backgroundColor: "#f8f9fa",
     borderRadius: 4,
     borderWidth: 1,
     borderColor: colors.border,
   },
-  amountRow: {
+  amountGrid: {
     flexDirection: "row",
-    justifyContent: "space-between",
-    paddingVertical: 5,
+    marginBottom: 6,
+  },
+  amountItem: {
+    flex: 1,
   },
   amountLabel: {
-    fontSize: 10,
+    fontSize: 8,
     color: colors.textLight,
+    marginBottom: 1,
   },
   amountValue: {
-    fontSize: 11,
+    fontSize: 9,
     fontFamily: "Helvetica-Bold",
   },
   amountPaid: {
-    marginTop: 10,
-    paddingTop: 10,
+    paddingTop: 6,
     borderTopWidth: 2,
     borderTopColor: colors.primary,
     flexDirection: "row",
     justifyContent: "space-between",
+    alignItems: "center",
   },
   amountPaidLabel: {
-    fontSize: 12,
+    fontSize: 10,
     fontFamily: "Helvetica-Bold",
     color: colors.text,
   },
   amountPaidValue: {
-    fontSize: 14,
+    fontSize: 12,
     fontFamily: "Helvetica-Bold",
     color: colors.primary,
   },
+  // Signatures - compact
   signatureSection: {
-    marginTop: 25,
+    marginTop: 16,
     flexDirection: "row",
     justifyContent: "space-between",
   },
   signatureBox: {
-    width: "40%",
+    width: "42%",
     alignItems: "center",
   },
   signatureLabel: {
-    fontSize: 10,
+    fontSize: 8,
     fontFamily: "Helvetica-Bold",
-    marginBottom: 25,
+    marginBottom: 20,
     textAlign: "center",
   },
   signatureLine: {
     width: "100%",
     borderTopWidth: 1,
     borderTopColor: colors.text,
-    paddingTop: 5,
+    paddingTop: 3,
   },
   signatureText: {
-    fontSize: 9,
+    fontSize: 7,
     color: colors.textLight,
     textAlign: "center",
   },
+  // Footer
   footer: {
     position: "absolute",
-    bottom: 25,
-    left: 40,
-    right: 40,
+    bottom: 16,
+    left: 32,
+    right: 32,
     flexDirection: "row",
     justifyContent: "space-between",
     borderTopWidth: 1,
     borderTopColor: colors.border,
-    paddingTop: 8,
+    paddingTop: 6,
   },
   footerText: {
-    fontSize: 8,
+    fontSize: 7,
     color: colors.textLight,
   },
+  // Payment method badge
   methodBadge: {
     display: "flex",
     flexDirection: "row",
     alignItems: "center",
-    padding: "4 8",
-    borderRadius: 4,
+    paddingVertical: 2,
+    paddingHorizontal: 6,
+    borderRadius: 3,
     backgroundColor: "#e8f5e9",
   },
   methodBadgeText: {
-    fontSize: 10,
+    fontSize: 8,
     fontFamily: "Helvetica-Bold",
     color: "#2e7d32",
   },
@@ -326,108 +374,119 @@ export function PaymentReceiptDocument({ data, language = "fr" }: PaymentReceipt
           <Image src={letterheadBase64} style={receiptStyles.letterheadImage} />
         </View>
 
-        {/* Document Title */}
-        <Text style={receiptStyles.title}>{t.title}</Text>
-        <Text style={receiptStyles.titleAlt}>{t.titleAlt}</Text>
-
-        {/* Receipt Number */}
-        <View style={receiptStyles.receiptNumber}>
-          <Text style={receiptStyles.receiptNumberLabel}>{t.receiptNumber}</Text>
-          <Text style={receiptStyles.receiptNumberValue}>{data.receiptNumber}</Text>
-        </View>
-
-        {/* Student Details */}
-        <Text style={receiptStyles.sectionTitle}>{t.studentDetails}</Text>
-        <View style={receiptStyles.detailsTable}>
-          <View style={receiptStyles.detailRow}>
-            <Text style={receiptStyles.detailLabel}>{t.studentId}</Text>
-            <Text style={receiptStyles.detailValue}>{data.studentNumber}</Text>
+        {/* Header: Title + Receipt Number side by side */}
+        <View style={receiptStyles.headerRow}>
+          <View style={receiptStyles.titleBlock}>
+            <Text style={receiptStyles.title}>{t.title}</Text>
+            <Text style={receiptStyles.titleAlt}>{t.titleAlt}</Text>
           </View>
-          <View style={receiptStyles.detailRow}>
-            <Text style={receiptStyles.detailLabel}>{t.studentName}</Text>
-            <Text style={receiptStyles.detailValue}>{studentName}</Text>
-          </View>
-          <View style={receiptStyles.detailRow}>
-            <Text style={receiptStyles.detailLabel}>{t.grade}</Text>
-            <Text style={receiptStyles.detailValue}>{data.gradeName}</Text>
-          </View>
-          <View style={receiptStyles.detailRow}>
-            <Text style={receiptStyles.detailLabel}>{t.schoolYear}</Text>
-            <Text style={receiptStyles.detailValue}>{data.schoolYearName}</Text>
+          <View style={receiptStyles.receiptNumberBlock}>
+            <Text style={receiptStyles.receiptNumberLabel}>{t.receiptNumber}</Text>
+            <Text style={receiptStyles.receiptNumberValue}>{data.receiptNumber}</Text>
           </View>
         </View>
 
-        {/* Payment Details */}
-        <Text style={receiptStyles.sectionTitle}>{t.paymentDetails}</Text>
-        <View style={receiptStyles.detailsTable}>
-          <View style={receiptStyles.detailRow}>
-            <Text style={receiptStyles.detailLabel}>{t.paymentMethod}</Text>
-            <View style={receiptStyles.methodBadge}>
-              <Text style={receiptStyles.methodBadgeText}>
-                {data.method === "cash" ? t.cash : t.orangeMoney}
-              </Text>
-            </View>
-          </View>
-          {data.method === "orange_money" && data.transactionRef && (
-            <View style={receiptStyles.detailRow}>
-              <Text style={receiptStyles.detailLabel}>{t.transactionRef}</Text>
-              <Text style={receiptStyles.detailValue}>{data.transactionRef}</Text>
-            </View>
-          )}
-          <View style={receiptStyles.detailRow}>
-            <Text style={receiptStyles.detailLabel}>{t.paymentDate}</Text>
-            <Text style={receiptStyles.detailValue}>
-              {formatDate(data.recordedAt, language)}
-            </Text>
-          </View>
-          {data.recorderName && (
-            <View style={receiptStyles.detailRow}>
-              <Text style={receiptStyles.detailLabel}>{t.recordedBy}</Text>
-              <Text style={receiptStyles.detailValue}>{data.recorderName}</Text>
-            </View>
-          )}
-        </View>
-
-        {/* Payer Details */}
-        {data.payer && (
-          <>
-            <Text style={receiptStyles.sectionTitle}>{t.payerDetails}</Text>
+        {/* Two-column layout: Student Details | Payment Details */}
+        <View style={receiptStyles.twoColumnRow}>
+          {/* Left column: Student Details */}
+          <View style={receiptStyles.column}>
+            <Text style={receiptStyles.sectionTitle}>{t.studentDetails}</Text>
             <View style={receiptStyles.detailsTable}>
               <View style={receiptStyles.detailRow}>
-                <Text style={receiptStyles.detailLabel}>{t.payerName}</Text>
-                <Text style={receiptStyles.detailValue}>{data.payer.name}</Text>
+                <Text style={receiptStyles.detailLabel}>{t.studentId}</Text>
+                <Text style={receiptStyles.detailValue}>{data.studentNumber}</Text>
               </View>
               <View style={receiptStyles.detailRow}>
-                <Text style={receiptStyles.detailLabel}>{t.payerRelation}</Text>
+                <Text style={receiptStyles.detailLabel}>{t.studentName}</Text>
+                <Text style={receiptStyles.detailValue}>{studentName}</Text>
+              </View>
+              <View style={receiptStyles.detailRow}>
+                <Text style={receiptStyles.detailLabel}>{t.grade}</Text>
+                <Text style={receiptStyles.detailValue}>{data.gradeName}</Text>
+              </View>
+              <View style={receiptStyles.detailRow}>
+                <Text style={receiptStyles.detailLabel}>{t.schoolYear}</Text>
+                <Text style={receiptStyles.detailValue}>{data.schoolYearName}</Text>
+              </View>
+            </View>
+          </View>
+
+          {/* Right column: Payment Details */}
+          <View style={receiptStyles.column}>
+            <Text style={receiptStyles.sectionTitle}>{t.paymentDetails}</Text>
+            <View style={receiptStyles.detailsTable}>
+              <View style={receiptStyles.detailRow}>
+                <Text style={receiptStyles.detailLabel}>{t.paymentMethod}</Text>
+                <View style={receiptStyles.methodBadge}>
+                  <Text style={receiptStyles.methodBadgeText}>
+                    {data.method === "cash" ? t.cash : t.orangeMoney}
+                  </Text>
+                </View>
+              </View>
+              {data.method === "orange_money" && data.transactionRef && (
+                <View style={receiptStyles.detailRow}>
+                  <Text style={receiptStyles.detailLabel}>{t.transactionRef}</Text>
+                  <Text style={receiptStyles.detailValue}>{data.transactionRef}</Text>
+                </View>
+              )}
+              <View style={receiptStyles.detailRow}>
+                <Text style={receiptStyles.detailLabel}>{t.paymentDate}</Text>
                 <Text style={receiptStyles.detailValue}>
+                  {formatDate(data.recordedAt, language)}
+                </Text>
+              </View>
+              {data.recorderName && (
+                <View style={receiptStyles.detailRow}>
+                  <Text style={receiptStyles.detailLabel}>{t.recordedBy}</Text>
+                  <Text style={receiptStyles.detailValue}>{data.recorderName}</Text>
+                </View>
+              )}
+            </View>
+          </View>
+        </View>
+
+        {/* Payer Details - compact horizontal layout */}
+        {data.payer && (
+          <View style={receiptStyles.payerSection}>
+            <Text style={receiptStyles.sectionTitle}>{t.payerDetails}</Text>
+            <View style={receiptStyles.payerRow}>
+              <View style={receiptStyles.payerItem}>
+                <Text style={receiptStyles.payerLabel}>{t.payerName}:</Text>
+                <Text style={receiptStyles.payerValue}>{data.payer.name}</Text>
+              </View>
+              <View style={receiptStyles.payerItem}>
+                <Text style={receiptStyles.payerLabel}>{t.payerRelation}:</Text>
+                <Text style={receiptStyles.payerValue}>
                   {getPayerTypeLabel(data.payer.type, language)}
                 </Text>
               </View>
-              <View style={receiptStyles.detailRow}>
-                <Text style={receiptStyles.detailLabel}>{t.payerPhone}</Text>
-                <Text style={receiptStyles.detailValue}>{data.payer.phone}</Text>
+              <View style={receiptStyles.payerItem}>
+                <Text style={receiptStyles.payerLabel}>{t.payerPhone}:</Text>
+                <Text style={receiptStyles.payerValue}>{data.payer.phone}</Text>
               </View>
             </View>
-          </>
+          </View>
         )}
 
-        {/* Amount Section */}
+        {/* Amount Section - grid layout */}
         <View style={receiptStyles.amountSection}>
-          <View style={receiptStyles.amountRow}>
-            <Text style={receiptStyles.amountLabel}>{t.tuitionFee}</Text>
-            <Text style={receiptStyles.amountValue}>{formatCurrency(data.tuitionFee)}</Text>
-          </View>
-          <View style={receiptStyles.amountRow}>
-            <Text style={receiptStyles.amountLabel}>{t.previousBalance}</Text>
-            <Text style={receiptStyles.amountValue}>{formatCurrency(previousBalance)}</Text>
+          <View style={receiptStyles.amountGrid}>
+            <View style={receiptStyles.amountItem}>
+              <Text style={receiptStyles.amountLabel}>{t.tuitionFee}</Text>
+              <Text style={receiptStyles.amountValue}>{formatCurrency(data.tuitionFee)}</Text>
+            </View>
+            <View style={receiptStyles.amountItem}>
+              <Text style={receiptStyles.amountLabel}>{t.previousBalance}</Text>
+              <Text style={receiptStyles.amountValue}>{formatCurrency(previousBalance)}</Text>
+            </View>
+            <View style={receiptStyles.amountItem}>
+              <Text style={receiptStyles.amountLabel}>{t.newBalance}</Text>
+              <Text style={receiptStyles.amountValue}>{formatCurrency(data.remainingAfter)}</Text>
+            </View>
           </View>
           <View style={receiptStyles.amountPaid}>
             <Text style={receiptStyles.amountPaidLabel}>{t.amountPaid}</Text>
             <Text style={receiptStyles.amountPaidValue}>{formatCurrency(data.amount)}</Text>
-          </View>
-          <View style={receiptStyles.amountRow}>
-            <Text style={receiptStyles.amountLabel}>{t.newBalance}</Text>
-            <Text style={receiptStyles.amountValue}>{formatCurrency(data.remainingAfter)}</Text>
           </View>
         </View>
 

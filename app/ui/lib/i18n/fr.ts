@@ -62,6 +62,9 @@ export const fr = {
     noAccess: "Vous n'avez pas la permission pour cette action",
     accessDenied: "Accès refusé",
     noPaymentPermission: "Vous n'avez pas la permission d'enregistrer des paiements. Veuillez contacter votre administrateur si vous avez besoin d'accès.",
+    noAuditPermission: "Vous n'avez pas la permission de voir les journaux d'audit. Veuillez contacter votre administrateur si vous avez besoin d'accès.",
+    noReportsPermission: "Vous n'avez pas la permission de voir les rapports. Veuillez contacter votre administrateur si vous avez besoin d'accès.",
+    noActivitiesPermission: "Vous n'avez pas la permission de voir les activités. Veuillez contacter votre administrateur si vous avez besoin d'accès.",
   },
 
   // Navigation
@@ -535,6 +538,10 @@ export const fr = {
     confirmedThisWeek: "Confirmés cette semaine",
     filterByGrade: "Filtrer par classe",
     allGrades: "Toutes les classes",
+    filterByBalance: "Solde étudiant",
+    allBalances: "Tous les soldes",
+    outstandingBalance: "Solde en cours",
+    paidUp: "Entièrement payé",
     filterPayments: "Filtrer les paiements",
     paymentsCount: "paiements",
     confirmedPercent: "confirmés",
@@ -2337,6 +2344,7 @@ export const fr = {
     searchToSelect: "Recherchez ci-dessus pour trouver et sélectionner un élève",
     remainingBalance: "Solde restant",
     totalPaid: "Total payé",
+    filters: "Filtres",
 
     // Step 2 - Payment Schedule
     paymentSchedules: "Échéancier de paiement",

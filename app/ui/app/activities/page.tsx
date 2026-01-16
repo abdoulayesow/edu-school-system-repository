@@ -18,6 +18,7 @@ import {
 import { BookOpen, Users, Plus, Search, Loader2, Trophy, Palette, GraduationCap, Sparkles } from "lucide-react"
 import { useI18n } from "@/components/i18n-provider"
 import { PageContainer } from "@/components/layout"
+import { PermissionGuard, NoPermission } from "@/components/permission-guard"
 import { DataPagination } from "@/components/data-pagination"
 import { sizing } from "@/lib/design-tokens"
 import { toast } from "sonner"
@@ -188,6 +189,20 @@ export default function ActivitiesPage() {
   }
 
   return (
+    <PermissionGuard
+      checks={[
+        { resource: "students", action: "view" },
+        { resource: "classes", action: "view" },
+      ]}
+      fallback={
+        <PageContainer maxWidth="full">
+          <NoPermission
+            title={t.permissions?.accessDenied || "Access Denied"}
+            description={t.permissions?.noActivitiesPermission || "You don't have permission to view activities."}
+          />
+        </PageContainer>
+      }
+    >
     <PageContainer maxWidth="full">
       <div className="mb-6">
         <h1 className="text-3xl font-bold text-foreground mb-2">{t.activities.title}</h1>
@@ -427,5 +442,6 @@ export default function ActivitiesPage() {
         </DialogContent>
       </Dialog>
     </PageContainer>
+    </PermissionGuard>
   )
 }

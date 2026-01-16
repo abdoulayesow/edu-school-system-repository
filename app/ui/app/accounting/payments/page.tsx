@@ -148,6 +148,7 @@ export default function PaymentsPage() {
   const [statusFilter, setStatusFilter] = useState<string>("all")
   const [methodFilter, setMethodFilter] = useState<string>("all")
   const [gradeFilter, setGradeFilter] = useState<string>("all")
+  const [balanceStatusFilter, setBalanceStatusFilter] = useState<string>("all")
   const [startDate, setStartDate] = useState("")
   const [endDate, setEndDate] = useState("")
   const [offset, setOffset] = useState(0)
@@ -157,6 +158,7 @@ export default function PaymentsPage() {
     status: statusFilter !== "all" ? statusFilter : undefined,
     method: methodFilter !== "all" ? methodFilter : undefined,
     gradeId: gradeFilter !== "all" ? gradeFilter : undefined,
+    balanceStatus: balanceStatusFilter !== "all" ? balanceStatusFilter : undefined,
     startDate: startDate || undefined,
     endDate: endDate || undefined,
     limit: 20,
@@ -183,7 +185,7 @@ export default function PaymentsPage() {
   // Reset offset when filters change
   useEffect(() => {
     setOffset(0)
-  }, [statusFilter, methodFilter, gradeFilter, startDate, endDate])
+  }, [statusFilter, methodFilter, gradeFilter, balanceStatusFilter, startDate, endDate])
 
   // Handle pagination
   const handleNextPage = () => {
@@ -505,12 +507,13 @@ export default function PaymentsPage() {
                   isVisible && "scale-100 rotate-0", !isVisible && "scale-0 rotate-90"
                 )} />
                 <span className="text-sm font-medium text-muted-foreground">{t.accounting.filterPayments}</span>
-                {(statusFilter !== "all" || methodFilter !== "all" || gradeFilter !== "all" || startDate || endDate) && (
+                {(statusFilter !== "all" || methodFilter !== "all" || gradeFilter !== "all" || balanceStatusFilter !== "all" || startDate || endDate) && (
                   <Badge variant="secondary" className="ml-2 font-normal animate-in fade-in slide-in-from-left-2 duration-300">
                     {[
                       statusFilter !== "all" ? 1 : 0,
                       methodFilter !== "all" ? 1 : 0,
                       gradeFilter !== "all" ? 1 : 0,
+                      balanceStatusFilter !== "all" ? 1 : 0,
                       startDate || endDate ? 1 : 0
                     ].reduce((a, b) => a + b, 0)} actif(s)
                   </Badge>
@@ -667,6 +670,34 @@ export default function PaymentsPage() {
                 </Select>
               </div>
 
+              {/* Balance Status Filter */}
+              <div className="space-y-1.5">
+                <Label className="text-xs text-muted-foreground">{t.accounting.filterByBalance}</Label>
+                <Select value={balanceStatusFilter} onValueChange={setBalanceStatusFilter}>
+                  <SelectTrigger className={cn(
+                    "w-[180px] h-9 transition-all",
+                    balanceStatusFilter !== "all" && "border-primary/50 bg-primary/5"
+                  )}>
+                    <SelectValue placeholder={t.accounting.allBalances} />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">{t.accounting.allBalances}</SelectItem>
+                    <SelectItem value="outstanding">
+                      <span className="flex items-center gap-2">
+                        <span className="size-2 rounded-full bg-amber-500" />
+                        {t.accounting.outstandingBalance}
+                      </span>
+                    </SelectItem>
+                    <SelectItem value="paid_up">
+                      <span className="flex items-center gap-2">
+                        <span className="size-2 rounded-full bg-emerald-500" />
+                        {t.accounting.paidUp}
+                      </span>
+                    </SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
               {/* Custom Date Range */}
               <div className="space-y-1.5">
                 <Label className="text-xs text-muted-foreground">{t.accounting.filterByDate}</Label>
@@ -694,7 +725,7 @@ export default function PaymentsPage() {
               </div>
 
               {/* Clear All */}
-              {(statusFilter !== "all" || methodFilter !== "all" || gradeFilter !== "all" || startDate || endDate) && (
+              {(statusFilter !== "all" || methodFilter !== "all" || gradeFilter !== "all" || balanceStatusFilter !== "all" || startDate || endDate) && (
                 <Button
                   variant="ghost"
                   size="sm"
@@ -702,6 +733,7 @@ export default function PaymentsPage() {
                     setStatusFilter("all")
                     setMethodFilter("all")
                     setGradeFilter("all")
+                    setBalanceStatusFilter("all")
                     setStartDate("")
                     setEndDate("")
                   }}

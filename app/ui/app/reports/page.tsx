@@ -10,6 +10,7 @@ import { ChartContainer, ChartTooltip, ChartTooltipContent, type ChartConfig } f
 import { BookOpen, Users, TrendingDown, BarChart3, Calendar, Loader2, AlertTriangle } from "lucide-react"
 import { useI18n } from "@/components/i18n-provider"
 import { PageContainer } from "@/components/layout"
+import { PermissionGuard, NoPermission } from "@/components/permission-guard"
 import { sizing } from "@/lib/design-tokens"
 import { formatDate } from "@/lib/utils"
 
@@ -199,6 +200,20 @@ export default function ReportsPage() {
   }
 
   return (
+    <PermissionGuard
+      checks={[
+        { resource: "academic_reports", action: "view" },
+        { resource: "attendance_reports", action: "view" },
+      ]}
+      fallback={
+        <PageContainer maxWidth="full">
+          <NoPermission
+            title={t.permissions?.accessDenied || "Access Denied"}
+            description={t.permissions?.noReportsPermission || "You don't have permission to view reports."}
+          />
+        </PageContainer>
+      }
+    >
     <PageContainer maxWidth="full">
         <div className="mb-6">
           <h1 className="text-3xl font-bold text-foreground mb-2">{t.reports.title}</h1>
@@ -540,5 +555,6 @@ export default function ReportsPage() {
           </TabsContent>
         </Tabs>
     </PageContainer>
+    </PermissionGuard>
   )
 }

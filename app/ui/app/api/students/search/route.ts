@@ -14,6 +14,7 @@ export async function GET(req: NextRequest) {
   const q = searchParams.get("q")
   const limit = parseInt(searchParams.get("limit") || "10")
   const gradeId = searchParams.get("gradeId")
+  const balanceStatus = searchParams.get("balanceStatus") // "outstanding" or "paid_up"
 
   if (!q || q.length < 2) {
     return NextResponse.json({ students: [] })
@@ -164,7 +165,19 @@ export async function GET(req: NextRequest) {
       }
     })
 
-    return NextResponse.json({ students: results })
+    // Filter by balance status if specified
+    let filteredResults = results
+    if (balanceStatus) {
+      filteredResults = results.filter((student) => {
+        if (!student.balanceInfo) return false
+        const hasOutstanding = student.balanceInfo.remainingBalance > 0
+        if (balanceStatus === "outstanding") return hasOutstanding
+        if (balanceStatus === "paid_up") return !hasOutstanding
+        return true
+      })
+    }
+
+    return NextResponse.json({ students: filteredResults })
   } catch (err) {
     console.error("Error searching students:", err)
     return NextResponse.json(

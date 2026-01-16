@@ -64,6 +64,9 @@ export const en: TranslationKeys = {
     noAccess: "You don't have permission for this action",
     accessDenied: "Access Denied",
     noPaymentPermission: "You don't have permission to record payments. Please contact your administrator if you need access.",
+    noAuditPermission: "You don't have permission to view audit logs. Please contact your administrator if you need access.",
+    noReportsPermission: "You don't have permission to view reports. Please contact your administrator if you need access.",
+    noActivitiesPermission: "You don't have permission to view activities. Please contact your administrator if you need access.",
   },
 
   // Navigation
@@ -537,6 +540,10 @@ export const en: TranslationKeys = {
     confirmedThisWeek: "Confirmed This Week",
     filterByGrade: "Filter by grade",
     allGrades: "All grades",
+    filterByBalance: "Student balance",
+    allBalances: "All balances",
+    outstandingBalance: "Outstanding balance",
+    paidUp: "Fully paid",
     filterPayments: "Filter payments",
     paymentsCount: "payments",
     confirmedPercent: "confirmed",
@@ -2339,6 +2346,7 @@ export const en: TranslationKeys = {
     searchToSelect: "Search above to find and select a student",
     remainingBalance: "Remaining Balance",
     totalPaid: "Total Paid",
+    filters: "Filters",
 
     // Step 2 - Payment Schedule
     paymentSchedules: "Payment Schedules",
