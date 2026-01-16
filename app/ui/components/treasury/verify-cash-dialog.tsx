@@ -112,8 +112,8 @@ export function VerifyCashDialog({
       <DialogContent className="sm:max-w-[500px]">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
-            <div className="p-2 rounded-full bg-purple-100 dark:bg-purple-900/30">
-              <ClipboardCheck className="h-5 w-5 text-purple-600" />
+            <div className="p-2 rounded-full bg-nav-highlight/10 dark:bg-gspn-gold-900/30">
+              <ClipboardCheck className="h-5 w-5 text-nav-highlight dark:text-gspn-gold-200" />
             </div>
             {t?.treasury?.verifyNow || "Vérification de la caisse"}
           </DialogTitle>
@@ -235,7 +235,7 @@ export function VerifyCashDialog({
           <Button
             onClick={handleSubmit}
             disabled={isSubmitting || !hasValue || (hasDiscrepancy && !explanation.trim())}
-            className={isMatch ? "bg-green-600 hover:bg-green-700" : ""}
+            className={isMatch ? "bg-emerald-600 hover:bg-emerald-700" : ""}
           >
             {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
             {isMatch

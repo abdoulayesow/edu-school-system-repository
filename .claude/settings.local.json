@@ -57,7 +57,9 @@
       "Bash(git checkout:*)",
       "WebFetch(domain:github.com)",
       "WebFetch(domain:sli.dev)",
-      "Bash(psql:*)"
+      "Bash(psql:*)",
+      "Skill(audit-design)",
+      "Skill(audit-design:*)"
     ],
     "additionalDirectories": [
       "c:\\workspace\\sources\\edu-school-system-repository"

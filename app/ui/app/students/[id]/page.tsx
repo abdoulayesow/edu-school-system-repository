@@ -470,7 +470,7 @@ export default function StudentDetailPage() {
                 {student.balanceInfo ? formatCurrency(student.balanceInfo.remainingBalance) : "N/A"}
               </div>
               {student.balanceInfo && (
-                <Progress value={student.balanceInfo.paymentPercentage} className="h-2 mt-2 bg-yellow-200 dark:bg-yellow-900/30 [&>div]:bg-yellow-500 dark:[&>div]:bg-yellow-400" />
+                <Progress value={student.balanceInfo.paymentPercentage} className="h-2 mt-2 bg-accent/20 dark:bg-accent/10 [&>div]:bg-accent dark:[&>div]:bg-accent" />
               )}
             </CardContent>
           </Card>
@@ -508,7 +508,7 @@ export default function StudentDetailPage() {
               </div>
               <Progress
                 value={student.attendanceSummary?.attendanceRate ?? 0}
-                className="h-2 mt-2 bg-yellow-200 dark:bg-yellow-900/30 [&>div]:bg-yellow-500 dark:[&>div]:bg-yellow-400"
+                className="h-2 mt-2 bg-accent/20 dark:bg-accent/10 [&>div]:bg-accent dark:[&>div]:bg-accent"
               />
             </CardContent>
           </Card>
@@ -526,7 +526,7 @@ export default function StudentDetailPage() {
               </div>
               <Progress
                 value={student.balanceInfo?.paymentPercentage ?? 0}
-                className="h-2 mt-2 bg-yellow-200 dark:bg-yellow-900/30 [&>div]:bg-yellow-500 dark:[&>div]:bg-yellow-400"
+                className="h-2 mt-2 bg-accent/20 dark:bg-accent/10 [&>div]:bg-accent dark:[&>div]:bg-accent"
               />
             </CardContent>
           </Card>
@@ -784,7 +784,7 @@ export default function StudentDetailPage() {
                           {student.attendanceSummary.attendanceRate}%
                         </span>
                       </div>
-                      <Progress value={student.attendanceSummary.attendanceRate} className="h-2 mt-2 bg-yellow-200 dark:bg-yellow-900/30 [&>div]:bg-yellow-500 dark:[&>div]:bg-yellow-400" />
+                      <Progress value={student.attendanceSummary.attendanceRate} className="h-2 mt-2 bg-accent/20 dark:bg-accent/10 [&>div]:bg-accent dark:[&>div]:bg-accent" />
                     </div>
                   </CardContent>
                 </Card>
@@ -938,7 +938,7 @@ export default function StudentDetailPage() {
                         <span>{t.students.paymentProgress}</span>
                         <span className="font-medium">{student.balanceInfo.paymentPercentage}%</span>
                       </div>
-                      <Progress value={student.balanceInfo.paymentPercentage} className="h-3 bg-yellow-200 dark:bg-yellow-900/30 [&>div]:bg-yellow-500 dark:[&>div]:bg-yellow-400" />
+                      <Progress value={student.balanceInfo.paymentPercentage} className="h-3 bg-accent/20 dark:bg-accent/10 [&>div]:bg-accent dark:[&>div]:bg-accent" />
                     </div>
 
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-4 pt-4">
@@ -1091,7 +1091,7 @@ export default function StudentDetailPage() {
                           {student.attendanceSummary.attendanceRate}%
                         </span>
                       </div>
-                      <Progress value={student.attendanceSummary.attendanceRate} className="h-4 bg-yellow-200 dark:bg-yellow-900/30 [&>div]:bg-yellow-500 dark:[&>div]:bg-yellow-400" />
+                      <Progress value={student.attendanceSummary.attendanceRate} className="h-4 bg-accent/20 dark:bg-accent/10 [&>div]:bg-accent dark:[&>div]:bg-accent" />
                       <div className="flex justify-between mt-2 text-xs text-muted-foreground">
                         <span>0%</span>
                         <span className="text-warning">60%</span>

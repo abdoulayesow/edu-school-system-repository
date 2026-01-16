@@ -257,7 +257,7 @@ export function StepStudentSelection() {
         )
       case "in_advance":
         return (
-          <Badge className="bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400 border-0">
+          <Badge className="bg-nav-highlight/20 text-nav-highlight dark:bg-gspn-gold-900/30 dark:text-gspn-gold-200 border-0">
             {locale === "fr" ? "En avance" : "In Advance"}
           </Badge>
         )

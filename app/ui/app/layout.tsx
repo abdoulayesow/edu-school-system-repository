@@ -105,7 +105,7 @@ export default function RootLayout({
         />
       </head>
       <body
-        className={`${inter.variable} ${plusJakarta.variable} ${dmSans.variable} font-sans antialiased text-gray-900 dark:text-gray-50 bg-white dark:bg-gray-900`}
+        className={`${inter.variable} ${plusJakarta.variable} ${dmSans.variable} font-sans antialiased text-foreground bg-background`}
       >
         <ThemeProvider
           attribute="class"

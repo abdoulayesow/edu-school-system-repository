@@ -148,7 +148,7 @@ export function StepConfirmation() {
               <p className="text-sm text-muted-foreground">
                 {t.enrollmentWizard.enrollmentNumber}
               </p>
-              <p className={`text-2xl font-mono font-bold ${isCompleted ? "text-green-600 dark:text-green-500" : "text-[#e79908] dark:text-gspn-gold-200"}`}>
+              <p className={`text-2xl font-mono font-bold ${isCompleted ? "text-green-600 dark:text-green-500" : "text-nav-highlight dark:text-gspn-gold-200"}`}>
                 {data.enrollmentNumber || "ENR-XXXX-XXXXX"}
               </p>
             </div>
@@ -156,7 +156,7 @@ export function StepConfirmation() {
               <p className="text-sm text-muted-foreground">
                 {t.enrollmentWizard.studentNumber}
               </p>
-              <p className={`text-2xl font-mono font-bold ${isCompleted ? "text-green-600 dark:text-green-500" : "text-[#e79908] dark:text-gspn-gold-200"}`}>
+              <p className={`text-2xl font-mono font-bold ${isCompleted ? "text-green-600 dark:text-green-500" : "text-nav-highlight dark:text-gspn-gold-200"}`}>
                 {data.studentNumber || "STU-XXXXX"}
               </p>
             </div>
@@ -231,7 +231,7 @@ export function StepConfirmation() {
       <div className="flex flex-col sm:flex-row gap-3 justify-center">
         <Button
           asChild
-          className="gap-2 bg-[#e79908] hover:bg-[#d68907] text-black dark:bg-gspn-maroon-950 dark:hover:bg-gspn-maroon-900 dark:text-white"
+          className="gap-2 bg-nav-highlight hover:bg-nav-highlight/90 text-black dark:bg-gspn-maroon-950 dark:hover:bg-gspn-maroon-900 dark:text-white"
         >
           <Link href={`/enrollments/${enrollmentId}`}>
             <Eye className={sizing.icon.sm} />

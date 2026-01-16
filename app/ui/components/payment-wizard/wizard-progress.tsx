@@ -57,8 +57,8 @@ export function WizardProgress({ currentStep, isFullyPaid }: WizardProgressProps
                   className={cn(
                     "relative z-10 flex items-center justify-center rounded-full border-2 transition-all duration-300",
                     sizing.avatar.md,
-                    isCompleted && "bg-[#e79908] border-[#e79908] text-black dark:bg-gspn-gold-500 dark:border-gspn-gold-500 dark:text-gspn-maroon-950",
-                    isCurrent && "border-[#e79908] bg-gspn-gold-50 text-black dark:border-gspn-gold-500 dark:bg-gspn-gold-500/30 dark:text-gspn-gold-200 ring-4 ring-[#e79908]/20 dark:ring-gspn-gold-500/20",
+                    isCompleted && "bg-nav-highlight border-nav-highlight text-black dark:bg-gspn-gold-500 dark:border-gspn-gold-500 dark:text-gspn-maroon-950",
+                    isCurrent && "border-nav-highlight bg-gspn-gold-50 text-black dark:border-gspn-gold-500 dark:bg-gspn-gold-500/30 dark:text-gspn-gold-200 ring-4 ring-nav-highlight/20 dark:ring-gspn-gold-500/20",
                     !isCompleted && !isCurrent && "border-muted bg-muted/50 text-muted-foreground"
                   )}
                 >
@@ -88,7 +88,7 @@ export function WizardProgress({ currentStep, isFullyPaid }: WizardProgressProps
                   className={cn(
                     "absolute top-4 left-1/2 w-full h-0.5 -translate-y-1/2",
                     "transition-colors duration-300",
-                    isCompleted ? "bg-[#e79908] dark:bg-gspn-gold-500" : "bg-muted"
+                    isCompleted ? "bg-nav-highlight dark:bg-gspn-gold-500" : "bg-muted"
                   )}
                   style={{ left: "calc(50% + 16px)", width: "calc(100% - 32px)" }}
                 />

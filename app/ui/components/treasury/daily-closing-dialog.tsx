@@ -152,9 +152,9 @@ export function DailyClosingDialog({
           )}
 
           {countedRegistryBalance && (
-            <div className="rounded-lg bg-blue-50 dark:bg-blue-950/20 p-4 space-y-2 border border-blue-200 dark:border-blue-800">
+            <div className="rounded-lg bg-nav-highlight/10 dark:bg-gspn-gold-900/20 p-4 space-y-2 border border-nav-highlight/30 dark:border-gspn-gold-700/30">
               <p className="text-sm text-muted-foreground">{reg.safeAfterClosing}</p>
-              <p className="text-2xl font-bold text-blue-600">
+              <p className="text-2xl font-bold text-nav-highlight dark:text-gspn-gold-200">
                 {formatCurrency(currentSafeBalance + countedAmount)}
               </p>
               <p className="text-xs text-muted-foreground">

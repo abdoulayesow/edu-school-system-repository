@@ -176,7 +176,7 @@ export default function AdminUsersPage() {
     switch (status) {
       case "accepted":
         return (
-          <Badge className="bg-green-500">
+          <Badge className="bg-success text-success-foreground">
             <CheckCircle2 className="h-3 w-3 mr-1" />
             {t.admin.invitationAccepted}
           </Badge>
@@ -202,14 +202,14 @@ export default function AdminUsersPage() {
 
   function getRoleBadge(role: string) {
     const roleColors: Record<string, string> = {
-      director: "bg-purple-500",
-      academic_director: "bg-blue-500",
-      secretary: "bg-green-500",
-      accountant: "bg-yellow-500",
-      teacher: "bg-cyan-500",
+      director: "bg-gspn-maroon-500 text-white",
+      academic_director: "bg-nav-highlight text-white dark:bg-gspn-gold-500 dark:text-gspn-gold-950",
+      secretary: "bg-success text-success-foreground",
+      accountant: "bg-gspn-gold-500 text-gspn-gold-950",
+      teacher: "bg-primary text-primary-foreground",
     }
     return (
-      <Badge className={roleColors[role] || "bg-gray-500"}>
+      <Badge className={roleColors[role] || "bg-muted text-muted-foreground"}>
         {roleLabels[role] || role}
       </Badge>
     )
@@ -260,7 +260,7 @@ export default function AdminUsersPage() {
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">{t.admin.pendingInvitations}</CardTitle>
-            <Clock className="h-4 w-4 text-orange-500" />
+            <Clock className="h-4 w-4 text-warning" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
@@ -272,7 +272,7 @@ export default function AdminUsersPage() {
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">{t.admin.acceptedInvitations}</CardTitle>
-            <CheckCircle2 className="h-4 w-4 text-green-500" />
+            <CheckCircle2 className="h-4 w-4 text-success" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
@@ -284,7 +284,7 @@ export default function AdminUsersPage() {
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">{t.admin.expiredInvitations}</CardTitle>
-            <XCircle className="h-4 w-4 text-red-500" />
+            <XCircle className="h-4 w-4 text-destructive" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">

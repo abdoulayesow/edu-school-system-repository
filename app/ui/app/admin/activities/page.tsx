@@ -235,11 +235,11 @@ export default function AdminActivitiesPage() {
 
   const getStatusColor = (status: ActivityStatus) => {
     const colors: Record<ActivityStatus, string> = {
-      draft: "bg-gray-100 text-gray-800",
-      active: "bg-green-100 text-green-800",
-      closed: "bg-yellow-100 text-yellow-800",
-      completed: "bg-blue-100 text-blue-800",
-      cancelled: "bg-red-100 text-red-800",
+      draft: "bg-muted text-muted-foreground",
+      active: "bg-success/20 text-success dark:bg-success/10",
+      closed: "bg-warning/20 text-warning dark:bg-warning/10",
+      completed: "bg-nav-highlight/20 text-nav-highlight dark:bg-gspn-gold-900/30 dark:text-gspn-gold-200",
+      cancelled: "bg-destructive/20 text-destructive dark:bg-destructive/10",
     }
     return colors[status]
   }

@@ -75,9 +75,9 @@ export function WizardProgress() {
                     "flex items-center justify-center w-10 h-10 rounded-full border-2 transition-all duration-300",
                     isCurrent && "animate-scale-in",
                     isCompleted
-                      ? "bg-[#e79908] border-[#e79908] text-black dark:bg-gspn-gold-500 dark:border-gspn-gold-500 dark:text-gspn-maroon-950"
+                      ? "bg-nav-highlight border-nav-highlight text-black dark:bg-gspn-gold-500 dark:border-gspn-gold-500 dark:text-gspn-maroon-950"
                       : isCurrent
-                        ? "border-[#e79908] bg-gspn-gold-50 text-black dark:border-gspn-gold-500 dark:bg-gspn-gold-500/30 dark:text-gspn-gold-200 shadow-md shadow-gspn-gold-500/20"
+                        ? "border-nav-highlight bg-gspn-gold-50 text-black dark:border-gspn-gold-500 dark:bg-gspn-gold-500/30 dark:text-gspn-gold-200 shadow-md shadow-gspn-gold-500/20"
                         : "border-muted-foreground/30 text-muted-foreground/50"
                   )}
                 >
@@ -105,7 +105,7 @@ export function WizardProgress() {
                 className={cn(
                   "flex-1 h-0.5 mx-2 transition-colors duration-500 ease-out",
                   completedSteps.includes(step.number)
-                    ? "bg-[#e79908] dark:bg-gspn-gold-500"
+                    ? "bg-nav-highlight dark:bg-gspn-gold-500"
                     : "bg-muted-foreground/20"
                 )}
               />
@@ -143,9 +143,9 @@ export function WizardProgress() {
                   index === 4 && "stagger-5",
                   index === 5 && "stagger-6",
                   isCompleted
-                    ? "bg-[#e79908] dark:bg-gspn-gold-500"
+                    ? "bg-nav-highlight dark:bg-gspn-gold-500"
                     : isCurrent
-                      ? "bg-[#e79908]/50 dark:bg-gspn-gold-500/50"
+                      ? "bg-nav-highlight/50 dark:bg-gspn-gold-500/50"
                       : "bg-muted-foreground/20"
                 )}
               />

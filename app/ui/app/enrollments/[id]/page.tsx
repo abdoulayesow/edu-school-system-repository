@@ -335,7 +335,7 @@ export default function EnrollmentDetailPage({
 
           <div className="flex gap-2">
             {canCancel && (
-              <PermissionGuard resource="enrollments" action="update" inline>
+              <PermissionGuard resource="student_enrollment" action="update" inline>
                 <Button variant="outline" onClick={() => setShowCancelDialog(true)}>
                   <XCircle className="h-4 w-4 mr-2" />
                   {locale === "fr" ? "Annuler" : "Cancel"}
@@ -343,7 +343,7 @@ export default function EnrollmentDetailPage({
               </PermissionGuard>
             )}
             {(enrollment.status === "draft" || enrollment.status === "cancelled") && (
-              <PermissionGuard resource="enrollments" action="delete" inline>
+              <PermissionGuard resource="student_enrollment" action="delete" inline>
                 <Button
                   variant="outline"
                   onClick={() => setShowDeleteDialog(true)}
@@ -355,7 +355,7 @@ export default function EnrollmentDetailPage({
               </PermissionGuard>
             )}
             {["draft", "submitted", "needs_review"].includes(enrollment.status) && (
-              <PermissionGuard resource="enrollments" action="update" inline>
+              <PermissionGuard resource="student_enrollment" action="update" inline>
                 <Button
                   asChild
                   className="bg-amber-500 hover:bg-amber-600 text-white dark:bg-amber-600 dark:hover:bg-amber-700"
@@ -503,7 +503,7 @@ export default function EnrollmentDetailPage({
 
                 <Separator />
                 <div className="flex gap-3 justify-end">
-                  <PermissionGuard resource="enrollments" action="approve" inline>
+                  <PermissionGuard resource="student_enrollment" action="approve" inline>
                     <Button
                       onClick={() => setShowApproveDialog(true)}
                       className="bg-green-600 hover:bg-green-700 text-white"
@@ -512,7 +512,7 @@ export default function EnrollmentDetailPage({
                       {locale === "fr" ? "Approuver" : "Approve"}
                     </Button>
                   </PermissionGuard>
-                  <PermissionGuard resource="enrollments" action="approve" inline>
+                  <PermissionGuard resource="student_enrollment" action="approve" inline>
                     <Button
                       onClick={() => setShowRejectDialog(true)}
                       className="bg-red-600 hover:bg-red-700 text-white"

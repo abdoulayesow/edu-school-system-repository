@@ -73,7 +73,7 @@ export function WizardNavigation({
           type="button"
           onClick={onNext}
           disabled={!canProceed || isSubmitting}
-          className="min-w-[140px]"
+          className="min-w-[140px] bg-nav-highlight hover:bg-nav-highlight/90 text-black dark:bg-gspn-maroon-950 dark:hover:bg-gspn-maroon-900 dark:text-white"
         >
           {isSubmitting ? (
             <>

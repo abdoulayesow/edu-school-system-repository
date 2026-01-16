@@ -47,11 +47,11 @@ export function StepPaymentSchedule() {
     in_advance: {
       icon: TrendingUp,
       label: locale === "fr" ? "En avance" : "Ahead of Schedule",
-      color: "text-blue-600 dark:text-blue-400",
-      bgColor: "bg-blue-100 dark:bg-blue-900/30",
-      borderColor: "border-blue-200 dark:border-blue-800",
-      gradientFrom: "from-blue-500",
-      gradientTo: "to-cyan-500",
+      color: "text-nav-highlight dark:text-gspn-gold-200",
+      bgColor: "bg-nav-highlight/10 dark:bg-gspn-gold-900/30",
+      borderColor: "border-nav-highlight/30 dark:border-gspn-gold-700",
+      gradientFrom: "from-gspn-gold-500",
+      gradientTo: "to-gspn-gold-300",
     },
     on_time: {
       icon: Clock,
@@ -480,7 +480,7 @@ export function StepPaymentSchedule() {
             <p className="text-sm text-muted-foreground">
               {locale === "fr" ? "Total scolarité" : "Total Tuition"}
             </p>
-            <p className={cn(typography.currency.lg, "text-[#e79908] dark:text-gspn-gold-200")}>
+            <p className={cn(typography.currency.lg, "text-nav-highlight dark:text-gspn-gold-200")}>
               {formatCurrency(data.tuitionFee)}
             </p>
           </div>

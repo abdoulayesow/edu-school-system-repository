@@ -355,7 +355,7 @@ export default function EnrollmentsPage() {
               </CardDescription>
             </div>
             <PermissionGuard
-              resource="enrollments"
+              resource="student_enrollment"
               action="create"
               loading={<div className="h-9 w-40 animate-pulse bg-muted rounded-md" />}
             >
@@ -385,7 +385,7 @@ export default function EnrollmentsPage() {
               <div className="rounded-md border">
                 <Table>
                   <TableHeader>
-                    <TableRow className="bg-yellow-50">
+                    <TableRow className="bg-gspn-gold-50/50 dark:bg-gspn-gold-950/20">
                       <TableHead className="w-[50px]"></TableHead>
                       <TableHead>{t.enrollments.fullName}</TableHead>
                       <TableHead>{t.enrollments.enrollmentId}</TableHead>

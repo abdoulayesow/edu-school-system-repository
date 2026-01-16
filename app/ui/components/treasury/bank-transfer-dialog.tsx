@@ -137,8 +137,8 @@ export function BankTransferDialog({
       <DialogContent className="sm:max-w-[500px]">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
-            <div className="p-2 rounded-full bg-blue-100 dark:bg-blue-900/30">
-              <Building2 className="h-5 w-5 text-blue-600" />
+            <div className="p-2 rounded-full bg-nav-highlight/10 dark:bg-gspn-gold-900/30">
+              <Building2 className="h-5 w-5 text-nav-highlight dark:text-gspn-gold-200" />
             </div>
             {t?.treasury?.bankTransfer || "Transfert bancaire"}
           </DialogTitle>
@@ -164,7 +164,7 @@ export function BankTransferDialog({
                 <p className="text-xs text-muted-foreground">{t?.treasury?.safeBalance || "Caisse"}</p>
                 <p className="text-lg font-bold">{formatCurrency(safeBalance)} GNF</p>
               </div>
-              <div className={`p-3 rounded-md ${transferType === "withdrawal" ? "bg-blue-50 dark:bg-blue-900/20 border border-blue-200" : "bg-muted"}`}>
+              <div className={`p-3 rounded-md ${transferType === "withdrawal" ? "bg-nav-highlight/10 dark:bg-gspn-gold-900/20 border border-nav-highlight/30 dark:border-gspn-gold-700" : "bg-muted"}`}>
                 <p className="text-xs text-muted-foreground">{t?.treasury?.bankBalance || "Banque"}</p>
                 <p className="text-lg font-bold">{formatCurrency(bankBalance)} GNF</p>
               </div>

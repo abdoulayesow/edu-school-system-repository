@@ -142,9 +142,9 @@ export default function SchoolYearsPage() {
   function getStatusBadge(status: SchoolYear["status"]) {
     switch (status) {
       case "active":
-        return <Badge className="bg-green-500">{t.admin.statusActive}</Badge>
+        return <Badge className="bg-success text-success-foreground">{t.admin.statusActive}</Badge>
       case "new":
-        return <Badge className="bg-blue-500">{t.admin.statusNew}</Badge>
+        return <Badge className="bg-nav-highlight text-white dark:bg-gspn-gold-500 dark:text-gspn-gold-950">{t.admin.statusNew}</Badge>
       case "passed":
         return <Badge variant="secondary">{t.admin.statusPassed}</Badge>
     }
@@ -392,7 +392,7 @@ export default function SchoolYearsPage() {
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">{t.admin.activeYear}</CardTitle>
-            <CheckCircle2 className="h-4 w-4 text-green-500" />
+            <CheckCircle2 className="h-4 w-4 text-success" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
@@ -409,7 +409,7 @@ export default function SchoolYearsPage() {
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">{t.admin.newYear}</CardTitle>
-            <Clock className="h-4 w-4 text-blue-500" />
+            <Clock className="h-4 w-4 text-nav-highlight dark:text-gspn-gold-400" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">

@@ -76,7 +76,7 @@ export function MobileNav() {
           size="icon"
           variant="outline"
           onClick={() => setIsOpen(!isOpen)}
-          className="bg-[#e79908] dark:bg-[#2d0707] shadow-lg border-gspn-gold-300 dark:border-gray-800/50 text-black dark:text-white hover:bg-gspn-gold-300 dark:hover:bg-gspn-maroon-900"
+          className="bg-nav-highlight dark:bg-gspn-maroon-950 shadow-lg border-gspn-gold-300 dark:border-gray-800/50 text-black dark:text-white hover:bg-gspn-gold-300 dark:hover:bg-gspn-maroon-900"
         >
           {isOpen ? (
             <X className="h-5 w-5" />
@@ -91,7 +91,7 @@ export function MobileNav() {
         <Sheet open={isOpen} onOpenChange={setIsOpen}>
           <SheetContent
             side="left"
-            className="w-80 p-0 bg-[#e79908] dark:bg-[#2d0707] border-gspn-gold-300 dark:border-gray-800/50"
+            className="w-80 p-0 bg-nav-highlight dark:bg-gspn-maroon-950 border-gspn-gold-300 dark:border-gray-800/50"
           >
           <SheetHeader className="border-b border-gspn-gold-300 dark:border-gray-800/50 p-4">
             <div className="flex items-center gap-3">
@@ -152,7 +152,7 @@ export function MobileNav() {
                     open={isExpanded}
                     onOpenChange={() => toggleExpanded(item.id)}
                   >
-                    <CollapsibleTrigger className="flex w-full items-center justify-between rounded-lg px-3 py-2.5 text-sm font-medium text-black hover:bg-gspn-gold-300 dark:text-gray-200 dark:hover:bg-[#4a0c0c] transition-colors">
+                    <CollapsibleTrigger className="flex w-full items-center justify-between rounded-lg px-3 py-2.5 text-sm font-medium text-black hover:bg-gspn-gold-300 dark:text-gray-200 dark:hover:bg-gspn-maroon-900 transition-colors">
                       <div className="flex items-center gap-3">
                         <Icon className="h-5 w-5" />
                         <span>
@@ -180,8 +180,8 @@ export function MobileNav() {
                               className={cn(
                                 "flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-colors",
                                 isActive
-                                  ? "bg-gspn-gold-50 text-black dark:bg-gspn-gold-500 dark:text-[#2d0707] font-semibold"
-                                  : "text-black hover:bg-gspn-gold-300 dark:text-gray-300 dark:hover:bg-[#4a0c0c] dark:hover:text-white"
+                                  ? "bg-gspn-gold-50 text-black dark:bg-gspn-gold-500 dark:text-gspn-maroon-950 font-semibold"
+                                  : "text-black hover:bg-gspn-gold-300 dark:text-gray-300 dark:hover:bg-gspn-maroon-900 dark:hover:text-white"
                               )}
                             >
                               <SubIcon className="h-4 w-4" />
@@ -219,7 +219,7 @@ export function MobileNav() {
                 <Link
                   href="/profile"
                   onClick={() => setIsOpen(false)}
-                  className="flex items-center gap-2 rounded-lg px-3 py-2 text-sm text-black hover:bg-gspn-gold-300 dark:text-gray-300 dark:hover:bg-[#4a0c0c] dark:hover:text-white transition-colors"
+                  className="flex items-center gap-2 rounded-lg px-3 py-2 text-sm text-black hover:bg-gspn-gold-300 dark:text-gray-300 dark:hover:bg-gspn-maroon-900 dark:hover:text-white transition-colors"
                 >
                   <User className="h-4 w-4" />
                   <span>{t.nav.profile}</span>

@@ -167,8 +167,8 @@ export function RecordPaymentDialog({
       <DialogContent className="sm:max-w-[500px]">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
-            <div className="p-2 rounded-full bg-green-100 dark:bg-green-900/30">
-              <User className="h-5 w-5 text-green-600" />
+            <div className="p-2 rounded-full bg-emerald-100 dark:bg-emerald-900/30">
+              <User className="h-5 w-5 text-emerald-600 dark:text-emerald-400" />
             </div>
             {t?.treasury?.recordPayment || "Enregistrer un paiement"}
           </DialogTitle>
@@ -316,7 +316,7 @@ export function RecordPaymentDialog({
           <Button
             onClick={handleSubmit}
             disabled={isSubmitting || !amountNum || !payerName.trim()}
-            className="bg-green-600 hover:bg-green-700"
+            className="bg-emerald-600 hover:bg-emerald-700"
           >
             {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
             {t?.treasury?.confirmTransaction || "Confirmer"}

@@ -132,13 +132,13 @@ export function SafeTransferDialog({
         <div className="space-y-4">
           {/* Current Balances */}
           <div className="grid grid-cols-2 gap-4">
-            <div className="rounded-lg bg-blue-50 dark:bg-blue-950/20 p-3 border border-blue-200 dark:border-blue-800">
+            <div className="rounded-lg bg-nav-highlight/10 dark:bg-gspn-gold-900/20 p-3 border border-nav-highlight/30 dark:border-gspn-gold-700">
               <p className="text-xs text-muted-foreground mb-1">{t.safe}</p>
-              <p className="text-lg font-bold text-blue-600">{formatCurrency(currentSafeBalance)}</p>
+              <p className="text-lg font-bold text-nav-highlight dark:text-gspn-gold-200">{formatCurrency(currentSafeBalance)}</p>
             </div>
-            <div className="rounded-lg bg-green-50 dark:bg-green-950/20 p-3 border border-green-200 dark:border-green-800">
+            <div className="rounded-lg bg-emerald-50 dark:bg-emerald-950/20 p-3 border border-emerald-200 dark:border-emerald-800">
               <p className="text-xs text-muted-foreground mb-1">{t.nav.treasury}</p>
-              <p className="text-lg font-bold text-green-600">{formatCurrency(currentRegistryBalance)}</p>
+              <p className="text-lg font-bold text-emerald-600 dark:text-emerald-400">{formatCurrency(currentRegistryBalance)}</p>
             </div>
           </div>
 

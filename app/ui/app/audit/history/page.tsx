@@ -50,7 +50,7 @@ export default function DataHistoryPage() {
 
       {/* Stats Cards */}
       <div className="grid gap-4 md:grid-cols-3">
-        <Card className="bg-white dark:bg-gray-900 border-gray-100 dark:border-gray-800 py-5">
+        <Card className="bg-card border-border py-5">
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-sm font-medium text-gray-600 dark:text-gray-400">
               Student Updates
@@ -65,7 +65,7 @@ export default function DataHistoryPage() {
           </CardContent>
         </Card>
 
-        <Card className="bg-white dark:bg-gray-900 border-gray-100 dark:border-gray-800 py-5">
+        <Card className="bg-card border-border py-5">
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-sm font-medium text-gray-600 dark:text-gray-400">
               Enrollment Changes
@@ -80,7 +80,7 @@ export default function DataHistoryPage() {
           </CardContent>
         </Card>
 
-        <Card className="bg-white dark:bg-gray-900 border-gray-100 dark:border-gray-800 py-5">
+        <Card className="bg-card border-border py-5">
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-sm font-medium text-gray-600 dark:text-gray-400">
               Document Updates
@@ -100,12 +100,12 @@ export default function DataHistoryPage() {
       <div className="flex gap-4">
         <Input
           placeholder="Search by student name, ID, or modification type..."
-          className="max-w-md bg-white dark:bg-gray-900 border-gray-200 dark:border-gray-700"
+          className="max-w-md bg-card border-border"
         />
       </div>
 
       {/* Data History Table Placeholder */}
-      <Card className="bg-white dark:bg-gray-900 border-gray-100 dark:border-gray-800">
+      <Card className="bg-card border-border">
         <CardHeader>
           <CardTitle>Change History</CardTitle>
           <CardDescription>
