@@ -60,6 +60,14 @@ export async function GET(req: NextRequest, { params }: RouteParams) {
       )
     }
 
+    // Check enrollment exists
+    if (!payment.enrollment) {
+      return NextResponse.json(
+        { message: "Enrollment not found for this payment" },
+        { status: 404 }
+      )
+    }
+
     // Check student exists on enrollment
     if (!payment.enrollment.student) {
       return NextResponse.json(

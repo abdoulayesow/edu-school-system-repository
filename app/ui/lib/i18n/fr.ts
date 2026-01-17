@@ -51,6 +51,7 @@ export const fr = {
     subjects: "Matières",
     active: "Actif",
     inactive: "Inactif",
+    saving: "Enregistrement...",
     pagination: {
       pageOf: "Page {current} sur {total} ({count} résultats)",
       itemsPerPage: "Éléments par page :",
@@ -416,7 +417,7 @@ export const fr = {
 
     // Filters
     filterActivities: "Filtrer les activités",
-    allTypes: "Tous les types",
+    allActivityTypes: "Tous les types",
     allTeachers: "Tous les enseignants",
     allStatuses: "Tous les statuts",
 
@@ -477,9 +478,19 @@ export const fr = {
     deleteClub: "Supprimer le Club",
     createClub: "Créer le Club",
     updateClub: "Mettre à jour le Club",
-    clubName: "Nom du Club (Anglais)",
-    clubNameFr: "Nom du Club (Français)",
+    clubName: "Nom du Club",
+    clubNamePlaceholder: "Entrez le nom du club",
+    clubNameFr: "Nom Français",
+    clubNameFrPlaceholder: "Entrez le nom français (optionnel)",
+    clubNameEn: "Nom Anglais",
+    clubNameEnPlaceholder: "Entrez le nom anglais (optionnel)",
     clubDescription: "Description",
+    clubDescriptionPlaceholder: "Décrivez les activités et objectifs du club",
+    basicInformation: "Informations de Base",
+    organization: "Organisation",
+    scheduleCapacity: "Horaire et Capacité",
+    fees: "Frais",
+    requiredField: "Champ obligatoire",
     category: "Catégorie",
     selectCategory: "Sélectionner une catégorie",
     noCategory: "Aucune",
@@ -589,23 +600,33 @@ export const fr = {
     viewEnrollments: "Voir les inscriptions",
     enrollments: "Inscriptions",
     monthlyPayments: "Paiements mensuels",
+    monthlyPaymentTracking: "Suivi des paiements mensuels",
     paymentStatus: "Statut de paiement",
     monthsPaid: "{paid} sur {total} mois payés",
     markAsPaid: "Marquer comme payé",
     recordPayment: "Enregistrer le paiement",
     confirmPayment: "Confirmer le paiement",
+    confirmPaymentDescription: "Marquer ce paiement mensuel comme payé",
     paymentRecorded: "Paiement enregistré avec succès",
     paid: "Payé",
     pending: "En attente",
     upcoming: "À venir",
     paymentHistory: "Historique des paiements",
     noEnrollments: "Aucun élève inscrit",
+    noMonthlyPayments: "Pas de paiements mensuels",
     selectPaymentMethod: "Sélectionner le mode de paiement",
     oneTimeFeeStatus: "Frais unique",
     monthlyFeeStatus: "Frais mensuels",
     paymentFor: "Paiement pour",
     cash: "Espèces",
     orangeMoney: "Orange Money",
+    printReceipt: "Imprimer le reçu",
+    clickToMarkPaid: "Cliquer pour marquer comme payé",
+    student: "Élève",
+    amount: "Montant",
+    paymentMethod: "Mode de paiement",
+    enrolledOn: "Inscrit le",
+    by: "par",
   },
 
   // Accounting
@@ -645,9 +666,13 @@ export const fr = {
     recentPayments: "Paiements récents",
     filterByStatus: "Filtrer par statut",
     filterByMethod: "Filtrer par méthode",
+    filterByType: "Filtrer par type",
     filterByDate: "Filtrer par date",
     allStatuses: "Tous les statuts",
     allMethods: "Toutes les méthodes",
+    allTypes: "Tous les types",
+    tuitionPayments: "Scolarité",
+    clubPayments: "Club",
     noPaymentsFound: "Aucun paiement trouvé",
     deposit: "Dépôt",
 
@@ -737,8 +762,6 @@ export const fr = {
     // Transactions and Review tabs
     tabTransactions: "Transactions",
     tabReview: "Revue",
-    filterByType: "Filtrer par type",
-    allTypes: "Tous les types",
     itemsToReview: "éléments à revoir",
     noItemsToReview: "Aucun élément à revoir. Toutes les transactions sont à jour !",
     approve: "Approuver",
@@ -1324,6 +1347,54 @@ export const fr = {
     backToEnrollments: "Retour aux inscriptions",
     startNewEnrollment: "Nouvelle inscription",
     enrollmentApproved: "Votre inscription a été approuvée.",
+  },
+
+  // Club Wizard
+  clubWizard: {
+    // Navigation
+    title: "Créer un nouveau club",
+    step1: "Infos de base",
+    step2: "Détails",
+    step3: "Révision",
+    previous: "Précédent",
+    next: "Suivant",
+    createClub: "Créer le club",
+
+    // Step 1 - Basic Info
+    clubName: "Nom du club",
+    clubNamePlaceholder: "Entrez le nom du club",
+    clubDescription: "Description",
+    category: "Catégorie",
+    selectCategory: "Sélectionnez une catégorie",
+
+    // Step 2 - Details
+    leader: "Responsable du club",
+    selectLeader: "Sélectionnez un enseignant (optionnel)",
+    followSchoolYear: "Suivre les dates de l'année scolaire",
+    followSchoolYearHint: "Utiliser automatiquement les dates de début/fin de l'année scolaire",
+    startDate: "Date de début",
+    endDate: "Date de fin",
+    capacity: "Capacité maximale",
+    status: "Statut",
+    monthlyFee: "Frais mensuels",
+    monthlyFeeRequired: "Les frais mensuels sont obligatoires",
+    oneTimeFee: "Frais d'inscription uniques",
+    oneTimeFeeOptional: "Optionnel",
+
+    // Step 3 - Review
+    reviewTitle: "Réviser les détails du club",
+    basicInformation: "Informations de base",
+    detailsSchedule: "Détails et calendrier",
+    financialInformation: "Informations financières",
+    editSection: "Modifier",
+    followingSchoolYear: "Suit les dates de l'année scolaire",
+
+    // Validation
+    nameMinLength: "Le nom du club doit contenir au moins 3 caractères",
+    categoryRequired: "Veuillez sélectionner une catégorie",
+    monthlyFeeMin: "Les frais mensuels doivent être de 0 ou plus",
+    capacityMin: "La capacité doit être d'au moins 1",
+    endDateAfterStart: "La date de fin doit être après la date de début",
   },
 
   // Students module
@@ -2518,7 +2589,17 @@ export const fr = {
     title: "Nouveau paiement",
     description: "Enregistrer un paiement de scolarité",
 
+    // Step 0 - Payment Type Selection
+    selectPaymentType: "Sélectionner le type de paiement",
+    selectPaymentTypeDesc: "Choisissez le type de paiement que vous souhaitez enregistrer. Cela déterminera les options disponibles dans les étapes suivantes.",
+    schoolTuition: "Scolarité",
+    schoolTuitionDesc: "Enregistrer un paiement pour les frais de scolarité et l'inscription scolaire.",
+    clubPayment: "Paiement de club",
+    clubPaymentDesc: "Enregistrer un paiement pour les activités parascolaires et les adhésions aux clubs.",
+    paymentTypeHint: "Vous pouvez modifier cette sélection en cliquant sur l'autre option ci-dessus.",
+
     // Steps
+    step0: "Type de paiement",
     step1: "Élève",
     step2: "Échéancier",
     step3: "Paiement",

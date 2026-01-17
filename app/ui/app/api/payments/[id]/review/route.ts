@@ -51,6 +51,14 @@ export async function POST(req: NextRequest, { params }: RouteParams) {
       )
     }
 
+    // Check enrollment exists
+    if (!existingPayment.enrollment) {
+      return NextResponse.json(
+        { message: "Enrollment not found for this payment" },
+        { status: 404 }
+      )
+    }
+
     // Only allow reversal of confirmed payments
     if (existingPayment.status !== "confirmed") {
       return NextResponse.json(
@@ -61,6 +69,9 @@ export async function POST(req: NextRequest, { params }: RouteParams) {
 
     const body = await req.json()
     const validated = reversePaymentSchema.parse(body)
+
+    // Store enrollment reference for transaction (TypeScript flow analysis)
+    const enrollment = existingPayment.enrollment
 
     // Reverse the payment in a transaction
     const result = await prisma.$transaction(async (tx) => {
@@ -111,7 +122,7 @@ export async function POST(req: NextRequest, { params }: RouteParams) {
           receiptNumber: reversalReceiptNumber,
           referenceType: "payment",
           referenceId: existingPayment.id,
-          studentId: existingPayment.enrollment.studentId,
+          studentId: enrollment.studentId,
           recordedBy: session!.user.id,
           notes: validated.reason,
         },
@@ -146,13 +157,13 @@ export async function POST(req: NextRequest, { params }: RouteParams) {
       })
 
       // Recalculate payment schedules - some may now be unpaid
-      const remainingPayments = existingPayment.enrollment.payments.filter(
+      const remainingPayments = enrollment.payments.filter(
         (p) => p.id !== id
       )
       const newTotalPaid = remainingPayments.reduce((sum, p) => sum + p.amount, 0)
 
       let runningTotal = 0
-      for (const schedule of existingPayment.enrollment.paymentSchedules) {
+      for (const schedule of enrollment.paymentSchedules) {
         runningTotal += schedule.amount
         // Mark as unpaid if no longer covered by remaining payments
         await tx.paymentSchedule.update({

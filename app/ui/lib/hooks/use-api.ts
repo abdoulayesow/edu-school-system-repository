@@ -95,6 +95,7 @@ interface ExpenseFilters {
 interface PaymentFilters {
   status?: string
   method?: string
+  paymentType?: string // "tuition" or "club"
   gradeId?: string
   balanceStatus?: string // "outstanding" (still owes) or "paid_up" (fully paid)
   startDate?: string
@@ -1302,6 +1303,7 @@ export interface ApiPayment {
   amount: number
   method: "cash" | "orange_money"
   status: string
+  paymentType: "tuition" | "club"
   receiptNumber: string
   transactionRef: string | null
   notes: string | null
@@ -1322,6 +1324,22 @@ export interface ApiPayment {
       id: string
       name: string
     } | null
+  } | null
+  clubEnrollment: {
+    id: string
+    club: {
+      id: string
+      name: string
+      nameFr: string | null
+      fee: number | null
+      monthlyFee: number | null
+    }
+    student: {
+      id: string
+      firstName: string
+      lastName: string
+    }
+    studentNumber: string
   } | null
   recorder: {
     id: string

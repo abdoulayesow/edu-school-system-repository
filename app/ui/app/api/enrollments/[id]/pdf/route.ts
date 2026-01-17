@@ -132,7 +132,7 @@ export async function GET(req: NextRequest, { params }: RouteParams) {
 
     const payments: Payment[] = enrollment.payments.map((p) => ({
       id: p.id,
-      enrollmentId: p.enrollmentId,
+      enrollmentId: p.enrollmentId!, // Safe assertion - these payments are fetched from enrollment
       paymentScheduleId: p.paymentScheduleId ?? undefined,
       amount: p.amount,
       method: p.method as Payment["method"],

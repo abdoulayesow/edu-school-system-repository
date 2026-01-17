@@ -47,6 +47,19 @@ interface StudentSearchResult {
   }
 }
 
+interface ClubEnrollment {
+  id: string
+  clubId: string
+  clubName: string
+  monthlyFee: number
+  totalFee: number | null
+  startMonth: number | null
+  startYear: number | null
+  totalMonths: number | null
+  totalPaid: number
+  remainingBalance: number
+}
+
 export function StepStudentSelection() {
   const { t, locale } = useI18n()
   const { state, loadStudent, updateData } = usePaymentWizard()
@@ -62,6 +75,13 @@ export function StepStudentSelection() {
   const [balanceStatusFilter, setBalanceStatusFilter] = useState<string>("outstanding")
   const searchTimeoutRef = useRef<NodeJS.Timeout | null>(null)
   const dropdownRef = useRef<HTMLDivElement>(null)
+
+  // Club enrollment states
+  const [clubEnrollments, setClubEnrollments] = useState<ClubEnrollment[]>([])
+  const [isLoadingClubs, setIsLoadingClubs] = useState(false)
+  const [selectedClubEnrollmentId, setSelectedClubEnrollmentId] = useState<string | undefined>(
+    data.clubEnrollmentId
+  )
 
   // Get grades list
   const grades = gradesData?.grades || []
@@ -149,6 +169,11 @@ export function StepStudentSelection() {
     setIsLoadingBalance(true)
 
     try {
+      // For club payments, fetch club enrollments
+      if (data.paymentType === "club") {
+        await loadClubEnrollments(student.id)
+      }
+
       // Fetch full balance info
       const response = await fetch(`/api/students/${student.id}/balance`)
       if (response.ok) {
@@ -243,6 +268,36 @@ export function StepStudentSelection() {
     } finally {
       setIsLoadingBalance(false)
     }
+  }
+
+  // Load club enrollments for selected student
+  const loadClubEnrollments = async (studentId: string) => {
+    setIsLoadingClubs(true)
+    try {
+      const response = await fetch(`/api/students/${studentId}/club-enrollments`)
+      if (response.ok) {
+        const data = await response.json()
+        setClubEnrollments(data.clubEnrollments || [])
+      }
+    } catch (err) {
+      console.error("Failed to load club enrollments:", err)
+    } finally {
+      setIsLoadingClubs(false)
+    }
+  }
+
+  // Handle club enrollment selection
+  const handleSelectClubEnrollment = (enrollment: ClubEnrollment) => {
+    setSelectedClubEnrollmentId(enrollment.id)
+    updateData({
+      clubEnrollmentId: enrollment.id,
+      clubId: enrollment.clubId,
+      clubName: enrollment.clubName,
+      clubFee: enrollment.totalFee || 0,
+      clubMonthlyFee: enrollment.monthlyFee,
+      // Pre-populate payment amount with remaining balance
+      paymentAmount: enrollment.remainingBalance > 0 ? enrollment.remainingBalance : enrollment.monthlyFee,
+    })
   }
 
   // Get status badge variant
@@ -707,61 +762,172 @@ export function StepStudentSelection() {
             </Card>
           )}
 
-          {/* Balance Summary Card */}
-          <Card className={cn(
-            "border-2 shadow-md",
-            isFullyPaid
-              ? "border-emerald-200 dark:border-emerald-800 bg-emerald-50/50 dark:bg-emerald-950/20"
-              : "border-amber-200 dark:border-amber-800"
-          )}>
-            <CardContent className="py-5">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-4">
-                  <div className={cn(
-                    "p-3 rounded-xl",
-                    isFullyPaid
-                      ? "bg-emerald-100 dark:bg-emerald-900/50"
-                      : "bg-amber-100 dark:bg-amber-900/50"
-                  )}>
-                    <Wallet className={cn(
-                      sizing.icon.md,
+          {/* Balance Summary Card - Only for tuition payments */}
+          {data.paymentType === "tuition" && (
+            <Card className={cn(
+              "border-2 shadow-md",
+              isFullyPaid
+                ? "border-emerald-200 dark:border-emerald-800 bg-emerald-50/50 dark:bg-emerald-950/20"
+                : "border-amber-200 dark:border-amber-800"
+            )}>
+              <CardContent className="py-5">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-4">
+                    <div className={cn(
+                      "p-3 rounded-xl",
                       isFullyPaid
-                        ? "text-emerald-600 dark:text-emerald-400"
-                        : "text-amber-600 dark:text-amber-400"
-                    )} />
-                  </div>
-                  <div>
-                    <p className="text-sm text-muted-foreground">
-                      {t?.paymentWizard?.remainingBalance || "Remaining Balance"}
-                    </p>
-                    <p className={cn(
-                      typography.currency.lg,
-                      isFullyPaid
-                        ? "text-emerald-600 dark:text-emerald-400"
-                        : "text-amber-600 dark:text-amber-400"
+                        ? "bg-emerald-100 dark:bg-emerald-900/50"
+                        : "bg-amber-100 dark:bg-amber-900/50"
                     )}>
-                      {isFullyPaid ? (
-                        <span className="flex items-center gap-2">
-                          <CheckCircle2 className={sizing.icon.md} />
-                          {locale === "fr" ? "Payé intégralement" : "Fully Paid"}
-                        </span>
-                      ) : (
-                        formatCurrency(data.remainingBalance)
-                      )}
+                      <Wallet className={cn(
+                        sizing.icon.md,
+                        isFullyPaid
+                          ? "text-emerald-600 dark:text-emerald-400"
+                          : "text-amber-600 dark:text-amber-400"
+                      )} />
+                    </div>
+                    <div>
+                      <p className="text-sm text-muted-foreground">
+                        {t?.paymentWizard?.remainingBalance || "Remaining Balance"}
+                      </p>
+                      <p className={cn(
+                        typography.currency.lg,
+                        isFullyPaid
+                          ? "text-emerald-600 dark:text-emerald-400"
+                          : "text-amber-600 dark:text-amber-400"
+                      )}>
+                        {isFullyPaid ? (
+                          <span className="flex items-center gap-2">
+                            <CheckCircle2 className={sizing.icon.md} />
+                            {locale === "fr" ? "Payé intégralement" : "Fully Paid"}
+                          </span>
+                        ) : (
+                          formatCurrency(data.remainingBalance)
+                        )}
+                      </p>
+                    </div>
+                  </div>
+                  <div className="text-right">
+                    <p className="text-sm text-muted-foreground">
+                      {t?.paymentWizard?.totalPaid || "Total Paid"}
+                    </p>
+                    <p className={cn(typography.currency.sm, "text-foreground")}>
+                      {formatCurrency(data.totalPaid)} / {formatCurrency(data.tuitionFee)}
                     </p>
                   </div>
                 </div>
-                <div className="text-right">
-                  <p className="text-sm text-muted-foreground">
-                    {t?.paymentWizard?.totalPaid || "Total Paid"}
-                  </p>
-                  <p className={cn(typography.currency.sm, "text-foreground")}>
-                    {formatCurrency(data.totalPaid)} / {formatCurrency(data.tuitionFee)}
-                  </p>
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Club Enrollment Selection - Only for club payments */}
+          {data.paymentType === "club" && (
+            <>
+              {isLoadingClubs ? (
+                <Card className="border-dashed border-2">
+                  <CardContent className="flex items-center justify-center py-12">
+                    <div className="flex flex-col items-center gap-3 text-muted-foreground">
+                      <Loader2 className={`${sizing.icon.lg} animate-spin`} />
+                      <span className="text-sm">
+                        {locale === "fr" ? "Chargement des clubs..." : "Loading clubs..."}
+                      </span>
+                    </div>
+                  </CardContent>
+                </Card>
+              ) : clubEnrollments.length === 0 ? (
+                <Card className="border-dashed border-2">
+                  <CardContent className="flex flex-col items-center justify-center py-12 text-center">
+                    <AlertCircle className={`${sizing.icon.lg} text-muted-foreground mb-3`} />
+                    <h3 className="text-lg font-semibold text-muted-foreground">
+                      {locale === "fr" ? "Aucun club actif" : "No Active Clubs"}
+                    </h3>
+                    <p className="text-sm text-muted-foreground mt-2 max-w-sm">
+                      {locale === "fr"
+                        ? "Cet élève n'est inscrit à aucun club actif"
+                        : "This student is not enrolled in any active clubs"}
+                    </p>
+                  </CardContent>
+                </Card>
+              ) : (
+                <div className="space-y-3">
+                  <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider">
+                    {locale === "fr" ? "Sélectionnez un club" : "Select a Club"}
+                  </h3>
+                  <div className="grid gap-3">
+                    {clubEnrollments.map((enrollment) => (
+                      <Card
+                        key={enrollment.id}
+                        className={cn(
+                          "cursor-pointer transition-all duration-200 border-2",
+                          selectedClubEnrollmentId === enrollment.id
+                            ? "border-primary bg-primary/5 shadow-md"
+                            : "border-border hover:border-primary/50 hover:shadow-sm"
+                        )}
+                        onClick={() => handleSelectClubEnrollment(enrollment)}
+                      >
+                        <CardContent className="p-4">
+                          <div className="flex items-start justify-between gap-4">
+                            <div className="flex-1 min-w-0">
+                              <div className="flex items-center gap-2 mb-2">
+                                <h4 className="font-semibold text-lg">{enrollment.clubName}</h4>
+                                {selectedClubEnrollmentId === enrollment.id && (
+                                  <CheckCircle2 className="size-5 text-primary shrink-0" />
+                                )}
+                              </div>
+                              <div className="flex items-center gap-4 text-sm text-muted-foreground">
+                                {enrollment.totalMonths && (
+                                  <span>
+                                    {enrollment.totalMonths}{" "}
+                                    {locale === "fr"
+                                      ? enrollment.totalMonths > 1
+                                        ? "mois"
+                                        : "mois"
+                                      : enrollment.totalMonths > 1
+                                        ? "months"
+                                        : "month"}
+                                  </span>
+                                )}
+                                <span>•</span>
+                                <span>
+                                  {formatCurrency(enrollment.monthlyFee)}
+                                  {locale === "fr" ? "/mois" : "/month"}
+                                </span>
+                              </div>
+                            </div>
+                            <div className="text-right shrink-0">
+                              <p className="text-xs text-muted-foreground mb-1">
+                                {locale === "fr" ? "Solde restant" : "Remaining"}
+                              </p>
+                              <p className={cn(
+                                typography.currency.lg,
+                                enrollment.remainingBalance === 0
+                                  ? "text-emerald-600 dark:text-emerald-400"
+                                  : "text-amber-600 dark:text-amber-400"
+                              )}>
+                                {enrollment.remainingBalance === 0 ? (
+                                  <span className="flex items-center gap-1">
+                                    <CheckCircle2 className={sizing.icon.sm} />
+                                    {locale === "fr" ? "Payé" : "Paid"}
+                                  </span>
+                                ) : (
+                                  formatCurrency(enrollment.remainingBalance)
+                                )}
+                              </p>
+                              {enrollment.totalFee && (
+                                <p className="text-xs text-muted-foreground mt-1">
+                                  {formatCurrency(enrollment.totalPaid)} / {formatCurrency(enrollment.totalFee)}
+                                </p>
+                              )}
+                            </div>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    ))}
+                  </div>
                 </div>
-              </div>
-            </CardContent>
-          </Card>
+              )}
+            </>
+          )}
         </div>
       )}
 

@@ -53,6 +53,7 @@ export const en: TranslationKeys = {
     subjects: "Subjects",
     active: "Active",
     inactive: "Inactive",
+    saving: "Saving...",
     pagination: {
       pageOf: "Page {current} of {total} ({count} results)",
       itemsPerPage: "Items per page:",
@@ -418,7 +419,7 @@ export const en: TranslationKeys = {
 
     // Filters
     filterActivities: "Filter activities",
-    allTypes: "All types",
+    allActivityTypes: "All types",
     allTeachers: "All teachers",
     allStatuses: "All statuses",
 
@@ -479,9 +480,19 @@ export const en: TranslationKeys = {
     deleteClub: "Delete Club",
     createClub: "Create Club",
     updateClub: "Update Club",
-    clubName: "Club Name (English)",
-    clubNameFr: "Club Name (French)",
+    clubName: "Club Name",
+    clubNamePlaceholder: "Enter club name",
+    clubNameFr: "French Name",
+    clubNameFrPlaceholder: "Enter French name (optional)",
+    clubNameEn: "English Name",
+    clubNameEnPlaceholder: "Enter English name (optional)",
     clubDescription: "Description",
+    clubDescriptionPlaceholder: "Describe the club activities and objectives",
+    basicInformation: "Basic Information",
+    organization: "Organization",
+    scheduleCapacity: "Schedule & Capacity",
+    fees: "Fees",
+    requiredField: "Required field",
     category: "Category",
     selectCategory: "Select category",
     noCategory: "None",
@@ -591,23 +602,33 @@ export const en: TranslationKeys = {
     viewEnrollments: "View Enrollments",
     enrollments: "Enrollments",
     monthlyPayments: "Monthly Payments",
+    monthlyPaymentTracking: "Monthly Payment Tracking",
     paymentStatus: "Payment Status",
     monthsPaid: "{paid} of {total} months paid",
     markAsPaid: "Mark as Paid",
     recordPayment: "Record Payment",
     confirmPayment: "Confirm Payment",
+    confirmPaymentDescription: "Mark this monthly payment as paid",
     paymentRecorded: "Payment recorded successfully",
     paid: "Paid",
     pending: "Pending",
     upcoming: "Upcoming",
     paymentHistory: "Payment History",
     noEnrollments: "No students enrolled",
+    noMonthlyPayments: "No monthly payments",
     selectPaymentMethod: "Select payment method",
     oneTimeFeeStatus: "One-time Fee",
     monthlyFeeStatus: "Monthly Fees",
     paymentFor: "Payment for",
     cash: "Cash",
     orangeMoney: "Orange Money",
+    printReceipt: "Print Receipt",
+    clickToMarkPaid: "Click to mark as paid",
+    student: "Student",
+    amount: "Amount",
+    paymentMethod: "Payment Method",
+    enrolledOn: "Enrolled on",
+    by: "by",
   },
 
   // Accounting
@@ -647,9 +668,13 @@ export const en: TranslationKeys = {
     recentPayments: "Recent Payments",
     filterByStatus: "Filter by status",
     filterByMethod: "Filter by method",
+    filterByType: "Filter by type",
     filterByDate: "Filter by date",
     allStatuses: "All statuses",
     allMethods: "All methods",
+    allTypes: "All types",
+    tuitionPayments: "Tuition",
+    clubPayments: "Club",
     noPaymentsFound: "No payments found",
     deposit: "Deposit",
 
@@ -739,8 +764,6 @@ export const en: TranslationKeys = {
     // Transactions and Review tabs
     tabTransactions: "Transactions",
     tabReview: "Review",
-    filterByType: "Filter by type",
-    allTypes: "All types",
     itemsToReview: "items to review",
     noItemsToReview: "No items to review. All transactions are up to date!",
     approve: "Approve",
@@ -1326,6 +1349,54 @@ export const en: TranslationKeys = {
     backToEnrollments: "Back to Enrollments",
     startNewEnrollment: "Start New Enrollment",
     enrollmentApproved: "Your enrollment has been approved.",
+  },
+
+  // Club Wizard
+  clubWizard: {
+    // Navigation
+    title: "Create New Club",
+    step1: "Basic Info",
+    step2: "Details",
+    step3: "Review",
+    previous: "Previous",
+    next: "Next",
+    createClub: "Create Club",
+
+    // Step 1 - Basic Info
+    clubName: "Club Name",
+    clubNamePlaceholder: "Enter club name",
+    clubDescription: "Description",
+    category: "Category",
+    selectCategory: "Select a category",
+
+    // Step 2 - Details
+    leader: "Club Leader",
+    selectLeader: "Select a teacher (optional)",
+    followSchoolYear: "Follow school year dates",
+    followSchoolYearHint: "Automatically use school year start/end dates",
+    startDate: "Start Date",
+    endDate: "End Date",
+    capacity: "Maximum Capacity",
+    status: "Status",
+    monthlyFee: "Monthly Fee",
+    monthlyFeeRequired: "Monthly fee is required",
+    oneTimeFee: "One-time Registration Fee",
+    oneTimeFeeOptional: "Optional",
+
+    // Step 3 - Review
+    reviewTitle: "Review Club Details",
+    basicInformation: "Basic Information",
+    detailsSchedule: "Details & Schedule",
+    financialInformation: "Financial Information",
+    editSection: "Edit",
+    followingSchoolYear: "Following school year dates",
+
+    // Validation
+    nameMinLength: "Club name must be at least 3 characters",
+    categoryRequired: "Please select a category",
+    monthlyFeeMin: "Monthly fee must be 0 or greater",
+    capacityMin: "Capacity must be at least 1",
+    endDateAfterStart: "End date must be after start date",
   },
 
   // Students module
@@ -2520,7 +2591,17 @@ export const en: TranslationKeys = {
     title: "New Payment",
     description: "Record a tuition payment",
 
+    // Step 0 - Payment Type Selection
+    selectPaymentType: "Select Payment Type",
+    selectPaymentTypeDesc: "Choose the type of payment you want to record. This will determine the available options in the next steps.",
+    schoolTuition: "School Tuition",
+    schoolTuitionDesc: "Record a payment for student tuition fees and school enrollment.",
+    clubPayment: "Club Payment",
+    clubPaymentDesc: "Record a payment for extracurricular club activities and memberships.",
+    paymentTypeHint: "You can change this selection by clicking the other option above.",
+
     // Steps
+    step0: "Payment Type",
     step1: "Student",
     step2: "Schedule",
     step3: "Payment",

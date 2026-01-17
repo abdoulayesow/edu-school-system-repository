@@ -77,6 +77,14 @@ export async function GET(req: NextRequest, { params }: RouteParams) {
       )
     }
 
+    // Check enrollment exists
+    if (!payment.enrollment) {
+      return NextResponse.json(
+        { message: "Enrollment not found for this payment" },
+        { status: 404 }
+      )
+    }
+
     // Calculate balance info
     const tuitionFee = payment.enrollment.adjustedTuitionFee || payment.enrollment.originalTuitionFee
     const totalPaid = payment.enrollment.payments.reduce((sum, p) => sum + p.amount, 0)
@@ -130,6 +138,14 @@ export async function PATCH(req: NextRequest, { params }: RouteParams) {
     if (!existingPayment) {
       return NextResponse.json(
         { message: "Payment not found" },
+        { status: 404 }
+      )
+    }
+
+    // Check enrollment exists
+    if (!existingPayment.enrollment) {
+      return NextResponse.json(
+        { message: "Enrollment not found for this payment" },
         { status: 404 }
       )
     }

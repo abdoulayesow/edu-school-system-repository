@@ -281,7 +281,9 @@ model PaymentSchedule {
 
 model Payment {
   id                String           @id @default(cuid())
-  enrollmentId      String
+  enrollmentId      String?
+  clubEnrollmentId  String?
+  paymentType       PaymentType      @default(tuition)
   paymentScheduleId String?
   amount            Int
   method            PaymentMethod
@@ -301,7 +303,8 @@ model Payment {
   syncVersion       Int              @default(0)
   createdAt         DateTime         @default(now())
   updatedAt         DateTime         @updatedAt
-  enrollment        Enrollment       @relation(fields: [enrollmentId], references: [id], onDelete: Cascade)
+  enrollment        Enrollment?      @relation(fields: [enrollmentId], references: [id], onDelete: Cascade)
+  clubEnrollment    ClubEnrollment?  @relation(fields: [clubEnrollmentId], references: [id], onDelete: Cascade)
   paymentSchedule   PaymentSchedule? @relation(fields: [paymentScheduleId], references: [id])
   recorder          User             @relation("PaymentRecorder", fields: [recordedBy], references: [id])
   confirmer         User?            @relation("PaymentConfirmer", fields: [confirmedBy], references: [id])
@@ -309,6 +312,8 @@ model Payment {
   cashDeposit       CashDeposit?
 
   @@index([enrollmentId])
+  @@index([clubEnrollmentId])
+  @@index([paymentType])
   @@index([paymentScheduleId])
   @@index([status])
   @@index([recordedBy])
@@ -867,8 +872,9 @@ model ClubEnrollment {
   club             Club                 @relation(fields: [clubId], references: [id], onDelete: Cascade)
   studentProfile   StudentProfile       @relation(fields: [studentProfileId], references: [id], onDelete: Cascade)
   enroller         User                 @relation("ClubEnroller", fields: [enrolledBy], references: [id])
-  payments         ClubPayment[]
+  clubPayments     ClubPayment[]
   monthlyPayments  ClubMonthlyPayment[]
+  payments         Payment[]
 
   @@unique([clubId, studentProfileId])
   @@index([clubId])
@@ -1229,6 +1235,11 @@ enum EnrollmentStatus {
 enum PaymentMethod {
   cash
   orange_money
+}
+
+enum PaymentType {
+  tuition
+  club
 }
 
 enum PaymentStatus {

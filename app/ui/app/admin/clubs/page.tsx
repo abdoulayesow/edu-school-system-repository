@@ -19,6 +19,8 @@ import {
   DialogFooter,
   DialogDescription,
 } from "@/components/ui/dialog"
+import { ClubWizard } from "@/components/clubs/wizard/club-wizard"
+import { EnrollStudentDialog } from "@/components/clubs/enroll-student-dialog"
 import {
   Select,
   SelectContent,
@@ -59,6 +61,7 @@ import {
   Circle,
   Smartphone,
   Shield,
+  Printer,
 } from "lucide-react"
 import { Checkbox } from "@/components/ui/checkbox"
 type ClubStatus = "draft" | "active" | "closed" | "completed" | "cancelled"
@@ -104,6 +107,7 @@ const ITEMS_PER_PAGE = 50
 
 export default function AdminClubsPage() {
   const { t, locale } = useI18n()
+  const [mounted, setMounted] = useState(false)
   const [schoolYears, setSchoolYears] = useState<SchoolYear[]>([])
   const [teachers, setTeachers] = useState<TeacherOption[]>([])
   const [selectedSchoolYearId, setSelectedSchoolYearId] = useState<string>("")
@@ -119,6 +123,7 @@ export default function AdminClubsPage() {
   // Enrollments dialog state
   const [isEnrollmentsDialogOpen, setIsEnrollmentsDialogOpen] = useState(false)
   const [enrollmentsClub, setEnrollmentsClub] = useState<Club | null>(null)
+  const [isEnrollStudentDialogOpen, setIsEnrollStudentDialogOpen] = useState(false)
   const [isPaymentDialogOpen, setIsPaymentDialogOpen] = useState(false)
   const [selectedEnrollment, setSelectedEnrollment] = useState<ClubEnrollmentWithPayments | null>(null)
   const [selectedMonthlyPayment, setSelectedMonthlyPayment] = useState<ClubMonthlyPayment | null>(null)
@@ -195,12 +200,17 @@ export default function AdminClubsPage() {
   const clubs = clubsData?.clubs ?? []
   const pagination = clubsData?.pagination ?? null
 
+  // Set mounted state
+  useEffect(() => {
+    setMounted(true)
+  }, [])
+
   // Load school years and teachers
   useEffect(() => {
     async function loadData() {
       try {
         const [syRes, teachersRes] = await Promise.all([
-          fetch("/api/school-years"),
+          fetch("/api/admin/school-years"),
           fetch("/api/admin/teachers?limit=500"),
         ])
         if (syRes.ok) {
@@ -437,6 +447,11 @@ export default function AdminClubsPage() {
     setIsPaymentDialogOpen(true)
   }
 
+  const printReceipt = (clubId: string, paymentId: string) => {
+    const url = `/api/admin/clubs/${clubId}/payments/${paymentId}/receipt-pdf?lang=${locale}`
+    window.open(url, "_blank")
+  }
+
   const handleMarkAsPaid = async () => {
     if (!enrollmentsClub || !selectedEnrollment || !selectedMonthlyPayment) return
 
@@ -517,11 +532,29 @@ export default function AdminClubsPage() {
   }, {} as Record<string, typeof grades>)
 
   const levelOrder = ["kindergarten", "primary", "middle", "high"]
+  // Map database level values to i18n label keys
   const levelLabels: Record<string, string> = {
-    kindergarten: t.grades?.kindergarten || "Kindergarten",
-    primary: t.grades?.primary || "Primary",
-    middle: t.grades?.middle || "Middle School",
-    high: t.grades?.high || "High School",
+    kindergarten: t.grades?.levelLabels?.kindergarten || "Kindergarten",
+    primary: t.grades?.levelLabels?.elementary || "Primary",
+    middle: t.grades?.levelLabels?.college || "Middle School",
+    high: t.grades?.levelLabels?.high_school || "High School",
+  }
+
+  // Prevent hydration mismatch by not rendering interactive components until mounted
+  if (!mounted) {
+    return (
+      <PageContainer maxWidth="full">
+        <div className="space-y-6">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+            <div>
+              <h1 className="text-2xl font-bold">{t.clubs?.adminTitle || "Clubs Management"}</h1>
+              <p className="text-muted-foreground">{t.clubs?.adminSubtitle || "Create and manage clubs for the school year"}</p>
+            </div>
+          </div>
+          <div className="text-center py-8 text-muted-foreground">{t.common?.loading || "Loading..."}</div>
+        </div>
+      </PageContainer>
+    )
   }
 
   return (
@@ -853,152 +886,310 @@ export default function AdminClubsPage() {
           }
         }}
       >
-        <DialogContent className="max-w-md max-h-[90vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle>
-              {isEditDialogOpen ? t.clubs?.editClub || "Edit Club" : t.clubs?.addClub || "Add Club"}
-            </DialogTitle>
-          </DialogHeader>
-          <div className="grid gap-4 py-4">
-            <div className="grid gap-2">
-              <Label>{t.clubs?.clubName || "Club Name (English)"}</Label>
-              <Input
-                value={form.name}
-                onChange={(e) => setForm({ ...form, name: e.target.value })}
-              />
-            </div>
-            <div className="grid gap-2">
-              <Label>{t.clubs?.clubNameFr || "Club Name (French)"}</Label>
-              <Input
-                value={form.nameFr}
-                onChange={(e) => setForm({ ...form, nameFr: e.target.value })}
-              />
-            </div>
-            <div className="grid gap-2">
-              <Label>{t.clubs?.clubDescription || "Description"}</Label>
-              <Textarea
-                value={form.description}
-                onChange={(e) => setForm({ ...form, description: e.target.value })}
-              />
-            </div>
-            <div className="grid grid-cols-2 gap-4">
-              <div className="grid gap-2">
-                <Label>{t.clubs?.category || "Category"}</Label>
-                <Select
-                  value={form.categoryId || "__none__"}
-                  onValueChange={(v) => setForm({ ...form, categoryId: v === "__none__" ? "" : v })}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder={t.clubs?.selectCategory || "Select..."} />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="__none__">{t.clubs?.noCategory || "None"}</SelectItem>
-                    {categories?.map((cat) => (
-                      <SelectItem key={cat.id} value={cat.id}>
-                        {locale === "fr" ? cat.nameFr : cat.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="grid gap-2">
-                <Label>{t.common?.status || "Status"}</Label>
-                <Select
-                  value={form.status}
-                  onValueChange={(v) => setForm({ ...form, status: v as ClubStatus })}
-                >
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {CLUB_STATUSES.map((status) => (
-                      <SelectItem key={status} value={status}>
-                        {getStatusLabel(status)}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
-            <div className="grid gap-2">
-              <Label>{t.clubs?.leader || "Leader"}</Label>
-              <Select
-                value={form.leaderId || "__none__"}
-                onValueChange={(v) => setForm({ ...form, leaderId: v === "__none__" ? "" : v })}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder={t.clubs?.selectLeader || "Select leader..."} />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="__none__">{t.clubs?.noLeader || "None"}</SelectItem>
-                  {teachers.map((teacher) => (
-                    <SelectItem key={teacher.id} value={teacher.id}>
-                      {teacher.firstName} {teacher.lastName}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-            <div className="grid grid-cols-2 gap-4">
-              <div className="grid gap-2">
-                <Label>{t.clubs?.startDate || "Start Date"}</Label>
-                <Input
-                  type="date"
-                  value={form.startDate}
-                  onChange={(e) => setForm({ ...form, startDate: e.target.value })}
-                />
-              </div>
-              <div className="grid gap-2">
-                <Label>{t.clubs?.endDate || "End Date"}</Label>
-                <Input
-                  type="date"
-                  value={form.endDate}
-                  onChange={(e) => setForm({ ...form, endDate: e.target.value })}
-                />
-              </div>
-            </div>
-            <div className="grid grid-cols-2 gap-4">
-              <div className="grid gap-2">
-                <Label>{t.clubs?.oneTimeFee || "One-time Fee"} (GNF)</Label>
-                <Input
-                  type="number"
-                  value={form.fee}
-                  onChange={(e) => setForm({ ...form, fee: parseInt(e.target.value) || 0 })}
-                />
-              </div>
-              <div className="grid gap-2">
-                <Label>{t.clubs?.monthlyFee || "Monthly Fee"} (GNF)</Label>
-                <Input
-                  type="number"
-                  value={form.monthlyFee}
-                  onChange={(e) => setForm({ ...form, monthlyFee: parseInt(e.target.value) || 0 })}
-                />
-              </div>
-            </div>
-            <div className="grid gap-2">
-              <Label>{t.clubs?.capacity || "Capacity"}</Label>
-              <Input
-                type="number"
-                value={form.capacity}
-                onChange={(e) => setForm({ ...form, capacity: parseInt(e.target.value) || 30 })}
-              />
-            </div>
-          </div>
-          <DialogFooter>
-            <Button
-              variant="outline"
-              onClick={() => {
+        <DialogContent className={cn(
+          "overflow-hidden flex flex-col",
+          isCreateDialogOpen ? "max-w-4xl max-h-[90vh]" : "max-w-2xl max-h-[90vh]"
+        )}>
+          {/* Use wizard for create, old form for edit */}
+          {isCreateDialogOpen ? (
+            <ClubWizard
+              onComplete={() => {
                 setIsCreateDialogOpen(false)
-                setIsEditDialogOpen(false)
                 resetForm()
               }}
-            >
-              {t.common?.cancel || "Cancel"}
-            </Button>
-            <Button onClick={isEditDialogOpen ? handleEdit : handleCreate}>
-              {isEditDialogOpen ? t.clubs?.updateClub || "Update Club" : t.clubs?.createClub || "Create Club"}
-            </Button>
+              onCancel={() => {
+                setIsCreateDialogOpen(false)
+                resetForm()
+              }}
+            />
+          ) : (
+            <>
+              <DialogHeader className="pb-4 border-b border-border">
+                <DialogTitle className="text-2xl font-bold flex items-center gap-3">
+                  <div className="h-10 w-1 bg-gradient-to-b from-gspn-gold-400 via-gspn-gold-500 to-gspn-gold-600 rounded-full" />
+                  {t.clubs?.editClub || "Edit Club"}
+                </DialogTitle>
+              </DialogHeader>
+
+          <div className="overflow-y-auto flex-1 pr-2 -mr-2">
+            <div className="grid gap-6 py-6">
+              {/* Basic Information Section */}
+              <div className="space-y-4">
+                <div className="flex items-center gap-2 pb-2">
+                  <div className="h-px flex-1 bg-gradient-to-r from-gspn-gold-200 via-gspn-gold-300 to-transparent dark:from-gspn-gold-800 dark:via-gspn-gold-700" />
+                  <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider">
+                    {t.clubs?.basicInformation || "Basic Information"}
+                  </h3>
+                  <div className="h-px flex-1 bg-gradient-to-l from-gspn-gold-200 via-gspn-gold-300 to-transparent dark:from-gspn-gold-800 dark:via-gspn-gold-700" />
+                </div>
+
+                <div className="grid gap-4">
+                  <div className="grid gap-2.5">
+                    <Label className="flex items-center gap-2 text-sm font-medium">
+                      {t.clubs?.clubName || "Club Name"}
+                      <span className="inline-flex items-center justify-center w-4 h-4 text-[10px] font-bold text-white bg-amber-500 rounded-full">*</span>
+                    </Label>
+                    <Input
+                      value={form.name}
+                      onChange={(e) => setForm({ ...form, name: e.target.value })}
+                      placeholder={t.clubs?.clubNamePlaceholder || "Enter club name"}
+                      className="h-11 border-2 focus-visible:border-gspn-gold-400 dark:focus-visible:border-gspn-gold-600 transition-colors"
+                    />
+                  </div>
+
+                  <div className="grid gap-2.5">
+                    <Label className="text-sm font-medium text-muted-foreground flex items-center gap-2">
+                      {t.clubs?.clubNameFr || "French Name"}
+                      <span className="text-xs px-1.5 py-0.5 rounded-md bg-muted text-muted-foreground">
+                        {t.common?.optional || "optional"}
+                      </span>
+                    </Label>
+                    <Input
+                      value={form.nameFr}
+                      onChange={(e) => setForm({ ...form, nameFr: e.target.value })}
+                      placeholder={t.clubs?.clubNameFrPlaceholder || "Enter French name (optional)"}
+                      className="h-10"
+                    />
+                  </div>
+
+                  <div className="grid gap-2.5">
+                    <Label className="text-sm font-medium text-muted-foreground flex items-center gap-2">
+                      {t.clubs?.clubDescription || "Description"}
+                      <span className="text-xs px-1.5 py-0.5 rounded-md bg-muted text-muted-foreground">
+                        {t.common?.optional || "optional"}
+                      </span>
+                    </Label>
+                    <Textarea
+                      value={form.description}
+                      onChange={(e) => setForm({ ...form, description: e.target.value })}
+                      placeholder={t.clubs?.clubDescriptionPlaceholder || "Describe the club activities and objectives"}
+                      className="min-h-[100px] resize-none"
+                      rows={4}
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* Organization Section */}
+              <div className="space-y-4">
+                <div className="flex items-center gap-2 pb-2">
+                  <div className="h-px flex-1 bg-gradient-to-r from-emerald-200 via-emerald-300 to-transparent dark:from-emerald-800 dark:via-emerald-700" />
+                  <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider">
+                    {t.clubs?.organization || "Organization"}
+                  </h3>
+                  <div className="h-px flex-1 bg-gradient-to-l from-emerald-200 via-emerald-300 to-transparent dark:from-emerald-800 dark:via-emerald-700" />
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="grid gap-2.5">
+                    <Label className="text-sm font-medium text-muted-foreground">
+                      {t.clubs?.category || "Category"}
+                    </Label>
+                    <Select
+                      value={form.categoryId || "__none__"}
+                      onValueChange={(v) => setForm({ ...form, categoryId: v === "__none__" ? "" : v })}
+                    >
+                      <SelectTrigger className="h-11">
+                        <SelectValue placeholder={t.clubs?.selectCategory || "Select..."} />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="__none__">{t.clubs?.noCategory || "None"}</SelectItem>
+                        {categories?.map((cat) => (
+                          <SelectItem key={cat.id} value={cat.id}>
+                            {locale === "fr" ? cat.nameFr : cat.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  <div className="grid gap-2.5">
+                    <Label className="flex items-center gap-2 text-sm font-medium">
+                      {t.common?.status || "Status"}
+                      <span className="inline-flex items-center justify-center w-4 h-4 text-[10px] font-bold text-white bg-amber-500 rounded-full">*</span>
+                    </Label>
+                    <Select
+                      value={form.status}
+                      onValueChange={(v) => setForm({ ...form, status: v as ClubStatus })}
+                    >
+                      <SelectTrigger className="h-11">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {CLUB_STATUSES.map((status) => (
+                          <SelectItem key={status} value={status}>
+                            {getStatusLabel(status)}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+
+                <div className="grid gap-2.5">
+                  <Label className="text-sm font-medium text-muted-foreground">
+                    {t.clubs?.leader || "Leader"}
+                  </Label>
+                  <Select
+                    value={form.leaderId || "__none__"}
+                    onValueChange={(v) => setForm({ ...form, leaderId: v === "__none__" ? "" : v })}
+                  >
+                    <SelectTrigger className="h-11">
+                      <SelectValue placeholder={t.clubs?.selectLeader || "Select leader..."} />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="__none__">{t.clubs?.noLeader || "None"}</SelectItem>
+                      {teachers.map((teacher) => (
+                        <SelectItem key={teacher.id} value={teacher.id}>
+                          {teacher.firstName} {teacher.lastName}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+
+              {/* Schedule & Capacity Section */}
+              <div className="space-y-4">
+                <div className="flex items-center gap-2 pb-2">
+                  <div className="h-px flex-1 bg-gradient-to-r from-blue-200 via-blue-300 to-transparent dark:from-blue-800 dark:via-blue-700" />
+                  <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider">
+                    {t.clubs?.scheduleCapacity || "Schedule & Capacity"}
+                  </h3>
+                  <div className="h-px flex-1 bg-gradient-to-l from-blue-200 via-blue-300 to-transparent dark:from-blue-800 dark:via-blue-700" />
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="grid gap-2.5">
+                    <Label className="flex items-center gap-2 text-sm font-medium">
+                      {t.clubs?.startDate || "Start Date"}
+                      <span className="inline-flex items-center justify-center w-4 h-4 text-[10px] font-bold text-white bg-amber-500 rounded-full">*</span>
+                    </Label>
+                    <Input
+                      type="date"
+                      value={form.startDate}
+                      onChange={(e) => setForm({ ...form, startDate: e.target.value })}
+                      className="h-11 border-2 focus-visible:border-blue-400 dark:focus-visible:border-blue-600 transition-colors"
+                    />
+                  </div>
+
+                  <div className="grid gap-2.5">
+                    <Label className="flex items-center gap-2 text-sm font-medium">
+                      {t.clubs?.endDate || "End Date"}
+                      <span className="inline-flex items-center justify-center w-4 h-4 text-[10px] font-bold text-white bg-amber-500 rounded-full">*</span>
+                    </Label>
+                    <Input
+                      type="date"
+                      value={form.endDate}
+                      onChange={(e) => setForm({ ...form, endDate: e.target.value })}
+                      className="h-11 border-2 focus-visible:border-blue-400 dark:focus-visible:border-blue-600 transition-colors"
+                    />
+                  </div>
+                </div>
+
+                <div className="grid gap-2.5">
+                  <Label className="flex items-center gap-2 text-sm font-medium">
+                    {t.clubs?.capacity || "Capacity"}
+                    <span className="inline-flex items-center justify-center w-4 h-4 text-[10px] font-bold text-white bg-amber-500 rounded-full">*</span>
+                  </Label>
+                  <Input
+                    type="number"
+                    value={form.capacity}
+                    onChange={(e) => setForm({ ...form, capacity: parseInt(e.target.value) || 30 })}
+                    className="h-11 border-2 focus-visible:border-blue-400 dark:focus-visible:border-blue-600 transition-colors"
+                    placeholder="30"
+                  />
+                </div>
+              </div>
+
+              {/* Financial Information Section */}
+              <div className="space-y-4">
+                <div className="flex items-center gap-2 pb-2">
+                  <div className="h-px flex-1 bg-gradient-to-r from-amber-200 via-amber-300 to-transparent dark:from-amber-800 dark:via-amber-700" />
+                  <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider">
+                    {t.clubs?.fees || "Fees"}
+                  </h3>
+                  <div className="h-px flex-1 bg-gradient-to-l from-amber-200 via-amber-300 to-transparent dark:from-amber-800 dark:via-amber-700" />
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="grid gap-2.5">
+                    <Label className="flex items-center gap-2 text-sm font-medium">
+                      {t.clubs?.oneTimeFee || "One-time Fee"}
+                      <span className="inline-flex items-center justify-center w-4 h-4 text-[10px] font-bold text-white bg-amber-500 rounded-full">*</span>
+                    </Label>
+                    <div className="relative">
+                      <Input
+                        type="number"
+                        value={form.fee}
+                        onChange={(e) => setForm({ ...form, fee: parseInt(e.target.value) || 0 })}
+                        className="h-11 pr-12 border-2 focus-visible:border-amber-400 dark:focus-visible:border-amber-600 transition-colors font-mono"
+                        placeholder="0"
+                      />
+                      <div className="absolute right-3 top-1/2 -translate-y-1/2 text-sm font-medium text-muted-foreground">
+                        GNF
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="grid gap-2.5">
+                    <Label className="text-sm font-medium text-muted-foreground flex items-center gap-2">
+                      {t.clubs?.monthlyFee || "Monthly Fee"}
+                      <span className="text-xs px-1.5 py-0.5 rounded-md bg-muted text-muted-foreground">
+                        {t.common?.optional || "optional"}
+                      </span>
+                    </Label>
+                    <div className="relative">
+                      <Input
+                        type="number"
+                        value={form.monthlyFee}
+                        onChange={(e) => setForm({ ...form, monthlyFee: parseInt(e.target.value) || 0 })}
+                        className="h-11 pr-12 font-mono"
+                        placeholder="0"
+                      />
+                      <div className="absolute right-3 top-1/2 -translate-y-1/2 text-sm font-medium text-muted-foreground">
+                        GNF
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <DialogFooter className="pt-4 border-t border-border mt-2">
+            <div className="flex items-center justify-between w-full">
+              <div className="text-xs text-muted-foreground flex items-center gap-1.5">
+                <span className="inline-flex items-center justify-center w-3.5 h-3.5 text-[9px] font-bold text-white bg-amber-500 rounded-full">*</span>
+                {t.clubs?.requiredField || "Required field"}
+              </div>
+              <div className="flex gap-3">
+                <Button
+                  variant="outline"
+                  onClick={() => {
+                    setIsCreateDialogOpen(false)
+                    setIsEditDialogOpen(false)
+                    resetForm()
+                  }}
+                  className="min-w-[100px]"
+                >
+                  {t.common?.cancel || "Cancel"}
+                </Button>
+                <Button
+                  onClick={isEditDialogOpen ? handleEdit : handleCreate}
+                  className={cn(
+                    "min-w-[140px]",
+                    componentClasses.primaryActionButton,
+                    "shadow-lg hover:shadow-xl transition-all duration-200"
+                  )}
+                >
+                  {isEditDialogOpen ? t.clubs?.updateClub || "Update Club" : t.clubs?.createClub || "Create Club"}
+                </Button>
+              </div>
+            </div>
           </DialogFooter>
+            </>
+          )}
         </DialogContent>
       </Dialog>
 
@@ -1156,18 +1347,34 @@ export default function AdminClubsPage() {
       >
         <DialogContent className="max-w-3xl max-h-[85vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
-              <Users className="h-5 w-5" />
-              {t.clubs?.enrollments || "Enrollments"}
+            <div className="flex items-center justify-between">
+              <div className="space-y-1.5">
+                <DialogTitle className="flex items-center gap-2">
+                  <Users className="h-5 w-5" />
+                  {t.clubs?.enrollments || "Enrollments"}
+                  {enrollmentsClub && (
+                    <span className="text-muted-foreground font-normal">
+                      - {locale === "fr" && enrollmentsClub.nameFr ? enrollmentsClub.nameFr : enrollmentsClub.name}
+                    </span>
+                  )}
+                </DialogTitle>
+                <DialogDescription>
+                  {t.clubs?.monthlyPaymentTracking || "Track monthly payment status for enrolled students"}
+                </DialogDescription>
+              </div>
               {enrollmentsClub && (
-                <span className="text-muted-foreground font-normal">
-                  - {locale === "fr" && enrollmentsClub.nameFr ? enrollmentsClub.nameFr : enrollmentsClub.name}
-                </span>
+                <PermissionGuard resource="schedule" action="create" inline>
+                  <Button
+                    size="sm"
+                    onClick={() => setIsEnrollStudentDialogOpen(true)}
+                    className={componentClasses.primaryActionButton}
+                  >
+                    <Plus className="h-4 w-4 mr-2" />
+                    {t.clubs?.enrollStudent || "Enroll Student"}
+                  </Button>
+                </PermissionGuard>
               )}
-            </DialogTitle>
-            <DialogDescription>
-              {t.clubs?.monthlyPaymentTracking || "Track monthly payment status for enrolled students"}
-            </DialogDescription>
+            </div>
           </DialogHeader>
 
           {enrollmentsLoading ? (
@@ -1236,38 +1443,60 @@ export default function AdminClubsPage() {
                             {enrollment.monthlyPayments.map((payment) => {
                               const isPaid = payment.isPaid
                               const isPending = !isPaid
-                              const now = new Date()
+                              // Only calculate date on client to avoid hydration mismatch
+                              const now = mounted ? new Date() : new Date(0)
                               const paymentDate = new Date(payment.year, payment.month - 1, 1)
                               const isUpcoming = paymentDate > now
+                              const canPrint = isPaid && payment.clubPaymentId
 
                               return (
-                                <button
-                                  key={payment.id}
-                                  disabled={isPaid || isUpcoming}
-                                  onClick={() => !isPaid && !isUpcoming && openPaymentDialog(enrollment, payment)}
-                                  className={cn(
-                                    "flex flex-col items-center p-1.5 rounded-md text-xs transition-all",
-                                    isPaid && "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300",
-                                    isPending && !isUpcoming && "bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300 hover:bg-amber-200 dark:hover:bg-amber-900/60 cursor-pointer",
-                                    isUpcoming && "bg-slate-100 text-slate-500 dark:bg-slate-800/40 dark:text-slate-400 cursor-not-allowed opacity-60"
+                                <div key={payment.id} className="relative group">
+                                  <button
+                                    disabled={isUpcoming && !isPaid}
+                                    onClick={() => {
+                                      if (isPaid) {
+                                        // Do nothing on main button click for paid (print button handles it)
+                                      } else if (!isUpcoming) {
+                                        openPaymentDialog(enrollment, payment)
+                                      }
+                                    }}
+                                    className={cn(
+                                      "flex flex-col items-center p-1.5 rounded-md text-xs transition-all w-full",
+                                      isPaid && "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300",
+                                      isPending && !isUpcoming && "bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300 hover:bg-amber-200 dark:hover:bg-amber-900/60 cursor-pointer",
+                                      isUpcoming && "bg-slate-100 text-slate-500 dark:bg-slate-800/40 dark:text-slate-400 cursor-not-allowed opacity-60"
+                                    )}
+                                    title={isPaid
+                                      ? `${t.clubs?.paid || "Paid"}: ${payment.paidAt ? new Date(payment.paidAt).toLocaleDateString(locale) : ""}`
+                                      : isUpcoming
+                                        ? t.clubs?.upcoming || "Upcoming"
+                                        : t.clubs?.clickToMarkPaid || "Click to mark as paid"
+                                    }
+                                  >
+                                    {isPaid ? (
+                                      <CheckCircle2 className="h-3.5 w-3.5 mb-0.5" />
+                                    ) : isUpcoming ? (
+                                      <Circle className="h-3.5 w-3.5 mb-0.5" />
+                                    ) : (
+                                      <Clock className="h-3.5 w-3.5 mb-0.5" />
+                                    )}
+                                    <span className="font-medium">{getMonthAbbrev(payment.month)}</span>
+                                    <span className="text-[10px] opacity-70">{payment.year}</span>
+                                  </button>
+                                  {/* Print button overlay for paid payments */}
+                                  {canPrint && enrollmentsClub && (
+                                    <button
+                                      onClick={(e) => {
+                                        e.stopPropagation()
+                                        printReceipt(enrollmentsClub.id, payment.clubPaymentId!)
+                                      }}
+                                      className="absolute -top-1 -right-1 p-1 rounded-full bg-white dark:bg-slate-800 shadow-sm border border-emerald-200 dark:border-emerald-700 opacity-0 group-hover:opacity-100 transition-opacity"
+                                      title={t.clubs?.printReceipt || "Print Receipt"}
+                                    >
+                                      <Printer className="h-3 w-3 text-emerald-600" />
+                                    </button>
                                   )}
-                                  title={isPaid
-                                    ? `${t.clubs?.paid || "Paid"}: ${payment.paidAt ? new Date(payment.paidAt).toLocaleDateString(locale) : ""}`
-                                    : isUpcoming
-                                      ? t.clubs?.upcoming || "Upcoming"
-                                      : t.clubs?.clickToMarkPaid || "Click to mark as paid"
-                                  }
-                                >
-                                  {isPaid ? (
-                                    <CheckCircle2 className="h-3.5 w-3.5 mb-0.5" />
-                                  ) : isUpcoming ? (
-                                    <Circle className="h-3.5 w-3.5 mb-0.5" />
-                                  ) : (
-                                    <Clock className="h-3.5 w-3.5 mb-0.5" />
-                                  )}
-                                  <span className="font-medium">{getMonthAbbrev(payment.month)}</span>
-                                  <span className="text-[10px] opacity-70">{payment.year}</span>
-                                </button>
+                                </div>
                               )
                             })}
                           </div>
@@ -1536,6 +1765,20 @@ export default function AdminClubsPage() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {/* Enroll Student Dialog */}
+      {enrollmentsClub && (
+        <EnrollStudentDialog
+          clubId={enrollmentsClub.id}
+          clubName={locale === "fr" && enrollmentsClub.nameFr ? enrollmentsClub.nameFr : enrollmentsClub.name}
+          open={isEnrollStudentDialogOpen}
+          onOpenChange={setIsEnrollStudentDialogOpen}
+          onSuccess={() => {
+            // Refetch enrollments after successful enrollment
+            // The react-query hook will automatically refetch
+          }}
+        />
+      )}
     </PageContainer>
   )
 }

@@ -7,6 +7,7 @@ import React, { createContext, useContext, useReducer, useCallback } from "react
 // =============================================================================
 
 export const PAYMENT_WIZARD_STEPS = [
+  "payment-type",
   "student-selection",
   "payment-schedule",
   "payment-entry",
@@ -64,6 +65,9 @@ export interface EnrollmentPayerInfo {
 }
 
 export interface PaymentWizardData {
+  // Step 0 - Payment Type Selection
+  paymentType?: "tuition" | "club"
+
   // Step 1 - Student Selection (complete student info for verification)
   studentId?: string
   studentNumber?: string
@@ -81,6 +85,14 @@ export interface PaymentWizardData {
   gradeName?: string
   schoolYearId?: string
   schoolYearName?: string
+
+  // Club enrollment fields (when paymentType === "club")
+  clubEnrollmentId?: string
+  clubId?: string
+  clubName?: string
+  clubNameFr?: string
+  clubFee?: number
+  clubMonthlyFee?: number
 
   // Balance Info (loaded with student)
   tuitionFee: number
@@ -116,6 +128,9 @@ export interface PaymentWizardData {
 
 // Initial wizard data
 const initialData: PaymentWizardData = {
+  // Payment type defaults to tuition for backward compatibility
+  paymentType: "tuition",
+
   // Balance defaults
   tuitionFee: 0,
   totalPaid: 0,
@@ -141,7 +156,7 @@ export interface PaymentWizardState {
 }
 
 const initialState: PaymentWizardState = {
-  currentStep: 1,
+  currentStep: 0, // Start at step 0 (payment type selection)
   completedSteps: [],
   data: initialData,
   isSubmitting: false,
@@ -177,17 +192,31 @@ function wizardReducer(
     case "SET_STEP":
       return { ...state, currentStep: action.step }
 
-    case "NEXT_STEP":
+    case "NEXT_STEP": {
+      // Skip payment schedule step (step 2) for club payments
+      let nextStep = state.currentStep + 1
+      if (nextStep === 2 && state.data.paymentType === "club") {
+        nextStep = 3 // Skip to payment entry
+      }
+
       return {
         ...state,
-        currentStep: Math.min(state.currentStep + 1, 5),
+        currentStep: Math.min(nextStep, 5),
         completedSteps: state.completedSteps.includes(state.currentStep)
           ? state.completedSteps
           : [...state.completedSteps, state.currentStep],
       }
+    }
 
-    case "PREV_STEP":
-      return { ...state, currentStep: Math.max(state.currentStep - 1, 1) }
+    case "PREV_STEP": {
+      // Skip payment schedule step (step 2) when going back for club payments
+      let prevStep = state.currentStep - 1
+      if (prevStep === 2 && state.data.paymentType === "club") {
+        prevStep = 1 // Skip back to student selection
+      }
+
+      return { ...state, currentStep: Math.max(prevStep, 0) }
+    }
 
     case "UPDATE_DATA":
       return {
@@ -315,13 +344,25 @@ export function PaymentWizardProvider({
       const { data, isFullyPaid } = state
 
       switch (step) {
-        case 1: // Student Selection
-          // Must have student selected with enrollment
-          if (!data.studentId || !data.enrollmentId) return false
-          // If fully paid, can still proceed to view schedule (celebration handled in step 2)
-          return true
+        case 0: // Payment Type Selection
+          // Must have payment type selected
+          return !!data.paymentType
 
-        case 2: // Payment Schedule (read-only, informational)
+        case 1: // Student Selection
+          // For tuition payments: must have student with enrollment
+          if (data.paymentType === "tuition") {
+            if (!data.studentId || !data.enrollmentId) return false
+            // If fully paid, can still proceed to view schedule (celebration handled in step 2)
+            return true
+          }
+          // For club payments: must have student with club enrollment
+          if (data.paymentType === "club") {
+            if (!data.studentId || !data.clubEnrollmentId) return false
+            return true
+          }
+          return false
+
+        case 2: // Payment Schedule (read-only, informational, tuition only)
           // If fully paid, cannot proceed to payment entry
           if (isFullyPaid) return false
           return true
@@ -329,7 +370,10 @@ export function PaymentWizardProvider({
         case 3: // Payment Entry
           // Amount required and valid
           if (!data.paymentAmount || data.paymentAmount <= 0) return false
-          if (data.paymentAmount > data.remainingBalance) return false
+          // For tuition, check against remaining balance
+          if (data.paymentType === "tuition" && data.paymentAmount > data.remainingBalance) {
+            return false
+          }
 
           // Payment method required
           if (!data.paymentMethod) return false

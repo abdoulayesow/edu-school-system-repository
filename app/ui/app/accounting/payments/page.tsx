@@ -31,7 +31,7 @@ import {
 import { useI18n } from "@/components/i18n-provider"
 import { PageContainer } from "@/components/layout"
 import { formatDate, cn } from "@/lib/utils"
-import { usePayments, usePaymentStats, useGrades } from "@/lib/hooks/use-api"
+import { usePayments, usePaymentStats, useGrades, type ApiPayment } from "@/lib/hooks/use-api"
 import { getPaymentRowStatus } from "@/lib/status-helpers"
 import { typography } from "@/lib/design-tokens"
 
@@ -88,32 +88,6 @@ function useCountUp(end: number, duration: number = 800, enabled: boolean = true
   return count
 }
 
-interface Payment {
-  id: string
-  amount: number
-  method: "cash" | "orange_money"
-  status: "confirmed" | "reversed" | "failed"
-  receiptNumber: string
-  transactionRef: string | null
-  recordedAt: string
-  confirmedAt: string | null
-  enrollment: {
-    id: string
-    enrollmentNumber: string
-    student: {
-      id: string
-      firstName: string
-      lastName: string
-      studentNumber: string
-    } | null
-    grade: {
-      id: string
-      name: string
-    } | null
-  } | null
-  recorder: { id: string; name: string; email: string } | null
-}
-
 interface PaginationInfo {
   total: number
   limit: number
@@ -147,6 +121,7 @@ export default function PaymentsPage() {
   // Filter state
   const [statusFilter, setStatusFilter] = useState<string>("all")
   const [methodFilter, setMethodFilter] = useState<string>("all")
+  const [paymentTypeFilter, setPaymentTypeFilter] = useState<string>("all")
   const [gradeFilter, setGradeFilter] = useState<string>("all")
   const [balanceStatusFilter, setBalanceStatusFilter] = useState<string>("all")
   const [startDate, setStartDate] = useState("")
@@ -157,6 +132,7 @@ export default function PaymentsPage() {
   const { data: paymentsData, isLoading } = usePayments({
     status: statusFilter !== "all" ? statusFilter : undefined,
     method: methodFilter !== "all" ? methodFilter : undefined,
+    paymentType: paymentTypeFilter !== "all" ? paymentTypeFilter : undefined,
     gradeId: gradeFilter !== "all" ? gradeFilter : undefined,
     balanceStatus: balanceStatusFilter !== "all" ? balanceStatusFilter : undefined,
     startDate: startDate || undefined,
@@ -185,7 +161,7 @@ export default function PaymentsPage() {
   // Reset offset when filters change
   useEffect(() => {
     setOffset(0)
-  }, [statusFilter, methodFilter, gradeFilter, balanceStatusFilter, startDate, endDate])
+  }, [statusFilter, methodFilter, paymentTypeFilter, gradeFilter, balanceStatusFilter, startDate, endDate])
 
   // Handle pagination
   const handleNextPage = () => {
@@ -507,11 +483,12 @@ export default function PaymentsPage() {
                   isVisible && "scale-100 rotate-0", !isVisible && "scale-0 rotate-90"
                 )} />
                 <span className="text-sm font-medium text-muted-foreground">{t.accounting.filterPayments}</span>
-                {(statusFilter !== "all" || methodFilter !== "all" || gradeFilter !== "all" || balanceStatusFilter !== "all" || startDate || endDate) && (
+                {(statusFilter !== "all" || methodFilter !== "all" || paymentTypeFilter !== "all" || gradeFilter !== "all" || balanceStatusFilter !== "all" || startDate || endDate) && (
                   <Badge variant="secondary" className="ml-2 font-normal animate-in fade-in slide-in-from-left-2 duration-300">
                     {[
                       statusFilter !== "all" ? 1 : 0,
                       methodFilter !== "all" ? 1 : 0,
+                      paymentTypeFilter !== "all" ? 1 : 0,
                       gradeFilter !== "all" ? 1 : 0,
                       balanceStatusFilter !== "all" ? 1 : 0,
                       startDate || endDate ? 1 : 0
@@ -651,6 +628,34 @@ export default function PaymentsPage() {
                 </Select>
               </div>
 
+              {/* Payment Type Filter */}
+              <div className="space-y-1.5">
+                <Label className="text-xs text-muted-foreground">{t.accounting.filterByType || "Type"}</Label>
+                <Select value={paymentTypeFilter} onValueChange={setPaymentTypeFilter}>
+                  <SelectTrigger className={cn(
+                    "w-[160px] h-9 transition-all",
+                    paymentTypeFilter !== "all" && "border-primary/50 bg-primary/5"
+                  )}>
+                    <SelectValue placeholder={t.accounting.allTypes || "All Types"} />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">{t.accounting.allTypes || "All Types"}</SelectItem>
+                    <SelectItem value="tuition">
+                      <span className="flex items-center gap-2">
+                        <span className="size-2 rounded-full bg-blue-500" />
+                        {t.accounting.tuitionPayments || "Tuition"}
+                      </span>
+                    </SelectItem>
+                    <SelectItem value="club">
+                      <span className="flex items-center gap-2">
+                        <span className="size-2 rounded-full bg-purple-500" />
+                        {t.accounting.clubPayments || "Club"}
+                      </span>
+                    </SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
               {/* Grade Filter */}
               <div className="space-y-1.5">
                 <Label className="text-xs text-muted-foreground">{t.accounting.filterByGrade}</Label>
@@ -725,13 +730,14 @@ export default function PaymentsPage() {
               </div>
 
               {/* Clear All */}
-              {(statusFilter !== "all" || methodFilter !== "all" || gradeFilter !== "all" || balanceStatusFilter !== "all" || startDate || endDate) && (
+              {(statusFilter !== "all" || methodFilter !== "all" || paymentTypeFilter !== "all" || gradeFilter !== "all" || balanceStatusFilter !== "all" || startDate || endDate) && (
                 <Button
                   variant="ghost"
                   size="sm"
                   onClick={() => {
                     setStatusFilter("all")
                     setMethodFilter("all")
+                    setPaymentTypeFilter("all")
                     setGradeFilter("all")
                     setBalanceStatusFilter("all")
                     setStartDate("")
@@ -802,10 +808,23 @@ export default function PaymentsPage() {
                       }
                       const borderColor = statusColors[payment.status] || "border-l-transparent"
 
-                      // Get student initials
-                      const firstName = payment.enrollment?.student?.firstName || ""
-                      const lastName = payment.enrollment?.student?.lastName || ""
+                      // Get student info based on payment type
+                      const isClubPayment = payment.paymentType === "club"
+                      const firstName = isClubPayment
+                        ? payment.clubEnrollment?.student?.firstName || ""
+                        : payment.enrollment?.student?.firstName || ""
+                      const lastName = isClubPayment
+                        ? payment.clubEnrollment?.student?.lastName || ""
+                        : payment.enrollment?.student?.lastName || ""
                       const initials = `${firstName.charAt(0)}${lastName.charAt(0)}`.toUpperCase() || "?"
+
+                      // Get club or grade info
+                      const clubName = isClubPayment
+                        ? (locale === "fr" && payment.clubEnrollment?.club?.nameFr)
+                          ? payment.clubEnrollment.club.nameFr
+                          : payment.clubEnrollment?.club?.name
+                        : null
+                      const gradeName = !isClubPayment ? payment.enrollment?.grade?.name : null
 
                       return (
                         <TableRow
@@ -829,9 +848,16 @@ export default function PaymentsPage() {
                                 <p className="font-medium text-foreground truncate">
                                   {firstName || "N/A"} {lastName}
                                 </p>
-                                <p className="text-xs text-muted-foreground">
-                                  {payment.enrollment?.grade?.name ?? "-"}
-                                </p>
+                                {isClubPayment && clubName ? (
+                                  <p className="text-xs text-purple-600 dark:text-purple-400 flex items-center gap-1">
+                                    <span className="size-1.5 rounded-full bg-purple-500" />
+                                    {clubName}
+                                  </p>
+                                ) : (
+                                  <p className="text-xs text-muted-foreground">
+                                    {gradeName ?? "-"}
+                                  </p>
+                                )}
                               </div>
                             </div>
                           </TableCell>

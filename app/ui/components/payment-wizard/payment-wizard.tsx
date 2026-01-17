@@ -6,6 +6,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert"
 import { PaymentWizardProvider, usePaymentWizard } from "./wizard-context"
 import { WizardProgress } from "./wizard-progress"
 import { WizardNavigation } from "./wizard-navigation"
+import { StepPaymentType } from "./steps/step-payment-type"
 import { StepStudentSelection } from "./steps/step-student-selection"
 import { StepPaymentSchedule } from "./steps/step-payment-schedule"
 import { StepPaymentEntry } from "./steps/step-payment-entry"
@@ -37,7 +38,16 @@ function WizardContent({ onComplete, onCancel }: Omit<PaymentWizardProps, "initi
 
   // Submit payment
   const handleSubmit = useCallback(async () => {
-    if (!data.enrollmentId || !data.paymentAmount || !data.paymentMethod || !data.receiptNumber) {
+    // Validate based on payment type
+    if (data.paymentType === "tuition" && !data.enrollmentId) {
+      setError("Missing enrollment information for tuition payment")
+      return
+    }
+    if (data.paymentType === "club" && !data.clubEnrollmentId) {
+      setError("Missing club enrollment information for club payment")
+      return
+    }
+    if (!data.paymentAmount || !data.paymentMethod || !data.receiptNumber) {
       setError("Missing required payment information")
       return
     }
@@ -58,7 +68,9 @@ function WizardContent({ onComplete, onCancel }: Omit<PaymentWizardProps, "initi
       } : { userNotes: data.notes }
 
       const payload = {
+        paymentType: data.paymentType,
         enrollmentId: data.enrollmentId,
+        clubEnrollmentId: data.clubEnrollmentId,
         amount: data.paymentAmount,
         method: data.paymentMethod,
         receiptNumber: data.receiptNumber,
@@ -107,6 +119,8 @@ function WizardContent({ onComplete, onCancel }: Omit<PaymentWizardProps, "initi
   // Render current step
   const renderStep = () => {
     switch (currentStep) {
+      case 0:
+        return <StepPaymentType />
       case 1:
         return <StepStudentSelection />
       case 2:
@@ -125,6 +139,7 @@ function WizardContent({ onComplete, onCancel }: Omit<PaymentWizardProps, "initi
   // Get step title
   const getStepTitle = () => {
     const titles = {
+      0: t?.paymentWizard?.step0 || "Payment Type",
       1: t?.paymentWizard?.step1 || "Select Student",
       2: t?.paymentWizard?.step2 || "Payment Schedule",
       3: t?.paymentWizard?.step3 || "Payment Details",

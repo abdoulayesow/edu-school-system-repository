@@ -18,6 +18,8 @@ const createClubSchema = z.object({
   capacity: z.number().int().min(1).default(30),
   status: z.enum(["draft", "active", "closed", "completed", "cancelled"]).default("draft"),
   isEnabled: z.boolean().default(true),
+  eligibilityRuleType: z.enum(["all_grades", "include_only", "exclude_only"]).optional(),
+  eligibilityGradeIds: z.array(z.string()).optional(),
 })
 
 /**
@@ -176,6 +178,7 @@ export async function POST(req: NextRequest) {
       }
     }
 
+    // Create club with eligibility rule if provided
     const club = await prisma.club.create({
       data: {
         name: validated.name,
@@ -192,6 +195,21 @@ export async function POST(req: NextRequest) {
         status: validated.status,
         isEnabled: validated.isEnabled,
         createdBy: session!.user.id,
+        ...(validated.eligibilityRuleType && {
+          eligibilityRule: {
+            create: {
+              ruleType: validated.eligibilityRuleType,
+              ...(validated.eligibilityGradeIds &&
+                validated.eligibilityGradeIds.length > 0 && {
+                  gradeRules: {
+                    create: validated.eligibilityGradeIds.map((gradeId) => ({
+                      gradeId,
+                    })),
+                  },
+                }),
+            },
+          },
+        }),
       },
       include: {
         creator: {
@@ -204,6 +222,17 @@ export async function POST(req: NextRequest) {
           include: {
             person: {
               select: { firstName: true, lastName: true },
+            },
+          },
+        },
+        eligibilityRule: {
+          include: {
+            gradeRules: {
+              include: {
+                grade: {
+                  select: { id: true, name: true, order: true },
+                },
+              },
             },
           },
         },

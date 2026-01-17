@@ -2,7 +2,7 @@
 
 import { useI18n } from "@/components/i18n-provider"
 import { cn } from "@/lib/utils"
-import { Check, User, Calendar, CreditCard, FileCheck, PartyPopper } from "lucide-react"
+import { Check, User, Calendar, CreditCard, FileCheck, PartyPopper, Wallet } from "lucide-react"
 import { sizing } from "@/lib/design-tokens"
 
 interface WizardProgressProps {
@@ -14,6 +14,11 @@ export function WizardProgress({ currentStep, isFullyPaid }: WizardProgressProps
   const { t } = useI18n()
 
   const steps = [
+    {
+      number: 0,
+      label: t?.paymentWizard?.step0 || "Type",
+      icon: Wallet
+    },
     {
       number: 1,
       label: t?.paymentWizard?.step1 || "Student",
