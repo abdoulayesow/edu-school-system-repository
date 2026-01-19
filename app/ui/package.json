@@ -4,8 +4,8 @@
   "private": true,
   "scripts": {
     "postinstall": "node scripts/fix-native-modules.js || true",
-    "prebuild": "cd ../db && npx prisma generate",
-    "build": "next build --webpack",
+    "prebuild": "node scripts/conditional-prisma-generate.js",
+    "build": "next build",
     "dev": "next dev --turbopack --port 8000",
     "lint": "eslint . --max-warnings 0",
     "lint:fix": "eslint . --fix",
