@@ -17,7 +17,7 @@ type RouteParams = {
  * Mark a monthly payment as paid
  */
 export async function PATCH(req: NextRequest, { params }: RouteParams) {
-  const { session, error } = await requirePerm("schedule", "create")
+  const { session, error } = await requirePerm("club_enrollment", "create")
   if (error) return error
 
   try {

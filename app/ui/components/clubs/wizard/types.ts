@@ -2,12 +2,14 @@
 
 export type ClubStatus = "active" | "draft" | "closed" | "completed" | "cancelled"
 export type EligibilityRuleType = "all_grades" | "include_only" | "exclude_only"
+export type ClubLeaderType = "teacher" | "staff" | "student" | ""
 
 export interface ClubWizardData {
   name: string
   description: string
   categoryId: string
   leaderId: string
+  leaderType: ClubLeaderType  // Polymorphic leader type
   followSchoolYear: boolean
   startDate: string
   endDate: string
@@ -48,7 +50,11 @@ export interface CategoryOption {
 export interface LeaderOption {
   id: string
   name: string
-  type: "teacher" | "staff" | "student"
+  type: ClubLeaderType
+  email?: string         // For staff
+  photoUrl?: string      // For all types
+  role?: string          // For staff (staffRole display)
+  grade?: string         // For students (current grade)
 }
 
 export const initialWizardData: ClubWizardData = {
@@ -56,6 +62,7 @@ export const initialWizardData: ClubWizardData = {
   description: "",
   categoryId: "",
   leaderId: "",
+  leaderType: "",  // Empty string initially (no type selected)
   followSchoolYear: false,
   startDate: "",
   endDate: "",

@@ -9,6 +9,7 @@ const updateClubSchema = z.object({
   description: z.string().optional().nullable(),
   categoryId: z.string().optional().nullable(),
   leaderId: z.string().optional().nullable(),
+  leaderType: z.enum(["teacher", "staff", "student"]).optional().nullable(),
   startDate: z.string().transform((s) => new Date(s)).optional(),
   endDate: z.string().transform((s) => new Date(s)).optional(),
   fee: z.number().int().min(0).optional(),
@@ -39,13 +40,6 @@ export async function GET(req: NextRequest, { params }: RouteParams) {
         },
         category: {
           select: { id: true, name: true, nameFr: true },
-        },
-        leader: {
-          include: {
-            person: {
-              select: { firstName: true, lastName: true },
-            },
-          },
         },
         eligibilityRule: {
           include: {
@@ -161,10 +155,26 @@ export async function PUT(req: NextRequest, { params }: RouteParams) {
     }
 
     // Verify leader exists if provided
-    if (validated.leaderId) {
-      const leader = await prisma.teacherProfile.findUnique({
-        where: { id: validated.leaderId },
-      })
+    if (validated.leaderId && validated.leaderType) {
+      let leader = null
+
+      if (validated.leaderType === "teacher") {
+        leader = await prisma.teacherProfile.findUnique({
+          where: { id: validated.leaderId },
+        })
+      } else if (validated.leaderType === "staff") {
+        leader = await prisma.user.findFirst({
+          where: {
+            id: validated.leaderId,
+            staffRole: { not: null }
+          },
+        })
+      } else if (validated.leaderType === "student") {
+        leader = await prisma.studentProfile.findUnique({
+          where: { id: validated.leaderId },
+        })
+      }
+
       if (!leader) {
         return NextResponse.json(
           { message: "Leader not found" },
@@ -181,6 +191,7 @@ export async function PUT(req: NextRequest, { params }: RouteParams) {
         ...(validated.description !== undefined && { description: validated.description }),
         ...(validated.categoryId !== undefined && { categoryId: validated.categoryId }),
         ...(validated.leaderId !== undefined && { leaderId: validated.leaderId }),
+        ...(validated.leaderType !== undefined && { leaderType: validated.leaderType }),
         ...(validated.startDate && { startDate: validated.startDate }),
         ...(validated.endDate && { endDate: validated.endDate }),
         ...(validated.fee !== undefined && { fee: validated.fee }),
@@ -195,13 +206,6 @@ export async function PUT(req: NextRequest, { params }: RouteParams) {
         },
         category: {
           select: { id: true, name: true, nameFr: true },
-        },
-        leader: {
-          include: {
-            person: {
-              select: { firstName: true, lastName: true },
-            },
-          },
         },
         _count: {
           select: { enrollments: true, payments: true },

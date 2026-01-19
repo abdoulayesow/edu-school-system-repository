@@ -515,9 +515,16 @@ export interface ApiClub {
   fee: number
   monthlyFee: number | null
   capacity: number | null
+  leaderId: string | null
+  leaderType: "teacher" | "staff" | "student" | null
   leader: {
     id: string
-    person: { firstName: string; lastName: string }
+    name: string
+    type: "teacher" | "staff" | "student"
+    photoUrl?: string | null
+    email?: string | null
+    role?: string | null
+    grade?: string | null
   } | null
   eligibilityRule: ApiClubEligibilityRule | null
   _count: {
@@ -763,9 +770,15 @@ export interface AdminClub {
   categoryId: string | null
   category: ApiClubCategory | null
   leaderId: string | null
+  leaderType: "teacher" | "staff" | "student" | null
   leader: {
     id: string
-    person: { firstName: string; lastName: string }
+    name: string
+    type: "teacher" | "staff" | "student"
+    photoUrl?: string | null
+    email?: string | null
+    role?: string | null
+    grade?: string | null
   } | null
   startDate: string
   endDate: string
@@ -810,6 +823,7 @@ interface CreateClubInput {
   description?: string
   categoryId?: string
   leaderId?: string
+  leaderType?: "teacher" | "staff" | "student"
   startDate: string
   endDate: string
   fee: number
@@ -852,6 +866,7 @@ interface UpdateClubInput {
   description?: string
   categoryId?: string | null
   leaderId?: string | null
+  leaderType?: "teacher" | "staff" | "student" | null
   startDate?: string
   endDate?: string
   fee?: number

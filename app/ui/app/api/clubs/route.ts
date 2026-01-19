@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server"
 import { requirePerm } from "@/lib/authz"
 import { prisma } from "@/lib/prisma"
 import { ClubStatus } from "@prisma/client"
+import { resolveClubLeaders, getLeaderKey } from "@/lib/club-helpers"
 
 /**
  * GET /api/clubs
@@ -127,13 +128,6 @@ export async function GET(req: NextRequest) {
           category: {
             select: { id: true, name: true, nameFr: true },
           },
-          leader: {
-            include: {
-              person: {
-                select: { firstName: true, lastName: true },
-              },
-            },
-          },
           eligibilityRule: {
             include: {
               gradeRules: {
@@ -155,8 +149,17 @@ export async function GET(req: NextRequest) {
       prisma.club.count({ where: clubsWhere }),
     ])
 
+    // Resolve polymorphic leaders
+    const leaderMap = await resolveClubLeaders(clubs)
+
+    // Attach resolved leaders to clubs
+    const clubsWithLeaders = clubs.map(club => ({
+      ...club,
+      leader: leaderMap.get(getLeaderKey(club.leaderId, club.leaderType)!) || null,
+    }))
+
     return NextResponse.json({
-      clubs,
+      clubs: clubsWithLeaders,
       pagination: {
         total,
         limit,

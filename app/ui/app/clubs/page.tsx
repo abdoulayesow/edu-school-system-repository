@@ -18,7 +18,7 @@ import {
   DialogTitle,
   DialogFooter,
 } from "@/components/ui/dialog"
-import { BookOpen, Users, Plus, Search, Loader2, Sparkles, Calendar, Banknote, ArrowLeft, CheckCircle2, AlertCircle } from "lucide-react"
+import { BookOpen, Users, Plus, Search, Loader2, Sparkles, Calendar, Banknote, ArrowLeft, CheckCircle2, AlertCircle, UserPlus } from "lucide-react"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
 import { cn } from "@/lib/utils"
 import { useI18n } from "@/components/i18n-provider"
@@ -826,7 +826,7 @@ function ClubGrid({
               )}
               {club.leader && (
                 <p className="text-xs text-muted-foreground">
-                  {clubsT.leader || "Leader"}: {club.leader.person.firstName} {club.leader.person.lastName}
+                  {clubsT.leader || "Leader"}: {club.leader.name}
                 </p>
               )}
               <div className="flex items-center gap-4 text-sm mt-2">
@@ -850,15 +850,18 @@ function ClubGrid({
           </CardHeader>
           <CardContent>
             <Button
-              variant="outline"
-              className="w-full bg-transparent"
-              onClick={() => onAssign(club)}
+              variant="default"
+              className="w-full bg-amber-600 hover:bg-amber-700"
+              onClick={() => {
+                // Navigate to enrollment wizard with pre-selected club
+                window.location.href = `/clubs/enroll?clubId=${club.id}`
+              }}
               disabled={club.capacity !== null && club._count.enrollments >= club.capacity}
             >
-              <Plus className="size-4 mr-2" />
+              <UserPlus className="size-4 mr-2" />
               {club.capacity !== null && club._count.enrollments >= club.capacity
                 ? clubsT.full || "Full"
-                : clubsT.assignStudent || "Assign Student"}
+                : clubsT.enrollStudent || "Enroll Student"}
             </Button>
           </CardContent>
         </Card>

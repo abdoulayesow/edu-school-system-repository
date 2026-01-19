@@ -41,6 +41,7 @@ export const fr = {
     selected: "Sélectionné",
     viewDetails: "Voir les détails",
     noData: "Aucune donnée disponible",
+    noResults: "Aucun résultat trouvé",
     today: "aujourd'hui",
     refresh: "Actualiser",
     description: "Description",
@@ -496,7 +497,14 @@ export const fr = {
     noCategory: "Aucune",
     leader: "Responsable",
     selectLeader: "Sélectionner un responsable...",
+    selectLeaderType: "Sélectionner le type de responsable...",
+    selectPerson: "Sélectionner une personne...",
+    leaderTypeTeacher: "Enseignant",
+    leaderTypeStaff: "Personnel",
+    leaderTypeStudent: "Élève Responsable",
     noLeader: "Aucun",
+    staffLeaderNote: "La sélection du personnel nécessite le point de terminaison API /api/admin/staff-leaders",
+    studentLeaderNote: "La sélection d'élève responsable nécessite le point de terminaison API /api/admin/student-leaders",
     startDate: "Date de Début",
     endDate: "Date de Fin",
     oneTimeFee: "Frais Unique",
@@ -627,6 +635,98 @@ export const fr = {
     paymentMethod: "Mode de paiement",
     enrolledOn: "Inscrit le",
     by: "par",
+
+    // Enrollment dialog
+    enrollStudent: "Inscrire un élève",
+    selectStudent: "Sélectionner un élève",
+    selectedStudent: "Élève sélectionné",
+    noEligibleStudents: "Aucun élève éligible disponible",
+    totalMonths: "Total des mois",
+
+    // Wizard
+    wizard: {
+      title: "Créer un nouveau club",
+      step1: "Détails",
+      step2: "Éligibilité",
+      step3: "Révision",
+      step4: "Résumé",
+      previous: "Précédent",
+      next: "Suivant",
+      createClub: "Créer le club",
+      selectAtLeastOneGrade: "Veuillez sélectionner au moins un niveau",
+    },
+
+    // Enrollment Wizard
+    enrollmentWizard: {
+      title: "Inscription au Club",
+      subtitle: "Inscrire un élève à un club parascolaire",
+      backToClubs: "Retour aux Clubs",
+
+      // Steps
+      step1Title: "Sélectionner un Club",
+      step1Subtitle: "Choisissez le club dans lequel vous souhaitez inscrire un élève",
+      step2Title: "Sélectionner un Élève",
+      step2Subtitle: "Choisissez un élève éligible pour l'inscrire à ce club",
+      step3Title: "Paiement et Révision",
+      step3Subtitle: "Vérifiez les détails de l'inscription et enregistrez le paiement",
+      step4Title: "Confirmation",
+      step4Subtitle: "Inscription terminée avec succès",
+
+      // Step 1: Club Selection
+      searchClubs: "Rechercher des clubs...",
+      allClubs: "Tous les Clubs",
+      noClubsFound: "Aucun club trouvé",
+      noClubsAvailable: "Aucun club actif disponible pour l'inscription",
+
+      // Step 2: Student Selection
+      searchStudents: "Rechercher des élèves...",
+      noStudentsFound: "Aucun élève ne correspond à votre recherche",
+      noEligibleStudentsForClub: "Aucun élève éligible trouvé pour ce club",
+      eligibilityCriteriaHint: "Les élèves doivent répondre aux critères d'éligibilité du club (niveau, etc.)",
+      currentClubs: "Clubs actuels :",
+      fee: "Frais",
+
+      // Step 3: Payment & Review
+      enrollmentSummary: "Résumé de l'Inscription",
+      studentDetails: "Détails de l'Élève",
+      clubDetails: "Détails du Club",
+      paymentDetails: "Détails du Paiement",
+      enrollmentFee: "Frais d'Inscription",
+      monthlyFee: "Frais Mensuels",
+      noPaymentRequired: "Aucun paiement requis",
+      recordPayment: "Enregistrer le Paiement",
+      paymentAmount: "Montant du Paiement",
+      paymentMethod: "Méthode de Paiement",
+      receiptNumber: "Numéro de Reçu",
+      transactionRef: "Référence de Transaction (optionnel)",
+      additionalNotes: "Notes Additionnelles (optionnel)",
+      notesPlaceholder: "Ajoutez des notes sur cette inscription...",
+
+      // Step 4: Confirmation
+      enrollmentSuccessful: "Inscription Réussie !",
+      enrollmentNumber: "Numéro d'Inscription",
+      enrollmentStatus: "Statut",
+      viewEnrollments: "Voir les Inscriptions",
+      enrollAnother: "Inscrire un Autre Élève",
+
+      // Navigation
+      previous: "Précédent",
+      next: "Continuer",
+      saveAsDraft: "Enregistrer comme Brouillon",
+      submitEnrollment: "Soumettre l'Inscription",
+
+      // Validation & Errors
+      clubRequired: "Veuillez sélectionner un club",
+      studentRequired: "Veuillez sélectionner un élève",
+      receiptRequired: "Le numéro de reçu est requis lors de l'enregistrement d'un paiement",
+      paymentMethodRequired: "La méthode de paiement est requise lors de l'enregistrement d'un paiement",
+
+      // Messages
+      savingDraft: "Enregistrement du brouillon...",
+      submittingEnrollment: "Soumission de l'inscription...",
+      draftSaved: "Brouillon enregistré avec succès",
+      enrollmentSubmitted: "Inscription soumise avec succès",
+    },
   },
 
   // Accounting
@@ -1356,6 +1456,7 @@ export const fr = {
     step1: "Infos de base",
     step2: "Détails",
     step3: "Révision",
+    step4: "Révision",
     previous: "Précédent",
     next: "Suivant",
     createClub: "Créer le club",
@@ -1369,6 +1470,12 @@ export const fr = {
 
     // Step 2 - Details
     leader: "Responsable du club",
+    leaderRole: "Rôle du responsable",
+    leaderRoleDescription: "Qui dirigera ce club ?",
+    roleTeachers: "Enseignants",
+    roleStaff: "Personnel",
+    roleStudents: "Élèves",
+    selectLeaderByRole: "Sélectionnez un(e) {role}",
     selectLeader: "Sélectionnez un enseignant (optionnel)",
     followSchoolYear: "Suivre les dates de l'année scolaire",
     followSchoolYearHint: "Utiliser automatiquement les dates de début/fin de l'année scolaire",
@@ -1381,15 +1488,43 @@ export const fr = {
     oneTimeFee: "Frais d'inscription uniques",
     oneTimeFeeOptional: "Optionnel",
 
-    // Step 3 - Review
+    // Step 3 - Eligibility
+    eligibilityTitle: "Éligibilité par classe",
+    eligibilityDescription: "Définir quels élèves peuvent rejoindre ce club",
+    eligibilityRuleCard: {
+      allGrades: {
+        title: "Toutes les classes",
+        description: "Tout élève peut rejoindre"
+      },
+      includeOnly: {
+        title: "Classes spécifiques",
+        description: "Seulement les classes sélectionnées"
+      },
+      excludeOnly: {
+        title: "Exclure des classes",
+        description: "Toutes sauf sélectionnées"
+      }
+    },
+    selectedGradesCount: "{count} classe(s) sélectionnée(s)",
+    selectGrades: "Sélectionnez les classes",
+    noGradesSelected: "Aucune classe sélectionnée",
+
+    // Step 4 - Review
     reviewTitle: "Réviser les détails du club",
     basicInformation: "Informations de base",
     detailsSchedule: "Détails et calendrier",
     financialInformation: "Informations financières",
+    eligibilitySection: "Règles d'éligibilité",
+    ruleTypeLabel: "Type de règle",
+    allowedGrades: "Classes autorisées",
+    excludedGrades: "Classes exclues",
+    allGradesAllowed: "Toutes les classes autorisées",
     editSection: "Modifier",
     followingSchoolYear: "Suit les dates de l'année scolaire",
 
     // Validation
+    leaderRequired: "Veuillez sélectionner un responsable",
+    leaderTypeRequired: "Veuillez sélectionner un rôle de responsable",
     nameMinLength: "Le nom du club doit contenir au moins 3 caractères",
     categoryRequired: "Veuillez sélectionner une catégorie",
     monthlyFeeMin: "Les frais mensuels doivent être de 0 ou plus",
@@ -2653,6 +2788,112 @@ export const fr = {
     submit: "Soumettre le paiement",
     submitting: "Enregistrement...",
     cancel: "Annuler",
+  },
+
+  // Club Enrollment Wizard
+  clubEnrollmentWizard: {
+    // Main
+    title: "Inscription au club",
+    subtitle: "Inscrire les élèves aux clubs parascolaires",
+
+    // Steps
+    step1: "Sélectionner le club",
+    step2: "Sélectionner l'élève",
+    step3: "Paiement et révision",
+    step4: "Confirmation",
+
+    // Step 1 - Club Selection
+    selectClub: "Sélectionner un club",
+    selectClubDescription: "Choisir un club pour inscrire un élève",
+    allCategories: "Toutes les catégories",
+    searchClubs: "Rechercher des clubs...",
+    noClubsFound: "Aucun club trouvé",
+    clubDetails: "Détails du club",
+    leader: "Responsable",
+    enrollmentFee: "Frais d'inscription",
+    monthlyFee: "Frais mensuels",
+    duration: "Durée",
+    spots: "Places disponibles",
+    spotsOf: "{current} sur {capacity}",
+    atCapacity: "Capacité maximale atteinte",
+    nearCapacity: "Presque complet",
+    selectThisClub: "Sélectionner ce club",
+
+    // Step 2 - Student Selection
+    selectStudent: "Sélectionner un élève",
+    selectStudentDescription: "Choisir l'élève à inscrire",
+    searchStudents: "Rechercher par nom ou numéro d'élève...",
+    noStudentsFound: "Aucun élève éligible trouvé",
+    alreadyEnrolled: "Déjà inscrit à ce club",
+    currentClubs: "Clubs actuels",
+    noCurrentClubs: "Aucune adhésion au club",
+    selectThisStudent: "Sélectionner cet élève",
+    eligibilityNote: "Seuls les élèves avec des inscriptions complètes sont affichés",
+
+    // Step 3 - Payment & Review
+    paymentAndReview: "Paiement et révision",
+    reviewDescription: "Vérifier les détails de l'inscription et enregistrer le paiement",
+    enrollmentDetails: "Détails de l'inscription",
+    club: "Club",
+    student: "Élève",
+    grade: "Classe",
+    totalAmount: "Montant total",
+    paymentDetails: "Détails du paiement",
+    payNow: "Payer maintenant",
+    payLater: "Payer plus tard",
+    paymentMethod: "Mode de paiement",
+    cash: "Espèces",
+    orangeMoney: "Orange Money",
+    amountPaid: "Montant payé",
+    receiptNumber: "Numéro de reçu",
+    transactionRef: "Référence de transaction",
+    notes: "Notes",
+    optional: "(Optionnel)",
+
+    // Monthly breakdown
+    monthlyBreakdown: "Détails mensuels",
+    showBreakdown: "Afficher les détails mensuels",
+    hideBreakdown: "Masquer les détails",
+    month: "Mois",
+    amount: "Montant",
+    pastMonth: "Passé",
+    currentMonth: "Actuel",
+    futureMonth: "À venir",
+    totalMonths: "Mois total",
+    adjustTotal: "Ajuster le total",
+    midYearProration: "Inscription en milieu d'année détectée",
+    midYearMessage: "Cette inscription commence en milieu d'année. Le total a été ajusté pour n'inclure que les mois à partir de {startMonth}.",
+    understood: "Compris",
+
+    // Step 4 - Confirmation
+    enrollmentComplete: "Inscription terminée !",
+    successMessage: "L'élève a été inscrit avec succès au club.",
+    enrollmentNumber: "Inscription nº",
+    studentName: "Élève",
+    clubName: "Club",
+    totalPaid: "Total payé",
+    enrollAnother: "Inscrire un autre élève",
+    viewClub: "Voir les détails du club",
+    done: "Terminé",
+
+    // Navigation
+    back: "Retour",
+    next: "Continuer",
+    submit: "Terminer l'inscription",
+    submitting: "Traitement...",
+    cancel: "Annuler",
+    saveDraft: "Enregistrer le brouillon",
+
+    // Errors
+    clubRequired: "Veuillez sélectionner un club",
+    studentRequired: "Veuillez sélectionner un élève",
+    paymentMethodRequired: "Le mode de paiement est requis lors de l'enregistrement du paiement",
+    receiptRequired: "Le numéro de reçu est requis lors de l'enregistrement du paiement",
+    amountRequired: "Le montant du paiement est requis",
+
+    // Capacity warnings
+    capacityWarning: "Ce club est à {percentage}% de sa capacité",
+    capacityFull: "Ce club est à sa capacité maximale et ne peut pas accepter de nouvelles inscriptions",
   },
 } as const;
 

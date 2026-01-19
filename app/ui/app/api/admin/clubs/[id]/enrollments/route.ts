@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server"
 import { requirePerm } from "@/lib/authz"
 import { prisma } from "@/lib/prisma"
 import { z } from "zod"
+import { generateClubEnrollmentNumber } from "@/lib/club-helpers"
 
 const enrollStudentSchema = z.object({
   studentProfileId: z.string().min(1, "Student profile ID is required"),
@@ -17,7 +18,7 @@ type RouteParams = { params: Promise<{ id: string }> }
  * Get all enrollments for a club
  */
 export async function GET(req: NextRequest, { params }: RouteParams) {
-  const { error } = await requirePerm("schedule", "view")
+  const { error } = await requirePerm("club_enrollment", "view")
   if (error) return error
 
   try {
@@ -61,7 +62,7 @@ export async function GET(req: NextRequest, { params }: RouteParams) {
  * Enroll a student in a club
  */
 export async function POST(req: NextRequest, { params }: RouteParams) {
-  const { session, error } = await requirePerm("schedule", "create")
+  const { session, error } = await requirePerm("club_enrollment", "create")
   if (error) return error
 
   try {
@@ -181,10 +182,32 @@ export async function POST(req: NextRequest, { params }: RouteParams) {
     })
 
     if (existingEnrollment) {
-      return NextResponse.json(
-        { message: "Student is already enrolled in this club" },
-        { status: 400 }
-      )
+      // Provide specific error message based on enrollment status
+      if (existingEnrollment.status === "active") {
+        return NextResponse.json(
+          {
+            message: "Student is already actively enrolled in this club",
+            existingEnrollment: {
+              id: existingEnrollment.id,
+              enrollmentNumber: existingEnrollment.enrollmentNumber,
+              status: existingEnrollment.status,
+            },
+          },
+          { status: 400 }
+        )
+      } else {
+        return NextResponse.json(
+          {
+            message: `Student has an existing enrollment (status: ${existingEnrollment.status}). Please modify the existing enrollment instead.`,
+            existingEnrollment: {
+              id: existingEnrollment.id,
+              enrollmentNumber: existingEnrollment.enrollmentNumber,
+              status: existingEnrollment.status,
+            },
+          },
+          { status: 400 }
+        )
+      }
     }
 
     // Calculate total fee if monthly fee and duration provided
@@ -192,6 +215,9 @@ export async function POST(req: NextRequest, { params }: RouteParams) {
     if (club.monthlyFee && validated.totalMonths) {
       totalFee = club.monthlyFee * validated.totalMonths
     }
+
+    // Generate enrollment number
+    const enrollmentNumber = await generateClubEnrollmentNumber()
 
     const enrollment = await prisma.clubEnrollment.create({
       data: {
@@ -203,6 +229,7 @@ export async function POST(req: NextRequest, { params }: RouteParams) {
         startYear: validated.startYear,
         totalMonths: validated.totalMonths,
         totalFee,
+        enrollmentNumber,
       },
       include: {
         studentProfile: {

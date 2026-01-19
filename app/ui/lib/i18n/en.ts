@@ -43,6 +43,7 @@ export const en: TranslationKeys = {
     selected: "Selected",
     viewDetails: "View details",
     noData: "No data available",
+    noResults: "No results found",
     today: "today",
     refresh: "Refresh",
     description: "Description",
@@ -498,7 +499,14 @@ export const en: TranslationKeys = {
     noCategory: "None",
     leader: "Leader",
     selectLeader: "Select leader...",
+    selectLeaderType: "Select leader type...",
+    selectPerson: "Select person...",
+    leaderTypeTeacher: "Teacher",
+    leaderTypeStaff: "Staff Member",
+    leaderTypeStudent: "Student Leader",
     noLeader: "None",
+    staffLeaderNote: "Staff member selection requires API endpoint /api/admin/staff-leaders",
+    studentLeaderNote: "Student leader selection requires API endpoint /api/admin/student-leaders",
     startDate: "Start Date",
     endDate: "End Date",
     oneTimeFee: "One-time Fee",
@@ -629,6 +637,98 @@ export const en: TranslationKeys = {
     paymentMethod: "Payment Method",
     enrolledOn: "Enrolled on",
     by: "by",
+
+    // Enrollment dialog
+    enrollStudent: "Enroll Student",
+    selectStudent: "Select a student",
+    selectedStudent: "Selected student",
+    noEligibleStudents: "No eligible students available",
+    totalMonths: "Total months",
+
+    // Wizard
+    wizard: {
+      title: "Create New Club",
+      step1: "Details",
+      step2: "Eligibility",
+      step3: "Review",
+      step4: "Summary",
+      previous: "Previous",
+      next: "Next",
+      createClub: "Create Club",
+      selectAtLeastOneGrade: "Please select at least one grade",
+    },
+
+    // Enrollment Wizard
+    enrollmentWizard: {
+      title: "Club Enrollment",
+      subtitle: "Enroll a student in an extracurricular club",
+      backToClubs: "Back to Clubs",
+
+      // Steps
+      step1Title: "Select Club",
+      step1Subtitle: "Choose the club you want to enroll a student in",
+      step2Title: "Select Student",
+      step2Subtitle: "Choose an eligible student to enroll in this club",
+      step3Title: "Payment & Review",
+      step3Subtitle: "Review enrollment details and record payment",
+      step4Title: "Confirmation",
+      step4Subtitle: "Enrollment completed successfully",
+
+      // Step 1: Club Selection
+      searchClubs: "Search clubs...",
+      allClubs: "All Clubs",
+      noClubsFound: "No clubs found",
+      noClubsAvailable: "No active clubs available for enrollment",
+
+      // Step 2: Student Selection
+      searchStudents: "Search students...",
+      noStudentsFound: "No students match your search",
+      noEligibleStudentsForClub: "No eligible students found for this club",
+      eligibilityCriteriaHint: "Students must meet the club's eligibility criteria (grade level, etc.)",
+      currentClubs: "Current clubs:",
+      fee: "Fee",
+
+      // Step 3: Payment & Review
+      enrollmentSummary: "Enrollment Summary",
+      studentDetails: "Student Details",
+      clubDetails: "Club Details",
+      paymentDetails: "Payment Details",
+      enrollmentFee: "Enrollment Fee",
+      monthlyFee: "Monthly Fee",
+      noPaymentRequired: "No payment required",
+      recordPayment: "Record Payment",
+      paymentAmount: "Payment Amount",
+      paymentMethod: "Payment Method",
+      receiptNumber: "Receipt Number",
+      transactionRef: "Transaction Reference (optional)",
+      additionalNotes: "Additional Notes (optional)",
+      notesPlaceholder: "Add any notes about this enrollment...",
+
+      // Step 4: Confirmation
+      enrollmentSuccessful: "Enrollment Successful!",
+      enrollmentNumber: "Enrollment Number",
+      enrollmentStatus: "Status",
+      viewEnrollments: "View Enrollments",
+      enrollAnother: "Enroll Another Student",
+
+      // Navigation
+      previous: "Previous",
+      next: "Continue",
+      saveAsDraft: "Save as Draft",
+      submitEnrollment: "Submit Enrollment",
+
+      // Validation & Errors
+      clubRequired: "Please select a club",
+      studentRequired: "Please select a student",
+      receiptRequired: "Receipt number is required when recording payment",
+      paymentMethodRequired: "Payment method is required when recording payment",
+
+      // Messages
+      savingDraft: "Saving draft...",
+      submittingEnrollment: "Submitting enrollment...",
+      draftSaved: "Draft saved successfully",
+      enrollmentSubmitted: "Enrollment submitted successfully",
+    },
   },
 
   // Accounting
@@ -1358,6 +1458,7 @@ export const en: TranslationKeys = {
     step1: "Basic Info",
     step2: "Details",
     step3: "Review",
+    step4: "Review",
     previous: "Previous",
     next: "Next",
     createClub: "Create Club",
@@ -1371,6 +1472,12 @@ export const en: TranslationKeys = {
 
     // Step 2 - Details
     leader: "Club Leader",
+    leaderRole: "Leader Role",
+    leaderRoleDescription: "Who will lead this club?",
+    roleTeachers: "Teachers",
+    roleStaff: "Staff Members",
+    roleStudents: "Students",
+    selectLeaderByRole: "Select a {role}",
     selectLeader: "Select a teacher (optional)",
     followSchoolYear: "Follow school year dates",
     followSchoolYearHint: "Automatically use school year start/end dates",
@@ -1383,15 +1490,43 @@ export const en: TranslationKeys = {
     oneTimeFee: "One-time Registration Fee",
     oneTimeFeeOptional: "Optional",
 
-    // Step 3 - Review
+    // Step 3 - Eligibility
+    eligibilityTitle: "Grade Eligibility",
+    eligibilityDescription: "Define which students can join this club",
+    eligibilityRuleCard: {
+      allGrades: {
+        title: "All Grades",
+        description: "Any student can join"
+      },
+      includeOnly: {
+        title: "Specific Grades",
+        description: "Only selected grades"
+      },
+      excludeOnly: {
+        title: "Exclude Grades",
+        description: "All except selected"
+      }
+    },
+    selectedGradesCount: "{count} grade(s) selected",
+    selectGrades: "Select Grades",
+    noGradesSelected: "No grades selected",
+
+    // Step 4 - Review
     reviewTitle: "Review Club Details",
     basicInformation: "Basic Information",
     detailsSchedule: "Details & Schedule",
     financialInformation: "Financial Information",
+    eligibilitySection: "Eligibility Rules",
+    ruleTypeLabel: "Rule Type",
+    allowedGrades: "Allowed Grades",
+    excludedGrades: "Excluded Grades",
+    allGradesAllowed: "All grades allowed",
     editSection: "Edit",
     followingSchoolYear: "Following school year dates",
 
     // Validation
+    leaderRequired: "Please select a leader",
+    leaderTypeRequired: "Please select a leader role",
     nameMinLength: "Club name must be at least 3 characters",
     categoryRequired: "Please select a category",
     monthlyFeeMin: "Monthly fee must be 0 or greater",
@@ -2655,5 +2790,111 @@ export const en: TranslationKeys = {
     submit: "Submit Payment",
     submitting: "Submitting...",
     cancel: "Cancel",
+  },
+
+  // Club Enrollment Wizard
+  clubEnrollmentWizard: {
+    // Main
+    title: "Club Enrollment",
+    subtitle: "Enroll students in extracurricular clubs",
+
+    // Steps
+    step1: "Select Club",
+    step2: "Select Student",
+    step3: "Payment & Review",
+    step4: "Confirmation",
+
+    // Step 1 - Club Selection
+    selectClub: "Select a Club",
+    selectClubDescription: "Choose a club to enroll a student",
+    allCategories: "All Categories",
+    searchClubs: "Search clubs...",
+    noClubsFound: "No clubs found",
+    clubDetails: "Club Details",
+    leader: "Leader",
+    enrollmentFee: "Enrollment Fee",
+    monthlyFee: "Monthly Fee",
+    duration: "Duration",
+    spots: "Spots Available",
+    spotsOf: "{current} of {capacity}",
+    atCapacity: "At full capacity",
+    nearCapacity: "Nearly full",
+    selectThisClub: "Select this Club",
+
+    // Step 2 - Student Selection
+    selectStudent: "Select a Student",
+    selectStudentDescription: "Choose the student to enroll",
+    searchStudents: "Search by name or student ID...",
+    noStudentsFound: "No eligible students found",
+    alreadyEnrolled: "Already enrolled in this club",
+    currentClubs: "Current Clubs",
+    noCurrentClubs: "No club memberships",
+    selectThisStudent: "Select this Student",
+    eligibilityNote: "Only students with completed enrollments are shown",
+
+    // Step 3 - Payment & Review
+    paymentAndReview: "Payment & Review",
+    reviewDescription: "Review enrollment details and record payment",
+    enrollmentDetails: "Enrollment Details",
+    club: "Club",
+    student: "Student",
+    grade: "Grade",
+    totalAmount: "Total Amount",
+    paymentDetails: "Payment Details",
+    payNow: "Pay Now",
+    payLater: "Pay Later",
+    paymentMethod: "Payment Method",
+    cash: "Cash",
+    orangeMoney: "Orange Money",
+    amountPaid: "Amount Paid",
+    receiptNumber: "Receipt Number",
+    transactionRef: "Transaction Reference",
+    notes: "Notes",
+    optional: "(Optional)",
+
+    // Monthly breakdown
+    monthlyBreakdown: "Monthly Breakdown",
+    showBreakdown: "Show Monthly Breakdown",
+    hideBreakdown: "Hide Breakdown",
+    month: "Month",
+    amount: "Amount",
+    pastMonth: "Past",
+    currentMonth: "Current",
+    futureMonth: "Upcoming",
+    totalMonths: "Total Months",
+    adjustTotal: "Adjust Total",
+    midYearProration: "Mid-Year Enrollment Detected",
+    midYearMessage: "This enrollment starts mid-year. The total has been adjusted to only include months from {startMonth} onwards.",
+    understood: "Understood",
+
+    // Step 4 - Confirmation
+    enrollmentComplete: "Enrollment Complete!",
+    successMessage: "The student has been successfully enrolled in the club.",
+    enrollmentNumber: "Enrollment #",
+    studentName: "Student",
+    clubName: "Club",
+    totalPaid: "Total Paid",
+    enrollAnother: "Enroll Another Student",
+    viewClub: "View Club Details",
+    done: "Done",
+
+    // Navigation
+    back: "Back",
+    next: "Continue",
+    submit: "Complete Enrollment",
+    submitting: "Processing...",
+    cancel: "Cancel",
+    saveDraft: "Save Draft",
+
+    // Errors
+    clubRequired: "Please select a club",
+    studentRequired: "Please select a student",
+    paymentMethodRequired: "Payment method is required when recording payment",
+    receiptRequired: "Receipt number is required when recording payment",
+    amountRequired: "Payment amount is required",
+
+    // Capacity warnings
+    capacityWarning: "This club is at {percentage}% capacity",
+    capacityFull: "This club is at full capacity and cannot accept new enrollments",
   },
 } as const;

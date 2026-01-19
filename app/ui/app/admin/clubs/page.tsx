@@ -101,6 +101,28 @@ interface TeacherOption {
   lastName: string
 }
 
+interface StaffOption {
+  id: string
+  name: string | null
+  email: string | null
+  staffRole: string | null
+  image: string | null
+}
+
+interface StudentOption {
+  id: string
+  person: {
+    firstName: string
+    lastName: string
+    photoUrl: string | null
+  }
+  currentGrade: {
+    name: string
+    level: string
+  } | null
+  studentStatus: string
+}
+
 const CLUB_STATUSES: ClubStatus[] = ["draft", "active", "closed", "completed", "cancelled"]
 
 const ITEMS_PER_PAGE = 50
@@ -110,6 +132,8 @@ export default function AdminClubsPage() {
   const [mounted, setMounted] = useState(false)
   const [schoolYears, setSchoolYears] = useState<SchoolYear[]>([])
   const [teachers, setTeachers] = useState<TeacherOption[]>([])
+  const [staff, setStaff] = useState<StaffOption[]>([])
+  const [students, setStudents] = useState<StudentOption[]>([])
   const [selectedSchoolYearId, setSelectedSchoolYearId] = useState<string>("")
   const [selectedCategoryId, setSelectedCategoryId] = useState<string>("all")
   const [offset, setOffset] = useState(0)
@@ -156,6 +180,7 @@ export default function AdminClubsPage() {
     description: "",
     categoryId: "",
     leaderId: "",
+    leaderType: "" as "" | "teacher" | "staff" | "student",
     startDate: "",
     endDate: "",
     fee: 0,
@@ -205,13 +230,15 @@ export default function AdminClubsPage() {
     setMounted(true)
   }, [])
 
-  // Load school years and teachers
+  // Load school years, teachers, staff, and students
   useEffect(() => {
     async function loadData() {
       try {
-        const [syRes, teachersRes] = await Promise.all([
+        const [syRes, teachersRes, staffRes, studentsRes] = await Promise.all([
           fetch("/api/admin/school-years"),
           fetch("/api/admin/teachers?limit=500"),
+          fetch("/api/admin/staff-leaders?limit=500"),
+          fetch("/api/admin/student-leaders?limit=500"),
         ])
         if (syRes.ok) {
           const data = await syRes.json()
@@ -224,6 +251,14 @@ export default function AdminClubsPage() {
         if (teachersRes.ok) {
           const data = await teachersRes.json()
           setTeachers(data.teachers || [])
+        }
+        if (staffRes.ok) {
+          const data = await staffRes.json()
+          setStaff(data.staff || data || [])
+        }
+        if (studentsRes.ok) {
+          const data = await studentsRes.json()
+          setStudents(data.students || data || [])
         }
       } catch (err) {
         console.error("Error loading data:", err)
@@ -244,6 +279,7 @@ export default function AdminClubsPage() {
       description: "",
       categoryId: "",
       leaderId: "",
+      leaderType: "",
       startDate: "",
       endDate: "",
       fee: 0,
@@ -259,6 +295,7 @@ export default function AdminClubsPage() {
         ...form,
         categoryId: form.categoryId || undefined,
         leaderId: form.leaderId || undefined,
+        leaderType: form.leaderType || undefined,
         monthlyFee: form.monthlyFee || undefined,
         schoolYearId: selectedSchoolYearId,
       })
@@ -277,6 +314,7 @@ export default function AdminClubsPage() {
         ...form,
         categoryId: form.categoryId || null,
         leaderId: form.leaderId || null,
+        leaderType: form.leaderType || null,
         monthlyFee: form.monthlyFee || null,
       })
       setIsEditDialogOpen(false)
@@ -382,6 +420,7 @@ export default function AdminClubsPage() {
       description: club.description || "",
       categoryId: club.categoryId || "",
       leaderId: club.leaderId || "",
+      leaderType: club.leaderType || "",
       startDate: club.startDate.split("T")[0],
       endDate: club.endDate.split("T")[0],
       fee: club.fee,
@@ -832,7 +871,7 @@ export default function AdminClubsPage() {
                     {club.leader && (
                       <div className="flex items-center gap-2 text-sm mb-2">
                         <User className="h-4 w-4 text-muted-foreground" />
-                        <span>{club.leader.person.firstName} {club.leader.person.lastName}</span>
+                        <span>{club.leader.name}</span>
                       </div>
                     )}
                     <div className="grid grid-cols-2 gap-2 text-sm">
@@ -1028,24 +1067,78 @@ export default function AdminClubsPage() {
 
                 <div className="grid gap-2.5">
                   <Label className="text-sm font-medium text-muted-foreground">
-                    {t.clubs?.leader || "Leader"}
+                    {t.clubs?.leader || "Leader"} <span className="text-xs text-muted-foreground">(Optional)</span>
                   </Label>
-                  <Select
-                    value={form.leaderId || "__none__"}
-                    onValueChange={(v) => setForm({ ...form, leaderId: v === "__none__" ? "" : v })}
-                  >
-                    <SelectTrigger className="h-11">
-                      <SelectValue placeholder={t.clubs?.selectLeader || "Select leader..."} />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="__none__">{t.clubs?.noLeader || "None"}</SelectItem>
-                      {teachers.map((teacher) => (
-                        <SelectItem key={teacher.id} value={teacher.id}>
-                          {teacher.firstName} {teacher.lastName}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                  <div className="space-y-3">
+                    <Select
+                      value={form.leaderType || "__none__"}
+                      onValueChange={(v) => setForm({ ...form, leaderType: v === "__none__" ? "" : v as "" | "teacher" | "staff" | "student", leaderId: "" })}
+                    >
+                      <SelectTrigger className="h-11">
+                        <SelectValue placeholder={t.clubs?.selectLeaderType || "Select leader type..."} />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="__none__">{t.clubs?.noLeader || "None"}</SelectItem>
+                        <SelectItem value="teacher">{t.clubs?.leaderTypeTeacher || "Teacher"}</SelectItem>
+                        <SelectItem value="staff">{t.clubs?.leaderTypeStaff || "Staff Member"}</SelectItem>
+                        <SelectItem value="student">{t.clubs?.leaderTypeStudent || "Student Leader"}</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    {form.leaderType === "teacher" && (
+                      <Select
+                        value={form.leaderId || "__select__"}
+                        onValueChange={(v) => setForm({ ...form, leaderId: v === "__select__" ? "" : v })}
+                      >
+                        <SelectTrigger className="h-11">
+                          <SelectValue placeholder={t.clubs?.selectPerson || "Select teacher..."} />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="__select__" disabled>{t.clubs?.selectPerson || "Select..."}</SelectItem>
+                          {teachers.map((teacher) => (
+                            <SelectItem key={teacher.id} value={teacher.id}>
+                              {teacher.firstName} {teacher.lastName}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    )}
+                    {form.leaderType === "staff" && (
+                      <Select
+                        value={form.leaderId || "__select__"}
+                        onValueChange={(v) => setForm({ ...form, leaderId: v === "__select__" ? "" : v })}
+                      >
+                        <SelectTrigger className="h-11">
+                          <SelectValue placeholder={t.clubs?.selectPerson || "Select staff member..."} />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="__select__" disabled>{t.clubs?.selectPerson || "Select..."}</SelectItem>
+                          {staff.map((member) => (
+                            <SelectItem key={member.id} value={member.id}>
+                              {member.name || member.email || "Unknown"} {member.staffRole ? `(${member.staffRole})` : ""}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    )}
+                    {form.leaderType === "student" && (
+                      <Select
+                        value={form.leaderId || "__select__"}
+                        onValueChange={(v) => setForm({ ...form, leaderId: v === "__select__" ? "" : v })}
+                      >
+                        <SelectTrigger className="h-11">
+                          <SelectValue placeholder={t.clubs?.selectPerson || "Select student..."} />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="__select__" disabled>{t.clubs?.selectPerson || "Select..."}</SelectItem>
+                          {students.map((student) => (
+                            <SelectItem key={student.id} value={student.id}>
+                              {student.person.firstName} {student.person.lastName} {student.currentGrade ? `(${student.currentGrade.name})` : ""}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    )}
+                  </div>
                 </div>
               </div>
 

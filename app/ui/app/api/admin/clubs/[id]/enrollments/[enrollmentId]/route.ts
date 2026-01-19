@@ -9,7 +9,7 @@ type RouteParams = { params: Promise<{ id: string; enrollmentId: string }> }
  * Remove a student from a club
  */
 export async function DELETE(req: NextRequest, { params }: RouteParams) {
-  const { error } = await requirePerm("schedule", "delete")
+  const { error } = await requirePerm("club_enrollment", "delete")
   if (error) return error
 
   try {

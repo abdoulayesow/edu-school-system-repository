@@ -3,6 +3,7 @@ import { requirePerm } from "@/lib/authz"
 import { prisma } from "@/lib/prisma"
 import { z } from "zod"
 import type { ClubStatus } from "@prisma/client"
+import { resolveClubLeaders, getLeaderKey } from "@/lib/club-helpers"
 
 const createClubSchema = z.object({
   name: z.string().min(1, "Name is required"),
@@ -10,6 +11,7 @@ const createClubSchema = z.object({
   description: z.string().optional().nullable(),
   categoryId: z.string().optional().nullable(),
   leaderId: z.string().optional().nullable(),
+  leaderType: z.enum(["teacher", "staff", "student"]).optional().nullable(),
   schoolYearId: z.string().min(1, "School year ID is required"),
   startDate: z.string().transform((s) => new Date(s)),
   endDate: z.string().transform((s) => new Date(s)),
@@ -20,7 +22,15 @@ const createClubSchema = z.object({
   isEnabled: z.boolean().default(true),
   eligibilityRuleType: z.enum(["all_grades", "include_only", "exclude_only"]).optional(),
   eligibilityGradeIds: z.array(z.string()).optional(),
-})
+}).refine(
+  (data) => {
+    // Both leaderType and leaderId must be present together or both absent
+    if (data.leaderType && !data.leaderId) return false
+    if (!data.leaderType && data.leaderId) return false
+    return true
+  },
+  { message: "leaderType and leaderId must both be provided or both omitted" }
+)
 
 /**
  * GET /api/admin/clubs
@@ -73,13 +83,6 @@ export async function GET(req: NextRequest) {
           category: {
             select: { id: true, name: true, nameFr: true },
           },
-          leader: {
-            include: {
-              person: {
-                select: { firstName: true, lastName: true },
-              },
-            },
-          },
           eligibilityRule: {
             include: {
               gradeRules: {
@@ -102,8 +105,17 @@ export async function GET(req: NextRequest) {
       prisma.club.count({ where }),
     ])
 
+    // Resolve polymorphic leaders
+    const leaderMap = await resolveClubLeaders(clubs)
+
+    // Attach resolved leaders to clubs
+    const clubsWithLeaders = clubs.map(club => ({
+      ...club,
+      leader: leaderMap.get(getLeaderKey(club.leaderId, club.leaderType)!) || null,
+    }))
+
     return NextResponse.json({
-      clubs,
+      clubs: clubsWithLeaders,
       pagination: {
         total,
         limit,
@@ -165,14 +177,43 @@ export async function POST(req: NextRequest) {
       }
     }
 
-    // Verify leader exists if provided
-    if (validated.leaderId) {
-      const leader = await prisma.teacherProfile.findUnique({
-        where: { id: validated.leaderId },
-      })
-      if (!leader) {
+    // Verify leader exists if provided (polymorphic check based on leaderType)
+    if (validated.leaderId && validated.leaderType) {
+      let leaderExists = false
+
+      switch (validated.leaderType) {
+        case 'teacher':
+          const teacher = await prisma.teacherProfile.findUnique({
+            where: { id: validated.leaderId },
+          })
+          leaderExists = !!teacher
+          break
+
+        case 'staff':
+          const staff = await prisma.user.findFirst({
+            where: {
+              id: validated.leaderId,
+              staffRole: { not: null },
+              // Exclude teaching roles
+              NOT: {
+                staffRole: { in: ['enseignant', 'professeur_principal'] }
+              }
+            }
+          })
+          leaderExists = !!staff
+          break
+
+        case 'student':
+          const student = await prisma.studentProfile.findUnique({
+            where: { id: validated.leaderId },
+          })
+          leaderExists = !!student
+          break
+      }
+
+      if (!leaderExists) {
         return NextResponse.json(
-          { message: "Leader not found" },
+          { message: `${validated.leaderType} leader not found` },
           { status: 404 }
         )
       }
@@ -186,6 +227,7 @@ export async function POST(req: NextRequest) {
         description: validated.description,
         categoryId: validated.categoryId,
         leaderId: validated.leaderId,
+        leaderType: validated.leaderType,
         schoolYearId: validated.schoolYearId,
         startDate: validated.startDate,
         endDate: validated.endDate,
@@ -217,13 +259,6 @@ export async function POST(req: NextRequest) {
         },
         category: {
           select: { id: true, name: true, nameFr: true },
-        },
-        leader: {
-          include: {
-            person: {
-              select: { firstName: true, lastName: true },
-            },
-          },
         },
         eligibilityRule: {
           include: {
