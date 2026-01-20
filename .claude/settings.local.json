@@ -60,7 +60,8 @@
       "Bash(psql:*)",
       "Skill(audit-design)",
       "Skill(audit-design:*)",
-      "Bash(npm run lint:*)"
+      "Bash(npm run lint:*)",
+      "Bash(git diff:*)"
     ],
     "additionalDirectories": [
       "c:\\workspace\\sources\\edu-school-system-repository"

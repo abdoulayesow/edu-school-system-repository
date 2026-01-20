@@ -125,10 +125,11 @@ export function StepStudentSelection() {
 
     // Filter by search (name OR formatted student ID)
     if (searchQuery) {
-      const query = searchQuery.toLowerCase()
+      const query = searchQuery.toLowerCase().trim()
       filtered = filtered.filter((s) => {
         const fullName = `${s.person.firstName} ${s.person.lastName}`.toLowerCase()
-        const formattedId = (s.formattedStudentId || "").toLowerCase()
+        // Safely handle null/undefined formattedStudentId
+        const formattedId = s.formattedStudentId?.toLowerCase() || ""
         return fullName.includes(query) || formattedId.includes(query)
       })
     }

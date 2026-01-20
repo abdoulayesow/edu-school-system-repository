@@ -86,11 +86,11 @@ export function ClubEnrollmentWizard() {
     }
   }, [searchParams, state.data.clubId, state.currentStep, setClub, completeStep, goToStep])
 
-  // Save enrollment as draft
-  const handleSave = useCallback(async () => {
+  // Save enrollment as draft - returns true on success, false on failure
+  const handleSave = useCallback(async (): Promise<boolean> => {
     if (!state.data.clubId || !state.data.studentId) {
       setError("Club and student must be selected before saving")
-      return
+      return false
     }
 
     try {
@@ -127,24 +127,28 @@ export function ClubEnrollmentWizard() {
 
       const data = await res.json()
       setEnrollmentId(data.id)
+      return true
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to save enrollment")
+      return false
     } finally {
       setSubmitting(false)
     }
   }, [state.data, state.currentStep, setEnrollmentId, setError, clearError, setSubmitting])
 
+  // Wrapper for handleSave that matches expected type signature
+  const handleSaveWrapper = useCallback(async (): Promise<void> => {
+    await handleSave()
+  }, [handleSave])
+
   // Handle navigation to next step
   const handleNext = useCallback(async () => {
     // Save as draft when moving from step 2 to 3
     if (state.currentStep === 2 && state.data.studentId) {
-      try {
-        await handleSave()
-        // Auto-save is already showing submitting state via setSubmitting(true)
-        // The WizardNavigation component will show loading state on buttons
-      } catch (err) {
-        // Error is already handled in handleSave
-        return // Don't proceed to next step if save failed
+      const success = await handleSave()
+      // Only proceed to next step if save was successful
+      if (!success) {
+        return
       }
     }
     nextStep()
@@ -152,16 +156,34 @@ export function ClubEnrollmentWizard() {
 
   // Show confirmation modal before submitting
   const handleShowConfirmation = useCallback(async () => {
-    // Validate club capacity before showing confirmation
-    if (state.data.capacity && state.data.currentEnrollments !== undefined) {
-      if (state.data.currentEnrollments >= state.data.capacity) {
-        setError("This club has reached its capacity. Cannot enroll additional students.")
-        return
+    // Fetch fresh club data to get current enrollment count
+    if (state.data.clubId) {
+      try {
+        const res = await fetch(`/api/clubs/${state.data.clubId}`)
+        if (res.ok) {
+          const club = await res.json()
+          const currentEnrollments = club._count?.enrollments || 0
+
+          // Update capacity data in state
+          setClub({
+            currentEnrollments,
+            capacity: club.capacity,
+          })
+
+          // Validate capacity with fresh data
+          if (club.capacity !== null && currentEnrollments >= club.capacity) {
+            setError("This club has reached its capacity. Cannot enroll additional students.")
+            return
+          }
+        }
+      } catch (err) {
+        // Continue even if refresh fails - submit endpoint will validate
+        console.warn("Failed to refresh club capacity:", err)
       }
     }
 
     setShowConfirmModal(true)
-  }, [state.data.capacity, state.data.currentEnrollments, setError])
+  }, [state.data.clubId, setClub, setError])
 
   // Submit final enrollment (called from confirmation modal)
   const handleSubmit = useCallback(async () => {
@@ -338,7 +360,7 @@ export function ClubEnrollmentWizard() {
                 isSubmitting={state.isSubmitting}
                 onPrevious={prevStep}
                 onNext={handleNext}
-                onSave={handleSave}
+                onSave={handleSaveWrapper}
                 onSubmit={handleShowConfirmation}
                 isDirty={state.isDirty}
               />

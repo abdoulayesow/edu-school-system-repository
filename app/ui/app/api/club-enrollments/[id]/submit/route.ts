@@ -46,14 +46,31 @@ export async function POST(req: NextRequest, { params }: RouteParams) {
     // Generate enrollment number if it doesn't exist (for drafts)
     const enrollmentNumber = enrollment.enrollmentNumber || await generateClubEnrollmentNumber()
 
-    // Update enrollment status to active
-    const updated = await prisma.clubEnrollment.update({
-      where: { id },
-      data: {
-        status: "active",
-        enrollmentNumber,
-        syncVersion: { increment: 1 },
-      },
+    // Use transaction to ensure capacity check and status update are atomic
+    const updated = await prisma.$transaction(async (tx) => {
+      // Check capacity before activating the enrollment
+      if (enrollment.club.capacity !== null) {
+        const activeEnrollmentCount = await tx.clubEnrollment.count({
+          where: {
+            clubId: enrollment.club.id,
+            status: "active",
+          },
+        })
+
+        if (activeEnrollmentCount >= enrollment.club.capacity) {
+          throw new Error("Club is at full capacity")
+        }
+      }
+
+      // Update enrollment status to active
+      return await tx.clubEnrollment.update({
+        where: { id },
+        data: {
+          status: "active",
+          enrollmentNumber,
+          syncVersion: { increment: 1 },
+        },
+      })
     })
 
     // Create payment if provided
@@ -92,9 +109,17 @@ export async function POST(req: NextRequest, { params }: RouteParams) {
     })
   } catch (err) {
     console.error("Error submitting enrollment:", err)
+
+    // Handle specific error messages
+    const errorMessage = err instanceof Error ? err.message : "Failed to submit enrollment"
+    const statusCode = errorMessage === "Club is at full capacity" ||
+                       errorMessage === "Valid payment method is required when recording a payment"
+                       ? 400
+                       : 500
+
     return NextResponse.json(
-      { message: "Failed to submit enrollment" },
-      { status: 500 }
+      { message: errorMessage },
+      { status: statusCode }
     )
   }
 }
