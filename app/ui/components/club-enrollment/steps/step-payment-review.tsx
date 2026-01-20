@@ -30,7 +30,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog"
 import { cn } from "@/lib/utils"
-import { sizing } from "@/lib/design-tokens"
+import { sizing, spacing } from "@/lib/design-tokens"
 import { useI18n } from "@/components/i18n-provider"
 import { useClubEnrollmentWizard } from "../wizard-context"
 
@@ -175,14 +175,14 @@ export function StepPaymentReview() {
       {/* Summary Cards */}
       <div className="grid md:grid-cols-2 gap-6">
         {/* Club Summary */}
-        <div className="p-6 bg-white border-2 border-gray-200 rounded-xl space-y-4">
+        <div className={cn(spacing.card.md, "bg-white border-2 border-gray-200 rounded-xl space-y-4")}>
           <div className="flex items-center justify-between mb-4">
             <h3 className="font-bold text-lg text-gray-900">Club Details</h3>
             <Button
               variant="ghost"
               size="sm"
               onClick={() => goToStep(1)}
-              className="gap-1 text-amber-600 hover:text-amber-700 hover:bg-amber-50 min-h-[44px]"
+              className="gap-1 text-primary hover:text-primary/90 hover:bg-primary/5 min-h-[44px]"
               aria-label="Edit club details"
             >
               <Edit className={sizing.icon.xs} />
@@ -240,14 +240,14 @@ export function StepPaymentReview() {
         </div>
 
         {/* Student Summary */}
-        <div className="p-6 bg-white border-2 border-gray-200 rounded-xl space-y-4">
+        <div className={cn(spacing.card.md, "bg-white border-2 border-gray-200 rounded-xl space-y-4")}>
           <div className="flex items-center justify-between mb-4">
             <h3 className="font-bold text-lg text-gray-900">Student Details</h3>
             <Button
               variant="ghost"
               size="sm"
               onClick={() => goToStep(2)}
-              className="gap-1 text-amber-600 hover:text-amber-700 hover:bg-amber-50 min-h-[44px]"
+              className="gap-1 text-primary hover:text-primary/90 hover:bg-primary/5 min-h-[44px]"
               aria-label="Edit student details"
             >
               <Edit className={sizing.icon.xs} />

@@ -69,6 +69,9 @@ const DEFAULT_PERMISSIONS: PermissionDef[] = [
   { role: StaffRole.proviseur, resource: PermissionResource.teachers_assignment, action: PermissionAction.update, scope: PermissionScope.own_level },
   { role: StaffRole.proviseur, resource: PermissionResource.schedule, action: PermissionAction.view, scope: PermissionScope.own_level },
   { role: StaffRole.proviseur, resource: PermissionResource.schedule, action: PermissionAction.update, scope: PermissionScope.own_level },
+  { role: StaffRole.proviseur, resource: PermissionResource.club_enrollment, action: PermissionAction.view, scope: PermissionScope.own_level },
+  { role: StaffRole.proviseur, resource: PermissionResource.club_enrollment, action: PermissionAction.create, scope: PermissionScope.own_level },
+  { role: StaffRole.proviseur, resource: PermissionResource.club_enrollment, action: PermissionAction.update, scope: PermissionScope.own_level },
 
   { role: StaffRole.proviseur, resource: PermissionResource.grades, action: PermissionAction.view, scope: PermissionScope.own_level },
   { role: StaffRole.proviseur, resource: PermissionResource.report_cards, action: PermissionAction.view, scope: PermissionScope.own_level },
@@ -188,6 +191,9 @@ const DEFAULT_PERMISSIONS: PermissionDef[] = [
   { role: StaffRole.directeur, resource: PermissionResource.teachers_assignment, action: PermissionAction.update, scope: PermissionScope.own_level },
   { role: StaffRole.directeur, resource: PermissionResource.schedule, action: PermissionAction.view, scope: PermissionScope.own_level },
   { role: StaffRole.directeur, resource: PermissionResource.schedule, action: PermissionAction.update, scope: PermissionScope.own_level },
+  { role: StaffRole.directeur, resource: PermissionResource.club_enrollment, action: PermissionAction.view, scope: PermissionScope.own_level },
+  { role: StaffRole.directeur, resource: PermissionResource.club_enrollment, action: PermissionAction.create, scope: PermissionScope.own_level },
+  { role: StaffRole.directeur, resource: PermissionResource.club_enrollment, action: PermissionAction.update, scope: PermissionScope.own_level },
 
   { role: StaffRole.directeur, resource: PermissionResource.grades, action: PermissionAction.view, scope: PermissionScope.own_level },
   { role: StaffRole.directeur, resource: PermissionResource.report_cards, action: PermissionAction.view, scope: PermissionScope.own_level },
@@ -227,6 +233,9 @@ const DEFAULT_PERMISSIONS: PermissionDef[] = [
   { role: StaffRole.secretariat, resource: PermissionResource.student_enrollment, action: PermissionAction.view, scope: PermissionScope.all },
   { role: StaffRole.secretariat, resource: PermissionResource.student_enrollment, action: PermissionAction.create, scope: PermissionScope.all },
   { role: StaffRole.secretariat, resource: PermissionResource.student_enrollment, action: PermissionAction.update, scope: PermissionScope.all },
+  { role: StaffRole.secretariat, resource: PermissionResource.club_enrollment, action: PermissionAction.view, scope: PermissionScope.all },
+  { role: StaffRole.secretariat, resource: PermissionResource.club_enrollment, action: PermissionAction.create, scope: PermissionScope.all },
+  { role: StaffRole.secretariat, resource: PermissionResource.club_enrollment, action: PermissionAction.update, scope: PermissionScope.all },
   { role: StaffRole.secretariat, resource: PermissionResource.student_documents, action: PermissionAction.view, scope: PermissionScope.all },
   { role: StaffRole.secretariat, resource: PermissionResource.student_documents, action: PermissionAction.update, scope: PermissionScope.all },
 
@@ -433,6 +442,10 @@ const DEFAULT_PERMISSIONS: PermissionDef[] = [
   { role: StaffRole.admin_systeme, resource: PermissionResource.schedule, action: PermissionAction.view, scope: PermissionScope.all },
   { role: StaffRole.admin_systeme, resource: PermissionResource.schedule, action: PermissionAction.create, scope: PermissionScope.all },
   { role: StaffRole.admin_systeme, resource: PermissionResource.schedule, action: PermissionAction.update, scope: PermissionScope.all },
+  { role: StaffRole.admin_systeme, resource: PermissionResource.club_enrollment, action: PermissionAction.view, scope: PermissionScope.all },
+  { role: StaffRole.admin_systeme, resource: PermissionResource.club_enrollment, action: PermissionAction.create, scope: PermissionScope.all },
+  { role: StaffRole.admin_systeme, resource: PermissionResource.club_enrollment, action: PermissionAction.update, scope: PermissionScope.all },
+  { role: StaffRole.admin_systeme, resource: PermissionResource.club_enrollment, action: PermissionAction.delete, scope: PermissionScope.all },
 
   { role: StaffRole.admin_systeme, resource: PermissionResource.grades, action: PermissionAction.view, scope: PermissionScope.all },
   { role: StaffRole.admin_systeme, resource: PermissionResource.grades, action: PermissionAction.update, scope: PermissionScope.all },

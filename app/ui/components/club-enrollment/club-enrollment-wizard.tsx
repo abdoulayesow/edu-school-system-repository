@@ -13,7 +13,8 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog"
-import { sizing } from "@/lib/design-tokens"
+import { sizing, typography } from "@/lib/design-tokens"
+import { cn } from "@/lib/utils"
 import { useI18n } from "@/components/i18n-provider"
 import { useRouter, useSearchParams } from "next/navigation"
 import { useClubEnrollmentWizard } from "./wizard-context"
@@ -271,8 +272,19 @@ export function ClubEnrollmentWizard() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-amber-50/30 to-orange-50/20 py-8">
-      <div className="container max-w-6xl mx-auto px-4">
+    <div className="min-h-screen relative overflow-hidden py-8">
+      {/* Animated background with decorative elements */}
+      <div className="absolute inset-0 bg-gradient-to-br from-white via-gspn-gold-50/20 to-gspn-gold-100/30" />
+
+      {/* Decorative floating orbs */}
+      <div className="absolute top-20 right-10 w-72 h-72 bg-gspn-gold-200/20 rounded-full blur-3xl animate-pulse"
+           style={{ animationDuration: '4s' }} />
+      <div className="absolute bottom-20 left-10 w-96 h-96 bg-gspn-gold-100/20 rounded-full blur-3xl animate-pulse"
+           style={{ animationDelay: '1s', animationDuration: '5s' }} />
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-gspn-gold-50/10 rounded-full blur-3xl animate-pulse"
+           style={{ animationDelay: '2s', animationDuration: '6s' }} />
+
+      <div className="container max-w-6xl mx-auto px-4 relative z-10">
         {/* Header */}
         <div className="mb-8">
           <Button
@@ -284,16 +296,20 @@ export function ClubEnrollmentWizard() {
             Back to Clubs
           </Button>
 
-          <div className="text-center space-y-2">
-            <h1 className="text-4xl font-bold bg-gradient-to-r from-amber-600 to-orange-600 bg-clip-text text-transparent">
+          <div className="text-center space-y-3 animate-in fade-in slide-in-from-top-4 duration-700">
+            <h1 className={cn(
+              typography.heading.page,
+              "bg-gradient-to-r from-gspn-gold-600 via-gspn-gold-700 to-gspn-gold-600 bg-clip-text text-transparent",
+              "drop-shadow-sm"
+            )}>
               Club Enrollment
             </h1>
-            <p className="text-gray-600">Enroll a student in an extracurricular club</p>
+            <p className="text-gray-600 text-lg">Enroll a student in an extracurricular club</p>
           </div>
         </div>
 
         {/* Wizard Card */}
-        <Card className="shadow-xl border-2 border-gray-200/50 backdrop-blur-sm bg-white/95">
+        <Card className="shadow-2xl border-2 border-gray-200/50 backdrop-blur-sm bg-white/95 animate-in fade-in slide-in-from-bottom-8 duration-700 delay-150">
           <CardHeader className="space-y-6 pb-6">
             {/* Progress Indicator */}
             <WizardProgress
@@ -344,8 +360,8 @@ export function ClubEnrollmentWizard() {
           <DialogContent className="max-w-md">
             <DialogHeader>
               <div className="flex items-center gap-3 mb-2">
-                <div className="p-3 bg-amber-100 rounded-full">
-                  <AlertTriangle className="w-6 h-6 text-amber-700" />
+                <div className="p-3 bg-warning/10 rounded-full">
+                  <AlertTriangle className="w-6 h-6 text-warning" />
                 </div>
                 <div>
                   <DialogTitle className="text-xl">Unsaved Changes</DialogTitle>

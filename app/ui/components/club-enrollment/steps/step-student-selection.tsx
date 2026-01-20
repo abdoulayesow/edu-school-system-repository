@@ -176,8 +176,8 @@ export function StepStudentSelection() {
 
         <div className="flex flex-col items-center justify-center py-12 space-y-4">
           <div className="relative">
-            <Loader2 className={cn(sizing.icon.xl, "animate-spin text-amber-600")} />
-            <div className="absolute inset-0 bg-amber-100 rounded-full blur-xl opacity-30 animate-pulse" />
+            <Loader2 className={cn(sizing.icon.xl, "animate-spin text-primary")} />
+            <div className="absolute inset-0 bg-primary/10 rounded-full blur-xl opacity-30 animate-pulse" />
           </div>
           <p className="text-sm text-gray-500 font-medium">Loading eligible students...</p>
         </div>
@@ -220,12 +220,12 @@ export function StepStudentSelection() {
             <h3 className="font-semibold text-lg text-gray-900">Unable to Load Students</h3>
             <p className="text-sm text-gray-600">{error}</p>
           </div>
-          <button
+          <Button
             onClick={() => window.location.reload()}
-            className="px-4 py-2 bg-amber-600 hover:bg-amber-700 text-white rounded-lg font-medium transition-colors"
+            className="bg-primary hover:bg-primary/90"
           >
             Retry
-          </button>
+          </Button>
         </div>
       </div>
     )
@@ -236,10 +236,10 @@ export function StepStudentSelection() {
       {/* Selected Club Header */}
       {state.data.clubName && (
         <div className="space-y-3">
-          <div className="p-4 bg-gradient-to-br from-amber-50 to-orange-50 rounded-xl border-2 border-amber-200/50">
+          <div className="p-4 bg-gradient-to-br from-gspn-gold-50 to-gspn-gold-100 rounded-xl border-2 border-gspn-gold-200/50">
             <div className="flex items-center justify-between flex-wrap gap-3">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-full bg-gradient-to-br from-amber-500 to-orange-500 flex items-center justify-center shadow-lg shadow-amber-500/30">
+                <div className="w-10 h-10 rounded-full bg-gradient-to-br from-gspn-gold-500 to-gspn-gold-600 flex items-center justify-center shadow-lg shadow-gspn-gold-500/30">
                   <Users className={cn(sizing.icon.sm, "text-white")} />
                 </div>
                 <div>
@@ -254,22 +254,27 @@ export function StepStudentSelection() {
                 </div>
               </div>
               <div className="flex items-center gap-4 text-sm">
-                <div className="flex items-center gap-1">
-                  <span className="text-gray-600">Fee:</span>
-                  <span className="font-semibold text-amber-700">
-                    {formatCurrency(state.data.enrollmentFee || 0)}
-                  </span>
-                </div>
-                <Badge
-                  variant="secondary"
-                  className={cn(
-                    "bg-white/80",
-                    state.data.capacity && state.data.currentEnrollments !== undefined &&
-                    state.data.currentEnrollments >= state.data.capacity && "bg-red-100 text-red-700 border-red-300"
-                  )}
-                >
-                  {state.data.currentEnrollments}/{state.data.capacity} enrolled
-                </Badge>
+                {/* Show monthly fee if available, otherwise show enrollment fee */}
+                {state.data.monthlyFee && state.data.monthlyFee > 0 ? (
+                  <div className="flex items-center gap-1">
+                    <span className="text-gray-600">Monthly:</span>
+                    <span className="font-semibold text-primary">
+                      {formatCurrency(state.data.monthlyFee)}/mo
+                    </span>
+                  </div>
+                ) : state.data.enrollmentFee && state.data.enrollmentFee > 0 ? (
+                  <div className="flex items-center gap-1">
+                    <span className="text-gray-600">Fee:</span>
+                    <span className="font-semibold text-primary">
+                      {formatCurrency(state.data.enrollmentFee)}
+                    </span>
+                  </div>
+                ) : (
+                  <div className="flex items-center gap-1">
+                    <span className="text-gray-600">Fee:</span>
+                    <span className="font-semibold text-primary">Free</span>
+                  </div>
+                )}
               </div>
             </div>
           </div>
@@ -304,7 +309,7 @@ export function StepStudentSelection() {
             placeholder="Search by name or student ID..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="pl-10 h-11 bg-white border-2 border-gray-200 focus:border-amber-400 transition-colors"
+            className="pl-10 h-11 bg-white border-2 border-gray-200 focus:border-primary transition-colors"
             aria-label="Search for students by name or ID"
             role="searchbox"
           />
@@ -320,27 +325,31 @@ export function StepStudentSelection() {
         </div>
 
         {/* Grade Filter */}
-        <Select value={selectedGrade} onValueChange={setSelectedGrade}>
-          <SelectTrigger className="w-full sm:w-48 h-11 bg-white border-2 border-gray-200 focus:border-amber-400" aria-label="Filter students by grade">
-            <Filter className={cn(sizing.icon.sm, "mr-2 text-gray-500")} aria-hidden="true" />
-            <SelectValue placeholder="All Grades" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">All Grades</SelectItem>
-            {Array.from(availableGradesByLevel.entries()).map(([level, grades]) => (
-              <SelectGroup key={level}>
-                <SelectLabel className="font-semibold text-gray-700">
-                  {formatLevelName(level)}
-                </SelectLabel>
-                {grades.map((grade) => (
-                  <SelectItem key={grade.name} value={grade.name}>
-                    {grade.name}
-                  </SelectItem>
-                ))}
-              </SelectGroup>
-            ))}
-          </SelectContent>
-        </Select>
+        <div className="relative w-full sm:w-48">
+          <Filter className={cn(sizing.icon.sm, "absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 pointer-events-none z-10")} aria-hidden="true" />
+          <Select value={selectedGrade} onValueChange={setSelectedGrade}>
+            <SelectTrigger className="w-full h-11 bg-white border-2 border-gray-200 focus:border-primary pl-10" aria-label="Filter students by grade">
+              <SelectValue>
+                {selectedGrade === "all" ? "All Grades" : selectedGrade}
+              </SelectValue>
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All Grades</SelectItem>
+              {Array.from(availableGradesByLevel.entries()).map(([level, grades]) => (
+                <SelectGroup key={level}>
+                  <SelectLabel className="font-semibold text-gray-700">
+                    {formatLevelName(level)}
+                  </SelectLabel>
+                  {grades.map((grade) => (
+                    <SelectItem key={grade.name} value={grade.name}>
+                      {grade.name}
+                    </SelectItem>
+                  ))}
+                </SelectGroup>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
       </div>
 
       {/* Active Filters Display */}
@@ -368,17 +377,45 @@ export function StepStudentSelection() {
 
       {/* Students Grid */}
       {filteredStudentsList.length === 0 ? (
-        <div className="text-center py-12">
-          <GraduationCap className={cn(sizing.icon.xl, "mx-auto text-gray-300 mb-4")} />
-          <p className="text-gray-500 mb-2">
+        <div className="flex flex-col items-center justify-center py-20 animate-in fade-in slide-in-from-bottom-4 duration-700">
+          {/* Animated icon container */}
+          <div className="relative mb-8">
+            <div className="w-32 h-32 rounded-full bg-gradient-to-br from-gspn-gold-100 to-gspn-gold-200
+                          flex items-center justify-center shadow-lg shadow-gspn-gold-200/50 animate-pulse">
+              <GraduationCap className="w-16 h-16 text-gspn-gold-600" />
+            </div>
+            {/* Floating decorative elements */}
+            <div className="absolute -top-2 -right-2 w-6 h-6 rounded-full bg-gspn-gold-400 animate-bounce shadow-md"
+                 style={{ animationDelay: '0.2s', animationDuration: '2s' }} />
+            <div className="absolute -bottom-1 -left-3 w-4 h-4 rounded-full bg-gspn-gold-300 animate-bounce shadow-md"
+                 style={{ animationDelay: '0.4s', animationDuration: '2.5s' }} />
+            <div className="absolute top-1/2 -right-4 w-3 h-3 rounded-full bg-gspn-gold-200 animate-bounce shadow-sm"
+                 style={{ animationDelay: '0.6s', animationDuration: '3s' }} />
+          </div>
+
+          <h3 className="text-2xl font-bold text-gray-900 mb-3">
             {students.length === 0
-              ? "No eligible students found for this club"
-              : "No students match your search"}
+              ? "No Eligible Students Yet"
+              : "No Students Match Your Search"}
+          </h3>
+          <p className="text-gray-600 text-center max-w-md leading-relaxed mb-6">
+            {students.length === 0
+              ? "Students must meet the club's eligibility criteria such as grade level and enrollment status."
+              : "Try adjusting your search term or grade filter to find more students."}
           </p>
-          {students.length === 0 && (
-            <p className="text-sm text-gray-400">
-              Students must meet the club's eligibility criteria (grade level, etc.)
-            </p>
+
+          {/* Helpful actions */}
+          {(searchQuery || selectedGrade !== "all") && (
+            <Button
+              variant="outline"
+              onClick={() => {
+                setSearchQuery("")
+                setSelectedGrade("all")
+              }}
+              className="mt-2 border-2 hover:bg-gspn-gold-50 hover:border-gspn-gold-300 transition-colors"
+            >
+              Clear All Filters
+            </Button>
           )}
         </div>
       ) : (
@@ -394,7 +431,7 @@ export function StepStudentSelection() {
           </div>
 
           <div className="grid gap-3 md:grid-cols-2">
-            {filteredStudentsList.map((student) => {
+            {filteredStudentsList.map((student, index) => {
               const isSelected = state.data.studentId === student.studentId
               const isExpanded = expandedStudent === student.studentId
               const fullName = `${student.person.firstName} ${student.person.lastName}`
@@ -405,13 +442,14 @@ export function StepStudentSelection() {
                 <div
                   key={student.id}
                   className={cn(
-                    "relative rounded-xl border-2 transition-all duration-300",
+                    "group relative rounded-xl border-2 transition-all duration-500 animate-in fade-in slide-in-from-bottom-2",
                     isSelected
-                      ? "border-green-500 bg-green-50/50 shadow-lg shadow-green-500/10"
+                      ? "border-green-500 bg-green-50/50 shadow-xl shadow-green-500/20 scale-[1.02]"
                       : isExpanded
-                      ? "border-amber-400 bg-amber-50/30 shadow-lg"
-                      : "border-gray-200 bg-white hover:border-amber-300 hover:shadow-md"
+                      ? "border-primary bg-gradient-to-br from-gspn-gold-50 to-white shadow-xl shadow-primary/10 scale-[1.01]"
+                      : "border-gray-200 bg-white hover:border-primary/40 hover:shadow-xl hover:-translate-y-1 hover:scale-[1.01]"
                   )}
+                  style={{ animationDelay: `${index * 50}ms` }}
                   role="article"
                   aria-label={`Student: ${fullName}`}
                 >
@@ -439,7 +477,7 @@ export function StepStudentSelection() {
                         <AvatarImage src={student.person.photoUrl || undefined} alt={fullName} />
                         <AvatarFallback className={cn(
                           "font-semibold transition-colors",
-                          isSelected ? "bg-green-100 text-green-700" : "bg-amber-100 text-amber-700"
+                          isSelected ? "bg-green-100 text-green-700" : "bg-primary/10 text-primary"
                         )}>
                           {initials}
                         </AvatarFallback>
@@ -483,7 +521,7 @@ export function StepStudentSelection() {
                   {/* Expanded Detail View */}
                   {isExpanded && (
                     <div className="px-4 pb-4 pt-0 space-y-4 animate-in slide-in-from-top-2 duration-300">
-                      <div className="h-px bg-gradient-to-r from-transparent via-amber-300 to-transparent" />
+                      <div className="h-px bg-gradient-to-r from-transparent via-primary/30 to-transparent" />
 
                       {/* Detailed Information Grid */}
                       <div className="grid gap-3 sm:grid-cols-2">
@@ -538,7 +576,7 @@ export function StepStudentSelection() {
                           "w-full min-h-[44px] font-semibold transition-all duration-300",
                           isSelected
                             ? "bg-green-600 hover:bg-green-700 text-white"
-                            : "bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white shadow-lg shadow-amber-500/30"
+                            : "bg-gradient-to-r from-gspn-gold-500 to-gspn-gold-600 hover:from-gspn-gold-600 hover:to-gspn-gold-700 text-white shadow-lg shadow-gspn-gold-500/30"
                         )}
                         aria-label={`Confirm selection of ${fullName}`}
                       >

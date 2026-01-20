@@ -198,15 +198,15 @@ export function StepClubSelection() {
                   "group relative p-5 rounded-xl border-2 transition-all duration-300 text-left",
                   "hover:shadow-lg hover:scale-[1.02] active:scale-[0.98]",
                   isSelected
-                    ? "border-amber-500 bg-amber-50 shadow-md"
+                    ? "border-primary bg-primary/5 shadow-md"
                     : isFull
                     ? "border-gray-200 bg-gray-50 opacity-60 cursor-not-allowed"
-                    : "border-gray-200 hover:border-amber-300 bg-white"
+                    : "border-gray-200 hover:border-primary/30 bg-white"
                 )}
               >
                 {/* Selected Indicator */}
                 {isSelected && (
-                  <div className="absolute -top-2 -right-2 w-8 h-8 bg-amber-500 rounded-full flex items-center justify-center shadow-lg">
+                  <div className="absolute -top-2 -right-2 w-8 h-8 bg-primary rounded-full flex items-center justify-center shadow-lg">
                     <svg className="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 20 20">
                       <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
                     </svg>
@@ -244,7 +244,7 @@ export function StepClubSelection() {
                 </div>
 
                 {/* Fees */}
-                <div className="flex items-center gap-2 mb-4 text-sm font-semibold text-amber-700">
+                <div className="flex items-center gap-2 mb-4 text-sm font-semibold text-primary">
                   <DollarSign className={sizing.icon.xs} />
                   <span>{formatCurrency(club.fee)}</span>
                   {club.monthlyFee && club.monthlyFee > 0 && (
@@ -271,7 +271,7 @@ export function StepClubSelection() {
                           ? "bg-red-500"
                           : fillPercentage > 80
                           ? "bg-orange-500"
-                          : "bg-amber-500"
+                          : "bg-primary"
                       )}
                       style={{ width: `${Math.min(fillPercentage, 100)}%` }}
                     />

@@ -10,15 +10,20 @@ export const metadata: Metadata = {
 
 export default function ClubEnrollPage() {
   return (
-    <PermissionGuard resource="club-enrollments" action="create">
+    <PermissionGuard
+      resource="club_enrollment"
+      action="create"
+      fallback={
+        <NoPermission
+          resource="club_enrollment"
+          action="create"
+          description="You don't have permission to enroll students in clubs."
+        />
+      }
+    >
       <ClubEnrollmentWizardProvider>
         <ClubEnrollmentWizard />
       </ClubEnrollmentWizardProvider>
-      <NoPermission
-        resource="club-enrollments"
-        action="create"
-        description="You don't have permission to enroll students in clubs."
-      />
     </PermissionGuard>
   )
 }
