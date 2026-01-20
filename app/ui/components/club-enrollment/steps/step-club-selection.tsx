@@ -19,7 +19,6 @@ export function StepClubSelection() {
   const { state, setClub } = useClubEnrollmentWizard()
 
   const [clubs, setClubs] = useState<ClubOption[]>([])
-  const [filteredClubs, setFilteredClubs] = useState<ClubOption[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string>()
   const [searchQuery, setSearchQuery] = useState("")
@@ -34,7 +33,6 @@ export function StepClubSelection() {
         if (!res.ok) throw new Error("Failed to fetch clubs")
         const data = await res.json()
         setClubs(data.clubs || [])
-        setFilteredClubs(data.clubs || [])
       } catch (err) {
         setError(err instanceof Error ? err.message : "Failed to load clubs")
       } finally {
@@ -45,14 +43,14 @@ export function StepClubSelection() {
     fetchClubs()
   }, [])
 
-  // Get unique categories
+  // Get unique categories - optimized with useMemo
   const categories = React.useMemo(() => {
     const cats = new Set(clubs.map((c) => c.category?.name).filter(Boolean))
     return Array.from(cats) as string[]
   }, [clubs])
 
-  // Filter clubs by category and search
-  useEffect(() => {
+  // Filter clubs by category and search - optimized with useMemo for immediate updates
+  const filteredClubs = React.useMemo(() => {
     let filtered = clubs
 
     // Filter by category
@@ -71,7 +69,7 @@ export function StepClubSelection() {
       )
     }
 
-    setFilteredClubs(filtered)
+    return filtered
   }, [clubs, selectedCategory, searchQuery])
 
   const handleSelectClub = (club: ClubOption) => {

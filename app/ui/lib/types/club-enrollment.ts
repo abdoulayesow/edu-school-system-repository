@@ -24,7 +24,7 @@ export interface ClubEnrollmentData {
 
   // Step 3: Payment
   paymentAmount: number
-  paymentMethod: "cash" | "orange_money" | ""
+  paymentMethod: "cash" | "orange_money" | null
   receiptNumber: string
   transactionRef: string
   notes: string

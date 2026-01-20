@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server"
 import { requireSession } from "@/lib/authz"
 import { prisma } from "@/lib/prisma"
+import { generateClubEnrollmentNumber } from "@/lib/club-helpers"
 
 type RouteParams = { params: Promise<{ id: string }> }
 
@@ -42,17 +43,29 @@ export async function POST(req: NextRequest, { params }: RouteParams) {
       )
     }
 
+    // Generate enrollment number if it doesn't exist (for drafts)
+    const enrollmentNumber = enrollment.enrollmentNumber || await generateClubEnrollmentNumber()
+
     // Update enrollment status to active
     const updated = await prisma.clubEnrollment.update({
       where: { id },
       data: {
         status: "active",
+        enrollmentNumber,
         syncVersion: { increment: 1 },
       },
     })
 
     // Create payment if provided
     if (payment && payment.amount > 0) {
+      // Validate payment method is provided
+      if (!payment.method || (payment.method !== "cash" && payment.method !== "orange_money")) {
+        return NextResponse.json(
+          { message: "Valid payment method is required when recording a payment" },
+          { status: 400 }
+        )
+      }
+
       await prisma.payment.create({
         data: {
           amount: payment.amount,
@@ -69,7 +82,7 @@ export async function POST(req: NextRequest, { params }: RouteParams) {
 
     return NextResponse.json({
       id: updated.id,
-      enrollmentNumber: updated.id,
+      enrollmentNumber: updated.enrollmentNumber,
       status: updated.status,
       club: enrollment.club,
       student: {

@@ -28,7 +28,7 @@ const initialState: ClubEnrollmentWizardState = {
     studentGrade: "",
     studentPhoto: null,
     paymentAmount: 0,
-    paymentMethod: "",
+    paymentMethod: null,
     receiptNumber: "",
     transactionRef: "",
     notes: "",
@@ -58,6 +58,7 @@ function wizardReducer(
         ...state,
         data: { ...state.data, ...action.club },
         isDirty: true,
+        error: undefined, // Auto-clear errors when user makes changes
       }
 
     case "SET_STUDENT":
@@ -65,6 +66,7 @@ function wizardReducer(
         ...state,
         data: { ...state.data, ...action.student },
         isDirty: true,
+        error: undefined, // Auto-clear errors when user makes changes
       }
 
     case "SET_PAYMENT":
@@ -72,6 +74,7 @@ function wizardReducer(
         ...state,
         data: { ...state.data, ...action.payment },
         isDirty: true,
+        error: undefined, // Auto-clear errors when user makes changes
       }
 
     case "SET_ENROLLMENT_ID":

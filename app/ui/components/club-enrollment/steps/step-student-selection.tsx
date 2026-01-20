@@ -17,10 +17,13 @@ import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Button } from "@/components/ui/button"
+import { Alert, AlertDescription } from "@/components/ui/alert"
 import {
   Select,
   SelectContent,
+  SelectGroup,
   SelectItem,
+  SelectLabel,
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
@@ -35,7 +38,6 @@ export function StepStudentSelection() {
   const { state, setStudent } = useClubEnrollmentWizard()
 
   const [students, setStudents] = useState<EligibleStudent[]>([])
-  const [filteredStudents, setFilteredStudents] = useState<EligibleStudent[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string>()
   const [searchQuery, setSearchQuery] = useState("")
@@ -53,12 +55,11 @@ export function StepStudentSelection() {
 
       try {
         setLoading(true)
-        const res = await fetch(`/api/admin/clubs/${state.data.clubId}/eligible-students`)
+        const res = await fetch(`/api/clubs/${state.data.clubId}/eligible-students`)
         if (!res.ok) throw new Error("Failed to fetch eligible students")
         const data = await res.json()
         const studentsList = data.students || data || []
         setStudents(studentsList)
-        setFilteredStudents(studentsList)
       } catch (err) {
         setError(err instanceof Error ? err.message : "Failed to load students")
       } finally {
@@ -69,16 +70,52 @@ export function StepStudentSelection() {
     fetchStudents()
   }, [state.data.clubId])
 
-  // Extract unique grades for filter
-  const availableGrades = useMemo(() => {
-    const grades = students
-      .map(s => s.currentGrade?.name)
-      .filter(Boolean) as string[]
-    return Array.from(new Set(grades)).sort()
+  // Extract unique grades grouped by level for filter
+  const availableGradesByLevel = useMemo(() => {
+    const gradeMap = new Map<string, Array<{ name: string; level: string }>>()
+
+    students.forEach(s => {
+      if (s.currentGrade) {
+        const level = s.currentGrade.level
+        if (!gradeMap.has(level)) {
+          gradeMap.set(level, [])
+        }
+        const levelGrades = gradeMap.get(level)!
+        // Add if not already present
+        if (!levelGrades.some(g => g.name === s.currentGrade!.name)) {
+          levelGrades.push({
+            name: s.currentGrade.name,
+            level: s.currentGrade.level
+          })
+        }
+      }
+    })
+
+    // Sort levels in educational order
+    const levelOrder = ['kindergarten', 'primary', 'middle', 'high']
+    const sortedLevels = Array.from(gradeMap.entries())
+      .sort(([a], [b]) => {
+        const aIndex = levelOrder.indexOf(a)
+        const bIndex = levelOrder.indexOf(b)
+        return aIndex - bIndex
+      })
+
+    return new Map(sortedLevels)
   }, [students])
 
-  // Filter students by search query AND grade
-  useEffect(() => {
+  // Helper to format level names
+  const formatLevelName = (level: string) => {
+    const levelNames: Record<string, string> = {
+      kindergarten: 'Kindergarten',
+      primary: 'Primary',
+      middle: 'Middle School',
+      high: 'High School'
+    }
+    return levelNames[level] || level
+  }
+
+  // Filter students by search query AND grade using useMemo for immediate updates
+  const filteredStudentsList = useMemo(() => {
     let filtered = students
 
     // Filter by grade
@@ -96,7 +133,7 @@ export function StepStudentSelection() {
       })
     }
 
-    setFilteredStudents(filtered)
+    return filtered
   }, [students, selectedGrade, searchQuery])
 
   const handleSelectStudent = (student: EligibleStudent) => {
@@ -110,7 +147,10 @@ export function StepStudentSelection() {
 
   const handleConfirmStudent = (student: EligibleStudent) => {
     setStudent({
-      studentId: student.studentId, // Use Person ID, not StudentProfile ID
+      // IMPORTANT: studentId in ClubEnrollmentData expects Person ID (not StudentProfile ID)
+      // student.studentId contains the Person ID (see EligibleStudent type definition)
+      // student.id contains the StudentProfile ID (not used in enrollment creation)
+      studentId: student.studentId, // Person ID for enrollment creation
       studentName: `${student.person.firstName} ${student.person.lastName}`,
       studentGrade: student.currentGrade?.name || "Unknown",
       studentPhoto: student.person.photoUrl,
@@ -195,35 +235,56 @@ export function StepStudentSelection() {
     <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
       {/* Selected Club Header */}
       {state.data.clubName && (
-        <div className="p-4 bg-gradient-to-br from-amber-50 to-orange-50 rounded-xl border-2 border-amber-200/50">
-          <div className="flex items-center justify-between flex-wrap gap-3">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-full bg-gradient-to-br from-amber-500 to-orange-500 flex items-center justify-center shadow-lg shadow-amber-500/30">
-                <Users className={cn(sizing.icon.sm, "text-white")} />
-              </div>
-              <div>
-                <div className="font-bold text-gray-900">
-                  {locale === "fr" && state.data.clubNameFr
-                    ? state.data.clubNameFr
-                    : state.data.clubName}
+        <div className="space-y-3">
+          <div className="p-4 bg-gradient-to-br from-amber-50 to-orange-50 rounded-xl border-2 border-amber-200/50">
+            <div className="flex items-center justify-between flex-wrap gap-3">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-full bg-gradient-to-br from-amber-500 to-orange-500 flex items-center justify-center shadow-lg shadow-amber-500/30">
+                  <Users className={cn(sizing.icon.sm, "text-white")} />
                 </div>
-                {state.data.categoryName && (
-                  <div className="text-sm text-gray-600">{state.data.categoryName}</div>
-                )}
+                <div>
+                  <div className="font-bold text-gray-900">
+                    {locale === "fr" && state.data.clubNameFr
+                      ? state.data.clubNameFr
+                      : state.data.clubName}
+                  </div>
+                  {state.data.categoryName && (
+                    <div className="text-sm text-gray-600">{state.data.categoryName}</div>
+                  )}
+                </div>
               </div>
-            </div>
-            <div className="flex items-center gap-4 text-sm">
-              <div className="flex items-center gap-1">
-                <span className="text-gray-600">Fee:</span>
-                <span className="font-semibold text-amber-700">
-                  {formatCurrency(state.data.enrollmentFee || 0)}
-                </span>
+              <div className="flex items-center gap-4 text-sm">
+                <div className="flex items-center gap-1">
+                  <span className="text-gray-600">Fee:</span>
+                  <span className="font-semibold text-amber-700">
+                    {formatCurrency(state.data.enrollmentFee || 0)}
+                  </span>
+                </div>
+                <Badge
+                  variant="secondary"
+                  className={cn(
+                    "bg-white/80",
+                    state.data.capacity && state.data.currentEnrollments !== undefined &&
+                    state.data.currentEnrollments >= state.data.capacity && "bg-red-100 text-red-700 border-red-300"
+                  )}
+                >
+                  {state.data.currentEnrollments}/{state.data.capacity} enrolled
+                </Badge>
               </div>
-              <Badge variant="secondary" className="bg-white/80">
-                {state.data.currentEnrollments}/{state.data.capacity} enrolled
-              </Badge>
             </div>
           </div>
+
+          {/* Capacity Warning */}
+          {state.data.capacity && state.data.currentEnrollments !== undefined &&
+           state.data.currentEnrollments >= state.data.capacity && (
+            <Alert variant="destructive" className="animate-in slide-in-from-top-2">
+              <AlertCircle className={sizing.icon.sm} />
+              <AlertDescription>
+                This club has reached its maximum capacity ({state.data.capacity} students).
+                No additional enrollments can be processed at this time.
+              </AlertDescription>
+            </Alert>
+          )}
         </div>
       )}
 
@@ -237,18 +298,21 @@ export function StepStudentSelection() {
       <div className="flex flex-col sm:flex-row gap-3">
         {/* Search Input */}
         <div className="relative flex-1">
-          <Search className={cn(sizing.icon.sm, "absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none")} />
+          <Search className={cn(sizing.icon.sm, "absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none")} aria-hidden="true" />
           <Input
             type="text"
             placeholder="Search by name or student ID..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className="pl-10 h-11 bg-white border-2 border-gray-200 focus:border-amber-400 transition-colors"
+            aria-label="Search for students by name or ID"
+            role="searchbox"
           />
           {searchQuery && (
             <button
               onClick={() => setSearchQuery("")}
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors min-w-[44px] min-h-[44px] -mr-2 flex items-center justify-center"
+              aria-label="Clear search"
             >
               <X className={sizing.icon.sm} />
             </button>
@@ -257,16 +321,23 @@ export function StepStudentSelection() {
 
         {/* Grade Filter */}
         <Select value={selectedGrade} onValueChange={setSelectedGrade}>
-          <SelectTrigger className="w-full sm:w-48 h-11 bg-white border-2 border-gray-200 focus:border-amber-400">
-            <Filter className={cn(sizing.icon.sm, "mr-2 text-gray-500")} />
+          <SelectTrigger className="w-full sm:w-48 h-11 bg-white border-2 border-gray-200 focus:border-amber-400" aria-label="Filter students by grade">
+            <Filter className={cn(sizing.icon.sm, "mr-2 text-gray-500")} aria-hidden="true" />
             <SelectValue placeholder="All Grades" />
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="all">All Grades</SelectItem>
-            {availableGrades.map((grade) => (
-              <SelectItem key={grade} value={grade}>
-                {grade}
-              </SelectItem>
+            {Array.from(availableGradesByLevel.entries()).map(([level, grades]) => (
+              <SelectGroup key={level}>
+                <SelectLabel className="font-semibold text-gray-700">
+                  {formatLevelName(level)}
+                </SelectLabel>
+                {grades.map((grade) => (
+                  <SelectItem key={grade.name} value={grade.name}>
+                    {grade.name}
+                  </SelectItem>
+                ))}
+              </SelectGroup>
             ))}
           </SelectContent>
         </Select>
@@ -296,7 +367,7 @@ export function StepStudentSelection() {
       )}
 
       {/* Students Grid */}
-      {filteredStudents.length === 0 ? (
+      {filteredStudentsList.length === 0 ? (
         <div className="text-center py-12">
           <GraduationCap className={cn(sizing.icon.xl, "mx-auto text-gray-300 mb-4")} />
           <p className="text-gray-500 mb-2">
@@ -313,7 +384,7 @@ export function StepStudentSelection() {
       ) : (
         <div className="space-y-3">
           <div className="text-sm text-gray-600 flex items-center justify-between px-1">
-            <span>{filteredStudents.length} student{filteredStudents.length !== 1 ? 's' : ''} found</span>
+            <span>{filteredStudentsList.length} student{filteredStudentsList.length !== 1 ? 's' : ''} found</span>
             {state.data.studentId && (
               <span className="flex items-center gap-1 text-green-600 font-medium">
                 <CheckCircle2 className="w-4 h-4" />
@@ -323,7 +394,7 @@ export function StepStudentSelection() {
           </div>
 
           <div className="grid gap-3 md:grid-cols-2">
-            {filteredStudents.map((student) => {
+            {filteredStudentsList.map((student) => {
               const isSelected = state.data.studentId === student.studentId
               const isExpanded = expandedStudent === student.studentId
               const fullName = `${student.person.firstName} ${student.person.lastName}`
@@ -341,11 +412,15 @@ export function StepStudentSelection() {
                       ? "border-amber-400 bg-amber-50/30 shadow-lg"
                       : "border-gray-200 bg-white hover:border-amber-300 hover:shadow-md"
                   )}
+                  role="article"
+                  aria-label={`Student: ${fullName}`}
                 >
                   {/* Compact View */}
                   <button
                     onClick={() => handleSelectStudent(student)}
-                    className="w-full p-4 text-left group"
+                    className="w-full p-4 text-left group min-h-[44px]"
+                    aria-expanded={isExpanded}
+                    aria-label={`${isExpanded ? 'Collapse' : 'Expand'} details for ${fullName}`}
                   >
                     {/* Selected Badge */}
                     {isSelected && (
@@ -460,11 +535,12 @@ export function StepStudentSelection() {
                       <Button
                         onClick={() => handleConfirmStudent(student)}
                         className={cn(
-                          "w-full h-11 font-semibold transition-all duration-300",
+                          "w-full min-h-[44px] font-semibold transition-all duration-300",
                           isSelected
                             ? "bg-green-600 hover:bg-green-700 text-white"
                             : "bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white shadow-lg shadow-amber-500/30"
                         )}
+                        aria-label={`Confirm selection of ${fullName}`}
                       >
                         {isSelected ? (
                           <>

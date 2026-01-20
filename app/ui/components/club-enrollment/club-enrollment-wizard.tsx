@@ -1,10 +1,18 @@
 "use client"
 
 import React, { useCallback, useEffect, useState } from "react"
-import { ArrowLeft } from "lucide-react"
+import { ArrowLeft, AlertTriangle } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader } from "@/components/ui/card"
 import { Alert, AlertDescription } from "@/components/ui/alert"
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog"
 import { sizing } from "@/lib/design-tokens"
 import { useI18n } from "@/components/i18n-provider"
 import { useRouter, useSearchParams } from "next/navigation"
@@ -22,6 +30,8 @@ export function ClubEnrollmentWizard() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const [showConfirmModal, setShowConfirmModal] = useState(false)
+  const [showUnsavedChangesDialog, setShowUnsavedChangesDialog] = useState(false)
+  const [pendingNavigation, setPendingNavigation] = useState<string | null>(null)
 
   const {
     state,
@@ -75,15 +85,6 @@ export function ClubEnrollmentWizard() {
     }
   }, [searchParams, state.data.clubId, state.currentStep, setClub, completeStep, goToStep])
 
-  // Handle navigation to next step
-  const handleNext = useCallback(async () => {
-    // Save as draft when moving from step 2 to 3
-    if (state.currentStep === 2 && state.data.studentId) {
-      await handleSave()
-    }
-    nextStep()
-  }, [state.currentStep, state.data.studentId, nextStep])
-
   // Save enrollment as draft
   const handleSave = useCallback(async () => {
     if (!state.data.clubId || !state.data.studentId) {
@@ -132,10 +133,34 @@ export function ClubEnrollmentWizard() {
     }
   }, [state.data, state.currentStep, setEnrollmentId, setError, clearError, setSubmitting])
 
+  // Handle navigation to next step
+  const handleNext = useCallback(async () => {
+    // Save as draft when moving from step 2 to 3
+    if (state.currentStep === 2 && state.data.studentId) {
+      try {
+        await handleSave()
+        // Auto-save is already showing submitting state via setSubmitting(true)
+        // The WizardNavigation component will show loading state on buttons
+      } catch (err) {
+        // Error is already handled in handleSave
+        return // Don't proceed to next step if save failed
+      }
+    }
+    nextStep()
+  }, [state.currentStep, state.data.studentId, nextStep, handleSave])
+
   // Show confirmation modal before submitting
   const handleShowConfirmation = useCallback(async () => {
+    // Validate club capacity before showing confirmation
+    if (state.data.capacity && state.data.currentEnrollments !== undefined) {
+      if (state.data.currentEnrollments >= state.data.capacity) {
+        setError("This club has reached its capacity. Cannot enroll additional students.")
+        return
+      }
+    }
+
     setShowConfirmModal(true)
-  }, [])
+  }, [state.data.capacity, state.data.currentEnrollments, setError])
 
   // Submit final enrollment (called from confirmation modal)
   const handleSubmit = useCallback(async () => {
@@ -204,6 +229,31 @@ export function ClubEnrollmentWizard() {
     }
   }, [state.data, setEnrollmentNumber, setError, clearError, setSubmitting, nextStep])
 
+  // Handle back navigation with unsaved changes check
+  const handleBackToClubs = useCallback(() => {
+    if (state.isDirty && state.currentStep < 4) {
+      setPendingNavigation("/clubs")
+      setShowUnsavedChangesDialog(true)
+    } else {
+      router.push("/clubs")
+    }
+  }, [state.isDirty, state.currentStep, router])
+
+  // Confirm leave without saving
+  const handleConfirmLeave = useCallback(() => {
+    if (pendingNavigation) {
+      router.push(pendingNavigation)
+    }
+    setShowUnsavedChangesDialog(false)
+    setPendingNavigation(null)
+  }, [pendingNavigation, router])
+
+  // Cancel navigation
+  const handleCancelLeave = useCallback(() => {
+    setShowUnsavedChangesDialog(false)
+    setPendingNavigation(null)
+  }, [])
+
   // Render current step
   const renderStep = () => {
     switch (state.currentStep) {
@@ -227,7 +277,7 @@ export function ClubEnrollmentWizard() {
         <div className="mb-8">
           <Button
             variant="ghost"
-            onClick={() => router.push("/clubs")}
+            onClick={handleBackToClubs}
             className="gap-2 mb-4 hover:bg-white/50"
           >
             <ArrowLeft className={sizing.icon.sm} />
@@ -288,6 +338,48 @@ export function ClubEnrollmentWizard() {
           isSubmitting={state.isSubmitting}
           onConfirm={handleSubmit}
         />
+
+        {/* Unsaved Changes Dialog */}
+        <Dialog open={showUnsavedChangesDialog} onOpenChange={setShowUnsavedChangesDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <div className="flex items-center gap-3 mb-2">
+                <div className="p-3 bg-amber-100 rounded-full">
+                  <AlertTriangle className="w-6 h-6 text-amber-700" />
+                </div>
+                <div>
+                  <DialogTitle className="text-xl">Unsaved Changes</DialogTitle>
+                  <DialogDescription className="text-sm mt-1">
+                    You have unsaved changes to this enrollment
+                  </DialogDescription>
+                </div>
+              </div>
+            </DialogHeader>
+
+            <div className="py-4">
+              <p className="text-gray-700">
+                Are you sure you want to leave? Any changes you've made will be lost.
+              </p>
+            </div>
+
+            <DialogFooter className="flex gap-3 sm:gap-3">
+              <Button
+                variant="outline"
+                onClick={handleCancelLeave}
+                className="flex-1 sm:flex-1"
+              >
+                Stay & Continue
+              </Button>
+              <Button
+                variant="destructive"
+                onClick={handleConfirmLeave}
+                className="flex-1 sm:flex-1"
+              >
+                Leave Without Saving
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
       </div>
     </div>
   )

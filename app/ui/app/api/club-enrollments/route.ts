@@ -108,63 +108,72 @@ export async function POST(req: NextRequest) {
       )
     }
 
-    // Check capacity
-    if (club.capacity !== null) {
-      const enrollmentCount = await prisma.clubEnrollment.count({
-        where: { clubId, status: "active" },
-      })
-
-      if (enrollmentCount >= club.capacity) {
-        return NextResponse.json(
-          { message: "Club is at full capacity" },
-          { status: 400 }
-        )
-      }
-    }
-
     // Generate enrollment number
     const enrollmentNumber = await generateClubEnrollmentNumber()
 
-    // Create enrollment
-    const enrollment = await prisma.clubEnrollment.create({
-      data: {
-        clubId,
-        studentProfileId,
-        status,
-        enrolledBy: session.user.id,
-        totalFee: club.fee || 0,
-        enrollmentNumber,
-      },
-      include: {
-        club: {
-          select: { id: true, name: true },
+    // Use transaction to ensure capacity check and enrollment creation are atomic
+    const result = await prisma.$transaction(async (tx) => {
+      // Check capacity within transaction
+      if (club.capacity !== null) {
+        const enrollmentCount = await tx.clubEnrollment.count({
+          where: { clubId, status: "active" },
+        })
+
+        if (enrollmentCount >= club.capacity) {
+          throw new Error("Club is at full capacity")
+        }
+      }
+
+      // Create enrollment
+      const enrollment = await tx.clubEnrollment.create({
+        data: {
+          clubId,
+          studentProfileId,
+          status,
+          enrolledBy: session.user.id,
+          totalFee: club.fee || 0,
+          enrollmentNumber,
         },
-        studentProfile: {
-          include: {
-            person: {
-              select: { firstName: true, lastName: true },
+        include: {
+          club: {
+            select: { id: true, name: true },
+          },
+          studentProfile: {
+            include: {
+              person: {
+                select: { firstName: true, lastName: true },
+              },
             },
           },
         },
-      },
+      })
+
+      // Only create payment if enrollment is active (not draft)
+      // Drafts should not have payments until submitted
+      if (status === "active" && payment && payment.amount > 0) {
+        // Validate payment method is provided
+        if (!payment.method || (payment.method !== "cash" && payment.method !== "orange_money")) {
+          throw new Error("Valid payment method is required when recording a payment")
+        }
+
+        await tx.payment.create({
+          data: {
+            amount: payment.amount,
+            method: payment.method,
+            receiptNumber: payment.receiptNumber,
+            transactionRef: payment.transactionRef,
+            notes: notes || null,
+            recordedBy: session.user.id,
+            clubEnrollmentId: enrollment.id,
+            paymentType: "club",
+          },
+        })
+      }
+
+      return enrollment
     })
 
-    // Only create payment if enrollment is active (not draft)
-    // Drafts should not have payments until submitted
-    if (status === "active" && payment && payment.amount > 0) {
-      await prisma.payment.create({
-        data: {
-          amount: payment.amount,
-          method: payment.method,
-          receiptNumber: payment.receiptNumber,
-          transactionRef: payment.transactionRef,
-          notes: notes || null,
-          recordedBy: session.user.id,
-          clubEnrollmentId: enrollment.id,
-          paymentType: "club",
-        },
-      })
-    }
+    const enrollment = result
 
     return NextResponse.json({
       id: enrollment.id,
@@ -178,9 +187,17 @@ export async function POST(req: NextRequest) {
     })
   } catch (err) {
     console.error("Error creating club enrollment:", err)
+
+    // Handle specific error messages from transaction
+    const errorMessage = err instanceof Error ? err.message : "Failed to create enrollment"
+    const statusCode = errorMessage === "Club is at full capacity" ||
+                       errorMessage === "Valid payment method is required when recording a payment"
+                       ? 400
+                       : 500
+
     return NextResponse.json(
-      { message: "Failed to create enrollment" },
-      { status: 500 }
+      { message: errorMessage },
+      { status: statusCode }
     )
   }
 }

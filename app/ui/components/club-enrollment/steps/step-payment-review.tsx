@@ -182,7 +182,8 @@ export function StepPaymentReview() {
               variant="ghost"
               size="sm"
               onClick={() => goToStep(1)}
-              className="gap-1 text-amber-600 hover:text-amber-700 hover:bg-amber-50"
+              className="gap-1 text-amber-600 hover:text-amber-700 hover:bg-amber-50 min-h-[44px]"
+              aria-label="Edit club details"
             >
               <Edit className={sizing.icon.xs} />
               Edit
@@ -246,7 +247,8 @@ export function StepPaymentReview() {
               variant="ghost"
               size="sm"
               onClick={() => goToStep(2)}
-              className="gap-1 text-amber-600 hover:text-amber-700 hover:bg-amber-50"
+              className="gap-1 text-amber-600 hover:text-amber-700 hover:bg-amber-50 min-h-[44px]"
+              aria-label="Edit student details"
             >
               <Edit className={sizing.icon.xs} />
               Edit
@@ -448,9 +450,10 @@ export function StepPaymentReview() {
               placeholder="0"
               value={state.data.paymentAmount || ""}
               onChange={(e) => handlePaymentChange("paymentAmount", parseInt(e.target.value) || 0)}
-              className="h-11"
+              className="min-h-[44px]"
+              aria-describedby="payment-amount-help"
             />
-            <p className="text-sm text-gray-500">
+            <p id="payment-amount-help" className="text-sm text-gray-500">
               Enter the amount being paid (can be partial payment)
             </p>
           </div>
@@ -481,15 +484,18 @@ export function StepPaymentReview() {
 
               {/* Receipt Number */}
               <div className="space-y-2">
-                <Label htmlFor="receiptNumber">Receipt Number *</Label>
+                <Label htmlFor="receiptNumber">
+                  Receipt Number <span className="text-red-500" aria-label="required">*</span>
+                </Label>
                 <Input
                   id="receiptNumber"
                   type="text"
                   placeholder="REC-2024-00001"
                   value={state.data.receiptNumber || ""}
                   onChange={(e) => handlePaymentChange("receiptNumber", e.target.value)}
-                  className="h-11"
+                  className="min-h-[44px]"
                   required={!!state.data.paymentAmount && state.data.paymentAmount > 0}
+                  aria-required={!!state.data.paymentAmount && state.data.paymentAmount > 0}
                 />
               </div>
 
@@ -502,7 +508,7 @@ export function StepPaymentReview() {
                   placeholder="OM-123456789"
                   value={state.data.transactionRef || ""}
                   onChange={(e) => handlePaymentChange("transactionRef", e.target.value)}
-                  className="h-11"
+                  className="min-h-[44px]"
                 />
               </div>
             </>
