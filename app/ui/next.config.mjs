@@ -15,12 +15,12 @@ const nextConfig = {
   experimental: {
     // Allows importing server-only code from outside of the Next.js project root.
     externalDir: true,
-    // Turbopack configuration for monorepo aliases
-    turbo: {
-      resolveAlias: {
-        "@api": "../api",
-        "@db": "../db",
-      },
+  },
+  // Turbopack configuration (Next.js 16+ uses 'turbopack' key, not 'turbo')
+  turbopack: {
+    resolveAlias: {
+      "@api": "../api",
+      "@db": "../db",
     },
   },
   // Fix workspace root warning for Vercel - points to monorepo root

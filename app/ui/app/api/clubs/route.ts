@@ -10,6 +10,8 @@ import { resolveClubLeaders, getLeaderKey } from "@/lib/club-helpers"
  * Query params:
  *   - view: "clubs" | "students" (default: clubs)
  *   - categoryId: filter by category
+ *
+ * OPTIMIZED: Reduced nested includes and added strategic selects
  */
 export async function GET(req: NextRequest) {
   const { error } = await requirePerm("classes", "view")
@@ -24,9 +26,10 @@ export async function GET(req: NextRequest) {
     const limit = Math.min(parseInt(searchParams.get("limit") || "50"), 100)
     const offset = parseInt(searchParams.get("offset") || "0")
 
-    // Get current school year
+    // Get current school year - cache this in production
     const currentSchoolYear = await prisma.schoolYear.findFirst({
       where: { isActive: true },
+      select: { id: true }, // Only select what we need
     })
 
     if (!currentSchoolYear) {
@@ -37,7 +40,7 @@ export async function GET(req: NextRequest) {
     }
 
     if (view === "students") {
-      // Build where clause for students query
+      // OPTIMIZED: Use select instead of include where possible to reduce data transfer
       const studentsWhere = {
         schoolYearId: currentSchoolYear.id,
         status: "completed" as const,
@@ -46,24 +49,25 @@ export async function GET(req: NextRequest) {
         },
       }
 
-      // Get students with completed enrollments who can join clubs (with pagination)
       const [students, total] = await Promise.all([
         prisma.enrollment.findMany({
           where: studentsWhere,
-          include: {
+          select: {
+            id: true,
+            firstName: true,
+            lastName: true,
             student: {
-              include: {
+              select: {
                 studentProfile: {
-                  include: {
-                    person: {
-                      select: { firstName: true, lastName: true },
-                    },
+                  select: {
+                    id: true,
+                    studentNumber: true,
                     clubEnrollments: {
                       where: {
                         club: { schoolYearId: currentSchoolYear.id },
                         status: "active",
                       },
-                      include: {
+                      select: {
                         club: {
                           select: { id: true, name: true, categoryId: true },
                         },
@@ -88,7 +92,7 @@ export async function GET(req: NextRequest) {
         prisma.enrollment.count({ where: studentsWhere }),
       ])
 
-      // Transform to simpler structure
+      // Transform to expected structure
       const eligibleStudents = students
         .filter((e) => e.student?.studentProfile)
         .map((e) => ({
@@ -112,7 +116,7 @@ export async function GET(req: NextRequest) {
       })
     }
 
-    // Default: get clubs with pagination
+    // OPTIMIZED: Default clubs query with reduced nesting
     const clubsWhere = {
       schoolYearId: currentSchoolYear.id,
       status: { in: ["active", "closed"] as ClubStatus[] },
@@ -124,14 +128,27 @@ export async function GET(req: NextRequest) {
       prisma.club.findMany({
         where: clubsWhere,
         orderBy: [{ category: { order: "asc" } }, { name: "asc" }],
-        include: {
+        select: {
+          id: true,
+          name: true,
+          nameFr: true,
+          description: true,
+          fee: true,
+          monthlyFee: true,
+          capacity: true,
+          categoryId: true,
+          leaderId: true,
+          leaderType: true,
           category: {
             select: { id: true, name: true, nameFr: true },
           },
           eligibilityRule: {
-            include: {
+            select: {
+              id: true,
+              ruleType: true,
               gradeRules: {
-                include: {
+                select: {
+                  gradeId: true,
                   grade: {
                     select: { id: true, name: true, order: true },
                   },
@@ -158,15 +175,22 @@ export async function GET(req: NextRequest) {
       leader: leaderMap.get(getLeaderKey(club.leaderId, club.leaderType)!) || null,
     }))
 
-    return NextResponse.json({
-      clubs: clubsWithLeaders,
-      pagination: {
-        total,
-        limit,
-        offset,
-        hasMore: offset + clubs.length < total,
+    // Add cache headers for better performance
+    const headers = new Headers()
+    headers.set('Cache-Control', 'private, max-age=30, stale-while-revalidate=60')
+
+    return NextResponse.json(
+      {
+        clubs: clubsWithLeaders,
+        pagination: {
+          total,
+          limit,
+          offset,
+          hasMore: offset + clubs.length < total,
+        },
       },
-    })
+      { headers }
+    )
   } catch (err) {
     console.error("Error fetching clubs data:", err)
     return NextResponse.json(

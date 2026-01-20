@@ -814,6 +814,7 @@ model Club {
   @@index([createdBy])
   @@index([leaderId, leaderType])
   @@index([isEnabled])
+  @@index([schoolYearId, status, isEnabled]) // Performance: for filtering active clubs
 }
 
 model ClubEligibilityRule {
@@ -880,6 +881,7 @@ model ClubEnrollment {
   @@index([clubId])
   @@index([studentProfileId])
   @@index([enrolledBy])
+  @@index([status, clubId]) // Performance: for counting active enrollments
 }
 
 model ClubMonthlyPayment {
