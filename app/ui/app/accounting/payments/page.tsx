@@ -140,7 +140,11 @@ export default function PaymentsPage() {
     limit: 20,
     offset,
   })
-  const { data: statsData, isLoading: isLoadingStats } = usePaymentStats()
+  // Pass date filters to stats so "Par méthode" respects the selected date range
+  const { data: statsData, isLoading: isLoadingStats } = usePaymentStats({
+    startDate: startDate || undefined,
+    endDate: endDate || undefined,
+  })
   const { data: gradesData } = useGrades()
 
   // Extract data from query results
@@ -267,6 +271,33 @@ export default function PaymentsPage() {
 
   const currentHeroStyle = heroStyles[heroStatus]
 
+  // Helper to get date range label for stats cards
+  const getDateRangeLabel = () => {
+    if (!startDate && !endDate) {
+      return locale === "fr" ? "Tous les temps" : "All time"
+    }
+    const formatDateShort = (dateStr: string) => {
+      const date = new Date(dateStr)
+      return date.toLocaleDateString(locale === "fr" ? "fr-FR" : "en-US", {
+        day: "numeric",
+        month: "short",
+      })
+    }
+    if (startDate && endDate) {
+      if (startDate === endDate) {
+        const today = new Date().toISOString().split("T")[0]
+        if (startDate === today) {
+          return locale === "fr" ? "Aujourd'hui" : "Today"
+        }
+        return formatDateShort(startDate)
+      }
+      return `${formatDateShort(startDate)} - ${formatDateShort(endDate)}`
+    }
+    if (startDate) return `${locale === "fr" ? "Depuis" : "From"} ${formatDateShort(startDate)}`
+    if (endDate) return `${locale === "fr" ? "Jusqu'au" : "Until"} ${formatDateShort(endDate)}`
+    return ""
+  }
+
   return (
     <PageContainer maxWidth="full">
       {/* Header with title and action */}
@@ -389,14 +420,19 @@ export default function PaymentsPage() {
           )}>
             <CardContent className="pt-5 pb-5">
               <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-muted-foreground flex items-center gap-2">
-                    <CheckCircle2 className={cn(
-                      "size-4 text-emerald-500 transition-transform duration-500 delay-200",
-                      isVisible && "scale-100", !isVisible && "scale-0"
-                    )} />
-                    {t.accounting.confirmedThisWeek}
-                  </p>
+                <div className="flex-1">
+                  <div className="flex items-center justify-between">
+                    <p className="text-sm font-medium text-muted-foreground flex items-center gap-2">
+                      <CheckCircle2 className={cn(
+                        "size-4 text-emerald-500 transition-transform duration-500 delay-200",
+                        isVisible && "scale-100", !isVisible && "scale-0"
+                      )} />
+                      {t.accounting.confirmedThisWeek}
+                    </p>
+                    <Badge variant="outline" className="text-[10px] px-1.5 py-0 h-5 font-normal text-muted-foreground">
+                      {locale === "fr" ? "Cette semaine" : "This week"}
+                    </Badge>
+                  </div>
                   {isLoadingStats ? (
                     <Loader2 className="size-5 animate-spin text-muted-foreground mt-2" />
                   ) : (
@@ -411,28 +447,44 @@ export default function PaymentsPage() {
                   )}
                 </div>
                 <ArrowUpRight className={cn(
-                  "size-5 text-emerald-500 transition-all duration-500 delay-300",
+                  "size-5 text-emerald-500 transition-all duration-500 delay-300 ml-2",
                   isVisible && "opacity-100 translate-x-0 translate-y-0", !isVisible && "opacity-0 translate-x-1 translate-y-1"
                 )} />
               </div>
             </CardContent>
           </Card>
 
-          {/* By Method Card */}
+          {/* By Method Card - Now respects date filter */}
           <Card className={cn(
             "flex-1 border hover:shadow-md transition-all duration-700 delay-300",
             isVisible
               ? "opacity-100 translate-x-0"
-              : "opacity-0 translate-x-4"
+              : "opacity-0 translate-x-4",
+            // Subtle highlight when filtered
+            (startDate || endDate) && "ring-1 ring-primary/20"
           )}>
             <CardContent className="pt-5 pb-5">
-              <p className="text-sm font-medium text-muted-foreground flex items-center gap-2 mb-3">
-                <Wallet className={cn(
-                  "size-4 transition-transform duration-500 delay-400",
-                  isVisible && "scale-100 rotate-0", !isVisible && "scale-0 -rotate-90"
-                )} />
-                {t.accounting.byMethod}
-              </p>
+              <div className="flex items-center justify-between mb-3">
+                <p className="text-sm font-medium text-muted-foreground flex items-center gap-2">
+                  <Wallet className={cn(
+                    "size-4 transition-transform duration-500 delay-400",
+                    isVisible && "scale-100 rotate-0", !isVisible && "scale-0 -rotate-90"
+                  )} />
+                  {t.accounting.byMethod}
+                </p>
+                {/* Date range indicator badge */}
+                <Badge
+                  variant="outline"
+                  className={cn(
+                    "text-[10px] px-1.5 py-0 h-5 font-normal transition-all",
+                    (startDate || endDate)
+                      ? "bg-primary/5 text-primary border-primary/30"
+                      : "text-muted-foreground"
+                  )}
+                >
+                  {getDateRangeLabel()}
+                </Badge>
+              </div>
               {isLoadingStats ? (
                 <Loader2 className="size-5 animate-spin text-muted-foreground" />
               ) : (

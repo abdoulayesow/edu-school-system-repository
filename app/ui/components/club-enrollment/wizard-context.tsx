@@ -27,6 +27,9 @@ const initialState: ClubEnrollmentWizardState = {
     studentName: "",
     studentGrade: "",
     studentPhoto: null,
+    studentDateOfBirth: null,
+    studentGender: null,
+    studentParentInfo: null,
     paymentAmount: 0,
     paymentMethod: null,
     receiptNumber: "",
@@ -219,9 +222,19 @@ export function ClubEnrollmentWizardProvider({
         return !!(data.studentId && data.studentName)
 
       case 3:
-        // If payment amount > 0, must have receipt number and method
+        // If payment amount > 0, must have receipt number, method, and payer info
         if (data.paymentAmount && data.paymentAmount > 0) {
-          return !!(data.receiptNumber && data.paymentMethod)
+          // Must have payment method and receipt number
+          if (!data.receiptNumber || !data.paymentMethod) return false
+
+          // Must have payer info with name and phone
+          if (!data.payer?.name || !data.payer?.phone) return false
+
+          // Validate phone is not empty/placeholder
+          const phone = data.payer.phone.trim()
+          if (!phone || phone === "+224") return false
+
+          return true
         }
         // Otherwise can proceed (no payment required)
         return true

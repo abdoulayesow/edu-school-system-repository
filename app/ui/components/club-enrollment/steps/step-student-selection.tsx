@@ -11,7 +11,11 @@ import {
   IdCard,
   CheckCircle2,
   ChevronDown,
-  X
+  X,
+  Calendar,
+  Phone,
+  Mail,
+  UserCircle
 } from "lucide-react"
 import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
@@ -43,6 +47,7 @@ export function StepStudentSelection() {
   const [searchQuery, setSearchQuery] = useState("")
   const [selectedGrade, setSelectedGrade] = useState<string>("all")
   const [expandedStudent, setExpandedStudent] = useState<string | null>(null)
+  const [showAllStudents, setShowAllStudents] = useState(false)
 
   // Fetch eligible students for selected club
   useEffect(() => {
@@ -137,6 +142,14 @@ export function StepStudentSelection() {
     return filtered
   }, [students, selectedGrade, searchQuery])
 
+  // Helper to build full name including middle name
+  const getFullName = (person: EligibleStudent["person"]) => {
+    const parts = [person.firstName]
+    if (person.middleName) parts.push(person.middleName)
+    parts.push(person.lastName)
+    return parts.join(" ")
+  }
+
   const handleSelectStudent = (student: EligibleStudent) => {
     // If clicking same student, expand/collapse
     if (expandedStudent === student.studentId) {
@@ -146,15 +159,36 @@ export function StepStudentSelection() {
     }
   }
 
+  // Quick select - single click to select without expanding
+  const handleQuickSelect = (student: EligibleStudent, e: React.MouseEvent) => {
+    e.stopPropagation() // Prevent card expansion
+    const fullName = getFullName(student.person)
+    setStudent({
+      studentId: student.studentId,
+      studentName: fullName,
+      studentGrade: student.currentGrade?.name || "Unknown",
+      studentPhoto: student.person.photoUrl,
+      studentDateOfBirth: student.person.dateOfBirth || null,
+      studentGender: student.person.gender || null,
+      studentParentInfo: student.parentInfo || null,
+      enrollmentPayerInfo: student.enrollmentPayerInfo || undefined,
+    })
+  }
+
   const handleConfirmStudent = (student: EligibleStudent) => {
+    const fullName = getFullName(student.person)
     setStudent({
       // IMPORTANT: studentId in ClubEnrollmentData expects Person ID (not StudentProfile ID)
       // student.studentId contains the Person ID (see EligibleStudent type definition)
       // student.id contains the StudentProfile ID (not used in enrollment creation)
       studentId: student.studentId, // Person ID for enrollment creation
-      studentName: `${student.person.firstName} ${student.person.lastName}`,
+      studentName: fullName,
       studentGrade: student.currentGrade?.name || "Unknown",
       studentPhoto: student.person.photoUrl,
+      studentDateOfBirth: student.person.dateOfBirth || null,
+      studentGender: student.person.gender || null,
+      studentParentInfo: student.parentInfo || null,
+      enrollmentPayerInfo: student.enrollmentPayerInfo || undefined,
     })
     setExpandedStudent(null)
   }
@@ -165,6 +199,32 @@ export function StepStudentSelection() {
       currency: "GNF",
       minimumFractionDigits: 0,
     }).format(amount)
+  }
+
+  // Format date of birth for display
+  const formatDateOfBirth = (dateStr: string | null | undefined) => {
+    if (!dateStr) return null
+    try {
+      return new Date(dateStr).toLocaleDateString(locale === "fr" ? "fr-FR" : "en-US", {
+        day: "numeric",
+        month: "long",
+        year: "numeric",
+      })
+    } catch {
+      return null
+    }
+  }
+
+  // Format gender for display
+  const formatGender = (gender: string | null | undefined) => {
+    if (!gender) return null
+    const genderMap: Record<string, { en: string; fr: string }> = {
+      male: { en: "Male", fr: "Masculin" },
+      female: { en: "Female", fr: "Féminin" },
+      other: { en: "Other", fr: "Autre" },
+    }
+    const normalized = gender.toLowerCase()
+    return genderMap[normalized]?.[locale === "fr" ? "fr" : "en"] || gender
   }
 
   if (loading) {
@@ -306,6 +366,8 @@ export function StepStudentSelection() {
         <div className="relative flex-1">
           <Search className={cn(sizing.icon.sm, "absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none")} aria-hidden="true" />
           <Input
+            id="student-search"
+            name="student-search"
             type="text"
             placeholder="Search by name or student ID..."
             value={searchQuery}
@@ -420,9 +482,9 @@ export function StepStudentSelection() {
           )}
         </div>
       ) : (
-        <div className="space-y-3">
+        <div className="space-y-6">
           <div className="text-sm text-gray-600 flex items-center justify-between px-1">
-            <span>{filteredStudentsList.length} student{filteredStudentsList.length !== 1 ? 's' : ''} found</span>
+            <span className="font-medium">{filteredStudentsList.length} student{filteredStudentsList.length !== 1 ? 's' : ''} found</span>
             {state.data.studentId && (
               <span className="flex items-center gap-1 text-green-600 font-medium">
                 <CheckCircle2 className="w-4 h-4" />
@@ -431,98 +493,228 @@ export function StepStudentSelection() {
             )}
           </div>
 
-          <div className="grid gap-3 md:grid-cols-2">
-            {filteredStudentsList.map((student, index) => {
+          {/* Elegant Student Showcase Grid - First 6 or All */}
+          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+            {filteredStudentsList.slice(0, showAllStudents ? undefined : 6).map((student, index) => {
               const isSelected = state.data.studentId === student.studentId
               const isExpanded = expandedStudent === student.studentId
-              const fullName = `${student.person.firstName} ${student.person.lastName}`
-              const initials = `${student.person.firstName[0]}${student.person.lastName[0]}`
+              const fullName = getFullName(student.person)
+              const firstInitial = student.person.firstName?.[0] || "?"
+              const lastInitial = student.person.lastName?.[0] || "?"
+              const initials = `${firstInitial}${lastInitial}`
               const hasExistingEnrollments = student.clubEnrollments && student.clubEnrollments.length > 0
 
               return (
                 <div
                   key={student.id}
                   className={cn(
-                    "group relative rounded-xl border-2 transition-all duration-500 animate-in fade-in slide-in-from-bottom-2",
+                    "group relative rounded-2xl border-2 overflow-hidden transition-all duration-500 animate-in fade-in slide-in-from-bottom-2",
                     isSelected
-                      ? "border-green-500 bg-green-50/50 shadow-xl shadow-green-500/20 scale-[1.02]"
+                      ? "border-green-500 bg-gradient-to-br from-green-50 to-emerald-50 shadow-2xl shadow-green-500/30 scale-[1.02]"
                       : isExpanded
-                      ? "border-primary bg-gradient-to-br from-gspn-gold-50 to-white shadow-xl shadow-primary/10 scale-[1.01]"
-                      : "border-gray-200 bg-white hover:border-primary/40 hover:shadow-xl hover:-translate-y-1 hover:scale-[1.01]"
+                      ? "border-primary bg-gradient-to-br from-gspn-gold-50 via-white to-gspn-gold-50/30 shadow-2xl shadow-primary/20 scale-[1.01]"
+                      : "border-gray-200 bg-white hover:border-gspn-gold-300 hover:shadow-2xl hover:-translate-y-2 hover:scale-[1.02]"
                   )}
-                  style={{ animationDelay: `${index * 50}ms` }}
+                  style={{ animationDelay: `${index * 80}ms` }}
                   role="article"
                   aria-label={`Student: ${fullName}`}
                 >
-                  {/* Compact View */}
-                  <button
+                  {/* Decorative Top Bar */}
+                  <div className={cn(
+                    "h-1.5 w-full transition-all duration-500",
+                    isSelected
+                      ? "bg-gradient-to-r from-green-500 via-emerald-500 to-green-500"
+                      : "bg-gradient-to-r from-gspn-gold-400 via-gspn-gold-500 to-gspn-gold-400 opacity-0 group-hover:opacity-100"
+                  )} />
+
+                  {/* Main Card Content */}
+                  <div
                     onClick={() => handleSelectStudent(student)}
-                    className="w-full p-4 text-left group min-h-[44px]"
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter' || e.key === ' ') {
+                        e.preventDefault()
+                        handleSelectStudent(student)
+                      }
+                    }}
+                    className="w-full p-5 text-left cursor-pointer"
+                    role="button"
+                    tabIndex={0}
                     aria-expanded={isExpanded}
                     aria-label={`${isExpanded ? 'Collapse' : 'Expand'} details for ${fullName}`}
                   >
                     {/* Selected Badge */}
                     {isSelected && (
-                      <div className="absolute -top-2 -right-2 z-10 px-3 py-1 bg-green-500 text-white text-xs font-bold rounded-full shadow-lg flex items-center gap-1">
-                        <CheckCircle2 className="w-3 h-3" />
+                      <div className="absolute top-4 right-4 z-10 px-3 py-1.5 bg-gradient-to-r from-green-500 to-emerald-500 text-white text-xs font-bold rounded-full shadow-lg flex items-center gap-1.5 animate-in zoom-in duration-300">
+                        <CheckCircle2 className="w-3.5 h-3.5" />
                         SELECTED
                       </div>
                     )}
 
-                    <div className="flex items-start gap-3">
-                      {/* Avatar */}
-                      <Avatar className={cn(
-                        "border-2 transition-all duration-300",
-                        isSelected ? "w-14 h-14 border-green-400" : "w-12 h-12 border-gray-200"
-                      )}>
-                        <AvatarImage src={student.person.photoUrl || undefined} alt={fullName} />
-                        <AvatarFallback className={cn(
-                          "font-semibold transition-colors",
-                          isSelected ? "bg-green-100 text-green-700" : "bg-primary/10 text-primary"
+                    {/* Student Header */}
+                    <div className="flex flex-col items-center text-center space-y-3 mb-4">
+                      {/* Large Avatar */}
+                      <div className="relative">
+                        <Avatar className={cn(
+                          "border-4 transition-all duration-500 ring-4",
+                          isSelected
+                            ? "w-24 h-24 border-green-400 ring-green-100"
+                            : "w-20 h-20 border-white ring-gray-100 group-hover:w-24 group-hover:h-24 group-hover:border-gspn-gold-300 group-hover:ring-gspn-gold-100"
                         )}>
-                          {initials}
-                        </AvatarFallback>
-                      </Avatar>
+                          <AvatarImage src={student.person.photoUrl || undefined} alt={fullName} />
+                          <AvatarFallback className={cn(
+                            "font-bold text-2xl transition-colors",
+                            isSelected ? "bg-green-100 text-green-700" : "bg-gradient-to-br from-gspn-gold-100 to-gspn-gold-200 text-gspn-gold-700"
+                          )}>
+                            {initials}
+                          </AvatarFallback>
+                        </Avatar>
 
-                      {/* Info */}
-                      <div className="flex-1 min-w-0">
-                        <h3 className="font-bold text-gray-900 mb-1 flex items-center gap-2">
+                        {/* Status Indicator Dot */}
+                        <div className="absolute -bottom-1 -right-1 w-5 h-5 bg-green-500 border-4 border-white rounded-full shadow-md"
+                             title="Active Student" />
+                      </div>
+
+                      {/* Student Name */}
+                      <div className="space-y-1">
+                        <h3 className="font-bold text-gray-900 text-lg leading-tight">
                           {fullName}
-                          <ChevronDown className={cn(
-                            "w-4 h-4 text-gray-400 transition-transform duration-300",
-                            isExpanded && "rotate-180"
-                          )} />
                         </h3>
-
-                        <div className="flex flex-wrap items-center gap-2 mb-1">
-                          {student.currentGrade && (
-                            <Badge variant="outline" className="text-xs">
-                              <GraduationCap className="w-3 h-3 mr-1" />
-                              {student.currentGrade.name}
-                            </Badge>
-                          )}
-                          {student.formattedStudentId && (
-                            <Badge variant="secondary" className="text-xs font-mono">
-                              <IdCard className="w-3 h-3 mr-1" />
-                              {student.formattedStudentId}
-                            </Badge>
-                          )}
-                        </div>
-
-                        {/* Existing Club Enrollments */}
-                        {hasExistingEnrollments && !isExpanded && (
-                          <div className="text-xs text-gray-500">
-                            {student.clubEnrollments!.length} active club{student.clubEnrollments!.length !== 1 ? 's' : ''}
-                          </div>
+                        {student.formattedStudentId && (
+                          <p className="text-xs font-mono text-gray-500 tracking-wide">
+                            {student.formattedStudentId}
+                          </p>
                         )}
                       </div>
                     </div>
-                  </button>
+
+                    {/* Student Meta Information */}
+                    <div className="space-y-2.5">
+                      {/* Grade Badge */}
+                      {student.currentGrade && (
+                        <div className="flex items-center justify-center gap-2 p-2.5 bg-gradient-to-br from-gray-50 to-gray-100 rounded-lg border border-gray-200">
+                          <GraduationCap className="w-4 h-4 text-gspn-gold-600" />
+                          <span className="text-sm font-semibold text-gray-700">
+                            {student.currentGrade.name}
+                          </span>
+                          <span className="text-xs text-gray-500">
+                            ({student.currentGrade.level})
+                          </span>
+                        </div>
+                      )}
+
+                      {/* Club Enrollments */}
+                      {hasExistingEnrollments && (
+                        <div className="flex items-center justify-center gap-2 p-2 bg-gradient-to-br from-blue-50 to-indigo-50 rounded-lg border border-blue-200">
+                          <Users className="w-3.5 h-3.5 text-blue-600" />
+                          <span className="text-xs font-medium text-blue-700">
+                            {student.clubEnrollments!.length} Active Club{student.clubEnrollments!.length !== 1 ? 's' : ''}
+                          </span>
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Quick Select & Expand Indicator */}
+                    <div className="mt-4 pt-3 border-t border-gray-100 flex items-center justify-between gap-2">
+                      <span className="text-xs text-gray-500 flex items-center gap-1.5 group-hover:text-gspn-gold-600 transition-colors">
+                        {isExpanded ? 'Click to collapse' : 'Click for details'}
+                        <ChevronDown className={cn(
+                          "w-3.5 h-3.5 transition-transform duration-300",
+                          isExpanded && "rotate-180"
+                        )} />
+                      </span>
+
+                      {/* Quick Select Button - Visible on hover */}
+                      {!isSelected && (
+                        <Button
+                          size="sm"
+                          onClick={(e) => handleQuickSelect(student, e)}
+                          className="opacity-0 group-hover:opacity-100 transition-all duration-300 bg-gradient-to-r from-gspn-gold-500 to-gspn-gold-600 hover:from-gspn-gold-600 hover:to-gspn-gold-700 text-white text-xs px-3 py-1 h-7 shadow-md"
+                          aria-label={`Quick select ${fullName}`}
+                        >
+                          <CheckCircle2 className="w-3 h-3 mr-1" />
+                          Select
+                        </Button>
+                      )}
+                    </div>
+                  </div>
 
                   {/* Expanded Detail View */}
                   {isExpanded && (
-                    <div className="px-4 pb-4 pt-0 space-y-4 animate-in slide-in-from-top-2 duration-300">
-                      <div className="h-px bg-gradient-to-r from-transparent via-primary/30 to-transparent" />
+                    <div className="px-5 pb-5 pt-0 space-y-4 animate-in slide-in-from-top-2 duration-300 border-t-2 border-gspn-gold-100">
+                      <div className="h-px bg-gradient-to-r from-transparent via-primary/30 to-transparent mb-4" />
+
+                      {/* Personal Information Section */}
+                      <div className="p-4 bg-gradient-to-br from-blue-50 to-indigo-50 rounded-xl border border-blue-200">
+                        <div className="text-xs font-semibold text-blue-700 uppercase tracking-wide mb-3 flex items-center gap-1.5">
+                          <UserCircle className="w-4 h-4" />
+                          Personal Information
+                        </div>
+                        <div className="grid gap-3 sm:grid-cols-2">
+                          {/* Date of Birth */}
+                          {student.person.dateOfBirth && (
+                            <div className="space-y-1">
+                              <div className="text-xs text-gray-500">Date of Birth</div>
+                              <div className="text-sm font-medium text-gray-900 flex items-center gap-1.5">
+                                <Calendar className="w-3.5 h-3.5 text-blue-500" />
+                                {formatDateOfBirth(student.person.dateOfBirth)}
+                              </div>
+                            </div>
+                          )}
+
+                          {/* Gender */}
+                          {student.person.gender && (
+                            <div className="space-y-1">
+                              <div className="text-xs text-gray-500">Gender</div>
+                              <div className="text-sm font-medium text-gray-900">
+                                {formatGender(student.person.gender)}
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+
+                      {/* Parent Information Section */}
+                      {(student.parentInfo?.fatherName || student.parentInfo?.motherName) && (
+                        <div className="p-4 bg-gradient-to-br from-purple-50 to-pink-50 rounded-xl border border-purple-200">
+                          <div className="text-xs font-semibold text-purple-700 uppercase tracking-wide mb-3 flex items-center gap-1.5">
+                            <Users className="w-4 h-4" />
+                            Parent Information
+                          </div>
+                          <div className="grid gap-4 sm:grid-cols-2">
+                            {/* Father */}
+                            {student.parentInfo?.fatherName && (
+                              <div className="space-y-1.5">
+                                <div className="text-xs text-gray-500 font-medium">Father</div>
+                                <div className="text-sm font-semibold text-gray-900">
+                                  {student.parentInfo.fatherName}
+                                </div>
+                                {student.parentInfo?.fatherPhone && (
+                                  <div className="text-xs text-gray-600 flex items-center gap-1">
+                                    <Phone className="w-3 h-3" />
+                                    {student.parentInfo.fatherPhone}
+                                  </div>
+                                )}
+                              </div>
+                            )}
+
+                            {/* Mother */}
+                            {student.parentInfo?.motherName && (
+                              <div className="space-y-1.5">
+                                <div className="text-xs text-gray-500 font-medium">Mother</div>
+                                <div className="text-sm font-semibold text-gray-900">
+                                  {student.parentInfo.motherName}
+                                </div>
+                                {student.parentInfo?.motherPhone && (
+                                  <div className="text-xs text-gray-600 flex items-center gap-1">
+                                    <Phone className="w-3 h-3" />
+                                    {student.parentInfo.motherPhone}
+                                  </div>
+                                )}
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      )}
 
                       {/* Detailed Information Grid */}
                       <div className="grid gap-3 sm:grid-cols-2">
@@ -599,6 +791,40 @@ export function StepStudentSelection() {
               )
             })}
           </div>
+
+          {/* View All Students Button - Show if more than 6 students */}
+          {filteredStudentsList.length > 6 && !showAllStudents && (
+            <div className="pt-4 flex flex-col items-center gap-4 border-t-2 border-dashed border-gray-200">
+              <p className="text-sm text-gray-600 font-medium">
+                Showing 6 of {filteredStudentsList.length} students
+              </p>
+              <Button
+                onClick={() => setShowAllStudents(true)}
+                variant="outline"
+                className="px-8 py-2.5 border-2 border-gspn-gold-300 text-gspn-gold-700 hover:bg-gspn-gold-50 hover:border-gspn-gold-400 hover:shadow-lg transition-all duration-300 font-semibold"
+              >
+                <Users className="w-4 h-4 mr-2" />
+                View All {filteredStudentsList.length} Students
+              </Button>
+            </div>
+          )}
+
+          {/* Show Less Button - Show when viewing all students */}
+          {filteredStudentsList.length > 6 && showAllStudents && (
+            <div className="pt-4 flex flex-col items-center gap-4 border-t-2 border-dashed border-gray-200">
+              <p className="text-sm text-gray-600 font-medium">
+                Showing all {filteredStudentsList.length} students
+              </p>
+              <Button
+                onClick={() => setShowAllStudents(false)}
+                variant="outline"
+                className="px-8 py-2.5 border-2 border-gray-300 text-gray-700 hover:bg-gray-50 hover:border-gray-400 hover:shadow-lg transition-all duration-300 font-semibold"
+              >
+                <Users className="w-4 h-4 mr-2" />
+                Show Less
+              </Button>
+            </div>
+          )}
         </div>
       )}
     </div>

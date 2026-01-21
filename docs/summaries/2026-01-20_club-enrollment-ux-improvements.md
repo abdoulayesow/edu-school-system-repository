@@ -6,7 +6,58 @@
 
 ## Overview
 
-This session focused on testing the club enrollment wizard flow, identifying and fixing critical bugs (permission guard, missing permissions), addressing UI/UX issues (grade filter, fee display, enrollment badge), and implementing comprehensive design improvements using the frontend-design skill to create a distinctive, polished user experience.
+This multi-session document covers comprehensive improvements to the club enrollment wizard:
+
+1. **Session 1:** Testing, bug fixes (permission guard, missing permissions), and design improvements
+2. **Session 2:** Fixed critical bugs (student names not displaying, "Student profile not found" error) and UX improvements (middle name support, View All Students pagination, quick-select feature)
+
+---
+
+## Session 2: Student Display & UX Fixes (Latest)
+
+### Critical Bug Fixes
+
+#### Student Names Not Displaying
+- **Root Cause:** API was returning empty names when Person record data wasn't found
+- **Fix:** Added enrollment data as fallback (Enrollment table stores names at enrollment time)
+- **Files:** `eligible-students/route.ts` - created `enrollmentDataMap` for fallback
+
+#### "Student Profile Not Found" Error
+- **Root Cause:** Confusion between Person ID and StudentProfile ID in enrollment creation
+- **Fix:** Added clear comments and ensured `studentId` (Person ID) is passed correctly
+- **Files:** `step-student-selection.tsx`, `club-enrollment.ts` types
+
+### UX Enhancements
+
+#### Middle Name Support
+- Added `middleName` field throughout the data flow
+- API fetches middle name from both Person and Enrollment tables
+- UI displays full name including middle name when present
+- `getFullName()` helper function builds complete name
+
+#### View All Students Pagination
+- Initially shows 6 students, expandable to show all
+- "View All X Students" button with count
+- "Show Less" button to collapse back
+- State managed via `showAllStudents` boolean
+
+#### Quick-Select Feature
+- Added hover-visible "Select" button on student cards
+- Single click to select without expanding card details
+- Uses `handleQuickSelect()` with `e.stopPropagation()`
+- Reduces clicks from 2 to 1 for selecting students
+
+### Files Modified (Session 2)
+
+| File | Changes |
+|------|---------|
+| `app/ui/app/api/clubs/[id]/eligible-students/route.ts` | Added middleName to queries, enrollmentDataMap fallback, Person->Enrollment fallback logic |
+| `app/ui/components/club-enrollment/steps/step-student-selection.tsx` | getFullName helper, showAllStudents state, quick-select button, View All/Show Less buttons |
+| `app/ui/lib/types/club-enrollment.ts` | Added middleName to EligibleStudent.person interface |
+
+---
+
+## Session 1: Permission & Design Improvements
 
 ## Completed Work
 
@@ -336,7 +387,7 @@ Same pattern used in `/students` page - immediate filtering without API calls.
 ## Resume Prompt for Next Session
 
 ```
-Continue club enrollment UX improvements work.
+Resume club enrollment UX improvements session.
 
 IMPORTANT: Follow token optimization patterns from `.claude/skills/summary-generator/guidelines/token-optimization.md`:
 - Use Grep before Read for searches
@@ -345,73 +396,48 @@ IMPORTANT: Follow token optimization patterns from `.claude/skills/summary-gener
 - Keep responses concise
 
 ## Context
+Previous sessions completed:
+- Fixed student names not displaying (added enrollment data as fallback)
+- Fixed "Student profile not found" error (using correct Person ID)
+- Added middle name support throughout data flow
+- Implemented "View All Students" pagination toggle
+- Added quick-select button for single-click student selection
+- Fixed permission guard, seeded club_enrollment permissions
+- Comprehensive design improvements (animations, backgrounds, progress indicator)
 
-Previous session completed testing, bug fixes, and comprehensive design improvements for the club enrollment wizard.
+Session summary: docs/summaries/2026-01-20_club-enrollment-ux-improvements.md
 
-**Session Summary:** docs/summaries/2026-01-20_club-enrollment-ux-improvements.md
-
-## Key Accomplishments
-
-✅ Fixed critical bugs:
-- PermissionGuard structure bug (blank page issue)
-- Missing club_enrollment permissions (seeded to database)
-- Grade filter display issue
-- Fee display priority (monthly → enrollment → free)
-- Removed enrollment badge from club header
-
-✅ Implemented design enhancements:
-- Enhanced empty states with animations
-- Improved student card hover effects
-- Decorative background elements
-- Enhanced progress indicator
-- Page-level animations
+## Key Files to Review First
+- app/ui/components/club-enrollment/steps/step-student-selection.tsx (main UI changes)
+- app/ui/app/api/clubs/[id]/eligible-students/route.ts (API fallback logic)
 
 ## Current Status
+All implementation complete. TypeScript compiles successfully. Ready for testing.
 
-**Branch:** feature/ux-redesign-frontend (5 commits ahead of origin)
+## Next Steps
+1. Test the complete enrollment flow in browser
+2. Run create-missing-student-profiles.ts script if data issues persist
+3. Commit changes when verified
 
-**Modified Files (uncommitted):**
-- app/db/prisma/seeds/seed-permissions.ts (+13 lines)
-- app/ui/app/clubs/enroll/page.tsx (permission guard fix)
-- app/ui/components/club-enrollment/club-enrollment-wizard.tsx (background decorations)
-- app/ui/components/club-enrollment/steps/step-student-selection.tsx (design improvements)
-- app/ui/components/club-enrollment/wizard-progress.tsx (enhanced progress indicator)
-- 3 other club enrollment step components (design token compliance)
-
-**Next Immediate Steps:**
-1. User to complete testing of all design improvements
-2. Commit all changes with descriptive message
-3. Push to remote branch
-4. Consider creating PR for review
-
-## Important Files Reference
-
-- Club enrollment wizard: `app/ui/components/club-enrollment/club-enrollment-wizard.tsx`
-- Student selection step: `app/ui/components/club-enrollment/steps/step-student-selection.tsx`
-- Progress indicator: `app/ui/components/club-enrollment/wizard-progress.tsx`
-- Permission seed: `app/db/prisma/seeds/seed-permissions.ts`
-- Page wrapper: `app/ui/app/clubs/enroll/page.tsx`
+## Important Notes
+- EligibleStudent.studentId = Person ID (used for enrollment creation)
+- EligibleStudent.id = StudentProfile ID (internal reference only)
+- Script exists at app/db/scripts/create-missing-student-profiles.ts for data integrity
+- Data fallback pattern: Person data -> Enrollment data -> empty string
 
 ## Design Patterns in Use
-
 - GSPN brand gold colors (`gspn-gold-*`)
-- Client-side filtering with useMemo (search + grade filter)
+- Data fallback: Person -> Enrollment -> empty
+- Client-side filtering with useMemo
 - Tailwind animations (pulse, bounce, ping, fade-in, slide-in)
-- Permission-based access control via PermissionGuard
-- Staggered entrance animations for visual hierarchy
-
-## Blockers/Notes
-
-- None currently
-- All tests passing
-- Dev server running on http://localhost:8000
-- Database permissions seeded successfully
+- Quick-select with e.stopPropagation()
 ```
 
 ---
 
-**Session Duration:** ~2 hours
-**Files Modified:** 8
-**Bugs Fixed:** 5
-**Features Enhanced:** 5
-**User Satisfaction:** ✅ Positive (design improvements approved, testing in progress)
+**Session 1 Duration:** ~2 hours
+**Session 2 Duration:** ~1 hour
+**Total Files Modified:** 10+
+**Bugs Fixed:** 7
+**Features Enhanced:** 8
+**TypeScript Status:** Compiles successfully

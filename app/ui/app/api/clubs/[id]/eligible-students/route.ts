@@ -7,7 +7,18 @@ type RouteParams = { params: Promise<{ id: string }> }
 /**
  * GET /api/clubs/[id]/eligible-students
  * Get all students eligible for a specific club based on eligibility rules
- * Public endpoint for enrollment wizard (requires authentication but not admin permissions)
+ *
+ * DATA MODEL:
+ * - Enrollment.studentId → Student.id (legacy table)
+ * - StudentProfile.studentId → Student.id (links to legacy)
+ * - StudentProfile.personId → Person.id (actual person record)
+ * - ClubEnrollment.studentProfileId → StudentProfile.id
+ *
+ * FLOW:
+ * 1. Get Enrollments matching criteria
+ * 2. Get StudentProfiles via StudentProfile.studentId = Enrollment.studentId
+ * 3. Get Person records via StudentProfile.personId
+ * 4. Return Person.id as studentId for club enrollment creation
  */
 export async function GET(req: NextRequest, { params }: RouteParams) {
   const { session, error } = await requireSession()
@@ -43,6 +54,7 @@ export async function GET(req: NextRequest, { params }: RouteParams) {
     const enrollmentWhere: any = {
       schoolYear: { isActive: true },
       status: "completed",
+      studentId: { not: null }, // Only enrollments linked to a student
     }
 
     // Apply eligibility rules
@@ -62,15 +74,26 @@ export async function GET(req: NextRequest, { params }: RouteParams) {
     }
 
     // Fetch students with completed enrollments matching criteria
+    // NOTE: Enrollment.studentId is actually Student.id (legacy table)
     const enrollments = await prisma.enrollment.findMany({
       where: enrollmentWhere,
       distinct: ["studentId"],
       select: {
-        studentId: true,
+        studentId: true, // This is Student.id (legacy), NOT Person.id!
         firstName: true,
+        middleName: true,
         lastName: true,
         photoUrl: true,
         gradeId: true,
+        fatherName: true,
+        fatherPhone: true,
+        fatherEmail: true,
+        motherName: true,
+        motherPhone: true,
+        motherEmail: true,
+        enrollingPersonName: true,
+        enrollingPersonPhone: true,
+        enrollingPersonEmail: true,
       },
       orderBy: [
         { lastName: "asc" },
@@ -78,23 +101,75 @@ export async function GET(req: NextRequest, { params }: RouteParams) {
       ],
     })
 
-    // Get unique student IDs (Person IDs)
-    const personIds = enrollments
+    // Get unique legacy Student IDs from enrollments
+    const legacyStudentIds = enrollments
       .map(e => e.studentId)
       .filter(Boolean) as string[]
 
-    // Fetch student profiles with formatted student IDs
+    if (legacyStudentIds.length === 0) {
+      return NextResponse.json({ students: [] })
+    }
+
+    // CRITICAL: Get StudentProfiles by matching StudentProfile.studentId = Enrollment.studentId
+    // StudentProfile.studentId links to the legacy Student table
     const studentProfiles = await prisma.studentProfile.findMany({
       where: {
-        personId: { in: personIds },
+        studentId: { in: legacyStudentIds },
       },
       select: {
         id: true,
         personId: true,
-        studentId: true,
+        studentId: true, // Legacy Student.id
         currentGradeId: true,
       },
     })
+
+    // Fetch the legacy Student records to get studentNumber for display
+    const legacyStudents = await prisma.student.findMany({
+      where: {
+        id: { in: legacyStudentIds },
+      },
+      select: {
+        id: true,
+        studentNumber: true,
+      },
+    })
+
+    // Create map: Student.id → studentNumber
+    const studentNumberMap = new Map(
+      legacyStudents.map(s => [s.id, s.studentNumber])
+    )
+
+    // Create map: legacy Student.id → StudentProfile
+    const studentProfileByLegacyId = new Map(
+      studentProfiles.map(sp => [sp.studentId, sp])
+    )
+
+    // Get Person IDs from StudentProfiles
+    const personIds = studentProfiles.map(sp => sp.personId)
+
+    // Fetch full Person records with personal details
+    const persons = await prisma.person.findMany({
+      where: {
+        id: { in: personIds },
+      },
+      select: {
+        id: true,
+        firstName: true,
+        middleName: true,
+        lastName: true,
+        dateOfBirth: true,
+        gender: true,
+        phone: true,
+        email: true,
+        photoUrl: true,
+      },
+    })
+
+    // Create map: Person.id → Person
+    const personMap = new Map(
+      persons.map(p => [p.id, p])
+    )
 
     // Fetch grades for display
     const gradeIds = Array.from(new Set([
@@ -111,16 +186,12 @@ export async function GET(req: NextRequest, { params }: RouteParams) {
       },
     })
 
-    // Create maps for quick lookup
-    const studentProfileMap = new Map(
-      studentProfiles.map(sp => [sp.personId, sp])
-    )
     const gradeMap = new Map(
       grades.map(g => [g.id, g])
     )
 
     // Get students already enrolled in this club
-    const existingEnrollments = await prisma.clubEnrollment.findMany({
+    const existingClubEnrollments = await prisma.clubEnrollment.findMany({
       where: {
         clubId: id,
         status: "active",
@@ -130,7 +201,7 @@ export async function GET(req: NextRequest, { params }: RouteParams) {
       },
     })
     const enrolledStudentProfileIds = new Set(
-      existingEnrollments.map((e) => e.studentProfileId)
+      existingClubEnrollments.map((e) => e.studentProfileId)
     )
 
     // Get all club enrollments for eligible students to show current clubs
@@ -159,47 +230,78 @@ export async function GET(req: NextRequest, { params }: RouteParams) {
       clubEnrollmentsByStudent.set(enrollment.studentProfileId, existing)
     })
 
-    // Map to student profile format and filter out already enrolled
+    // Build eligible students list
     const eligibleStudents = enrollments
       .map((enrollment) => {
-        const studentProfile = studentProfileMap.get(enrollment.studentId!)
-        if (!studentProfile) return null
+        // Get StudentProfile by legacy Student.id
+        const studentProfile = studentProfileByLegacyId.get(enrollment.studentId!)
+        if (!studentProfile) {
+          // No StudentProfile linked to this enrollment - skip
+          return null
+        }
+
+        // Skip if already enrolled in this club
+        if (enrolledStudentProfileIds.has(studentProfile.id)) {
+          return null
+        }
+
+        // Get Person record
+        const person = personMap.get(studentProfile.personId)
 
         // Use current grade from student profile, fallback to enrollment grade
         const gradeId = studentProfile.currentGradeId || enrollment.gradeId
         const grade = gradeMap.get(gradeId)
 
         return {
-          studentProfileId: studentProfile.id,
-          personId: enrollment.studentId!,
-          firstName: enrollment.firstName,
-          lastName: enrollment.lastName,
-          photoUrl: enrollment.photoUrl,
-          grade: grade || null,
-          formattedStudentId: studentProfile.studentId,
+          // IDs
+          id: studentProfile.id, // StudentProfile.id (for display/reference)
+          studentId: studentProfile.personId, // Person.id (for club enrollment creation!)
+          formattedStudentId: studentNumberMap.get(studentProfile.studentId!) || null, // Actual student number for display
+
+          // Person data with enrollment fallback
+          person: {
+            firstName: person?.firstName || enrollment.firstName || "",
+            middleName: person?.middleName || enrollment.middleName || null,
+            lastName: person?.lastName || enrollment.lastName || "",
+            photoUrl: person?.photoUrl || enrollment.photoUrl,
+            dateOfBirth: person?.dateOfBirth,
+            gender: person?.gender,
+            phone: person?.phone,
+            email: person?.email,
+          },
+
+          // Parent/payer info from enrollment
+          parentInfo: {
+            fatherName: enrollment.fatherName,
+            fatherPhone: enrollment.fatherPhone,
+            motherName: enrollment.motherName,
+            motherPhone: enrollment.motherPhone,
+          },
+          enrollmentPayerInfo: {
+            fatherName: enrollment.fatherName,
+            fatherPhone: enrollment.fatherPhone,
+            fatherEmail: enrollment.fatherEmail,
+            motherName: enrollment.motherName,
+            motherPhone: enrollment.motherPhone,
+            motherEmail: enrollment.motherEmail,
+            enrollingPersonName: enrollment.enrollingPersonName,
+            enrollingPersonPhone: enrollment.enrollingPersonPhone,
+            enrollingPersonEmail: enrollment.enrollingPersonEmail,
+          },
+
+          // Grade info
+          currentGrade: grade ? {
+            id: grade.id,
+            name: grade.name,
+            level: grade.level,
+          } : null,
+
+          // Status and clubs
+          studentStatus: "active" as const,
+          clubEnrollments: clubEnrollmentsByStudent.get(studentProfile.id) || [],
         }
       })
-      .filter((student): student is NonNullable<typeof student> => {
-        if (!student) return false
-        return !enrolledStudentProfileIds.has(student.studentProfileId)
-      })
-      .map((student) => ({
-        id: student.studentProfileId,
-        studentId: student.personId, // Person ID for enrollment creation
-        formattedStudentId: student.formattedStudentId,
-        person: {
-          firstName: student.firstName,
-          lastName: student.lastName,
-          photoUrl: student.photoUrl,
-        },
-        currentGrade: student.grade ? {
-          id: student.grade.id,
-          name: student.grade.name,
-          level: student.grade.level,
-        } : null,
-        studentStatus: "active",
-        clubEnrollments: clubEnrollmentsByStudent.get(student.studentProfileId) || [],
-      }))
+      .filter((student): student is NonNullable<typeof student> => student !== null)
 
     return NextResponse.json({ students: eligibleStudents })
   } catch (err) {

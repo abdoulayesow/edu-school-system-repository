@@ -47,7 +47,8 @@ export const queryKeys = {
   // Payments
   payments: (filters?: PaymentFilters) =>
     filters ? (["payments", filters] as const) : (["payments"] as const),
-  paymentStats: () => ["payments", "stats"] as const,
+  paymentStats: (filters?: PaymentStatsFilters) =>
+    filters ? (["payments", "stats", filters] as const) : (["payments", "stats"] as const),
 } as const
 
 // Filter types
@@ -102,6 +103,11 @@ interface PaymentFilters {
   endDate?: string
   limit?: number
   offset?: number
+}
+
+interface PaymentStatsFilters {
+  startDate?: string
+  endDate?: string
 }
 
 // Pagination response type
@@ -1395,11 +1401,24 @@ interface PaymentStats {
     count: number
     amount: number
   }
+  reversed?: {
+    count: number
+    amount: number
+  }
   confirmedThisWeek: {
     count: number
     amount: number
   }
   byMethod: Record<string, { count: number; amount: number }>
+  allTime?: {
+    cash: { count: number; amount: number }
+    orange_money: { count: number; amount: number }
+  }
+  filterApplied?: boolean
+  filterRange?: {
+    startDate: string | null
+    endDate: string | null
+  } | null
 }
 
 /**
@@ -1417,11 +1436,14 @@ export function usePayments(filters?: PaymentFilters) {
 
 /**
  * Hook: Fetch payment statistics
+ * @param filters - Optional date filters to scope stats
  */
-export function usePaymentStats() {
+export function usePaymentStats(filters?: PaymentStatsFilters) {
+  const url = buildUrl("/api/payments/stats", { ...filters })
+
   return useQuery({
-    queryKey: queryKeys.paymentStats(),
-    queryFn: () => fetchApi<PaymentStats>("/api/payments/stats"),
+    queryKey: queryKeys.paymentStats(filters),
+    queryFn: () => fetchApi<PaymentStats>(url),
     staleTime: 60 * 1000, // 1 minute - aggregated stats
   })
 }

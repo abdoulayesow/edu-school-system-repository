@@ -23,6 +23,7 @@ export async function POST(req: NextRequest) {
     }
 
     // Get student profile ID from person ID
+    // NOTE: studentId here is Person.id (from eligible-students API)
     const student = await prisma.person.findUnique({
       where: { id: studentId },
       include: { studentProfile: true },

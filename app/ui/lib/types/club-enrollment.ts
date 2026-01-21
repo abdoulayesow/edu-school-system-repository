@@ -2,6 +2,34 @@
 
 export type ClubEnrollmentStep = 1 | 2 | 3 | 4
 
+export type PayerType = "father" | "mother" | "enrolling_person" | "other"
+
+export interface PayerInfo {
+  type: PayerType
+  name: string
+  phone: string
+  email?: string
+}
+
+export interface EnrollmentPayerInfo {
+  fatherName?: string | null
+  fatherPhone?: string | null
+  fatherEmail?: string | null
+  motherName?: string | null
+  motherPhone?: string | null
+  motherEmail?: string | null
+  enrollingPersonName?: string | null
+  enrollingPersonPhone?: string | null
+  enrollingPersonEmail?: string | null
+}
+
+export interface StudentParentInfo {
+  fatherName?: string | null
+  fatherPhone?: string | null
+  motherName?: string | null
+  motherPhone?: string | null
+}
+
 export interface ClubEnrollmentData {
   // Step 1: Club Selection
   clubId: string
@@ -21,6 +49,10 @@ export interface ClubEnrollmentData {
   studentName: string
   studentGrade: string
   studentPhoto: string | null
+  studentDateOfBirth?: string | null
+  studentGender?: string | null
+  studentParentInfo?: StudentParentInfo | null
+  enrollmentPayerInfo?: EnrollmentPayerInfo
 
   // Step 3: Payment
   paymentAmount: number
@@ -28,6 +60,7 @@ export interface ClubEnrollmentData {
   receiptNumber: string
   transactionRef: string
   notes: string
+  payer?: PayerInfo
 
   // Metadata
   enrollmentId?: string
@@ -70,9 +103,21 @@ export interface EligibleStudent {
   formattedStudentId?: string | null // Formatted ID like STD-2024-22052016-0036
   person: {
     firstName: string
+    middleName?: string | null
     lastName: string
     photoUrl: string | null
+    dateOfBirth?: string | null
+    gender?: string | null
+    phone?: string | null
+    email?: string | null
   }
+  parentInfo?: {
+    fatherName?: string | null
+    fatherPhone?: string | null
+    motherName?: string | null
+    motherPhone?: string | null
+  } | null
+  enrollmentPayerInfo?: EnrollmentPayerInfo | null
   currentGrade: {
     id: string
     name: string

@@ -89,7 +89,7 @@ export function ClubEnrollmentWizard() {
   // Save enrollment as draft - returns true on success, false on failure
   const handleSave = useCallback(async (): Promise<boolean> => {
     if (!state.data.clubId || !state.data.studentId) {
-      setError("Club and student must be selected before saving")
+      setError(t.clubEnrollmentWizard.clubAndStudentRequired)
       return false
     }
 
@@ -122,19 +122,19 @@ export function ClubEnrollmentWizard() {
 
       if (!res.ok) {
         const error = await res.json()
-        throw new Error(error.message || "Failed to save enrollment")
+        throw new Error(error.message || t.clubEnrollmentWizard.failedToSave)
       }
 
       const data = await res.json()
       setEnrollmentId(data.id)
       return true
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to save enrollment")
+      setError(err instanceof Error ? err.message : t.clubEnrollmentWizard.failedToSave)
       return false
     } finally {
       setSubmitting(false)
     }
-  }, [state.data, state.currentStep, setEnrollmentId, setError, clearError, setSubmitting])
+  }, [state.data, state.currentStep, setEnrollmentId, setError, clearError, setSubmitting, t])
 
   // Wrapper for handleSave that matches expected type signature
   const handleSaveWrapper = useCallback(async (): Promise<void> => {
@@ -172,7 +172,7 @@ export function ClubEnrollmentWizard() {
 
           // Validate capacity with fresh data
           if (club.capacity !== null && currentEnrollments >= club.capacity) {
-            setError("This club has reached its capacity. Cannot enroll additional students.")
+            setError(t.clubEnrollmentWizard.capacityFull)
             return
           }
         }
@@ -183,12 +183,12 @@ export function ClubEnrollmentWizard() {
     }
 
     setShowConfirmModal(true)
-  }, [state.data.clubId, setClub, setError])
+  }, [state.data.clubId, setClub, setError, t])
 
   // Submit final enrollment (called from confirmation modal)
   const handleSubmit = useCallback(async () => {
     if (!state.data.enrollmentId && !state.data.clubId) {
-      setError("Missing enrollment data")
+      setError(t.clubEnrollmentWizard.missingEnrollmentData)
       setShowConfirmModal(false)
       return
     }
@@ -210,6 +210,16 @@ export function ClubEnrollmentWizard() {
           method: state.data.paymentMethod,
           receiptNumber: state.data.receiptNumber,
           transactionRef: state.data.transactionRef,
+        }
+
+        // Include payer information if provided
+        if (state.data.payer) {
+          payload.payment.payer = {
+            type: state.data.payer.type,
+            name: state.data.payer.name,
+            phone: state.data.payer.phone,
+            email: state.data.payer.email,
+          }
         }
       }
 
@@ -237,7 +247,7 @@ export function ClubEnrollmentWizard() {
 
       if (!res.ok) {
         const error = await res.json()
-        throw new Error(error.message || "Failed to submit enrollment")
+        throw new Error(error.message || t.clubEnrollmentWizard.failedToSubmit)
       }
 
       const data = await res.json()
@@ -245,12 +255,12 @@ export function ClubEnrollmentWizard() {
       setShowConfirmModal(false)
       nextStep()
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to submit enrollment")
+      setError(err instanceof Error ? err.message : t.clubEnrollmentWizard.failedToSubmit)
       setShowConfirmModal(false)
     } finally {
       setSubmitting(false)
     }
-  }, [state.data, setEnrollmentNumber, setError, clearError, setSubmitting, nextStep])
+  }, [state.data, setEnrollmentNumber, setError, clearError, setSubmitting, nextStep, t])
 
   // Handle back navigation with unsaved changes check
   const handleBackToClubs = useCallback(() => {
@@ -315,7 +325,7 @@ export function ClubEnrollmentWizard() {
             className="gap-2 mb-4 hover:bg-white/50"
           >
             <ArrowLeft className={sizing.icon.sm} />
-            Back to Clubs
+            {t.clubEnrollmentWizard.backToClubs}
           </Button>
 
           <div className="text-center space-y-3 animate-in fade-in slide-in-from-top-4 duration-700">
@@ -324,9 +334,9 @@ export function ClubEnrollmentWizard() {
               "bg-gradient-to-r from-gspn-gold-600 via-gspn-gold-700 to-gspn-gold-600 bg-clip-text text-transparent",
               "drop-shadow-sm"
             )}>
-              Club Enrollment
+              {t.clubEnrollmentWizard.title}
             </h1>
-            <p className="text-gray-600 text-lg">Enroll a student in an extracurricular club</p>
+            <p className="text-gray-600 text-lg">{t.clubEnrollmentWizard.subtitle}</p>
           </div>
         </div>
 
@@ -386,9 +396,9 @@ export function ClubEnrollmentWizard() {
                   <AlertTriangle className="w-6 h-6 text-warning" />
                 </div>
                 <div>
-                  <DialogTitle className="text-xl">Unsaved Changes</DialogTitle>
+                  <DialogTitle className="text-xl">{t.clubEnrollmentWizard.unsavedChanges}</DialogTitle>
                   <DialogDescription className="text-sm mt-1">
-                    You have unsaved changes to this enrollment
+                    {t.clubEnrollmentWizard.unsavedChangesDescription}
                   </DialogDescription>
                 </div>
               </div>
@@ -396,7 +406,7 @@ export function ClubEnrollmentWizard() {
 
             <div className="py-4">
               <p className="text-gray-700">
-                Are you sure you want to leave? Any changes you've made will be lost.
+                {t.clubEnrollmentWizard.unsavedChangesMessage}
               </p>
             </div>
 
@@ -406,14 +416,14 @@ export function ClubEnrollmentWizard() {
                 onClick={handleCancelLeave}
                 className="flex-1 sm:flex-1"
               >
-                Stay & Continue
+                {t.clubEnrollmentWizard.stayAndContinue}
               </Button>
               <Button
                 variant="destructive"
                 onClick={handleConfirmLeave}
                 className="flex-1 sm:flex-1"
               >
-                Leave Without Saving
+                {t.clubEnrollmentWizard.leaveWithoutSaving}
               </Button>
             </DialogFooter>
           </DialogContent>

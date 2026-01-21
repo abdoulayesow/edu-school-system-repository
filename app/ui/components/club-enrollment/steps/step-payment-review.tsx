@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect, useMemo } from "react"
+import { useState, useEffect, useMemo, useCallback } from "react"
 import {
   Users,
   GraduationCap,
@@ -13,6 +13,16 @@ import {
   CalendarClock,
   Calculator,
   Info,
+  UserCircle,
+  Check,
+  Loader2,
+  Banknote,
+  Smartphone,
+  Phone,
+  ChevronDown,
+  Clock,
+  CircleDot,
+  ArrowRight,
 } from "lucide-react"
 import { Label } from "@/components/ui/label"
 import { Input } from "@/components/ui/input"
@@ -22,17 +32,11 @@ import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog"
 import { cn } from "@/lib/utils"
 import { sizing, spacing } from "@/lib/design-tokens"
 import { useI18n } from "@/components/i18n-provider"
 import { useClubEnrollmentWizard } from "../wizard-context"
+import type { PayerType } from "@/lib/types/club-enrollment"
 
 interface MonthInfo {
   month: string
@@ -47,8 +51,84 @@ export function StepPaymentReview() {
 
   const [isEditingTotal, setIsEditingTotal] = useState(false)
   const [customTotal, setCustomTotal] = useState<string>("")
-  const [showProrationDialog, setShowProrationDialog] = useState(false)
-  const [hasShownProrationPrompt, setHasShownProrationPrompt] = useState(false)
+  const [hasAppliedProration, setHasAppliedProration] = useState(false)
+  const [isGeneratingReceipt, setIsGeneratingReceipt] = useState(false)
+
+  // Translations
+  const translations = {
+    reviewAndPayment: locale === "fr" ? "Révision et Paiement" : "Review & Payment",
+    reviewDescription: locale === "fr"
+      ? "Vérifiez les détails de l'inscription et enregistrez le paiement (optionnel)"
+      : "Review enrollment details and record payment (optional)",
+    clubDetails: locale === "fr" ? "Détails du Club" : "Club Details",
+    studentDetails: locale === "fr" ? "Détails de l'Élève" : "Student Details",
+    changeStudent: locale === "fr" ? "Changer d'élève" : "Change Student",
+    changeClub: locale === "fr" ? "Changer de club" : "Change Club",
+    clubName: locale === "fr" ? "Nom du Club" : "Club Name",
+    leader: locale === "fr" ? "Responsable" : "Leader",
+    duration: locale === "fr" ? "Durée" : "Duration",
+    enrollment: locale === "fr" ? "Inscriptions" : "Enrollment",
+    students: locale === "fr" ? "élèves" : "students",
+    personalInfo: locale === "fr" ? "Informations Personnelles" : "Personal Information",
+    dateOfBirth: locale === "fr" ? "Date de naissance" : "Date of Birth",
+    gender: locale === "fr" ? "Genre" : "Gender",
+    parentInfo: locale === "fr" ? "Informations Parentales" : "Parent Information",
+    father: locale === "fr" ? "Père" : "Father",
+    mother: locale === "fr" ? "Mère" : "Mother",
+    feeBreakdown: locale === "fr" ? "Détail des Frais" : "Fee Breakdown",
+    enrollmentFee: locale === "fr" ? "Frais d'inscription (unique)" : "Enrollment Fee (One-time)",
+    monthlyFee: locale === "fr" ? "Frais mensuels" : "Monthly Fee",
+    totalMonthlyFees: locale === "fr" ? "Total frais mensuels" : "Total Monthly Fees",
+    totalAmount: locale === "fr" ? "Montant Total" : "Total Amount",
+    fullYear: locale === "fr" ? "(Année complète)" : "(Full Year)",
+    adjustTotal: locale === "fr" ? "Ajuster le Total" : "Adjust Total",
+    reset: locale === "fr" ? "Réinitialiser" : "Reset",
+    adjustedTotalAmount: locale === "fr" ? "Montant total ajusté" : "Adjusted Total Amount",
+    originalTotal: locale === "fr" ? "Total d'origine" : "Original total",
+    prorated: locale === "fr" ? "Proratisé" : "Prorated",
+    midYearEnrollment: locale === "fr" ? "Inscription en Cours d'Année" : "Mid-Year Enrollment",
+    midYearDescription: locale === "fr"
+      ? "Ce club a commencé avant aujourd'hui. Voulez-vous appliquer un tarif proratisé ?"
+      : "This club started before today. Would you like to apply a prorated rate?",
+    monthsRemaining: locale === "fr" ? "mois restants" : "months remaining",
+    monthsPassed: locale === "fr" ? "mois passés" : "months passed",
+    applyProration: locale === "fr" ? "Appliquer le Prorata" : "Apply Proration",
+    keepFullAmount: locale === "fr" ? "Garder le Montant Complet" : "Keep Full Amount",
+    viewMonthlyBreakdown: locale === "fr" ? "Voir le détail mensuel" : "View Monthly Breakdown",
+    months: locale === "fr" ? "mois" : "months",
+    current: locale === "fr" ? "Actuel" : "Current",
+    past: locale === "fr" ? "Passé" : "Past",
+    recordPayment: locale === "fr" ? "Enregistrer le Paiement (Optionnel)" : "Record Payment (Optional)",
+    paymentOptionalInfo: locale === "fr"
+      ? "Vous pouvez enregistrer le paiement maintenant ou plus tard. Si le paiement n'est pas enregistré, l'inscription sera sauvegardée en attente de paiement."
+      : "You can record payment now or later. If payment is not recorded, the enrollment will be saved as pending payment.",
+    paymentAmount: locale === "fr" ? "Montant du Paiement" : "Payment Amount",
+    paymentAmountHelp: locale === "fr"
+      ? "Entrez le montant payé (peut être un paiement partiel)"
+      : "Enter the amount being paid (can be partial payment)",
+    paymentMethod: locale === "fr" ? "Mode de Paiement" : "Payment Method",
+    cash: locale === "fr" ? "Espèces" : "Cash",
+    orangeMoney: "Orange Money",
+    receiptNumber: locale === "fr" ? "Numéro de Reçu" : "Receipt Number",
+    autoGenerated: locale === "fr" ? "Généré automatiquement" : "Auto-generated",
+    generating: locale === "fr" ? "Génération..." : "Generating...",
+    transactionRef: locale === "fr" ? "Référence de Transaction (Optionnel)" : "Transaction Reference (Optional)",
+    whoIsPaying: locale === "fr" ? "Qui effectue ce paiement ?" : "Who is making this payment?",
+    payerName: locale === "fr" ? "Nom du Payeur" : "Payer Name",
+    fullName: locale === "fr" ? "Nom complet" : "Full name",
+    phoneNumber: locale === "fr" ? "Numéro de Téléphone" : "Phone Number",
+    email: "Email",
+    optional: locale === "fr" ? "optionnel" : "optional",
+    notes: "Notes",
+    notesPlaceholder: locale === "fr"
+      ? "Ajoutez des notes supplémentaires concernant cette inscription..."
+      : "Add any additional notes about this enrollment...",
+    selected: locale === "fr" ? "Sélectionné" : "Selected",
+    male: locale === "fr" ? "Masculin" : "Male",
+    female: locale === "fr" ? "Féminin" : "Female",
+    other: locale === "fr" ? "Autre" : "Other",
+    enrollingPerson: locale === "fr" ? "Personne inscrivante" : "Enrolling Person",
+  }
 
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat("fr-GN", {
@@ -64,6 +144,30 @@ export function StepPaymentReview() {
       day: "numeric",
       year: "numeric",
     })
+  }
+
+  const formatDateOfBirth = (dateStr: string | null | undefined) => {
+    if (!dateStr) return null
+    try {
+      return new Date(dateStr).toLocaleDateString(locale === "fr" ? "fr-FR" : "en-US", {
+        day: "numeric",
+        month: "long",
+        year: "numeric",
+      })
+    } catch {
+      return null
+    }
+  }
+
+  const formatGender = (gender: string | null | undefined) => {
+    if (!gender) return null
+    const genderMap: Record<string, string> = {
+      male: translations.male,
+      female: translations.female,
+      other: translations.other,
+    }
+    const normalized = gender.toLowerCase()
+    return genderMap[normalized] || gender
   }
 
   // Calculate monthly fee breakdown
@@ -120,31 +224,136 @@ export function StepPaymentReview() {
     }
   }, [state.data.startDate, state.data.endDate, state.data.monthlyFee, locale])
 
-  // Show proration dialog on mid-year enrollment (once per session)
-  useEffect(() => {
-    if (monthlyCalculation.isMidYear && !hasShownProrationPrompt && !isEditingTotal) {
-      setShowProrationDialog(true)
-      setHasShownProrationPrompt(true)
-    }
-  }, [monthlyCalculation.isMidYear, hasShownProrationPrompt, isEditingTotal])
-
   // Calculate total fees
   const fullYearTotal = (state.data.enrollmentFee || 0) + monthlyCalculation.totalMonthlyFees
   const proratedTotal = (state.data.enrollmentFee || 0) + monthlyCalculation.proratedMonthlyFees
   const displayTotal = isEditingTotal && customTotal ? parseInt(customTotal) || 0 : fullYearTotal
 
+  // Fetch next receipt number
+  const fetchReceiptNumber = useCallback(async (method: "cash" | "orange_money") => {
+    setIsGeneratingReceipt(true)
+    try {
+      const response = await fetch(`/api/payments/next-receipt-number?method=${method}`)
+      if (response.ok) {
+        const data = await response.json()
+        return data.receiptNumber
+      }
+    } catch (err) {
+      console.error("Failed to fetch receipt number:", err)
+    } finally {
+      setIsGeneratingReceipt(false)
+    }
+    return null
+  }, [])
+
+  // Auto-generate receipt number when payment method changes
+  useEffect(() => {
+    async function generateReceipt() {
+      if (
+        state.data.paymentMethod &&
+        state.data.paymentAmount &&
+        state.data.paymentAmount > 0 &&
+        !state.data.receiptNumber
+      ) {
+        const receiptNumber = await fetchReceiptNumber(state.data.paymentMethod)
+        if (receiptNumber) {
+          setPayment({ receiptNumber })
+        }
+      }
+    }
+    generateReceipt()
+  }, [state.data.paymentMethod, state.data.paymentAmount, state.data.receiptNumber, fetchReceiptNumber, setPayment])
+
   const handlePaymentChange = (field: string, value: string | number) => {
     setPayment({ [field]: value })
   }
 
+  // Handle payment method change
+  const handleMethodChange = async (method: "cash" | "orange_money") => {
+    setPayment({ paymentMethod: method, receiptNumber: "" })
+    const receiptNumber = await fetchReceiptNumber(method)
+    if (receiptNumber) {
+      setPayment({ receiptNumber })
+    }
+  }
+
+  // Handle payer type selection
+  const handlePayerTypeChange = (type: PayerType) => {
+    let payerInfo = { type, name: "", phone: "", email: "" }
+
+    // Pre-fill from enrollment payer info
+    const enrollmentPayerInfo = state.data.enrollmentPayerInfo
+    if (enrollmentPayerInfo) {
+      switch (type) {
+        case "father":
+          payerInfo = {
+            type,
+            name: enrollmentPayerInfo.fatherName || "",
+            phone: enrollmentPayerInfo.fatherPhone || "",
+            email: enrollmentPayerInfo.fatherEmail || "",
+          }
+          break
+        case "mother":
+          payerInfo = {
+            type,
+            name: enrollmentPayerInfo.motherName || "",
+            phone: enrollmentPayerInfo.motherPhone || "",
+            email: enrollmentPayerInfo.motherEmail || "",
+          }
+          break
+        case "enrolling_person":
+          payerInfo = {
+            type,
+            name: enrollmentPayerInfo.enrollingPersonName || "",
+            phone: enrollmentPayerInfo.enrollingPersonPhone || "",
+            email: enrollmentPayerInfo.enrollingPersonEmail || "",
+          }
+          break
+        case "other":
+          payerInfo = { type, name: "", phone: "", email: "" }
+          break
+      }
+    }
+
+    setPayment({ payer: payerInfo })
+  }
+
+  // Get payer type options
+  const payerOptions = [
+    {
+      value: "father" as PayerType,
+      label: translations.father,
+      icon: User,
+      available: !!state.data.enrollmentPayerInfo?.fatherName,
+      name: state.data.enrollmentPayerInfo?.fatherName,
+    },
+    {
+      value: "mother" as PayerType,
+      label: translations.mother,
+      icon: UserCircle,
+      available: !!state.data.enrollmentPayerInfo?.motherName,
+      name: state.data.enrollmentPayerInfo?.motherName,
+    },
+    {
+      value: "enrolling_person" as PayerType,
+      label: translations.enrollingPerson,
+      icon: Users,
+      available: !!state.data.enrollmentPayerInfo?.enrollingPersonName,
+      name: state.data.enrollmentPayerInfo?.enrollingPersonName,
+    },
+    {
+      value: "other" as PayerType,
+      label: translations.other,
+      icon: User,
+      available: true,
+      name: null,
+    },
+  ]
+
   const handleApplyProration = () => {
     setCustomTotal(proratedTotal.toString())
     setIsEditingTotal(true)
-    setShowProrationDialog(false)
-  }
-
-  const handleKeepFullAmount = () => {
-    setShowProrationDialog(false)
+    setHasAppliedProration(true)
   }
 
   const handleToggleEditTotal = () => {
@@ -154,6 +363,7 @@ export function StepPaymentReview() {
     } else {
       setCustomTotal("")
       setIsEditingTotal(false)
+      setHasAppliedProration(false)
     }
   }
 
@@ -168,8 +378,8 @@ export function StepPaymentReview() {
     <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
       {/* Header */}
       <div className="text-center space-y-2">
-        <h2 className="text-2xl font-bold text-gray-900">Review & Payment</h2>
-        <p className="text-gray-600">Review enrollment details and record payment (optional)</p>
+        <h2 className="text-2xl font-bold text-gray-900">{translations.reviewAndPayment}</h2>
+        <p className="text-gray-600">{translations.reviewDescription}</p>
       </div>
 
       {/* Summary Cards */}
@@ -177,23 +387,23 @@ export function StepPaymentReview() {
         {/* Club Summary */}
         <div className={cn(spacing.card.md, "bg-white border-2 border-gray-200 rounded-xl space-y-4")}>
           <div className="flex items-center justify-between mb-4">
-            <h3 className="font-bold text-lg text-gray-900">Club Details</h3>
+            <h3 className="font-bold text-lg text-gray-900">{translations.clubDetails}</h3>
             <Button
               variant="ghost"
               size="sm"
               onClick={() => goToStep(1)}
               className="gap-1 text-primary hover:text-primary/90 hover:bg-primary/5 min-h-[44px]"
-              aria-label="Edit club details"
+              aria-label={translations.changeClub}
             >
               <Edit className={sizing.icon.xs} />
-              Edit
+              {translations.changeClub}
             </Button>
           </div>
 
           <div className="space-y-3">
             {/* Club Name */}
             <div>
-              <div className="text-sm text-gray-500 mb-1">Club Name</div>
+              <div className="text-sm text-gray-500 mb-1">{translations.clubName}</div>
               <div className="font-semibold text-gray-900">
                 {locale === "fr" && state.data.clubNameFr
                   ? state.data.clubNameFr
@@ -217,7 +427,7 @@ export function StepPaymentReview() {
             {/* Dates */}
             {state.data.startDate && state.data.endDate && (
               <div>
-                <div className="text-sm text-gray-500 mb-1">Duration</div>
+                <div className="text-sm text-gray-500 mb-1">{translations.duration}</div>
                 <div className="flex items-center gap-2 text-sm text-gray-700">
                   <Calendar className={sizing.icon.xs} />
                   <span>
@@ -230,9 +440,9 @@ export function StepPaymentReview() {
             {/* Capacity */}
             {state.data.capacity && (
               <div>
-                <div className="text-sm text-gray-500 mb-1">Enrollment</div>
+                <div className="text-sm text-gray-500 mb-1">{translations.enrollment}</div>
                 <div className="text-sm text-gray-700">
-                  {state.data.currentEnrollments}/{state.data.capacity} students
+                  {state.data.currentEnrollments}/{state.data.capacity} {translations.students}
                 </div>
               </div>
             )}
@@ -242,16 +452,16 @@ export function StepPaymentReview() {
         {/* Student Summary */}
         <div className={cn(spacing.card.md, "bg-white border-2 border-gray-200 rounded-xl space-y-4")}>
           <div className="flex items-center justify-between mb-4">
-            <h3 className="font-bold text-lg text-gray-900">Student Details</h3>
+            <h3 className="font-bold text-lg text-gray-900">{translations.studentDetails}</h3>
             <Button
               variant="ghost"
               size="sm"
               onClick={() => goToStep(2)}
               className="gap-1 text-primary hover:text-primary/90 hover:bg-primary/5 min-h-[44px]"
-              aria-label="Edit student details"
+              aria-label={translations.changeStudent}
             >
               <Edit className={sizing.icon.xs} />
-              Edit
+              {translations.changeStudent}
             </Button>
           </div>
 
@@ -273,6 +483,71 @@ export function StepPaymentReview() {
               )}
             </div>
           </div>
+
+          {/* Personal Information */}
+          {(state.data.studentDateOfBirth || state.data.studentGender) && (
+            <div className="pt-3 border-t border-gray-100 space-y-2">
+              <div className="text-xs font-semibold text-blue-700 uppercase tracking-wide flex items-center gap-1">
+                <UserCircle className="w-3.5 h-3.5" />
+                {translations.personalInfo}
+              </div>
+              <div className="grid grid-cols-2 gap-2 text-sm">
+                {state.data.studentDateOfBirth && (
+                  <div>
+                    <span className="text-gray-500">{translations.dateOfBirth}:</span>
+                    <div className="font-medium text-gray-900 flex items-center gap-1">
+                      <Calendar className="w-3.5 h-3.5 text-blue-500" />
+                      {formatDateOfBirth(state.data.studentDateOfBirth)}
+                    </div>
+                  </div>
+                )}
+                {state.data.studentGender && (
+                  <div>
+                    <span className="text-gray-500">{translations.gender}:</span>
+                    <div className="font-medium text-gray-900">
+                      {formatGender(state.data.studentGender)}
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+
+          {/* Parent Information */}
+          {(state.data.studentParentInfo?.fatherName || state.data.studentParentInfo?.motherName) && (
+            <div className="pt-3 border-t border-gray-100 space-y-2">
+              <div className="text-xs font-semibold text-purple-700 uppercase tracking-wide flex items-center gap-1">
+                <Users className="w-3.5 h-3.5" />
+                {translations.parentInfo}
+              </div>
+              <div className="grid grid-cols-2 gap-3 text-sm">
+                {state.data.studentParentInfo?.fatherName && (
+                  <div className="space-y-0.5">
+                    <div className="text-xs text-gray-500">{translations.father}</div>
+                    <div className="font-medium text-gray-900">{state.data.studentParentInfo.fatherName}</div>
+                    {state.data.studentParentInfo?.fatherPhone && (
+                      <div className="text-xs text-gray-600 flex items-center gap-1">
+                        <Phone className="w-3 h-3" />
+                        {state.data.studentParentInfo.fatherPhone}
+                      </div>
+                    )}
+                  </div>
+                )}
+                {state.data.studentParentInfo?.motherName && (
+                  <div className="space-y-0.5">
+                    <div className="text-xs text-gray-500">{translations.mother}</div>
+                    <div className="font-medium text-gray-900">{state.data.studentParentInfo.motherName}</div>
+                    {state.data.studentParentInfo?.motherPhone && (
+                      <div className="text-xs text-gray-600 flex items-center gap-1">
+                        <Phone className="w-3 h-3" />
+                        {state.data.studentParentInfo.motherPhone}
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
         </div>
       </div>
 
@@ -282,7 +557,7 @@ export function StepPaymentReview() {
           <div className="flex items-center justify-between mb-4">
             <h3 className="font-bold text-lg text-gray-900 flex items-center gap-2">
               <DollarSign className={sizing.icon.sm} />
-              Fee Breakdown
+              {translations.feeBreakdown}
             </h3>
             {state.data.monthlyFee && state.data.monthlyFee > 0 && (
               <Button
@@ -292,15 +567,60 @@ export function StepPaymentReview() {
                 className="gap-1 text-amber-600 hover:text-amber-700 hover:bg-amber-50"
               >
                 <Calculator className={sizing.icon.xs} />
-                {isEditingTotal ? "Reset" : "Adjust Total"}
+                {isEditingTotal ? translations.reset : translations.adjustTotal}
               </Button>
             )}
           </div>
 
+          {/* Mid-Year Proration Alert - Inline instead of modal */}
+          {monthlyCalculation.isMidYear && !hasAppliedProration && !isEditingTotal && (
+            <div className="mb-4 p-4 bg-blue-50 border-2 border-blue-200 rounded-xl space-y-3">
+              <div className="flex items-start gap-3">
+                <div className="p-2 bg-blue-100 rounded-lg shrink-0">
+                  <CalendarClock className={cn(sizing.icon.md, "text-blue-700")} />
+                </div>
+                <div className="flex-1">
+                  <h4 className="font-semibold text-blue-900">{translations.midYearEnrollment}</h4>
+                  <p className="text-sm text-blue-700 mt-1">{translations.midYearDescription}</p>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4 p-3 bg-white/70 rounded-lg text-sm">
+                <div className="flex justify-between">
+                  <span className="text-gray-600">{translations.monthsPassed}:</span>
+                  <span className="font-semibold">{monthlyCalculation.totalMonths - monthlyCalculation.remainingMonths}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-gray-600">{translations.monthsRemaining}:</span>
+                  <span className="font-semibold text-blue-700">{monthlyCalculation.remainingMonths}</span>
+                </div>
+              </div>
+
+              <div className="flex gap-2">
+                <Button
+                  onClick={handleApplyProration}
+                  className="flex-1 bg-blue-600 hover:bg-blue-700 text-white"
+                  size="sm"
+                >
+                  <Check className={cn(sizing.icon.xs, "mr-1")} />
+                  {translations.applyProration} ({formatCurrency(proratedTotal)})
+                </Button>
+                <Button
+                  variant="outline"
+                  onClick={() => setHasAppliedProration(true)}
+                  className="flex-1"
+                  size="sm"
+                >
+                  {translations.keepFullAmount}
+                </Button>
+              </div>
+            </div>
+          )}
+
           <div className="space-y-3">
             {/* Enrollment Fee */}
             <div className="flex justify-between text-gray-700">
-              <span>Enrollment Fee (One-time)</span>
+              <span>{translations.enrollmentFee}</span>
               <span className="font-semibold">{formatCurrency(state.data.enrollmentFee || 0)}</span>
             </div>
 
@@ -308,7 +628,7 @@ export function StepPaymentReview() {
             {state.data.monthlyFee && state.data.monthlyFee > 0 && (
               <>
                 <div className="flex justify-between text-gray-700">
-                  <span>Monthly Fee</span>
+                  <span>{translations.monthlyFee}</span>
                   <span className="font-semibold">{formatCurrency(state.data.monthlyFee)}</span>
                 </div>
 
@@ -318,7 +638,7 @@ export function StepPaymentReview() {
                     <div className="flex items-center gap-2 text-sm text-gray-600">
                       <CalendarClock className={sizing.icon.xs} />
                       <span>
-                        {monthlyCalculation.totalMonths} month{monthlyCalculation.totalMonths !== 1 ? 's' : ''}
+                        {monthlyCalculation.totalMonths} {translations.months}
                         {state.data.startDate && state.data.endDate && (
                           <> ({formatDate(state.data.startDate)} - {formatDate(state.data.endDate)})</>
                         )}
@@ -326,18 +646,17 @@ export function StepPaymentReview() {
                     </div>
 
                     {/* Mid-year indicator */}
-                    {monthlyCalculation.isMidYear && (
-                      <Alert className="bg-blue-50 border-blue-200 py-2">
-                        <Info className={sizing.icon.sm} />
-                        <AlertDescription className="text-sm">
-                          {monthlyCalculation.remainingMonths} of {monthlyCalculation.totalMonths} months remaining.
-                          Prorated amount: {formatCurrency(proratedTotal)}
+                    {monthlyCalculation.isMidYear && hasAppliedProration && (
+                      <Alert className="bg-green-50 border-green-200 py-2">
+                        <Check className={cn(sizing.icon.sm, "text-green-600")} />
+                        <AlertDescription className="text-sm text-green-700">
+                          {translations.prorated}: {monthlyCalculation.remainingMonths} {translations.monthsRemaining}
                         </AlertDescription>
                       </Alert>
                     )}
 
                     <div className="flex justify-between text-sm text-gray-600">
-                      <span>Total Monthly Fees ({monthlyCalculation.totalMonths} × {formatCurrency(state.data.monthlyFee)})</span>
+                      <span>{translations.totalMonthlyFees} ({monthlyCalculation.totalMonths} × {formatCurrency(state.data.monthlyFee)})</span>
                       <span className="font-semibold">{formatCurrency(monthlyCalculation.totalMonthlyFees)}</span>
                     </div>
                   </div>
@@ -349,7 +668,7 @@ export function StepPaymentReview() {
             {isEditingTotal && (
               <div className="pt-3 border-t-2 border-amber-300 space-y-2">
                 <Label htmlFor="customTotal" className="text-sm font-medium text-gray-700">
-                  Adjusted Total Amount
+                  {translations.adjustedTotalAmount}
                 </Label>
                 <Input
                   id="customTotal"
@@ -360,8 +679,8 @@ export function StepPaymentReview() {
                   placeholder={fullYearTotal.toString()}
                 />
                 <p className="text-xs text-gray-500">
-                  Original total: {formatCurrency(fullYearTotal)}
-                  {monthlyCalculation.isMidYear && ` • Prorated: ${formatCurrency(proratedTotal)}`}
+                  {translations.originalTotal}: {formatCurrency(fullYearTotal)}
+                  {monthlyCalculation.isMidYear && ` • ${translations.prorated}: ${formatCurrency(proratedTotal)}`}
                 </p>
               </div>
             )}
@@ -369,9 +688,9 @@ export function StepPaymentReview() {
             {/* Total */}
             <div className="pt-3 border-t-2 border-amber-300 flex justify-between text-lg font-bold text-gray-900">
               <span>
-                Total Amount
+                {translations.totalAmount}
                 {monthlyCalculation.isMidYear && !isEditingTotal && (
-                  <span className="ml-2 text-xs font-normal text-gray-500">(Full Year)</span>
+                  <span className="ml-2 text-xs font-normal text-gray-500">{translations.fullYear}</span>
                 )}
               </span>
               <span className="text-amber-700">{formatCurrency(displayTotal)}</span>
@@ -379,47 +698,140 @@ export function StepPaymentReview() {
           </div>
         </div>
 
-        {/* Month-by-Month Breakdown (Collapsible) */}
+        {/* Month-by-Month Breakdown (Collapsible) - Premium Calendar Design */}
         {monthlyCalculation.months.length > 0 && (
           <details className="group">
-            <summary className="cursor-pointer p-4 bg-white border-2 border-gray-200 rounded-xl hover:border-amber-300 transition-colors">
-              <div className="flex items-center justify-between">
-                <span className="font-semibold text-gray-900 flex items-center gap-2">
-                  <Calendar className={sizing.icon.sm} />
-                  View Monthly Breakdown ({monthlyCalculation.totalMonths} months)
-                </span>
-                <span className="text-gray-400 group-open:rotate-180 transition-transform">▼</span>
+            {/* Premium Summary Trigger */}
+            <summary className="cursor-pointer list-none [&::-webkit-details-marker]:hidden">
+              <div className="relative overflow-hidden rounded-xl border border-gray-200 bg-gradient-to-r from-white via-white to-gray-50 p-4 shadow-sm transition-all duration-300 hover:shadow-md hover:border-amber-300 group-open:rounded-b-none group-open:border-b-0 group-open:shadow-none">
+                {/* Decorative accent line */}
+                <div className="absolute left-0 top-0 bottom-0 w-1 bg-gradient-to-b from-amber-400 via-amber-500 to-orange-400 rounded-l-xl" />
+
+                <div className="flex items-center justify-between pl-3">
+                  <div className="flex items-center gap-3">
+                    <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-gradient-to-br from-amber-100 to-orange-100 shadow-inner">
+                      <CalendarClock className="h-5 w-5 text-amber-700" />
+                    </div>
+                    <div>
+                      <span className="font-semibold text-gray-900 block">
+                        {translations.viewMonthlyBreakdown}
+                      </span>
+                      <span className="text-sm text-gray-500">
+                        {monthlyCalculation.totalMonths} {translations.months} • {monthlyCalculation.remainingMonths} {translations.monthsRemaining}
+                      </span>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <div className="hidden sm:flex items-center gap-1.5 text-xs">
+                      <span className="flex items-center gap-1 px-2 py-1 rounded-full bg-gray-100 text-gray-500">
+                        <Clock className="h-3 w-3" />
+                        {monthlyCalculation.totalMonths - monthlyCalculation.remainingMonths}
+                      </span>
+                      <ArrowRight className="h-3 w-3 text-gray-300" />
+                      <span className="flex items-center gap-1 px-2 py-1 rounded-full bg-emerald-100 text-emerald-700">
+                        <Check className="h-3 w-3" />
+                        {monthlyCalculation.remainingMonths}
+                      </span>
+                    </div>
+                    <ChevronDown className="h-5 w-5 text-gray-400 transition-transform duration-300 group-open:rotate-180" />
+                  </div>
+                </div>
               </div>
             </summary>
-            <div className="mt-2 p-4 bg-white border-2 border-gray-200 rounded-xl space-y-2">
-              {monthlyCalculation.months.map((m, idx) => (
-                <div
-                  key={idx}
-                  className={cn(
-                    "flex items-center justify-between p-2 rounded-lg",
-                    m.isPast && "bg-gray-100 text-gray-400 line-through",
-                    m.isToday && "bg-amber-100 border-2 border-amber-400 font-semibold",
-                    !m.isPast && !m.isToday && "bg-green-50"
-                  )}
-                >
-                  <div className="flex items-center gap-2">
-                    <span className="text-sm">{m.month}</span>
-                    {m.isToday && (
-                      <Badge variant="secondary" className="text-xs bg-amber-200 text-amber-900">
-                        Current
-                      </Badge>
-                    )}
-                    {m.isPast && (
-                      <Badge variant="secondary" className="text-xs">
-                        Past
-                      </Badge>
-                    )}
-                  </div>
-                  <span className="text-sm font-semibold">
-                    {formatCurrency(state.data.monthlyFee || 0)}
+
+            {/* Enhanced Monthly Items */}
+            <div className="rounded-b-xl border border-t-0 border-gray-200 bg-white overflow-hidden">
+              {/* Timeline container */}
+              <div className="relative">
+                {/* Vertical timeline line */}
+                <div className="absolute left-[29px] top-0 bottom-0 w-px bg-gradient-to-b from-gray-300 via-amber-300 to-emerald-300" />
+
+                <div className="divide-y divide-gray-100">
+                  {monthlyCalculation.months.map((m, idx) => {
+                    const isPast = m.isPast
+                    const isCurrent = m.isToday
+                    const isFuture = !m.isPast && !m.isToday
+
+                    return (
+                      <div
+                        key={idx}
+                        className={cn(
+                          "relative flex items-center justify-between py-3 px-4 transition-colors duration-200",
+                          isPast && "bg-gray-50/50",
+                          isCurrent && "bg-gradient-to-r from-amber-50 via-amber-50/80 to-transparent",
+                          isFuture && "bg-white hover:bg-emerald-50/30"
+                        )}
+                      >
+                        {/* Timeline dot */}
+                        <div className="flex items-center gap-3 min-w-0">
+                          <div className={cn(
+                            "relative z-10 flex h-5 w-5 items-center justify-center rounded-full border-2 transition-all",
+                            isPast && "bg-gray-200 border-gray-300",
+                            isCurrent && "bg-amber-400 border-amber-500 shadow-lg shadow-amber-200 ring-4 ring-amber-100",
+                            isFuture && "bg-emerald-100 border-emerald-300"
+                          )}>
+                            {isPast && <Check className="h-3 w-3 text-gray-500" />}
+                            {isCurrent && <CircleDot className="h-3 w-3 text-white" />}
+                            {isFuture && <div className="h-1.5 w-1.5 rounded-full bg-emerald-500" />}
+                          </div>
+
+                          <div className="flex flex-col min-w-0">
+                            <span className={cn(
+                              "text-sm font-medium capitalize truncate",
+                              isPast && "text-gray-400",
+                              isCurrent && "text-amber-900 font-semibold",
+                              isFuture && "text-gray-700"
+                            )}>
+                              {m.month}
+                            </span>
+                            {isCurrent && (
+                              <span className="text-xs text-amber-600 font-medium flex items-center gap-1">
+                                <span className="relative flex h-2 w-2">
+                                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75" />
+                                  <span className="relative inline-flex rounded-full h-2 w-2 bg-amber-500" />
+                                </span>
+                                {translations.current}
+                              </span>
+                            )}
+                          </div>
+                        </div>
+
+                        {/* Amount */}
+                        <div className={cn(
+                          "flex items-center gap-2 shrink-0",
+                          isPast && "opacity-50"
+                        )}>
+                          {isPast && (
+                            <Badge variant="outline" className="text-[10px] px-1.5 py-0 h-5 border-gray-300 text-gray-400 font-normal">
+                              {translations.past}
+                            </Badge>
+                          )}
+                          <span className={cn(
+                            "text-sm font-semibold tabular-nums",
+                            isPast && "text-gray-400 line-through decoration-gray-300",
+                            isCurrent && "text-amber-700",
+                            isFuture && "text-gray-900"
+                          )}>
+                            {formatCurrency(state.data.monthlyFee || 0)}
+                          </span>
+                        </div>
+                      </div>
+                    )
+                  })}
+                </div>
+              </div>
+
+              {/* Summary Footer */}
+              <div className="bg-gradient-to-r from-gray-50 to-gray-100/50 px-4 py-3 border-t border-gray-200">
+                <div className="flex items-center justify-between text-sm">
+                  <span className="text-gray-600 font-medium">
+                    {translations.totalMonthlyFees}
+                  </span>
+                  <span className="font-bold text-gray-900">
+                    {formatCurrency(monthlyCalculation.totalMonthlyFees)}
                   </span>
                 </div>
-              ))}
+              </div>
             </div>
           </details>
         )}
@@ -429,21 +841,20 @@ export function StepPaymentReview() {
       <div className="p-6 bg-white border-2 border-gray-200 rounded-xl space-y-6">
         <div className="flex items-center gap-2">
           <CreditCard className={sizing.icon.sm} />
-          <h3 className="font-bold text-lg text-gray-900">Record Payment (Optional)</h3>
+          <h3 className="font-bold text-lg text-gray-900">{translations.recordPayment}</h3>
         </div>
 
         <Alert className="bg-blue-50 border-blue-200">
           <AlertCircle className={sizing.icon.sm} />
           <AlertDescription>
-            You can record payment now or later. If payment is not recorded, the enrollment will be
-            saved as pending payment.
+            {translations.paymentOptionalInfo}
           </AlertDescription>
         </Alert>
 
         <div className="space-y-6">
           {/* Payment Amount */}
           <div className="space-y-2">
-            <Label htmlFor="paymentAmount">Payment Amount</Label>
+            <Label htmlFor="paymentAmount">{translations.paymentAmount}</Label>
             <Input
               id="paymentAmount"
               type="number"
@@ -454,7 +865,7 @@ export function StepPaymentReview() {
               aria-describedby="payment-amount-help"
             />
             <p id="payment-amount-help" className="text-sm text-gray-500">
-              Enter the amount being paid (can be partial payment)
+              {translations.paymentAmountHelp}
             </p>
           </div>
 
@@ -462,64 +873,230 @@ export function StepPaymentReview() {
           {state.data.paymentAmount && state.data.paymentAmount > 0 && (
             <>
               <div className="space-y-3">
-                <Label>Payment Method</Label>
+                <Label>{translations.paymentMethod}</Label>
                 <RadioGroup
                   value={state.data.paymentMethod || ""}
-                  onValueChange={(v) => handlePaymentChange("paymentMethod", v)}
+                  onValueChange={(v) => handleMethodChange(v as "cash" | "orange_money")}
+                  className="grid grid-cols-2 gap-4"
                 >
-                  <div className="flex items-center space-x-2 p-3 border rounded-lg hover:border-amber-300 transition-colors">
-                    <RadioGroupItem value="cash" id="cash" />
-                    <Label htmlFor="cash" className="flex-1 cursor-pointer">
-                      Cash
-                    </Label>
-                  </div>
-                  <div className="flex items-center space-x-2 p-3 border rounded-lg hover:border-amber-300 transition-colors">
-                    <RadioGroupItem value="orange_money" id="orange_money" />
-                    <Label htmlFor="orange_money" className="flex-1 cursor-pointer">
-                      Orange Money
-                    </Label>
-                  </div>
+                  <Label
+                    htmlFor="cash"
+                    className={cn(
+                      "flex items-center gap-3 p-4 border-2 rounded-lg cursor-pointer transition-all",
+                      state.data.paymentMethod === "cash"
+                        ? "border-emerald-500 bg-emerald-50"
+                        : "border-gray-200 hover:border-gray-300"
+                    )}
+                  >
+                    <RadioGroupItem value="cash" id="cash" className="sr-only" />
+                    <div className={cn(
+                      "p-2.5 rounded-full",
+                      state.data.paymentMethod === "cash" ? "bg-emerald-100" : "bg-gray-100"
+                    )}>
+                      <Banknote className={cn(
+                        sizing.icon.md,
+                        state.data.paymentMethod === "cash" ? "text-emerald-600" : "text-gray-500"
+                      )} />
+                    </div>
+                    <div>
+                      <span className="font-medium">{translations.cash}</span>
+                      {state.data.paymentMethod === "cash" && (
+                        <Check className={cn(sizing.icon.sm, "inline ml-2 text-emerald-600")} />
+                      )}
+                    </div>
+                  </Label>
+
+                  <Label
+                    htmlFor="orange_money"
+                    className={cn(
+                      "flex items-center gap-3 p-4 border-2 rounded-lg cursor-pointer transition-all",
+                      state.data.paymentMethod === "orange_money"
+                        ? "border-orange-500 bg-orange-50"
+                        : "border-gray-200 hover:border-gray-300"
+                    )}
+                  >
+                    <RadioGroupItem value="orange_money" id="orange_money" className="sr-only" />
+                    <div className={cn(
+                      "p-2.5 rounded-full",
+                      state.data.paymentMethod === "orange_money" ? "bg-orange-100" : "bg-gray-100"
+                    )}>
+                      <Smartphone className={cn(
+                        sizing.icon.md,
+                        state.data.paymentMethod === "orange_money" ? "text-orange-600" : "text-gray-500"
+                      )} />
+                    </div>
+                    <div>
+                      <span className="font-medium">{translations.orangeMoney}</span>
+                      {state.data.paymentMethod === "orange_money" && (
+                        <Check className={cn(sizing.icon.sm, "inline ml-2 text-orange-600")} />
+                      )}
+                    </div>
+                  </Label>
                 </RadioGroup>
               </div>
 
               {/* Receipt Number */}
               <div className="space-y-2">
                 <Label htmlFor="receiptNumber">
-                  Receipt Number <span className="text-red-500" aria-label="required">*</span>
+                  {translations.receiptNumber}
                 </Label>
-                <Input
-                  id="receiptNumber"
-                  type="text"
-                  placeholder="REC-2024-00001"
-                  value={state.data.receiptNumber || ""}
-                  onChange={(e) => handlePaymentChange("receiptNumber", e.target.value)}
-                  className="min-h-[44px]"
-                  required={!!state.data.paymentAmount && state.data.paymentAmount > 0}
-                  aria-required={!!state.data.paymentAmount && state.data.paymentAmount > 0}
-                />
+                <div className="relative">
+                  <Input
+                    id="receiptNumber"
+                    type="text"
+                    value={state.data.receiptNumber || ""}
+                    readOnly
+                    placeholder={isGeneratingReceipt ? translations.generating : "GSPN-2025-CLUB-00001"}
+                    className={cn(
+                      "font-mono bg-gray-50 cursor-not-allowed min-h-[44px]",
+                      isGeneratingReceipt && "pr-10"
+                    )}
+                  />
+                  {isGeneratingReceipt && (
+                    <Loader2 className={cn(
+                      "absolute right-3 top-1/2 -translate-y-1/2 animate-spin text-gray-400",
+                      sizing.icon.sm
+                    )} />
+                  )}
+                </div>
+                <div className="flex items-center gap-1 text-xs text-gray-500">
+                  <Info className={sizing.icon.xs} />
+                  <span>{translations.autoGenerated}</span>
+                </div>
               </div>
 
               {/* Transaction Reference */}
-              <div className="space-y-2">
-                <Label htmlFor="transactionRef">Transaction Reference (Optional)</Label>
-                <Input
-                  id="transactionRef"
-                  type="text"
-                  placeholder="OM-123456789"
-                  value={state.data.transactionRef || ""}
-                  onChange={(e) => handlePaymentChange("transactionRef", e.target.value)}
-                  className="min-h-[44px]"
-                />
+              {state.data.paymentMethod === "orange_money" && (
+                <div className="space-y-2">
+                  <Label htmlFor="transactionRef">{translations.transactionRef}</Label>
+                  <Input
+                    id="transactionRef"
+                    type="text"
+                    placeholder="MP24010100001"
+                    value={state.data.transactionRef || ""}
+                    onChange={(e) => handlePaymentChange("transactionRef", e.target.value)}
+                    className="min-h-[44px]"
+                  />
+                </div>
+              )}
+
+              {/* Payer Selection */}
+              <div className="space-y-4 pt-4 border-t-2 border-gray-200">
+                <div className="flex items-center gap-2">
+                  <Users className={sizing.icon.sm} />
+                  <Label className="text-base font-semibold">{translations.whoIsPaying}</Label>
+                </div>
+
+                {/* Payer Type Selection */}
+                <RadioGroup
+                  value={state.data.payer?.type || ""}
+                  onValueChange={(v) => handlePayerTypeChange(v as PayerType)}
+                  className="grid grid-cols-2 md:grid-cols-4 gap-2"
+                >
+                  {payerOptions.map((option) => {
+                    const Icon = option.icon
+                    const isSelected = state.data.payer?.type === option.value
+                    return (
+                      <Label
+                        key={option.value}
+                        htmlFor={`payer-${option.value}`}
+                        className={cn(
+                          "flex flex-col items-center gap-2 p-3 border-2 rounded-lg cursor-pointer transition-all text-center min-h-[44px]",
+                          isSelected
+                            ? "border-amber-500 bg-amber-50"
+                            : "border-gray-200 hover:border-amber-300",
+                          !option.available && option.value !== "other" && "opacity-50"
+                        )}
+                      >
+                        <RadioGroupItem
+                          value={option.value}
+                          id={`payer-${option.value}`}
+                          className="sr-only"
+                        />
+                        <Icon className={cn(
+                          sizing.icon.md,
+                          isSelected ? "text-amber-600" : "text-gray-500"
+                        )} />
+                        <span className="text-sm font-medium">{option.label}</span>
+                        {option.name && (
+                          <span className="text-xs text-gray-500 truncate max-w-full">
+                            {option.name}
+                          </span>
+                        )}
+                        {isSelected && (
+                          <Badge className="text-xs bg-amber-600 hover:bg-amber-700">
+                            <Check className={cn(sizing.icon.xs, "mr-1")} />
+                            {translations.selected}
+                          </Badge>
+                        )}
+                      </Label>
+                    )
+                  })}
+                </RadioGroup>
+
+                {/* Payer Details (editable for "other" or to override) */}
+                {state.data.payer && (
+                  <div className="space-y-4 pt-2">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div className="space-y-2">
+                        <Label htmlFor="payerName">
+                          {translations.payerName} <span className="text-red-500" aria-label="required">*</span>
+                        </Label>
+                        <Input
+                          id="payerName"
+                          value={state.data.payer.name}
+                          onChange={(e) => setPayment({
+                            payer: { ...state.data.payer!, name: e.target.value }
+                          })}
+                          placeholder={translations.fullName}
+                          className="min-h-[44px]"
+                          required
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="payerPhone">
+                          {translations.phoneNumber} <span className="text-red-500" aria-label="required">*</span>
+                        </Label>
+                        <Input
+                          id="payerPhone"
+                          type="tel"
+                          value={state.data.payer.phone}
+                          onChange={(e) => setPayment({
+                            payer: { ...state.data.payer!, phone: e.target.value }
+                          })}
+                          placeholder="+224 XXX XX XX XX"
+                          className="min-h-[44px]"
+                          required
+                        />
+                      </div>
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="payerEmail">
+                        {translations.email} ({translations.optional})
+                      </Label>
+                      <Input
+                        id="payerEmail"
+                        type="email"
+                        value={state.data.payer.email || ""}
+                        onChange={(e) => setPayment({
+                          payer: { ...state.data.payer!, email: e.target.value }
+                        })}
+                        placeholder="email@example.com"
+                        className="min-h-[44px]"
+                      />
+                    </div>
+                  </div>
+                )}
               </div>
             </>
           )}
 
           {/* Notes */}
           <div className="space-y-2">
-            <Label htmlFor="notes">Notes (Optional)</Label>
+            <Label htmlFor="notes">{translations.notes} ({translations.optional})</Label>
             <Textarea
               id="notes"
-              placeholder="Add any additional notes about this enrollment..."
+              placeholder={translations.notesPlaceholder}
               value={state.data.notes || ""}
               onChange={(e) => handlePaymentChange("notes", e.target.value)}
               rows={3}
@@ -527,84 +1104,6 @@ export function StepPaymentReview() {
           </div>
         </div>
       </div>
-
-      {/* Proration Dialog */}
-      <Dialog open={showProrationDialog} onOpenChange={setShowProrationDialog}>
-        <DialogContent className="max-w-lg">
-          <DialogHeader>
-            <div className="flex items-center gap-3 mb-2">
-              <div className="p-2 bg-blue-100 rounded-lg">
-                <CalendarClock className={cn(sizing.icon.md, "text-blue-700")} />
-              </div>
-              <div>
-                <DialogTitle className="text-xl">Mid-Year Enrollment Detected</DialogTitle>
-                <DialogDescription className="text-sm mt-1">
-                  Adjust the total amount for remaining months?
-                </DialogDescription>
-              </div>
-            </div>
-          </DialogHeader>
-
-          <div className="space-y-4 py-4">
-            <Alert className="bg-blue-50 border-blue-200">
-              <Info className={sizing.icon.sm} />
-              <AlertDescription>
-                {state.data.startDate && (
-                  <>
-                    This club started in {formatDate(state.data.startDate)}, but we're enrolling the student today.
-                    {' '}{monthlyCalculation.totalMonths - monthlyCalculation.remainingMonths} month
-                    {monthlyCalculation.totalMonths - monthlyCalculation.remainingMonths !== 1 ? 's have' : ' has'} already passed.
-                  </>
-                )}
-              </AlertDescription>
-            </Alert>
-
-            <div className="space-y-3 p-4 bg-gray-50 rounded-lg">
-              <div className="flex justify-between text-sm">
-                <span className="text-gray-600">Full Year Total:</span>
-                <span className="font-semibold text-gray-900">{formatCurrency(fullYearTotal)}</span>
-              </div>
-              <div className="flex justify-between text-sm">
-                <span className="text-gray-600">Months Passed:</span>
-                <span className="font-semibold text-gray-900">
-                  {monthlyCalculation.totalMonths - monthlyCalculation.remainingMonths} of {monthlyCalculation.totalMonths}
-                </span>
-              </div>
-              <div className="flex justify-between text-sm">
-                <span className="text-gray-600">Months Remaining:</span>
-                <span className="font-semibold text-gray-900">{monthlyCalculation.remainingMonths}</span>
-              </div>
-              <div className="pt-2 border-t flex justify-between">
-                <span className="font-semibold text-gray-900">Prorated Amount:</span>
-                <span className="font-bold text-lg text-blue-700">{formatCurrency(proratedTotal)}</span>
-              </div>
-              <p className="text-xs text-gray-500">
-                Enrollment Fee ({formatCurrency(state.data.enrollmentFee || 0)}) + Monthly Fees for {monthlyCalculation.remainingMonths} remaining months
-              </p>
-            </div>
-
-            <div className="flex flex-col gap-2">
-              <Button
-                onClick={handleApplyProration}
-                className="w-full bg-blue-600 hover:bg-blue-700 text-white"
-              >
-                Use Prorated Amount ({formatCurrency(proratedTotal)})
-              </Button>
-              <Button
-                variant="outline"
-                onClick={handleKeepFullAmount}
-                className="w-full"
-              >
-                Keep Full Year Amount ({formatCurrency(fullYearTotal)})
-              </Button>
-            </div>
-
-            <p className="text-xs text-gray-500 text-center">
-              You can always adjust the total manually using the "Adjust Total" button
-            </p>
-          </div>
-        </DialogContent>
-      </Dialog>
     </div>
   )
 }
