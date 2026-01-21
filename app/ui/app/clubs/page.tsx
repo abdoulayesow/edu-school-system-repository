@@ -3,15 +3,26 @@
 import { useState, useMemo, useEffect, lazy, Suspense } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Skeleton } from "@/components/ui/skeleton"
-import { BookOpen, Users, Plus, Search, Sparkles } from "lucide-react"
+import {
+  BookOpen,
+  Users,
+  UserPlus,
+  Search,
+  Layers,
+  GraduationCap,
+  Cpu,
+  Trophy,
+  Palette,
+  Music,
+  FlaskConical,
+} from "lucide-react"
 import { useI18n } from "@/components/i18n-provider"
 import { PageContainer } from "@/components/layout"
 import { PermissionGuard, NoPermission } from "@/components/permission-guard"
 import { DataPagination } from "@/components/data-pagination"
-import { sizing } from "@/lib/design-tokens"
+import { cn } from "@/lib/utils"
 import {
   useClubs,
   useClubCategories,
@@ -139,105 +150,127 @@ export default function ClubsPage() {
       }
     >
     <PageContainer maxWidth="full">
-      <div className="mb-6">
-        <h1 className="text-3xl font-bold text-foreground mb-2">{t.clubs?.title || "Clubs"}</h1>
-        <p className="text-muted-foreground">{t.clubs?.subtitle || "Manage and enroll students in clubs"}</p>
-      </div>
+      {/* Hero Header with Stats */}
+      <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-amber-500 via-orange-500 to-amber-600 p-8 mb-8 animate-in fade-in slide-in-from-top-4 duration-500">
+        {/* Decorative patterns */}
+        <div className="absolute inset-0 opacity-10">
+          <div className="absolute top-0 right-0 w-64 h-64 bg-white rounded-full -translate-y-1/2 translate-x-1/2" />
+          <div className="absolute bottom-0 left-0 w-48 h-48 bg-white rounded-full translate-y-1/2 -translate-x-1/2" />
+          <div className="absolute top-1/2 left-1/3 w-32 h-32 bg-white rounded-full -translate-y-1/2" />
+        </div>
 
-      {/* Summary Cards */}
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4 mb-6">
-        <Card className="py-5">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">{t.clubs?.totalClubs || "Total Clubs"}</CardTitle>
-            <BookOpen className={sizing.icon.lg} />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{stats.total}</div>
-            <p className="text-xs text-muted-foreground">{t.clubs?.allClubs || "All clubs"}</p>
-          </CardContent>
-        </Card>
+        <div className="relative z-10">
+          <h1 className="text-3xl font-bold text-white mb-2">
+            {t.clubs?.title || "Clubs & Activités"}
+          </h1>
+          <p className="text-amber-100 mb-6">
+            {t.clubs?.subtitle || "Inscrivez les élèves aux clubs parascolaires"}
+          </p>
 
-        <Card className="py-5">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">{t.clubs?.categories || "Categories"}</CardTitle>
-            <Sparkles className={sizing.icon.lg} />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{categories.length}</div>
-            <p className="text-xs text-muted-foreground">{t.clubs?.activeCategories || "Active categories"}</p>
-          </CardContent>
-        </Card>
-
-        <Card className="py-5">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">{t.clubs?.enrolledStudents || "Enrolled Students"}</CardTitle>
-            <Users className={sizing.icon.lg} />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{stats.enrolledStudents}</div>
-            <p className="text-xs text-muted-foreground">{t.clubs?.totalEnrollments || "Total enrollments"}</p>
-          </CardContent>
-        </Card>
-
-        <Card className="py-5">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">{t.clubs?.availableSpots || "Available Spots"}</CardTitle>
-            <Plus className={sizing.icon.lg} />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">
-              {clubs.reduce((sum, c) => sum + (c.capacity ? c.capacity - c._count.enrollments : 0), 0)}
-            </div>
-            <p className="text-xs text-muted-foreground">{t.clubs?.acrossAllClubs || "Across all clubs"}</p>
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* Filters */}
-      <Card className="mb-6 py-2">
-        <CardHeader className="pb-1 px-6 pt-3">
-          <CardTitle className="text-sm">{t.clubs?.filterClubs || "Filter Clubs"}</CardTitle>
-        </CardHeader>
-        <CardContent className="pt-0 pb-2 px-6">
-          <div className="flex flex-col sm:flex-row gap-4">
-            <div className="relative flex-1">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground" />
-              <Input
-                placeholder={t.clubs?.searchPlaceholder || "Search clubs..."}
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-10"
-              />
-            </div>
-
-            <Select value={categoryFilter} onValueChange={setCategoryFilter}>
-              <SelectTrigger className="w-full sm:w-[200px]">
-                <SelectValue placeholder={t.clubs?.allCategories || "All categories"} />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">{t.clubs?.allCategories || "All categories"}</SelectItem>
-                {categories.map((cat) => (
-                  <SelectItem key={cat.id} value={cat.id}>
-                    {locale === "fr" ? cat.nameFr : cat.name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+          {/* Quick stats */}
+          <div className="flex flex-wrap gap-4">
+            {[
+              { label: t.clubs?.totalClubs || "Clubs actifs", value: stats.total, icon: BookOpen },
+              { label: t.clubs?.enrolledStudents || "Élèves inscrits", value: stats.enrolledStudents, icon: Users },
+              {
+                label: t.clubs?.availableSpots || "Places disponibles",
+                value: clubs.reduce((sum, c) => sum + (c.capacity ? c.capacity - c._count.enrollments : 0), 0),
+                icon: UserPlus,
+              },
+            ].map((stat) => (
+              <div
+                key={stat.label}
+                className="flex items-center gap-3 bg-white/20 backdrop-blur-sm rounded-xl px-4 py-3 transition-transform hover:scale-105"
+              >
+                <stat.icon className="h-5 w-5 text-white" />
+                <div>
+                  <div className="text-2xl font-bold text-white">{stat.value}</div>
+                  <div className="text-xs text-amber-100">{stat.label}</div>
+                </div>
+              </div>
+            ))}
           </div>
-        </CardContent>
-      </Card>
+        </div>
+      </div>
 
-      <Tabs defaultValue="all" className="space-y-6">
-        <TabsList className="flex-wrap h-auto">
-          <TabsTrigger value="all">{t.common?.all || "All"} ({clubs.length})</TabsTrigger>
-          {categories.map((cat) => (
-            <TabsTrigger key={cat.id} value={cat.id}>
-              {locale === "fr" ? cat.nameFr : cat.name} ({stats.byCategory[cat.id] || 0})
-            </TabsTrigger>
-          ))}
+      {/* Search Bar */}
+      <div className="mb-6 animate-in fade-in slide-in-from-bottom-4 duration-500 delay-100">
+        <div className="relative max-w-md">
+          <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
+          <Input
+            placeholder={t.clubs?.searchPlaceholder || "Rechercher un club..."}
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="pl-12 h-12 rounded-xl border-gray-200 shadow-sm focus:ring-2 focus:ring-amber-200 focus:border-amber-300 transition-shadow"
+          />
+        </div>
+      </div>
+
+      <Tabs defaultValue="all" className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500 delay-150">
+        <TabsList className="flex flex-wrap gap-2 p-1.5 h-auto bg-gray-100/80 rounded-2xl">
+          <TabsTrigger
+            value="all"
+            className={cn(
+              "flex items-center gap-2 px-4 py-2.5 rounded-xl font-medium text-sm transition-all",
+              "data-[state=active]:bg-white data-[state=active]:shadow-md",
+              "data-[state=inactive]:text-gray-600 data-[state=inactive]:hover:bg-white/50"
+            )}
+          >
+            <Layers className="h-4 w-4" />
+            <span>{t.common?.all || "Tous"}</span>
+            <span className="px-2 py-0.5 rounded-full text-xs bg-gray-900 text-white data-[state=inactive]:bg-gray-200 data-[state=inactive]:text-gray-600">
+              {clubs.length}
+            </span>
+          </TabsTrigger>
+          {categories.map((cat) => {
+            const catName = (locale === "fr" ? cat.nameFr : cat.name).toLowerCase()
+            const count = stats.byCategory[cat.id] || 0
+            // Determine icon based on category name
+            let CategoryIcon = Layers
+            if (catName.includes("academ") || catName.includes("excell") || catName.includes("revis")) CategoryIcon = GraduationCap
+            else if (catName.includes("tech") || catName.includes("innov") || catName.includes("info")) CategoryIcon = Cpu
+            else if (catName.includes("sport") || catName.includes("athl")) CategoryIcon = Trophy
+            else if (catName.includes("art") || catName.includes("creat")) CategoryIcon = Palette
+            else if (catName.includes("music") || catName.includes("musiq") || catName.includes("spect")) CategoryIcon = Music
+            else if (catName.includes("scien") || catName.includes("decouv")) CategoryIcon = FlaskConical
+
+            return (
+              <TabsTrigger
+                key={cat.id}
+                value={cat.id}
+                className={cn(
+                  "flex items-center gap-2 px-4 py-2.5 rounded-xl font-medium text-sm transition-all",
+                  "data-[state=active]:bg-white data-[state=active]:shadow-md",
+                  "data-[state=inactive]:text-gray-600 data-[state=inactive]:hover:bg-white/50",
+                  count === 0 && "opacity-50"
+                )}
+              >
+                <CategoryIcon className="h-4 w-4" />
+                <span className="hidden sm:inline">{locale === "fr" ? cat.nameFr : cat.name}</span>
+                <span className={cn(
+                  "px-2 py-0.5 rounded-full text-xs",
+                  "data-[state=active]:bg-gray-900 data-[state=active]:text-white",
+                  "data-[state=inactive]:bg-gray-200 data-[state=inactive]:text-gray-600"
+                )}>
+                  {count}
+                </span>
+              </TabsTrigger>
+            )
+          })}
           {stats.uncategorized > 0 && (
-            <TabsTrigger value="uncategorized">
-              {t.clubs?.uncategorized || "Other"} ({stats.uncategorized})
+            <TabsTrigger
+              value="uncategorized"
+              className={cn(
+                "flex items-center gap-2 px-4 py-2.5 rounded-xl font-medium text-sm transition-all",
+                "data-[state=active]:bg-white data-[state=active]:shadow-md",
+                "data-[state=inactive]:text-gray-600 data-[state=inactive]:hover:bg-white/50"
+              )}
+            >
+              <Layers className="h-4 w-4" />
+              <span>{t.clubs?.uncategorized || "Autre"}</span>
+              <span className="px-2 py-0.5 rounded-full text-xs bg-gray-200 text-gray-600">
+                {stats.uncategorized}
+              </span>
             </TabsTrigger>
           )}
         </TabsList>
@@ -263,6 +296,7 @@ export default function ClubsPage() {
                 formatCurrency={formatCurrency}
                 locale={locale}
                 t={t}
+                categoryName={locale === "fr" ? cat.nameFr : cat.name}
               />
             </Suspense>
           </TabsContent>

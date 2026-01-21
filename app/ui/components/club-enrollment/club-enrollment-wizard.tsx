@@ -49,6 +49,9 @@ export function ClubEnrollmentWizard() {
     canProceed,
   } = useClubEnrollmentWizard()
 
+  // Track previous student ID to detect new selections
+  const [prevStudentId, setPrevStudentId] = React.useState<string>("")
+
   // Load pre-selected club from URL parameter
   useEffect(() => {
     const clubId = searchParams.get("clubId")
@@ -153,6 +156,26 @@ export function ClubEnrollmentWizard() {
     }
     nextStep()
   }, [state.currentStep, state.data.studentId, nextStep, handleSave])
+
+  // Auto-advance to step 3 when a student is selected in step 2
+  useEffect(() => {
+    // Only auto-advance if:
+    // 1. We're on step 2
+    // 2. A student was just selected (studentId changed from empty or different value)
+    // 3. The new studentId is valid
+    if (
+      state.currentStep === 2 &&
+      state.data.studentId &&
+      state.data.studentId !== prevStudentId
+    ) {
+      setPrevStudentId(state.data.studentId)
+      // Auto-advance to step 3 after a brief delay for visual feedback
+      const timer = setTimeout(() => {
+        handleNext()
+      }, 400)
+      return () => clearTimeout(timer)
+    }
+  }, [state.currentStep, state.data.studentId, prevStudentId, handleNext])
 
   // Show confirmation modal before submitting
   const handleShowConfirmation = useCallback(async () => {

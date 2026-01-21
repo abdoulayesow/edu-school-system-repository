@@ -11,16 +11,12 @@ import {
 } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { Badge } from "@/components/ui/badge"
-import { Separator } from "@/components/ui/separator"
 import {
-  AlertCircle,
   CheckCircle2,
-  Users,
-  Calendar,
-  DollarSign,
-  CreditCard,
   Loader2,
+  ArrowRight,
+  Sparkles,
+  BookOpen,
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { sizing } from "@/lib/design-tokens"
@@ -52,14 +48,6 @@ export function ConfirmationModal({
     }).format(amount)
   }
 
-  const formatDate = (dateStr: string) => {
-    return new Date(dateStr).toLocaleDateString(locale === "fr" ? "fr-FR" : "en-US", {
-      month: "long",
-      day: "numeric",
-      year: "numeric",
-    })
-  }
-
   const initials = data.studentName
     ? data.studentName
         .split(" ")
@@ -67,199 +55,123 @@ export function ConfirmationModal({
         .join("")
     : "?"
 
-  const totalFee = (data.enrollmentFee || 0) + (data.monthlyFee || 0)
   const hasPayment = data.paymentAmount && data.paymentAmount > 0
+  const clubName = locale === "fr" && data.clubNameFr ? data.clubNameFr : data.clubName
+
+  const translations = {
+    title: t.clubEnrollmentWizard?.confirmEnrollment || "Confirm Enrollment",
+    description: t.clubEnrollmentWizard?.finalConfirmation || "You're about to complete this enrollment",
+    withPayment: t.clubEnrollmentWizard?.withPayment || "with initial payment of",
+    noPayment: t.clubEnrollmentWizard?.noPaymentNote || "No payment will be recorded",
+    cancel: t.common?.cancel || "Cancel",
+    confirm: t.clubEnrollmentWizard?.confirmAndSubmit || "Confirm & Submit",
+    submitting: t.clubEnrollmentWizard?.confirmingEnrollment || "Submitting...",
+  }
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
-        <DialogHeader>
-          <div className="flex items-center gap-3 mb-2">
-            <div className="p-2 bg-amber-100 rounded-lg">
-              <CheckCircle2 className={cn(sizing.icon.md, "text-amber-700")} />
-            </div>
-            <div>
-              <DialogTitle className="text-2xl">Confirm Enrollment</DialogTitle>
-              <DialogDescription className="text-base mt-1">
-                Please review the enrollment details before submitting
-              </DialogDescription>
+      <DialogContent className="max-w-md">
+        <DialogHeader className="text-center pb-2">
+          {/* Animated success indicator */}
+          <div className="mx-auto mb-4 relative">
+            <div className="absolute inset-0 bg-gradient-to-br from-amber-400 to-orange-500 rounded-full blur-xl opacity-30 animate-pulse" />
+            <div className="relative flex h-16 w-16 items-center justify-center rounded-full bg-gradient-to-br from-amber-400 to-orange-500 shadow-lg">
+              <Sparkles className="h-8 w-8 text-white" />
             </div>
           </div>
+          <DialogTitle className="text-xl font-bold text-gray-900">
+            {translations.title}
+          </DialogTitle>
+          <DialogDescription className="text-gray-500">
+            {translations.description}
+          </DialogDescription>
         </DialogHeader>
 
-        <div className="space-y-6 py-4">
-          {/* Student Information */}
-          <div className="space-y-3">
-            <div className="flex items-center gap-2 text-sm font-semibold text-gray-700">
-              <Users className={sizing.icon.sm} />
-              Student Information
-            </div>
-            <div className="flex items-center gap-4 p-4 bg-gradient-to-br from-amber-50 to-orange-50 rounded-xl border border-amber-200">
-              <Avatar className="w-16 h-16 border-2 border-amber-300 shadow-sm">
+        {/* Compact visual flow: Student → Club */}
+        <div className="py-6">
+          <div className="flex items-center justify-center gap-3">
+            {/* Student */}
+            <div className="flex flex-col items-center">
+              <Avatar className="h-14 w-14 border-2 border-amber-200 shadow-md">
                 <AvatarImage src={data.studentPhoto || undefined} alt={data.studentName} />
-                <AvatarFallback className="bg-amber-200 text-amber-800 font-semibold text-lg">
+                <AvatarFallback className="bg-gradient-to-br from-amber-100 to-orange-100 text-amber-800 font-bold">
                   {initials}
                 </AvatarFallback>
               </Avatar>
-              <div className="flex-1">
-                <div className="font-bold text-lg text-gray-900">{data.studentName}</div>
-                {data.studentGrade && (
-                  <Badge variant="outline" className="mt-1">
-                    {data.studentGrade}
-                  </Badge>
-                )}
+              <span className="mt-2 text-sm font-semibold text-gray-900 max-w-[100px] text-center truncate">
+                {data.studentName}
+              </span>
+              {data.studentGrade && (
+                <span className="text-xs text-gray-500">{data.studentGrade}</span>
+              )}
+            </div>
+
+            {/* Arrow */}
+            <div className="flex flex-col items-center px-2">
+              <div className="flex h-8 w-8 items-center justify-center rounded-full bg-gray-100">
+                <ArrowRight className="h-4 w-4 text-gray-400" />
               </div>
             </div>
-          </div>
 
-          <Separator />
-
-          {/* Club Information */}
-          <div className="space-y-3">
-            <div className="flex items-center gap-2 text-sm font-semibold text-gray-700">
-              <Calendar className={sizing.icon.sm} />
-              Club Information
-            </div>
-            <div className="space-y-2 p-4 bg-gray-50 rounded-xl">
-              <div>
-                <div className="text-sm text-gray-500 mb-1">Club Name</div>
-                <div className="font-semibold text-gray-900">
-                  {locale === "fr" && data.clubNameFr ? data.clubNameFr : data.clubName}
-                </div>
-                {data.categoryName && (
-                  <Badge variant="secondary" className="mt-1">
-                    {data.categoryName}
-                  </Badge>
-                )}
+            {/* Club */}
+            <div className="flex flex-col items-center">
+              <div className="flex h-14 w-14 items-center justify-center rounded-full bg-gradient-to-br from-emerald-400 to-teal-500 shadow-md">
+                <BookOpen className="h-7 w-7 text-white" />
               </div>
-              {data.startDate && data.endDate && (
-                <div className="pt-2">
-                  <div className="text-sm text-gray-500 mb-1">Duration</div>
-                  <div className="text-sm text-gray-700">
-                    {formatDate(data.startDate)} - {formatDate(data.endDate)}
-                  </div>
-                </div>
+              <span className="mt-2 text-sm font-semibold text-gray-900 max-w-[100px] text-center truncate">
+                {clubName}
+              </span>
+              {data.categoryName && (
+                <span className="text-xs text-gray-500">{data.categoryName}</span>
               )}
             </div>
           </div>
 
-          <Separator />
-
-          {/* Fee Information */}
-          <div className="space-y-3">
-            <div className="flex items-center gap-2 text-sm font-semibold text-gray-700">
-              <DollarSign className={sizing.icon.sm} />
-              Fee Breakdown
-            </div>
-            <div className="p-4 bg-gradient-to-br from-blue-50 to-indigo-50 rounded-xl border border-blue-200">
-              <div className="space-y-2">
-                <div className="flex justify-between text-sm text-gray-700">
-                  <span>Enrollment Fee</span>
-                  <span className="font-semibold">{formatCurrency(data.enrollmentFee || 0)}</span>
-                </div>
-                {data.monthlyFee && data.monthlyFee > 0 && (
-                  <div className="flex justify-between text-sm text-gray-700">
-                    <span>Monthly Fee</span>
-                    <span className="font-semibold">{formatCurrency(data.monthlyFee)}</span>
-                  </div>
-                )}
-                <Separator className="my-2" />
-                <div className="flex justify-between text-base font-bold text-gray-900">
-                  <span>Total Fee</span>
-                  <span className="text-amber-700">{formatCurrency(totalFee)}</span>
-                </div>
+          {/* Payment summary */}
+          <div className="mt-6 text-center">
+            {hasPayment ? (
+              <div className="inline-flex items-center gap-2 px-4 py-2 bg-emerald-50 border border-emerald-200 rounded-full">
+                <CheckCircle2 className="h-4 w-4 text-emerald-600" />
+                <span className="text-sm text-emerald-700">
+                  {translations.withPayment}{" "}
+                  <span className="font-bold">{formatCurrency(data.paymentAmount!)}</span>
+                </span>
               </div>
-            </div>
+            ) : (
+              <div className="inline-flex items-center gap-2 px-4 py-2 bg-amber-50 border border-amber-200 rounded-full">
+                <span className="text-sm text-amber-700">{translations.noPayment}</span>
+              </div>
+            )}
           </div>
-
-          {/* Payment Information */}
-          {hasPayment && (
-            <>
-              <Separator />
-              <div className="space-y-3">
-                <div className="flex items-center gap-2 text-sm font-semibold text-gray-700">
-                  <CreditCard className={sizing.icon.sm} />
-                  Payment Details
-                </div>
-                <div className="p-4 bg-green-50 rounded-xl border border-green-200">
-                  <div className="space-y-2">
-                    <div className="flex justify-between text-sm">
-                      <span className="text-gray-700">Payment Amount</span>
-                      <span className="font-bold text-green-700">
-                        {formatCurrency(data.paymentAmount!)}
-                      </span>
-                    </div>
-                    <div className="flex justify-between text-sm">
-                      <span className="text-gray-700">Payment Method</span>
-                      <span className="font-semibold text-gray-900 capitalize">
-                        {data.paymentMethod?.replace("_", " ")}
-                      </span>
-                    </div>
-                    {data.receiptNumber && (
-                      <div className="flex justify-between text-sm">
-                        <span className="text-gray-700">Receipt Number</span>
-                        <span className="font-mono font-semibold text-gray-900">
-                          {data.receiptNumber}
-                        </span>
-                      </div>
-                    )}
-                  </div>
-                </div>
-              </div>
-            </>
-          )}
-
-          {/* Warning if no payment */}
-          {!hasPayment && (
-            <div className="flex items-start gap-3 p-4 bg-amber-50 border border-amber-200 rounded-xl">
-              <AlertCircle className={cn(sizing.icon.sm, "text-amber-600 mt-0.5")} />
-              <div className="flex-1 text-sm">
-                <div className="font-semibold text-amber-900 mb-1">No Payment Recorded</div>
-                <div className="text-amber-700">
-                  This enrollment will be created without an initial payment. Payment can be
-                  recorded later.
-                </div>
-              </div>
-            </div>
-          )}
-
-          {/* Notes */}
-          {data.notes && (
-            <>
-              <Separator />
-              <div className="space-y-2">
-                <div className="text-sm font-semibold text-gray-700">Additional Notes</div>
-                <div className="p-3 bg-gray-50 rounded-lg text-sm text-gray-700 whitespace-pre-wrap">
-                  {data.notes}
-                </div>
-              </div>
-            </>
-          )}
         </div>
 
-        <DialogFooter className="gap-2 sm:gap-0">
+        <DialogFooter className="flex gap-3 sm:gap-3">
           <Button
             variant="outline"
             onClick={() => onOpenChange(false)}
             disabled={isSubmitting}
-            className="flex-1 sm:flex-none"
+            className="flex-1"
           >
-            Cancel
+            {translations.cancel}
           </Button>
           <Button
             onClick={onConfirm}
             disabled={isSubmitting}
-            className="flex-1 sm:flex-none bg-amber-600 hover:bg-amber-700 text-white gap-2"
+            className={cn(
+              "flex-1 gap-2 text-white shadow-lg transition-all duration-200",
+              "bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600",
+              "hover:shadow-xl hover:scale-[1.02]"
+            )}
           >
             {isSubmitting ? (
               <>
                 <Loader2 className={cn(sizing.icon.sm, "animate-spin")} />
-                Submitting...
+                {translations.submitting}
               </>
             ) : (
               <>
                 <CheckCircle2 className={sizing.icon.sm} />
-                Confirm Enrollment
+                {translations.confirm}
               </>
             )}
           </Button>

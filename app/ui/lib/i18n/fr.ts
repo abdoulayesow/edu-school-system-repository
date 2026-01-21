@@ -15,6 +15,7 @@ export const fr = {
     previous: "Précédent",
     close: "Fermer",
     loading: "Chargement...",
+    downloading: "Téléchargement...",
     error: "Erreur",
     success: "Succès",
     required: "Obligatoire",
@@ -578,8 +579,6 @@ export const fr = {
     monthsOf: "mois de",
     paymentSummary: "Récapitulatif du paiement",
     totalAmount: "Montant total",
-    confirmEnrollment: "Confirmer l'inscription",
-
     // Eligibility
     notEligible: "Non éligible",
     eligibleGrades: "Niveaux éligibles",
@@ -2964,9 +2963,14 @@ export const fr = {
     returnToClubs: "Retour aux clubs",
     viewEnrollment: "Voir l'inscription",
     enrollAnother: "Inscrire un autre élève",
+    downloadCertificate: "Télécharger le certificat",
 
     // Confirmation modal
     confirmEnrollment: "Confirmer l'inscription",
+    finalConfirmation: "Vous êtes sur le point de finaliser cette inscription",
+    withPayment: "avec un paiement initial de",
+    noPaymentNote: "Aucun paiement ne sera enregistré",
+    confirmAndSubmit: "Confirmer et soumettre",
     confirmDescription: "Veuillez vérifier les détails de l'inscription avant de soumettre",
     studentInformation: "Informations de l'élève",
     clubInformation: "Informations du club",

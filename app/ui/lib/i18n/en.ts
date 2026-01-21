@@ -17,6 +17,7 @@ export const en: TranslationKeys = {
     previous: "Previous",
     close: "Close",
     loading: "Loading...",
+    downloading: "Downloading...",
     error: "Error",
     success: "Success",
     required: "Required",
@@ -580,8 +581,6 @@ export const en: TranslationKeys = {
     monthsOf: "months of",
     paymentSummary: "Payment Summary",
     totalAmount: "Total Amount",
-    confirmEnrollment: "Confirm Enrollment",
-
     // Eligibility
     notEligible: "Not eligible",
     eligibleGrades: "Eligible grades",
@@ -2966,9 +2965,14 @@ export const en: TranslationKeys = {
     returnToClubs: "Return to Clubs",
     viewEnrollment: "View Enrollment",
     enrollAnother: "Enroll Another Student",
+    downloadCertificate: "Download Certificate",
 
     // Confirmation modal
     confirmEnrollment: "Confirm Enrollment",
+    finalConfirmation: "You're about to complete this enrollment",
+    withPayment: "with initial payment of",
+    noPaymentNote: "No payment will be recorded",
+    confirmAndSubmit: "Confirm & Submit",
     confirmDescription: "Please review the enrollment details before submitting",
     studentInformation: "Student Information",
     clubInformation: "Club Information",
