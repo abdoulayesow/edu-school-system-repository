@@ -103,6 +103,10 @@ interface PaymentStats {
     cash: { count: number; amount: number }
     orange_money: { count: number; amount: number }
   }
+  byType?: {
+    tuition: { count: number; amount: number }
+    club: { count: number; amount: number }
+  }
 }
 
 interface Grade {
@@ -243,6 +247,10 @@ export default function PaymentsPage() {
   const weekCount = useCountUp(stats?.confirmedThisWeek?.count || 0, 800, hasAnimated && !isLoadingStats)
   const cashCount = useCountUp(stats?.byMethod?.cash?.count || 0, 800, hasAnimated && !isLoadingStats)
   const mobileCount = useCountUp(stats?.byMethod?.orange_money?.count || 0, 800, hasAnimated && !isLoadingStats)
+  const tuitionCount = useCountUp(stats?.byType?.tuition?.count || 0, 800, hasAnimated && !isLoadingStats)
+  const clubCount = useCountUp(stats?.byType?.club?.count || 0, 800, hasAnimated && !isLoadingStats)
+  const tuitionAmount = useCountUp(stats?.byType?.tuition?.amount || 0, 1000, hasAnimated && !isLoadingStats)
+  const clubAmount = useCountUp(stats?.byType?.club?.amount || 0, 1000, hasAnimated && !isLoadingStats)
 
   // Determine status for hero card styling
   const pendingCount = stats?.pending?.count || 0
@@ -520,6 +528,174 @@ export default function PaymentsPage() {
         </div>
       </div>
 
+      {/* Payment Type Breakdown - New Section */}
+      <div className={cn(
+        "grid gap-4 sm:grid-cols-2 mb-6 transition-all duration-700 delay-[350ms]",
+        isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"
+      )}>
+        {/* Tuition Payments Card */}
+        <Card className={cn(
+          "relative overflow-hidden border-2 transition-all duration-300 hover:shadow-xl cursor-pointer group",
+          paymentTypeFilter === "tuition"
+            ? "border-blue-500 bg-gradient-to-br from-blue-50 to-cyan-50 dark:from-blue-950/40 dark:to-cyan-900/30 shadow-lg ring-2 ring-blue-500/20"
+            : "border-blue-200 dark:border-blue-800 hover:border-blue-400 dark:hover:border-blue-600"
+        )}
+        onClick={() => setPaymentTypeFilter(paymentTypeFilter === "tuition" ? "all" : "tuition")}
+        >
+          {/* Decorative gradient overlay */}
+          <div className="absolute inset-0 bg-gradient-to-br from-blue-500/5 via-transparent to-cyan-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+
+          <CardContent className="pt-6 pb-6 relative z-10">
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center gap-3">
+                <div className={cn(
+                  "p-3 rounded-xl transition-all duration-300",
+                  paymentTypeFilter === "tuition"
+                    ? "bg-blue-600 dark:bg-blue-500 shadow-lg shadow-blue-500/30 scale-110"
+                    : "bg-blue-100 dark:bg-blue-900/50 group-hover:bg-blue-200 dark:group-hover:bg-blue-800/70"
+                )}>
+                  <BanknoteIcon className={cn(
+                    "size-6 transition-colors duration-300",
+                    paymentTypeFilter === "tuition"
+                      ? "text-white"
+                      : "text-blue-600 dark:text-blue-400"
+                  )} />
+                </div>
+                <div>
+                  <h3 className="font-display text-lg font-bold text-blue-700 dark:text-blue-300">
+                    {t.accounting.tuitionPayments || "Scolarité"}
+                  </h3>
+                  <p className="text-xs text-blue-600/70 dark:text-blue-400/70">
+                    {locale === "fr" ? "Frais de scolarité" : "Tuition fees"}
+                  </p>
+                </div>
+              </div>
+              {paymentTypeFilter === "tuition" && (
+                <Badge className="bg-blue-600 text-white border-0 shadow-lg animate-in zoom-in duration-300">
+                  Actif
+                </Badge>
+              )}
+            </div>
+
+            {isLoadingStats ? (
+              <Loader2 className="size-6 animate-spin text-blue-500 mx-auto" />
+            ) : (
+              <div className="space-y-3">
+                <div className="flex items-baseline gap-2">
+                  <span className={cn(
+                    typography.currency.lg,
+                    "text-blue-700 dark:text-blue-300 transition-all duration-500",
+                    isVisible && "translate-x-0 opacity-100",
+                    !isVisible && "-translate-x-4 opacity-0"
+                  )}>
+                    {formatAmount(tuitionAmount)}
+                  </span>
+                </div>
+                <div className="flex items-center gap-3">
+                  <Badge variant="secondary" className="font-semibold bg-blue-100 dark:bg-blue-900/50 text-blue-700 dark:text-blue-300">
+                    {tuitionCount} {locale === "fr" ? "paiements" : "payments"}
+                  </Badge>
+                  {stats?.byType?.tuition && (
+                    <span className="text-sm text-blue-600/70 dark:text-blue-400/70">
+                      {getDateRangeLabel()}
+                    </span>
+                  )}
+                </div>
+                <div className="h-2 bg-blue-200 dark:bg-blue-900/30 rounded-full overflow-hidden">
+                  <div
+                    className="h-full bg-gradient-to-r from-blue-500 to-cyan-500 rounded-full transition-all duration-1000 ease-out"
+                    style={{
+                      width: `${stats?.byType ? (stats.byType.tuition?.amount || 0) / ((stats.byType.tuition?.amount || 0) + (stats.byType.club?.amount || 0)) * 100 : 0}%`
+                    }}
+                  />
+                </div>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+
+        {/* Club Payments Card */}
+        <Card className={cn(
+          "relative overflow-hidden border-2 transition-all duration-300 hover:shadow-xl cursor-pointer group",
+          paymentTypeFilter === "club"
+            ? "border-purple-500 bg-gradient-to-br from-purple-50 to-fuchsia-50 dark:from-purple-950/40 dark:to-fuchsia-900/30 shadow-lg ring-2 ring-purple-500/20"
+            : "border-purple-200 dark:border-purple-800 hover:border-purple-400 dark:hover:border-purple-600"
+        )}
+        onClick={() => setPaymentTypeFilter(paymentTypeFilter === "club" ? "all" : "club")}
+        >
+          {/* Decorative gradient overlay */}
+          <div className="absolute inset-0 bg-gradient-to-br from-purple-500/5 via-transparent to-fuchsia-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+
+          <CardContent className="pt-6 pb-6 relative z-10">
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center gap-3">
+                <div className={cn(
+                  "p-3 rounded-xl transition-all duration-300",
+                  paymentTypeFilter === "club"
+                    ? "bg-purple-600 dark:bg-purple-500 shadow-lg shadow-purple-500/30 scale-110"
+                    : "bg-purple-100 dark:bg-purple-900/50 group-hover:bg-purple-200 dark:group-hover:bg-purple-800/70"
+                )}>
+                  <Sparkles className={cn(
+                    "size-6 transition-colors duration-300",
+                    paymentTypeFilter === "club"
+                      ? "text-white"
+                      : "text-purple-600 dark:text-purple-400"
+                  )} />
+                </div>
+                <div>
+                  <h3 className="font-display text-lg font-bold text-purple-700 dark:text-purple-300">
+                    {t.accounting.clubPayments || "Clubs"}
+                  </h3>
+                  <p className="text-xs text-purple-600/70 dark:text-purple-400/70">
+                    {locale === "fr" ? "Activités parascolaires" : "Extracurricular activities"}
+                  </p>
+                </div>
+              </div>
+              {paymentTypeFilter === "club" && (
+                <Badge className="bg-purple-600 text-white border-0 shadow-lg animate-in zoom-in duration-300">
+                  Actif
+                </Badge>
+              )}
+            </div>
+
+            {isLoadingStats ? (
+              <Loader2 className="size-6 animate-spin text-purple-500 mx-auto" />
+            ) : (
+              <div className="space-y-3">
+                <div className="flex items-baseline gap-2">
+                  <span className={cn(
+                    typography.currency.lg,
+                    "text-purple-700 dark:text-purple-300 transition-all duration-500",
+                    isVisible && "translate-x-0 opacity-100",
+                    !isVisible && "-translate-x-4 opacity-0"
+                  )}>
+                    {formatAmount(clubAmount)}
+                  </span>
+                </div>
+                <div className="flex items-center gap-3">
+                  <Badge variant="secondary" className="font-semibold bg-purple-100 dark:bg-purple-900/50 text-purple-700 dark:text-purple-300">
+                    {clubCount} {locale === "fr" ? "paiements" : "payments"}
+                  </Badge>
+                  {stats?.byType?.club && (
+                    <span className="text-sm text-purple-600/70 dark:text-purple-400/70">
+                      {getDateRangeLabel()}
+                    </span>
+                  )}
+                </div>
+                <div className="h-2 bg-purple-200 dark:bg-purple-900/30 rounded-full overflow-hidden">
+                  <div
+                    className="h-full bg-gradient-to-r from-purple-500 to-fuchsia-500 rounded-full transition-all duration-1000 ease-out"
+                    style={{
+                      width: `${stats?.byType ? (stats.byType.club?.amount || 0) / ((stats.byType.tuition?.amount || 0) + (stats.byType.club?.amount || 0)) * 100 : 0}%`
+                    }}
+                  />
+                </div>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      </div>
+
       {/* Enhanced Filter Section with Animations */}
       <Card className={cn(
         "mb-6 border shadow-sm transition-all duration-700 delay-[400ms]",
@@ -680,28 +856,53 @@ export default function PaymentsPage() {
                 </Select>
               </div>
 
-              {/* Payment Type Filter */}
+              {/* Payment Type Filter - Enhanced */}
               <div className="space-y-1.5">
-                <Label className="text-xs text-muted-foreground">{t.accounting.filterByType || "Type"}</Label>
+                <Label className={cn(
+                  "text-xs font-semibold flex items-center gap-1.5",
+                  paymentTypeFilter !== "all"
+                    ? paymentTypeFilter === "tuition"
+                      ? "text-blue-600 dark:text-blue-400"
+                      : "text-purple-600 dark:text-purple-400"
+                    : "text-muted-foreground"
+                )}>
+                  {paymentTypeFilter === "tuition" && <BanknoteIcon className="size-3" />}
+                  {paymentTypeFilter === "club" && <Sparkles className="size-3" />}
+                  {t.accounting.filterByType || "Type"}
+                </Label>
                 <Select value={paymentTypeFilter} onValueChange={setPaymentTypeFilter}>
                   <SelectTrigger className={cn(
-                    "w-[160px] h-9 transition-all",
-                    paymentTypeFilter !== "all" && "border-primary/50 bg-primary/5"
+                    "w-[180px] h-9 transition-all font-medium",
+                    paymentTypeFilter === "tuition" && "border-blue-500 bg-blue-50 dark:bg-blue-950/30 text-blue-700 dark:text-blue-300 shadow-md ring-1 ring-blue-500/20",
+                    paymentTypeFilter === "club" && "border-purple-500 bg-purple-50 dark:bg-purple-950/30 text-purple-700 dark:text-purple-300 shadow-md ring-1 ring-purple-500/20",
+                    paymentTypeFilter === "all" && "border-border"
                   )}>
                     <SelectValue placeholder={t.accounting.allTypes || "All Types"} />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="all">{t.accounting.allTypes || "All Types"}</SelectItem>
+                    <SelectItem value="all">
+                      <span className="flex items-center gap-2 font-medium">
+                        {t.accounting.allTypes || "All Types"}
+                      </span>
+                    </SelectItem>
                     <SelectItem value="tuition">
-                      <span className="flex items-center gap-2">
-                        <span className="size-2 rounded-full bg-blue-500" />
-                        {t.accounting.tuitionPayments || "Tuition"}
+                      <span className="flex items-center gap-2 font-medium">
+                        <div className="p-1 rounded bg-blue-100 dark:bg-blue-900/50">
+                          <BanknoteIcon className="size-3 text-blue-600 dark:text-blue-400" />
+                        </div>
+                        <span className="text-blue-700 dark:text-blue-300">
+                          {t.accounting.tuitionPayments || "Scolarité"}
+                        </span>
                       </span>
                     </SelectItem>
                     <SelectItem value="club">
-                      <span className="flex items-center gap-2">
-                        <span className="size-2 rounded-full bg-purple-500" />
-                        {t.accounting.clubPayments || "Club"}
+                      <span className="flex items-center gap-2 font-medium">
+                        <div className="p-1 rounded bg-purple-100 dark:bg-purple-900/50">
+                          <Sparkles className="size-3 text-purple-600 dark:text-purple-400" />
+                        </div>
+                        <span className="text-purple-700 dark:text-purple-300">
+                          {t.accounting.clubPayments || "Clubs"}
+                        </span>
                       </span>
                     </SelectItem>
                   </SelectContent>
@@ -842,6 +1043,7 @@ export default function PaymentsPage() {
                     <TableRow className="bg-muted/30 hover:bg-muted/30">
                       <TableHead className="font-semibold">{t.accounting.transactionId}</TableHead>
                       <TableHead className="font-semibold">{t.common.student}</TableHead>
+                      <TableHead className="font-semibold">Type</TableHead>
                       <TableHead className="text-right font-semibold">{t.common.amount}</TableHead>
                       <TableHead className="font-semibold">{t.accounting.method}</TableHead>
                       <TableHead className="font-semibold">{t.common.date}</TableHead>
@@ -878,42 +1080,85 @@ export default function PaymentsPage() {
                         : null
                       const gradeName = !isClubPayment ? payment.enrollment?.grade?.name : null
 
+                      // Payment type background color
+                      const typeBackground = isClubPayment
+                        ? "bg-purple-50/50 dark:bg-purple-950/20 hover:bg-purple-50 dark:hover:bg-purple-950/30"
+                        : "bg-blue-50/50 dark:bg-blue-950/20 hover:bg-blue-50 dark:hover:bg-blue-950/30"
+
                       return (
                         <TableRow
                           key={payment.id}
                           status={getPaymentRowStatus(payment.status)}
                           className={cn(
-                            "border-l-4 transition-all duration-200 hover:bg-muted/50 hover:shadow-sm group",
+                            "border-l-4 transition-all duration-200 hover:shadow-md group relative",
                             borderColor,
-                            index % 2 === 0 ? "bg-background" : "bg-muted/10"
+                            typeBackground
                           )}
                         >
-                          <TableCell className="font-mono text-sm font-medium text-primary">
+                          {/* Subtle gradient overlay */}
+                          <div className={cn(
+                            "absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none",
+                            isClubPayment
+                              ? "bg-gradient-to-r from-purple-500/5 via-transparent to-transparent"
+                              : "bg-gradient-to-r from-blue-500/5 via-transparent to-transparent"
+                          )} />
+
+                          <TableCell className="font-mono text-sm font-medium text-primary relative z-10">
                             {payment.receiptNumber}
                           </TableCell>
-                          <TableCell>
+                          <TableCell className="relative z-10">
                             <div className="flex items-center gap-3">
-                              <div className="size-9 rounded-full bg-primary/10 flex items-center justify-center shrink-0 transition-all duration-200 group-hover:scale-110 group-hover:bg-primary/20">
-                                <span className="text-xs font-semibold text-primary">{initials}</span>
+                              <div className={cn(
+                                "size-9 rounded-full flex items-center justify-center shrink-0 transition-all duration-200 group-hover:scale-110",
+                                isClubPayment
+                                  ? "bg-purple-100 dark:bg-purple-900/50 group-hover:bg-purple-200 dark:group-hover:bg-purple-800/70"
+                                  : "bg-blue-100 dark:bg-blue-900/50 group-hover:bg-blue-200 dark:group-hover:bg-blue-800/70"
+                              )}>
+                                <span className={cn(
+                                  "text-xs font-semibold",
+                                  isClubPayment
+                                    ? "text-purple-700 dark:text-purple-300"
+                                    : "text-blue-700 dark:text-blue-300"
+                                )}>{initials}</span>
                               </div>
                               <div className="min-w-0">
                                 <p className="font-medium text-foreground truncate">
                                   {firstName || "N/A"} {lastName}
                                 </p>
                                 {isClubPayment && clubName ? (
-                                  <p className="text-xs text-purple-600 dark:text-purple-400 flex items-center gap-1">
+                                  <p className="text-xs text-purple-600 dark:text-purple-400 flex items-center gap-1 font-medium">
                                     <span className="size-1.5 rounded-full bg-purple-500" />
                                     {clubName}
                                   </p>
                                 ) : (
-                                  <p className="text-xs text-muted-foreground">
+                                  <p className="text-xs text-blue-600 dark:text-blue-400 flex items-center gap-1">
+                                    <span className="size-1.5 rounded-full bg-blue-500" />
                                     {gradeName ?? "-"}
                                   </p>
                                 )}
                               </div>
                             </div>
                           </TableCell>
-                          <TableCell className="text-right">
+                          <TableCell className="relative z-10">
+                            {isClubPayment ? (
+                              <Badge className={cn(
+                                "bg-gradient-to-r from-purple-500 to-fuchsia-500 text-white border-0 shadow-md font-bold px-3 py-1",
+                                "group-hover:shadow-lg group-hover:scale-105 transition-all duration-200"
+                              )}>
+                                <Sparkles className="size-3 mr-1" />
+                                {t.accounting.clubPayments || "Club"}
+                              </Badge>
+                            ) : (
+                              <Badge className={cn(
+                                "bg-gradient-to-r from-blue-500 to-cyan-500 text-white border-0 shadow-md font-bold px-3 py-1",
+                                "group-hover:shadow-lg group-hover:scale-105 transition-all duration-200"
+                              )}>
+                                <BanknoteIcon className="size-3 mr-1" />
+                                {t.accounting.tuitionPayments || "Scolarité"}
+                              </Badge>
+                            )}
+                          </TableCell>
+                          <TableCell className="text-right relative z-10">
                             <span className={cn(
                               typography.currency.sm,
                               "transition-colors duration-200 group-hover:text-primary drop-shadow-sm"
@@ -921,15 +1166,15 @@ export default function PaymentsPage() {
                               {formatAmount(payment.amount)}
                             </span>
                           </TableCell>
-                          <TableCell>{getMethodBadge(payment.method)}</TableCell>
-                          <TableCell className="text-sm text-muted-foreground">
+                          <TableCell className="relative z-10">{getMethodBadge(payment.method)}</TableCell>
+                          <TableCell className="text-sm text-muted-foreground relative z-10">
                             {formatDate(payment.recordedAt, locale)}
                           </TableCell>
-                          <TableCell>{getStatusBadge(payment.status)}</TableCell>
-                          <TableCell className="font-mono text-sm text-muted-foreground">
+                          <TableCell className="relative z-10">{getStatusBadge(payment.status)}</TableCell>
+                          <TableCell className="font-mono text-sm text-muted-foreground relative z-10">
                             {payment.transactionRef || "-"}
                           </TableCell>
-                          <TableCell className="text-right">
+                          <TableCell className="text-right relative z-10">
                             {payment.status === "confirmed" && (
                               <span className="inline-flex items-center gap-1 text-xs font-medium text-emerald-600 dark:text-emerald-400 animate-in fade-in duration-300">
                                 <CheckCircle2 className="size-3" />

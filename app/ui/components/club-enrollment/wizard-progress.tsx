@@ -57,68 +57,47 @@ export function WizardProgress({
                 {/* Icon Circle */}
                 <div
                   className={cn(
-                    "w-14 h-14 rounded-full flex items-center justify-center transition-all duration-500 transform relative",
-                    isActive && "scale-110 shadow-xl shadow-gspn-gold-500/30",
+                    "flex items-center justify-center w-10 h-10 rounded-full border-2 transition-all duration-300",
+                    isActive && "animate-scale-in",
                     isCompleted
-                      ? "bg-gradient-to-br from-gspn-gold-500 to-gspn-gold-600 text-white shadow-lg shadow-gspn-gold-500/30"
+                      ? "bg-nav-highlight border-nav-highlight text-black dark:bg-gspn-gold-500 dark:border-gspn-gold-500 dark:text-gspn-maroon-950"
                       : isActive
-                      ? "bg-gradient-to-br from-gspn-gold-50 to-gspn-gold-100 text-gspn-gold-700 border-2 border-gspn-gold-500 shadow-md"
-                      : "bg-gray-100 text-gray-400 border-2 border-gray-200"
+                        ? "border-nav-highlight bg-gspn-gold-50 text-black dark:border-gspn-gold-500 dark:bg-gspn-gold-500/30 dark:text-gspn-gold-200 shadow-md shadow-gspn-gold-500/20"
+                        : "border-muted-foreground/30 text-muted-foreground/50"
                   )}
                 >
-                  {/* Animated ring on active step */}
-                  {isActive && (
-                    <div className="absolute inset-0 rounded-full border-2 border-gspn-gold-400 animate-ping opacity-75" />
-                  )}
                   {isCompleted ? (
-                    <Check className={sizing.icon.sm} strokeWidth={3} />
+                    <Check className={sizing.toolbarIcon} />
                   ) : (
-                    <Icon className={sizing.icon.sm} />
+                    <Icon className={sizing.toolbarIcon} />
                   )}
                 </div>
 
                 {/* Label */}
-                <div className="flex flex-col items-center gap-0.5">
-                  <span
-                    className={cn(
-                      "text-xs font-semibold uppercase tracking-wider transition-colors",
-                      isActive
-                        ? "text-gspn-gold-700"
-                        : isCompleted
-                        ? "text-gspn-gold-600"
-                        : "text-gray-400"
-                    )}
-                  >
-                    {t.clubEnrollmentWizard.step} {step.number}
-                  </span>
-                  <span
-                    className={cn(
-                      "text-sm font-bold transition-colors whitespace-nowrap",
-                      isActive
-                        ? "text-gray-900"
-                        : isCompleted
-                        ? "text-gray-700"
-                        : "text-gray-400"
-                    )}
-                  >
-                    {step.label}
-                  </span>
-                </div>
+                <span
+                  className={cn(
+                    "text-xs font-medium text-center max-w-[80px]",
+                    isActive
+                      ? "text-black dark:text-gspn-gold-200"
+                      : isCompleted
+                        ? "text-black dark:text-gspn-gold-200"
+                        : "text-muted-foreground/50"
+                  )}
+                >
+                  {step.label}
+                </span>
               </button>
 
               {/* Connector Line */}
               {index < steps.length - 1 && (
-                <div className="flex-1 h-[3px] mx-3 relative rounded-full overflow-hidden">
-                  <div className="absolute inset-0 bg-gray-200" />
-                  <div
-                    className={cn(
-                      "absolute inset-0 bg-gradient-to-r from-gspn-gold-500 to-gspn-gold-600 transition-all duration-700 ease-out",
-                      completedSteps.includes(step.number as ClubEnrollmentStep)
-                        ? "w-full"
-                        : "w-0"
-                    )}
-                  />
-                </div>
+              <div
+                className={cn(
+                  "flex-1 h-0.5 mx-2 transition-colors duration-500 ease-out",
+                  completedSteps.includes(step.number as ClubEnrollmentStep)
+                    ? "bg-nav-highlight dark:bg-gspn-gold-500"
+                    : "bg-muted-foreground/20"
+                )}
+              />
               )}
             </React.Fragment>
           )
@@ -128,18 +107,39 @@ export function WizardProgress({
       {/* Mobile Progress */}
       <div className="md:hidden">
         <div className="flex items-center justify-between mb-2">
-          <span className="text-sm font-medium text-gray-700">
+          <span className="text-sm font-medium text-muted-foreground">
             {t.clubEnrollmentWizard.step} {currentStep} / {steps.length}
           </span>
-          <span className="text-sm font-medium text-amber-700">
+          <span className="text-sm font-medium text-black dark:text-gspn-gold-200">
             {steps.find((s) => s.number === currentStep)?.label}
           </span>
         </div>
-        <div className="w-full h-2 bg-gray-200 rounded-full overflow-hidden">
-          <div
-            className="h-full bg-gradient-to-r from-amber-400 to-amber-600 transition-all duration-500 ease-out"
-            style={{ width: `${(currentStep / steps.length) * 100}%` }}
-          />
+        <div className="flex gap-1">
+          {steps.map((step, index) => {
+            const isCompleted = completedSteps.includes(step.number as ClubEnrollmentStep)
+            const isCurrent = currentStep === step.number
+
+            return (
+              <div
+                key={step.number}
+                className={cn(
+                  "flex-1 h-2 rounded-full transition-all duration-300",
+                  "animate-scale-in",
+                  index === 0 && "stagger-1",
+                  index === 1 && "stagger-2",
+                  index === 2 && "stagger-3",
+                  index === 3 && "stagger-4",
+                  index === 4 && "stagger-5",
+                  index === 5 && "stagger-6",
+                  isCompleted
+                    ? "bg-nav-highlight dark:bg-gspn-gold-500"
+                    : isCurrent
+                      ? "bg-nav-highlight/50 dark:bg-gspn-gold-500/50"
+                      : "bg-muted-foreground/20"
+                )}
+              />
+            )
+          })}
         </div>
       </div>
     </>

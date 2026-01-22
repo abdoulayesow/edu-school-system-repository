@@ -110,14 +110,14 @@ export function StepConfirmation() {
         <div className="inline-flex items-center justify-center w-24 h-24 bg-gradient-to-br from-amber-400 to-amber-600 rounded-full mb-6 shadow-2xl animate-in zoom-in duration-500">
           <CheckCircle2 className="w-14 h-14 text-white" strokeWidth={2.5} />
         </div>
-        <h2 className="text-3xl font-bold text-gray-900 mb-2">{translations.enrollmentSuccessful}</h2>
-        <p className="text-lg text-gray-600">
+        <h2 className="text-3xl font-bold text-foreground mb-2">{translations.enrollmentSuccessful}</h2>
+        <p className="text-lg text-muted-foreground">
           {translations.successMessage}
         </p>
       </div>
 
       {/* Enrollment Details Card */}
-      <div className="p-8 bg-white border-2 border-gray-200 rounded-2xl shadow-lg space-y-6">
+      <div className="p-8 bg-white border-2 border-border rounded-2xl shadow-lg space-y-6">
         {/* Enrollment Number */}
         {state.data.enrollmentNumber && (
           <div className="text-center pb-6 border-b-2 border-gray-100">
@@ -137,7 +137,7 @@ export function StepConfirmation() {
             </AvatarFallback>
           </Avatar>
           <div className="flex-1">
-            <div className="font-bold text-lg text-gray-900">{state.data.studentName}</div>
+            <div className="font-bold text-lg text-foreground">{state.data.studentName}</div>
             {state.data.studentGrade && (
               <Badge variant="outline" className="mt-1">
                 {state.data.studentGrade}
@@ -149,8 +149,8 @@ export function StepConfirmation() {
         {/* Club Info */}
         <div>
           <div className="text-sm text-gray-500 mb-2">{translations.enrolledIn}</div>
-          <div className="p-4 bg-gray-50 rounded-xl">
-            <div className="font-bold text-lg text-gray-900 mb-1">
+          <div className="p-4 bg-muted/50 rounded-xl">
+            <div className="font-bold text-lg text-foreground mb-1">
               {locale === "fr" && state.data.clubNameFr
                 ? state.data.clubNameFr
                 : state.data.clubName}
@@ -172,7 +172,7 @@ export function StepConfirmation() {
               </span>
             </div>
             {state.data.receiptNumber && (
-              <div className="mt-2 text-sm text-gray-600">
+              <div className="mt-2 text-sm text-muted-foreground">
                 {translations.receipt}: <span className="font-mono font-semibold">{state.data.receiptNumber}</span>
               </div>
             )}
@@ -183,7 +183,7 @@ export function StepConfirmation() {
         {state.data.status && (
           <div className="pt-6 border-t-2 border-gray-100">
             <div className="flex items-center justify-center gap-2">
-              <span className="text-sm text-gray-600">{translations.status}:</span>
+              <span className="text-sm text-muted-foreground">{translations.status}:</span>
               <Badge
                 variant={state.data.status === "completed" ? "default" : "secondary"}
                 className={cn(
@@ -223,10 +223,10 @@ export function StepConfirmation() {
 
               {/* Text Content */}
               <div className="flex-1 text-center sm:text-left">
-                <h3 className="text-lg font-bold text-gray-900 mb-1">
+                <h3 className="text-lg font-bold text-foreground mb-1">
                   {locale === "fr" ? "Certificat d'inscription" : "Enrollment Certificate"}
                 </h3>
-                <p className="text-sm text-gray-600">
+                <p className="text-sm text-muted-foreground">
                   {locale === "fr"
                     ? "Téléchargez le certificat officiel d'inscription au club"
                     : "Download the official club enrollment certificate"}

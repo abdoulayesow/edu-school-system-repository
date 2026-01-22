@@ -231,8 +231,8 @@ export function StepStudentSelection() {
     return (
       <div className="space-y-6 animate-in fade-in duration-500">
         <div className="text-center space-y-2">
-          <h2 className="text-2xl font-bold text-gray-900">Select Student</h2>
-          <p className="text-gray-600">Choose the student to enroll in this club</p>
+          <h2 className="text-2xl font-bold text-foreground">Select Student</h2>
+          <p className="text-muted-foreground">Choose the student to enroll in this club</p>
         </div>
 
         <div className="flex flex-col items-center justify-center py-12 space-y-4">
@@ -248,7 +248,7 @@ export function StepStudentSelection() {
           {[1, 2, 3, 4, 5, 6].map((i) => (
             <div
               key={i}
-              className="p-4 border-2 border-gray-200 rounded-xl animate-pulse"
+              className="p-4 border-2 border-border rounded-xl animate-pulse"
               style={{ animationDelay: `${i * 50}ms` }}
             >
               <div className="flex items-start gap-3">
@@ -269,8 +269,8 @@ export function StepStudentSelection() {
     return (
       <div className="space-y-6 animate-in fade-in duration-500">
         <div className="text-center space-y-2">
-          <h2 className="text-2xl font-bold text-gray-900">Select Student</h2>
-          <p className="text-gray-600">Choose the student to enroll in this club</p>
+          <h2 className="text-2xl font-bold text-foreground">Select Student</h2>
+          <p className="text-muted-foreground">Choose the student to enroll in this club</p>
         </div>
 
         <div className="flex flex-col items-center justify-center py-16 space-y-6">
@@ -278,8 +278,8 @@ export function StepStudentSelection() {
             <AlertCircle className={cn(sizing.icon.xl, "text-red-600")} />
           </div>
           <div className="text-center space-y-2 max-w-md">
-            <h3 className="font-semibold text-lg text-gray-900">Unable to Load Students</h3>
-            <p className="text-sm text-gray-600">{error}</p>
+            <h3 className="font-semibold text-lg text-foreground">Unable to Load Students</h3>
+            <p className="text-sm text-muted-foreground">{error}</p>
           </div>
           <Button
             onClick={() => window.location.reload()}
@@ -304,13 +304,13 @@ export function StepStudentSelection() {
                   <Users className={cn(sizing.icon.sm, "text-white")} />
                 </div>
                 <div>
-                  <div className="font-bold text-gray-900">
+                  <div className="font-bold text-foreground">
                     {locale === "fr" && state.data.clubNameFr
                       ? state.data.clubNameFr
                       : state.data.clubName}
                   </div>
                   {state.data.categoryName && (
-                    <div className="text-sm text-gray-600">{state.data.categoryName}</div>
+                    <div className="text-sm text-muted-foreground">{state.data.categoryName}</div>
                   )}
                 </div>
               </div>
@@ -318,21 +318,21 @@ export function StepStudentSelection() {
                 {/* Show monthly fee if available, otherwise show enrollment fee */}
                 {state.data.monthlyFee && state.data.monthlyFee > 0 ? (
                   <div className="flex items-center gap-1">
-                    <span className="text-gray-600">Monthly:</span>
+                    <span className="text-muted-foreground">Monthly:</span>
                     <span className="font-semibold text-primary">
                       {formatCurrency(state.data.monthlyFee)}/mo
                     </span>
                   </div>
                 ) : state.data.enrollmentFee && state.data.enrollmentFee > 0 ? (
                   <div className="flex items-center gap-1">
-                    <span className="text-gray-600">Fee:</span>
+                    <span className="text-muted-foreground">Fee:</span>
                     <span className="font-semibold text-primary">
                       {formatCurrency(state.data.enrollmentFee)}
                     </span>
                   </div>
                 ) : (
                   <div className="flex items-center gap-1">
-                    <span className="text-gray-600">Fee:</span>
+                    <span className="text-muted-foreground">Fee:</span>
                     <span className="font-semibold text-primary">Free</span>
                   </div>
                 )}
@@ -356,8 +356,8 @@ export function StepStudentSelection() {
 
       {/* Header */}
       <div className="text-center space-y-2">
-        <h2 className="text-2xl font-bold text-gray-900">Select Student</h2>
-        <p className="text-gray-600">Choose an eligible student to enroll in this club</p>
+        <h2 className="text-2xl font-bold text-foreground">Select Student</h2>
+        <p className="text-muted-foreground">Choose an eligible student to enroll in this club</p>
       </div>
 
       {/* Search and Filter Controls */}
@@ -372,14 +372,14 @@ export function StepStudentSelection() {
             placeholder="Search by name or student ID..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="pl-10 h-11 bg-white border-2 border-gray-200 focus:border-primary transition-colors"
+            className="pl-10 h-11 bg-white border-2 border-border focus:border-primary transition-colors"
             aria-label="Search for students by name or ID"
             role="searchbox"
           />
           {searchQuery && (
             <button
               onClick={() => setSearchQuery("")}
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors min-w-[44px] min-h-[44px] -mr-2 flex items-center justify-center"
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-muted-foreground transition-colors min-w-[44px] min-h-[44px] -mr-2 flex items-center justify-center"
               aria-label="Clear search"
             >
               <X className={sizing.icon.sm} />
@@ -391,7 +391,7 @@ export function StepStudentSelection() {
         <div className="relative w-full sm:w-48">
           <Filter className={cn(sizing.icon.sm, "absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 pointer-events-none z-10")} aria-hidden="true" />
           <Select value={selectedGrade} onValueChange={setSelectedGrade}>
-            <SelectTrigger className="w-full h-11 bg-white border-2 border-gray-200 focus:border-primary pl-10" aria-label="Filter students by grade">
+            <SelectTrigger className="w-full h-11 bg-white border-2 border-border focus:border-primary pl-10" aria-label="Filter students by grade">
               <SelectValue>
                 {selectedGrade === "all" ? "All Grades" : selectedGrade}
               </SelectValue>
@@ -400,7 +400,7 @@ export function StepStudentSelection() {
               <SelectItem value="all">All Grades</SelectItem>
               {Array.from(availableGradesByLevel.entries()).map(([level, grades]) => (
                 <SelectGroup key={level}>
-                  <SelectLabel className="font-semibold text-gray-700">
+                  <SelectLabel className="font-semibold text-foreground">
                     {formatLevelName(level)}
                   </SelectLabel>
                   {grades.map((grade) => (
@@ -418,11 +418,11 @@ export function StepStudentSelection() {
       {/* Active Filters Display */}
       {(searchQuery || selectedGrade !== "all") && (
         <div className="flex items-center gap-2 text-sm">
-          <span className="text-gray-600">Active filters:</span>
+          <span className="text-muted-foreground">Active filters:</span>
           {searchQuery && (
             <Badge variant="secondary" className="gap-1">
               Search: {searchQuery}
-              <button onClick={() => setSearchQuery("")} className="ml-1 hover:text-gray-900">
+              <button onClick={() => setSearchQuery("")} className="ml-1 hover:text-foreground">
                 <X className="w-3 h-3" />
               </button>
             </Badge>
@@ -430,7 +430,7 @@ export function StepStudentSelection() {
           {selectedGrade !== "all" && (
             <Badge variant="secondary" className="gap-1">
               Grade: {selectedGrade}
-              <button onClick={() => setSelectedGrade("all")} className="ml-1 hover:text-gray-900">
+              <button onClick={() => setSelectedGrade("all")} className="ml-1 hover:text-foreground">
                 <X className="w-3 h-3" />
               </button>
             </Badge>
@@ -456,12 +456,12 @@ export function StepStudentSelection() {
                  style={{ animationDelay: '0.6s', animationDuration: '3s' }} />
           </div>
 
-          <h3 className="text-2xl font-bold text-gray-900 mb-3">
+          <h3 className="text-2xl font-bold text-foreground mb-3">
             {students.length === 0
               ? "No Eligible Students Yet"
               : "No Students Match Your Search"}
           </h3>
-          <p className="text-gray-600 text-center max-w-md leading-relaxed mb-6">
+          <p className="text-muted-foreground text-center max-w-md leading-relaxed mb-6">
             {students.length === 0
               ? "Students must meet the club's eligibility criteria such as grade level and enrollment status."
               : "Try adjusting your search term or grade filter to find more students."}
@@ -483,7 +483,7 @@ export function StepStudentSelection() {
         </div>
       ) : (
         <div className="space-y-6">
-          <div className="text-sm text-gray-600 flex items-center justify-between px-1">
+          <div className="text-sm text-muted-foreground flex items-center justify-between px-1">
             <span className="font-medium">{filteredStudentsList.length} student{filteredStudentsList.length !== 1 ? 's' : ''} found</span>
             {state.data.studentId && (
               <span className="flex items-center gap-1 text-green-600 font-medium">
@@ -513,7 +513,7 @@ export function StepStudentSelection() {
                       ? "border-green-500 bg-gradient-to-br from-green-50 to-emerald-50 shadow-2xl shadow-green-500/30 scale-[1.02]"
                       : isExpanded
                       ? "border-primary bg-gradient-to-br from-gspn-gold-50 via-white to-gspn-gold-50/30 shadow-2xl shadow-primary/20 scale-[1.01]"
-                      : "border-gray-200 bg-white hover:border-gspn-gold-300 hover:shadow-2xl hover:-translate-y-2 hover:scale-[1.02]"
+                      : "border-border bg-white hover:border-gspn-gold-300 hover:shadow-2xl hover:-translate-y-2 hover:scale-[1.02]"
                   )}
                   style={{ animationDelay: `${index * 80}ms` }}
                   role="article"
@@ -576,7 +576,7 @@ export function StepStudentSelection() {
 
                       {/* Student Name */}
                       <div className="space-y-1">
-                        <h3 className="font-bold text-gray-900 text-lg leading-tight">
+                        <h3 className="font-bold text-foreground text-lg leading-tight">
                           {fullName}
                         </h3>
                         {student.formattedStudentId && (
@@ -591,9 +591,9 @@ export function StepStudentSelection() {
                     <div className="space-y-2.5">
                       {/* Grade Badge */}
                       {student.currentGrade && (
-                        <div className="flex items-center justify-center gap-2 p-2.5 bg-gradient-to-br from-gray-50 to-gray-100 rounded-lg border border-gray-200">
+                        <div className="flex items-center justify-center gap-2 p-2.5 bg-gradient-to-br from-gray-50 to-gray-100 rounded-lg border border-border">
                           <GraduationCap className="w-4 h-4 text-gspn-gold-600" />
-                          <span className="text-sm font-semibold text-gray-700">
+                          <span className="text-sm font-semibold text-foreground">
                             {student.currentGrade.name}
                           </span>
                           <span className="text-xs text-gray-500">
@@ -654,7 +654,7 @@ export function StepStudentSelection() {
                           {student.person.dateOfBirth && (
                             <div className="space-y-1">
                               <div className="text-xs text-gray-500">Date of Birth</div>
-                              <div className="text-sm font-medium text-gray-900 flex items-center gap-1.5">
+                              <div className="text-sm font-medium text-foreground flex items-center gap-1.5">
                                 <Calendar className="w-3.5 h-3.5 text-blue-500" />
                                 {formatDateOfBirth(student.person.dateOfBirth)}
                               </div>
@@ -665,7 +665,7 @@ export function StepStudentSelection() {
                           {student.person.gender && (
                             <div className="space-y-1">
                               <div className="text-xs text-gray-500">Gender</div>
-                              <div className="text-sm font-medium text-gray-900">
+                              <div className="text-sm font-medium text-foreground">
                                 {formatGender(student.person.gender)}
                               </div>
                             </div>
@@ -685,11 +685,11 @@ export function StepStudentSelection() {
                             {student.parentInfo?.fatherName && (
                               <div className="space-y-1.5">
                                 <div className="text-xs text-gray-500 font-medium">Father</div>
-                                <div className="text-sm font-semibold text-gray-900">
+                                <div className="text-sm font-semibold text-foreground">
                                   {student.parentInfo.fatherName}
                                 </div>
                                 {student.parentInfo?.fatherPhone && (
-                                  <div className="text-xs text-gray-600 flex items-center gap-1">
+                                  <div className="text-xs text-muted-foreground flex items-center gap-1">
                                     <Phone className="w-3 h-3" />
                                     {student.parentInfo.fatherPhone}
                                   </div>
@@ -701,11 +701,11 @@ export function StepStudentSelection() {
                             {student.parentInfo?.motherName && (
                               <div className="space-y-1.5">
                                 <div className="text-xs text-gray-500 font-medium">Mother</div>
-                                <div className="text-sm font-semibold text-gray-900">
+                                <div className="text-sm font-semibold text-foreground">
                                   {student.parentInfo.motherName}
                                 </div>
                                 {student.parentInfo?.motherPhone && (
-                                  <div className="text-xs text-gray-600 flex items-center gap-1">
+                                  <div className="text-xs text-muted-foreground flex items-center gap-1">
                                     <Phone className="w-3 h-3" />
                                     {student.parentInfo.motherPhone}
                                   </div>
@@ -725,7 +725,7 @@ export function StepStudentSelection() {
                               <IdCard className="w-3 h-3" />
                               Student ID
                             </div>
-                            <div className="font-mono text-sm font-semibold text-gray-900 bg-gray-100 px-2 py-1 rounded">
+                            <div className="font-mono text-sm font-semibold text-foreground bg-muted px-2 py-1 rounded">
                               {student.formattedStudentId}
                             </div>
                           </div>
@@ -738,7 +738,7 @@ export function StepStudentSelection() {
                               <GraduationCap className="w-3 h-3" />
                               Grade Level
                             </div>
-                            <div className="text-sm font-semibold text-gray-900">
+                            <div className="text-sm font-semibold text-foreground">
                               {student.currentGrade.name}
                               <span className="text-xs text-gray-500 ml-2">({student.currentGrade.level})</span>
                             </div>
@@ -794,8 +794,8 @@ export function StepStudentSelection() {
 
           {/* View All Students Button - Show if more than 6 students */}
           {filteredStudentsList.length > 6 && !showAllStudents && (
-            <div className="pt-4 flex flex-col items-center gap-4 border-t-2 border-dashed border-gray-200">
-              <p className="text-sm text-gray-600 font-medium">
+            <div className="pt-4 flex flex-col items-center gap-4 border-t-2 border-dashed border-border">
+              <p className="text-sm text-muted-foreground font-medium">
                 Showing 6 of {filteredStudentsList.length} students
               </p>
               <Button
@@ -811,14 +811,14 @@ export function StepStudentSelection() {
 
           {/* Show Less Button - Show when viewing all students */}
           {filteredStudentsList.length > 6 && showAllStudents && (
-            <div className="pt-4 flex flex-col items-center gap-4 border-t-2 border-dashed border-gray-200">
-              <p className="text-sm text-gray-600 font-medium">
+            <div className="pt-4 flex flex-col items-center gap-4 border-t-2 border-dashed border-border">
+              <p className="text-sm text-muted-foreground font-medium">
                 Showing all {filteredStudentsList.length} students
               </p>
               <Button
                 onClick={() => setShowAllStudents(false)}
                 variant="outline"
-                className="px-8 py-2.5 border-2 border-gray-300 text-gray-700 hover:bg-gray-50 hover:border-gray-400 hover:shadow-lg transition-all duration-300 font-semibold"
+                className="px-8 py-2.5 border-2 border-gray-300 text-foreground hover:bg-muted/50 hover:border-gray-400 hover:shadow-lg transition-all duration-300 font-semibold"
               >
                 <Users className="w-4 h-4 mr-2" />
                 Show Less

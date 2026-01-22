@@ -205,8 +205,8 @@ export function StepPaymentTransaction() {
     <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
       {/* Header */}
       <div className="text-center space-y-2">
-        <h2 className="text-2xl font-bold text-gray-900">{translations.recordPayment}</h2>
-        <p className="text-gray-600">{translations.recordPaymentDescription}</p>
+        <h2 className="text-2xl font-bold text-foreground">{translations.recordPayment}</h2>
+        <p className="text-muted-foreground">{translations.recordPaymentDescription}</p>
       </div>
 
       {/* Total Owed Summary */}
@@ -218,10 +218,10 @@ export function StepPaymentTransaction() {
       </div>
 
       {/* Payment Section */}
-      <div className="p-6 bg-white border-2 border-gray-200 rounded-xl space-y-6">
+      <div className="p-6 bg-white border-2 border-border rounded-xl space-y-6">
         <div className="flex items-center gap-2">
           <CreditCard className={sizing.icon.sm} />
-          <h3 className="font-bold text-lg text-gray-900">{translations.recordPayment}</h3>
+          <h3 className="font-bold text-lg text-foreground">{translations.recordPayment}</h3>
         </div>
 
         <Alert className="bg-blue-50 border-blue-200">
@@ -265,7 +265,7 @@ export function StepPaymentTransaction() {
                       "flex items-center gap-3 p-4 border-2 rounded-lg cursor-pointer transition-all",
                       state.data.paymentMethod === "cash"
                         ? "border-emerald-500 bg-emerald-50"
-                        : "border-gray-200 hover:border-gray-300"
+                        : "border-border hover:border-gray-300"
                     )}
                   >
                     <RadioGroupItem value="cash" id="cash" className="sr-only" />
@@ -292,7 +292,7 @@ export function StepPaymentTransaction() {
                       "flex items-center gap-3 p-4 border-2 rounded-lg cursor-pointer transition-all",
                       state.data.paymentMethod === "orange_money"
                         ? "border-orange-500 bg-orange-50"
-                        : "border-gray-200 hover:border-gray-300"
+                        : "border-border hover:border-gray-300"
                     )}
                   >
                     <RadioGroupItem value="orange_money" id="orange_money" className="sr-only" />
@@ -328,7 +328,7 @@ export function StepPaymentTransaction() {
                     readOnly
                     placeholder={isGeneratingReceipt ? translations.generating : "GSPN-2025-CLUB-00001"}
                     className={cn(
-                      "font-mono bg-gray-50 cursor-not-allowed min-h-[44px]",
+                      "font-mono bg-muted/50 cursor-not-allowed min-h-[44px]",
                       isGeneratingReceipt && "pr-10"
                     )}
                   />
@@ -361,7 +361,7 @@ export function StepPaymentTransaction() {
               )}
 
               {/* Payer Selection */}
-              <div className="space-y-4 pt-4 border-t-2 border-gray-200">
+              <div className="space-y-4 pt-4 border-t-2 border-border">
                 <div className="flex items-center gap-2">
                   <Users className={sizing.icon.sm} />
                   <Label className="text-base font-semibold">{translations.whoIsPaying}</Label>
@@ -384,7 +384,7 @@ export function StepPaymentTransaction() {
                           "flex flex-col items-center gap-2 p-3 border-2 rounded-lg cursor-pointer transition-all text-center min-h-[44px]",
                           isSelected
                             ? "border-amber-500 bg-amber-50"
-                            : "border-gray-200 hover:border-amber-300",
+                            : "border-border hover:border-amber-300",
                           !option.available && option.value !== "other" && "opacity-50"
                         )}
                       >

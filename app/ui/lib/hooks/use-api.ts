@@ -1410,6 +1410,10 @@ interface PaymentStats {
     amount: number
   }
   byMethod: Record<string, { count: number; amount: number }>
+  byType?: {
+    tuition: { count: number; amount: number }
+    club: { count: number; amount: number }
+  }
   allTime?: {
     cash: { count: number; amount: number }
     orange_money: { count: number; amount: number }

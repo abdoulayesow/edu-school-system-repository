@@ -234,16 +234,16 @@ export function StepPaymentOwed() {
     <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
       {/* Header */}
       <div className="text-center space-y-2">
-        <h2 className="text-2xl font-bold text-gray-900">{translations.paymentOwed}</h2>
-        <p className="text-gray-600">{translations.paymentOwedDescription}</p>
+        <h2 className="text-2xl font-bold text-foreground">{translations.paymentOwed}</h2>
+        <p className="text-muted-foreground">{translations.paymentOwedDescription}</p>
       </div>
 
       {/* Summary Cards */}
       <div className="grid md:grid-cols-2 gap-6">
         {/* Club Summary */}
-        <div className={cn(spacing.card.md, "bg-white border-2 border-gray-200 rounded-xl space-y-4")}>
+        <div className={cn(spacing.card.md, "bg-white border-2 border-border rounded-xl space-y-4")}>
           <div className="flex items-center justify-between mb-4">
-            <h3 className="font-bold text-lg text-gray-900">{translations.clubDetails}</h3>
+            <h3 className="font-bold text-lg text-foreground">{translations.clubDetails}</h3>
             <Button
               variant="ghost"
               size="sm"
@@ -259,7 +259,7 @@ export function StepPaymentOwed() {
           <div className="space-y-3">
             <div>
               <div className="text-sm text-gray-500 mb-1">{translations.clubName}</div>
-              <div className="font-semibold text-gray-900">
+              <div className="font-semibold text-foreground">
                 {locale === "fr" && state.data.clubNameFr
                   ? state.data.clubNameFr
                   : state.data.clubName}
@@ -272,7 +272,7 @@ export function StepPaymentOwed() {
             </div>
 
             {state.data.leaderName && (
-              <div className="flex items-center gap-2 text-sm text-gray-600">
+              <div className="flex items-center gap-2 text-sm text-muted-foreground">
                 <User className={sizing.icon.xs} />
                 <span>{state.data.leaderName}</span>
               </div>
@@ -302,9 +302,9 @@ export function StepPaymentOwed() {
         </div>
 
         {/* Student Summary */}
-        <div className={cn(spacing.card.md, "bg-white border-2 border-gray-200 rounded-xl space-y-4")}>
+        <div className={cn(spacing.card.md, "bg-white border-2 border-border rounded-xl space-y-4")}>
           <div className="flex items-center justify-between mb-4">
-            <h3 className="font-bold text-lg text-gray-900">{translations.studentDetails}</h3>
+            <h3 className="font-bold text-lg text-foreground">{translations.studentDetails}</h3>
             <Button
               variant="ghost"
               size="sm"
@@ -318,7 +318,7 @@ export function StepPaymentOwed() {
           </div>
 
           <div className="flex items-start gap-3">
-            <Avatar className="w-16 h-16 border-2 border-gray-200">
+            <Avatar className="w-16 h-16 border-2 border-border">
               <AvatarImage src={state.data.studentPhoto || undefined} alt={state.data.studentName} />
               <AvatarFallback className="bg-amber-100 text-amber-700 font-semibold text-lg">
                 {initials}
@@ -326,7 +326,7 @@ export function StepPaymentOwed() {
             </Avatar>
 
             <div className="flex-1">
-              <div className="font-bold text-gray-900 mb-2">{state.data.studentName}</div>
+              <div className="font-bold text-foreground mb-2">{state.data.studentName}</div>
               {state.data.studentGrade && (
                 <Badge variant="outline">
                   <GraduationCap className={cn(sizing.icon.xs, "mr-1")} />
@@ -346,7 +346,7 @@ export function StepPaymentOwed() {
                 {state.data.studentDateOfBirth && (
                   <div>
                     <span className="text-gray-500">{translations.dateOfBirth}:</span>
-                    <div className="font-medium text-gray-900 flex items-center gap-1">
+                    <div className="font-medium text-foreground flex items-center gap-1">
                       <Calendar className="w-3.5 h-3.5 text-blue-500" />
                       {formatDateOfBirth(state.data.studentDateOfBirth)}
                     </div>
@@ -355,7 +355,7 @@ export function StepPaymentOwed() {
                 {state.data.studentGender && (
                   <div>
                     <span className="text-gray-500">{translations.gender}:</span>
-                    <div className="font-medium text-gray-900">
+                    <div className="font-medium text-foreground">
                       {formatGender(state.data.studentGender)}
                     </div>
                   </div>
@@ -374,9 +374,9 @@ export function StepPaymentOwed() {
                 {state.data.studentParentInfo?.fatherName && (
                   <div className="space-y-0.5">
                     <div className="text-xs text-gray-500">{translations.father}</div>
-                    <div className="font-medium text-gray-900">{state.data.studentParentInfo.fatherName}</div>
+                    <div className="font-medium text-foreground">{state.data.studentParentInfo.fatherName}</div>
                     {state.data.studentParentInfo?.fatherPhone && (
-                      <div className="text-xs text-gray-600 flex items-center gap-1">
+                      <div className="text-xs text-muted-foreground flex items-center gap-1">
                         <Phone className="w-3 h-3" />
                         {state.data.studentParentInfo.fatherPhone}
                       </div>
@@ -386,9 +386,9 @@ export function StepPaymentOwed() {
                 {state.data.studentParentInfo?.motherName && (
                   <div className="space-y-0.5">
                     <div className="text-xs text-gray-500">{translations.mother}</div>
-                    <div className="font-medium text-gray-900">{state.data.studentParentInfo.motherName}</div>
+                    <div className="font-medium text-foreground">{state.data.studentParentInfo.motherName}</div>
                     {state.data.studentParentInfo?.motherPhone && (
-                      <div className="text-xs text-gray-600 flex items-center gap-1">
+                      <div className="text-xs text-muted-foreground flex items-center gap-1">
                         <Phone className="w-3 h-3" />
                         {state.data.studentParentInfo.motherPhone}
                       </div>
@@ -405,7 +405,7 @@ export function StepPaymentOwed() {
       <div className="space-y-4">
         <div className="p-6 bg-gradient-to-br from-amber-50 to-orange-50 border-2 border-amber-200 rounded-xl">
           <div className="flex items-center justify-between mb-4">
-            <h3 className="font-bold text-lg text-gray-900 flex items-center gap-2">
+            <h3 className="font-bold text-lg text-foreground flex items-center gap-2">
               <DollarSign className={sizing.icon.sm} />
               {translations.feeBreakdown}
             </h3>
@@ -437,11 +437,11 @@ export function StepPaymentOwed() {
 
               <div className="grid grid-cols-2 gap-4 p-3 bg-white/70 rounded-lg text-sm">
                 <div className="flex justify-between">
-                  <span className="text-gray-600">{translations.monthsPassed}:</span>
+                  <span className="text-muted-foreground">{translations.monthsPassed}:</span>
                   <span className="font-semibold">{monthlyCalculation.totalMonths - monthlyCalculation.remainingMonths}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-gray-600">{translations.monthsRemaining}:</span>
+                  <span className="text-muted-foreground">{translations.monthsRemaining}:</span>
                   <span className="font-semibold text-blue-700">{monthlyCalculation.remainingMonths}</span>
                 </div>
               </div>
@@ -484,7 +484,7 @@ export function StepPaymentOwed() {
 
                 {monthlyCalculation.totalMonths > 0 && (
                   <div className="pt-2 space-y-2">
-                    <div className="flex items-center gap-2 text-sm text-gray-600">
+                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
                       <CalendarClock className={sizing.icon.xs} />
                       <span>
                         {monthlyCalculation.totalMonths} {translations.months}
@@ -503,7 +503,7 @@ export function StepPaymentOwed() {
                       </Alert>
                     )}
 
-                    <div className="flex justify-between text-sm text-gray-600">
+                    <div className="flex justify-between text-sm text-muted-foreground">
                       <span>{translations.totalMonthlyFees} ({monthlyCalculation.totalMonths} × {formatCurrency(state.data.monthlyFee)})</span>
                       <span className="font-semibold">{formatCurrency(monthlyCalculation.totalMonthlyFees)}</span>
                     </div>
@@ -534,7 +534,7 @@ export function StepPaymentOwed() {
             )}
 
             {/* Total */}
-            <div className="pt-3 border-t-2 border-amber-300 flex justify-between text-lg font-bold text-gray-900">
+            <div className="pt-3 border-t-2 border-amber-300 flex justify-between text-lg font-bold text-foreground">
               <span>
                 {translations.totalAmount}
                 {monthlyCalculation.isMidYear && !isEditingTotal && (
@@ -550,7 +550,7 @@ export function StepPaymentOwed() {
         {monthlyCalculation.months.length > 0 && (
           <details className="group">
             <summary className="cursor-pointer list-none [&::-webkit-details-marker]:hidden">
-              <div className="relative overflow-hidden rounded-xl border border-gray-200 bg-gradient-to-r from-white via-white to-gray-50 p-4 shadow-sm transition-all duration-300 hover:shadow-md hover:border-amber-300 group-open:rounded-b-none group-open:border-b-0 group-open:shadow-none">
+              <div className="relative overflow-hidden rounded-xl border border-border bg-gradient-to-r from-white via-white to-gray-50 p-4 shadow-sm transition-all duration-300 hover:shadow-md hover:border-amber-300 group-open:rounded-b-none group-open:border-b-0 group-open:shadow-none">
                 <div className="absolute left-0 top-0 bottom-0 w-1 bg-gradient-to-b from-amber-400 via-amber-500 to-orange-400 rounded-l-xl" />
 
                 <div className="flex items-center justify-between pl-3">
@@ -559,7 +559,7 @@ export function StepPaymentOwed() {
                       <CalendarClock className="h-5 w-5 text-amber-700" />
                     </div>
                     <div>
-                      <span className="font-semibold text-gray-900 block">
+                      <span className="font-semibold text-foreground block">
                         {translations.viewMonthlyBreakdown}
                       </span>
                       <span className="text-sm text-gray-500">
@@ -585,7 +585,7 @@ export function StepPaymentOwed() {
               </div>
             </summary>
 
-            <div className="rounded-b-xl border border-t-0 border-gray-200 bg-white overflow-hidden">
+            <div className="rounded-b-xl border border-t-0 border-border bg-white overflow-hidden">
               <div className="relative">
                 <div className="absolute left-[29px] top-0 bottom-0 w-px bg-gradient-to-b from-gray-300 via-amber-300 to-emerald-300" />
 
@@ -600,7 +600,7 @@ export function StepPaymentOwed() {
                         key={idx}
                         className={cn(
                           "relative flex items-center justify-between py-3 px-4 transition-colors duration-200",
-                          isPast && "bg-gray-50/50",
+                          isPast && "bg-muted/50/50",
                           isCurrent && "bg-gradient-to-r from-amber-50 via-amber-50/80 to-transparent",
                           isFuture && "bg-white hover:bg-emerald-50/30"
                         )}
@@ -651,7 +651,7 @@ export function StepPaymentOwed() {
                             "text-sm font-semibold tabular-nums",
                             isPast && "text-gray-400 line-through decoration-gray-300",
                             isCurrent && "text-amber-700",
-                            isFuture && "text-gray-900"
+                            isFuture && "text-foreground"
                           )}>
                             {formatCurrency(state.data.monthlyFee || 0)}
                           </span>
@@ -662,12 +662,12 @@ export function StepPaymentOwed() {
                 </div>
               </div>
 
-              <div className="bg-gradient-to-r from-gray-50 to-gray-100/50 px-4 py-3 border-t border-gray-200">
+              <div className="bg-gradient-to-r from-gray-50 to-gray-100/50 px-4 py-3 border-t border-border">
                 <div className="flex items-center justify-between text-sm">
-                  <span className="text-gray-600 font-medium">
+                  <span className="text-muted-foreground font-medium">
                     {translations.totalMonthlyFees}
                   </span>
-                  <span className="font-bold text-gray-900">
+                  <span className="font-bold text-foreground">
                     {formatCurrency(monthlyCalculation.totalMonthlyFees)}
                   </span>
                 </div>

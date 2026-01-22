@@ -64,6 +64,8 @@ export async function GET(req: NextRequest) {
       confirmedThisWeek,
       cashPayments,
       orangeMoneyPayments,
+      tuitionPayments,
+      clubPayments,
       // Also fetch all-time totals for comparison
       allTimeCash,
       allTimeMobile,
@@ -117,6 +119,26 @@ export async function GET(req: NextRequest) {
         _sum: { amount: true },
       }),
 
+      // Tuition payments (respects date filter)
+      prisma.payment.aggregate({
+        where: {
+          paymentType: "tuition",
+          ...dateFilter,
+        },
+        _count: true,
+        _sum: { amount: true },
+      }),
+
+      // Club payments (respects date filter)
+      prisma.payment.aggregate({
+        where: {
+          paymentType: "club",
+          ...dateFilter,
+        },
+        _count: true,
+        _sum: { amount: true },
+      }),
+
       // All-time cash (for reference)
       prisma.payment.aggregate({
         where: { method: "cash" },
@@ -141,6 +163,10 @@ export async function GET(req: NextRequest) {
         count: reversedPayments._count,
         amount: reversedPayments._sum.amount || 0,
       },
+      pending: {
+        count: reversedPayments._count,
+        amount: reversedPayments._sum.amount || 0,
+      },
       confirmedThisWeek: {
         count: confirmedThisWeek._count,
         amount: confirmedThisWeek._sum.amount || 0,
@@ -153,6 +179,16 @@ export async function GET(req: NextRequest) {
         orange_money: {
           count: orangeMoneyPayments._count,
           amount: orangeMoneyPayments._sum.amount || 0,
+        },
+      },
+      byType: {
+        tuition: {
+          count: tuitionPayments._count,
+          amount: tuitionPayments._sum.amount || 0,
+        },
+        club: {
+          count: clubPayments._count,
+          amount: clubPayments._sum.amount || 0,
         },
       },
       // Include all-time totals for reference

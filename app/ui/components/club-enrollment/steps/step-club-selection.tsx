@@ -1,7 +1,7 @@
 "use client"
 
 import React, { useState, useEffect } from "react"
-import { Search, Users, Calendar, DollarSign, User, Loader2 } from "lucide-react"
+import { Search, Users, Calendar, DollarSign, User, Loader2, Check } from "lucide-react"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Badge } from "@/components/ui/badge"
@@ -136,8 +136,8 @@ export function StepClubSelection() {
     <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
       {/* Header */}
       <div className="text-center space-y-2">
-        <h2 className="text-2xl font-bold text-gray-900">Select a Club</h2>
-        <p className="text-gray-600">Choose the club you want to enroll a student in</p>
+        <h2 className="text-2xl font-bold text-foreground">Select a Club</h2>
+        <p className="text-muted-foreground">Choose the club you want to enroll a student in</p>
       </div>
 
       {/* Capacity Warning */}
@@ -152,7 +152,7 @@ export function StepClubSelection() {
 
       {/* Search */}
       <div className="relative max-w-md mx-auto">
-        <Search className={cn(sizing.icon.sm, "absolute left-3 top-1/2 -translate-y-1/2 text-gray-400")} />
+        <Search className={cn(sizing.icon.sm, "absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground/50")} />
         <Input
           type="text"
           placeholder="Search clubs..."
@@ -179,8 +179,8 @@ export function StepClubSelection() {
       {/* Clubs Grid */}
       {filteredClubs.length === 0 ? (
         <div className="text-center py-12">
-          <Users className={cn(sizing.icon.xl, "mx-auto text-gray-300 mb-4")} />
-          <p className="text-gray-500">No clubs found</p>
+          <Users className={cn(sizing.icon.xl, "mx-auto text-muted-foreground/30 mb-4")} />
+          <p className="text-muted-foreground">No clubs found</p>
         </div>
       ) : (
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
@@ -198,24 +198,22 @@ export function StepClubSelection() {
                   "group relative p-5 rounded-xl border-2 transition-all duration-300 text-left",
                   "hover:shadow-lg hover:scale-[1.02] active:scale-[0.98]",
                   isSelected
-                    ? "border-primary bg-primary/5 shadow-md"
+                    ? "border-amber-500 ring-2 ring-amber-500/20 shadow-md"
                     : isFull
-                    ? "border-gray-200 bg-gray-50 opacity-60 cursor-not-allowed"
-                    : "border-gray-200 hover:border-primary/30 bg-white"
+                    ? "border-border bg-muted/50 opacity-60 cursor-not-allowed"
+                    : "border-border hover:border-amber-500 bg-card"
                 )}
               >
                 {/* Selected Indicator */}
                 {isSelected && (
-                  <div className="absolute -top-2 -right-2 w-8 h-8 bg-primary rounded-full flex items-center justify-center shadow-lg">
-                    <svg className="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 20 20">
-                      <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                    </svg>
+                  <div className="h-6 w-6 absolute -top-2 -right-2 rounded-full bg-amber-500 flex items-center justify-center shadow-lg">
+                    <Check className={cn(sizing.icon.sm, "text-white")} />
                   </div>
                 )}
 
                 {/* Club Name */}
                 <div className="mb-3">
-                  <h3 className="font-bold text-lg text-gray-900 mb-1 line-clamp-2">
+                  <h3 className="font-bold text-lg text-foreground mb-1 line-clamp-2">
                     {locale === "fr" && club.nameFr ? club.nameFr : club.name}
                   </h3>
                   {club.category && (
@@ -229,14 +227,14 @@ export function StepClubSelection() {
 
                 {/* Leader */}
                 {club.leader && (
-                  <div className="flex items-center gap-2 mb-3 text-sm text-gray-600">
+                  <div className="flex items-center gap-2 mb-3 text-sm text-muted-foreground">
                     <User className={sizing.icon.xs} />
                     <span className="truncate">{club.leader.name}</span>
                   </div>
                 )}
 
                 {/* Dates */}
-                <div className="flex items-center gap-2 mb-3 text-sm text-gray-600">
+                <div className="flex items-center gap-2 mb-3 text-sm text-muted-foreground">
                   <Calendar className={sizing.icon.xs} />
                   <span>
                     {formatDate(club.startDate)} - {formatDate(club.endDate)}
@@ -244,11 +242,11 @@ export function StepClubSelection() {
                 </div>
 
                 {/* Fees */}
-                <div className="flex items-center gap-2 mb-4 text-sm font-semibold text-primary">
+                <div className="flex items-center gap-2 mb-4 text-sm font-semibold text-amber-700 dark:text-amber-400">
                   <DollarSign className={sizing.icon.xs} />
                   <span>{formatCurrency(club.fee)}</span>
                   {club.monthlyFee && club.monthlyFee > 0 && (
-                    <span className="text-gray-500 font-normal">
+                    <span className="text-muted-foreground font-normal">
                       + {formatCurrency(club.monthlyFee)}/mo
                     </span>
                   )}
@@ -256,14 +254,14 @@ export function StepClubSelection() {
 
                 {/* Capacity */}
                 <div className="space-y-1">
-                  <div className="flex justify-between text-xs text-gray-600">
+                  <div className="flex justify-between text-xs text-muted-foreground">
                     <span>Enrollment</span>
                     <span className="font-medium">
                       {club._count.enrollments}/{club.capacity}
                       {isFull && <span className="ml-2 text-red-600 font-semibold">FULL</span>}
                     </span>
                   </div>
-                  <div className="h-2 bg-gray-200 rounded-full overflow-hidden">
+                  <div className="h-2 bg-muted rounded-full overflow-hidden">
                     <div
                       className={cn(
                         "h-full transition-all duration-500",
@@ -271,7 +269,7 @@ export function StepClubSelection() {
                           ? "bg-red-500"
                           : fillPercentage > 80
                           ? "bg-orange-500"
-                          : "bg-primary"
+                          : "bg-amber-500"
                       )}
                       style={{ width: `${Math.min(fillPercentage, 100)}%` }}
                     />

@@ -12,16 +12,16 @@ import {
   G,
 } from "@react-pdf/renderer"
 
-// Register custom fonts for a distinctive look
+// Register custom fonts using CDN URLs
 Font.register({
   family: "Playfair",
   fonts: [
     {
-      src: "https://fonts.gstatic.com/s/playfairdisplay/v36/nuFvD-vYSZviVYUb_rj3ij__anPXJzDwcbmjWBN2PKdFvUDQ.ttf",
+      src: "https://cdn.jsdelivr.net/npm/@fontsource/playfair-display@5.0.18/files/playfair-display-latin-400-normal.woff",
       fontWeight: 400,
     },
     {
-      src: "https://fonts.gstatic.com/s/playfairdisplay/v36/nuFvD-vYSZviVYUb_rj3ij__anPXJzDwcbmjWBN2PKd1sEDQ.ttf",
+      src: "https://cdn.jsdelivr.net/npm/@fontsource/playfair-display@5.0.18/files/playfair-display-latin-700-normal.woff",
       fontWeight: 700,
     },
   ],
@@ -31,19 +31,19 @@ Font.register({
   family: "Montserrat",
   fonts: [
     {
-      src: "https://fonts.gstatic.com/s/montserrat/v26/JTUSjIg1_i6t8kCHKm459Wlhyw.ttf",
+      src: "https://cdn.jsdelivr.net/npm/@fontsource/montserrat@5.0.18/files/montserrat-latin-400-normal.woff",
       fontWeight: 400,
     },
     {
-      src: "https://fonts.gstatic.com/s/montserrat/v26/JTUSjIg1_i6t8kCHKm459W_hyzbi.ttf",
+      src: "https://cdn.jsdelivr.net/npm/@fontsource/montserrat@5.0.18/files/montserrat-latin-500-normal.woff",
       fontWeight: 500,
     },
     {
-      src: "https://fonts.gstatic.com/s/montserrat/v26/JTUSjIg1_i6t8kCHKm459WRhyzbi.ttf",
+      src: "https://cdn.jsdelivr.net/npm/@fontsource/montserrat@5.0.18/files/montserrat-latin-600-normal.woff",
       fontWeight: 600,
     },
     {
-      src: "https://fonts.gstatic.com/s/montserrat/v26/JTUSjIg1_i6t8kCHKm459WZhyzbi.ttf",
+      src: "https://cdn.jsdelivr.net/npm/@fontsource/montserrat@5.0.18/files/montserrat-latin-700-normal.woff",
       fontWeight: 700,
     },
   ],

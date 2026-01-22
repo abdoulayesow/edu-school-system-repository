@@ -119,8 +119,8 @@ export function StepReview() {
     <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
       {/* Header */}
       <div className="text-center space-y-2">
-        <h2 className="text-2xl font-bold text-gray-900">{translations.reviewEnrollment}</h2>
-        <p className="text-gray-600">{translations.reviewDescription}</p>
+        <h2 className="text-2xl font-bold text-foreground">{translations.reviewEnrollment}</h2>
+        <p className="text-muted-foreground">{translations.reviewDescription}</p>
       </div>
 
       {/* Club Information */}
@@ -161,7 +161,7 @@ export function StepReview() {
               <div>
                 <p className="text-sm text-muted-foreground">{translations.leader}</p>
                 <p className="font-medium flex items-center gap-1">
-                  <User className="w-3.5 h-3.5 text-gray-500" />
+                  <User className="w-3.5 h-3.5 text-muted-foreground" />
                   {data.leaderName}
                 </p>
               </div>
@@ -170,7 +170,7 @@ export function StepReview() {
               <div>
                 <p className="text-sm text-muted-foreground">{translations.duration}</p>
                 <p className="font-medium flex items-center gap-1">
-                  <Calendar className="w-3.5 h-3.5 text-gray-500" />
+                  <Calendar className="w-3.5 h-3.5 text-muted-foreground" />
                   {formatDate(data.startDate)} - {formatDate(data.endDate)}
                 </p>
               </div>
@@ -210,9 +210,9 @@ export function StepReview() {
         <CardContent className="space-y-4">
           {/* Student Avatar and Name */}
           <div className="flex items-center gap-4">
-            <Avatar className="w-14 h-14 border-2 border-gray-200">
+            <Avatar className="w-14 h-14 border-2 border-border">
               <AvatarImage src={data.studentPhoto || undefined} alt={data.studentName} />
-              <AvatarFallback className="bg-amber-100 text-amber-700 font-semibold">
+              <AvatarFallback className="bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400 font-semibold">
                 {initials}
               </AvatarFallback>
             </Avatar>
@@ -234,7 +234,7 @@ export function StepReview() {
                 <div>
                   <p className="text-sm text-muted-foreground">{translations.dateOfBirth}</p>
                   <p className="font-medium flex items-center gap-1">
-                    <Calendar className="w-3.5 h-3.5 text-gray-500" />
+                    <Calendar className="w-3.5 h-3.5 text-muted-foreground" />
                     {formatDate(data.studentDateOfBirth)}
                   </p>
                 </div>
@@ -263,7 +263,7 @@ export function StepReview() {
                       <p className="text-xs text-muted-foreground">{translations.father}</p>
                       <p className="font-medium">{data.studentParentInfo.fatherName}</p>
                       {data.studentParentInfo?.fatherPhone && (
-                        <p className="text-sm text-gray-600 flex items-center gap-1">
+                        <p className="text-sm text-muted-foreground flex items-center gap-1">
                           <Phone className="w-3 h-3" />
                           {data.studentParentInfo.fatherPhone}
                         </p>
@@ -275,7 +275,7 @@ export function StepReview() {
                       <p className="text-xs text-muted-foreground">{translations.mother}</p>
                       <p className="font-medium">{data.studentParentInfo.motherName}</p>
                       {data.studentParentInfo?.motherPhone && (
-                        <p className="text-sm text-gray-600 flex items-center gap-1">
+                        <p className="text-sm text-muted-foreground flex items-center gap-1">
                           <Phone className="w-3 h-3" />
                           {data.studentParentInfo.motherPhone}
                         </p>
@@ -342,7 +342,7 @@ export function StepReview() {
 
             <div className="flex justify-between text-lg">
               <span className="font-semibold">{translations.totalAmount}</span>
-              <span className="font-bold text-amber-700">{formatCurrency(totalOwed)}</span>
+              <span className="font-bold text-amber-700 dark:text-amber-400">{formatCurrency(totalOwed)}</span>
             </div>
           </div>
         </CardContent>
@@ -374,7 +374,7 @@ export function StepReview() {
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <p className="text-sm text-muted-foreground">{translations.paymentAmount}</p>
-                  <p className="font-bold text-lg text-green-600">
+                  <p className="font-bold text-lg text-green-600 dark:text-green-400">
                     {formatCurrency(data.paymentAmount || 0)}
                   </p>
                 </div>
@@ -408,9 +408,9 @@ export function StepReview() {
                   <Separator />
                   <div>
                     <p className="text-sm text-muted-foreground mb-2">{translations.payer}</p>
-                    <div className="p-3 bg-gray-50 rounded-lg">
+                    <div className="p-3 bg-muted/50 rounded-lg border border-border">
                       <p className="font-medium">{data.payer.name}</p>
-                      <div className="flex items-center gap-4 mt-1 text-sm text-gray-600">
+                      <div className="flex items-center gap-4 mt-1 text-sm text-muted-foreground">
                         <span className="flex items-center gap-1">
                           <Phone className="w-3.5 h-3.5" />
                           {data.payer.phone}
@@ -462,7 +462,7 @@ export function StepReview() {
             </div>
           </CardHeader>
           <CardContent>
-            <div className="p-3 bg-yellow-50 rounded-lg">
+            <div className="p-3 bg-yellow-50 dark:bg-yellow-950/20 rounded-lg border border-yellow-200 dark:border-yellow-800">
               <p className="text-sm whitespace-pre-wrap">{data.notes}</p>
             </div>
           </CardContent>
