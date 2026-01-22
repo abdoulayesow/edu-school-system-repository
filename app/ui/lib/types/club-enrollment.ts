@@ -1,6 +1,6 @@
 // Club Enrollment Wizard Types
 
-export type ClubEnrollmentStep = 1 | 2 | 3 | 4
+export type ClubEnrollmentStep = 1 | 2 | 3 | 4 | 5 | 6
 
 export type PayerType = "father" | "mother" | "enrolling_person" | "other"
 
@@ -54,7 +54,14 @@ export interface ClubEnrollmentData {
   studentParentInfo?: StudentParentInfo | null
   enrollmentPayerInfo?: EnrollmentPayerInfo
 
-  // Step 3: Payment
+  // Step 3: Payment Owed (fee calculations)
+  totalMonthlyFees?: number
+  remainingMonths?: number
+  proratedMonthlyFees?: number
+  customTotal?: number | null
+  isProrated?: boolean
+
+  // Step 4: Payment Recording
   paymentAmount: number
   paymentMethod: "cash" | "orange_money" | null
   receiptNumber: string
@@ -145,6 +152,7 @@ export type ClubEnrollmentAction =
   | { type: "COMPLETE_STEP"; step: ClubEnrollmentStep }
   | { type: "SET_CLUB"; club: Partial<ClubEnrollmentData> }
   | { type: "SET_STUDENT"; student: Partial<ClubEnrollmentData> }
+  | { type: "SET_FEE_BREAKDOWN"; feeBreakdown: Partial<ClubEnrollmentData> }
   | { type: "SET_PAYMENT"; payment: Partial<ClubEnrollmentData> }
   | { type: "SET_ENROLLMENT_ID"; enrollmentId: string }
   | { type: "SET_ENROLLMENT_NUMBER"; enrollmentNumber: string; status: string }

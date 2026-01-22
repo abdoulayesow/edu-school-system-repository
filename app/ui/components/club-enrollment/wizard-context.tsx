@@ -72,6 +72,14 @@ function wizardReducer(
         error: undefined, // Auto-clear errors when user makes changes
       }
 
+    case "SET_FEE_BREAKDOWN":
+      return {
+        ...state,
+        data: { ...state.data, ...action.feeBreakdown },
+        isDirty: true,
+        error: undefined,
+      }
+
     case "SET_PAYMENT":
       return {
         ...state,
@@ -122,6 +130,7 @@ interface ClubEnrollmentWizardContextValue {
   completeStep: (step: ClubEnrollmentStep) => void
   setClub: (club: Partial<ClubEnrollmentData>) => void
   setStudent: (student: Partial<ClubEnrollmentData>) => void
+  setFeeBreakdown: (feeBreakdown: Partial<ClubEnrollmentData>) => void
   setPayment: (payment: Partial<ClubEnrollmentData>) => void
   setEnrollmentId: (id: string) => void
   setEnrollmentNumber: (number: string, status: string) => void
@@ -144,7 +153,7 @@ export function ClubEnrollmentWizardProvider({
   const [state, dispatch] = useReducer(wizardReducer, initialState)
 
   const nextStep = useCallback(() => {
-    if (state.currentStep < 4) {
+    if (state.currentStep < 6) {
       dispatch({ type: "COMPLETE_STEP", step: state.currentStep })
       dispatch({ type: "SET_STEP", step: (state.currentStep + 1) as ClubEnrollmentStep })
     }
@@ -179,6 +188,10 @@ export function ClubEnrollmentWizardProvider({
 
   const setStudent = useCallback((student: Partial<ClubEnrollmentData>) => {
     dispatch({ type: "SET_STUDENT", student })
+  }, [])
+
+  const setFeeBreakdown = useCallback((feeBreakdown: Partial<ClubEnrollmentData>) => {
+    dispatch({ type: "SET_FEE_BREAKDOWN", feeBreakdown })
   }, [])
 
   const setPayment = useCallback((payment: Partial<ClubEnrollmentData>) => {
@@ -222,7 +235,11 @@ export function ClubEnrollmentWizardProvider({
         return !!(data.studentId && data.studentName)
 
       case 3:
-        // If payment amount > 0, must have receipt number, method, and payer info
+        // Payment Owed step - always can proceed (fee display only)
+        return true
+
+      case 4:
+        // Payment Recording - If payment amount > 0, must have receipt number, method, and payer info
         if (data.paymentAmount && data.paymentAmount > 0) {
           // Must have payment method and receipt number
           if (!data.receiptNumber || !data.paymentMethod) return false
@@ -239,7 +256,11 @@ export function ClubEnrollmentWizardProvider({
         // Otherwise can proceed (no payment required)
         return true
 
-      case 4:
+      case 5:
+        // Review step - always can proceed
+        return true
+
+      case 6:
         // Confirmation step - always can proceed
         return true
 
@@ -256,6 +277,7 @@ export function ClubEnrollmentWizardProvider({
     completeStep,
     setClub,
     setStudent,
+    setFeeBreakdown,
     setPayment,
     setEnrollmentId,
     setEnrollmentNumber,

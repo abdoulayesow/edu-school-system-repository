@@ -31,10 +31,10 @@ export function WizardNavigation({
   const [saveStatus, setSaveStatus] = useState<"idle" | "saving" | "saved">("idle")
   const [showSavedMessage, setShowSavedMessage] = useState(false)
 
-  const showBack = currentStep > 1 && currentStep < 4
-  const showSave = currentStep >= 2 && currentStep <= 3 && onSave && isDirty
-  const showNext = currentStep >= 1 && currentStep < 3
-  const showSubmit = currentStep === 3
+  const showBack = currentStep > 1 && currentStep < 6
+  const showSave = currentStep >= 2 && currentStep <= 5 && onSave && isDirty
+  const showNext = currentStep >= 1 && currentStep < 5
+  const showSubmit = currentStep === 5
 
   // Handle save with status feedback
   const handleSaveClick = async () => {

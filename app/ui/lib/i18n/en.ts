@@ -2810,8 +2810,10 @@ export const en: TranslationKeys = {
     stepOf: "Step {current} of {total}",
     step1: "Select Club",
     step2: "Select Student",
-    step3: "Payment & Review",
-    step4: "Confirmation",
+    step3: "Payment Owed",
+    step4: "Record Payment",
+    step5: "Review",
+    step6: "Confirmation",
 
     // Navigation
     back: "Back",

@@ -22,15 +22,15 @@ import { WizardProgress } from "./wizard-progress"
 import { WizardNavigation } from "./wizard-navigation"
 import { StepClubSelection } from "./steps/step-club-selection"
 import { StepStudentSelection } from "./steps/step-student-selection"
-import { StepPaymentReview } from "./steps/step-payment-review"
+import { StepPaymentOwed } from "./steps/step-payment-owed"
+import { StepPaymentTransaction } from "./steps/step-payment-transaction"
+import { StepReview } from "./steps/step-review"
 import { StepConfirmation } from "./steps/step-confirmation"
-import { ConfirmationModal } from "./confirmation-modal"
 
 export function ClubEnrollmentWizard() {
   const { t } = useI18n()
   const router = useRouter()
   const searchParams = useSearchParams()
-  const [showConfirmModal, setShowConfirmModal] = useState(false)
   const [showUnsavedChangesDialog, setShowUnsavedChangesDialog] = useState(false)
   const [pendingNavigation, setPendingNavigation] = useState<string | null>(null)
 
@@ -177,8 +177,13 @@ export function ClubEnrollmentWizard() {
     }
   }, [state.currentStep, state.data.studentId, prevStudentId, handleNext])
 
-  // Show confirmation modal before submitting
-  const handleShowConfirmation = useCallback(async () => {
+  // Submit final enrollment (called from Review step)
+  const handleSubmit = useCallback(async () => {
+    if (!state.data.enrollmentId && !state.data.clubId) {
+      setError(t.clubEnrollmentWizard.missingEnrollmentData)
+      return
+    }
+
     // Fetch fresh club data to get current enrollment count
     if (state.data.clubId) {
       try {
@@ -203,17 +208,6 @@ export function ClubEnrollmentWizard() {
         // Continue even if refresh fails - submit endpoint will validate
         console.warn("Failed to refresh club capacity:", err)
       }
-    }
-
-    setShowConfirmModal(true)
-  }, [state.data.clubId, setClub, setError, t])
-
-  // Submit final enrollment (called from confirmation modal)
-  const handleSubmit = useCallback(async () => {
-    if (!state.data.enrollmentId && !state.data.clubId) {
-      setError(t.clubEnrollmentWizard.missingEnrollmentData)
-      setShowConfirmModal(false)
-      return
     }
 
     try {
@@ -275,19 +269,17 @@ export function ClubEnrollmentWizard() {
 
       const data = await res.json()
       setEnrollmentNumber(data.enrollmentNumber, data.status)
-      setShowConfirmModal(false)
       nextStep()
     } catch (err) {
       setError(err instanceof Error ? err.message : t.clubEnrollmentWizard.failedToSubmit)
-      setShowConfirmModal(false)
     } finally {
       setSubmitting(false)
     }
-  }, [state.data, setEnrollmentNumber, setError, clearError, setSubmitting, nextStep, t])
+  }, [state.data, setClub, setEnrollmentNumber, setError, clearError, setSubmitting, nextStep, t])
 
   // Handle back navigation with unsaved changes check
   const handleBackToClubs = useCallback(() => {
-    if (state.isDirty && state.currentStep < 4) {
+    if (state.isDirty && state.currentStep < 6) {
       setPendingNavigation("/clubs")
       setShowUnsavedChangesDialog(true)
     } else {
@@ -318,8 +310,12 @@ export function ClubEnrollmentWizard() {
       case 2:
         return <StepStudentSelection />
       case 3:
-        return <StepPaymentReview />
+        return <StepPaymentOwed />
       case 4:
+        return <StepPaymentTransaction />
+      case 5:
+        return <StepReview />
+      case 6:
         return <StepConfirmation />
       default:
         return null
@@ -386,7 +382,7 @@ export function ClubEnrollmentWizard() {
             <div className="min-h-[400px]">{renderStep()}</div>
 
             {/* Navigation (hide on confirmation step) */}
-            {state.currentStep < 4 && (
+            {state.currentStep < 6 && (
               <WizardNavigation
                 currentStep={state.currentStep}
                 canProceed={canProceed()}
@@ -394,21 +390,12 @@ export function ClubEnrollmentWizard() {
                 onPrevious={prevStep}
                 onNext={handleNext}
                 onSave={handleSaveWrapper}
-                onSubmit={handleShowConfirmation}
+                onSubmit={handleSubmit}
                 isDirty={state.isDirty}
               />
             )}
           </CardContent>
         </Card>
-
-        {/* Confirmation Modal */}
-        <ConfirmationModal
-          open={showConfirmModal}
-          onOpenChange={setShowConfirmModal}
-          data={state.data}
-          isSubmitting={state.isSubmitting}
-          onConfirm={handleSubmit}
-        />
 
         {/* Unsaved Changes Dialog */}
         <Dialog open={showUnsavedChangesDialog} onOpenChange={setShowUnsavedChangesDialog}>

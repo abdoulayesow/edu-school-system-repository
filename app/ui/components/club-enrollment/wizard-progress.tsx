@@ -1,9 +1,10 @@
 "use client"
 
 import React from "react"
-import { Check, Users, UserPlus, CreditCard, CheckCircle } from "lucide-react"
+import { Check, Users, UserPlus, DollarSign, CreditCard, FileSearch, CheckCircle } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { sizing } from "@/lib/design-tokens"
+import { useI18n } from "@/components/i18n-provider"
 import type { ClubEnrollmentStep } from "@/lib/types/club-enrollment"
 
 interface WizardProgressProps {
@@ -12,11 +13,13 @@ interface WizardProgressProps {
   onStepClick?: (step: ClubEnrollmentStep) => void
 }
 
-const steps = [
-  { number: 1, label: "Select Club", icon: Users },
-  { number: 2, label: "Select Student", icon: UserPlus },
-  { number: 3, label: "Payment & Review", icon: CreditCard },
-  { number: 4, label: "Confirmation", icon: CheckCircle },
+const stepIcons = [
+  { number: 1, icon: Users },
+  { number: 2, icon: UserPlus },
+  { number: 3, icon: DollarSign },
+  { number: 4, icon: CreditCard },
+  { number: 5, icon: FileSearch },
+  { number: 6, icon: CheckCircle },
 ] as const
 
 export function WizardProgress({
@@ -24,6 +27,12 @@ export function WizardProgress({
   completedSteps,
   onStepClick,
 }: WizardProgressProps) {
+  const { t } = useI18n()
+
+  const steps = stepIcons.map((step) => ({
+    ...step,
+    label: t.clubEnrollmentWizard[`step${step.number}` as keyof typeof t.clubEnrollmentWizard] as string,
+  }))
   return (
     <>
       {/* Desktop Progress */}
@@ -80,7 +89,7 @@ export function WizardProgress({
                         : "text-gray-400"
                     )}
                   >
-                    Step {step.number}
+                    {t.clubEnrollmentWizard.step} {step.number}
                   </span>
                   <span
                     className={cn(
@@ -120,7 +129,7 @@ export function WizardProgress({
       <div className="md:hidden">
         <div className="flex items-center justify-between mb-2">
           <span className="text-sm font-medium text-gray-700">
-            Step {currentStep} of {steps.length}
+            {t.clubEnrollmentWizard.step} {currentStep} / {steps.length}
           </span>
           <span className="text-sm font-medium text-amber-700">
             {steps.find((s) => s.number === currentStep)?.label}

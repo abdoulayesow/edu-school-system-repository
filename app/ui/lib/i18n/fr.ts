@@ -2808,8 +2808,10 @@ export const fr = {
     stepOf: "Étape {current} sur {total}",
     step1: "Sélectionner le club",
     step2: "Sélectionner l'élève",
-    step3: "Paiement et révision",
-    step4: "Confirmation",
+    step3: "Frais dus",
+    step4: "Enregistrer le paiement",
+    step5: "Révision",
+    step6: "Confirmation",
 
     // Navigation
     back: "Retour",
