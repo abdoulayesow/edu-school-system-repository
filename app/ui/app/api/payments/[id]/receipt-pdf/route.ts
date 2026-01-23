@@ -42,8 +42,31 @@ export async function GET(req: NextRequest, { params }: RouteParams) {
             },
             payments: {
               where: { status: "confirmed" },
-              select: { amount: true, recordedAt: true },
+              select: {
+                amount: true,
+                recordedAt: true,
+                receiptNumber: true,
+                method: true,
+              },
               orderBy: { recordedAt: "asc" },
+            },
+          },
+        },
+        clubEnrollment: {
+          include: {
+            club: {
+              select: { name: true, nameFr: true },
+            },
+            studentProfile: {
+              select: {
+                studentNumber: true,
+                person: {
+                  select: {
+                    firstName: true,
+                    lastName: true,
+                  },
+                },
+              },
             },
           },
         },
@@ -60,28 +83,30 @@ export async function GET(req: NextRequest, { params }: RouteParams) {
       )
     }
 
-    // Check enrollment exists
-    if (!payment.enrollment) {
-      return NextResponse.json(
-        { message: "Enrollment not found for this payment" },
-        { status: 404 }
-      )
-    }
+    const isClubPayment = payment.paymentType === "club"
 
-    // Check student exists on enrollment
-    if (!payment.enrollment.student) {
-      return NextResponse.json(
-        { message: "Student not found for this enrollment" },
-        { status: 404 }
-      )
+    // Validate based on payment type
+    if (!isClubPayment) {
+      if (!payment.enrollment) {
+        return NextResponse.json(
+          { message: "Enrollment not found for this payment" },
+          { status: 404 }
+        )
+      }
+      if (!payment.enrollment.student) {
+        return NextResponse.json(
+          { message: "Student not found for this enrollment" },
+          { status: 404 }
+        )
+      }
+    } else {
+      if (!payment.clubEnrollment) {
+        return NextResponse.json(
+          { message: "Club enrollment not found for this payment" },
+          { status: 404 }
+        )
+      }
     }
-
-    // Calculate total paid before this payment
-    const tuitionFee = payment.enrollment.adjustedTuitionFee || payment.enrollment.originalTuitionFee
-    const totalPaidBefore = payment.enrollment.payments
-      .filter((p) => new Date(p.recordedAt) < new Date(payment.recordedAt))
-      .reduce((sum, p) => sum + p.amount, 0)
-    const remainingAfter = tuitionFee - totalPaidBefore - payment.amount
 
     // Parse payer info from notes
     let payer = undefined
@@ -96,24 +121,98 @@ export async function GET(req: NextRequest, { params }: RouteParams) {
       }
     }
 
-    // Prepare receipt data
-    const receiptData = {
-      paymentId: payment.id,
-      receiptNumber: payment.receiptNumber,
-      amount: payment.amount,
-      method: payment.method as "cash" | "orange_money",
-      transactionRef: payment.transactionRef || undefined,
-      recordedAt: payment.recordedAt.toISOString(),
-      recorderName: payment.recorder?.name ?? undefined,
-      studentNumber: payment.enrollment.student.studentNumber ?? "",
-      studentFirstName: payment.enrollment.student.firstName,
-      studentLastName: payment.enrollment.student.lastName ?? "",
-      gradeName: payment.enrollment.grade.name,
-      schoolYearName: payment.enrollment.schoolYear.name,
-      tuitionFee,
-      totalPaidBefore,
-      remainingAfter: Math.max(0, remainingAfter),
-      payer,
+    // Get payment history for this student/enrollment
+    let paymentHistory: Array<{
+      receiptNumber: string
+      amount: number
+      recordedAt: string
+      method: string
+    }> = []
+
+    if (isClubPayment && payment.clubEnrollment) {
+      // Get all club payments for this club enrollment
+      const clubPayments = await prisma.payment.findMany({
+        where: {
+          clubEnrollmentId: payment.clubEnrollmentId,
+          status: "confirmed",
+        },
+        select: {
+          receiptNumber: true,
+          amount: true,
+          recordedAt: true,
+          method: true,
+        },
+        orderBy: { recordedAt: "asc" },
+      })
+      paymentHistory = clubPayments.map((p) => ({
+        receiptNumber: p.receiptNumber,
+        amount: p.amount,
+        recordedAt: p.recordedAt.toISOString(),
+        method: p.method,
+      }))
+    } else if (payment.enrollment) {
+      // Use tuition payments from enrollment
+      paymentHistory = payment.enrollment.payments.map((p) => ({
+        receiptNumber: p.receiptNumber,
+        amount: p.amount,
+        recordedAt: p.recordedAt.toISOString(),
+        method: p.method,
+      }))
+    }
+
+    // Prepare receipt data based on payment type
+    let receiptData: any
+
+    if (isClubPayment && payment.clubEnrollment) {
+      // Club payment receipt
+      const clubName = language === "fr"
+        ? payment.clubEnrollment.club.nameFr || payment.clubEnrollment.club.name
+        : payment.clubEnrollment.club.name
+
+      receiptData = {
+        paymentId: payment.id,
+        receiptNumber: payment.receiptNumber,
+        amount: payment.amount,
+        method: payment.method as "cash" | "orange_money",
+        transactionRef: payment.transactionRef || undefined,
+        recordedAt: payment.recordedAt.toISOString(),
+        recorderName: payment.recorder?.name ?? undefined,
+        studentNumber: payment.clubEnrollment.studentProfile?.studentNumber ?? "",
+        studentFirstName: payment.clubEnrollment.studentProfile?.person.firstName ?? "",
+        studentLastName: payment.clubEnrollment.studentProfile?.person.lastName ?? "",
+        clubName,
+        paymentType: "club" as const,
+        paymentHistory,
+        payer,
+      }
+    } else if (payment.enrollment) {
+      // Tuition payment receipt
+      const tuitionFee = payment.enrollment.adjustedTuitionFee || payment.enrollment.originalTuitionFee
+      const totalPaidBefore = payment.enrollment.payments
+        .filter((p) => new Date(p.recordedAt) < new Date(payment.recordedAt))
+        .reduce((sum, p) => sum + p.amount, 0)
+      const remainingAfter = tuitionFee - totalPaidBefore - payment.amount
+
+      receiptData = {
+        paymentId: payment.id,
+        receiptNumber: payment.receiptNumber,
+        amount: payment.amount,
+        method: payment.method as "cash" | "orange_money",
+        transactionRef: payment.transactionRef || undefined,
+        recordedAt: payment.recordedAt.toISOString(),
+        recorderName: payment.recorder?.name ?? undefined,
+        studentNumber: payment.enrollment.student?.studentNumber ?? "",
+        studentFirstName: payment.enrollment.student?.firstName ?? "",
+        studentLastName: payment.enrollment.student?.lastName ?? "",
+        gradeName: payment.enrollment.grade?.name ?? "",
+        schoolYearName: payment.enrollment.schoolYear?.name ?? "",
+        tuitionFee,
+        totalPaidBefore,
+        remainingAfter: Math.max(0, remainingAfter),
+        paymentType: "tuition" as const,
+        paymentHistory,
+        payer,
+      }
     }
 
     // Generate PDF

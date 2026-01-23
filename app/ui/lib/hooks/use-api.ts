@@ -1340,6 +1340,10 @@ export interface ApiPayment {
       lastName: string
       studentNumber: string
       photoUrl: string | null
+      dateOfBirth: string | null
+      guardianName: string | null
+      guardianPhone: string | null
+      guardianEmail: string | null
     } | null
     grade: {
       id: string
@@ -1359,8 +1363,27 @@ export interface ApiPayment {
       id: string
       firstName: string
       lastName: string
+      dateOfBirth: string | null
+      guardianName: string | null
+      guardianPhone: string | null
+      guardianEmail: string | null
+      photoUrl: string | null
     }
     studentNumber: string
+    studentProfile: {
+      id: string
+      studentNumber: string
+      person: {
+        id: string
+        firstName: string
+        lastName: string
+        dateOfBirth: string | null
+        email: string | null
+        phone: string | null
+        photoUrl: string | null
+        gender: "male" | "female" | null
+      }
+    } | null
   } | null
   recorder: {
     id: string

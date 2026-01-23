@@ -17,6 +17,13 @@ interface PayerInfo {
   email?: string
 }
 
+interface PaymentHistoryItem {
+  receiptNumber: string
+  amount: number
+  recordedAt: string
+  method: string
+}
+
 interface PaymentReceiptData {
   // Payment info
   paymentId: string
@@ -31,13 +38,20 @@ interface PaymentReceiptData {
   studentNumber: string
   studentFirstName: string
   studentLastName: string
-  gradeName: string
-  schoolYearName: string
+  gradeName?: string
+  schoolYearName?: string
+  clubName?: string
 
-  // Balance info
-  tuitionFee: number
-  totalPaidBefore: number
-  remainingAfter: number
+  // Payment type
+  paymentType?: "tuition" | "club"
+
+  // Balance info (tuition only)
+  tuitionFee?: number
+  totalPaidBefore?: number
+  remainingAfter?: number
+
+  // Payment history
+  paymentHistory?: PaymentHistoryItem[]
 
   // Payer info
   payer?: PayerInfo
@@ -69,7 +83,7 @@ const receiptStyles = StyleSheet.create({
     maxHeight: 58,
     objectFit: "contain",
   },
-  // Header row with gold accent bar
+  // Header row with subtle border
   headerRow: {
     flexDirection: "row",
     justifyContent: "space-between",
@@ -77,8 +91,8 @@ const receiptStyles = StyleSheet.create({
     marginTop: 6,
     marginBottom: 8,
     paddingBottom: 6,
-    borderBottomWidth: 3,
-    borderBottomColor: colors.accent, // Gold accent
+    borderBottomWidth: 2,
+    borderBottomColor: colors.border, // Neutral gray border
   },
   titleBlock: {
     flex: 1,
@@ -114,12 +128,12 @@ const receiptStyles = StyleSheet.create({
     backgroundColor: colors.primary,
     borderRadius: 2,
   },
-  // Compact info card with side accent
+  // Compact info card with neutral style
   infoCard: {
     marginBottom: 6,
     paddingLeft: 10,
-    borderLeftWidth: 3,
-    borderLeftColor: colors.accent,
+    borderLeftWidth: 2,
+    borderLeftColor: colors.border,
     backgroundColor: colors.background,
     paddingVertical: 6,
     paddingRight: 10,
@@ -220,15 +234,15 @@ const receiptStyles = StyleSheet.create({
     fontFamily: "Helvetica-Bold",
     color: colors.text,
   },
-  // Prominent amount paid with gold accent
+  // Prominent amount paid with neutral style
   amountPaidRow: {
     paddingTop: 8,
     borderTopWidth: 2,
-    borderTopColor: colors.accent,
+    borderTopColor: colors.border,
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    backgroundColor: "#fffef8", // Light gold tint - specific to amount highlight
+    backgroundColor: colors.background,
     paddingHorizontal: 8,
     paddingBottom: 4,
     marginHorizontal: -4,
@@ -294,7 +308,7 @@ const receiptStyles = StyleSheet.create({
     fontSize: 6.5,
     color: colors.textLight,
   },
-  // Payment method badge - refined
+  // Payment method badge - neutral
   methodBadge: {
     display: "flex",
     flexDirection: "row",
@@ -302,13 +316,81 @@ const receiptStyles = StyleSheet.create({
     paddingVertical: 2,
     paddingHorizontal: 7,
     borderRadius: 2,
-    backgroundColor: "#e8f5e9", // Light green - success state
+    backgroundColor: colors.background,
+    borderWidth: 1,
+    borderColor: colors.border,
   },
   methodBadgeText: {
     fontSize: 8,
     fontFamily: "Helvetica-Bold",
-    color: colors.success,
+    color: colors.text,
   },
+  // Payment history table - sober editorial style
+  historySection: {
+    marginTop: 8,
+    marginBottom: 8,
+    paddingVertical: 8,
+    paddingHorizontal: 10,
+    backgroundColor: colors.background,
+    borderRadius: 2,
+    borderWidth: 1,
+    borderColor: colors.border,
+  },
+  historyTitle: {
+    fontSize: 8,
+    fontFamily: "Helvetica-Bold",
+    color: colors.primary,
+    marginBottom: 6,
+    textTransform: "uppercase",
+    letterSpacing: 0.4,
+  },
+  historyTable: {
+    borderWidth: 1,
+    borderColor: colors.border,
+  },
+  historyHeaderRow: {
+    flexDirection: "row",
+    backgroundColor: "#000000", // Black header like enrollment PDF
+    paddingVertical: 4,
+    paddingHorizontal: 6,
+  },
+  historyRow: {
+    flexDirection: "row",
+    borderBottomWidth: 0.5,
+    borderBottomColor: colors.border,
+    paddingVertical: 3,
+    paddingHorizontal: 6,
+  },
+  historyRowCurrent: {
+    flexDirection: "row",
+    backgroundColor: colors.background,
+    paddingVertical: 3,
+    paddingHorizontal: 6,
+    borderTopWidth: 2,
+    borderTopColor: colors.text,
+    borderBottomWidth: 2,
+    borderBottomColor: colors.text,
+  },
+  historyHeaderCell: {
+    fontSize: 7,
+    fontFamily: "Helvetica-Bold",
+    color: colors.white,
+    textTransform: "uppercase",
+    letterSpacing: 0.3,
+  },
+  historyCell: {
+    fontSize: 7.5,
+    color: colors.text,
+  },
+  historyCellBold: {
+    fontSize: 7.5,
+    fontFamily: "Helvetica-Bold",
+    color: colors.primary,
+  },
+  historyColReceipt: { width: "25%" },
+  historyColDate: { width: "35%" },
+  historyColAmount: { width: "25%", textAlign: "right" },
+  historyColMethod: { width: "15%", textAlign: "center" },
 })
 
 // Format currency in GNF
@@ -371,6 +453,13 @@ const labels = {
     payerSignature: "Payer",
     printedOn: "Printed on",
     page: "Page",
+    paymentHistory: "Payment History",
+    historyReceipt: "Receipt #",
+    historyDate: "Date",
+    historyAmount: "Amount",
+    historyMethod: "Method",
+    club: "Club",
+    totalPaid: "Total Paid",
   },
   fr: {
     title: "REÇU DE PAIEMENT",
@@ -400,13 +489,23 @@ const labels = {
     payerSignature: "Le Payeur",
     printedOn: "Imprimé le",
     page: "Page",
+    paymentHistory: "Historique des Paiements",
+    historyReceipt: "Reçu №",
+    historyDate: "Date",
+    historyAmount: "Montant",
+    historyMethod: "Mode",
+    club: "Club",
+    totalPaid: "Total Payé",
   },
 }
 
 export function PaymentReceiptDocument({ data, language = "fr" }: PaymentReceiptDocumentProps) {
   const t = labels[language]
   const studentName = `${data.studentFirstName} ${data.studentLastName}`
-  const previousBalance = data.tuitionFee - data.totalPaidBefore
+  const previousBalance = data.tuitionFee && data.totalPaidBefore
+    ? data.tuitionFee - data.totalPaidBefore
+    : 0
+  const isClubPayment = data.paymentType === "club"
 
   return (
     <Document>
@@ -443,14 +542,24 @@ export function PaymentReceiptDocument({ data, language = "fr" }: PaymentReceipt
                   <Text style={receiptStyles.detailLabel}>{t.studentName}</Text>
                   <Text style={receiptStyles.detailValueBold}>{studentName}</Text>
                 </View>
-                <View style={receiptStyles.detailRow}>
-                  <Text style={receiptStyles.detailLabel}>{t.grade}</Text>
-                  <Text style={receiptStyles.detailValue}>{data.gradeName}</Text>
-                </View>
-                <View style={receiptStyles.detailRow}>
-                  <Text style={receiptStyles.detailLabel}>{t.schoolYear}</Text>
-                  <Text style={receiptStyles.detailValue}>{data.schoolYearName}</Text>
-                </View>
+                {data.gradeName && (
+                  <View style={receiptStyles.detailRow}>
+                    <Text style={receiptStyles.detailLabel}>{t.grade}</Text>
+                    <Text style={receiptStyles.detailValue}>{data.gradeName}</Text>
+                  </View>
+                )}
+                {data.schoolYearName && (
+                  <View style={receiptStyles.detailRow}>
+                    <Text style={receiptStyles.detailLabel}>{t.schoolYear}</Text>
+                    <Text style={receiptStyles.detailValue}>{data.schoolYearName}</Text>
+                  </View>
+                )}
+                {data.clubName && (
+                  <View style={receiptStyles.detailRow}>
+                    <Text style={receiptStyles.detailLabel}>{t.club}</Text>
+                    <Text style={receiptStyles.detailValue}>{data.clubName}</Text>
+                  </View>
+                )}
               </View>
             </View>
           </View>
@@ -516,8 +625,73 @@ export function PaymentReceiptDocument({ data, language = "fr" }: PaymentReceipt
           </View>
         )}
 
-        {/* Financial Summary - Elegant bordered section with gold accent */}
-        <View style={receiptStyles.financialSection}>
+        {/* Payment History Table - Editorial style */}
+        {data.paymentHistory && data.paymentHistory.length > 0 && (
+          <View style={receiptStyles.historySection}>
+            <Text style={receiptStyles.historyTitle}>{t.paymentHistory}</Text>
+            <View style={receiptStyles.historyTable}>
+              {/* Table Header */}
+              <View style={receiptStyles.historyHeaderRow}>
+                <Text style={[receiptStyles.historyHeaderCell, receiptStyles.historyColReceipt]}>
+                  {t.historyReceipt}
+                </Text>
+                <Text style={[receiptStyles.historyHeaderCell, receiptStyles.historyColDate]}>
+                  {t.historyDate}
+                </Text>
+                <Text style={[receiptStyles.historyHeaderCell, receiptStyles.historyColAmount]}>
+                  {t.historyAmount}
+                </Text>
+                <Text style={[receiptStyles.historyHeaderCell, receiptStyles.historyColMethod]}>
+                  {t.historyMethod}
+                </Text>
+              </View>
+
+              {/* Table Rows */}
+              {data.paymentHistory.map((item, index) => {
+                const isCurrent = item.receiptNumber === data.receiptNumber
+                const rowStyle = isCurrent ? receiptStyles.historyRowCurrent : receiptStyles.historyRow
+                const textStyle = isCurrent ? receiptStyles.historyCellBold : receiptStyles.historyCell
+
+                return (
+                  <View key={index} style={rowStyle}>
+                    <Text style={[textStyle, receiptStyles.historyColReceipt]}>
+                      {item.receiptNumber}
+                    </Text>
+                    <Text style={[textStyle, receiptStyles.historyColDate]}>
+                      {formatDate(item.recordedAt, language)}
+                    </Text>
+                    <Text style={[textStyle, receiptStyles.historyColAmount]}>
+                      {formatCurrency(item.amount)}
+                    </Text>
+                    <Text style={[textStyle, receiptStyles.historyColMethod]}>
+                      {item.method === "cash" ? t.cash : "OM"}
+                    </Text>
+                  </View>
+                )
+              })}
+
+              {/* Total Row */}
+              {data.paymentHistory.length > 1 && (
+                <View style={receiptStyles.historyRowCurrent}>
+                  <Text style={[receiptStyles.historyCellBold, receiptStyles.historyColReceipt]}>
+                    {t.totalPaid}
+                  </Text>
+                  <Text style={[receiptStyles.historyCellBold, receiptStyles.historyColDate]}></Text>
+                  <Text style={[receiptStyles.historyCellBold, receiptStyles.historyColAmount]}>
+                    {formatCurrency(
+                      data.paymentHistory.reduce((sum, p) => sum + p.amount, 0)
+                    )}
+                  </Text>
+                  <Text style={[receiptStyles.historyCellBold, receiptStyles.historyColMethod]}></Text>
+                </View>
+              )}
+            </View>
+          </View>
+        )}
+
+        {/* Financial Summary - Only for tuition payments */}
+        {!isClubPayment && data.tuitionFee && (
+          <View style={receiptStyles.financialSection}>
           <View style={receiptStyles.financialGrid}>
             <View style={receiptStyles.financialItem}>
               <Text style={receiptStyles.financialLabel}>{t.tuitionFee}</Text>
@@ -529,14 +703,15 @@ export function PaymentReceiptDocument({ data, language = "fr" }: PaymentReceipt
             </View>
             <View style={receiptStyles.financialItem}>
               <Text style={receiptStyles.financialLabel}>{t.newBalance}</Text>
-              <Text style={receiptStyles.financialValue}>{formatCurrency(data.remainingAfter)}</Text>
+              <Text style={receiptStyles.financialValue}>{formatCurrency(data.remainingAfter ?? 0)}</Text>
             </View>
           </View>
           <View style={receiptStyles.amountPaidRow}>
             <Text style={receiptStyles.amountPaidLabel}>{t.amountPaid}</Text>
             <Text style={receiptStyles.amountPaidValue}>{formatCurrency(data.amount)}</Text>
           </View>
-        </View>
+          </View>
+        )}
 
         {/* Signatures - Compact */}
         <View style={receiptStyles.signatureSection}>

@@ -47,12 +47,22 @@ export async function GET(req: NextRequest, { params }: RouteParams) {
             enrollmentNumber: true,
             originalTuitionFee: true,
             adjustedTuitionFee: true,
+            motherName: true,
+            motherPhone: true,
+            motherEmail: true,
+            fatherName: true,
+            fatherPhone: true,
+            fatherEmail: true,
             student: {
               select: {
                 id: true,
                 firstName: true,
                 lastName: true,
                 studentNumber: true,
+                dateOfBirth: true,
+                guardianName: true,
+                guardianPhone: true,
+                guardianEmail: true,
               },
             },
             grade: {
@@ -67,6 +77,38 @@ export async function GET(req: NextRequest, { params }: RouteParams) {
             },
           },
         },
+        clubEnrollment: {
+          select: {
+            id: true,
+            club: {
+              select: {
+                id: true,
+                name: true,
+                nameFr: true,
+                fee: true,
+                monthlyFee: true,
+              },
+            },
+            studentProfile: {
+              select: {
+                id: true,
+                studentNumber: true,
+                person: {
+                  select: {
+                    id: true,
+                    firstName: true,
+                    lastName: true,
+                    dateOfBirth: true,
+                    email: true,
+                    phone: true,
+                    photoUrl: true,
+                    gender: true,
+                  },
+                },
+              },
+            },
+          },
+        },
       },
     })
 
@@ -77,26 +119,22 @@ export async function GET(req: NextRequest, { params }: RouteParams) {
       )
     }
 
-    // Check enrollment exists
-    if (!payment.enrollment) {
-      return NextResponse.json(
-        { message: "Enrollment not found for this payment" },
-        { status: 404 }
-      )
-    }
-
-    // Calculate balance info
-    const tuitionFee = payment.enrollment.adjustedTuitionFee || payment.enrollment.originalTuitionFee
-    const totalPaid = payment.enrollment.payments.reduce((sum, p) => sum + p.amount, 0)
-    const remainingBalance = tuitionFee - totalPaid
-
-    return NextResponse.json({
-      ...payment,
-      balanceInfo: {
+    // Calculate balance info (only for tuition payments)
+    let balanceInfo = undefined
+    if (payment.enrollment) {
+      const tuitionFee = payment.enrollment.adjustedTuitionFee || payment.enrollment.originalTuitionFee
+      const totalPaid = payment.enrollment.payments.reduce((sum: number, p: { amount: number }) => sum + p.amount, 0)
+      const remainingBalance = tuitionFee - totalPaid
+      balanceInfo = {
         tuitionFee,
         totalPaid,
         remainingBalance,
-      },
+      }
+    }
+
+    return NextResponse.json({
+      ...payment,
+      balanceInfo,
     })
   } catch (err) {
     console.error("Error fetching payment:", err)
@@ -161,10 +199,10 @@ export async function PATCH(req: NextRequest, { params }: RouteParams) {
     const body = await req.json()
     const validated = updatePaymentSchema.parse(body)
 
-    // If updating amount, validate it doesn't exceed remaining balance
-    if (validated.amount) {
+    // If updating amount, validate it doesn't exceed remaining balance (tuition payments only)
+    if (validated.amount && existingPayment.enrollment) {
       const tuitionFee = existingPayment.enrollment.adjustedTuitionFee || existingPayment.enrollment.originalTuitionFee
-      const totalPaidOthers = existingPayment.enrollment.payments.reduce((sum, p) => sum + p.amount, 0)
+      const totalPaidOthers = existingPayment.enrollment.payments.reduce((sum: number, p: { amount: number }) => sum + p.amount, 0)
       const remainingBalance = tuitionFee - totalPaidOthers
 
       if (validated.amount > remainingBalance) {
