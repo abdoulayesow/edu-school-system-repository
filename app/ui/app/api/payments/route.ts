@@ -405,6 +405,11 @@ export async function POST(req: NextRequest) {
           throw new Error("TreasuryBalance not initialized. Please contact administrator.")
         }
 
+        // Check if registry is open (registryBalance > 0)
+        if (currentBalance.registryBalance === 0) {
+          throw new Error("La caisse est fermée. Veuillez d'abord effectuer l'ouverture journalière pour enregistrer des paiements en espèces.")
+        }
+
         const newRegistryBalance = currentBalance.registryBalance + validated.amount
 
         // Create safe transaction for audit trail

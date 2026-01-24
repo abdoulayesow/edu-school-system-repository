@@ -24,7 +24,7 @@ function PaymentWizardPage() {
   }
 
   return (
-    <PageContainer maxWidth="lg">
+    <PageContainer maxWidth="full">
       <PaymentWizard
         initialStudentId={studentId}
         onComplete={handleComplete}
@@ -37,7 +37,7 @@ function PaymentWizardPage() {
 export default function NewPaymentPage() {
   return (
     <Suspense fallback={
-      <PageContainer maxWidth="lg">
+      <PageContainer maxWidth="full">
         <div className="flex items-center justify-center min-h-[400px]">
           <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
         </div>

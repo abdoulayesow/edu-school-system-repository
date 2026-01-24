@@ -126,12 +126,6 @@ export default function PaymentDetailsPage() {
         guardianName: payment.enrollment.student?.guardianName || null,
         guardianPhone: payment.enrollment.student?.guardianPhone || null,
         guardianEmail: payment.enrollment.student?.guardianEmail || null,
-        motherName: payment.enrollment.motherName || null,
-        motherPhone: payment.enrollment.motherPhone || null,
-        motherEmail: payment.enrollment.motherEmail || null,
-        fatherName: payment.enrollment.fatherName || null,
-        fatherPhone: payment.enrollment.fatherPhone || null,
-        fatherEmail: payment.enrollment.fatherEmail || null,
         gradeName: payment.enrollment.grade?.name || null,
         clubName: null,
       }
@@ -506,21 +500,6 @@ export default function PaymentDetailsPage() {
                           </div>
                         )}
 
-                        {studentInfo.motherName && (
-                          <div className="flex items-start gap-3 p-3 rounded-xl bg-slate-100/50 dark:bg-slate-800/50">
-                            <div className="size-9 rounded-lg bg-pink-100 dark:bg-pink-900/30 flex items-center justify-center shrink-0">
-                              <User className="size-4 text-pink-600 dark:text-pink-400" />
-                            </div>
-                            <div className="min-w-0">
-                              <div className="text-xs text-slate-500 dark:text-slate-400">Mother</div>
-                              <div className="text-sm font-medium text-slate-900 dark:text-slate-100 truncate">{studentInfo.motherName}</div>
-                              {studentInfo.motherPhone && (
-                                <div className="text-xs font-mono text-slate-600 dark:text-slate-400 tabular-nums">{studentInfo.motherPhone}</div>
-                              )}
-                            </div>
-                          </div>
-                        )}
-
                         {studentInfo.guardianName && (
                           <div className="flex items-start gap-3 p-3 rounded-xl bg-slate-100/50 dark:bg-slate-800/50">
                             <div className="size-9 rounded-lg bg-emerald-100 dark:bg-emerald-900/30 flex items-center justify-center shrink-0">
@@ -531,21 +510,6 @@ export default function PaymentDetailsPage() {
                               <div className="text-sm font-medium text-slate-900 dark:text-slate-100 truncate">{studentInfo.guardianName}</div>
                               {studentInfo.guardianPhone && (
                                 <div className="text-xs font-mono text-slate-600 dark:text-slate-400 tabular-nums">{studentInfo.guardianPhone}</div>
-                              )}
-                            </div>
-                          </div>
-                        )}
-
-                        {studentInfo.fatherName && (
-                          <div className="flex items-start gap-3 p-3 rounded-xl bg-slate-100/50 dark:bg-slate-800/50">
-                            <div className="size-9 rounded-lg bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center shrink-0">
-                              <User className="size-4 text-blue-600 dark:text-blue-400" />
-                            </div>
-                            <div className="min-w-0">
-                              <div className="text-xs text-slate-500 dark:text-slate-400">Father</div>
-                              <div className="text-sm font-medium text-slate-900 dark:text-slate-100 truncate">{studentInfo.fatherName}</div>
-                              {studentInfo.fatherPhone && (
-                                <div className="text-xs font-mono text-slate-600 dark:text-slate-400 tabular-nums">{studentInfo.fatherPhone}</div>
                               )}
                             </div>
                           </div>
@@ -569,34 +533,26 @@ export default function PaymentDetailsPage() {
 
                   <div className="p-6">
                     <div className="space-y-4 relative pl-8 before:absolute before:left-[11px] before:top-8 before:bottom-8 before:w-[2px] before:bg-gradient-to-b before:from-slate-300 before:via-slate-200 before:to-transparent dark:before:from-slate-600 dark:before:via-slate-700 dark:before:to-transparent">
-                      {/* Payment Recorded Event - WITH PAYER INFO */}
-                      <div className="relative group">
-                        <div
-                          className="absolute left-[-27px] top-2 size-6 rounded-full ring-4 ring-background shadow-lg transition-transform group-hover:scale-110"
-                          style={{
-                            background: 'linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)'
-                          }}
-                        />
-                        <div className="bg-white dark:bg-slate-900 rounded-xl border-2 border-slate-200 dark:border-slate-700 p-4 shadow-sm hover:shadow-md transition-shadow">
-                          <div className="flex items-start justify-between gap-3 mb-2">
-                            <div className="text-base font-bold text-slate-900 dark:text-slate-100">
-                              {t.accounting.paymentRecorded}
+                      {/* Person Who Paid - FIRST EVENT */}
+                      {payerInfo && (
+                        <div className="relative group">
+                          <div
+                            className="absolute left-[-27px] top-2 size-6 rounded-full ring-4 ring-background shadow-lg transition-transform group-hover:scale-110"
+                            style={{
+                              background: 'linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%)'
+                            }}
+                          />
+                          <div className="bg-gradient-to-br from-purple-50/50 to-transparent dark:from-purple-950/20 dark:to-transparent rounded-xl border-2 border-purple-200 dark:border-purple-800 p-4 shadow-sm hover:shadow-md transition-shadow">
+                            <div className="flex items-start justify-between gap-3 mb-3">
+                              <div className="text-base font-bold text-purple-900 dark:text-purple-100">
+                                {t.accounting.payerInfo || "Person Who Paid"}
+                              </div>
                             </div>
-                            <Badge variant="outline" className="text-xs px-2 py-0.5 border-slate-300 dark:border-slate-600">
-                              {t.accounting.statusInitial}
-                            </Badge>
-                          </div>
 
-                          <div className="text-xs text-slate-500 dark:text-slate-400 font-mono mb-3 tabular-nums">
-                            {formatDate(payment.recordedAt)}
-                          </div>
-
-                          {/* Payer Information Integrated */}
-                          {payerInfo && (
-                            <div className="mt-4 pt-3 border-t-2 border-slate-100 dark:border-slate-800 space-y-3">
+                            <div className="space-y-3">
                               <div className="flex items-center gap-3">
-                                <div className="size-10 rounded-xl bg-gradient-to-br from-blue-100 to-blue-50 dark:from-blue-900/30 dark:to-blue-900/10 flex items-center justify-center shrink-0 shadow-sm">
-                                  <User className="size-5 text-blue-600 dark:text-blue-400" />
+                                <div className="size-10 rounded-xl bg-gradient-to-br from-purple-100 to-purple-50 dark:from-purple-900/30 dark:to-purple-900/10 flex items-center justify-center shrink-0 shadow-sm">
+                                  <User className="size-5 text-purple-600 dark:text-purple-400" />
                                 </div>
                                 <div className="min-w-0">
                                   <div className="text-sm font-bold text-slate-900 dark:text-slate-100">
@@ -626,37 +582,37 @@ export default function PaymentDetailsPage() {
                                   </div>
                                 )}
                               </div>
-
-                              {/* Payment method and type */}
-                              <div className="grid grid-cols-2 gap-2 pt-2 border-t border-slate-100 dark:border-slate-800">
-                                <div>
-                                  <div className="text-[10px] text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1">Method</div>
-                                  <Badge variant="outline" className="text-xs px-2 py-0.5 w-full justify-start">
-                                    {payment.method === "cash" ? (
-                                      <><BanknoteIcon className="size-3 mr-1.5" /> {t.accounting.cashPayments}</>
-                                    ) : (
-                                      <><Smartphone className="size-3 mr-1.5" /> Orange</>
-                                    )}
-                                  </Badge>
-                                </div>
-                                <div>
-                                  <div className="text-[10px] text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1">Type</div>
-                                  <Badge variant="outline" className="text-xs px-2 py-0.5 w-full justify-start">
-                                    {isClubPayment ? (
-                                      <><Sparkles className="size-3 mr-1.5" /> Club</>
-                                    ) : (
-                                      <><BanknoteIcon className="size-3 mr-1.5" /> Tuition</>
-                                    )}
-                                  </Badge>
-                                </div>
-                              </div>
                             </div>
-                          )}
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Payment Recorded Event */}
+                      <div className="relative group">
+                        <div
+                          className="absolute left-[-27px] top-2 size-6 rounded-full ring-4 ring-background shadow-lg transition-transform group-hover:scale-110"
+                          style={{
+                            background: 'linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)'
+                          }}
+                        />
+                        <div className="bg-white dark:bg-slate-900 rounded-xl border-2 border-slate-200 dark:border-slate-700 p-4 shadow-sm hover:shadow-md transition-shadow">
+                          <div className="flex items-start justify-between gap-3 mb-2">
+                            <div className="text-base font-bold text-slate-900 dark:text-slate-100">
+                              {t.accounting.paymentRecorded}
+                            </div>
+                            <Badge variant="outline" className="text-xs px-2 py-0.5 border-slate-300 dark:border-slate-600">
+                              {t.accounting.statusInitial}
+                            </Badge>
+                          </div>
+
+                          <div className="text-xs text-slate-500 dark:text-slate-400 font-mono mb-3 tabular-nums">
+                            {formatDate(payment.recordedAt)}
+                          </div>
 
                           {payment.recorder && (
                             <div className="flex items-center gap-2 mt-3 pt-3 border-t border-slate-100 dark:border-slate-800 text-xs text-slate-500 dark:text-slate-400">
                               <User className="size-3.5" />
-                              <span className="receipt-sans">Recorded by {payment.recorder.name}</span>
+                              <span>Recorded by {payment.recorder.name}</span>
                             </div>
                           )}
                         </div>

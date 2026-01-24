@@ -58,6 +58,16 @@ export async function POST(req: NextRequest, { params }: RouteParams) {
 
     // Handle cash expenses - deduct from registry
     if (existingExpense.method === "cash") {
+      // Check if registry is open
+      if (currentBalance.registryBalance === 0) {
+        return NextResponse.json(
+          {
+            message: "La caisse est fermée. Veuillez d'abord effectuer l'ouverture journalière pour payer des dépenses en espèces.",
+          },
+          { status: 400 }
+        )
+      }
+
       // Check sufficient funds in registry
       if (currentBalance.registryBalance < existingExpense.amount) {
         return NextResponse.json(

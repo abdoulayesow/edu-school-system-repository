@@ -10,8 +10,20 @@ const createExpenseSchema = z.object({
   amount: z.number().positive("Amount must be positive"),
   method: z.enum(["cash", "orange_money"]).default("cash"),
   date: z.string().transform((s) => new Date(s)),
+
+  // DEPRECATED (kept for backwards compatibility)
   vendorName: z.string().optional(),
   receiptUrl: z.string().optional(),
+
+  // NEW FIELDS
+  supplierId: z.string().optional(),
+  supplierName: z.string().optional(), // For "Other" custom supplier
+  billingReferenceId: z.string().optional(),
+  receiptFileData: z.string().optional(), // base64 encoded file data
+  receiptFileName: z.string().optional(),
+  receiptFileType: z.string().optional(),
+  transactionRef: z.string().optional(),
+  initiatedById: z.string().optional(),
 })
 
 /**
@@ -63,6 +75,8 @@ export async function GET(req: NextRequest) {
         include: {
           requester: { select: { id: true, name: true, email: true } },
           approver: { select: { id: true, name: true, email: true } },
+          supplier: { select: { id: true, name: true, category: true, phone: true } },
+          initiatedBy: { select: { id: true, name: true, email: true } },
         },
         orderBy: { date: "desc" },
         take: limit,
@@ -101,6 +115,30 @@ export async function POST(req: NextRequest) {
     const body = await req.json()
     const validated = createExpenseSchema.parse(body)
 
+    // Handle custom supplier creation if supplierName is provided
+    let supplierId = validated.supplierId
+
+    if (validated.supplierName && !supplierId) {
+      // Create a new supplier for the "Other" custom supplier option
+      const newSupplier = await prisma.supplier.create({
+        data: {
+          name: validated.supplierName,
+          category: validated.category,
+        },
+      })
+      supplierId = newSupplier.id
+    }
+
+    // Convert base64 file data to Buffer if provided
+    let receiptFile: Buffer | undefined
+    if (validated.receiptFileData) {
+      // Remove data URL prefix if present (data:image/png;base64,...)
+      const base64Data = validated.receiptFileData.includes(",")
+        ? validated.receiptFileData.split(",")[1]
+        : validated.receiptFileData
+      receiptFile = Buffer.from(base64Data, "base64")
+    }
+
     const expense = await prisma.expense.create({
       data: {
         category: validated.category,
@@ -108,13 +146,26 @@ export async function POST(req: NextRequest) {
         amount: validated.amount,
         method: validated.method,
         date: validated.date,
-        vendorName: validated.vendorName,
-        receiptUrl: validated.receiptUrl,
         status: "pending",
         requestedBy: session!.user.id,
+
+        // DEPRECATED fields (backwards compatibility)
+        vendorName: validated.vendorName,
+        receiptUrl: validated.receiptUrl,
+
+        // NEW FIELDS
+        supplierId,
+        billingReferenceId: validated.billingReferenceId,
+        // @ts-expect-error Buffer extends Uint8Array in Node.js runtime, TypeScript generic mismatch
+        receiptFile,
+        receiptFileName: validated.receiptFileName,
+        receiptFileType: validated.receiptFileType,
+        initiatedById: validated.initiatedById,
       },
       include: {
         requester: { select: { id: true, name: true, email: true } },
+        supplier: { select: { id: true, name: true, category: true } },
+        initiatedBy: { select: { id: true, name: true, email: true } },
       },
     })
 

@@ -6,8 +6,9 @@ import { cn } from "@/lib/utils"
 
 export function PaymentStatsSkeletoncard({ className }: { className?: string }) {
   return (
-    <Card className={cn("animate-pulse", className)}>
-      <CardContent className="pt-6 pb-6">
+    <Card className={cn("border-2 shadow-lg overflow-hidden rounded-xl", className)}>
+      <div className="h-2 bg-gradient-to-r from-slate-200 to-slate-300 dark:from-slate-700 dark:to-slate-600 animate-pulse" />
+      <CardContent className="pt-6 pb-6 animate-pulse">
         <div className="space-y-4">
           <div className="flex items-center gap-2">
             <Skeleton className="size-5 rounded" />
@@ -26,8 +27,9 @@ export function PaymentStatsSkeletoncard({ className }: { className?: string }) 
 
 export function PaymentTypeSkeletonCard({ className }: { className?: string }) {
   return (
-    <Card className={cn("animate-pulse", className)}>
-      <CardContent className="pt-6 pb-6">
+    <Card className={cn("border-2 shadow-lg overflow-hidden rounded-xl", className)}>
+      <div className="h-2 bg-gradient-to-r from-slate-200 to-slate-300 dark:from-slate-700 dark:to-slate-600 animate-pulse" />
+      <CardContent className="pt-6 pb-6 animate-pulse">
         <div className="space-y-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">

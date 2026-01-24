@@ -123,6 +123,11 @@ export async function POST(req: NextRequest, { params }: RouteParams) {
       if (currentBalance) {
         // Update balances based on payment method
         if (validated.method === "cash") {
+          // Check if registry is open (registryBalance > 0)
+          if (currentBalance.registryBalance === 0) {
+            throw new Error("La caisse est fermée. Veuillez d'abord effectuer l'ouverture journalière pour enregistrer des paiements en espèces.")
+          }
+
           const newSafeBalance = currentBalance.safeBalance + validated.amount
           await tx.safeTransaction.create({
             data: {

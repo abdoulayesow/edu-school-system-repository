@@ -1,6 +1,7 @@
 "use client"
 
 import { useState, useEffect, useMemo } from "react"
+import { useRouter } from "next/navigation"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -9,15 +10,7 @@ import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog"
+// Removed Dialog import - now using wizard at /expenses/new
 import {
   AlertDialog,
   AlertDialogAction,
@@ -63,10 +56,11 @@ import { PageContainer } from "@/components/layout"
 import { PermissionGuard, usePermissions } from "@/components/permission-guard"
 import { DataPagination } from "@/components/data-pagination"
 import { formatDate as formatDateUtil } from "@/lib/utils"
-import { useExpenses, useCreateExpense, useUpdateExpenseStatus, useDeleteExpense } from "@/lib/hooks/use-api"
+import { useExpenses, useUpdateExpenseStatus, useDeleteExpense } from "@/lib/hooks/use-api"
 import { getExpenseRowStatus } from "@/lib/status-helpers"
 import { Empty, EmptyMedia, EmptyTitle, EmptyDescription } from "@/components/ui/empty"
 import { EmptyExpensesIllustration } from "@/components/illustrations"
+import { RegistryStatusIndicator } from "@/components/registry-status-indicator"
 
 const ITEMS_PER_PAGE = 50
 
@@ -107,6 +101,7 @@ type PaymentMethod = "cash" | "orange_money"
 
 export default function ExpensesPage() {
   const { t, locale } = useI18n()
+  const router = useRouter()
 
   // Hydration guard - prevents SSR/client mismatch with Radix IDs
   const [isMounted, setIsMounted] = useState(false)
@@ -155,7 +150,7 @@ export default function ExpensesPage() {
     limit,
     offset,
   })
-  const createExpenseMutation = useCreateExpense()
+  // Removed createExpenseMutation - now using wizard
   const updateStatusMutation = useUpdateExpenseStatus()
   const deleteExpenseMutation = useDeleteExpense()
 
@@ -172,31 +167,15 @@ export default function ExpensesPage() {
   const error = queryError ? "Failed to load expenses" : null
 
   // Combined mutation pending state
-  const isSubmitting = createExpenseMutation.isPending || updateStatusMutation.isPending || deleteExpenseMutation.isPending
+  const isSubmitting = updateStatusMutation.isPending || deleteExpenseMutation.isPending
 
   // Dialog states
-  const [isNewExpenseOpen, setIsNewExpenseOpen] = useState(false)
+  // Removed dialog state - now using wizard at /expenses/new
   const [selectedExpense, setSelectedExpense] = useState<Expense | null>(null)
   const [actionType, setActionType] = useState<"approve" | "reject" | "mark_paid" | "delete" | null>(null)
   const [rejectionReason, setRejectionReason] = useState("")
 
-  // New expense form - initialize date only on client to avoid hydration mismatch
-  const [newExpense, setNewExpense] = useState({
-    category: "" as ExpenseCategory | "",
-    description: "",
-    amount: "",
-    method: "cash" as PaymentMethod,
-    date: "",
-    vendorName: "",
-  })
-
-  // Set the date on client mount
-  useEffect(() => {
-    setNewExpense(prev => ({
-      ...prev,
-      date: new Date().toISOString().split("T")[0]
-    }))
-  }, [])
+  // New expense form removed - now using wizard at /expenses/new
 
   // Server-side search is now handled by the API
   const filteredExpenses = expenses
@@ -307,33 +286,7 @@ export default function ExpensesPage() {
     return method === "orange_money" ? t.expenses.orangeMoney : t.expenses.cash
   }
 
-  // Handle create expense
-  const handleCreateExpense = () => {
-    if (!newExpense.category || !newExpense.description || !newExpense.amount) {
-      return
-    }
-
-    createExpenseMutation.mutate({
-      category: newExpense.category,
-      description: newExpense.description,
-      amount: parseFloat(newExpense.amount),
-      method: newExpense.method,
-      date: newExpense.date,
-      vendorName: newExpense.vendorName || undefined,
-    }, {
-      onSuccess: () => {
-        setIsNewExpenseOpen(false)
-        setNewExpense({
-          category: "",
-          description: "",
-          amount: "",
-          method: "cash",
-          date: new Date().toISOString().split("T")[0],
-          vendorName: "",
-        })
-      },
-    })
-  }
+  // handleCreateExpense removed - now using wizard at /expenses/new
 
   // Handle expense action (approve, reject, mark_paid)
   const handleExpenseAction = () => {
@@ -400,122 +353,27 @@ export default function ExpensesPage() {
     <PageContainer maxWidth="full">
         {/* Header */}
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
-          <div>
+          <div className="flex-1">
             <h1 className="text-3xl font-bold text-foreground mb-2">{t.expenses.title}</h1>
             <p className="text-muted-foreground">{t.expenses.subtitle}</p>
           </div>
+
+          {/* Registry Status Indicator - only shows when closed */}
+          <RegistryStatusIndicator className="sm:order-2" />
 
           <PermissionGuard
             resource="safe_expense"
             action="create"
             loading={<div className="h-9 w-36 animate-pulse bg-muted rounded-md" />}
+            className="sm:order-3"
           >
-            <Dialog open={isNewExpenseOpen} onOpenChange={setIsNewExpenseOpen}>
-              <DialogTrigger asChild>
-                <Button variant="gold">
-                  <Plus className="size-4 mr-2" />
-                  {t.expenses.newExpense}
-                </Button>
-              </DialogTrigger>
-            <DialogContent className="sm:max-w-[500px]">
-              <DialogHeader>
-                <DialogTitle>{t.expenses.newExpense}</DialogTitle>
-                <DialogDescription>
-                  {t.expenses.subtitle}
-                </DialogDescription>
-              </DialogHeader>
-              <div className="grid gap-4 py-4">
-                <div className="grid gap-2">
-                  <Label>{t.expenses.category} *</Label>
-                  <Select
-                    value={newExpense.category}
-                    onValueChange={(value) => setNewExpense({ ...newExpense, category: value as ExpenseCategory })}
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder={t.expenses.selectCategory} />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="supplies">{t.expenses.categories.supplies}</SelectItem>
-                      <SelectItem value="maintenance">{t.expenses.categories.maintenance}</SelectItem>
-                      <SelectItem value="utilities">{t.expenses.categories.utilities}</SelectItem>
-                      <SelectItem value="salary">{t.expenses.categories.salary}</SelectItem>
-                      <SelectItem value="transport">{t.expenses.categories.transport}</SelectItem>
-                      <SelectItem value="communication">{t.expenses.categories.communication}</SelectItem>
-                      <SelectItem value="other">{t.expenses.categories.other}</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                <div className="grid gap-2">
-                  <Label>{t.expenses.description} *</Label>
-                  <Textarea
-                    value={newExpense.description}
-                    onChange={(e) => setNewExpense({ ...newExpense, description: e.target.value })}
-                    placeholder={t.expenses.descriptionPlaceholder}
-                    rows={2}
-                  />
-                </div>
-
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="grid gap-2">
-                    <Label>{t.common.amount} (GNF) *</Label>
-                    <Input
-                      type="number"
-                      value={newExpense.amount}
-                      onChange={(e) => setNewExpense({ ...newExpense, amount: e.target.value })}
-                      placeholder="0"
-                    />
-                  </div>
-                  <div className="grid gap-2">
-                    <Label>{t.common.date}</Label>
-                    <Input
-                      type="date"
-                      value={newExpense.date}
-                      onChange={(e) => setNewExpense({ ...newExpense, date: e.target.value })}
-                    />
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="grid gap-2">
-                    <Label>{t.expenses.paymentMethod}</Label>
-                    <Select
-                      value={newExpense.method}
-                      onValueChange={(value) => setNewExpense({ ...newExpense, method: value as PaymentMethod })}
-                    >
-                      <SelectTrigger>
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="cash">{t.expenses.cash}</SelectItem>
-                        <SelectItem value="orange_money">{t.expenses.orangeMoney}</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  <div className="grid gap-2">
-                    <Label>{t.expenses.vendor}</Label>
-                    <Input
-                      value={newExpense.vendorName}
-                      onChange={(e) => setNewExpense({ ...newExpense, vendorName: e.target.value })}
-                      placeholder={t.expenses.vendorPlaceholder}
-                    />
-                  </div>
-                </div>
-              </div>
-              <DialogFooter>
-                <Button variant="outline" onClick={() => setIsNewExpenseOpen(false)}>
-                  {t.common.cancel}
-                </Button>
-                <Button
-                  onClick={handleCreateExpense}
-                  disabled={isSubmitting || !newExpense.category || !newExpense.description || !newExpense.amount}
-                >
-                  {isSubmitting && <Loader2 className="size-4 mr-2 animate-spin" />}
-                  {t.common.save}
-                </Button>
-              </DialogFooter>
-            </DialogContent>
-            </Dialog>
+            <Button
+              variant="gold"
+              onClick={() => router.push('/expenses/new')}
+            >
+              <Plus className="size-4 mr-2" />
+              {t.expenses.newExpense}
+            </Button>
           </PermissionGuard>
         </div>
 
@@ -670,7 +528,12 @@ export default function ExpensesPage() {
                   </TableHeader>
                   <TableBody>
                     {filteredExpenses.map((expense) => (
-                        <TableRow key={expense.id} status={getExpenseRowStatus(expense.status)}>
+                        <TableRow
+                          key={expense.id}
+                          status={getExpenseRowStatus(expense.status)}
+                          className="cursor-pointer"
+                          onClick={() => router.push(`/expenses/${expense.id}`)}
+                        >
                           <TableCell className="text-sm">
                             {formatDate(expense.date)}
                           </TableCell>
@@ -703,7 +566,11 @@ export default function ExpensesPage() {
                           <TableCell className="text-right">
                             <DropdownMenu>
                               <DropdownMenuTrigger asChild>
-                                <Button variant="ghost" size="sm">
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  onClick={(e) => e.stopPropagation()}
+                                >
                                   <MoreHorizontal className="size-4" />
                                 </Button>
                               </DropdownMenuTrigger>

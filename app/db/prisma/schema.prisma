@@ -44,6 +44,7 @@ model User {
   reconciledBankDeposits     BankDeposit[]           @relation("BankDepositReconciler")
   requestedExpenses          Expense[]               @relation("ExpenseRequester")
   approvedExpenses           Expense[]               @relation("ExpenseApprover")
+  initiatedExpenses          Expense[]               @relation("ExpenseInitiator")
   assignedRoomAssignments    StudentRoomAssignment[] @relation("RoomAssigner")
   sentInvitations            UserInvitation[]        @relation("InvitationSender")
   createdClubs               Club[]                  @relation("ClubCreator")
@@ -674,32 +675,62 @@ model BankDeposit {
   @@index([depositDate, isReconciled])
 }
 
+model Supplier {
+  id        String           @id @default(cuid())
+  name      String
+  category  ExpenseCategory? // null = available for all categories
+  phone     String?
+  email     String?
+  address   String?
+  createdAt DateTime         @default(now())
+  updatedAt DateTime         @updatedAt
+
+  expenses Expense[]
+
+  @@index([category])
+  @@index([name])
+}
+
 model Expense {
-  id              String          @id @default(cuid())
-  category        ExpenseCategory
-  description     String
-  amount          Int
-  method          PaymentMethod
-  date            DateTime
-  vendorName      String?
-  receiptUrl      String?
-  status          ExpenseStatus   @default(pending)
-  requestedBy     String
-  approvedBy      String?
-  approvedAt      DateTime?
-  rejectionReason String?
-  paidAt          DateTime?
-  syncVersion     Int             @default(0)
-  createdAt       DateTime        @default(now())
-  updatedAt       DateTime        @updatedAt
-  requester       User            @relation("ExpenseRequester", fields: [requestedBy], references: [id])
-  approver        User?           @relation("ExpenseApprover", fields: [approvedBy], references: [id])
+  id                 String          @id @default(cuid())
+  category           ExpenseCategory
+  description        String
+  amount             Int
+  method             PaymentMethod
+  date               DateTime
+  vendorName         String?         // DEPRECATED: Use supplier relation instead
+  receiptUrl         String?         // DEPRECATED: Use receiptFile instead
+  status             ExpenseStatus   @default(pending)
+  requestedBy        String
+  approvedBy         String?
+  approvedAt         DateTime?
+  rejectionReason    String?
+  paidAt             DateTime?
+
+  // NEW FIELDS
+  supplierId         String?
+  billingReferenceId String?         // Invoice/receipt number
+  receiptFile        Bytes?          @db.ByteA // Store file content in database
+  receiptFileName    String?         // Original filename
+  receiptFileType    String?         // MIME type (image/png, application/pdf, etc.)
+  initiatedById      String?         // Staff who initiated the expense
+
+  syncVersion        Int             @default(0)
+  createdAt          DateTime        @default(now())
+  updatedAt          DateTime        @updatedAt
+
+  supplier           Supplier?       @relation(fields: [supplierId], references: [id])
+  requester          User            @relation("ExpenseRequester", fields: [requestedBy], references: [id])
+  approver           User?           @relation("ExpenseApprover", fields: [approvedBy], references: [id])
+  initiatedBy        User?           @relation("ExpenseInitiator", fields: [initiatedById], references: [id])
 
   @@index([category])
   @@index([date])
   @@index([status])
   @@index([requestedBy])
   @@index([approvedBy])
+  @@index([supplierId])
+  @@index([initiatedById])
 }
 
 model GradeRoom {

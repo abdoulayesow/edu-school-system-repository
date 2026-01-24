@@ -78,7 +78,53 @@ interface PermissionGuardProps {
 
 // Cache for permission results to avoid redundant API calls
 const permissionCache = new Map<string, { granted: boolean; scope?: string; timestamp: number }>()
-const CACHE_TTL = 60000 // 1 minute cache
+const CACHE_TTL = 300000 // 5 minute cache (increased from 1 minute)
+
+// SessionStorage key for persistence across page refreshes
+const STORAGE_KEY = "permission_cache"
+
+// Load cache from sessionStorage on initialization
+function loadCacheFromStorage() {
+  if (typeof window === "undefined") return
+
+  try {
+    const stored = sessionStorage.getItem(STORAGE_KEY)
+    if (stored) {
+      const parsed = JSON.parse(stored)
+      Object.entries(parsed).forEach(([key, value]: [string, any]) => {
+        // Only restore if not expired
+        if (value.timestamp && Date.now() - value.timestamp < CACHE_TTL) {
+          permissionCache.set(key, value)
+        }
+      })
+    }
+  } catch (error) {
+    console.error("Failed to load permission cache from storage:", error)
+  }
+}
+
+// Save cache to sessionStorage
+function saveCacheToStorage() {
+  if (typeof window === "undefined") return
+
+  try {
+    const cacheObj: Record<string, any> = {}
+    permissionCache.forEach((value, key) => {
+      // Only save non-expired entries
+      if (Date.now() - value.timestamp < CACHE_TTL) {
+        cacheObj[key] = value
+      }
+    })
+    sessionStorage.setItem(STORAGE_KEY, JSON.stringify(cacheObj))
+  } catch (error) {
+    console.error("Failed to save permission cache to storage:", error)
+  }
+}
+
+// Initialize cache from storage
+if (typeof window !== "undefined") {
+  loadCacheFromStorage()
+}
 
 function getCacheKey(checks: PermissionCheck[]): string {
   return checks.map(c => `${c.resource}:${c.action}`).sort().join("|")
@@ -157,6 +203,9 @@ export function PermissionGuard({
         granted: anyGranted,
         timestamp: Date.now(),
       })
+
+      // Persist to sessionStorage
+      saveCacheToStorage()
 
       setGranted(anyGranted)
       setIsLoading(false)
@@ -375,6 +424,9 @@ export function usePermission(resource: string, action: string) {
           timestamp: Date.now(),
         })
 
+        // Persist to sessionStorage
+        saveCacheToStorage()
+
         setGranted(data.granted)
         setScope(data.scope || null)
         setLoading(false)
@@ -472,4 +524,46 @@ export function usePermissions(checks: PermissionCheck[]) {
  */
 export function clearPermissionCache() {
   permissionCache.clear()
+  if (typeof window !== "undefined") {
+    sessionStorage.removeItem(STORAGE_KEY)
+  }
+}
+
+/**
+ * Preload common permissions to warm the cache
+ * Call this after login or on app initialization
+ */
+export async function preloadPermissions(checks: PermissionCheck[]) {
+  if (checks.length === 0) return
+
+  try {
+    const response = await fetch("/api/permissions/check-batch", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ checks }),
+    })
+
+    if (!response.ok) {
+      console.error("Failed to preload permissions:", await response.text())
+      return
+    }
+
+    const data = await response.json()
+    const results = data.results
+
+    // Update cache with all results
+    results.forEach((result: PermissionCheck & { granted: boolean; scope?: string }) => {
+      const key = `${result.resource}:${result.action}`
+      permissionCache.set(key, {
+        granted: result.granted,
+        scope: result.scope,
+        timestamp: Date.now(),
+      })
+    })
+
+    // Persist to sessionStorage
+    saveCacheToStorage()
+  } catch (error) {
+    console.error("Error preloading permissions:", error)
+  }
 }
