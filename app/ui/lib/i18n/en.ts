@@ -2508,6 +2508,7 @@ export const en: TranslationKeys = {
   // Grading System
   grading: {
     // Page titles
+    gradingSectionSubtitle: "Manage student grades, evaluations, and academic performance",
     gradeEntry: "Grade Entry",
     gradeEntrySubtitle: "Enter student grades for the current trimester",
     evaluations: "Evaluations",
@@ -2850,6 +2851,10 @@ export const en: TranslationKeys = {
     dailyVerificationWarning: "The daily cash verification has not been completed today.",
     verificationRecommendation: "It is recommended to verify the safe balance before recording transactions.",
     continueAnyway: "Continue Anyway",
+
+    // Registry status warnings
+    registryClosedTitle: "Registry Closed",
+    registryClosedMessage: "The registry is currently closed. Cash payments and expenses cannot be processed. Please open the registry for the day to begin operations.",
 
     // Registry (Caisse) - Daily Operations
     registry: {

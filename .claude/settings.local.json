@@ -58,11 +58,11 @@
       "WebFetch(domain:github.com)",
       "WebFetch(domain:sli.dev)",
       "Bash(psql:*)",
-      "Skill(audit-design)",
-      "Skill(audit-design:*)",
       "Bash(npm run lint:*)",
       "Bash(git diff:*)",
-      "Bash(git -C c:/workspace/sources/edu-school-system-repository log --oneline -10)"
+      "Bash(git -C c:/workspace/sources/edu-school-system-repository log --oneline -10)",
+      "Bash(git -C c:/workspace/sources/edu-school-system-repository status --short)",
+      "Bash(git -C c:/workspace/sources/edu-school-system-repository diff --stat)"
     ],
     "additionalDirectories": [
       "c:\\workspace\\sources\\edu-school-system-repository"

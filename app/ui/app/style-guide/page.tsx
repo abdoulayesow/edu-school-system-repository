@@ -151,71 +151,55 @@ export default function StyleGuidePage() {
 
   return (
     <PageContainer maxWidth="full">
-      {/* Hero Header with Gradient */}
-      <div className="relative mb-10 overflow-hidden rounded-2xl p-8 shadow-2xl">
-        {/* Animated gradient background */}
-        <div
-          className="absolute inset-0"
-          style={{
-            background: 'linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%)',
-          }}
-        />
+      {/* Clean Professional Header with Maroon Accent */}
+      <div className="relative mb-10 overflow-hidden rounded-2xl border border-border bg-card shadow-lg">
+        {/* Maroon accent bar */}
+        <div className="h-1 bg-gspn-maroon-500" />
 
-        {/* Decorative elements */}
-        <div className="absolute inset-0 opacity-20">
-          <div className="absolute inset-0" style={{
-            backgroundImage: `linear-gradient(to right, rgba(255,255,255,0.1) 1px, transparent 1px),
-                             linear-gradient(to bottom, rgba(255,255,255,0.1) 1px, transparent 1px)`,
-            backgroundSize: '40px 40px'
-          }} />
-        </div>
-        <div className="absolute -top-20 -right-20 h-64 w-64 rounded-full bg-white/10 blur-3xl" />
-        <div className="absolute -bottom-10 -left-10 h-48 w-48 rounded-full bg-white/10 blur-2xl" />
-
-        <div className="relative">
+        <div className="p-8">
           <div className="flex items-start justify-between">
             <div>
               <div className="flex items-center gap-3 mb-3">
-                <div className="p-2.5 bg-white/20 backdrop-blur-sm rounded-xl shadow-lg">
-                  <BookOpen className="h-7 w-7 text-white" />
+                <div className="p-2.5 bg-gspn-maroon-500/10 rounded-xl">
+                  <BookOpen className="h-7 w-7 text-gspn-maroon-500" />
                 </div>
-                <Badge className="bg-white/20 backdrop-blur-sm text-white border-white/30 font-mono text-xs px-3 py-1">
+                <Badge variant="outline" className="font-mono text-xs px-3 py-1 border-gspn-gold-500 text-gspn-gold-600 dark:text-gspn-gold-400">
                   Design System v1.0
                 </Badge>
               </div>
-              <h1 className="font-display text-5xl font-extrabold tracking-tight text-white mb-3">
+              <h1 className="font-display text-5xl font-extrabold tracking-tight text-foreground mb-3">
                 Design Tokens
               </h1>
-              <p className="text-white/90 font-medium max-w-2xl text-lg">
+              <p className="text-muted-foreground font-medium max-w-2xl text-lg">
                 Visual language reference — colors, typography, spacing, and component patterns for consistent, beautiful interfaces
               </p>
             </div>
             <a
               href="/brand"
-              className="hidden md:flex items-center gap-2 px-5 py-2.5 bg-white/20 backdrop-blur-sm hover:bg-white/30 rounded-xl text-sm font-semibold text-white transition-all shadow-lg hover:shadow-xl"
+              className="hidden md:flex items-center gap-2 px-5 py-2.5 bg-gspn-maroon-500/10 hover:bg-gspn-maroon-500/20 rounded-xl text-sm font-semibold text-gspn-maroon-600 dark:text-gspn-maroon-400 transition-all"
             >
               Component Showcase
               <ExternalLink className="h-4 w-4" />
             </a>
           </div>
 
-          {/* Quick Stats with gradient cards */}
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-8 pt-8 border-t border-white/20">
-            <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20">
-              <p className="font-mono text-3xl font-bold text-white">4</p>
-              <p className="text-sm text-white/80 mt-1">Font Families</p>
+          {/* Quick Stats with clean cards */}
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-8 pt-8 border-t border-border">
+            <div className="bg-muted/50 rounded-xl p-4 border border-border">
+              <p className="font-mono text-3xl font-bold text-gspn-maroon-600 dark:text-gspn-maroon-400">4</p>
+              <p className="text-sm text-muted-foreground mt-1">Font Families</p>
             </div>
-            <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20">
-              <p className="font-mono text-3xl font-bold text-white">21</p>
-              <p className="text-sm text-white/80 mt-1">Color Tokens</p>
+            <div className="bg-muted/50 rounded-xl p-4 border border-border">
+              <p className="font-mono text-3xl font-bold text-gspn-maroon-600 dark:text-gspn-maroon-400">21</p>
+              <p className="text-sm text-muted-foreground mt-1">Color Tokens</p>
             </div>
-            <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20">
-              <p className="font-mono text-3xl font-bold text-white">12</p>
-              <p className="text-sm text-white/80 mt-1">Shadow Levels</p>
+            <div className="bg-muted/50 rounded-xl p-4 border border-border">
+              <p className="font-mono text-3xl font-bold text-gspn-maroon-600 dark:text-gspn-maroon-400">12</p>
+              <p className="text-sm text-muted-foreground mt-1">Shadow Levels</p>
             </div>
-            <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20">
-              <p className="font-mono text-3xl font-bold text-white">5</p>
-              <p className="text-sm text-white/80 mt-1">Animations</p>
+            <div className="bg-muted/50 rounded-xl p-4 border border-border">
+              <p className="font-mono text-3xl font-bold text-gspn-maroon-600 dark:text-gspn-maroon-400">5</p>
+              <p className="text-sm text-muted-foreground mt-1">Animations</p>
             </div>
           </div>
         </div>
@@ -226,7 +210,7 @@ export default function StyleGuidePage() {
         <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
         <Input
           placeholder="Search tokens... (e.g., 'gold', 'heading', 'shadow')"
-          className="pl-12 h-12 text-base max-w-2xl border-2 focus-visible:ring-2 focus-visible:ring-purple-500"
+          className="pl-12 h-12 text-base max-w-2xl border-2 focus-visible:ring-2 focus-visible:ring-gspn-gold-500"
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
         />
@@ -263,11 +247,10 @@ export default function StyleGuidePage() {
         {/* COLORS TAB */}
         <TabsContent value="colors" className="space-y-6">
           {/* Brand Colors */}
-          <Card className="border-2 shadow-lg overflow-hidden">
-            <div className="h-2 bg-gradient-to-r from-purple-500 via-blue-500 to-purple-500" />
-            <CardHeader className="bg-gradient-to-br from-purple-50/50 to-transparent dark:from-purple-950/20">
+          <Card className="border shadow-sm overflow-hidden">
+            <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <div className="h-1.5 w-1.5 rounded-full bg-purple-500" />
+                <div className="h-2 w-2 rounded-full bg-gspn-maroon-500" />
                 Brand Colors
               </CardTitle>
             </CardHeader>
@@ -293,11 +276,10 @@ export default function StyleGuidePage() {
           </Card>
 
           {/* Semantic Colors */}
-          <Card className="border-2 shadow-lg overflow-hidden">
-            <div className="h-2 bg-gradient-to-r from-blue-500 via-cyan-500 to-blue-500" />
-            <CardHeader className="bg-gradient-to-br from-blue-50/50 to-transparent dark:from-blue-950/20">
+          <Card className="border shadow-sm overflow-hidden">
+            <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <div className="h-1.5 w-1.5 rounded-full bg-blue-500" />
+                <div className="h-2 w-2 rounded-full bg-gspn-maroon-500" />
                 Semantic Colors
               </CardTitle>
             </CardHeader>
@@ -349,11 +331,10 @@ export default function StyleGuidePage() {
           </Card>
 
           {/* Maroon Scale */}
-          <Card className="border-2 shadow-lg overflow-hidden">
-            <div className="h-2 bg-gradient-to-r from-gspn-maroon-500 via-gspn-maroon-700 to-gspn-maroon-500" />
-            <CardHeader className="bg-gradient-to-br from-gspn-maroon-50/50 to-transparent dark:from-gspn-maroon-950/20">
+          <Card className="border shadow-sm overflow-hidden">
+            <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <div className="h-1.5 w-1.5 rounded-full bg-gspn-maroon-600" />
+                <div className="h-2 w-2 rounded-full bg-gspn-maroon-500" />
                 Maroon Scale (gspn-maroon)
               </CardTitle>
             </CardHeader>
@@ -374,11 +355,10 @@ export default function StyleGuidePage() {
           </Card>
 
           {/* Gold Scale */}
-          <Card className="border-2 shadow-lg overflow-hidden">
-            <div className="h-2 bg-gradient-to-r from-gspn-gold-400 via-gspn-gold-600 to-gspn-gold-400" />
-            <CardHeader className="bg-gradient-to-br from-gspn-gold-50/50 to-transparent dark:from-gspn-gold-950/20">
+          <Card className="border shadow-sm overflow-hidden">
+            <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <div className="h-1.5 w-1.5 rounded-full bg-gspn-gold-500" />
+                <div className="h-2 w-2 rounded-full bg-gspn-maroon-500" />
                 Gold Scale (gspn-gold)
               </CardTitle>
             </CardHeader>
@@ -399,11 +379,10 @@ export default function StyleGuidePage() {
           </Card>
 
           {/* Navigation Colors */}
-          <Card className="border-2 shadow-lg overflow-hidden">
-            <div className="h-2 bg-gradient-to-r from-slate-500 via-slate-700 to-slate-500" />
-            <CardHeader className="bg-gradient-to-br from-slate-50/50 to-transparent dark:from-slate-900/20">
+          <Card className="border shadow-sm overflow-hidden">
+            <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <div className="h-1.5 w-1.5 rounded-full bg-slate-600" />
+                <div className="h-2 w-2 rounded-full bg-gspn-maroon-500" />
                 Navigation Colors
               </CardTitle>
             </CardHeader>
@@ -434,11 +413,10 @@ export default function StyleGuidePage() {
           </Card>
 
           {/* Chart Colors */}
-          <Card className="border-2 shadow-lg overflow-hidden">
-            <div className="h-2 bg-gradient-to-r from-pink-500 via-purple-500 to-blue-500" />
-            <CardHeader className="bg-gradient-to-br from-purple-50/50 to-transparent dark:from-purple-950/20">
+          <Card className="border shadow-sm overflow-hidden">
+            <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <div className="h-1.5 w-1.5 rounded-full bg-purple-500" />
+                <div className="h-2 w-2 rounded-full bg-gspn-maroon-500" />
                 Chart Colors
               </CardTitle>
             </CardHeader>
@@ -465,11 +443,10 @@ export default function StyleGuidePage() {
         {/* TYPOGRAPHY TAB */}
         <TabsContent value="typography" className="space-y-6">
           {/* Font Families */}
-          <Card className="border-2 shadow-lg overflow-hidden">
-            <div className="h-2 bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500" />
-            <CardHeader className="bg-gradient-to-br from-indigo-50/50 to-transparent dark:from-indigo-950/20">
+          <Card className="border shadow-sm overflow-hidden">
+            <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <div className="h-1.5 w-1.5 rounded-full bg-indigo-500" />
+                <div className="h-2 w-2 rounded-full bg-gspn-maroon-500" />
                 Font Families
               </CardTitle>
             </CardHeader>
@@ -524,11 +501,10 @@ export default function StyleGuidePage() {
           </Card>
 
           {/* Headings */}
-          <Card className="border-2 shadow-lg overflow-hidden">
-            <div className="h-2 bg-gradient-to-r from-violet-500 to-purple-500" />
-            <CardHeader className="bg-gradient-to-br from-violet-50/50 to-transparent dark:from-violet-950/20">
+          <Card className="border shadow-sm overflow-hidden">
+            <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <div className="h-1.5 w-1.5 rounded-full bg-violet-500" />
+                <div className="h-2 w-2 rounded-full bg-gspn-maroon-500" />
                 Heading Styles
               </CardTitle>
             </CardHeader>
@@ -557,11 +533,10 @@ export default function StyleGuidePage() {
           </Card>
 
           {/* Body Text */}
-          <Card className="border-2 shadow-lg overflow-hidden">
-            <div className="h-2 bg-gradient-to-r from-blue-500 to-cyan-500" />
-            <CardHeader className="bg-gradient-to-br from-blue-50/50 to-transparent dark:from-blue-950/20">
+          <Card className="border shadow-sm overflow-hidden">
+            <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <div className="h-1.5 w-1.5 rounded-full bg-blue-500" />
+                <div className="h-2 w-2 rounded-full bg-gspn-maroon-500" />
                 Body Text Sizes
               </CardTitle>
             </CardHeader>
@@ -590,11 +565,10 @@ export default function StyleGuidePage() {
           </Card>
 
           {/* Stats */}
-          <Card className="border-2 shadow-lg overflow-hidden">
-            <div className="h-2 bg-gradient-to-r from-emerald-500 to-teal-500" />
-            <CardHeader className="bg-gradient-to-br from-emerald-50/50 to-transparent dark:from-emerald-950/20">
+          <Card className="border shadow-sm overflow-hidden">
+            <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <div className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
+                <div className="h-2 w-2 rounded-full bg-gspn-maroon-500" />
                 Stat Numbers
               </CardTitle>
             </CardHeader>
@@ -628,11 +602,10 @@ export default function StyleGuidePage() {
           </Card>
 
           {/* Currency */}
-          <Card className="border-2 shadow-lg overflow-hidden">
-            <div className="h-2 bg-gradient-to-r from-amber-500 to-orange-500" />
-            <CardHeader className="bg-gradient-to-br from-amber-50/50 to-transparent dark:from-amber-950/20">
+          <Card className="border shadow-sm overflow-hidden">
+            <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <div className="h-1.5 w-1.5 rounded-full bg-amber-500" />
+                <div className="h-2 w-2 rounded-full bg-gspn-maroon-500" />
                 Currency Formatting
               </CardTitle>
             </CardHeader>
@@ -664,11 +637,10 @@ export default function StyleGuidePage() {
         {/* SIZING TAB */}
         <TabsContent value="sizing" className="space-y-6">
           {/* Icon Sizes */}
-          <Card className="border-2 shadow-lg overflow-hidden">
-            <div className="h-2 bg-gradient-to-r from-rose-500 to-pink-500" />
-            <CardHeader className="bg-gradient-to-br from-rose-50/50 to-transparent dark:from-rose-950/20">
+          <Card className="border shadow-sm overflow-hidden">
+            <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <div className="h-1.5 w-1.5 rounded-full bg-rose-500" />
+                <div className="h-2 w-2 rounded-full bg-gspn-maroon-500" />
                 Icon Sizes
               </CardTitle>
             </CardHeader>
@@ -682,11 +654,10 @@ export default function StyleGuidePage() {
           </Card>
 
           {/* Avatar Sizes */}
-          <Card className="border-2 shadow-lg overflow-hidden">
-            <div className="h-2 bg-gradient-to-r from-cyan-500 to-blue-500" />
-            <CardHeader className="bg-gradient-to-br from-cyan-50/50 to-transparent dark:from-cyan-950/20">
+          <Card className="border shadow-sm overflow-hidden">
+            <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <div className="h-1.5 w-1.5 rounded-full bg-cyan-500" />
+                <div className="h-2 w-2 rounded-full bg-gspn-maroon-500" />
                 Avatar Sizes
               </CardTitle>
             </CardHeader>
@@ -715,11 +686,10 @@ export default function StyleGuidePage() {
           </Card>
 
           {/* Button Sizes */}
-          <Card className="border-2 shadow-lg overflow-hidden">
-            <div className="h-2 bg-gradient-to-r from-indigo-500 to-purple-500" />
-            <CardHeader className="bg-gradient-to-br from-indigo-50/50 to-transparent dark:from-indigo-950/20">
+          <Card className="border shadow-sm overflow-hidden">
+            <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <div className="h-1.5 w-1.5 rounded-full bg-indigo-500" />
+                <div className="h-2 w-2 rounded-full bg-gspn-maroon-500" />
                 Button/Toolbar Sizes
               </CardTitle>
             </CardHeader>
@@ -760,11 +730,10 @@ export default function StyleGuidePage() {
         {/* SPACING TAB */}
         <TabsContent value="spacing" className="space-y-6">
           {/* Container Widths */}
-          <Card className="border-2 shadow-lg overflow-hidden">
-            <div className="h-2 bg-gradient-to-r from-violet-500 via-purple-500 to-fuchsia-500" />
-            <CardHeader className="bg-gradient-to-br from-violet-50/50 to-transparent dark:from-violet-950/20">
+          <Card className="border shadow-sm overflow-hidden">
+            <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <div className="h-1.5 w-1.5 rounded-full bg-violet-500" />
+                <div className="h-2 w-2 rounded-full bg-gspn-maroon-500" />
                 Container Max Widths
               </CardTitle>
             </CardHeader>
@@ -795,11 +764,10 @@ export default function StyleGuidePage() {
           </Card>
 
           {/* Card Padding */}
-          <Card className="border-2 shadow-lg overflow-hidden">
-            <div className="h-2 bg-gradient-to-r from-blue-500 to-cyan-500" />
-            <CardHeader className="bg-gradient-to-br from-blue-50/50 to-transparent dark:from-blue-950/20">
+          <Card className="border shadow-sm overflow-hidden">
+            <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <div className="h-1.5 w-1.5 rounded-full bg-blue-500" />
+                <div className="h-2 w-2 rounded-full bg-gspn-maroon-500" />
                 Card Padding
               </CardTitle>
             </CardHeader>
@@ -819,11 +787,10 @@ export default function StyleGuidePage() {
           </Card>
 
           {/* Gap Sizes */}
-          <Card className="border-2 shadow-lg overflow-hidden">
-            <div className="h-2 bg-gradient-to-r from-emerald-500 to-teal-500" />
-            <CardHeader className="bg-gradient-to-br from-emerald-50/50 to-transparent dark:from-emerald-950/20">
+          <Card className="border shadow-sm overflow-hidden">
+            <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <div className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
+                <div className="h-2 w-2 rounded-full bg-gspn-maroon-500" />
                 Gap Sizes
               </CardTitle>
             </CardHeader>
@@ -850,11 +817,10 @@ export default function StyleGuidePage() {
         {/* SHADOWS TAB */}
         <TabsContent value="shadows" className="space-y-6">
           {/* Elevation */}
-          <Card className="border-2 shadow-lg overflow-hidden">
-            <div className="h-2 bg-gradient-to-r from-slate-500 via-gray-600 to-slate-500" />
-            <CardHeader className="bg-gradient-to-br from-slate-50/50 to-transparent dark:from-slate-900/20">
+          <Card className="border shadow-sm overflow-hidden">
+            <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <div className="h-1.5 w-1.5 rounded-full bg-slate-600" />
+                <div className="h-2 w-2 rounded-full bg-gspn-maroon-500" />
                 Shadow Elevation
               </CardTitle>
             </CardHeader>
@@ -880,11 +846,10 @@ export default function StyleGuidePage() {
           </Card>
 
           {/* Special Effects */}
-          <Card className="border-2 shadow-lg overflow-hidden">
-            <div className="h-2 bg-gradient-to-r from-pink-500 via-purple-500 to-blue-500" />
-            <CardHeader className="bg-gradient-to-br from-pink-50/50 to-transparent dark:from-pink-950/20">
+          <Card className="border shadow-sm overflow-hidden">
+            <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <div className="h-1.5 w-1.5 rounded-full bg-pink-500" />
+                <div className="h-2 w-2 rounded-full bg-gspn-maroon-500" />
                 Glow Effects
               </CardTitle>
             </CardHeader>
@@ -939,11 +904,10 @@ export default function StyleGuidePage() {
           </Card>
 
           {/* Lift Effect */}
-          <Card className="border-2 shadow-lg overflow-hidden">
-            <div className="h-2 bg-gradient-to-r from-indigo-500 to-purple-500" />
-            <CardHeader className="bg-gradient-to-br from-indigo-50/50 to-transparent dark:from-indigo-950/20">
+          <Card className="border shadow-sm overflow-hidden">
+            <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <div className="h-1.5 w-1.5 rounded-full bg-indigo-500" />
+                <div className="h-2 w-2 rounded-full bg-gspn-maroon-500" />
                 Lift Effect (Hover)
               </CardTitle>
             </CardHeader>
@@ -965,11 +929,10 @@ export default function StyleGuidePage() {
         {/* ANIMATIONS TAB */}
         <TabsContent value="animations" className="space-y-6">
           {/* Timing Functions */}
-          <Card className="border-2 shadow-lg overflow-hidden">
-            <div className="h-2 bg-gradient-to-r from-orange-500 via-pink-500 to-purple-500" />
-            <CardHeader className="bg-gradient-to-br from-orange-50/50 to-transparent dark:from-orange-950/20">
+          <Card className="border shadow-sm overflow-hidden">
+            <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <div className="h-1.5 w-1.5 rounded-full bg-orange-500" />
+                <div className="h-2 w-2 rounded-full bg-gspn-maroon-500" />
                 Timing Functions
               </CardTitle>
             </CardHeader>
@@ -1022,11 +985,10 @@ export default function StyleGuidePage() {
           </Card>
 
           {/* Durations */}
-          <Card className="border-2 shadow-lg overflow-hidden">
-            <div className="h-2 bg-gradient-to-r from-cyan-500 to-blue-500" />
-            <CardHeader className="bg-gradient-to-br from-cyan-50/50 to-transparent dark:from-cyan-950/20">
+          <Card className="border shadow-sm overflow-hidden">
+            <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <div className="h-1.5 w-1.5 rounded-full bg-cyan-500" />
+                <div className="h-2 w-2 rounded-full bg-gspn-maroon-500" />
                 Duration Scale
               </CardTitle>
             </CardHeader>
@@ -1045,11 +1007,10 @@ export default function StyleGuidePage() {
           </Card>
 
           {/* Animation Classes */}
-          <Card className="border-2 shadow-lg overflow-hidden">
-            <div className="h-2 bg-gradient-to-r from-fuchsia-500 via-purple-500 to-indigo-500" />
-            <CardHeader className="bg-gradient-to-br from-fuchsia-50/50 to-transparent dark:from-fuchsia-950/20">
+          <Card className="border shadow-sm overflow-hidden">
+            <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <div className="h-1.5 w-1.5 rounded-full bg-fuchsia-500" />
+                <div className="h-2 w-2 rounded-full bg-gspn-maroon-500" />
                 Animation Classes (Click to replay)
               </CardTitle>
             </CardHeader>

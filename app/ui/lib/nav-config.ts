@@ -140,6 +140,14 @@ export const navigationConfig: MainNavItem[] = [
         icon: ClipboardCheck,
         roles: ["director", "teacher", "academic_director"],
       },
+      {
+        id: "grading",
+        name: "Grading",
+        translationKey: "gradingSection",
+        href: "/students/grading",
+        icon: PenLine,
+        roles: ["director", "academic_director", "teacher"],
+      },
     ],
   },
   {

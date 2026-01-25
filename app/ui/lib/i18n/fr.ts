@@ -2506,6 +2506,7 @@ export const fr = {
   // Grading System
   grading: {
     // Page titles
+    gradingSectionSubtitle: "Gérer les notes, évaluations et performances académiques des élèves",
     gradeEntry: "Saisie des Notes",
     gradeEntrySubtitle: "Saisir les notes des élèves pour le trimestre en cours",
     evaluations: "Évaluations",
@@ -2849,6 +2850,10 @@ export const fr = {
     verificationRecommendation: "Il est recommandé de vérifier le solde de la caisse avant d'enregistrer des transactions.",
     continueAnyway: "Continuer Quand Même",
 
+    // Registry status warnings
+    registryClosedTitle: "Caisse Fermée",
+    registryClosedMessage: "La caisse est actuellement fermée. Les paiements et dépenses en espèces ne peuvent pas être traités. Veuillez ouvrir la caisse pour commencer les opérations.",
+
     // Registry (Caisse) - Daily Operations
     registry: {
       // Balance display
@@ -2949,7 +2954,7 @@ export const fr = {
   },
 
   // Navigation
-  safe: "Caisse",
+  safe: "Coffre",
 
   // Payment Wizard
   paymentWizard: {

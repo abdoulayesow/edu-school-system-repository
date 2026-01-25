@@ -114,28 +114,24 @@ export default function BrandPage() {
   if (!mounted) {
     return (
       <PageContainer maxWidth="full">
-        <div className="relative mb-10 overflow-hidden rounded-2xl p-8 shadow-2xl">
-          <div
-            className="absolute inset-0"
-            style={{
-              background: 'linear-gradient(135deg, #fbbf24 0%, #f59e0b 50%, #f97316 100%)',
-            }}
-          />
-          <div className="relative">
+        <div className="relative mb-10 overflow-hidden rounded-2xl border border-border bg-card shadow-lg">
+          {/* Maroon accent bar */}
+          <div className="h-1 bg-gspn-maroon-500" />
+          <div className="p-8">
             <div className="flex items-start justify-between">
               <div>
-                <div className="flex items-center gap-3 mb-2">
-                  <div className="p-2 bg-white/20 backdrop-blur-sm rounded-xl shadow-lg">
-                    <Palette className="h-6 w-6 text-white" />
+                <div className="flex items-center gap-3 mb-3">
+                  <div className="p-2.5 bg-gspn-maroon-500/10 rounded-xl">
+                    <Palette className="h-6 w-6 text-gspn-maroon-500" />
                   </div>
-                  <Badge className="bg-white/20 backdrop-blur-sm text-white border-white/30 font-mono text-xs">
+                  <Badge variant="outline" className="font-mono text-xs border-gspn-gold-500 text-gspn-gold-600">
                     Live Preview
                   </Badge>
                 </div>
-                <h1 className="font-display text-4xl font-extrabold tracking-tight text-white">
+                <h1 className="font-display text-4xl font-extrabold tracking-tight text-foreground">
                   Brand Showcase
                 </h1>
-                <p className="mt-2 text-white/90 font-medium max-w-lg">
+                <p className="mt-2 text-muted-foreground font-medium max-w-lg">
                   Interactive component gallery with side-by-side light and dark mode comparison
                 </p>
               </div>
@@ -157,48 +153,32 @@ export default function BrandPage() {
 
   return (
     <PageContainer maxWidth="full">
-      {/* Enhanced Branded Header with Gradient */}
-      <div className="relative mb-10 overflow-hidden rounded-2xl p-8 shadow-2xl">
-        {/* Animated gradient background */}
-        <div
-          className="absolute inset-0"
-          style={{
-            background: 'linear-gradient(135deg, #fbbf24 0%, #f59e0b 50%, #f97316 100%)',
-          }}
-        />
+      {/* Clean Professional Header with Maroon Accent */}
+      <div className="relative mb-10 overflow-hidden rounded-2xl border border-border bg-card shadow-lg">
+        {/* Maroon accent bar */}
+        <div className="h-1 bg-gspn-maroon-500" />
 
-        {/* Decorative elements */}
-        <div className="absolute inset-0 opacity-20">
-          <div className="absolute inset-0" style={{
-            backgroundImage: `radial-gradient(circle at 2px 2px, rgba(139,35,50,0.3) 1px, transparent 0)`,
-            backgroundSize: '32px 32px'
-          }} />
-        </div>
-        {/* Accent corners */}
-        <div className="absolute -top-24 -right-24 h-48 w-48 rounded-full bg-white/10 blur-3xl" />
-        <div className="absolute -bottom-16 -left-16 h-40 w-40 rounded-full bg-white/10 blur-2xl" />
-
-        <div className="relative">
+        <div className="p-8">
           <div className="flex items-start justify-between">
             <div>
               <div className="flex items-center gap-3 mb-3">
-                <div className="p-2.5 bg-white/20 backdrop-blur-sm rounded-xl shadow-lg">
-                  <Palette className="h-7 w-7 text-white" />
+                <div className="p-2.5 bg-gspn-maroon-500/10 rounded-xl">
+                  <Palette className="h-7 w-7 text-gspn-maroon-500" />
                 </div>
-                <Badge className="bg-white/20 backdrop-blur-sm text-white border-white/30 font-mono text-xs px-3 py-1">
+                <Badge variant="outline" className="font-mono text-xs px-3 py-1 border-gspn-gold-500 text-gspn-gold-600 dark:text-gspn-gold-400">
                   Live Preview
                 </Badge>
               </div>
-              <h1 className="font-display text-5xl font-extrabold tracking-tight text-white mb-3">
+              <h1 className="font-display text-5xl font-extrabold tracking-tight text-foreground mb-3">
                 Brand Showcase
               </h1>
-              <p className="text-white/90 font-medium max-w-2xl text-lg">
+              <p className="text-muted-foreground font-medium max-w-2xl text-lg">
                 Interactive component gallery with side-by-side light and dark mode comparison
               </p>
             </div>
             <a
               href="/style-guide"
-              className="hidden md:flex items-center gap-2 px-5 py-2.5 bg-white/20 backdrop-blur-sm hover:bg-white/30 rounded-xl text-sm font-semibold text-white transition-all shadow-lg hover:shadow-xl"
+              className="hidden md:flex items-center gap-2 px-5 py-2.5 bg-gspn-maroon-500/10 hover:bg-gspn-maroon-500/20 rounded-xl text-sm font-semibold text-gspn-maroon-600 dark:text-gspn-maroon-400 transition-all"
             >
               Design Tokens
               <ExternalLink className="h-4 w-4" />
@@ -206,16 +186,16 @@ export default function BrandPage() {
           </div>
 
           {/* View Mode Toggle */}
-          <div className="flex items-center gap-4 mt-8 pt-8 border-t border-white/20">
-            <span className="text-sm font-semibold text-white">View Mode:</span>
-            <div className="flex gap-1.5 bg-white/10 backdrop-blur-sm rounded-xl p-1.5 border border-white/20">
+          <div className="flex items-center gap-4 mt-8 pt-8 border-t border-border">
+            <span className="text-sm font-semibold text-foreground">View Mode:</span>
+            <div className="flex gap-1.5 bg-muted rounded-xl p-1.5 border border-border">
               <button
                 onClick={() => setViewMode("side-by-side")}
                 className={cn(
                   "flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-semibold transition-all",
                   viewMode === "side-by-side"
-                    ? "bg-white text-amber-900 shadow-lg"
-                    : "text-white hover:bg-white/10"
+                    ? "bg-gspn-gold-500 text-black shadow-sm"
+                    : "text-muted-foreground hover:bg-background hover:text-foreground"
                 )}
               >
                 <Monitor className="h-4 w-4" />
@@ -226,8 +206,8 @@ export default function BrandPage() {
                 className={cn(
                   "flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-semibold transition-all",
                   viewMode === "light"
-                    ? "bg-white text-amber-900 shadow-lg"
-                    : "text-white hover:bg-white/10"
+                    ? "bg-gspn-gold-500 text-black shadow-sm"
+                    : "text-muted-foreground hover:bg-background hover:text-foreground"
                 )}
               >
                 Light Only
@@ -237,8 +217,8 @@ export default function BrandPage() {
                 className={cn(
                   "flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-semibold transition-all",
                   viewMode === "dark"
-                    ? "bg-white text-amber-900 shadow-lg"
-                    : "text-white hover:bg-white/10"
+                    ? "bg-gspn-gold-500 text-black shadow-sm"
+                    : "text-muted-foreground hover:bg-background hover:text-foreground"
                 )}
               >
                 Dark Only
@@ -262,57 +242,19 @@ export default function BrandPage() {
         {/* COMPONENTS TAB */}
         <TabsContent value="components" className="space-y-8">
           {/* Buttons */}
-          <Card className="border-2 shadow-lg overflow-hidden">
-            <div className="h-2 bg-gradient-to-r from-blue-500 to-purple-500" />
-            <CardHeader className="bg-gradient-to-br from-blue-50/50 to-transparent dark:from-blue-950/20">
+          <Card className="border shadow-sm overflow-hidden">
+            <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <div className="h-1.5 w-1.5 rounded-full bg-blue-500" />
+                <div className="h-2 w-2 rounded-full bg-gspn-maroon-500" />
                 Buttons
               </CardTitle>
             </CardHeader>
-            <CardContent className="pt-6">
-              <DualModePreview title="Button Variants" viewMode={viewMode}>
-                <div className="flex flex-wrap gap-3">
-                  <Button>Primary</Button>
-                  <Button variant="secondary">Secondary</Button>
-                  <Button variant="outline">Outline</Button>
-                  <Button variant="ghost">Ghost</Button>
-                  <Button variant="destructive">Destructive</Button>
-                  <Button variant="link">Link</Button>
-                </div>
-                <div className="flex flex-wrap gap-3 mt-4">
-                  <Button size="sm">Small</Button>
-                  <Button size="default">Default</Button>
-                  <Button size="lg">Large</Button>
-                  <Button size="icon"><Plus className="h-4 w-4" /></Button>
-                </div>
-                <div className="flex flex-wrap gap-3 mt-4">
-                  <Button disabled>Disabled</Button>
-                  <Button disabled><Loader2 className="h-4 w-4 mr-2 animate-spin" />Loading</Button>
-                </div>
-              </DualModePreview>
-            </CardContent>
-          </Card>
-
-          {/* Primary Action Button (Gold) */}
-          <Card className="border-2 shadow-lg overflow-hidden">
-            <div className="h-2 bg-gradient-to-r from-amber-500 to-orange-500" />
-            <CardHeader className="bg-gradient-to-br from-amber-50/50 to-transparent dark:from-amber-950/20">
-              <CardTitle className="flex items-center gap-2">
-                <div className="h-1.5 w-1.5 rounded-full bg-amber-500" />
-                Primary Action Button (Gold/Highlight)
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="pt-6">
-              <DualModePreview title="Gold Action Buttons" viewMode={viewMode}>
+            <CardContent className="pt-6 space-y-6">
+              <DualModePreview title="Gold Action Buttons (Primary CTA)" viewMode={viewMode}>
                 <div className="flex flex-wrap gap-3">
                   <Button className={componentClasses.primaryActionButton}>
                     <Plus className="h-4 w-4 mr-2" />
                     New Enrollment
-                  </Button>
-                  <Button className={componentClasses.primaryActionButton}>
-                    <Download className="h-4 w-4 mr-2" />
-                    Export Report
                   </Button>
                   <Button className={cn(componentClasses.primaryActionButton, "gap-2")}>
                     Continue
@@ -320,38 +262,101 @@ export default function BrandPage() {
                   </Button>
                 </div>
               </DualModePreview>
+
+              <DualModePreview title="Sizes" viewMode={viewMode}>
+                <div className="space-y-4">
+                  <div className="flex flex-wrap items-center gap-3">
+                    <Button size="sm" className={componentClasses.primaryActionButton}>
+                      <Plus className="h-3.5 w-3.5 mr-1.5" />
+                      Small
+                    </Button>
+                    <Button size="default" className={componentClasses.primaryActionButton}>
+                      <Plus className="h-4 w-4 mr-2" />
+                      Default
+                    </Button>
+                    <Button size="lg" className={componentClasses.primaryActionButton}>
+                      <Plus className="h-5 w-5 mr-2" />
+                      Large
+                    </Button>
+                    <Button size="icon" className={componentClasses.primaryActionButton}>
+                      <Plus className="h-4 w-4" />
+                    </Button>
+                  </div>
+                  <div className="flex flex-wrap items-center gap-3">
+                    <Button size="sm" variant="outline">Small</Button>
+                    <Button size="default" variant="outline">Default</Button>
+                    <Button size="lg" variant="outline">Large</Button>
+                    <Button size="icon" variant="outline"><Settings className="h-4 w-4" /></Button>
+                  </div>
+                </div>
+              </DualModePreview>
+
+              <DualModePreview title="States" viewMode={viewMode}>
+                <div className="flex flex-wrap gap-3">
+                  <Button className={componentClasses.primaryActionButton} disabled>Disabled</Button>
+                  <Button className={componentClasses.primaryActionButton} disabled>
+                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                    Loading
+                  </Button>
+                </div>
+              </DualModePreview>
             </CardContent>
           </Card>
 
           {/* Badges */}
-          <Card className="border-2 shadow-lg overflow-hidden">
-            <div className="h-2 bg-gradient-to-r from-purple-500 to-pink-500" />
-            <CardHeader className="bg-gradient-to-br from-purple-50/50 to-transparent dark:from-purple-950/20">
+          <Card className="border shadow-sm overflow-hidden">
+            <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <div className="h-1.5 w-1.5 rounded-full bg-purple-500" />
+                <div className="h-2 w-2 rounded-full bg-gspn-maroon-500" />
                 Badges
               </CardTitle>
             </CardHeader>
-            <CardContent className="pt-6">
-              <DualModePreview title="Badge Styles" viewMode={viewMode}>
+            <CardContent className="pt-6 space-y-6">
+              <DualModePreview title="Core Variants" viewMode={viewMode}>
                 <div className="flex flex-wrap gap-2">
-                  <Badge>Default</Badge>
-                  <Badge variant="secondary">Secondary</Badge>
-                  <Badge variant="outline">Outline</Badge>
-                  <Badge variant="destructive">Destructive</Badge>
+                  <Badge className="bg-gspn-maroon-500 text-white hover:bg-gspn-maroon-600 dark:bg-gspn-maroon-600 dark:hover:bg-gspn-maroon-500">
+                    Primary
+                  </Badge>
+                  <Badge className="bg-gspn-gold-500 text-black hover:bg-gspn-gold-600 dark:bg-gspn-gold-400 dark:hover:bg-gspn-gold-300">
+                    Gold
+                  </Badge>
+                  <Badge variant="secondary" className="bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300">
+                    Secondary
+                  </Badge>
+                  <Badge variant="outline" className="border-slate-300 text-slate-600 dark:border-slate-600 dark:text-slate-400">
+                    Outline
+                  </Badge>
                 </div>
-                <div className="flex flex-wrap gap-2 mt-3">
-                  <Badge className="bg-success/15 text-success border-success/20">
+              </DualModePreview>
+
+              <DualModePreview title="Semantic Status" viewMode={viewMode}>
+                <div className="flex flex-wrap gap-2">
+                  <Badge className="bg-emerald-100 text-emerald-700 border border-emerald-200 dark:bg-emerald-500/20 dark:text-emerald-400 dark:border-emerald-500/30">
                     <CheckCircle className="h-3 w-3 mr-1" />
                     Success
                   </Badge>
-                  <Badge className="bg-warning/15 text-warning border-warning/20">
+                  <Badge className="bg-amber-100 text-amber-700 border border-amber-200 dark:bg-amber-500/20 dark:text-amber-400 dark:border-amber-500/30">
                     <AlertCircle className="h-3 w-3 mr-1" />
                     Warning
                   </Badge>
-                  <Badge className="bg-destructive/15 text-destructive border-destructive/20">
+                  <Badge className="bg-red-100 text-red-700 border border-red-200 dark:bg-red-500/20 dark:text-red-400 dark:border-red-500/30">
                     <XCircle className="h-3 w-3 mr-1" />
                     Error
+                  </Badge>
+                  <Badge className="bg-blue-100 text-blue-700 border border-blue-200 dark:bg-blue-500/20 dark:text-blue-400 dark:border-blue-500/30">
+                    <AlertCircle className="h-3 w-3 mr-1" />
+                    Info
+                  </Badge>
+                </div>
+              </DualModePreview>
+
+              <DualModePreview title="Subtle / Muted" viewMode={viewMode}>
+                <div className="flex flex-wrap gap-2">
+                  <Badge className="bg-slate-50 text-slate-500 border border-slate-200 dark:bg-slate-800/50 dark:text-slate-400 dark:border-slate-700">
+                    Draft
+                  </Badge>
+                  <Badge className="bg-slate-100 text-slate-400 border border-slate-200 line-through dark:bg-slate-800/50 dark:text-slate-500 dark:border-slate-700">
+                    Cancelled
                   </Badge>
                 </div>
               </DualModePreview>
@@ -359,11 +364,10 @@ export default function BrandPage() {
           </Card>
 
           {/* Avatars */}
-          <Card className="border-2 shadow-lg overflow-hidden">
-            <div className="h-2 bg-gradient-to-r from-emerald-500 to-teal-500" />
-            <CardHeader className="bg-gradient-to-br from-emerald-50/50 to-transparent dark:from-emerald-950/20">
+          <Card className="border shadow-sm overflow-hidden">
+            <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <div className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
+                <div className="h-2 w-2 rounded-full bg-gspn-maroon-500" />
                 Avatars
               </CardTitle>
             </CardHeader>
@@ -391,37 +395,131 @@ export default function BrandPage() {
           </Card>
 
           {/* Progress */}
-          <Card className="border-2 shadow-lg overflow-hidden">
-            <div className="h-2 bg-gradient-to-r from-indigo-500 to-purple-500" />
-            <CardHeader className="bg-gradient-to-br from-indigo-50/50 to-transparent dark:from-indigo-950/20">
+          <Card className="border shadow-sm overflow-hidden">
+            <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <div className="h-1.5 w-1.5 rounded-full bg-indigo-500" />
+                <div className="h-2 w-2 rounded-full bg-gspn-maroon-500" />
                 Progress Indicators
               </CardTitle>
             </CardHeader>
-            <CardContent className="pt-6">
-              <DualModePreview title="Progress Bars" viewMode={viewMode}>
-                <div className="space-y-4">
+            <CardContent className="pt-6 space-y-6">
+              <DualModePreview title="Progress Bar (Mode-Specific)" viewMode={viewMode}>
+                <div className="space-y-5">
+                  {/* In Progress - Gold for light, Red/Maroon for dark */}
                   <div className="space-y-2">
                     <div className="flex justify-between text-sm">
-                      <span>Enrollment Progress</span>
-                      <span className="text-muted-foreground">75%</span>
+                      <span className="font-medium">Enrollment Progress</span>
+                      <span className="text-muted-foreground font-mono">75%</span>
                     </div>
-                    <Progress value={75} />
+                    <Progress
+                      value={75}
+                      className="h-2.5 bg-slate-200 dark:bg-slate-700 [&>div]:bg-gspn-gold-500 dark:[&>div]:bg-gspn-maroon-500"
+                    />
                   </div>
+                  {/* Complete - Always Green */}
                   <div className="space-y-2">
                     <div className="flex justify-between text-sm">
-                      <span>Payment Complete</span>
-                      <span className="text-muted-foreground">100%</span>
+                      <span className="font-medium">Payment Complete</span>
+                      <span className="text-emerald-600 dark:text-emerald-400 font-mono">100%</span>
                     </div>
-                    <Progress value={100} className="[&>div]:bg-success" />
+                    <Progress
+                      value={100}
+                      className="h-2.5 bg-slate-200 dark:bg-slate-700 [&>div]:bg-emerald-500 dark:[&>div]:bg-emerald-500"
+                    />
                   </div>
+                  {/* Low Progress */}
                   <div className="space-y-2">
                     <div className="flex justify-between text-sm">
-                      <span>At Risk</span>
-                      <span className="text-muted-foreground">25%</span>
+                      <span className="font-medium">Getting Started</span>
+                      <span className="text-muted-foreground font-mono">25%</span>
                     </div>
-                    <Progress value={25} className="[&>div]:bg-destructive" />
+                    <Progress
+                      value={25}
+                      className="h-2.5 bg-slate-200 dark:bg-slate-700 [&>div]:bg-gspn-gold-500 dark:[&>div]:bg-gspn-maroon-500"
+                    />
+                  </div>
+                </div>
+              </DualModePreview>
+
+              <DualModePreview title="Stepped Progress (Wizard Style)" viewMode={viewMode}>
+                <div className="py-2">
+                  <div className="flex items-center justify-between">
+                    {[
+                      { label: "Info", done: true },
+                      { label: "Details", done: true },
+                      { label: "Review", current: true },
+                      { label: "Complete", done: false },
+                    ].map((step, i, arr) => (
+                      <div key={i} className="flex-1 relative flex flex-col items-center">
+                        <div className={cn(
+                          "w-8 h-8 rounded-full flex items-center justify-center border-2 z-10 transition-all",
+                          step.done && "bg-gspn-gold-500 border-gspn-gold-500 text-black dark:bg-gspn-gold-500 dark:border-gspn-gold-500",
+                          step.current && "border-gspn-gold-500 bg-gspn-gold-50 text-gspn-gold-700 dark:border-gspn-gold-400 dark:bg-gspn-gold-500/20 dark:text-gspn-gold-300 ring-4 ring-gspn-gold-500/20",
+                          !step.done && !step.current && "border-slate-300 bg-slate-100 text-slate-400 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-500"
+                        )}>
+                          {step.done ? <Check className="h-4 w-4" /> : <span className="text-xs font-semibold">{i + 1}</span>}
+                        </div>
+                        <span className={cn(
+                          "mt-1.5 text-xs font-medium",
+                          (step.done || step.current) ? "text-foreground" : "text-muted-foreground"
+                        )}>{step.label}</span>
+                        {i < arr.length - 1 && (
+                          <div className={cn(
+                            "absolute top-4 left-1/2 w-full h-0.5 -translate-y-1/2",
+                            step.done ? "bg-gspn-gold-500 dark:bg-gspn-gold-500" : "bg-slate-200 dark:bg-slate-700"
+                          )} style={{ left: "calc(50% + 16px)", width: "calc(100% - 32px)" }} />
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </DualModePreview>
+
+              <DualModePreview title="Circular Progress" viewMode={viewMode}>
+                <div className="flex items-center gap-6">
+                  {/* In Progress */}
+                  <div className="flex flex-col items-center gap-2">
+                    <div className="relative w-16 h-16">
+                      <svg className="w-full h-full -rotate-90">
+                        <circle cx="32" cy="32" r="28" fill="none" strokeWidth="6" className="stroke-slate-200 dark:stroke-slate-700" />
+                        <circle cx="32" cy="32" r="28" fill="none" strokeWidth="6" strokeLinecap="round" strokeDasharray="176" strokeDashoffset="44" className="stroke-gspn-gold-500 dark:stroke-gspn-maroon-500 transition-all" />
+                      </svg>
+                      <span className="absolute inset-0 flex items-center justify-center text-sm font-bold">75%</span>
+                    </div>
+                    <span className="text-xs text-muted-foreground">In Progress</span>
+                  </div>
+                  {/* Complete */}
+                  <div className="flex flex-col items-center gap-2">
+                    <div className="relative w-16 h-16">
+                      <svg className="w-full h-full -rotate-90">
+                        <circle cx="32" cy="32" r="28" fill="none" strokeWidth="6" className="stroke-slate-200 dark:stroke-slate-700" />
+                        <circle cx="32" cy="32" r="28" fill="none" strokeWidth="6" strokeLinecap="round" strokeDasharray="176" strokeDashoffset="0" className="stroke-emerald-500 transition-all" />
+                      </svg>
+                      <Check className="absolute inset-0 m-auto h-6 w-6 text-emerald-500" />
+                    </div>
+                    <span className="text-xs text-muted-foreground">Complete</span>
+                  </div>
+                </div>
+              </DualModePreview>
+
+              <DualModePreview title="Segmented Progress" viewMode={viewMode}>
+                <div className="space-y-3">
+                  <div className="flex justify-between text-sm">
+                    <span className="font-medium">Payment Installments</span>
+                    <span className="text-muted-foreground">3 of 4 paid</span>
+                  </div>
+                  <div className="flex gap-1.5">
+                    {[true, true, true, false].map((paid, i) => (
+                      <div
+                        key={i}
+                        className={cn(
+                          "flex-1 h-3 rounded-full transition-colors",
+                          paid
+                            ? "bg-emerald-500"
+                            : "bg-slate-200 dark:bg-slate-700"
+                        )}
+                      />
+                    ))}
                   </div>
                 </div>
               </DualModePreview>
@@ -432,11 +530,10 @@ export default function BrandPage() {
         {/* CARDS TAB */}
         <TabsContent value="cards" className="space-y-8">
           {/* Basic Card */}
-          <Card className="border-2 shadow-lg overflow-hidden">
-            <div className="h-2 bg-gradient-to-r from-cyan-500 to-blue-500" />
-            <CardHeader className="bg-gradient-to-br from-cyan-50/50 to-transparent dark:from-cyan-950/20">
+          <Card className="border shadow-sm overflow-hidden">
+            <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <div className="h-1.5 w-1.5 rounded-full bg-cyan-500" />
+                <div className="h-2 w-2 rounded-full bg-gspn-maroon-500" />
                 Basic Card
               </CardTitle>
             </CardHeader>
@@ -458,11 +555,10 @@ export default function BrandPage() {
           </Card>
 
           {/* Stat Cards */}
-          <Card className="border-2 shadow-lg overflow-hidden">
-            <div className="h-2 bg-gradient-to-r from-violet-500 to-purple-500" />
-            <CardHeader className="bg-gradient-to-br from-violet-50/50 to-transparent dark:from-violet-950/20">
+          <Card className="border shadow-sm overflow-hidden">
+            <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <div className="h-1.5 w-1.5 rounded-full bg-violet-500" />
+                <div className="h-2 w-2 rounded-full bg-gspn-maroon-500" />
                 Stat Cards
               </CardTitle>
             </CardHeader>
@@ -501,11 +597,10 @@ export default function BrandPage() {
           </Card>
 
           {/* Student Card */}
-          <Card className="border-2 shadow-lg overflow-hidden">
-            <div className="h-2 bg-gradient-to-r from-rose-500 to-pink-500" />
-            <CardHeader className="bg-gradient-to-br from-rose-50/50 to-transparent dark:from-rose-950/20">
+          <Card className="border shadow-sm overflow-hidden">
+            <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <div className="h-1.5 w-1.5 rounded-full bg-rose-500" />
+                <div className="h-2 w-2 rounded-full bg-gspn-maroon-500" />
                 Student Card
               </CardTitle>
             </CardHeader>
@@ -542,11 +637,10 @@ export default function BrandPage() {
           </Card>
 
           {/* Card with Actions */}
-          <Card className="border-2 shadow-lg overflow-hidden">
-            <div className="h-2 bg-gradient-to-r from-orange-500 to-amber-500" />
-            <CardHeader className="bg-gradient-to-br from-orange-50/50 to-transparent dark:from-orange-950/20">
+          <Card className="border shadow-sm overflow-hidden">
+            <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <div className="h-1.5 w-1.5 rounded-full bg-orange-500" />
+                <div className="h-2 w-2 rounded-full bg-gspn-maroon-500" />
                 Card with Actions
               </CardTitle>
             </CardHeader>
@@ -587,11 +681,10 @@ export default function BrandPage() {
         {/* FORMS TAB */}
         <TabsContent value="forms" className="space-y-8">
           {/* Form Inputs */}
-          <Card className="border-2 shadow-lg overflow-hidden">
-            <div className="h-2 bg-gradient-to-r from-blue-500 to-indigo-500" />
-            <CardHeader className="bg-gradient-to-br from-blue-50/50 to-transparent dark:from-blue-950/20">
+          <Card className="border shadow-sm overflow-hidden">
+            <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <div className="h-1.5 w-1.5 rounded-full bg-blue-500" />
+                <div className="h-2 w-2 rounded-full bg-gspn-maroon-500" />
                 Form Inputs
               </CardTitle>
             </CardHeader>
@@ -623,11 +716,10 @@ export default function BrandPage() {
           </Card>
 
           {/* Select */}
-          <Card className="border-2 shadow-lg overflow-hidden">
-            <div className="h-2 bg-gradient-to-r from-emerald-500 to-green-500" />
-            <CardHeader className="bg-gradient-to-br from-emerald-50/50 to-transparent dark:from-emerald-950/20">
+          <Card className="border shadow-sm overflow-hidden">
+            <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <div className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
+                <div className="h-2 w-2 rounded-full bg-gspn-maroon-500" />
                 Select Dropdown
               </CardTitle>
             </CardHeader>
@@ -656,11 +748,10 @@ export default function BrandPage() {
           </Card>
 
           {/* Form Card */}
-          <Card className="border-2 shadow-lg overflow-hidden">
-            <div className="h-2 bg-gradient-to-r from-purple-500 to-fuchsia-500" />
-            <CardHeader className="bg-gradient-to-br from-purple-50/50 to-transparent dark:from-purple-950/20">
+          <Card className="border shadow-sm overflow-hidden">
+            <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <div className="h-1.5 w-1.5 rounded-full bg-purple-500" />
+                <div className="h-2 w-2 rounded-full bg-gspn-maroon-500" />
                 Form Card
               </CardTitle>
             </CardHeader>
@@ -710,11 +801,10 @@ export default function BrandPage() {
         {/* NAVIGATION TAB */}
         <TabsContent value="navigation" className="space-y-8">
           {/* Navigation Buttons */}
-          <Card className="border-2 shadow-lg overflow-hidden">
-            <div className="h-2 bg-gradient-to-r from-slate-500 to-gray-500" />
-            <CardHeader className="bg-gradient-to-br from-slate-50/50 to-transparent dark:from-slate-900/20">
+          <Card className="border shadow-sm overflow-hidden">
+            <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <div className="h-1.5 w-1.5 rounded-full bg-slate-600" />
+                <div className="h-2 w-2 rounded-full bg-gspn-maroon-500" />
                 Navigation Buttons
               </CardTitle>
             </CardHeader>
@@ -743,11 +833,10 @@ export default function BrandPage() {
           </Card>
 
           {/* Tabs */}
-          <Card className="border-2 shadow-lg overflow-hidden">
-            <div className="h-2 bg-gradient-to-r from-indigo-500 to-blue-500" />
-            <CardHeader className="bg-gradient-to-br from-indigo-50/50 to-transparent dark:from-indigo-950/20">
+          <Card className="border shadow-sm overflow-hidden">
+            <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <div className="h-1.5 w-1.5 rounded-full bg-indigo-500" />
+                <div className="h-2 w-2 rounded-full bg-gspn-maroon-500" />
                 Tab Navigation
               </CardTitle>
             </CardHeader>
@@ -781,11 +870,10 @@ export default function BrandPage() {
           </Card>
 
           {/* Toolbar Buttons */}
-          <Card className="border-2 shadow-lg overflow-hidden">
-            <div className="h-2 bg-gradient-to-r from-cyan-500 to-teal-500" />
-            <CardHeader className="bg-gradient-to-br from-cyan-50/50 to-transparent dark:from-cyan-950/20">
+          <Card className="border shadow-sm overflow-hidden">
+            <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <div className="h-1.5 w-1.5 rounded-full bg-cyan-500" />
+                <div className="h-2 w-2 rounded-full bg-gspn-maroon-500" />
                 Toolbar Icon Buttons
               </CardTitle>
             </CardHeader>
@@ -811,11 +899,10 @@ export default function BrandPage() {
           </Card>
 
           {/* Breadcrumbs */}
-          <Card className="border-2 shadow-lg overflow-hidden">
-            <div className="h-2 bg-gradient-to-r from-pink-500 to-rose-500" />
-            <CardHeader className="bg-gradient-to-br from-pink-50/50 to-transparent dark:from-pink-950/20">
+          <Card className="border shadow-sm overflow-hidden">
+            <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <div className="h-1.5 w-1.5 rounded-full bg-pink-500" />
+                <div className="h-2 w-2 rounded-full bg-gspn-maroon-500" />
                 Breadcrumbs
               </CardTitle>
             </CardHeader>
@@ -836,11 +923,10 @@ export default function BrandPage() {
         {/* STATUS TAB */}
         <TabsContent value="status" className="space-y-8">
           {/* Enrollment Status Badges */}
-          <Card className="border-2 shadow-lg overflow-hidden">
-            <div className="h-2 bg-gradient-to-r from-blue-500 to-cyan-500" />
-            <CardHeader className="bg-gradient-to-br from-blue-50/50 to-transparent dark:from-blue-950/20">
+          <Card className="border shadow-sm overflow-hidden">
+            <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <div className="h-1.5 w-1.5 rounded-full bg-blue-500" />
+                <div className="h-2 w-2 rounded-full bg-gspn-maroon-500" />
                 Enrollment Status
               </CardTitle>
             </CardHeader>
@@ -859,11 +945,10 @@ export default function BrandPage() {
           </Card>
 
           {/* Payment Status */}
-          <Card className="border-2 shadow-lg overflow-hidden">
-            <div className="h-2 bg-gradient-to-r from-emerald-500 to-green-500" />
-            <CardHeader className="bg-gradient-to-br from-emerald-50/50 to-transparent dark:from-emerald-950/20">
+          <Card className="border shadow-sm overflow-hidden">
+            <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <div className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
+                <div className="h-2 w-2 rounded-full bg-gspn-maroon-500" />
                 Payment Status
               </CardTitle>
             </CardHeader>
@@ -884,11 +969,10 @@ export default function BrandPage() {
           </Card>
 
           {/* Attendance Status */}
-          <Card className="border-2 shadow-lg overflow-hidden">
-            <div className="h-2 bg-gradient-to-r from-violet-500 to-purple-500" />
-            <CardHeader className="bg-gradient-to-br from-violet-50/50 to-transparent dark:from-violet-950/20">
+          <Card className="border shadow-sm overflow-hidden">
+            <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <div className="h-1.5 w-1.5 rounded-full bg-violet-500" />
+                <div className="h-2 w-2 rounded-full bg-gspn-maroon-500" />
                 Attendance Status
               </CardTitle>
             </CardHeader>
@@ -917,11 +1001,10 @@ export default function BrandPage() {
           </Card>
 
           {/* Status Cards */}
-          <Card className="border-2 shadow-lg overflow-hidden">
-            <div className="h-2 bg-gradient-to-r from-orange-500 to-red-500" />
-            <CardHeader className="bg-gradient-to-br from-orange-50/50 to-transparent dark:from-orange-950/20">
+          <Card className="border shadow-sm overflow-hidden">
+            <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <div className="h-1.5 w-1.5 rounded-full bg-orange-500" />
+                <div className="h-2 w-2 rounded-full bg-gspn-maroon-500" />
                 Status Alert Cards
               </CardTitle>
             </CardHeader>
@@ -958,11 +1041,10 @@ export default function BrandPage() {
         {/* TREASURY TAB */}
         <TabsContent value="treasury" className="space-y-8">
           {/* Treasury Gradient Cards */}
-          <Card className="border-2 shadow-lg overflow-hidden">
-            <div className="h-2 bg-gradient-to-r from-emerald-500 via-teal-500 to-cyan-500" />
-            <CardHeader className="bg-gradient-to-br from-emerald-50/50 to-transparent dark:from-emerald-950/20">
+          <Card className="border shadow-sm overflow-hidden">
+            <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <div className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
+                <div className="h-2 w-2 rounded-full bg-gspn-maroon-500" />
                 Treasury Fund Cards
               </CardTitle>
             </CardHeader>
@@ -1050,11 +1132,10 @@ export default function BrandPage() {
           </Card>
 
           {/* Transaction Row */}
-          <Card className="border-2 shadow-lg overflow-hidden">
-            <div className="h-2 bg-gradient-to-r from-blue-500 to-purple-500" />
-            <CardHeader className="bg-gradient-to-br from-blue-50/50 to-transparent dark:from-blue-950/20">
+          <Card className="border shadow-sm overflow-hidden">
+            <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <div className="h-1.5 w-1.5 rounded-full bg-blue-500" />
+                <div className="h-2 w-2 rounded-full bg-gspn-maroon-500" />
                 Transaction List Items
               </CardTitle>
             </CardHeader>
@@ -1097,11 +1178,10 @@ export default function BrandPage() {
           </Card>
 
           {/* Glow Effects */}
-          <Card className="border-2 shadow-lg overflow-hidden">
-            <div className="h-2 bg-gradient-to-r from-pink-500 via-purple-500 to-blue-500" />
-            <CardHeader className="bg-gradient-to-br from-pink-50/50 to-transparent dark:from-pink-950/20">
+          <Card className="border shadow-sm overflow-hidden">
+            <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <div className="h-1.5 w-1.5 rounded-full bg-pink-500" />
+                <div className="h-2 w-2 rounded-full bg-gspn-maroon-500" />
                 Card Glow Effects
               </CardTitle>
             </CardHeader>
@@ -1129,11 +1209,10 @@ export default function BrandPage() {
         {/* LOADING TAB */}
         <TabsContent value="loading" className="space-y-8">
           {/* Spinners */}
-          <Card className="border-2 shadow-lg overflow-hidden">
-            <div className="h-2 bg-gradient-to-r from-indigo-500 to-purple-500" />
-            <CardHeader className="bg-gradient-to-br from-indigo-50/50 to-transparent dark:from-indigo-950/20">
+          <Card className="border shadow-sm overflow-hidden">
+            <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <div className="h-1.5 w-1.5 rounded-full bg-indigo-500" />
+                <div className="h-2 w-2 rounded-full bg-gspn-maroon-500" />
                 Loading Spinners
               </CardTitle>
             </CardHeader>
@@ -1158,11 +1237,10 @@ export default function BrandPage() {
           </Card>
 
           {/* Skeleton Cards */}
-          <Card className="border-2 shadow-lg overflow-hidden">
-            <div className="h-2 bg-gradient-to-r from-slate-500 to-gray-500" />
-            <CardHeader className="bg-gradient-to-br from-slate-50/50 to-transparent dark:from-slate-900/20">
+          <Card className="border shadow-sm overflow-hidden">
+            <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <div className="h-1.5 w-1.5 rounded-full bg-slate-600" />
+                <div className="h-2 w-2 rounded-full bg-gspn-maroon-500" />
                 Skeleton Loading
               </CardTitle>
             </CardHeader>
@@ -1199,11 +1277,10 @@ export default function BrandPage() {
           </Card>
 
           {/* Button Loading States */}
-          <Card className="border-2 shadow-lg overflow-hidden">
-            <div className="h-2 bg-gradient-to-r from-amber-500 to-orange-500" />
-            <CardHeader className="bg-gradient-to-br from-amber-50/50 to-transparent dark:from-amber-950/20">
+          <Card className="border shadow-sm overflow-hidden">
+            <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <div className="h-1.5 w-1.5 rounded-full bg-amber-500" />
+                <div className="h-2 w-2 rounded-full bg-gspn-maroon-500" />
                 Button Loading States
               </CardTitle>
             </CardHeader>
@@ -1228,11 +1305,10 @@ export default function BrandPage() {
           </Card>
 
           {/* Progress Loading */}
-          <Card className="border-2 shadow-lg overflow-hidden">
-            <div className="h-2 bg-gradient-to-r from-emerald-500 to-teal-500" />
-            <CardHeader className="bg-gradient-to-br from-emerald-50/50 to-transparent dark:from-emerald-950/20">
+          <Card className="border shadow-sm overflow-hidden">
+            <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <div className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
+                <div className="h-2 w-2 rounded-full bg-gspn-maroon-500" />
                 Progress Indicators
               </CardTitle>
             </CardHeader>
@@ -1266,11 +1342,10 @@ export default function BrandPage() {
           </Card>
 
           {/* Full Page Loading */}
-          <Card className="border-2 shadow-lg overflow-hidden">
-            <div className="h-2 bg-gradient-to-r from-violet-500 to-fuchsia-500" />
-            <CardHeader className="bg-gradient-to-br from-violet-50/50 to-transparent dark:from-violet-950/20">
+          <Card className="border shadow-sm overflow-hidden">
+            <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <div className="h-1.5 w-1.5 rounded-full bg-violet-500" />
+                <div className="h-2 w-2 rounded-full bg-gspn-maroon-500" />
                 Page Loading Overlay
               </CardTitle>
             </CardHeader>

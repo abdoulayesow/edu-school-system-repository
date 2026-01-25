@@ -4,6 +4,7 @@ import { useState, useEffect, useMemo, useCallback } from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import {
@@ -776,6 +777,19 @@ export default function AccountingPage() {
               </Card>
             </div>
 
+            {/* Registry Closed Warning */}
+            {treasuryBalance?.registryBalance === 0 && (
+              <Alert variant="default" className="border-amber-200 bg-amber-50 dark:border-amber-800/50 dark:bg-amber-950/20">
+                <AlertTriangle className="h-5 w-5 text-amber-600 dark:text-amber-400" />
+                <AlertTitle className="text-amber-800 dark:text-amber-200">
+                  {t.treasury.registryClosedTitle}
+                </AlertTitle>
+                <AlertDescription className="text-amber-700 dark:text-amber-300/90">
+                  {t.treasury.registryClosedMessage}
+                </AlertDescription>
+              </Alert>
+            )}
+
             {/* Quick Actions */}
             <div className="grid gap-4 grid-cols-2 md:grid-cols-3">
               <PermissionGuard resource="safe_balance" action="update" loading={<div className="h-16 animate-pulse bg-muted rounded-lg" />}>
@@ -808,7 +822,7 @@ export default function AccountingPage() {
                 </Button>
               </PermissionGuard>
 
-              <PermissionGuard resource="safe_balance" action="update" loading={<div className="h-16 animate-pulse bg-muted rounded-lg" />}>
+              <PermissionGuard resource="safe_balance" action="create" loading={<div className="h-16 animate-pulse bg-muted rounded-lg" />}>
                 <Button
                   size="lg"
                   variant="outline"
@@ -1053,7 +1067,7 @@ export default function AccountingPage() {
 
             {/* Quick Actions */}
             <div className="grid gap-4 grid-cols-2 md:grid-cols-3">
-              <PermissionGuard resource="safe_balance" action="update" loading={<div className="h-16 animate-pulse bg-muted rounded-lg" />}>
+              <PermissionGuard resource="safe_balance" action="create" loading={<div className="h-16 animate-pulse bg-muted rounded-lg" />}>
                 <Button
                   size="lg"
                   variant="outline"
