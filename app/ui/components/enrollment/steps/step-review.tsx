@@ -361,7 +361,7 @@ export function StepReview() {
           {/* Total */}
           <div className="flex items-center justify-between">
             <span>{t.enrollmentWizard.totalYearlyAmount}</span>
-            <span className="text-xl font-bold text-[#e79908] dark:text-gspn-gold-200">
+            <span className="text-xl font-bold text-nav-highlight dark:text-gspn-gold-200">
               {formatCurrency(data.adjustedTuitionFee || data.originalTuitionFee)}
             </span>
           </div>

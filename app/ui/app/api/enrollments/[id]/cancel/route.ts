@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server"
-import { requireSession } from "@/lib/authz"
+import { requirePerm } from "@/lib/authz"
 import { prisma } from "@/lib/prisma"
 
 interface RouteParams {
@@ -11,7 +11,7 @@ interface RouteParams {
  * Cancel a draft enrollment (requires a reason/comment)
  */
 export async function POST(req: NextRequest, { params }: RouteParams) {
-  const { session, error } = await requireSession()
+  const { session, error } = await requirePerm("student_enrollment", "update")
   if (error) return error
 
   const { id } = await params
@@ -48,8 +48,8 @@ export async function POST(req: NextRequest, { params }: RouteParams) {
     }
 
     // Only allow the creator or a director to cancel
-    const isDirector = session.user.role === "director"
-    const isCreator = enrollment.createdBy === session.user.id
+    const isDirector = session!.user.role === "director"
+    const isCreator = enrollment.createdBy === session!.user.id
 
     if (!isDirector && !isCreator) {
       return NextResponse.json(
@@ -64,7 +64,7 @@ export async function POST(req: NextRequest, { params }: RouteParams) {
         enrollmentId: id,
         title: "Enrollment Cancelled",
         content: reason.trim(),
-        createdBy: session.user.id,
+        createdBy: session!.user.id,
       },
     })
 
@@ -74,7 +74,7 @@ export async function POST(req: NextRequest, { params }: RouteParams) {
       data: {
         status: "cancelled",
         statusChangedAt: now,
-        statusChangedBy: session.user.id,
+        statusChangedBy: session!.user.id,
         statusComment: reason.trim(),
         draftExpiresAt: null, // Clear draft expiration
       },

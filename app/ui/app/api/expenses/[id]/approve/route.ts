@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server"
-import { requireRole } from "@/lib/authz"
+import { requirePerm } from "@/lib/authz"
 import { prisma } from "@/lib/prisma"
 import { z } from "zod"
 
@@ -18,7 +18,7 @@ const approveExpenseSchema = z.object({
  * Approve, reject, or mark an expense as paid
  */
 export async function POST(req: NextRequest, { params }: RouteParams) {
-  const { session, error } = await requireRole(["director"])
+  const { session, error } = await requirePerm("safe_expense", "approve")
   if (error) return error
 
   const { id } = await params
@@ -73,10 +73,85 @@ export async function POST(req: NextRequest, { params }: RouteParams) {
     let updateData: Record<string, unknown> = {}
 
     if (validated.action === "approve") {
-      updateData = {
-        status: "approved",
-        approvedBy: session!.user.id,
-        approvedAt: new Date(),
+      // Check if this is an Orange Money payment
+      const isOrangeMoney = existingExpense.method === "orange_money"
+
+      if (isOrangeMoney) {
+        // For Orange Money: update treasury balance immediately and mark as paid
+        const treasuryBalance = await prisma.treasuryBalance.findFirst()
+
+        if (!treasuryBalance) {
+          return NextResponse.json(
+            { message: "Treasury balance not found" },
+            { status: 500 }
+          )
+        }
+
+        // Check if sufficient balance
+        if (treasuryBalance.mobileMoneyBalance < existingExpense.amount) {
+          return NextResponse.json(
+            { message: "Insufficient mobile money balance" },
+            { status: 400 }
+          )
+        }
+
+        // Use transaction to ensure atomicity
+        const expense = await prisma.$transaction(async (tx) => {
+          // Update treasury balance
+          await tx.treasuryBalance.update({
+            where: { id: treasuryBalance.id },
+            data: {
+              mobileMoneyBalance: {
+                decrement: existingExpense.amount,
+              },
+            },
+          })
+
+          // Create SafeTransaction for audit trail
+          await tx.safeTransaction.create({
+            data: {
+              type: "mobile_money_payment",
+              direction: "out",
+              amount: existingExpense.amount,
+              mobileMoneyBalanceAfter:
+                treasuryBalance.mobileMoneyBalance - existingExpense.amount,
+              safeBalanceAfter: treasuryBalance.safeBalance,
+              description: `Expense: ${existingExpense.description}`,
+              category: existingExpense.category,
+              referenceType: "expense",
+              referenceId: existingExpense.id,
+              beneficiaryName: existingExpense.vendorName || "N/A",
+              recordedBy: session!.user.id,
+              recordedAt: new Date(),
+            },
+          })
+
+          // Update expense to "paid" status (skip "approved" for Orange Money)
+          return tx.expense.update({
+            where: { id },
+            data: {
+              status: "paid",
+              approvedBy: session!.user.id,
+              approvedAt: new Date(),
+              paidAt: new Date(),
+            },
+            include: {
+              requester: { select: { id: true, name: true, email: true } },
+              approver: { select: { id: true, name: true, email: true } },
+              supplier: { select: { id: true, name: true } },
+              initiatedBy: { select: { id: true, name: true } },
+            },
+          })
+        })
+
+        return NextResponse.json(expense)
+      } else {
+        // For Cash: just mark as approved (requires separate "mark_paid" step)
+        updateData = {
+          status: "approved",
+          approvedBy: session!.user.id,
+          approvedAt: new Date(),
+        }
       }
     } else if (validated.action === "reject") {
       updateData = {
@@ -84,10 +159,73 @@ export async function POST(req: NextRequest, { params }: RouteParams) {
         rejectionReason: validated.rejectionReason,
       }
     } else if (validated.action === "mark_paid") {
-      updateData = {
-        status: "paid",
-        paidAt: new Date(),
+      // This is for cash expenses that need manual payment confirmation
+      // Update treasury balance for cash payments
+      const treasuryBalance = await prisma.treasuryBalance.findFirst()
+
+      if (!treasuryBalance) {
+        return NextResponse.json(
+          { message: "Treasury balance not found" },
+          { status: 500 }
+        )
       }
+
+      // Check if sufficient balance
+      if (treasuryBalance.registryBalance < existingExpense.amount) {
+        return NextResponse.json(
+          { message: "Insufficient registry balance" },
+          { status: 400 }
+        )
+      }
+
+      // Use transaction to ensure atomicity
+      const expense = await prisma.$transaction(async (tx) => {
+        // Update treasury balance
+        await tx.treasuryBalance.update({
+          where: { id: treasuryBalance.id },
+          data: {
+            registryBalance: {
+              decrement: existingExpense.amount,
+            },
+          },
+        })
+
+        // Create SafeTransaction for audit trail
+        await tx.safeTransaction.create({
+          data: {
+            type: "expense_payment",
+            direction: "out",
+            amount: existingExpense.amount,
+            registryBalanceAfter:
+              treasuryBalance.registryBalance - existingExpense.amount,
+            safeBalanceAfter: treasuryBalance.safeBalance,
+            description: `Expense: ${existingExpense.description}`,
+            category: existingExpense.category,
+            referenceType: "expense",
+            referenceId: existingExpense.id,
+            beneficiaryName: existingExpense.vendorName || "N/A",
+            recordedBy: session!.user.id,
+            recordedAt: new Date(),
+          },
+        })
+
+        // Update expense to "paid" status
+        return tx.expense.update({
+          where: { id },
+          data: {
+            status: "paid",
+            paidAt: new Date(),
+          },
+          include: {
+            requester: { select: { id: true, name: true, email: true } },
+            approver: { select: { id: true, name: true, email: true } },
+            supplier: { select: { id: true, name: true } },
+            initiatedBy: { select: { id: true, name: true } },
+          },
+        })
+      })
+
+      return NextResponse.json(expense)
     }
 
     const expense = await prisma.expense.update({
@@ -96,6 +234,8 @@ export async function POST(req: NextRequest, { params }: RouteParams) {
       include: {
         requester: { select: { id: true, name: true, email: true } },
         approver: { select: { id: true, name: true, email: true } },
+        supplier: { select: { id: true, name: true } },
+        initiatedBy: { select: { id: true, name: true } },
       },
     })
 

@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server"
-import { requireRole } from "@/lib/authz"
+import { requirePerm } from "@/lib/authz"
 import { prisma } from "@/lib/prisma"
 
 interface RouteParams {
@@ -13,7 +13,7 @@ interface RouteParams {
  * - Sets the target year as active
  */
 export async function POST(req: NextRequest, { params }: RouteParams) {
-  const { error } = await requireRole(["director"])
+  const { error } = await requirePerm("academic_year", "update")
   if (error) return error
 
   const { id } = await params

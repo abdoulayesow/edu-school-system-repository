@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server"
-import { requireRole, requireSession } from "@/lib/authz"
+import { requirePerm } from "@/lib/authz"
 import { prisma } from "@/lib/prisma"
 import { z } from "zod"
 
@@ -34,7 +34,7 @@ const createBatchEvaluationSchema = z.object({
  * List evaluations with filters
  */
 export async function GET(req: NextRequest) {
-  const { session, error } = await requireSession()
+  const { error } = await requirePerm("grades", "view")
   if (error) return error
 
   const { searchParams } = new URL(req.url)
@@ -138,7 +138,7 @@ export async function GET(req: NextRequest) {
  * Create a single evaluation or batch evaluations
  */
 export async function POST(req: NextRequest) {
-  const { session, error } = await requireRole(["director", "academic_director", "teacher"])
+  const { session, error } = await requirePerm("grades", "create")
   if (error) return error
 
   try {

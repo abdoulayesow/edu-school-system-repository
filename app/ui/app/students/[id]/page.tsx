@@ -39,9 +39,11 @@ import {
   ExternalLink,
   FileText,
   UserCheck,
+  Banknote,
 } from "lucide-react"
 import { useI18n } from "@/components/i18n-provider"
 import { PageContainer } from "@/components/layout/PageContainer"
+import { PermissionGuard } from "@/components/permission-guard"
 import { formatDateLong } from "@/lib/utils"
 import Link from "next/link"
 import { StudentRoomChangeDialog } from "@/components/room-assignments"
@@ -316,12 +318,10 @@ export default function StudentDetailPage() {
   }
 
   const getPaymentStatusLabel = (status: string) => {
-    const statuses: Record<string, { label: string; variant: "default" | "secondary" | "destructive" | "outline" }> = {
-      pending_deposit: { label: "En attente de dépôt", variant: "secondary" },
-      deposited: { label: "Déposé", variant: "outline" },
-      pending_review: { label: "En attente de validation", variant: "secondary" },
-      confirmed: { label: "Confirmé", variant: "default" },
-      rejected: { label: "Rejeté", variant: "destructive" }
+    const statuses: Record<string, { label: string; variant: "default" | "secondary" | "destructive" | "outline" | "success" }> = {
+      confirmed: { label: "Confirmé", variant: "success" },
+      reversed: { label: "Annulé", variant: "outline" },
+      failed: { label: "Échoué", variant: "destructive" }
     }
     const config = statuses[status] || { label: status, variant: "secondary" }
     return <Badge variant={config.variant}>{config.label}</Badge>
@@ -400,28 +400,13 @@ export default function StudentDetailPage() {
               </p>
               <div className="flex items-center gap-2 flex-wrap">
                 {student.studentProfile?.currentGrade && (
-                  <Badge variant="outline" className="gap-1">
+                  <Badge variant="outline" className="gap-1 h-6">
                     <GraduationCap className="size-3" />
                     {student.studentProfile.currentGrade.name}
                   </Badge>
                 )}
-                {currentRoomName ? (
-                  <Badge variant="secondary" className="gap-1">
-                    <DoorOpen className="size-3" />
-                    {currentRoomName}
-                    {activeSchoolYearId && student.studentProfile?.currentGrade && (
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="h-4 w-4 ml-1 hover:bg-primary/10"
-                        onClick={() => setRoomChangeDialogOpen(true)}
-                      >
-                        <Edit2 className="size-3" />
-                      </Button>
-                    )}
-                  </Badge>
-                ) : (
-                  activeSchoolYearId && student.studentProfile?.currentGrade && (
+                <PermissionGuard resource="room_assignments" action="update" inline>
+                  {currentRoomName ? (
                     <Button
                       variant="outline"
                       size="sm"
@@ -431,12 +416,44 @@ export default function StudentDetailPage() {
                       <DoorOpen className="size-3" />
                       {t.students.room}
                     </Button>
-                  )
-                )}
+                  ) : (
+                    activeSchoolYearId && student.studentProfile?.currentGrade && (
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="gap-1 h-6"
+                        onClick={() => setRoomChangeDialogOpen(true)}
+                      >
+                        <DoorOpen className="size-3" />
+                        {t.students.room}
+                      </Button>
+                    )
+                  )}
+                </PermissionGuard>
               </div>
             </div>
           </div>
 
+          {/* Action Buttons */}
+          <div className="flex gap-2">
+            <PermissionGuard
+              resource="payments"
+              action="create"
+              loading={<div className="h-11 w-40 animate-pulse bg-muted rounded-md" />}
+            >
+              <Link href={`/payments/new?studentId=${student.id}`}>
+                <Button
+                  variant="gold"
+                  size="lg"
+                  className="gap-2 shadow-md hover:shadow-lg transition-all"
+                  disabled={!student.balanceInfo || student.balanceInfo.remainingBalance <= 0}
+                >
+                  <Banknote className="size-5" />
+                  {t.students.makePayment}
+                </Button>
+              </Link>
+            </PermissionGuard>
+          </div>
         </div>
 
         {/* Stats Cards */}
@@ -453,7 +470,7 @@ export default function StudentDetailPage() {
                 {student.balanceInfo ? formatCurrency(student.balanceInfo.remainingBalance) : "N/A"}
               </div>
               {student.balanceInfo && (
-                <Progress value={student.balanceInfo.paymentPercentage} className="h-2 mt-2 [&>div]:bg-amber-500 dark:[&>div]:bg-amber-400" />
+                <Progress value={student.balanceInfo.paymentPercentage} className="h-2 mt-2 bg-accent/20 dark:bg-accent/10 [&>div]:bg-accent dark:[&>div]:bg-accent" />
               )}
             </CardContent>
           </Card>
@@ -491,7 +508,7 @@ export default function StudentDetailPage() {
               </div>
               <Progress
                 value={student.attendanceSummary?.attendanceRate ?? 0}
-                className="h-2 mt-2 [&>div]:bg-amber-500 dark:[&>div]:bg-amber-400"
+                className="h-2 mt-2 bg-accent/20 dark:bg-accent/10 [&>div]:bg-accent dark:[&>div]:bg-accent"
               />
             </CardContent>
           </Card>
@@ -509,7 +526,7 @@ export default function StudentDetailPage() {
               </div>
               <Progress
                 value={student.balanceInfo?.paymentPercentage ?? 0}
-                className="h-2 mt-2 [&>div]:bg-amber-500 dark:[&>div]:bg-amber-400"
+                className="h-2 mt-2 bg-accent/20 dark:bg-accent/10 [&>div]:bg-accent dark:[&>div]:bg-accent"
               />
             </CardContent>
           </Card>
@@ -535,12 +552,14 @@ export default function StudentDetailPage() {
                     <User className="size-5" />
                     {t.students.personalInfo}
                   </CardTitle>
-                  <Link href={`/students/${student.id}/edit`}>
-                    <Button variant="outline" size="sm" className="gap-1 bg-amber-50 text-amber-700 border-amber-200 hover:bg-amber-100 dark:bg-amber-950/30 dark:text-amber-400 dark:border-amber-800 dark:hover:bg-amber-950/50">
-                      <Edit2 className="size-3" />
-                      {t.students.editInfo}
-                    </Button>
-                  </Link>
+                  <PermissionGuard resource="students" action="update" inline>
+                    <Link href={`/students/${student.id}/edit`}>
+                      <Button variant="outline" size="sm" className="gap-1 bg-amber-50 text-amber-700 border-amber-200 hover:bg-amber-100 dark:bg-amber-950/30 dark:text-amber-400 dark:border-amber-800 dark:hover:bg-amber-950/50">
+                        <Edit2 className="size-3" />
+                        {t.students.editInfo}
+                      </Button>
+                    </Link>
+                  </PermissionGuard>
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <div className="grid grid-cols-2 gap-4">
@@ -671,7 +690,7 @@ export default function StudentDetailPage() {
                   <CardContent className="space-y-4">
                     {/* Father */}
                     {activeEnrollment.fatherName && (
-                      <div className="p-3 rounded-lg bg-amber-50/50 dark:bg-amber-950/30">
+                      <div>
                         <p className="text-sm font-medium mb-2">{t.students.father}</p>
                         <p className="font-medium">{activeEnrollment.fatherName}</p>
                         {activeEnrollment.fatherPhone && (
@@ -691,7 +710,7 @@ export default function StudentDetailPage() {
 
                     {/* Mother */}
                     {activeEnrollment.motherName && (
-                      <div className="p-3 rounded-lg bg-amber-50/50 dark:bg-amber-950/30">
+                      <div>
                         <p className="text-sm font-medium mb-2">{t.students.mother}</p>
                         <p className="font-medium">{activeEnrollment.motherName}</p>
                         {activeEnrollment.motherPhone && (
@@ -765,7 +784,7 @@ export default function StudentDetailPage() {
                           {student.attendanceSummary.attendanceRate}%
                         </span>
                       </div>
-                      <Progress value={student.attendanceSummary.attendanceRate} className="h-2 mt-2" />
+                      <Progress value={student.attendanceSummary.attendanceRate} className="h-2 mt-2 bg-accent/20 dark:bg-accent/10 [&>div]:bg-accent dark:[&>div]:bg-accent" />
                     </div>
                   </CardContent>
                 </Card>
@@ -830,8 +849,8 @@ export default function StudentDetailPage() {
                       ) : (
                         student.enrollments.map((enrollment) => {
                           const tuition = enrollment.adjustedTuitionFee ?? enrollment.originalTuitionFee
-                          // Include all payments except rejected and failed
-                          const countablePayments = enrollment.payments.filter(p => !['rejected', 'failed'].includes(p.status))
+                          // Include all payments except reversed and failed
+                          const countablePayments = enrollment.payments.filter(p => !['reversed', 'failed'].includes(p.status))
                           const totalPaid = countablePayments.reduce((sum, p) => sum + p.amount, 0)
                           const percentage = Math.round((totalPaid / tuition) * 100)
 
@@ -919,7 +938,7 @@ export default function StudentDetailPage() {
                         <span>{t.students.paymentProgress}</span>
                         <span className="font-medium">{student.balanceInfo.paymentPercentage}%</span>
                       </div>
-                      <Progress value={student.balanceInfo.paymentPercentage} className="h-3 [&>div]:bg-amber-500 dark:[&>div]:bg-amber-400" />
+                      <Progress value={student.balanceInfo.paymentPercentage} className="h-3 bg-accent/20 dark:bg-accent/10 [&>div]:bg-accent dark:[&>div]:bg-accent" />
                     </div>
 
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-4 pt-4">
@@ -1072,7 +1091,7 @@ export default function StudentDetailPage() {
                           {student.attendanceSummary.attendanceRate}%
                         </span>
                       </div>
-                      <Progress value={student.attendanceSummary.attendanceRate} className="h-4" />
+                      <Progress value={student.attendanceSummary.attendanceRate} className="h-4 bg-accent/20 dark:bg-accent/10 [&>div]:bg-accent dark:[&>div]:bg-accent" />
                       <div className="flex justify-between mt-2 text-xs text-muted-foreground">
                         <span>0%</span>
                         <span className="text-warning">60%</span>

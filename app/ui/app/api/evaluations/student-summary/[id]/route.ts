@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server"
-import { requireRole } from "@/lib/authz"
+import { requirePerm } from "@/lib/authz"
 import { prisma } from "@/lib/prisma"
 import { z } from "zod"
 import { TrimesterDecision } from "@prisma/client"
@@ -21,7 +21,7 @@ const updateSummarySchema = z.object({
  * Get a specific student trimester summary
  */
 export async function GET(req: NextRequest, { params }: RouteParams) {
-  const { error } = await requireRole(["director", "academic_director", "teacher"])
+  const { error } = await requirePerm("report_cards", "view")
   if (error) return error
 
   const { id } = await params
@@ -109,7 +109,7 @@ export async function GET(req: NextRequest, { params }: RouteParams) {
  * Only directors can override decisions
  */
 export async function PUT(req: NextRequest, { params }: RouteParams) {
-  const { session, error } = await requireRole(["director", "academic_director"])
+  const { session, error } = await requirePerm("report_cards", "update")
   if (error) return error
 
   const { id } = await params

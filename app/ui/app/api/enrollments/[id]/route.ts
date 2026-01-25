@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server"
-import { requireSession, requireRole } from "@/lib/authz"
+import { requirePerm } from "@/lib/authz"
 import { prisma } from "@/lib/prisma"
 import { z } from "zod"
 
@@ -48,7 +48,7 @@ interface RouteParams {
  * Get a single enrollment with all related data
  */
 export async function GET(req: NextRequest, { params }: RouteParams) {
-  const { error } = await requireSession()
+  const { error } = await requirePerm("student_enrollment", "view")
   if (error) return error
 
   const { id } = await params
@@ -117,7 +117,7 @@ export async function GET(req: NextRequest, { params }: RouteParams) {
  * Update an enrollment (auto-save during wizard)
  */
 export async function PUT(req: NextRequest, { params }: RouteParams) {
-  const { session, error } = await requireSession()
+  const { session, error } = await requirePerm("student_enrollment", "update")
   if (error) return error
 
   const { id } = await params
@@ -139,8 +139,8 @@ export async function PUT(req: NextRequest, { params }: RouteParams) {
     // Only allow editing non-approved enrollments
     // Directors can edit any enrollment
     // Creators can edit their own enrollments that haven't been approved/rejected/cancelled
-    const isDirector = session.user.role === "director"
-    const isCreator = existing.createdBy === session.user.id
+    const isDirector = session!.user.role === "director"
+    const isCreator = existing.createdBy === session!.user.id
     const isDraft = existing.status === "draft"
     const isEditable = ["draft", "submitted", "needs_review"].includes(existing.status)
 
@@ -251,7 +251,7 @@ export async function PUT(req: NextRequest, { params }: RouteParams) {
  * Delete a draft enrollment
  */
 export async function DELETE(req: NextRequest, { params }: RouteParams) {
-  const { session, error } = await requireSession()
+  const { session, error } = await requirePerm("student_enrollment", "delete")
   if (error) return error
 
   const { id } = await params
@@ -269,8 +269,8 @@ export async function DELETE(req: NextRequest, { params }: RouteParams) {
     }
 
     // Only allow deleting drafts or cancelled enrollments by the creator or directors
-    const isDirector = session.user.role === "director"
-    const isCreator = existing.createdBy === session.user.id
+    const isDirector = session!.user.role === "director"
+    const isCreator = existing.createdBy === session!.user.id
     const isDeletable = existing.status === "draft" || existing.status === "cancelled"
 
     if (!isDeletable) {

@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server"
-import { requireRole } from "@/lib/authz"
+import { requirePerm } from "@/lib/authz"
 import { prisma } from "@/lib/prisma"
 import { z } from "zod"
 import { randomBytes } from "crypto"
@@ -17,11 +17,8 @@ const inviteUserSchema = z.object({
  * Send an invitation to a new user
  */
 export async function POST(req: NextRequest) {
-  const { session, error } = await requireRole(["director"])
+  const { session, error } = await requirePerm("user_accounts", "create")
   if (error) return error
-  if (!session?.user?.id) {
-    return NextResponse.json({ message: "Unauthorized" }, { status: 401 })
-  }
 
   try {
     const body = await req.json()
@@ -68,7 +65,7 @@ export async function POST(req: NextRequest) {
         role: validated.role,
         token,
         expiresAt,
-        invitedBy: session.user.id,
+        invitedBy: session!.user.id,
       },
       include: {
         inviter: {
@@ -134,7 +131,7 @@ export async function POST(req: NextRequest) {
  * List all invitations
  */
 export async function GET(req: NextRequest) {
-  const { error } = await requireRole(["director"])
+  const { error } = await requirePerm("user_accounts", "view")
   if (error) return error
 
   try {

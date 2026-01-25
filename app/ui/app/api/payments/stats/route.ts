@@ -1,14 +1,22 @@
-import { NextResponse } from "next/server"
-import { requireSession } from "@/lib/authz"
+import { NextRequest, NextResponse } from "next/server"
+import { requirePerm } from "@/lib/authz"
 import { prisma } from "@/lib/prisma"
 
 /**
  * GET /api/payments/stats
  * Get payment statistics for dashboard cards
+ *
+ * Query params:
+ * - startDate: filter stats from this date (YYYY-MM-DD)
+ * - endDate: filter stats until this date (YYYY-MM-DD)
  */
-export async function GET() {
-  const { error } = await requireSession()
+export async function GET(req: NextRequest) {
+  const { error } = await requirePerm("payment_recording", "view")
   if (error) return error
+
+  const { searchParams } = new URL(req.url)
+  const startDateParam = searchParams.get("startDate")
+  const endDateParam = searchParams.get("endDate")
 
   try {
     const now = new Date()
@@ -17,6 +25,10 @@ export async function GET() {
     const todayStart = new Date(now)
     todayStart.setHours(0, 0, 0, 0)
 
+    // End of today
+    const todayEnd = new Date(now)
+    todayEnd.setHours(23, 59, 59, 999)
+
     // Start of this week (Monday)
     const weekStart = new Date(now)
     const dayOfWeek = now.getDay()
@@ -24,33 +36,60 @@ export async function GET() {
     weekStart.setDate(now.getDate() - daysToMonday)
     weekStart.setHours(0, 0, 0, 0)
 
+    // Build date filter for filtered stats (byMethod, etc.)
+    // If date params provided, use them; otherwise use all-time
+    const buildDateFilter = () => {
+      if (startDateParam || endDateParam) {
+        const filter: { gte?: Date; lte?: Date } = {}
+        if (startDateParam) {
+          filter.gte = new Date(startDateParam)
+          filter.gte.setHours(0, 0, 0, 0)
+        }
+        if (endDateParam) {
+          filter.lte = new Date(endDateParam)
+          filter.lte.setHours(23, 59, 59, 999)
+        }
+        return { recordedAt: filter }
+      }
+      return {}
+    }
+
+    const dateFilter = buildDateFilter()
+    const hasDateFilter = startDateParam || endDateParam
+
     // Fetch all stats in parallel
     const [
       todayPayments,
-      pendingPayments,
+      reversedPayments,
       confirmedThisWeek,
       cashPayments,
       orangeMoneyPayments,
+      tuitionPayments,
+      clubPayments,
+      // Also fetch all-time totals for comparison
+      allTimeCash,
+      allTimeMobile,
     ] = await Promise.all([
-      // Today's payments
+      // Today's payments (always today, regardless of filter)
       prisma.payment.aggregate({
         where: {
-          recordedAt: { gte: todayStart },
+          recordedAt: { gte: todayStart, lte: todayEnd },
         },
         _count: true,
         _sum: { amount: true },
       }),
 
-      // Pending payments (pending_deposit, deposited, pending_review)
+      // Reversed payments (within date filter if provided)
       prisma.payment.aggregate({
         where: {
-          status: { in: ["pending_deposit", "deposited", "pending_review"] },
+          status: "reversed",
+          ...dateFilter,
         },
         _count: true,
         _sum: { amount: true },
       }),
 
-      // Confirmed this week
+      // Confirmed this week (always this week, regardless of filter)
       prisma.payment.aggregate({
         where: {
           status: "confirmed",
@@ -60,14 +99,54 @@ export async function GET() {
         _sum: { amount: true },
       }),
 
-      // Cash payments (all time)
+      // Cash payments (respects date filter)
+      prisma.payment.aggregate({
+        where: {
+          method: "cash",
+          ...dateFilter,
+        },
+        _count: true,
+        _sum: { amount: true },
+      }),
+
+      // Orange Money payments (respects date filter)
+      prisma.payment.aggregate({
+        where: {
+          method: "orange_money",
+          ...dateFilter,
+        },
+        _count: true,
+        _sum: { amount: true },
+      }),
+
+      // Tuition payments (respects date filter)
+      prisma.payment.aggregate({
+        where: {
+          paymentType: "tuition",
+          ...dateFilter,
+        },
+        _count: true,
+        _sum: { amount: true },
+      }),
+
+      // Club payments (respects date filter)
+      prisma.payment.aggregate({
+        where: {
+          paymentType: "club",
+          ...dateFilter,
+        },
+        _count: true,
+        _sum: { amount: true },
+      }),
+
+      // All-time cash (for reference)
       prisma.payment.aggregate({
         where: { method: "cash" },
         _count: true,
         _sum: { amount: true },
       }),
 
-      // Orange Money payments (all time)
+      // All-time mobile (for reference)
       prisma.payment.aggregate({
         where: { method: "orange_money" },
         _count: true,
@@ -80,9 +159,13 @@ export async function GET() {
         count: todayPayments._count,
         amount: todayPayments._sum.amount || 0,
       },
+      reversed: {
+        count: reversedPayments._count,
+        amount: reversedPayments._sum.amount || 0,
+      },
       pending: {
-        count: pendingPayments._count,
-        amount: pendingPayments._sum.amount || 0,
+        count: reversedPayments._count,
+        amount: reversedPayments._sum.amount || 0,
       },
       confirmedThisWeek: {
         count: confirmedThisWeek._count,
@@ -98,6 +181,33 @@ export async function GET() {
           amount: orangeMoneyPayments._sum.amount || 0,
         },
       },
+      byType: {
+        tuition: {
+          count: tuitionPayments._count,
+          amount: tuitionPayments._sum.amount || 0,
+        },
+        club: {
+          count: clubPayments._count,
+          amount: clubPayments._sum.amount || 0,
+        },
+      },
+      // Include all-time totals for reference
+      allTime: {
+        cash: {
+          count: allTimeCash._count,
+          amount: allTimeCash._sum.amount || 0,
+        },
+        orange_money: {
+          count: allTimeMobile._count,
+          amount: allTimeMobile._sum.amount || 0,
+        },
+      },
+      // Meta info about the filter applied
+      filterApplied: hasDateFilter,
+      filterRange: hasDateFilter ? {
+        startDate: startDateParam,
+        endDate: endDateParam,
+      } : null,
     })
   } catch (err) {
     console.error("Error fetching payment stats:", err)

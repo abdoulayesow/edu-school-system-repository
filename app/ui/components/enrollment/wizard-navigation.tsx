@@ -74,7 +74,7 @@ export function WizardNavigation({ onSave, onSubmit }: WizardNavigationProps) {
             type="button"
             onClick={handleNext}
             disabled={isSubmitting || !canGoNext}
-            className="bg-[#e79908] hover:bg-[#d68907] text-black dark:bg-gspn-maroon-950 dark:hover:bg-gspn-maroon-900 dark:text-white"
+            className="bg-nav-highlight hover:bg-nav-highlight/90 text-black dark:bg-gspn-maroon-950 dark:hover:bg-gspn-maroon-900 dark:text-white"
           >
             {isSubmitting ? (
               <Loader2 className={sizing.icon.sm + " mr-2 animate-spin"} />
@@ -90,7 +90,7 @@ export function WizardNavigation({ onSave, onSubmit }: WizardNavigationProps) {
             type="button"
             onClick={handleSubmit}
             disabled={isSubmitting}
-            className="bg-[#e79908] hover:bg-[#d68907] text-black dark:bg-gspn-maroon-950 dark:hover:bg-gspn-maroon-900 dark:text-white"
+            className="bg-nav-highlight hover:bg-nav-highlight/90 text-black dark:bg-gspn-maroon-950 dark:hover:bg-gspn-maroon-900 dark:text-white"
           >
             {isSubmitting ? (
               <Loader2 className={sizing.icon.sm + " mr-2 animate-spin"} />

@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server"
-import { requireSession } from "@/lib/authz"
+import { requirePerm } from "@/lib/authz"
 import { prisma } from "@/lib/prisma"
 
 interface RouteParams {
@@ -11,7 +11,7 @@ interface RouteParams {
  * Get a single attendance session with all records
  */
 export async function GET(req: NextRequest, { params }: RouteParams) {
-  const { error } = await requireSession()
+  const { error } = await requirePerm("attendance", "view")
   if (error) return error
 
   const { id } = await params

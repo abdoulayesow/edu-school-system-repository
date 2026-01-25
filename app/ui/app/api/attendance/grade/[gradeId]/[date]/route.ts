@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server"
-import { requireSession, requireRole } from "@/lib/authz"
+import { requirePerm } from "@/lib/authz"
 import { prisma } from "@/lib/prisma"
 import { z } from "zod"
 
@@ -25,7 +25,7 @@ const batchAttendanceSchema = z.object({
  * Get attendance for a specific grade and date
  */
 export async function GET(req: NextRequest, { params }: RouteParams) {
-  const { error } = await requireSession()
+  const { error } = await requirePerm("attendance", "view")
   if (error) return error
 
   const { gradeId, date } = await params
@@ -161,11 +161,7 @@ export async function GET(req: NextRequest, { params }: RouteParams) {
  * Submit batch attendance for a grade on a specific date
  */
 export async function POST(req: NextRequest, { params }: RouteParams) {
-  const { session: userSession, error } = await requireRole([
-    "director",
-    "academic_director",
-    "teacher",
-  ])
+  const { session: userSession, error } = await requirePerm("attendance", "create")
   if (error) return error
 
   const { gradeId, date } = await params

@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server"
-import { requireSession } from "@/lib/authz"
+import { requirePerm } from "@/lib/authz"
 import { prisma } from "@/lib/prisma"
 import { z } from "zod"
 
@@ -18,7 +18,7 @@ interface RouteParams {
  * Get all notes for an enrollment
  */
 export async function GET(req: NextRequest, { params }: RouteParams) {
-  const { error } = await requireSession()
+  const { error } = await requirePerm("student_enrollment", "view")
   if (error) return error
 
   const { id } = await params
@@ -47,7 +47,7 @@ export async function GET(req: NextRequest, { params }: RouteParams) {
  * Add a note to an enrollment
  */
 export async function POST(req: NextRequest, { params }: RouteParams) {
-  const { session, error } = await requireSession()
+  const { session, error } = await requirePerm("student_enrollment", "update")
   if (error) return error
 
   const { id } = await params
@@ -73,7 +73,7 @@ export async function POST(req: NextRequest, { params }: RouteParams) {
         enrollmentId: id,
         title: validated.title,
         content: validated.content,
-        createdBy: session.user.id,
+        createdBy: session!.user.id,
       },
       include: {
         author: { select: { name: true, email: true } },

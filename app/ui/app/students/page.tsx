@@ -197,7 +197,7 @@ export default function StudentsPage() {
   const getAttendanceBadge = (status: string | null) => {
     if (!status) {
       return (
-        <Badge variant="outline" className="bg-gray-100 text-gray-600 border-gray-300 dark:bg-gray-800 dark:text-gray-400 dark:border-gray-600">
+        <Badge variant="outline" className="bg-muted text-muted-foreground border-muted-foreground/30">
           {t.students.missingData || "Missing data"}
         </Badge>
       )
@@ -458,7 +458,7 @@ export default function StudentsPage() {
               <div className="rounded-md border">
                 <Table>
                   <TableHeader>
-                    <TableRow className="bg-yellow-50">
+                    <TableRow className="bg-gspn-gold-50/50 dark:bg-gspn-gold-950/20">
                       <TableHead className="w-[50px]"></TableHead>
                       <TableHead>{t.enrollments.fullName}</TableHead>
                       <TableHead>{t.enrollments.studentId}</TableHead>

@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server"
-import { requireSession, requireRole } from "@/lib/authz"
+import { requirePerm } from "@/lib/authz"
 import { prisma } from "@/lib/prisma"
 import { Prisma } from "@prisma/client"
 import { z } from "zod"
@@ -46,7 +46,7 @@ const createEnrollmentSchema = z.object({
  * Query params: status, schoolYearId, gradeId, search
  */
 export async function GET(req: NextRequest) {
-  const { session, error } = await requireSession()
+  const { session, error } = await requirePerm("student_enrollment", "view")
   if (error) return error
 
   const searchParams = req.nextUrl.searchParams
@@ -81,7 +81,7 @@ export async function GET(req: NextRequest) {
     // For drafts, only show user's own drafts
     if (draftsOnly) {
       where.status = "draft"
-      where.createdBy = session.user.id
+      where.createdBy = session!.user.id
       where.OR = [
         { draftExpiresAt: null },
         { draftExpiresAt: { gt: new Date() } },
@@ -191,7 +191,7 @@ export async function GET(req: NextRequest) {
  * Create a new enrollment (starts as draft)
  */
 export async function POST(req: NextRequest) {
-  const { session, error } = await requireSession()
+  const { session, error } = await requirePerm("student_enrollment", "view")
   if (error) return error
 
   try {
@@ -249,7 +249,7 @@ export async function POST(req: NextRequest) {
       status: "draft",
       currentStep: validated.currentStep || 1,
       draftExpiresAt,
-      createdBy: session.user.id,
+      createdBy: session!.user.id,
       // Optional fields
       studentId: validated.studentId,
       gender: validated.gender,

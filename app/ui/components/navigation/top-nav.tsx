@@ -20,7 +20,6 @@ import { getNavigationForRole } from "@/lib/nav-config"
 import type { UserRole } from "@/lib/nav-links"
 import { useI18n } from "@/components/i18n-provider"
 import { LanguageSwitcher } from "@/components/language-switcher"
-import { OfflineIndicator } from "@/components/offline-indicator"
 import { useNavigation } from "./navigation-context"
 import { useUserInitials } from "@/hooks/use-user-initials"
 import { ThemeToggleButton } from "@/components/theme-toggle-button"
@@ -152,8 +151,6 @@ export function TopNav() {
             <ThemeToggleButton variant="nav" />
 
             <LanguageSwitcher variant="nav" />
-
-            {session && <OfflineIndicator showLabel size="sm" />}
 
             {/* User Dropdown - Custom implementation (no animation) */}
             {session?.user && (

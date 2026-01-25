@@ -40,7 +40,7 @@ export const mainNavigation: NavLink[] = [
   },
   {
     name: "Enrollments",
-    href: "/enrollments",
+    href: "/students/enrollments",
     icon: Users,
     roles: ["director", "secretary", "academic_director"],
   },
@@ -52,7 +52,7 @@ export const mainNavigation: NavLink[] = [
   },
   {
     name: "Grades",
-    href: "/grades",
+    href: "/students/grades",
     icon: School,
     roles: ["director", "academic_director", "teacher"],
   },
@@ -70,19 +70,19 @@ export const mainNavigation: NavLink[] = [
   },
   {
     name: "Expenses",
-    href: "/expenses",
+    href: "/accounting/expenses",
     icon: Wallet,
     roles: ["director", "accountant"],
   },
   {
     name: "Attendance",
-    href: "/attendance",
+    href: "/students/attendance",
     icon: ClipboardCheck,
     roles: ["director", "teacher", "academic_director"],
   },
   {
     name: "Reports",
-    href: "/reports",
+    href: "/dashboard/reports",
     icon: BarChart3,
     roles: ["director", "academic_director"],
   },

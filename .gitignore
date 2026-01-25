@@ -23,4 +23,6 @@ yarn.lock
 pnpm-lock.json
 pnpm-lock.yaml
 
+app/db/prisma/migrations
+
 new-figma-design/

@@ -1,6 +1,7 @@
 "use client"
 
 import { Document, Page, Text, View, StyleSheet, Font, pdf } from "@react-pdf/renderer"
+import { colors } from "@/lib/pdf/styles"
 
 // Register fonts for better rendering
 Font.register({
@@ -14,7 +15,7 @@ Font.register({
 const styles = StyleSheet.create({
   page: {
     flexDirection: "column",
-    backgroundColor: "#ffffff",
+    backgroundColor: colors.white,
     padding: 30,
     fontSize: 10,
   },
@@ -24,7 +25,7 @@ const styles = StyleSheet.create({
     marginBottom: 20,
     paddingBottom: 10,
     borderBottomWidth: 2,
-    borderBottomColor: "#1a365d",
+    borderBottomColor: colors.navy,
   },
   schoolInfo: {
     flex: 1,
@@ -32,27 +33,27 @@ const styles = StyleSheet.create({
   schoolName: {
     fontSize: 14,
     fontWeight: "bold",
-    color: "#1a365d",
+    color: colors.navy,
     marginBottom: 4,
   },
   bulletinTitle: {
     fontSize: 18,
     fontWeight: "bold",
     textAlign: "center",
-    color: "#1a365d",
+    color: colors.navy,
     marginBottom: 4,
   },
   trimesterInfo: {
     fontSize: 12,
     textAlign: "center",
-    color: "#4a5568",
+    color: colors.textLight,
     marginBottom: 20,
   },
   studentInfoSection: {
     flexDirection: "row",
     marginBottom: 20,
     padding: 10,
-    backgroundColor: "#f7fafc",
+    backgroundColor: colors.background,
     borderRadius: 4,
   },
   studentInfoColumn: {
@@ -65,30 +66,30 @@ const styles = StyleSheet.create({
   },
   studentDetail: {
     fontSize: 10,
-    color: "#4a5568",
+    color: colors.textLight,
     marginBottom: 2,
   },
   summaryBox: {
     padding: 10,
-    backgroundColor: "#ebf8ff",
+    backgroundColor: "#ebf8ff", // Light blue - specific to summary box
     borderRadius: 4,
     alignItems: "center",
   },
   summaryLabel: {
     fontSize: 8,
-    color: "#4a5568",
+    color: colors.textLight,
   },
   summaryValue: {
     fontSize: 20,
     fontWeight: "bold",
-    color: "#2b6cb0",
+    color: colors.blue,
   },
   table: {
     marginBottom: 20,
   },
   tableHeader: {
     flexDirection: "row",
-    backgroundColor: "#1a365d",
+    backgroundColor: colors.navy,
     padding: 8,
   },
   tableHeaderCell: {
@@ -100,15 +101,15 @@ const styles = StyleSheet.create({
   tableRow: {
     flexDirection: "row",
     borderBottomWidth: 1,
-    borderBottomColor: "#e2e8f0",
+    borderBottomColor: colors.border,
     padding: 6,
   },
   tableRowAlt: {
     flexDirection: "row",
     borderBottomWidth: 1,
-    borderBottomColor: "#e2e8f0",
+    borderBottomColor: colors.border,
     padding: 6,
-    backgroundColor: "#f7fafc",
+    backgroundColor: colors.background,
   },
   tableCell: {
     fontSize: 9,
@@ -131,13 +132,13 @@ const styles = StyleSheet.create({
   statBox: {
     flex: 1,
     padding: 10,
-    backgroundColor: "#f7fafc",
+    backgroundColor: colors.background,
     borderRadius: 4,
     alignItems: "center",
   },
   statLabel: {
     fontSize: 8,
-    color: "#718096",
+    color: colors.textLight,
     marginBottom: 4,
   },
   statValue: {
@@ -148,7 +149,7 @@ const styles = StyleSheet.create({
     marginTop: 10,
     padding: 15,
     borderWidth: 2,
-    borderColor: "#1a365d",
+    borderColor: colors.navy,
     borderRadius: 4,
     alignItems: "center",
   },
@@ -161,18 +162,18 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
   },
   decisionAdmis: {
-    color: "#38a169",
+    color: colors.success,
   },
   decisionRattrapage: {
-    color: "#d69e2e",
+    color: colors.warning,
   },
   decisionRedouble: {
-    color: "#e53e3e",
+    color: colors.danger,
   },
   remarkSection: {
     marginTop: 20,
     padding: 10,
-    backgroundColor: "#f7fafc",
+    backgroundColor: colors.background,
     borderRadius: 4,
   },
   remarkLabel: {
@@ -182,7 +183,7 @@ const styles = StyleSheet.create({
   },
   remarkText: {
     fontSize: 9,
-    color: "#4a5568",
+    color: colors.textLight,
     fontStyle: "italic",
   },
   footer: {
@@ -193,12 +194,12 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-between",
     borderTopWidth: 1,
-    borderTopColor: "#e2e8f0",
+    borderTopColor: colors.border,
     paddingTop: 10,
   },
   footerText: {
     fontSize: 8,
-    color: "#718096",
+    color: colors.textLight,
   },
   signatureSection: {
     marginTop: 30,
@@ -217,7 +218,7 @@ const styles = StyleSheet.create({
   },
   signatureLabel: {
     fontSize: 8,
-    color: "#4a5568",
+    color: colors.textLight,
   },
 })
 
@@ -345,7 +346,7 @@ export const BulletinPDFDocument = ({ data, locale }: BulletinPDFProps) => {
         <View style={styles.header}>
           <View style={styles.schoolInfo}>
             <Text style={styles.schoolName}>{t.schoolName}</Text>
-            <Text style={{ fontSize: 8, color: "#718096" }}>
+            <Text style={{ fontSize: 8, color: colors.textLight }}>
               {locale === "fr" ? "Excellence - Discipline - R\u00e9ussite" : "Excellence - Discipline - Success"}
             </Text>
           </View>
@@ -450,13 +451,13 @@ export const BulletinPDFDocument = ({ data, locale }: BulletinPDFProps) => {
             </View>
             <View style={styles.statBox}>
               <Text style={styles.statLabel}>{t.highestAverage}</Text>
-              <Text style={[styles.statValue, { color: "#38a169" }]}>
+              <Text style={[styles.statValue, { color: colors.success }]}>
                 {data.classStats.highestAverage?.toFixed(2) || "-"}
               </Text>
             </View>
             <View style={styles.statBox}>
               <Text style={styles.statLabel}>{t.lowestAverage}</Text>
-              <Text style={[styles.statValue, { color: "#e53e3e" }]}>
+              <Text style={[styles.statValue, { color: colors.danger }]}>
                 {data.classStats.lowestAverage?.toFixed(2) || "-"}
               </Text>
             </View>

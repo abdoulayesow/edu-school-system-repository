@@ -95,9 +95,18 @@ export const typography = {
   },
   // Accent font for stats and numbers
   stat: {
-    lg: 'font-accent text-4xl font-bold tabular-nums',
-    md: 'font-accent text-2xl font-bold tabular-nums',
-    sm: 'font-accent text-xl font-semibold tabular-nums',
+    hero: 'font-mono text-5xl md:text-6xl lg:text-7xl font-bold tabular-nums tracking-tight',
+    lg: 'font-mono text-4xl font-bold tabular-nums tracking-tight',
+    md: 'font-mono text-2xl font-bold tabular-nums',
+    sm: 'font-mono text-xl font-semibold tabular-nums',
+    xs: 'font-mono text-lg font-medium tabular-nums',
+  },
+  // Financial numbers with currency styling
+  currency: {
+    hero: 'font-mono text-5xl md:text-6xl font-extrabold tabular-nums tracking-tighter',
+    lg: 'font-mono text-3xl font-bold tabular-nums',
+    md: 'font-mono text-xl font-semibold tabular-nums',
+    sm: 'font-mono text-base font-medium tabular-nums',
   },
 } as const
 
@@ -154,6 +163,10 @@ export const shadows = {
   lift: 'shadow-[0_10px_40px_-10px_rgb(0_0_0/0.2)]',
   glowPrimary: 'shadow-[0_0_20px_rgba(139,35,50,0.3)]',
   glowGold: 'shadow-[0_0_20px_rgba(212,175,55,0.3)]',
+  glowEmerald: 'shadow-[0_0_30px_rgba(16,185,129,0.25)]',
+  glowAmber: 'shadow-[0_0_30px_rgba(245,158,11,0.25)]',
+  glowBlue: 'shadow-[0_0_30px_rgba(59,130,246,0.25)]',
+  glowOrange: 'shadow-[0_0_30px_rgba(249,115,22,0.25)]',
 } as const
 
 // ============================================================================
@@ -167,8 +180,47 @@ export const interactive = {
   scale: 'interactive-scale',
   // Card with hover effects
   card: 'transition-all duration-200 hover:shadow-lg hover:-translate-y-0.5',
+  // Enhanced card with subtle lift
+  cardEnhanced: 'transition-all duration-300 hover:shadow-xl hover:-translate-y-1 hover:scale-[1.01]',
   // Button press effect
   button: 'active:scale-[0.98] transition-transform duration-100',
+  // Smooth glow on hover
+  glow: 'transition-all duration-300 hover:shadow-2xl',
+} as const
+
+// ============================================================================
+// GRADIENT TOKENS (for financial cards)
+// ============================================================================
+
+export const gradients = {
+  registry: {
+    light: 'bg-gradient-to-br from-emerald-50 via-teal-50 to-green-50',
+    dark: 'dark:from-emerald-950/20 dark:via-teal-950/20 dark:to-green-950/20',
+    border: 'border-emerald-200 dark:border-emerald-800',
+    text: 'text-emerald-600 dark:text-emerald-400',
+    glow: 'hover:shadow-emerald-500/20',
+  },
+  safe: {
+    light: 'bg-gradient-to-br from-amber-50 via-yellow-50 to-orange-50',
+    dark: 'dark:from-amber-950/20 dark:via-yellow-950/20 dark:to-orange-950/20',
+    border: 'border-amber-200 dark:border-amber-800',
+    text: 'text-amber-600 dark:text-amber-400',
+    glow: 'hover:shadow-amber-500/20',
+  },
+  bank: {
+    light: 'bg-gradient-to-br from-blue-50 via-indigo-50 to-cyan-50',
+    dark: 'dark:from-blue-950/20 dark:via-indigo-950/20 dark:to-cyan-950/20',
+    border: 'border-blue-200 dark:border-blue-800',
+    text: 'text-blue-600 dark:text-blue-400',
+    glow: 'hover:shadow-blue-500/20',
+  },
+  mobileMoney: {
+    light: 'bg-gradient-to-br from-orange-50 via-amber-50 to-red-50',
+    dark: 'dark:from-orange-950/20 dark:via-amber-950/20 dark:to-red-950/20',
+    border: 'border-orange-200 dark:border-orange-800',
+    text: 'text-orange-600 dark:text-orange-400',
+    glow: 'hover:shadow-orange-500/20',
+  },
 } as const
 
 // ============================================================================
@@ -275,3 +327,6 @@ export type CardPadding = keyof typeof spacing.card
 export type AnimationClass = keyof typeof animation.classes
 export type StaggerDelay = keyof typeof animation.stagger
 export type ShadowLevel = keyof typeof shadows
+export type StatSize = keyof typeof typography.stat
+export type CurrencySize = keyof typeof typography.currency
+export type GradientType = keyof typeof gradients

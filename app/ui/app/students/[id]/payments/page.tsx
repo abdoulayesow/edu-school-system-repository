@@ -39,6 +39,8 @@ import {
   ChevronRight,
   Wallet,
   Receipt,
+  RefreshCw,
+  XCircle,
 } from "lucide-react"
 import { useI18n } from "@/components/i18n-provider"
 import { PageContainer } from "@/components/layout"
@@ -202,27 +204,6 @@ export default function StudentPaymentsPage() {
 
   const getStatusBadge = (status: string) => {
     switch (status) {
-      case "pending_deposit":
-        return (
-          <Badge variant="outline" className="text-orange-500 border-orange-500">
-            <BanknoteIcon className="h-3 w-3 mr-1" />
-            En attente dépôt
-          </Badge>
-        )
-      case "deposited":
-        return (
-          <Badge variant="outline" className="text-blue-500 border-blue-500">
-            <Clock className="h-3 w-3 mr-1" />
-            Déposé
-          </Badge>
-        )
-      case "pending_review":
-        return (
-          <Badge variant="outline" className="text-warning border-warning">
-            <Clock className="h-3 w-3 mr-1" />
-            En attente validation
-          </Badge>
-        )
       case "confirmed":
         return (
           <Badge className="bg-success text-success-foreground">
@@ -230,11 +211,18 @@ export default function StudentPaymentsPage() {
             Confirmé
           </Badge>
         )
-      case "rejected":
+      case "reversed":
+        return (
+          <Badge variant="outline" className="text-orange-500 border-orange-500">
+            <RefreshCw className="h-3 w-3 mr-1" />
+            Annulé
+          </Badge>
+        )
+      case "failed":
         return (
           <Badge variant="destructive">
-            <AlertCircle className="h-3 w-3 mr-1" />
-            Rejeté
+            <XCircle className="h-3 w-3 mr-1" />
+            Échoué
           </Badge>
         )
       default:

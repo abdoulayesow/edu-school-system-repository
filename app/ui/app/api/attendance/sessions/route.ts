@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server"
-import { requireSession, requireRole } from "@/lib/authz"
+import { requirePerm } from "@/lib/authz"
 import { prisma } from "@/lib/prisma"
 import { z } from "zod"
 
@@ -15,7 +15,7 @@ const createSessionSchema = z.object({
  * List attendance sessions with filters
  */
 export async function GET(req: NextRequest) {
-  const { error } = await requireSession()
+  const { error } = await requirePerm("attendance", "view")
   if (error) return error
 
   const { searchParams } = new URL(req.url)
@@ -117,7 +117,7 @@ export async function GET(req: NextRequest) {
  * Create a new attendance session
  */
 export async function POST(req: NextRequest) {
-  const { session, error } = await requireRole(["director", "academic_director", "teacher"])
+  const { session, error } = await requirePerm("attendance", "create")
   if (error) return error
 
   try {

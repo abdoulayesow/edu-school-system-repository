@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server"
-import { requireRole } from "@/lib/authz"
+import { requirePerm } from "@/lib/authz"
 import { prisma } from "@/lib/prisma"
 
 /**
@@ -7,7 +7,7 @@ import { prisma } from "@/lib/prisma"
  * Get accounting balance summary (payments, expenses, margins)
  */
 export async function GET(req: NextRequest) {
-  const { error } = await requireRole(["director", "accountant"])
+  const { error } = await requirePerm("financial_reports", "view")
   if (error) return error
 
   const { searchParams } = new URL(req.url)
@@ -48,12 +48,10 @@ export async function GET(req: NextRequest) {
     })
 
     // Calculate payment totals by status
+    // PaymentStatus enum: confirmed, reversed, failed
     const paymentsByStatus = {
-      pending_deposit: { count: 0, amount: 0 },
-      deposited: { count: 0, amount: 0 },
-      pending_review: { count: 0, amount: 0 },
       confirmed: { count: 0, amount: 0 },
-      rejected: { count: 0, amount: 0 },
+      reversed: { count: 0, amount: 0 },
       failed: { count: 0, amount: 0 },
     }
 
@@ -130,18 +128,17 @@ export async function GET(req: NextRequest) {
     }
 
     // Calculate summary
+    // All payments are confirmed immediately - no pending payment statuses exist
     const totalConfirmedPayments = paymentsByStatus.confirmed.amount
     const totalPaidExpenses = expensesByStatus.paid.amount
-    const totalPendingPayments = paymentsByStatus.pending_deposit.amount +
-      paymentsByStatus.deposited.amount +
-      paymentsByStatus.pending_review.amount
+    const totalPendingPayments = 0 // No pending statuses in current workflow
     const totalPendingExpenses = expensesByStatus.pending.amount + expensesByStatus.approved.amount
 
     // Cash availability
     // Orange Money confirmed = immediately available
-    // Cash confirmed = available (deposited at bank)
+    // Cash confirmed = available (in registry or deposited at bank)
     const cashAvailable = paymentsByMethod.orange_money.confirmed + paymentsByMethod.cash.confirmed - totalPaidExpenses
-    const cashPending = paymentsByMethod.cash.amount - paymentsByMethod.cash.confirmed
+    const cashPending = 0 // All cash is confirmed immediately
 
     return NextResponse.json({
       summary: {

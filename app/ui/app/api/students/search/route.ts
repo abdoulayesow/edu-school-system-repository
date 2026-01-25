@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server"
-import { requireSession } from "@/lib/authz"
+import { requirePerm } from "@/lib/authz"
 import { prisma } from "@/lib/prisma"
 
 /**
@@ -7,13 +7,14 @@ import { prisma } from "@/lib/prisma"
  * Quick search for students (for autocomplete, etc.)
  */
 export async function GET(req: NextRequest) {
-  const { error } = await requireSession()
+  const { error } = await requirePerm("students", "view")
   if (error) return error
 
   const { searchParams } = new URL(req.url)
   const q = searchParams.get("q")
   const limit = parseInt(searchParams.get("limit") || "10")
   const gradeId = searchParams.get("gradeId")
+  const balanceStatus = searchParams.get("balanceStatus") // "outstanding" or "paid_up"
 
   if (!q || q.length < 2) {
     return NextResponse.json({ students: [] })
@@ -26,13 +27,50 @@ export async function GET(req: NextRequest) {
       select: { id: true },
     })
 
-    const where: Record<string, unknown> = {
-      status: "active",
-      OR: [
+    // Split search query into words for multi-word search
+    // "Abdoulaye Sow" -> search firstName contains "Abdoulaye" AND lastName contains "Sow"
+    const words = q.trim().split(/\s+/).filter(w => w.length >= 2)
+
+    let searchConditions: Record<string, unknown>[]
+
+    if (words.length >= 2) {
+      // Multi-word search: try firstName + lastName combinations
+      // Search for: (firstName contains word1 AND lastName contains word2)
+      //          OR (firstName contains word2 AND lastName contains word1)
+      //          OR any word matches studentNumber
+      searchConditions = [
+        // First word in firstName, second word in lastName
+        {
+          AND: [
+            { firstName: { contains: words[0], mode: "insensitive" } },
+            { lastName: { contains: words[1], mode: "insensitive" } },
+          ],
+        },
+        // Reverse: second word in firstName, first word in lastName
+        {
+          AND: [
+            { firstName: { contains: words[1], mode: "insensitive" } },
+            { lastName: { contains: words[0], mode: "insensitive" } },
+          ],
+        },
+        // Also try each word individually (for partial matches)
+        ...words.map(word => ({ firstName: { contains: word, mode: "insensitive" } })),
+        ...words.map(word => ({ lastName: { contains: word, mode: "insensitive" } })),
+        // Student number match
+        { studentNumber: { contains: q, mode: "insensitive" } },
+      ]
+    } else {
+      // Single word search: match any field
+      searchConditions = [
         { firstName: { contains: q, mode: "insensitive" } },
         { lastName: { contains: q, mode: "insensitive" } },
         { studentNumber: { contains: q, mode: "insensitive" } },
-      ],
+      ]
+    }
+
+    const where: Record<string, unknown> = {
+      status: "active",
+      OR: searchConditions,
     }
 
     // Add grade filter if provided
@@ -127,7 +165,19 @@ export async function GET(req: NextRequest) {
       }
     })
 
-    return NextResponse.json({ students: results })
+    // Filter by balance status if specified
+    let filteredResults = results
+    if (balanceStatus) {
+      filteredResults = results.filter((student) => {
+        if (!student.balanceInfo) return false
+        const hasOutstanding = student.balanceInfo.remainingBalance > 0
+        if (balanceStatus === "outstanding") return hasOutstanding
+        if (balanceStatus === "paid_up") return !hasOutstanding
+        return true
+      })
+    }
+
+    return NextResponse.json({ students: filteredResults })
   } catch (err) {
     console.error("Error searching students:", err)
     return NextResponse.json(

@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server"
-import { requireSession } from "@/lib/authz"
+import { requirePerm } from "@/lib/authz"
 import { prisma } from "@/lib/prisma"
 import { withCache } from "@/lib/cache"
 
@@ -8,7 +8,7 @@ import { withCache } from "@/lib/cache"
  * List all grades for a school year
  */
 export async function GET(req: NextRequest) {
-  const { error } = await requireSession()
+  const { error } = await requirePerm("classes", "view")
   if (error) return error
 
   const { searchParams } = new URL(req.url)

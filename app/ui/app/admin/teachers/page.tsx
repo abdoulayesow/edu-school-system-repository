@@ -40,6 +40,7 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog"
 import { useI18n } from "@/components/i18n-provider"
+import { PermissionGuard } from "@/components/permission-guard"
 import {
   Users,
   BookOpen,
@@ -498,25 +499,29 @@ export default function TeachersPage() {
                               {canEdit && (
                                 <>
                                   {assignment ? (
-                                    <Button
-                                      variant="ghost"
-                                      size="sm"
-                                      onClick={() => {
-                                        setSelectedAssignment(assignment)
-                                        setIsRemoveDialogOpen(true)
-                                      }}
-                                    >
-                                      <Trash2 className="h-4 w-4 text-destructive" />
-                                    </Button>
+                                    <PermissionGuard resource="teachers_assignment" action="delete" inline>
+                                      <Button
+                                        variant="ghost"
+                                        size="sm"
+                                        onClick={() => {
+                                          setSelectedAssignment(assignment)
+                                          setIsRemoveDialogOpen(true)
+                                        }}
+                                      >
+                                        <Trash2 className="h-4 w-4 text-destructive" />
+                                      </Button>
+                                    </PermissionGuard>
                                   ) : (
-                                    <Button
-                                      variant="outline"
-                                      size="sm"
-                                      onClick={() => openAssignDialog(gradeSubject)}
-                                    >
-                                      <UserPlus className="h-4 w-4 mr-1" />
-                                      {t.admin.assignTeacher}
-                                    </Button>
+                                    <PermissionGuard resource="teachers_assignment" action="create" inline>
+                                      <Button
+                                        variant="outline"
+                                        size="sm"
+                                        onClick={() => openAssignDialog(gradeSubject)}
+                                      >
+                                        <UserPlus className="h-4 w-4 mr-1" />
+                                        {t.admin.assignTeacher}
+                                      </Button>
+                                    </PermissionGuard>
                                   )}
                                 </>
                               )}

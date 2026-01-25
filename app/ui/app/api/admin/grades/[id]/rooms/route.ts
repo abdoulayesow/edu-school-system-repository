@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server"
-import { requireRole } from "@/lib/authz"
+import { requirePerm } from "@/lib/authz"
 import { prisma } from "@/lib/prisma"
 import { z } from "zod"
 
@@ -19,7 +19,7 @@ const createRoomSchema = z.object({
  * List all rooms for a grade
  */
 export async function GET(req: NextRequest, { params }: RouteParams) {
-  const { error } = await requireRole(["director", "academic_director"])
+  const { error } = await requirePerm("classes", "view")
   if (error) return error
 
   const { id: gradeId } = await params
@@ -62,7 +62,7 @@ export async function GET(req: NextRequest, { params }: RouteParams) {
  * Create a new room for a grade
  */
 export async function POST(req: NextRequest, { params }: RouteParams) {
-  const { error } = await requireRole(["director", "academic_director"])
+  const { error } = await requirePerm("classes", "create")
   if (error) return error
 
   const { id: gradeId } = await params

@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server"
-import { requireRole } from "@/lib/authz"
+import { requirePerm } from "@/lib/authz"
 import { prisma } from "@/lib/prisma"
 import { z } from "zod"
 
@@ -23,7 +23,7 @@ const bulkAssignSchema = z.object({
  * List all subjects assigned to a grade
  */
 export async function GET(req: NextRequest, { params }: RouteParams) {
-  const { error } = await requireRole(["director", "academic_director"])
+  const { error } = await requirePerm("classes", "view")
   if (error) return error
 
   const { id: gradeId } = await params
@@ -75,7 +75,7 @@ export async function GET(req: NextRequest, { params }: RouteParams) {
  * Assign a subject to a grade (single or bulk)
  */
 export async function POST(req: NextRequest, { params }: RouteParams) {
-  const { error } = await requireRole(["director", "academic_director"])
+  const { error } = await requirePerm("classes", "update")
   if (error) return error
 
   const { id: gradeId } = await params
@@ -226,7 +226,7 @@ export async function POST(req: NextRequest, { params }: RouteParams) {
  * Query params: subjectId (required), series (optional)
  */
 export async function DELETE(req: NextRequest, { params }: RouteParams) {
-  const { error } = await requireRole(["director"])
+  const { error } = await requirePerm("classes", "update")
   if (error) return error
 
   const { id: gradeId } = await params

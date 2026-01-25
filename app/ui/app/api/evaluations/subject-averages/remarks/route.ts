@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server"
-import { requireRole } from "@/lib/authz"
+import { requirePerm } from "@/lib/authz"
 import { prisma } from "@/lib/prisma"
 import { z } from "zod"
 
@@ -17,7 +17,7 @@ const updateRemarksSchema = z.object({
  * Bulk update teacher remarks for subject averages
  */
 export async function PUT(req: NextRequest) {
-  const { session, error } = await requireRole(["director", "academic_director", "teacher"])
+  const { error } = await requirePerm("report_cards", "update")
   if (error) return error
 
   try {

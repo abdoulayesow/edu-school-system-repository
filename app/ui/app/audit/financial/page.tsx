@@ -6,11 +6,24 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { useI18n } from "@/components/i18n-provider"
 import { PageContainer } from "@/components/layout/PageContainer"
+import { PermissionGuard, NoPermission } from "@/components/permission-guard"
 
 export default function FinancialAuditPage() {
   const { t } = useI18n()
 
   return (
+    <PermissionGuard
+      resource="audit_logs"
+      action="view"
+      fallback={
+        <PageContainer maxWidth="full">
+          <NoPermission
+            title={t.permissions?.accessDenied || "Access Denied"}
+            description={t.permissions?.noAuditPermission || "You don't have permission to view audit logs."}
+          />
+        </PageContainer>
+      }
+    >
     <PageContainer maxWidth="full">
       <div className="space-y-6">
         {/* Header */}
@@ -37,7 +50,7 @@ export default function FinancialAuditPage() {
 
       {/* Stats Cards */}
       <div className="grid gap-4 md:grid-cols-3">
-        <Card className="bg-white dark:bg-gray-900 border-gray-100 dark:border-gray-800 py-5">
+        <Card className="bg-card border-border py-5">
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-sm font-medium text-gray-600 dark:text-gray-400">
               Payment Modifications
@@ -52,7 +65,7 @@ export default function FinancialAuditPage() {
           </CardContent>
         </Card>
 
-        <Card className="bg-white dark:bg-gray-900 border-gray-100 dark:border-gray-800 py-5">
+        <Card className="bg-card border-border py-5">
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-sm font-medium text-gray-600 dark:text-gray-400">
               Expense Approvals
@@ -67,7 +80,7 @@ export default function FinancialAuditPage() {
           </CardContent>
         </Card>
 
-        <Card className="bg-white dark:bg-gray-900 border-gray-100 dark:border-gray-800 py-5">
+        <Card className="bg-card border-border py-5">
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-sm font-medium text-gray-600 dark:text-gray-400">
               Reconciliations
@@ -87,12 +100,12 @@ export default function FinancialAuditPage() {
       <div className="flex gap-4">
         <Input
           placeholder="Search by transaction ID, user, or description..."
-          className="max-w-md bg-white dark:bg-gray-900 border-gray-200 dark:border-gray-700"
+          className="max-w-md bg-card border-border"
         />
       </div>
 
       {/* Audit Trail Table Placeholder */}
-      <Card className="bg-white dark:bg-gray-900 border-gray-100 dark:border-gray-800">
+      <Card className="bg-card border-border">
         <CardHeader>
           <CardTitle>Audit Trail</CardTitle>
           <CardDescription>
@@ -114,5 +127,6 @@ export default function FinancialAuditPage() {
       </Card>
       </div>
     </PageContainer>
+    </PermissionGuard>
   )
 }

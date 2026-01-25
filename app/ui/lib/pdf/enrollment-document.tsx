@@ -20,7 +20,7 @@ interface EnrollmentDocumentProps {
 const attestationStyles = StyleSheet.create({
   page: {
     flexDirection: "column",
-    backgroundColor: "#ffffff",
+    backgroundColor: colors.white,
     padding: 40,
     paddingBottom: 60,
     fontFamily: "Helvetica",
@@ -94,14 +94,14 @@ const attestationStyles = StyleSheet.create({
   },
   paymentHeader: {
     flexDirection: "row",
-    backgroundColor: "#000000",  // Black header as requested
+    backgroundColor: "#000000",  // Black header - specific design choice
     padding: 8,
   },
   paymentHeaderCell: {
     flex: 1,
     fontSize: 9,
     fontFamily: "Helvetica-Bold",
-    color: "#ffffff",
+    color: colors.white,
     textAlign: "center",
   },
   paymentRow: {

@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server"
-import { requireRole, requireSession } from "@/lib/authz"
+import { requirePerm } from "@/lib/authz"
 import { prisma } from "@/lib/prisma"
 import { z } from "zod"
 import { TrimesterDecision } from "@prisma/client"
@@ -27,7 +27,7 @@ function calculateDecision(average: number): TrimesterDecision {
  * Calculate and store student trimester summaries (general average, rank, decision)
  */
 export async function POST(req: NextRequest) {
-  const { session, error } = await requireRole(["director", "academic_director"])
+  const { error } = await requirePerm("report_cards", "create")
   if (error) return error
 
   try {
@@ -282,7 +282,7 @@ export async function POST(req: NextRequest) {
  * Get student trimester summaries
  */
 export async function GET(req: NextRequest) {
-  const { error } = await requireSession()
+  const { error } = await requirePerm("report_cards", "view")
   if (error) return error
 
   const { searchParams } = new URL(req.url)

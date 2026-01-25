@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server"
-import { requireRole } from "@/lib/authz"
+import { requirePerm } from "@/lib/authz"
 import { createUser } from "@api/users/createUser"
 import { VALID_ROLES, type AppRole } from "@/lib/rbac"
 import { prisma } from "@/lib/prisma"
@@ -9,7 +9,7 @@ import { prisma } from "@/lib/prisma"
  * List all users
  */
 export async function GET() {
-  const { error } = await requireRole(["director"])
+  const { error } = await requirePerm("user_accounts", "view")
   if (error) return error
 
   try {
@@ -43,7 +43,7 @@ function isValidEmail(email: string): boolean {
 // Admin-only endpoint to create users (replacement for /api/register)
 // POST body: { email, password?, name?, role? }
 export async function POST(req: Request) {
-  const { error } = await requireRole(["director"])
+  const { error } = await requirePerm("user_accounts", "create")
   if (error) return error
 
   const body = await req.json().catch(() => null)

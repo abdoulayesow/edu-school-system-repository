@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server"
-import { requireRole, requireSession } from "@/lib/authz"
+import { requirePerm } from "@/lib/authz"
 import { prisma } from "@/lib/prisma"
 import { z } from "zod"
 
@@ -19,7 +19,7 @@ const updateEvaluationSchema = z.object({
  * Get a specific evaluation
  */
 export async function GET(req: NextRequest, { params }: RouteParams) {
-  const { error } = await requireSession()
+  const { error } = await requirePerm("grades", "view")
   if (error) return error
 
   const { id } = await params
@@ -106,7 +106,7 @@ export async function GET(req: NextRequest, { params }: RouteParams) {
  * Update an evaluation
  */
 export async function PUT(req: NextRequest, { params }: RouteParams) {
-  const { session, error } = await requireRole(["director", "academic_director", "teacher"])
+  const { error } = await requirePerm("grades", "update")
   if (error) return error
 
   const { id } = await params
@@ -185,7 +185,7 @@ export async function PUT(req: NextRequest, { params }: RouteParams) {
  * Delete an evaluation
  */
 export async function DELETE(req: NextRequest, { params }: RouteParams) {
-  const { session, error } = await requireRole(["director", "academic_director", "teacher"])
+  const { error } = await requirePerm("grades", "delete")
   if (error) return error
 
   const { id } = await params

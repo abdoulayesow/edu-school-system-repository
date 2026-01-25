@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server"
-import { requireRole } from "@/lib/authz"
+import { requirePerm } from "@/lib/authz"
 import { prisma } from "@/lib/prisma"
 import { z } from "zod"
 
@@ -16,7 +16,7 @@ const createSchoolYearSchema = z.object({
  * List all school years with grade counts
  */
 export async function GET() {
-  const { error } = await requireRole(["director", "academic_director"])
+  const { error } = await requirePerm("academic_year", "view")
   if (error) return error
 
   try {
@@ -66,7 +66,7 @@ export async function GET() {
  * - Cannot create more than one year ahead of the active year
  */
 export async function POST(req: NextRequest) {
-  const { error } = await requireRole(["director"])
+  const { error } = await requirePerm("academic_year", "create")
   if (error) return error
 
   try {

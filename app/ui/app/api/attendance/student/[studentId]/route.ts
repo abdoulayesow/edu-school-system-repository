@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server"
-import { requireSession, requireRole } from "@/lib/authz"
+import { requirePerm } from "@/lib/authz"
 import { prisma } from "@/lib/prisma"
 import { z } from "zod"
 
@@ -19,7 +19,7 @@ const updateAttendanceSchema = z.object({
  * Get attendance history for a specific student
  */
 export async function GET(req: NextRequest, { params }: RouteParams) {
-  const { error } = await requireSession()
+  const { error } = await requirePerm("attendance", "view")
   if (error) return error
 
   const { studentId } = await params
@@ -160,10 +160,7 @@ export async function GET(req: NextRequest, { params }: RouteParams) {
  * Update a single attendance record for a student
  */
 export async function PATCH(req: NextRequest, { params }: RouteParams) {
-  const { session: userSession, error } = await requireRole([
-    "director",
-    "academic_director",
-  ])
+  const { session: userSession, error } = await requirePerm("attendance", "update")
   if (error) return error
 
   const { studentId } = await params

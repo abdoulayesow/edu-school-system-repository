@@ -119,7 +119,7 @@ export function StepPaymentBreakdown() {
               <p className="text-sm text-muted-foreground">
                 {t.enrollmentWizard.totalYearlyAmount}
               </p>
-              <p className="text-3xl font-bold text-[#e79908] dark:text-gspn-gold-200">
+              <p className="text-3xl font-bold text-nav-highlight dark:text-gspn-gold-200">
                 {formatCurrency(displayTotal)}
               </p>
               {isAdjusted && (
@@ -134,7 +134,7 @@ export function StepPaymentBreakdown() {
                 id="adjust"
                 checked={hasAdjustment}
                 onCheckedChange={handleAdjustmentToggle}
-                className="data-[state=checked]:bg-[#e79908] dark:data-[state=checked]:bg-gspn-gold-200"
+                className="data-[state=checked]:bg-nav-highlight dark:data-[state=checked]:bg-gspn-gold-200"
               />
               <Label htmlFor="adjust" className="text-sm">
                 {t.enrollmentWizard.adjustAmount}
@@ -159,7 +159,7 @@ export function StepPaymentBreakdown() {
                       variant={currentPercentage === pct ? "default" : "outline"}
                       size="sm"
                       onClick={() => handlePercentageClick(pct)}
-                      className={`min-w-[60px] ${currentPercentage === pct ? "bg-[#e79908] hover:bg-[#d68907] text-black dark:bg-gspn-gold-200 dark:hover:bg-gspn-gold-300 dark:text-black" : ""}`}
+                      className={`min-w-[60px] ${currentPercentage === pct ? "bg-nav-highlight hover:bg-nav-highlight/90 text-black dark:bg-gspn-gold-200 dark:hover:bg-gspn-gold-300 dark:text-black" : ""}`}
                     >
                       {pct}%
                     </Button>
@@ -181,7 +181,7 @@ export function StepPaymentBreakdown() {
                   min={0}
                   max={100}
                   step={1}
-                  className="w-full [&_[data-slot=slider-range]]:bg-[#e79908] dark:[&_[data-slot=slider-range]]:bg-gspn-gold-200 [&_[data-slot=slider-thumb]]:border-[#e79908] dark:[&_[data-slot=slider-thumb]]:border-gspn-gold-200"
+                  className="w-full [&_[data-slot=slider-range]]:bg-nav-highlight dark:[&_[data-slot=slider-range]]:bg-gspn-gold-200 [&_[data-slot=slider-thumb]]:border-nav-highlight dark:[&_[data-slot=slider-thumb]]:border-gspn-gold-200"
                 />
                 <div className="flex justify-between text-xs text-muted-foreground">
                   <span>0%</span>
@@ -296,7 +296,7 @@ export function StepPaymentBreakdown() {
           <p className="text-sm text-muted-foreground">
             {t.enrollmentWizard.totalYearlyAmount}
           </p>
-          <p className="text-2xl font-bold text-[#e79908] dark:text-gspn-gold-200">
+          <p className="text-2xl font-bold text-nav-highlight dark:text-gspn-gold-200">
             {formatCurrency(displayTotal)}
           </p>
         </div>

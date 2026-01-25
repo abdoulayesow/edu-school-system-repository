@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server"
-import { requireSession } from "@/lib/authz"
+import { requirePerm } from "@/lib/authz"
 import { prisma } from "@/lib/prisma"
 
 type RouteParams = {
@@ -11,7 +11,7 @@ type RouteParams = {
  * Get a single time period by ID
  */
 export async function GET(req: NextRequest, { params }: RouteParams) {
-  const { error } = await requireSession()
+  const { error } = await requirePerm("schedule", "view")
   if (error) return error
 
   try {
@@ -52,7 +52,7 @@ export async function GET(req: NextRequest, { params }: RouteParams) {
  * Body: { name?, nameFr?, startTime?, endTime?, order?, isActive? }
  */
 export async function PUT(req: NextRequest, { params }: RouteParams) {
-  const { error } = await requireSession()
+  const { error } = await requirePerm("schedule", "view")
   if (error) return error
 
   try {
@@ -167,7 +167,7 @@ export async function PUT(req: NextRequest, { params }: RouteParams) {
  * Delete a time period (cascades to schedule slots)
  */
 export async function DELETE(req: NextRequest, { params }: RouteParams) {
-  const { error } = await requireSession()
+  const { error } = await requirePerm("schedule", "view")
   if (error) return error
 
   try {

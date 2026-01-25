@@ -45,14 +45,14 @@ export function normalizeRole(role?: string | null): AppRole {
 const routeRoleRules: Array<{ prefix: string; roles: AppRole[] }> = [
   { prefix: "/users", roles: ["director"] },
   { prefix: "/accounting", roles: ["director", "accountant"] },
-  { prefix: "/reports", roles: ["director", "academic_director"] },
-  { prefix: "/attendance", roles: ["director", "teacher", "academic_director"] },
+  { prefix: "/dashboard/reports", roles: ["director", "academic_director"] },
+  { prefix: "/students/attendance", roles: ["director", "teacher", "academic_director"] },
   { prefix: "/activities", roles: ["director", "academic_director", "teacher"] },
-  { prefix: "/enrollments", roles: ["director", "secretary", "academic_director"] },
+  { prefix: "/students/enrollments", roles: ["director", "secretary", "academic_director"] },
   // Students module - view for teachers, edit for director/secretary
   { prefix: "/students", roles: ["director", "academic_director", "secretary", "teacher"] },
   // Expenses module - director and accountant only
-  { prefix: "/expenses", roles: ["director", "accountant"] },
+  { prefix: "/accounting/expenses", roles: ["director", "accountant"] },
   // Default dashboard: allow all authenticated roles for now
   { prefix: "/dashboard", roles: ["user", "director", "academic_director", "secretary", "accountant", "teacher", "parent", "student"] },
   // Administration module

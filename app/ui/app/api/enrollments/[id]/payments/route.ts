@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server"
-import { requireSession } from "@/lib/authz"
+import { requirePerm } from "@/lib/authz"
 import { prisma } from "@/lib/prisma"
 import { z } from "zod"
 
@@ -23,7 +23,7 @@ interface RouteParams {
  * Get all payments for an enrollment
  */
 export async function GET(req: NextRequest, { params }: RouteParams) {
-  const { error } = await requireSession()
+  const { error } = await requirePerm("student_enrollment", "view")
   if (error) return error
 
   const { id } = await params
@@ -54,7 +54,7 @@ export async function GET(req: NextRequest, { params }: RouteParams) {
  * Record a new payment for an enrollment
  */
 export async function POST(req: NextRequest, { params }: RouteParams) {
-  const { session, error } = await requireSession()
+  const { session, error } = await requirePerm("student_enrollment", "update")
   if (error) return error
 
   const { id } = await params
@@ -113,32 +113,104 @@ export async function POST(req: NextRequest, { params }: RouteParams) {
       }
     }
 
-    // Determine initial status based on payment method
-    // Cash: pending_deposit (needs bank deposit first)
-    // Orange Money: pending_review (can be reviewed immediately, auto-confirm after 24h)
-    const initialStatus = validated.method === "cash" ? "pending_deposit" : "pending_review"
-    const autoConfirmAt = validated.method === "orange_money"
-      ? new Date(Date.now() + 24 * 60 * 60 * 1000) // 24 hours from now
-      : null
+    // Payments are confirmed immediately - money is received
+    const initialStatus = "confirmed"
 
-    // Create the payment
-    const payment = await prisma.payment.create({
-      data: {
-        enrollmentId: id,
-        paymentScheduleId,
-        amount: validated.amount,
-        method: validated.method,
-        receiptNumber: validated.receiptNumber,
-        transactionRef: validated.transactionRef,
-        receiptImageUrl: validated.receiptImageUrl,
-        notes: validated.notes,
-        recordedBy: session.user.id,
-        status: initialStatus,
-        autoConfirmAt,
-      },
-      include: {
-        recorder: { select: { name: true, email: true } },
-      },
+    // Create the payment with treasury tracking
+    const payment = await prisma.$transaction(async (tx) => {
+      // Get current safe balance for treasury tracking
+      const currentBalance = await tx.treasuryBalance.findFirst()
+      if (currentBalance) {
+        // Update balances based on payment method
+        if (validated.method === "cash") {
+          // Check if registry is open (registryBalance > 0)
+          if (currentBalance.registryBalance === 0) {
+            throw new Error("La caisse est fermée. Veuillez d'abord effectuer l'ouverture journalière pour enregistrer des paiements en espèces.")
+          }
+
+          const newSafeBalance = currentBalance.safeBalance + validated.amount
+          await tx.safeTransaction.create({
+            data: {
+              type: "student_payment",
+              direction: "in",
+              amount: validated.amount,
+              safeBalanceAfter: newSafeBalance,
+              bankBalanceAfter: currentBalance.bankBalance,
+              mobileMoneyBalanceAfter: currentBalance.mobileMoneyBalance,
+              description: `Paiement scolarité - ${validated.receiptNumber}`,
+              receiptNumber: validated.receiptNumber,
+              referenceType: "payment",
+              studentId: enrollment.studentId,
+              recordedBy: session!.user.id,
+            },
+          })
+          await tx.treasuryBalance.update({
+            where: { id: currentBalance.id },
+            data: { safeBalance: newSafeBalance, updatedAt: new Date() },
+          })
+        } else if (validated.method === "orange_money") {
+          const newMobileMoneyBalance = currentBalance.mobileMoneyBalance + validated.amount
+          await tx.safeTransaction.create({
+            data: {
+              type: "mobile_money_income",
+              direction: "in",
+              amount: validated.amount,
+              safeBalanceAfter: currentBalance.safeBalance,
+              bankBalanceAfter: currentBalance.bankBalance,
+              mobileMoneyBalanceAfter: newMobileMoneyBalance,
+              description: `Paiement Orange Money - ${validated.receiptNumber}`,
+              receiptNumber: validated.receiptNumber,
+              referenceType: "payment",
+              studentId: enrollment.studentId,
+              recordedBy: session!.user.id,
+            },
+          })
+          await tx.treasuryBalance.update({
+            where: { id: currentBalance.id },
+            data: { mobileMoneyBalance: newMobileMoneyBalance, updatedAt: new Date() },
+          })
+        }
+      }
+
+      // Create the payment record
+      const newPayment = await tx.payment.create({
+        data: {
+          enrollmentId: id,
+          paymentScheduleId,
+          amount: validated.amount,
+          method: validated.method,
+          receiptNumber: validated.receiptNumber,
+          transactionRef: validated.transactionRef,
+          receiptImageUrl: validated.receiptImageUrl,
+          notes: validated.notes,
+          recordedBy: session!.user.id,
+          status: initialStatus,
+          confirmedBy: session!.user.id,
+          confirmedAt: new Date(),
+        },
+        include: {
+          recorder: { select: { name: true, email: true } },
+        },
+      })
+
+      // Mark payment schedule as paid if applicable
+      if (paymentScheduleId) {
+        const allConfirmedPayments = [...enrollment.payments, { amount: validated.amount }]
+        const newTotalPaid = allConfirmedPayments.reduce((sum, p) => sum + p.amount, 0)
+
+        let runningTotal = 0
+        for (const schedule of enrollment.paymentSchedules) {
+          runningTotal += schedule.amount
+          if (runningTotal <= newTotalPaid && !schedule.isPaid) {
+            await tx.paymentSchedule.update({
+              where: { id: schedule.id },
+              data: { isPaid: true },
+            })
+          }
+        }
+      }
+
+      return newPayment
     })
 
     return NextResponse.json(payment, { status: 201 })

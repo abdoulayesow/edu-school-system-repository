@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server"
 import { prisma } from "@db/prisma"
-import { requireRole, requireSession } from "@/lib/authz"
+import { requirePerm } from "@/lib/authz"
 import { z } from "zod"
 
 const attendanceRecordSchema = z.object({
@@ -17,13 +17,8 @@ const saveAttendanceSchema = z.object({
 })
 
 export async function POST(req: NextRequest) {
-  const { error } = await requireRole(["director", "academic_director", "secretary", "teacher"])
+  const { session, error } = await requirePerm("attendance", "create")
   if (error) return error
-
-  const { session } = await requireSession()
-  if (!session) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
-  }
 
   try {
     const body = await req.json()
@@ -64,7 +59,7 @@ export async function POST(req: NextRequest) {
             gradeId: room.gradeId,
             date: normalizedDate,
             entryMode: validated.entryMode,
-            recordedBy: session.user.id,
+            recordedBy: session!.user.id,
           },
         })
       }
@@ -84,7 +79,7 @@ export async function POST(req: NextRequest) {
               studentProfileId: record.studentProfileId,
               status: record.status,
               notes: record.notes,
-              recordedBy: session.user.id,
+              recordedBy: session!.user.id,
             },
             update: {
               status: record.status,
@@ -148,7 +143,7 @@ export async function POST(req: NextRequest) {
 
 // GET endpoint to fetch attendance for a room on a specific date
 export async function GET(req: NextRequest) {
-  const { error } = await requireRole(["director", "academic_director", "secretary", "teacher"])
+  const { error } = await requirePerm("attendance", "view")
   if (error) return error
 
   const { searchParams } = new URL(req.url)

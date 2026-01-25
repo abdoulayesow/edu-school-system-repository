@@ -2,6 +2,12 @@
   "name": "@app/db",
   "private": true,
   "type": "module",
+  "scripts": {
+    "check-treasury": "tsx scripts/check-treasury-status.ts",
+    "migrate-registry": "tsx scripts/migrate-to-registry-system.ts",
+    "verify-registry": "tsx scripts/verify-registry-migration.ts",
+    "backup-treasury": "tsx scripts/backup-before-registry-migration.ts"
+  },
   "dependencies": {
     "@prisma/adapter-pg": "^7.2.0",
     "@prisma/client": "^7.2.0",

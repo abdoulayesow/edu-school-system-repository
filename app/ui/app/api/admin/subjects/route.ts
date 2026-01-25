@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server"
-import { requireRole } from "@/lib/authz"
+import { requirePerm } from "@/lib/authz"
 import { prisma } from "@/lib/prisma"
 import { withCache } from "@/lib/cache"
 import { z } from "zod"
@@ -16,7 +16,7 @@ const createSubjectSchema = z.object({
  * List all subjects
  */
 export async function GET(req: NextRequest) {
-  const { error } = await requireRole(["director", "academic_director"])
+  const { error } = await requirePerm("subjects", "view")
   if (error) return error
 
   try {
@@ -46,7 +46,7 @@ export async function GET(req: NextRequest) {
  * Create a new subject
  */
 export async function POST(req: NextRequest) {
-  const { error } = await requireRole(["director"])
+  const { error } = await requirePerm("subjects", "create")
   if (error) return error
 
   try {

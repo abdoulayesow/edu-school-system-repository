@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server"
-import { requireRole } from "@/lib/authz"
+import { requirePerm } from "@/lib/authz"
 import { prisma } from "@/lib/prisma"
 import { z } from "zod"
 
@@ -15,7 +15,7 @@ const createAssignmentSchema = z.object({
  * Query params: schoolYearId (required), gradeId (optional), teacherId (optional)
  */
 export async function GET(req: NextRequest) {
-  const { error } = await requireRole(["director", "academic_director"])
+  const { error } = await requirePerm("teachers_assignment", "view")
   if (error) return error
 
   try {
@@ -82,7 +82,7 @@ export async function GET(req: NextRequest) {
  * Create a new class assignment
  */
 export async function POST(req: NextRequest) {
-  const { error } = await requireRole(["director", "academic_director"])
+  const { error } = await requirePerm("teachers_assignment", "create")
   if (error) return error
 
   try {

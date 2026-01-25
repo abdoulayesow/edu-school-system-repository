@@ -194,13 +194,17 @@ export const authOptions: NextAuthOptions = {
         // (signIn callback may have updated name/image before this runs)
         const freshUser = await prisma.user.findUnique({
           where: { id: user.id },
-          select: { name: true, role: true, image: true },
+          select: { name: true, role: true, image: true, staffRole: true, schoolLevel: true, staffProfileId: true },
         })
 
         if (freshUser) {
           token.name = freshUser.name
           token.picture = freshUser.image
           token.role = normalizeRole(freshUser.role ?? null)
+          // Permission system fields
+          token.staffRole = freshUser.staffRole
+          token.schoolLevel = freshUser.schoolLevel
+          token.staffProfileId = freshUser.staffProfileId
         } else {
           // Fallback to user object if DB fetch fails
           const role = (user as { role?: string | null }).role
@@ -220,6 +224,10 @@ export const authOptions: NextAuthOptions = {
         if (token.picture) {
           session.user.image = token.picture as string
         }
+        // Permission system fields
+        session.user.staffRole = token.staffRole
+        session.user.schoolLevel = token.schoolLevel
+        session.user.staffProfileId = token.staffProfileId
       }
       return session
     },
