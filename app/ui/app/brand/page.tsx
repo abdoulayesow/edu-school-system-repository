@@ -77,10 +77,8 @@ function DualModePreview({
               <div className="h-2.5 w-2.5 rounded-full bg-amber-400 shadow-sm" />
               <span className="text-xs font-semibold text-amber-900 dark:text-amber-200">Light Mode</span>
             </div>
-            <div className="p-5 bg-white text-gray-900" data-theme="light">
-              <div className="[&_*]:!text-inherit light-mode-preview">
-                {children}
-              </div>
+            <div className="p-5 bg-white text-gray-900 [&_.text-muted-foreground]:text-slate-500 [&_.text-foreground]:text-slate-900" data-theme="light">
+              {children}
             </div>
           </div>
         )}
@@ -297,6 +295,22 @@ export default function BrandPage() {
                   <Button className={componentClasses.primaryActionButton} disabled>
                     <Loader2 className="h-4 w-4 mr-2 animate-spin" />
                     Loading
+                  </Button>
+                </div>
+              </DualModePreview>
+
+              <DualModePreview title="Destructive Actions" viewMode={viewMode}>
+                <div className="flex flex-wrap gap-3">
+                  <Button variant="destructive">
+                    <Trash2 className="h-4 w-4 mr-2" />
+                    Delete
+                  </Button>
+                  <Button variant="outline" className="text-destructive border-destructive/50 hover:bg-destructive/10 hover:text-destructive">
+                    <Trash2 className="h-4 w-4 mr-2" />
+                    Remove
+                  </Button>
+                  <Button variant="ghost" className="text-destructive hover:bg-destructive/10 hover:text-destructive">
+                    Cancel Enrollment
                   </Button>
                 </div>
               </DualModePreview>
