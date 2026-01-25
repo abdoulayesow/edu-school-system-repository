@@ -3,6 +3,59 @@ import { requireSession } from "@/lib/authz"
 import { prisma } from "@/lib/prisma"
 import { generateClubEnrollmentNumber } from "@/lib/club-helpers"
 
+/**
+ * Generate a unique receipt number for a payment
+ */
+async function generateReceiptNumber(method: "cash" | "orange_money"): Promise<string> {
+  const currentYear = new Date().getFullYear()
+  const prefix = method === "cash" ? "CASH" : "OM"
+
+  // Find the highest receipt number for this year and method
+  const lastPayment = await prisma.payment.findFirst({
+    where: {
+      receiptNumber: {
+        startsWith: `GSPN-${currentYear}-${prefix}-`,
+      },
+    },
+    orderBy: {
+      receiptNumber: "desc",
+    },
+    select: {
+      receiptNumber: true,
+    },
+  })
+
+  let nextNumber = 1
+  if (lastPayment?.receiptNumber) {
+    const match = lastPayment.receiptNumber.match(/-(\d+)$/)
+    if (match) {
+      nextNumber = parseInt(match[1], 10) + 1
+    }
+  }
+
+  // Try up to 100 times to find a unique number
+  let attempts = 0
+  const maxAttempts = 100
+
+  while (attempts < maxAttempts) {
+    const nextReceiptNumber = `GSPN-${currentYear}-${prefix}-${nextNumber.toString().padStart(5, "0")}`
+
+    const existing = await prisma.payment.findUnique({
+      where: { receiptNumber: nextReceiptNumber },
+      select: { id: true },
+    })
+
+    if (!existing) {
+      return nextReceiptNumber
+    }
+
+    nextNumber++
+    attempts++
+  }
+
+  throw new Error("Failed to generate unique receipt number after multiple attempts")
+}
+
 type RouteParams = { params: Promise<{ id: string }> }
 
 /**
@@ -83,11 +136,14 @@ export async function POST(req: NextRequest, { params }: RouteParams) {
         )
       }
 
+      // Generate receipt number server-side to ensure uniqueness
+      const receiptNumber = await generateReceiptNumber(payment.method)
+
       await prisma.payment.create({
         data: {
           amount: payment.amount,
           method: payment.method,
-          receiptNumber: payment.receiptNumber,
+          receiptNumber,
           transactionRef: payment.transactionRef,
           notes: notes || null,
           recordedBy: session.user.id,

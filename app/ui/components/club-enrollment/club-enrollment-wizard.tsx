@@ -33,6 +33,7 @@ export function ClubEnrollmentWizard() {
   const searchParams = useSearchParams()
   const [showUnsavedChangesDialog, setShowUnsavedChangesDialog] = useState(false)
   const [pendingNavigation, setPendingNavigation] = useState<string | null>(null)
+  const [isClubPreSelected, setIsClubPreSelected] = useState(false)
 
   const {
     state,
@@ -76,6 +77,9 @@ export function ClubEnrollmentWizard() {
             currentEnrollments: club._count?.enrollments || 0,
             capacity: club.capacity,
           })
+
+          // Mark club as pre-selected
+          setIsClubPreSelected(true)
 
           // Auto-complete step 1 and move to step 2
           completeStep(1)
@@ -367,6 +371,7 @@ export function ClubEnrollmentWizard() {
               currentStep={state.currentStep}
               completedSteps={state.completedSteps}
               onStepClick={goToStep}
+              skipStep1={isClubPreSelected}
             />
 
             {/* Error Alert */}

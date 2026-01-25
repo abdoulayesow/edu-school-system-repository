@@ -137,7 +137,8 @@ export function WizardNavigation({
             type="button"
             onClick={onNext}
             disabled={!canProceed || isSubmitting}
-            className="gap-2 min-h-[44px] bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white shadow-lg shadow-amber-500/30 font-semibold transition-all duration-200"
+            style={{ backgroundColor: '#dc9400' }}
+            className="gap-2 min-h-[44px] hover:opacity-90 text-white shadow-lg font-semibold transition-all duration-200"
             aria-label="Continue to next step"
           >
             Continue

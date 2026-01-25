@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useMemo } from "react"
+import { useState, useMemo, useEffect } from "react"
 import {
   Users,
   GraduationCap,
@@ -189,6 +189,17 @@ export function StepPaymentOwed() {
   const proratedTotal = (state.data.enrollmentFee || 0) + monthlyCalculation.proratedMonthlyFees
   const displayTotal = state.data.customTotal ?? (isEditingTotal && customTotal ? parseInt(customTotal) || 0 : fullYearTotal)
 
+  // Save fee breakdown to state whenever monthly calculation changes
+  // This ensures totalMonthlyFees is available in subsequent steps
+  useEffect(() => {
+    if (monthlyCalculation.totalMonthlyFees > 0 && !state.data.totalMonthlyFees) {
+      setFeeBreakdown({
+        totalMonthlyFees: monthlyCalculation.totalMonthlyFees,
+        remainingMonths: monthlyCalculation.remainingMonths,
+      })
+    }
+  }, [monthlyCalculation.totalMonthlyFees, monthlyCalculation.remainingMonths, state.data.totalMonthlyFees, setFeeBreakdown])
+
   const handleApplyProration = () => {
     setCustomTotal(proratedTotal.toString())
     setIsEditingTotal(true)
@@ -234,7 +245,7 @@ export function StepPaymentOwed() {
     <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
       {/* Header */}
       <div className="text-center space-y-2">
-        <h2 className="text-2xl font-bold text-foreground">{translations.paymentOwed}</h2>
+        <h2 className="text-2xl font-bold text-foreground">Montant à payer</h2>
         <p className="text-muted-foreground">{translations.paymentOwedDescription}</p>
       </div>
 

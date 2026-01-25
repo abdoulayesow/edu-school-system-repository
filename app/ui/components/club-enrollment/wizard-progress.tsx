@@ -11,6 +11,7 @@ interface WizardProgressProps {
   currentStep: ClubEnrollmentStep
   completedSteps: ClubEnrollmentStep[]
   onStepClick?: (step: ClubEnrollmentStep) => void
+  skipStep1?: boolean
 }
 
 const stepIcons = [
@@ -26,13 +27,17 @@ export function WizardProgress({
   currentStep,
   completedSteps,
   onStepClick,
+  skipStep1 = false,
 }: WizardProgressProps) {
   const { t } = useI18n()
 
-  const steps = stepIcons.map((step) => ({
+  const allSteps = stepIcons.map((step) => ({
     ...step,
     label: t.clubEnrollmentWizard[`step${step.number}` as keyof typeof t.clubEnrollmentWizard] as string,
   }))
+
+  // Filter out step 1 if club is pre-selected
+  const steps = skipStep1 ? allSteps.filter((step) => step.number !== 1) : allSteps
   return (
     <>
       {/* Desktop Progress */}

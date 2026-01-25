@@ -30,6 +30,7 @@ export function StepPaymentTransaction() {
   const { state, setPayment } = useClubEnrollmentWizard()
 
   const [isGeneratingReceipt, setIsGeneratingReceipt] = useState(false)
+  const [displayAmount, setDisplayAmount] = useState("")
 
   const translations = {
     recordPayment: locale === "fr" ? "Enregistrer le Paiement" : "Record Payment",
@@ -76,6 +77,10 @@ export function StepPaymentTransaction() {
     }).format(amount)
   }
 
+  const formatNumber = (value: number) => {
+    return new Intl.NumberFormat("fr-FR").format(value)
+  }
+
   // Calculate total owed from Step 3
   const totalOwed = state.data.customTotal ??
     ((state.data.enrollmentFee || 0) + (state.data.totalMonthlyFees || 0))
@@ -118,6 +123,29 @@ export function StepPaymentTransaction() {
   const handlePaymentChange = (field: string, value: string | number) => {
     setPayment({ [field]: value })
   }
+
+  const handleAmountChange = (inputValue: string) => {
+    // Remove all non-digit characters
+    const numericValue = inputValue.replace(/\D/g, "")
+    const parsedAmount = parseInt(numericValue) || 0
+
+    // Update the actual payment amount
+    setPayment({ paymentAmount: parsedAmount })
+
+    // Update the formatted display value
+    if (numericValue) {
+      setDisplayAmount(formatNumber(parsedAmount))
+    } else {
+      setDisplayAmount("")
+    }
+  }
+
+  // Initialize display amount when payment amount changes from other sources
+  useEffect(() => {
+    if (state.data.paymentAmount && state.data.paymentAmount > 0 && !displayAmount) {
+      setDisplayAmount(formatNumber(state.data.paymentAmount))
+    }
+  }, [state.data.paymentAmount])
 
   // Handle payment method change
   const handleMethodChange = async (method: "cash" | "orange_money") => {
@@ -237,10 +265,10 @@ export function StepPaymentTransaction() {
             <Label htmlFor="paymentAmount">{translations.paymentAmount}</Label>
             <Input
               id="paymentAmount"
-              type="number"
+              type="text"
               placeholder="0"
-              value={state.data.paymentAmount || ""}
-              onChange={(e) => handlePaymentChange("paymentAmount", parseInt(e.target.value) || 0)}
+              value={displayAmount}
+              onChange={(e) => handleAmountChange(e.target.value)}
               className="min-h-[44px]"
               aria-describedby="payment-amount-help"
             />
