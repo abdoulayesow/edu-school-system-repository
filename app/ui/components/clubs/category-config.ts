@@ -11,159 +11,115 @@ import {
 
 export interface CategoryConfig {
   icon: LucideIcon
-  gradient: string
-  gradientHover: string
-  bgLight: string
-  accent: string
-  ring: string
-  borderColor: string
+  /** Subtle background tint for category differentiation */
+  bgTint: string
+  /** Text color for category badge */
+  badgeText: string
+  /** Background for category badge */
+  badgeBg: string
 }
 
 // Category visual configuration based on slug/name patterns
+// Uses GSPN brand colors with category-specific icons for differentiation
 export const categoryConfigs: Record<string, CategoryConfig> = {
   // Academic Excellence
   academic: {
     icon: GraduationCap,
-    gradient: "from-amber-500 to-orange-600",
-    gradientHover: "from-amber-600 to-orange-700",
-    bgLight: "bg-amber-50",
-    accent: "text-amber-700",
-    ring: "ring-amber-200",
-    borderColor: "border-amber-300",
+    bgTint: "bg-gspn-gold-50/50",
+    badgeText: "text-gspn-maroon-700",
+    badgeBg: "bg-gspn-maroon-50",
   },
   excellence: {
     icon: GraduationCap,
-    gradient: "from-amber-500 to-orange-600",
-    gradientHover: "from-amber-600 to-orange-700",
-    bgLight: "bg-amber-50",
-    accent: "text-amber-700",
-    ring: "ring-amber-200",
-    borderColor: "border-amber-300",
+    bgTint: "bg-gspn-gold-50/50",
+    badgeText: "text-gspn-maroon-700",
+    badgeBg: "bg-gspn-maroon-50",
   },
   // Technology & Innovation
   technology: {
     icon: Cpu,
-    gradient: "from-blue-500 to-indigo-600",
-    gradientHover: "from-blue-600 to-indigo-700",
-    bgLight: "bg-blue-50",
-    accent: "text-blue-700",
-    ring: "ring-blue-200",
-    borderColor: "border-blue-300",
+    bgTint: "bg-blue-50/50",
+    badgeText: "text-blue-700",
+    badgeBg: "bg-blue-50",
   },
   innovation: {
     icon: Cpu,
-    gradient: "from-blue-500 to-indigo-600",
-    gradientHover: "from-blue-600 to-indigo-700",
-    bgLight: "bg-blue-50",
-    accent: "text-blue-700",
-    ring: "ring-blue-200",
-    borderColor: "border-blue-300",
+    bgTint: "bg-blue-50/50",
+    badgeText: "text-blue-700",
+    badgeBg: "bg-blue-50",
   },
   informatique: {
     icon: Cpu,
-    gradient: "from-blue-500 to-indigo-600",
-    gradientHover: "from-blue-600 to-indigo-700",
-    bgLight: "bg-blue-50",
-    accent: "text-blue-700",
-    ring: "ring-blue-200",
-    borderColor: "border-blue-300",
+    bgTint: "bg-blue-50/50",
+    badgeText: "text-blue-700",
+    badgeBg: "bg-blue-50",
   },
   // Sports & Athletics
   sports: {
     icon: Trophy,
-    gradient: "from-emerald-500 to-teal-600",
-    gradientHover: "from-emerald-600 to-teal-700",
-    bgLight: "bg-emerald-50",
-    accent: "text-emerald-700",
-    ring: "ring-emerald-200",
-    borderColor: "border-emerald-300",
+    bgTint: "bg-emerald-50/50",
+    badgeText: "text-emerald-700",
+    badgeBg: "bg-emerald-50",
   },
   athletisme: {
     icon: Trophy,
-    gradient: "from-emerald-500 to-teal-600",
-    gradientHover: "from-emerald-600 to-teal-700",
-    bgLight: "bg-emerald-50",
-    accent: "text-emerald-700",
-    ring: "ring-emerald-200",
-    borderColor: "border-emerald-300",
+    bgTint: "bg-emerald-50/50",
+    badgeText: "text-emerald-700",
+    badgeBg: "bg-emerald-50",
   },
   // Arts & Creativity
   arts: {
     icon: Palette,
-    gradient: "from-pink-500 to-rose-600",
-    gradientHover: "from-pink-600 to-rose-700",
-    bgLight: "bg-pink-50",
-    accent: "text-pink-700",
-    ring: "ring-pink-200",
-    borderColor: "border-pink-300",
+    bgTint: "bg-rose-50/50",
+    badgeText: "text-rose-700",
+    badgeBg: "bg-rose-50",
   },
   creativite: {
     icon: Palette,
-    gradient: "from-pink-500 to-rose-600",
-    gradientHover: "from-pink-600 to-rose-700",
-    bgLight: "bg-pink-50",
-    accent: "text-pink-700",
-    ring: "ring-pink-200",
-    borderColor: "border-pink-300",
+    bgTint: "bg-rose-50/50",
+    badgeText: "text-rose-700",
+    badgeBg: "bg-rose-50",
   },
   // Music & Performance
   music: {
     icon: Music,
-    gradient: "from-violet-500 to-purple-600",
-    gradientHover: "from-violet-600 to-purple-700",
-    bgLight: "bg-violet-50",
-    accent: "text-violet-700",
-    ring: "ring-violet-200",
-    borderColor: "border-violet-300",
+    bgTint: "bg-violet-50/50",
+    badgeText: "text-violet-700",
+    badgeBg: "bg-violet-50",
   },
   musique: {
     icon: Music,
-    gradient: "from-violet-500 to-purple-600",
-    gradientHover: "from-violet-600 to-purple-700",
-    bgLight: "bg-violet-50",
-    accent: "text-violet-700",
-    ring: "ring-violet-200",
-    borderColor: "border-violet-300",
+    bgTint: "bg-violet-50/50",
+    badgeText: "text-violet-700",
+    badgeBg: "bg-violet-50",
   },
   spectacle: {
     icon: Music,
-    gradient: "from-violet-500 to-purple-600",
-    gradientHover: "from-violet-600 to-purple-700",
-    bgLight: "bg-violet-50",
-    accent: "text-violet-700",
-    ring: "ring-violet-200",
-    borderColor: "border-violet-300",
+    bgTint: "bg-violet-50/50",
+    badgeText: "text-violet-700",
+    badgeBg: "bg-violet-50",
   },
   // Science & Discovery
   science: {
     icon: FlaskConical,
-    gradient: "from-cyan-500 to-sky-600",
-    gradientHover: "from-cyan-600 to-sky-700",
-    bgLight: "bg-cyan-50",
-    accent: "text-cyan-700",
-    ring: "ring-cyan-200",
-    borderColor: "border-cyan-300",
+    bgTint: "bg-cyan-50/50",
+    badgeText: "text-cyan-700",
+    badgeBg: "bg-cyan-50",
   },
   decouverte: {
     icon: FlaskConical,
-    gradient: "from-cyan-500 to-sky-600",
-    gradientHover: "from-cyan-600 to-sky-700",
-    bgLight: "bg-cyan-50",
-    accent: "text-cyan-700",
-    ring: "ring-cyan-200",
-    borderColor: "border-cyan-300",
+    bgTint: "bg-cyan-50/50",
+    badgeText: "text-cyan-700",
+    badgeBg: "bg-cyan-50",
   },
 }
 
 // Default config for unknown categories
 export const defaultCategoryConfig: CategoryConfig = {
   icon: Layers,
-  gradient: "from-gray-500 to-slate-600",
-  gradientHover: "from-gray-600 to-slate-700",
-  bgLight: "bg-gray-50",
-  accent: "text-gray-700",
-  ring: "ring-gray-200",
-  borderColor: "border-gray-300",
+  bgTint: "bg-gray-50/50",
+  badgeText: "text-gray-700",
+  badgeBg: "bg-gray-50",
 }
 
 /**

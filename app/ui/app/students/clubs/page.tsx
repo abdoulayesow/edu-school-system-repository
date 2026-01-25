@@ -3,7 +3,6 @@
 import { useState, useMemo, useEffect, lazy, Suspense } from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Skeleton } from "@/components/ui/skeleton"
 import {
   BookOpen,
@@ -17,7 +16,8 @@ import { useI18n } from "@/components/i18n-provider"
 import { PageContainer } from "@/components/layout"
 import { PermissionGuard, NoPermission } from "@/components/permission-guard"
 import { DataPagination } from "@/components/data-pagination"
-import { sizing } from "@/lib/design-tokens"
+import { StatCard, FilterCard, HydratedSelect, type SelectOption } from "@/components/students"
+import { usePagination } from "@/lib/hooks/use-pagination"
 import {
   useClubs,
   useClubCategories,
@@ -32,23 +32,24 @@ const ITEMS_PER_PAGE = 50
 export default function ClubsPage() {
   const { t, locale } = useI18n()
 
-  // Track if component is mounted to prevent hydration mismatches
-  const [isMounted, setIsMounted] = useState(false)
-
   // Filter states
   const [searchQuery, setSearchQuery] = useState("")
   const [categoryFilter, setCategoryFilter] = useState<string>("all")
-  const [offset, setOffset] = useState(0)
 
-  // Reset offset when filters change
+  // Pagination hook
+  const { offset, limit, goToNextPage, goToPrevPage, reset } = usePagination({
+    initialLimit: ITEMS_PER_PAGE,
+  })
+
+  // Reset pagination when filters change
   useEffect(() => {
-    setOffset(0)
-  }, [searchQuery, categoryFilter])
+    reset()
+  }, [searchQuery, categoryFilter, reset])
 
   // React Query hooks - fetch data with automatic caching
   const { data: clubsData, isLoading: clubsLoading, error: clubsError } = useClubs({
     categoryId: categoryFilter !== "all" ? categoryFilter : undefined,
-    limit: ITEMS_PER_PAGE,
+    limit,
     offset,
   })
   const { data: categoriesData, isLoading: categoriesLoading } = useClubCategories("active")
@@ -60,31 +61,13 @@ export default function ClubsPage() {
   const isLoading = clubsLoading || categoriesLoading
   const error = clubsError ? "Failed to load clubs" : null
 
-  // Set mounted flag after component mounts
-  useEffect(() => {
-    setIsMounted(true)
-  }, [])
-
   // Check if any filters are active
-  const hasActiveFilters = searchQuery || categoryFilter !== "all"
+  const hasActiveFilters = searchQuery !== "" || categoryFilter !== "all"
 
   // Clear all filters
   const clearFilters = () => {
     setSearchQuery("")
     setCategoryFilter("all")
-  }
-
-  // Pagination handlers
-  const handleNextPage = () => {
-    if (pagination?.hasMore) {
-      setOffset(pagination.offset + pagination.limit)
-    }
-  }
-
-  const handlePrevPage = () => {
-    if (pagination && pagination.offset > 0) {
-      setOffset(Math.max(0, pagination.offset - pagination.limit))
-    }
   }
 
   // Summary statistics
@@ -133,6 +116,15 @@ export default function ClubsPage() {
       minimumFractionDigits: 0,
     }).format(amount)
 
+  // Build category options for HydratedSelect
+  const categoryOptions: SelectOption[] = [
+    { value: "all", label: t.clubs?.allCategories || "All Categories" },
+    ...categories.map(cat => ({
+      value: cat.id,
+      label: locale === "fr" ? cat.nameFr : cat.name,
+    })),
+  ]
+
   return (
     <PermissionGuard
       checks={[
@@ -149,148 +141,106 @@ export default function ClubsPage() {
       }
     >
       <PageContainer>
-        {/* Header */}
-        <div className="mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
-          <div>
-            <h1 className="text-3xl font-bold text-foreground mb-2">
-              {t.clubs?.title || "Clubs & Activités"}
-            </h1>
-            <p className="text-muted-foreground">
-              {t.clubs?.subtitle || "Inscrivez les élèves aux clubs parascolaires"}
-            </p>
+        {/* Page Header with Brand Styling */}
+        <div className="relative mb-6 overflow-hidden rounded-2xl border border-border bg-card shadow-sm">
+          <div className="h-1 bg-gspn-maroon-500" />
+          <div className="p-6">
+            <div className="flex items-start justify-between">
+              <div>
+                <div className="flex items-center gap-3 mb-2">
+                  <div className="p-2.5 bg-gspn-maroon-500/10 rounded-xl">
+                    <BookOpen className="h-6 w-6 text-gspn-maroon-500" />
+                  </div>
+                </div>
+                <h1 className="text-3xl font-bold text-foreground">
+                  {t.clubs?.title || "Clubs & Activities"}
+                </h1>
+                <p className="text-muted-foreground mt-1">
+                  {t.clubs?.subtitle || "Enroll students in extracurricular clubs"}
+                </p>
+              </div>
+            </div>
           </div>
         </div>
 
         {/* Summary Cards */}
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4 mb-6">
-          {/* Total Clubs */}
-          <Card className="py-5">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">{t.clubs?.totalClubs || "Total Clubs"}</CardTitle>
-              <BookOpen className={sizing.icon.lg} />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{stats.total}</div>
-              <p className="text-xs text-muted-foreground">
-                {stats.activeClubs} {locale === "fr" ? "avec inscriptions" : "with enrollments"}
-              </p>
-            </CardContent>
-          </Card>
-
-          {/* Enrolled Students */}
-          <Card className="py-5">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">{t.clubs?.enrolledStudents || "Students Enrolled"}</CardTitle>
-              <Users className={sizing.icon.lg} />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{stats.enrolledStudents}</div>
-              <p className="text-xs text-muted-foreground">
-                {locale === "fr" ? "Inscriptions actives" : "Active enrollments"}
-              </p>
-            </CardContent>
-          </Card>
-
-          {/* Available Spots */}
-          <Card className="py-5">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">{t.clubs?.availableSpots || "Available Spots"}</CardTitle>
-              <UserPlus className={sizing.icon.lg} />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{stats.availableSpots}</div>
-              <p className="text-xs text-muted-foreground">
-                {locale === "fr" ? "Places restantes" : "Remaining capacity"}
-              </p>
-            </CardContent>
-          </Card>
-
-          {/* Active This Month */}
-          <Card className="py-5">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">{locale === "fr" ? "Catégories" : "Categories"}</CardTitle>
-              <Calendar className={sizing.icon.lg} />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{categories.length}</div>
-              <p className="text-xs text-muted-foreground">
-                {locale === "fr" ? "Types de clubs" : "Club types"}
-              </p>
-            </CardContent>
-          </Card>
+          <StatCard
+            title={t.clubs?.totalClubs || "Total Clubs"}
+            value={stats.total}
+            description={`${stats.activeClubs} ${locale === "fr" ? "avec inscriptions" : "with enrollments"}`}
+            icon={BookOpen}
+          />
+          <StatCard
+            title={t.clubs?.enrolledStudents || "Students Enrolled"}
+            value={stats.enrolledStudents}
+            description={locale === "fr" ? "Inscriptions actives" : "Active enrollments"}
+            icon={Users}
+          />
+          <StatCard
+            title={t.clubs?.availableSpots || "Available Spots"}
+            value={stats.availableSpots}
+            description={locale === "fr" ? "Places restantes" : "Remaining capacity"}
+            icon={UserPlus}
+          />
+          <StatCard
+            title={locale === "fr" ? "Catégories" : "Categories"}
+            value={categories.length}
+            description={locale === "fr" ? "Types de clubs" : "Club types"}
+            icon={Calendar}
+          />
         </div>
 
         {/* Filters */}
-        <Card className="mb-6 py-2">
-          <CardHeader className="pb-1 px-6 pt-3">
-            <CardTitle className="text-sm">{t.clubs?.filterClubs || "Filter Clubs"}</CardTitle>
-          </CardHeader>
-          <CardContent className="pt-0 pb-2 px-6">
-            <div className="flex flex-col sm:flex-row gap-4">
-              {/* Search Input */}
-              <div className="relative flex-1">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground" />
-                <Input
-                  placeholder={t.clubs?.searchPlaceholder || "Search clubs..."}
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="pl-10"
-                />
-              </div>
-
-              {/* Category Filter */}
-              {isMounted ? (
-                <Select value={categoryFilter} onValueChange={setCategoryFilter}>
-                  <SelectTrigger className="w-full sm:w-[200px]">
-                    <SelectValue placeholder={t.clubs?.allCategories || "All Categories"} />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">{t.clubs?.allCategories || "All Categories"}</SelectItem>
-                    {categories.map(cat => (
-                      <SelectItem key={cat.id} value={cat.id}>
-                        {locale === "fr" ? cat.nameFr : cat.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              ) : (
-                <div className="w-full sm:w-[200px] h-9 rounded-md border bg-transparent px-3 py-2 flex items-center text-sm text-muted-foreground">
-                  {t.clubs?.allCategories || "All Categories"}
-                </div>
-              )}
+        <FilterCard
+          title={t.clubs?.filterClubs || "Filter Clubs"}
+          showClear={hasActiveFilters}
+          onClearFilters={clearFilters}
+          clearLabel={locale === "fr" ? "Effacer les filtres" : "Clear filters"}
+        >
+          <div className="flex flex-col sm:flex-row gap-4">
+            {/* Search Input */}
+            <div className="relative flex-1">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground" />
+              <Input
+                placeholder={t.clubs?.searchPlaceholder || "Search clubs..."}
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="pl-10"
+              />
             </div>
 
-            {/* Clear Filters Link */}
-            {hasActiveFilters && (
-              <div className="mt-2">
-                <button
-                  onClick={clearFilters}
-                  className="text-sm text-primary hover:underline cursor-pointer"
-                >
-                  {locale === "fr" ? "Effacer les filtres" : "Clear filters"}
-                </button>
-              </div>
-            )}
-          </CardContent>
-        </Card>
+            {/* Category Filter */}
+            <HydratedSelect
+              value={categoryFilter}
+              onValueChange={setCategoryFilter}
+              placeholder={t.clubs?.allCategories || "All Categories"}
+              options={categoryOptions}
+              width="w-full sm:w-[200px]"
+            />
+          </div>
+        </FilterCard>
 
         {/* Clubs Grid */}
-        <Card>
+        <Card className="border shadow-sm overflow-hidden">
           <CardHeader>
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-              <div>
-                <CardTitle>{t.clubs?.title || "Clubs"}</CardTitle>
-                <CardDescription>
-                  {filteredClubs.length} {locale === "fr" ? "clubs" : "clubs"}
-                  {pagination && ` ${locale === "fr" ? "sur" : "of"} ${pagination.total}`}
-                </CardDescription>
+              <div className="flex items-center gap-2">
+                <div className="h-2 w-2 rounded-full bg-gspn-maroon-500" />
+                <div>
+                  <CardTitle>{t.clubs?.title || "Clubs"}</CardTitle>
+                  <CardDescription>
+                    {filteredClubs.length} {locale === "fr" ? "clubs" : "clubs"}
+                    {pagination && ` ${locale === "fr" ? "sur" : "of"} ${pagination.total}`}
+                  </CardDescription>
+                </div>
               </div>
             </div>
           </CardHeader>
           <CardContent>
             {isLoading ? (
               <div className="flex items-center justify-center py-8">
-                <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+                <Loader2 className="h-8 w-8 animate-spin text-gspn-maroon-500" />
               </div>
             ) : error ? (
               <div className="text-center py-8 text-destructive">{error}</div>
@@ -316,8 +266,8 @@ export default function ClubsPage() {
                 {pagination && (
                   <DataPagination
                     pagination={pagination}
-                    onPrevPage={handlePrevPage}
-                    onNextPage={handleNextPage}
+                    onPrevPage={goToPrevPage}
+                    onNextPage={() => goToNextPage(pagination.hasMore)}
                   />
                 )}
               </>
