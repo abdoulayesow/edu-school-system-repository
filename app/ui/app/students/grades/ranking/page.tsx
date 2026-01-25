@@ -342,7 +342,7 @@ export default function ClassRankingPage() {
     <PageContainer maxWidth="lg">
       {/* Header */}
       <div className="flex items-center gap-4 mb-6">
-        <Link href="/grades" className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground">
+        <Link href="/students/grades" className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground">
           <ArrowLeft className="size-4" />
           {locale === "fr" ? "Retour aux classes" : "Back to classes"}
         </Link>

@@ -28,7 +28,7 @@ export function StepConfirmation() {
   }
 
   const handleReturnToClubs = () => {
-    router.push("/clubs")
+    router.push("/students/clubs")
   }
 
   const handleDownloadCertificate = async () => {

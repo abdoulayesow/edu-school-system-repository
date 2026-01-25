@@ -78,7 +78,7 @@ export function StepConfirmation() {
   // Handle starting a new enrollment
   const handleNewEnrollment = () => {
     reset()
-    router.push("/enrollments/new")
+    router.push("/students/enrollments/new")
   }
 
   // Get icon styling based on status
@@ -233,7 +233,7 @@ export function StepConfirmation() {
           asChild
           className="gap-2 bg-nav-highlight hover:bg-nav-highlight/90 text-black dark:bg-gspn-maroon-950 dark:hover:bg-gspn-maroon-900 dark:text-white"
         >
-          <Link href={`/enrollments/${enrollmentId}`}>
+          <Link href={`/students/enrollments/${enrollmentId}`}>
             <Eye className={sizing.icon.sm} />
             {t.enrollmentWizard.viewEnrollment}
           </Link>
@@ -260,7 +260,7 @@ export function StepConfirmation() {
       {/* Navigation */}
       <div className="flex flex-col sm:flex-row gap-3 justify-center pt-6 border-t">
         <Button variant="ghost" asChild className="gap-2">
-          <Link href="/enrollments">
+          <Link href="/students/enrollments">
             <Home className={sizing.icon.sm} />
             {t.enrollmentWizard.backToEnrollments}
           </Link>

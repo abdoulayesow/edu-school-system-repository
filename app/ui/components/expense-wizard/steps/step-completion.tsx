@@ -26,7 +26,7 @@ export function StepCompletion({ onComplete }: StepCompletionProps) {
 
   const handleViewExpense = () => {
     if (data.expenseId) {
-      router.push(`/expenses/${data.expenseId}`)
+      router.push(`/accounting/expenses/${data.expenseId}`)
     }
   }
 
@@ -38,7 +38,7 @@ export function StepCompletion({ onComplete }: StepCompletionProps) {
     if (onComplete) {
       onComplete()
     } else {
-      router.push("/expenses")
+      router.push("/accounting/expenses")
     }
   }
 
