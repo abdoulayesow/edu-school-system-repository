@@ -307,7 +307,7 @@ export default function StudentPaymentsPage() {
     return (
       <PageContainer>
         <div className="flex items-center justify-center py-20">
-          <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+          <Loader2 className="h-8 w-8 animate-spin text-gspn-maroon-500" />
         </div>
       </PageContainer>
     )
@@ -334,16 +334,22 @@ export default function StudentPaymentsPage() {
   return (
     <PageContainer>
       {/* Header */}
-      <div className="flex items-center justify-between mb-6">
-        <div className="flex items-center gap-4">
-          <Button variant="outline" size="icon" onClick={() => router.back()} className="bg-transparent">
-            <ArrowLeft className="h-4 w-4" />
-          </Button>
-          <div>
-            <h1 className="text-2xl font-bold">Paiements</h1>
-            <p className="text-muted-foreground">Suivi des paiements de l'élève</p>
-          </div>
-        </div>
+      <div className="relative mb-6 overflow-hidden rounded-2xl border border-border bg-card shadow-sm">
+        <div className="h-1 bg-gspn-maroon-500" />
+        <div className="p-6">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-4">
+              <Button variant="outline" size="icon" onClick={() => router.back()} className="bg-transparent">
+                <ArrowLeft className="h-4 w-4" />
+              </Button>
+              <div className="p-2.5 bg-gspn-maroon-500/10 rounded-xl">
+                <Wallet className="h-6 w-6 text-gspn-maroon-500" />
+              </div>
+              <div>
+                <h1 className="text-2xl font-bold">Paiements</h1>
+                <p className="text-muted-foreground">Suivi des paiements de l'élève</p>
+              </div>
+            </div>
         <Dialog open={openRecordPayment} onOpenChange={(open) => {
           setOpenRecordPayment(open)
           if (!open) resetPaymentForm()
@@ -441,10 +447,12 @@ export default function StudentPaymentsPage() {
             </div>
           </DialogContent>
         </Dialog>
+          </div>
+        </div>
       </div>
 
       {/* Student Info Card */}
-      <Card className="mb-6">
+      <Card className="mb-6 border shadow-sm overflow-hidden">
         <CardContent className="pt-6">
           <div className="flex items-start gap-4">
             <div className="size-16 rounded-full bg-primary/10 flex items-center justify-center">
@@ -516,10 +524,10 @@ export default function StudentPaymentsPage() {
       </div>
 
       {/* Payment Schedules */}
-      <Card className="mb-6">
+      <Card className="mb-6 border shadow-sm overflow-hidden">
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
-            <Calendar className="h-5 w-5" />
+            <div className="h-2 w-2 rounded-full bg-gspn-maroon-500" />
             Échéancier de paiement
           </CardTitle>
         </CardHeader>
@@ -556,10 +564,10 @@ export default function StudentPaymentsPage() {
       </Card>
 
       {/* Payment History */}
-      <Card>
+      <Card className="border shadow-sm overflow-hidden">
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
-            <CreditCard className="h-5 w-5" />
+            <div className="h-2 w-2 rounded-full bg-gspn-maroon-500" />
             Historique des paiements
           </CardTitle>
           <CardDescription>

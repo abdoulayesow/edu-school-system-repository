@@ -313,58 +313,66 @@ export default function GradeViewPage() {
   return (
     <div className="container mx-auto py-6 space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-4">
-          <Button variant="ghost" size="icon" asChild>
-            <Link href="/students/grades">
-              <ArrowLeft className="h-4 w-4" />
-            </Link>
-          </Button>
-          <div>
-            <h1 className="text-2xl font-bold flex items-center gap-2">
-              {data.grade.name}
-              <Badge variant="outline">{data.grade.level}</Badge>
-            </h1>
-            <p className="text-muted-foreground">
-              {t.admin.roomAssignments.viewGrade}
-            </p>
-          </div>
-        </div>
+      <div className="relative mb-6 overflow-hidden rounded-2xl border border-border bg-card shadow-sm">
+        <div className="h-1 bg-gspn-maroon-500" />
+        <div className="p-6">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-4">
+              <Button variant="ghost" size="icon" asChild>
+                <Link href="/students/grades">
+                  <ArrowLeft className="h-4 w-4" />
+                </Link>
+              </Button>
+              <div className="p-2.5 bg-gspn-maroon-500/10 rounded-xl">
+                <Users className="h-6 w-6 text-gspn-maroon-500" />
+              </div>
+              <div>
+                <h1 className="text-2xl font-bold flex items-center gap-2">
+                  {data.grade.name}
+                  <Badge variant="outline">{data.grade.level}</Badge>
+                </h1>
+                <p className="text-muted-foreground">
+                  {t.admin.roomAssignments.viewGrade}
+                </p>
+              </div>
+            </div>
 
-        <div className="flex items-center gap-2">
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={fetchData}
-            disabled={isRefreshing}
-          >
-            <RefreshCw className={`h-4 w-4 mr-2 ${isRefreshing ? "animate-spin" : ""}`} />
-            {isRefreshing ? t.common.loading : "Refresh"}
-          </Button>
+            <div className="flex items-center gap-2">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={fetchData}
+                disabled={isRefreshing}
+              >
+                <RefreshCw className={`h-4 w-4 mr-2 ${isRefreshing ? "animate-spin" : ""}`} />
+                {isRefreshing ? t.common.loading : "Refresh"}
+              </Button>
+            </div>
+          </div>
         </div>
       </div>
 
       {/* Stats */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <Card>
+        <Card className="border shadow-sm overflow-hidden">
           <CardContent className="pt-4">
             <div className="text-2xl font-bold">{data.stats.totalEnrolled}</div>
             <div className="text-sm text-muted-foreground">{t.admin.students}</div>
           </CardContent>
         </Card>
-        <Card>
+        <Card className="border shadow-sm overflow-hidden">
           <CardContent className="pt-4">
             <div className="text-2xl font-bold text-green-600">{data.stats.totalAssigned}</div>
             <div className="text-sm text-muted-foreground">Assigned</div>
           </CardContent>
         </Card>
-        <Card>
+        <Card className="border shadow-sm overflow-hidden">
           <CardContent className="pt-4">
             <div className="text-2xl font-bold text-orange-600">{data.stats.totalUnassigned}</div>
             <div className="text-sm text-muted-foreground">Unassigned</div>
           </CardContent>
         </Card>
-        <Card>
+        <Card className="border shadow-sm overflow-hidden">
           <CardContent className="pt-4">
             <div className="text-2xl font-bold">{data.stats.roomUtilization}%</div>
             <div className="text-sm text-muted-foreground">{t.admin.roomAssignments.roomUtilization}</div>
@@ -427,14 +435,14 @@ export default function GradeViewPage() {
           {filteredRooms.map(room => (
             <Card
               key={room.id}
-              className={`transition-colors ${draggedStudent ? "border-dashed border-2" : ""}`}
+              className={`border shadow-sm overflow-hidden transition-colors ${draggedStudent ? "border-dashed border-2" : ""}`}
               onDragOver={e => e.preventDefault()}
               onDrop={() => handleDrop(room.id)}
             >
               <CardHeader className="pb-2">
                 <div className="flex items-center justify-between">
                   <CardTitle className="text-lg flex items-center gap-2">
-                    <Users className="h-4 w-4" />
+                    <div className="h-2 w-2 rounded-full bg-gspn-maroon-500" />
                     {room.displayName || room.name}
                     <Badge variant={room.students.length >= room.capacity ? "destructive" : "secondary"}>
                       {room.students.length}/{room.capacity}
@@ -532,10 +540,10 @@ export default function GradeViewPage() {
 
         {/* Unassigned students (1/3 width) */}
         <div className="lg:col-span-1">
-          <Card className="sticky top-4">
+          <Card className="sticky top-4 border shadow-sm overflow-hidden">
             <CardHeader>
               <CardTitle className="text-lg flex items-center gap-2">
-                <Users className="h-4 w-4" />
+                <div className="h-2 w-2 rounded-full bg-gspn-maroon-500" />
                 {t.admin.roomAssignments.unassignedStudentsPanel}
                 <Badge variant="secondary">{data.unassignedStudents.length}</Badge>
               </CardTitle>

@@ -280,7 +280,7 @@ export default function EnrollmentDetailPage({
   if (isLoading) {
     return (
       <div className="min-h-screen bg-white dark:bg-background flex items-center justify-center">
-        <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+        <Loader2 className="h-8 w-8 animate-spin text-gspn-maroon-500" />
       </div>
     )
   }
@@ -310,67 +310,75 @@ export default function EnrollmentDetailPage({
   return (
     <PageContainer maxWidth="full">
       {/* Header */}
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
-          <div className="flex items-center gap-4">
-            <Button variant="ghost" size="icon" asChild>
-              <Link href="/enrollments">
-                <ArrowLeft className="h-5 w-5" />
-              </Link>
-            </Button>
-            <div>
-              <div className="flex items-center gap-2">
-                <h1 className="text-2xl font-bold">
-                  {enrollment.firstName}{enrollment.middleName ? ` ${enrollment.middleName}` : ""} {enrollment.lastName}
-                </h1>
-                <Badge variant={status.variant} className={cn("gap-1", status.className)}>
-                  <StatusIcon className="h-3 w-3" />
-                  {locale === "fr" ? status.labelFr : status.label}
-                </Badge>
+      <div className="relative mb-6 overflow-hidden rounded-2xl border border-border bg-card shadow-sm">
+        <div className="h-1 bg-gspn-maroon-500" />
+        <div className="p-6">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+            <div className="flex items-center gap-4">
+              <Button variant="ghost" size="icon" asChild>
+                <Link href="/students/enrollments">
+                  <ArrowLeft className="h-5 w-5" />
+                </Link>
+              </Button>
+              <div className="p-2.5 bg-gspn-maroon-500/10 rounded-xl">
+                <FileText className="h-6 w-6 text-gspn-maroon-500" />
               </div>
-              <p className="text-muted-foreground">
-                {enrollment.enrollmentNumber || "Draft"} | {enrollment.grade.name} | {enrollment.schoolYear.name}
-              </p>
+              <div>
+                <div className="flex items-center gap-2">
+                  <h1 className="text-2xl font-bold">
+                    {enrollment.firstName}{enrollment.middleName ? ` ${enrollment.middleName}` : ""} {enrollment.lastName}
+                  </h1>
+                  <Badge variant={status.variant} className={cn("gap-1", status.className)}>
+                    <StatusIcon className="h-3 w-3" />
+                    {locale === "fr" ? status.labelFr : status.label}
+                  </Badge>
+                </div>
+                <p className="text-muted-foreground">
+                  {enrollment.enrollmentNumber || "Draft"} | {enrollment.grade.name} | {enrollment.schoolYear.name}
+                </p>
+              </div>
+            </div>
+
+            <div className="flex gap-2">
+              {canCancel && (
+                <PermissionGuard resource="student_enrollment" action="update" inline>
+                  <Button variant="outline" onClick={() => setShowCancelDialog(true)}>
+                    <XCircle className="h-4 w-4 mr-2" />
+                    {locale === "fr" ? "Annuler" : "Cancel"}
+                  </Button>
+                </PermissionGuard>
+              )}
+              {(enrollment.status === "draft" || enrollment.status === "cancelled") && (
+                <PermissionGuard resource="student_enrollment" action="delete" inline>
+                  <Button
+                    variant="outline"
+                    onClick={() => setShowDeleteDialog(true)}
+                    className="bg-amber-500 hover:bg-amber-600 text-white border-amber-500 hover:border-amber-600 dark:bg-amber-600 dark:hover:bg-amber-700"
+                  >
+                    <Trash2 className="h-4 w-4 mr-2" />
+                    {t.common.delete}
+                  </Button>
+                </PermissionGuard>
+              )}
+              {["draft", "submitted", "needs_review"].includes(enrollment.status) && (
+                <PermissionGuard resource="student_enrollment" action="update" inline>
+                  <Button
+                    asChild
+                    className="bg-amber-500 hover:bg-amber-600 text-white dark:bg-amber-600 dark:hover:bg-amber-700"
+                  >
+                    <Link href={enrollment.status === "draft"
+                      ? `/students/enrollments/new?draft=${enrollment.id}&step=${enrollment.currentStep || 1}`
+                      : `/students/enrollments/new?draft=${enrollment.id}&step=5`
+                    }>
+                      {enrollment.status === "draft" ? t.enrollments.continueEnrollment : t.common.edit}
+                    </Link>
+                  </Button>
+                </PermissionGuard>
+              )}
             </div>
           </div>
-
-          <div className="flex gap-2">
-            {canCancel && (
-              <PermissionGuard resource="student_enrollment" action="update" inline>
-                <Button variant="outline" onClick={() => setShowCancelDialog(true)}>
-                  <XCircle className="h-4 w-4 mr-2" />
-                  {locale === "fr" ? "Annuler" : "Cancel"}
-                </Button>
-              </PermissionGuard>
-            )}
-            {(enrollment.status === "draft" || enrollment.status === "cancelled") && (
-              <PermissionGuard resource="student_enrollment" action="delete" inline>
-                <Button
-                  variant="outline"
-                  onClick={() => setShowDeleteDialog(true)}
-                  className="bg-amber-500 hover:bg-amber-600 text-white border-amber-500 hover:border-amber-600 dark:bg-amber-600 dark:hover:bg-amber-700"
-                >
-                  <Trash2 className="h-4 w-4 mr-2" />
-                  {t.common.delete}
-                </Button>
-              </PermissionGuard>
-            )}
-            {["draft", "submitted", "needs_review"].includes(enrollment.status) && (
-              <PermissionGuard resource="student_enrollment" action="update" inline>
-                <Button
-                  asChild
-                  className="bg-amber-500 hover:bg-amber-600 text-white dark:bg-amber-600 dark:hover:bg-amber-700"
-                >
-                  <Link href={enrollment.status === "draft"
-                    ? `/enrollments/new?draft=${enrollment.id}&step=${enrollment.currentStep || 1}`
-                    : `/enrollments/new?draft=${enrollment.id}&step=5`
-                  }>
-                    {enrollment.status === "draft" ? t.enrollments.continueEnrollment : t.common.edit}
-                  </Link>
-                </Button>
-              </PermissionGuard>
-            )}
-          </div>
         </div>
+      </div>
 
         {/* Status Comment Alert */}
         {enrollment.statusComment && enrollment.status !== "draft" && (
@@ -531,10 +539,10 @@ export default function EnrollmentDetailPage({
           {/* Main Content */}
           <div className="lg:col-span-2 space-y-6">
             {/* Student Information */}
-            <Card>
+            <Card className="border shadow-sm overflow-hidden">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
-                  <User className="h-5 w-5" />
+                  <div className="h-2 w-2 rounded-full bg-gspn-maroon-500" />
                   {t.enrollments.personalInfo}
                 </CardTitle>
               </CardHeader>
@@ -588,10 +596,10 @@ export default function EnrollmentDetailPage({
             </Card>
 
             {/* Parents Information */}
-            <Card>
+            <Card className="border shadow-sm overflow-hidden">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
-                  <Users className="h-5 w-5" />
+                  <div className="h-2 w-2 rounded-full bg-gspn-maroon-500" />
                   {t.enrollments.parents}
                 </CardTitle>
               </CardHeader>
@@ -653,10 +661,10 @@ export default function EnrollmentDetailPage({
 
             {/* Enrolled By */}
             {enrollment.enrollingPersonType && (
-              <Card>
+              <Card className="border shadow-sm overflow-hidden">
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
-                    <UserCheck className="h-5 w-5" />
+                    <div className="h-2 w-2 rounded-full bg-gspn-maroon-500" />
                     {t.enrollments.enrolledBy}
                   </CardTitle>
                 </CardHeader>
@@ -714,10 +722,10 @@ export default function EnrollmentDetailPage({
             )}
 
             {/* Payment Schedules */}
-            <Card>
+            <Card className="border shadow-sm overflow-hidden">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
-                  <CreditCard className="h-5 w-5" />
+                  <div className="h-2 w-2 rounded-full bg-gspn-maroon-500" />
                   {locale === "fr" ? "Echeances de paiement" : "Payment Schedules"}
                 </CardTitle>
                 <CardDescription>
@@ -768,10 +776,10 @@ export default function EnrollmentDetailPage({
 
             {/* Notes */}
             {enrollment.notes.length > 0 && (
-              <Card>
+              <Card className="border shadow-sm overflow-hidden">
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
-                    <FileText className="h-5 w-5" />
+                    <div className="h-2 w-2 rounded-full bg-gspn-maroon-500" />
                     {locale === "fr" ? "Notes" : "Notes"}
                   </CardTitle>
                 </CardHeader>
@@ -795,9 +803,12 @@ export default function EnrollmentDetailPage({
           {/* Sidebar */}
           <div className="space-y-6">
             {/* Financial Summary */}
-            <Card>
+            <Card className="border shadow-sm overflow-hidden">
               <CardHeader>
-                <CardTitle>{locale === "fr" ? "Resume financier" : "Financial Summary"}</CardTitle>
+                <CardTitle className="flex items-center gap-2">
+                  <div className="h-2 w-2 rounded-full bg-gspn-maroon-500" />
+                  {locale === "fr" ? "Resume financier" : "Financial Summary"}
+                </CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="flex justify-between">
@@ -833,9 +844,12 @@ export default function EnrollmentDetailPage({
             </Card>
 
             {/* Status Timeline */}
-            <Card>
+            <Card className="border shadow-sm overflow-hidden">
               <CardHeader>
-                <CardTitle>{locale === "fr" ? "Chronologie" : "Timeline"}</CardTitle>
+                <CardTitle className="flex items-center gap-2">
+                  <div className="h-2 w-2 rounded-full bg-gspn-maroon-500" />
+                  {locale === "fr" ? "Chronologie" : "Timeline"}
+                </CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="flex items-start gap-3">
@@ -881,9 +895,12 @@ export default function EnrollmentDetailPage({
 
             {/* Recent Payments */}
             {enrollment.payments.length > 0 && (
-              <Card>
+              <Card className="border shadow-sm overflow-hidden">
                 <CardHeader>
-                  <CardTitle>{locale === "fr" ? "Paiements recents" : "Recent Payments"}</CardTitle>
+                  <CardTitle className="flex items-center gap-2">
+                    <div className="h-2 w-2 rounded-full bg-gspn-maroon-500" />
+                    {locale === "fr" ? "Paiements recents" : "Recent Payments"}
+                  </CardTitle>
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-3">

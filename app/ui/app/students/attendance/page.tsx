@@ -4,7 +4,6 @@ import { useState, useEffect, useMemo } from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Input } from "@/components/ui/input"
@@ -28,7 +27,7 @@ import {
 import { useI18n } from "@/components/i18n-provider"
 import { PermissionGuard } from "@/components/permission-guard"
 import { PageContainer } from "@/components/layout"
-import { sizing } from "@/lib/design-tokens"
+import { StatCard, FilterCard, HydratedSelect, type SelectOption } from "@/components/students"
 import { formatDateWithDay } from "@/lib/utils"
 
 type AttendanceStatus = "present" | "absent" | "late" | "excused" | null
@@ -389,114 +388,111 @@ export default function AttendancePage() {
     }
   }, [currentSummary])
 
+  // Build grade options for HydratedSelect
+  const gradeOptions: SelectOption[] = [
+    { value: "all", label: locale === "fr" ? "Toutes les classes" : "All grades" },
+    ...grades.map(grade => ({
+      value: grade.id,
+      label: grade.name,
+    })),
+  ]
+
+  // Build entry mode options
+  const entryModeOptions: SelectOption[] = [
+    { value: "checklist", label: locale === "fr" ? "Liste complète" : "Checklist" },
+    { value: "absences_only", label: locale === "fr" ? "Absences seulement" : "Absences Only" },
+  ]
+
   return (
     <PageContainer maxWidth="full">
-        {/* Header */}
-        <div className="mb-6">
-          <h1 className="text-3xl font-bold text-foreground mb-2">{t.attendance.title}</h1>
-          <p className="text-muted-foreground">Suivi de présence par classe</p>
+      {/* Page Header with Brand Styling */}
+      <div className="relative mb-6 overflow-hidden rounded-2xl border border-border bg-card shadow-sm">
+        <div className="h-1 bg-gspn-maroon-500" />
+        <div className="p-6">
+          <div className="flex items-center gap-3 mb-2">
+            <div className="p-2.5 bg-gspn-maroon-500/10 rounded-xl">
+              <CalendarCheck className="h-6 w-6 text-gspn-maroon-500" />
+            </div>
+            <h1 className="text-3xl font-bold text-foreground">{t.attendance.title}</h1>
+          </div>
+          <p className="text-muted-foreground mt-1">
+            {locale === "fr" ? "Suivi de présence par classe" : "Attendance tracking by class"}
+          </p>
         </div>
+      </div>
 
-        {/* Summary Cards */}
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4 mb-6">
-          <Card className="py-5">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">{t.attendance.totalSessions}</CardTitle>
-              <CalendarCheck className={sizing.icon.lg} />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{attendanceStats.totalSessions}</div>
-              <p className="text-xs text-muted-foreground">{t.attendance.attendanceSessions}</p>
-            </CardContent>
-          </Card>
+      {/* Summary Cards */}
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4 mb-6">
+        <StatCard
+          title={t.attendance.totalSessions}
+          value={attendanceStats.totalSessions}
+          description={t.attendance.attendanceSessions}
+          icon={CalendarCheck}
+        />
+        <StatCard
+          title={t.attendance.averageAttendanceRate}
+          value={`${attendanceStats.avgAttendanceRate}%`}
+          description={t.attendance.overallRate}
+          icon={TrendingUp}
+        />
+        <StatCard
+          title={t.attendance.presentToday}
+          value={attendanceStats.presentToday}
+          description={t.attendance.studentsPresent}
+          icon={CheckCircle2}
+        />
+        <StatCard
+          title={t.attendance.absentToday}
+          value={attendanceStats.absentToday}
+          description={t.attendance.studentsAbsent}
+          icon={XCircle}
+        />
+      </div>
 
-          <Card className="py-5">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">{t.attendance.averageAttendanceRate}</CardTitle>
-              <TrendingUp className={sizing.icon.lg} />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{attendanceStats.avgAttendanceRate}%</div>
-              <p className="text-xs text-muted-foreground">{t.attendance.overallRate}</p>
-            </CardContent>
-          </Card>
-
-          <Card className="py-5">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">{t.attendance.presentToday}</CardTitle>
-              <CheckCircle2 className={sizing.icon.lg} />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold text-success">{attendanceStats.presentToday}</div>
-              <p className="text-xs text-muted-foreground">{t.attendance.studentsPresent}</p>
-            </CardContent>
-          </Card>
-
-          <Card className="py-5">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">{t.attendance.absentToday}</CardTitle>
-              <XCircle className={sizing.icon.lg} />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold text-destructive">{attendanceStats.absentToday}</div>
-              <p className="text-xs text-muted-foreground">{t.attendance.studentsAbsent}</p>
-            </CardContent>
-          </Card>
-        </div>
-
-        {/* Filters */}
-        {!isRecording && (
-          <Card className="mb-6 py-2">
-            <CardHeader className="pb-1 px-6 pt-3">
-              <CardTitle className="text-sm">{t.attendance.filterAttendance}</CardTitle>
-            </CardHeader>
-            <CardContent className="pt-0 pb-2 px-6">
-              <div className="flex flex-col sm:flex-row gap-4">
-                {/* Grade Selection */}
-                {isLoadingGrades ? (
-                  <div className="flex items-center gap-2 text-muted-foreground">
-                    <Loader2 className="size-4 animate-spin" />
-                    Chargement des classes...
-                  </div>
-                ) : (
-                  <Select value={selectedGradeId} onValueChange={setSelectedGradeId}>
-                    <SelectTrigger className="w-full sm:w-[180px]">
-                      <SelectValue placeholder="All grades" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="all">All grades</SelectItem>
-                      {grades.map(grade => (
-                        <SelectItem key={grade.id} value={grade.id}>
-                          {grade.name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                )}
-
-                {/* Date Selection */}
-                <Input
-                  type="date"
-                  value={selectedDate}
-                  onChange={(e) => setSelectedDate(e.target.value)}
-                  max={new Date().toISOString().split('T')[0]}
-                  className="w-full sm:w-[180px]"
-                />
-
-                {/* Entry Mode Selection */}
-                <Select value={entryMode} onValueChange={(value: "checklist" | "absences_only") => setEntryMode(value)}>
-                  <SelectTrigger className="w-full sm:w-[180px]">
-                    <SelectValue placeholder="Entry mode" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="checklist">Checklist</SelectItem>
-                    <SelectItem value="absences_only">Absences Only</SelectItem>
-                  </SelectContent>
-                </Select>
+      {/* Filters */}
+      {!isRecording && (
+        <FilterCard
+          title={t.attendance.filterAttendance}
+          showClear={false}
+          onClearFilters={() => {}}
+        >
+          <div className="flex flex-col sm:flex-row gap-4">
+            {/* Grade Selection */}
+            {isLoadingGrades ? (
+              <div className="flex items-center gap-2 text-muted-foreground">
+                <Loader2 className="size-4 animate-spin text-gspn-maroon-500" />
+                {locale === "fr" ? "Chargement des classes..." : "Loading grades..."}
               </div>
-            </CardContent>
-          </Card>
-        )}
+            ) : (
+              <HydratedSelect
+                value={selectedGradeId}
+                onValueChange={setSelectedGradeId}
+                placeholder={locale === "fr" ? "Toutes les classes" : "All grades"}
+                options={gradeOptions}
+                width="w-full sm:w-[180px]"
+              />
+            )}
+
+            {/* Date Selection */}
+            <Input
+              type="date"
+              value={selectedDate}
+              onChange={(e) => setSelectedDate(e.target.value)}
+              max={new Date().toISOString().split('T')[0]}
+              className="w-full sm:w-[180px]"
+            />
+
+            {/* Entry Mode Selection */}
+            <HydratedSelect
+              value={entryMode}
+              onValueChange={(value) => setEntryMode(value as "checklist" | "absences_only")}
+              placeholder={locale === "fr" ? "Mode d'entrée" : "Entry mode"}
+              options={entryModeOptions}
+              width="w-full sm:w-[180px]"
+            />
+          </div>
+        </FilterCard>
+      )}
 
         {/* Attendance Content */}
         {!isRecording ? (

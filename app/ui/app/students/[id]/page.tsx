@@ -349,7 +349,7 @@ export default function StudentDetailPage() {
   if (isLoading) {
     return (
       <div className="min-h-screen bg-white dark:bg-background flex items-center justify-center">
-        <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+        <Loader2 className="h-8 w-8 animate-spin text-gspn-maroon-500" />
       </div>
     )
   }
@@ -379,45 +379,37 @@ export default function StudentDetailPage() {
         {t.students.backToStudents}
       </Link>
 
-        {/* Header */}
-        <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-4 mb-6">
-          <div className="flex items-start gap-4">
-            <Avatar className="size-20">
-              <AvatarImage src={student.studentProfile?.person?.photoUrl ?? undefined} />
-              <AvatarFallback className="text-xl bg-amber-50 dark:bg-amber-950/30 text-amber-700 dark:text-amber-400">
-                {student.firstName[0]}{student.lastName[0]}
-              </AvatarFallback>
-            </Avatar>
-            <div>
-              <div className="flex items-center gap-3 mb-1">
-                <h1 className="text-3xl font-bold text-foreground">
-                  {student.firstName}{activeEnrollment?.middleName ? ` ${activeEnrollment.middleName}` : ""} {student.lastName}
-                </h1>
-                {getStatusBadge(student.status)}
-              </div>
-              <p className="text-muted-foreground mb-2">
-                {student.studentNumber}
-              </p>
-              <div className="flex items-center gap-2 flex-wrap">
-                {student.studentProfile?.currentGrade && (
-                  <Badge variant="outline" className="gap-1 h-6">
-                    <GraduationCap className="size-3" />
-                    {student.studentProfile.currentGrade.name}
-                  </Badge>
-                )}
-                <PermissionGuard resource="room_assignments" action="update" inline>
-                  {currentRoomName ? (
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      className="gap-1 h-6"
-                      onClick={() => setRoomChangeDialogOpen(true)}
-                    >
-                      <DoorOpen className="size-3" />
-                      {t.students.room}
-                    </Button>
-                  ) : (
-                    activeSchoolYearId && student.studentProfile?.currentGrade && (
+      {/* Page Header with Brand Styling */}
+      <div className="relative mb-6 overflow-hidden rounded-2xl border border-border bg-card shadow-sm">
+        <div className="h-1 bg-gspn-maroon-500" />
+        <div className="p-6">
+          <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-4">
+            <div className="flex items-start gap-4">
+              <Avatar className="size-20 ring-2 ring-gspn-maroon-200 dark:ring-gspn-maroon-800">
+                <AvatarImage src={student.studentProfile?.person?.photoUrl ?? undefined} />
+                <AvatarFallback className="text-xl bg-gspn-maroon-50 dark:bg-gspn-maroon-950/30 text-gspn-maroon-700 dark:text-gspn-maroon-400">
+                  {student.firstName[0]}{student.lastName[0]}
+                </AvatarFallback>
+              </Avatar>
+              <div>
+                <div className="flex items-center gap-3 mb-1">
+                  <h1 className="text-3xl font-bold text-foreground">
+                    {student.firstName}{activeEnrollment?.middleName ? ` ${activeEnrollment.middleName}` : ""} {student.lastName}
+                  </h1>
+                  {getStatusBadge(student.status)}
+                </div>
+                <p className="text-muted-foreground mb-2">
+                  {student.studentNumber}
+                </p>
+                <div className="flex items-center gap-2 flex-wrap">
+                  {student.studentProfile?.currentGrade && (
+                    <Badge variant="outline" className="gap-1 h-6">
+                      <GraduationCap className="size-3" />
+                      {student.studentProfile.currentGrade.name}
+                    </Badge>
+                  )}
+                  <PermissionGuard resource="room_assignments" action="update" inline>
+                    {currentRoomName ? (
                       <Button
                         variant="outline"
                         size="sm"
@@ -427,34 +419,47 @@ export default function StudentDetailPage() {
                         <DoorOpen className="size-3" />
                         {t.students.room}
                       </Button>
-                    )
-                  )}
-                </PermissionGuard>
+                    ) : (
+                      activeSchoolYearId && student.studentProfile?.currentGrade && (
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="gap-1 h-6"
+                          onClick={() => setRoomChangeDialogOpen(true)}
+                        >
+                          <DoorOpen className="size-3" />
+                          {t.students.room}
+                        </Button>
+                      )
+                    )}
+                  </PermissionGuard>
+                </div>
               </div>
             </div>
-          </div>
 
-          {/* Action Buttons */}
-          <div className="flex gap-2">
-            <PermissionGuard
-              resource="payments"
-              action="create"
-              loading={<div className="h-11 w-40 animate-pulse bg-muted rounded-md" />}
-            >
-              <Link href={`/payments/new?studentId=${student.id}`}>
-                <Button
-                  variant="gold"
-                  size="lg"
-                  className="gap-2 shadow-md hover:shadow-lg transition-all"
-                  disabled={!student.balanceInfo || student.balanceInfo.remainingBalance <= 0}
-                >
-                  <Banknote className="size-5" />
-                  {t.students.makePayment}
-                </Button>
-              </Link>
-            </PermissionGuard>
+            {/* Action Buttons */}
+            <div className="flex gap-2">
+              <PermissionGuard
+                resource="payments"
+                action="create"
+                loading={<div className="h-11 w-40 animate-pulse bg-muted rounded-md" />}
+              >
+                <Link href={`/payments/new?studentId=${student.id}`}>
+                  <Button
+                    variant="gold"
+                    size="lg"
+                    className="gap-2 shadow-md hover:shadow-lg transition-all"
+                    disabled={!student.balanceInfo || student.balanceInfo.remainingBalance <= 0}
+                  >
+                    <Banknote className="size-5" />
+                    {t.students.makePayment}
+                  </Button>
+                </Link>
+              </PermissionGuard>
+            </div>
           </div>
         </div>
+      </div>
 
         {/* Stats Cards */}
         <div className="grid gap-4 md:grid-cols-4 mb-6">
@@ -546,10 +551,10 @@ export default function StudentDetailPage() {
           <TabsContent value="overview" className="space-y-4">
             <div className="grid gap-4 md:grid-cols-2">
               {/* Personal Info Card */}
-              <Card>
+              <Card className="border shadow-sm overflow-hidden">
                 <CardHeader className="flex flex-row items-start justify-between">
                   <CardTitle className="flex items-center gap-2">
-                    <User className="size-5" />
+                    <div className="h-2 w-2 rounded-full bg-gspn-maroon-500" />
                     {t.students.personalInfo}
                   </CardTitle>
                   <PermissionGuard resource="students" action="update" inline>
@@ -680,10 +685,10 @@ export default function StudentDetailPage() {
 
               {/* Family Information Card */}
               {activeEnrollment && (activeEnrollment.fatherName || activeEnrollment.motherName) && (
-                <Card>
+                <Card className="border shadow-sm overflow-hidden">
                   <CardHeader>
                     <CardTitle className="flex items-center gap-2">
-                      <Users className="size-5" />
+                      <div className="h-2 w-2 rounded-full bg-gspn-maroon-500" />
                       {t.students.familyInformation}
                     </CardTitle>
                   </CardHeader>
@@ -733,10 +738,10 @@ export default function StudentDetailPage() {
 
               {/* Attendance Summary Card - only show if has data */}
               {student.attendanceSummary && student.attendanceSummary.total > 0 && (
-                <Card>
+                <Card className="border shadow-sm overflow-hidden">
                   <CardHeader>
                     <CardTitle className="flex items-center gap-2">
-                      <CalendarCheck className="size-5" />
+                      <div className="h-2 w-2 rounded-full bg-gspn-maroon-500" />
                       {t.students.attendanceHistory}
                     </CardTitle>
                     <CardDescription>
@@ -792,10 +797,10 @@ export default function StudentDetailPage() {
 
               {/* Enrollment Notes Card */}
               {activeEnrollment?.notes && activeEnrollment.notes.length > 0 && (
-                <Card>
+                <Card className="border shadow-sm overflow-hidden">
                   <CardHeader>
                     <CardTitle className="flex items-center gap-2">
-                      <FileText className="size-5" />
+                      <div className="h-2 w-2 rounded-full bg-gspn-maroon-500" />
                       {t.students.enrollmentNotes}
                     </CardTitle>
                   </CardHeader>
@@ -819,9 +824,12 @@ export default function StudentDetailPage() {
 
           {/* Enrollments Tab */}
           <TabsContent value="enrollments">
-            <Card>
+            <Card className="border shadow-sm overflow-hidden">
               <CardHeader>
-                <CardTitle>{t.students.enrollmentHistory}</CardTitle>
+                <CardTitle className="flex items-center gap-2">
+                  <div className="h-2 w-2 rounded-full bg-gspn-maroon-500" />
+                  {t.students.enrollmentHistory}
+                </CardTitle>
                 <CardDescription>{student.enrollments.length} {t.students.enrollmentCount}</CardDescription>
               </CardHeader>
               <CardContent>
@@ -913,11 +921,11 @@ export default function StudentDetailPage() {
           <TabsContent value="payments" className="space-y-4">
             {/* Payment Summary Card */}
             {student.balanceInfo && (
-              <Card>
+              <Card className="border shadow-sm overflow-hidden">
                 <CardHeader className="flex flex-row items-start justify-between">
                   <div>
                     <CardTitle className="flex items-center gap-2">
-                      <Wallet className="size-5" />
+                      <div className="h-2 w-2 rounded-full bg-gspn-maroon-500" />
                       {t.students.paymentHistory}
                     </CardTitle>
                     <CardDescription>
@@ -970,9 +978,12 @@ export default function StudentDetailPage() {
             )}
 
             {/* Payment History Table */}
-            <Card>
+            <Card className="border shadow-sm overflow-hidden">
               <CardHeader>
-                <CardTitle>{t.students.paymentHistory}</CardTitle>
+                <CardTitle className="flex items-center gap-2">
+                  <div className="h-2 w-2 rounded-full bg-gspn-maroon-500" />
+                  {t.students.paymentHistory}
+                </CardTitle>
                 <CardDescription>{allPayments.length} {t.students.paymentCount}</CardDescription>
               </CardHeader>
               <CardContent>
@@ -1034,9 +1045,12 @@ export default function StudentDetailPage() {
 
           {/* Attendance Tab */}
           <TabsContent value="attendance">
-            <Card>
+            <Card className="border shadow-sm overflow-hidden">
               <CardHeader>
-                <CardTitle>{t.students.attendanceHistoryTitle}</CardTitle>
+                <CardTitle className="flex items-center gap-2">
+                  <div className="h-2 w-2 rounded-full bg-gspn-maroon-500" />
+                  {t.students.attendanceHistoryTitle}
+                </CardTitle>
                 <CardDescription>
                   {t.students.attendanceRate}: {student.attendanceSummary?.attendanceRate ?? 0}%
                 </CardDescription>
@@ -1131,10 +1145,10 @@ export default function StudentDetailPage() {
 
           {/* Activities Tab */}
           <TabsContent value="activities">
-            <Card>
+            <Card className="border shadow-sm overflow-hidden">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
-                  <BookOpen className="size-5" />
+                  <div className="h-2 w-2 rounded-full bg-gspn-maroon-500" />
                   {t.students.enrolledActivities}
                 </CardTitle>
                 <CardDescription>{activities.length} {t.students.activityCount}</CardDescription>

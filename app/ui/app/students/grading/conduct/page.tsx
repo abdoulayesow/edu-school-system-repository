@@ -304,7 +304,7 @@ export default function ConductEntryPage() {
     return (
       <PageContainer maxWidth="full">
         <div className="flex items-center justify-center h-64">
-          <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+          <Loader2 className="h-8 w-8 animate-spin text-gspn-maroon-500" />
         </div>
       </PageContainer>
     )
@@ -328,11 +328,19 @@ export default function ConductEntryPage() {
 
   return (
     <PageContainer maxWidth="full">
+      {/* Maroon accent bar */}
+      <div className="h-1 bg-gspn-maroon-500 -mx-4 sm:-mx-6 lg:-mx-8 mb-6" />
+
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
-        <div>
-          <h1 className="text-3xl font-bold">{t.nav.conductEntry}</h1>
-          <p className="text-muted-foreground">{t.grading.conductEntrySubtitle}</p>
+        <div className="flex items-center gap-3">
+          <div className="p-2.5 bg-gspn-maroon-500/10 rounded-xl">
+            <ClipboardCheck className="h-6 w-6 text-gspn-maroon-500" />
+          </div>
+          <div>
+            <h1 className="text-3xl font-bold">{t.nav.conductEntry}</h1>
+            <p className="text-muted-foreground">{t.grading.conductEntrySubtitle}</p>
+          </div>
         </div>
         <div className="flex items-center gap-2">
           <Badge variant="outline" className="text-sm py-1 px-3">
@@ -346,9 +354,12 @@ export default function ConductEntryPage() {
       </div>
 
       {/* Selection Controls */}
-      <Card className="mb-6">
+      <Card className="mb-6 border shadow-sm overflow-hidden">
         <CardHeader>
-          <CardTitle className="text-lg">{t.grading.selectGrade}</CardTitle>
+          <CardTitle className="text-lg flex items-center gap-2">
+            <div className="h-2 w-2 rounded-full bg-gspn-maroon-500" />
+            {t.grading.selectGrade}
+          </CardTitle>
         </CardHeader>
         <CardContent>
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
@@ -373,10 +384,13 @@ export default function ConductEntryPage() {
 
       {/* Conduct Entry Table */}
       {selectedGradeId && (
-        <Card>
+        <Card className="border shadow-sm overflow-hidden">
           <CardHeader className="flex flex-row items-center justify-between">
             <div>
-              <CardTitle>{t.nav.conductEntry}</CardTitle>
+              <CardTitle className="flex items-center gap-2">
+                <div className="h-2 w-2 rounded-full bg-gspn-maroon-500" />
+                {t.nav.conductEntry}
+              </CardTitle>
               <CardDescription>
                 {summaries.length} {t.common.students}
                 {hasChanges && (
@@ -401,7 +415,7 @@ export default function ConductEntryPage() {
           <CardContent>
             {isLoadingSummaries ? (
               <div className="flex items-center justify-center h-32">
-                <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+                <Loader2 className="h-8 w-8 animate-spin text-gspn-maroon-500" />
               </div>
             ) : summaries.length === 0 ? (
               <div className="text-center py-8 text-muted-foreground">

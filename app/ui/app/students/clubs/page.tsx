@@ -151,10 +151,10 @@ export default function ClubsPage() {
                   <div className="p-2.5 bg-gspn-maroon-500/10 rounded-xl">
                     <BookOpen className="h-6 w-6 text-gspn-maroon-500" />
                   </div>
+                  <h1 className="text-3xl font-bold text-foreground">
+                    {t.clubs?.title || "Clubs & Activities"}
+                  </h1>
                 </div>
-                <h1 className="text-3xl font-bold text-foreground">
-                  {t.clubs?.title || "Clubs & Activities"}
-                </h1>
                 <p className="text-muted-foreground mt-1">
                   {t.clubs?.subtitle || "Enroll students in extracurricular clubs"}
                 </p>
