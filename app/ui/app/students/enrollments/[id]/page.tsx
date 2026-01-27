@@ -734,43 +734,26 @@ export default function EnrollmentDetailPage({
                   {locale === "fr" ? "Chronologie" : "Timeline"}
                 </h3>
               </div>
-              <div className="p-6 space-y-4">
-                <div className="flex items-start gap-3">
-                  <div className="w-2 h-2 rounded-full bg-gspn-maroon-500 mt-2" />
-                  <div>
-                    <p className="font-medium">{locale === "fr" ? "Cree" : "Created"}</p>
-                    <p className="text-sm text-muted-foreground">{formatDate(enrollment.createdAt)}</p>
-                    <p className="text-xs text-muted-foreground">{locale === "fr" ? "par" : "by"} {enrollment.creator.name}</p>
-                  </div>
-                </div>
+              <div className="p-6 grid gap-4 sm:grid-cols-2">
                 {enrollment.submittedAt && (
-                  <div className="flex items-start gap-3">
-                    <div className="w-2 h-2 rounded-full bg-blue-500 mt-2" />
-                    <div>
-                      <p className="font-medium">{locale === "fr" ? "Soumis" : "Submitted"}</p>
-                      <p className="text-sm text-muted-foreground">{formatDate(enrollment.submittedAt)}</p>
-                    </div>
+                  <div>
+                    <p className="text-sm text-muted-foreground">{locale === "fr" ? "Soumis" : "Submitted"}</p>
+                    <p className="font-medium">{formatDate(enrollment.submittedAt)}</p>
                   </div>
                 )}
                 {enrollment.autoApproveAt && enrollment.status === "submitted" && (
-                  <div className="flex items-start gap-3">
-                    <div className="w-2 h-2 rounded-full bg-yellow-500 mt-2" />
-                    <div>
-                      <p className="font-medium">{locale === "fr" ? "Auto-approbation" : "Auto-Approval"}</p>
-                      <p className="text-sm text-muted-foreground">{formatDate(enrollment.autoApproveAt)}</p>
-                    </div>
+                  <div>
+                    <p className="text-sm text-muted-foreground">{locale === "fr" ? "Auto-approbation" : "Auto-Approval"}</p>
+                    <p className="font-medium">{formatDate(enrollment.autoApproveAt)}</p>
                   </div>
                 )}
                 {enrollment.approvedAt && (
-                  <div className="flex items-start gap-3">
-                    <div className="w-2 h-2 rounded-full bg-emerald-500 mt-2" />
-                    <div>
-                      <p className="font-medium">{locale === "fr" ? "Approuve" : "Approved"}</p>
-                      <p className="text-sm text-muted-foreground">{formatDate(enrollment.approvedAt)}</p>
-                      {enrollment.approver && (
-                        <p className="text-xs text-muted-foreground">{locale === "fr" ? "par" : "by"} {enrollment.approver.name}</p>
-                      )}
-                    </div>
+                  <div>
+                    <p className="text-sm text-muted-foreground">{locale === "fr" ? "Approuve" : "Approved"}</p>
+                    <p className="font-medium">{formatDate(enrollment.approvedAt)}</p>
+                    {enrollment.approver && (
+                      <p className="text-xs text-muted-foreground">{locale === "fr" ? "par" : "by"} {enrollment.approver.name}</p>
+                    )}
                   </div>
                 )}
               </div>
