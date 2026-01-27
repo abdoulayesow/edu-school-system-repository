@@ -336,12 +336,17 @@ export default function ExpensesPage() {
   if (!isMounted) {
     return (
       <PageContainer maxWidth="full">
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
-          <div>
-            <h1 className="text-3xl font-bold text-foreground mb-2">{t.expenses.title}</h1>
-            <p className="text-muted-foreground">{t.expenses.subtitle}</p>
+        <Card className="mb-6 overflow-hidden shadow-sm">
+          <div className="h-1 bg-gspn-maroon-500" />
+          <div className="p-6">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+              <div>
+                <h1 className="text-3xl font-bold text-foreground mb-2">{t.expenses.title}</h1>
+                <p className="text-muted-foreground">{t.expenses.subtitle}</p>
+              </div>
+            </div>
           </div>
-        </div>
+        </Card>
         <div className="flex items-center justify-center py-8">
           <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
         </div>
@@ -352,90 +357,111 @@ export default function ExpensesPage() {
   return (
     <PageContainer maxWidth="full">
         {/* Header */}
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
-          <div className="flex-1">
-            <h1 className="text-3xl font-bold text-foreground mb-2">{t.expenses.title}</h1>
-            <p className="text-muted-foreground">{t.expenses.subtitle}</p>
+        <Card className="mb-6 overflow-hidden shadow-sm">
+          <div className="h-1 bg-gspn-maroon-500" />
+          <div className="p-6">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+              <div className="flex-1">
+                <h1 className="text-3xl font-bold text-foreground mb-2">{t.expenses.title}</h1>
+                <p className="text-muted-foreground">{t.expenses.subtitle}</p>
+              </div>
+
+              {/* Registry Status Indicator - only shows when closed */}
+              <RegistryStatusIndicator className="sm:order-2" />
+
+              <PermissionGuard
+                resource="safe_expense"
+                action="create"
+                loading={<div className="h-9 w-36 animate-pulse bg-muted rounded-md" />}
+                className="sm:order-3"
+              >
+                <Button
+                  variant="gold"
+                  onClick={() => router.push('/expenses/new')}
+                >
+                  <Plus className="size-4 mr-2" />
+                  {t.expenses.newExpense}
+                </Button>
+              </PermissionGuard>
+            </div>
           </div>
-
-          {/* Registry Status Indicator - only shows when closed */}
-          <RegistryStatusIndicator className="sm:order-2" />
-
-          <PermissionGuard
-            resource="safe_expense"
-            action="create"
-            loading={<div className="h-9 w-36 animate-pulse bg-muted rounded-md" />}
-            className="sm:order-3"
-          >
-            <Button
-              variant="gold"
-              onClick={() => router.push('/expenses/new')}
-            >
-              <Plus className="size-4 mr-2" />
-              {t.expenses.newExpense}
-            </Button>
-          </PermissionGuard>
-        </div>
+        </Card>
 
         {/* Summary Cards */}
         <div className="grid gap-4 md:grid-cols-4 mb-6">
-          <Card className="py-5">
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
-                <Receipt className="size-4" />
-                {t.expenses.totalExpenses}
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{formatCurrency(stats.totalAmount)}</div>
-              <p className="text-xs text-muted-foreground mt-1">{stats.total} {t.expenses.expenseCount}</p>
+          <Card className="overflow-hidden shadow-sm">
+            <div className="h-1 bg-gspn-maroon-500" />
+            <CardContent className="pt-6">
+              <div className="flex items-start gap-4">
+                <div className="p-2.5 bg-gspn-maroon-500/10 rounded-xl">
+                  <Receipt className="size-5 text-gspn-maroon-600 dark:text-gspn-maroon-400" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-medium text-muted-foreground">{t.expenses.totalExpenses}</p>
+                  <div className="text-2xl font-bold text-gspn-maroon-700 dark:text-gspn-maroon-300">{formatCurrency(stats.totalAmount)}</div>
+                  <p className="text-xs text-muted-foreground mt-1">{stats.total} {t.expenses.expenseCount}</p>
+                </div>
+              </div>
             </CardContent>
           </Card>
 
-          <Card className="py-5">
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
-                <Clock className="size-4" />
-                {t.expenses.pending}
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold text-warning">{formatCurrency(stats.pendingAmount)}</div>
-              <p className="text-xs text-muted-foreground mt-1">{stats.pending} {t.expenses.pending.toLowerCase()}</p>
+          <Card className="overflow-hidden shadow-sm">
+            <div className="h-1 bg-amber-500" />
+            <CardContent className="pt-6">
+              <div className="flex items-start gap-4">
+                <div className="p-2.5 bg-amber-500/10 rounded-xl">
+                  <Clock className="size-5 text-amber-600 dark:text-amber-400" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-medium text-muted-foreground">{t.expenses.pending}</p>
+                  <div className="text-2xl font-bold text-amber-700 dark:text-amber-300">{formatCurrency(stats.pendingAmount)}</div>
+                  <p className="text-xs text-muted-foreground mt-1">{stats.pending} {t.expenses.pending.toLowerCase()}</p>
+                </div>
+              </div>
             </CardContent>
           </Card>
 
-          <Card className="py-5">
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
-                <CheckCircle className="size-4" />
-                {t.expenses.approved}
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold text-primary">{formatCurrency(stats.approvedAmount)}</div>
-              <p className="text-xs text-muted-foreground mt-1">{stats.approved} {t.expenses.approved.toLowerCase()}</p>
+          <Card className="overflow-hidden shadow-sm">
+            <div className="h-1 bg-blue-500" />
+            <CardContent className="pt-6">
+              <div className="flex items-start gap-4">
+                <div className="p-2.5 bg-blue-500/10 rounded-xl">
+                  <CheckCircle className="size-5 text-blue-600 dark:text-blue-400" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-medium text-muted-foreground">{t.expenses.approved}</p>
+                  <div className="text-2xl font-bold text-blue-700 dark:text-blue-300">{formatCurrency(stats.approvedAmount)}</div>
+                  <p className="text-xs text-muted-foreground mt-1">{stats.approved} {t.expenses.approved.toLowerCase()}</p>
+                </div>
+              </div>
             </CardContent>
           </Card>
 
-          <Card className="py-5">
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
-                <CreditCard className="size-4" />
-                {t.expenses.paid}
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold text-success">{formatCurrency(stats.paidAmount)}</div>
-              <p className="text-xs text-muted-foreground mt-1">{stats.paid} {t.expenses.paid.toLowerCase()}</p>
+          <Card className="overflow-hidden shadow-sm">
+            <div className="h-1 bg-emerald-500" />
+            <CardContent className="pt-6">
+              <div className="flex items-start gap-4">
+                <div className="p-2.5 bg-emerald-500/10 rounded-xl">
+                  <CreditCard className="size-5 text-emerald-600 dark:text-emerald-400" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-medium text-muted-foreground">{t.expenses.paid}</p>
+                  <div className="text-2xl font-bold text-emerald-700 dark:text-emerald-300">{formatCurrency(stats.paidAmount)}</div>
+                  <p className="text-xs text-muted-foreground mt-1">{stats.paid} {t.expenses.paid.toLowerCase()}</p>
+                </div>
+              </div>
             </CardContent>
           </Card>
         </div>
 
         {/* Filters */}
-        <Card className="mb-6 py-2">
-          <CardHeader className="pb-1 px-6 pt-3">
-            <CardTitle className="text-sm">{t.expenses.filterExpenses}</CardTitle>
+        <Card className="mb-6 overflow-hidden shadow-sm">
+          <div className="h-1 bg-gspn-maroon-500" />
+          <CardHeader className="pb-1 px-6 pt-4">
+            <CardTitle className="text-sm flex items-center gap-2">
+              <div className="h-2 w-2 rounded-full bg-gspn-maroon-500" />
+              {t.expenses.filterExpenses}
+            </CardTitle>
           </CardHeader>
           <CardContent className="pt-0 pb-2 px-6">
             <div className="flex flex-col sm:flex-row gap-4">
@@ -482,9 +508,13 @@ export default function ExpensesPage() {
         </Card>
 
         {/* Expenses Table */}
-        <Card>
+        <Card className="overflow-hidden shadow-sm">
+          <div className="h-1 bg-gspn-maroon-500" />
           <CardHeader>
-            <CardTitle>{t.expenses.expenseList}</CardTitle>
+            <CardTitle className="flex items-center gap-2">
+              <div className="h-2 w-2 rounded-full bg-gspn-maroon-500" />
+              {t.expenses.expenseList}
+            </CardTitle>
             <CardDescription>
               {filteredExpenses.length} {t.expenses.expenseCount}
               {pagination && ` / ${pagination.total}`}
@@ -500,7 +530,9 @@ export default function ExpensesPage() {
             ) : filteredExpenses.length === 0 ? (
               <Empty className="py-12">
                 <EmptyMedia variant="illustration">
-                  <EmptyExpensesIllustration />
+                  <div className="p-4 rounded-full bg-gspn-maroon-500/10">
+                    <Receipt className="size-8 text-gspn-maroon-600 dark:text-gspn-maroon-400" />
+                  </div>
                 </EmptyMedia>
                 <EmptyTitle>{t.expenses.noExpensesFound}</EmptyTitle>
                 <EmptyDescription>
@@ -514,7 +546,7 @@ export default function ExpensesPage() {
               <div className="rounded-md border">
                 <Table>
                   <TableHeader>
-                    <TableRow>
+                    <TableRow className="bg-gspn-gold-50/50 dark:bg-gspn-gold-950/20">
                       <TableHead>{t.common.date}</TableHead>
                       <TableHead>{t.expenses.category}</TableHead>
                       <TableHead>{t.expenses.description}</TableHead>

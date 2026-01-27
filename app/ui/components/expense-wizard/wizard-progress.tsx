@@ -43,7 +43,7 @@ export function WizardProgress({ currentStep }: WizardProgressProps) {
 
           {/* Progress line */}
           <div
-            className="absolute top-5 left-0 h-1 bg-gradient-to-r from-orange-500 via-orange-400 to-amber-500 rounded-full transition-all duration-700 ease-out shadow-lg shadow-orange-500/30"
+            className="absolute top-5 left-0 h-1 bg-gradient-to-r from-gspn-maroon-500 via-gspn-maroon-400 to-gspn-gold-500 rounded-full transition-all duration-700 ease-out shadow-lg shadow-gspn-maroon-500/30"
             style={{
               width: `${(currentStep / (steps.length - 1)) * 100}%`,
               zIndex: 1,
@@ -69,9 +69,9 @@ export function WizardProgress({ currentStep }: WizardProgressProps) {
                   className={cn(
                     "w-10 h-10 rounded-full flex items-center justify-center font-bold text-sm transition-all duration-500 border-2",
                     isCompleted &&
-                      "bg-gradient-to-br from-orange-500 to-amber-600 border-orange-400 text-white shadow-lg shadow-orange-500/40 scale-110",
+                      "bg-gradient-to-br from-gspn-maroon-500 to-gspn-maroon-600 border-gspn-maroon-400 text-white shadow-lg shadow-gspn-maroon-500/40 scale-110",
                     isCurrent &&
-                      "bg-white dark:bg-slate-900 border-orange-500 text-orange-600 dark:text-orange-400 shadow-xl shadow-orange-500/30 scale-125 ring-4 ring-orange-500/20",
+                      "bg-white dark:bg-slate-900 border-gspn-gold-500 text-gspn-maroon-600 dark:text-gspn-maroon-400 shadow-xl shadow-gspn-gold-500/30 scale-125 ring-4 ring-gspn-gold-500/20",
                     isUpcoming &&
                       "bg-slate-100 dark:bg-slate-800 border-slate-300 dark:border-slate-600 text-slate-500 dark:text-slate-400"
                   )}
@@ -87,7 +87,7 @@ export function WizardProgress({ currentStep }: WizardProgressProps) {
                 <div
                   className={cn(
                     "text-xs font-semibold transition-all duration-300 absolute top-14 whitespace-nowrap",
-                    isCurrent && "text-orange-600 dark:text-orange-400 scale-110",
+                    isCurrent && "text-gspn-maroon-600 dark:text-gspn-maroon-400 scale-110",
                     isCompleted && "text-slate-700 dark:text-slate-300",
                     isUpcoming && "text-slate-500 dark:text-slate-400"
                   )}
@@ -115,7 +115,7 @@ export function WizardProgress({ currentStep }: WizardProgressProps) {
         {/* Progress bar */}
         <div className="h-2 bg-slate-200 dark:bg-slate-800 rounded-full overflow-hidden">
           <div
-            className="h-full bg-gradient-to-r from-orange-500 to-amber-500 transition-all duration-700 ease-out rounded-full shadow-md"
+            className="h-full bg-gradient-to-r from-gspn-maroon-500 to-gspn-gold-500 transition-all duration-700 ease-out rounded-full shadow-md"
             style={{ width: `${((currentStep + 1) / steps.length) * 100}%` }}
           />
         </div>
@@ -128,7 +128,7 @@ export function WizardProgress({ currentStep }: WizardProgressProps) {
               className={cn(
                 "h-1.5 rounded-full transition-all duration-300",
                 index <= currentStep
-                  ? "w-8 bg-gradient-to-r from-orange-500 to-amber-500"
+                  ? "w-8 bg-gradient-to-r from-gspn-maroon-500 to-gspn-gold-500"
                   : "w-1.5 bg-slate-300 dark:bg-slate-700"
               )}
             />

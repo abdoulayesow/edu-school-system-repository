@@ -37,7 +37,7 @@ export function WizardNavigation({
               type="button"
               variant="ghost"
               onClick={onCancel}
-              className="gap-2 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 focus-visible:ring-4 focus-visible:ring-orange-400/50"
+              className="gap-2 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 focus-visible:ring-4 focus-visible:ring-gspn-maroon-400/50"
             >
               <X className="w-4 h-4" />
               {t.common?.cancel || "Cancel"}
@@ -49,7 +49,7 @@ export function WizardNavigation({
             variant="outline"
             onClick={onBack}
             disabled={isSubmitting}
-            className="gap-2 border-2 hover:border-slate-400 dark:hover:border-slate-500 focus-visible:ring-4 focus-visible:ring-orange-400/50"
+            className="gap-2 border-2 hover:border-slate-400 dark:hover:border-slate-500 focus-visible:ring-4 focus-visible:ring-gspn-maroon-400/50"
           >
             <ArrowLeft className="w-4 h-4" />
             {t.common?.back || "Back"}
@@ -64,11 +64,11 @@ export function WizardNavigation({
         disabled={!canProceed || isSubmitting}
         className={cn(
           "gap-2 min-w-[140px] font-semibold shadow-lg transition-all text-white",
-          "focus-visible:ring-4 focus-visible:ring-orange-400/50 focus-visible:shadow-xl",
+          "focus-visible:ring-4 focus-visible:ring-gspn-gold-400/50 focus-visible:shadow-xl",
           "active:scale-[0.98] hover:shadow-xl",
           isReviewStep
             ? "bg-gradient-to-r from-emerald-600 to-emerald-500 hover:from-emerald-700 hover:to-emerald-600 shadow-emerald-500/30"
-            : "bg-gradient-to-r from-orange-600 to-amber-600 hover:from-orange-700 hover:to-amber-700 shadow-orange-500/30"
+            : "bg-gradient-to-r from-gspn-gold-600 to-gspn-gold-500 hover:from-gspn-gold-700 hover:to-gspn-gold-600 shadow-gspn-gold-500/30 text-black"
         )}
       >
         {isSubmitting ? (
