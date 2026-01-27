@@ -596,7 +596,7 @@ export default function EnrollmentDetailPage({
               </div>
             </div>
 
-            {/* Parents Information */}
+            {/* Parents & Guardian Information */}
             <div className="rounded-2xl border-2 border-gspn-maroon-200 dark:border-gspn-maroon-800 bg-gradient-to-br from-gspn-maroon-50/30 to-transparent dark:from-gspn-maroon-950/20 dark:to-transparent shadow-sm overflow-hidden">
               <div className="px-6 py-4 bg-gspn-maroon-100 dark:bg-gspn-maroon-900/30 border-b-2 border-gspn-maroon-200 dark:border-gspn-maroon-800">
                 <h3 className="text-sm font-bold uppercase tracking-wider text-gspn-maroon-700 dark:text-gspn-maroon-300 flex items-center gap-2">
@@ -609,7 +609,15 @@ export default function EnrollmentDetailPage({
                 {(enrollment.fatherName || enrollment.fatherPhone) && (
                   <div className="grid gap-2 sm:grid-cols-3">
                     <div>
-                      <p className="text-sm text-muted-foreground">{locale === "fr" ? "Père" : "Father"}</p>
+                      <div className="flex items-center gap-2">
+                        <p className="text-sm text-muted-foreground">{locale === "fr" ? "Père" : "Father"}</p>
+                        {enrollment.enrollingPersonType === "father" && (
+                          <Badge variant="outline" className="text-[10px] px-1.5 py-0 h-4 bg-gspn-gold-50 text-gspn-gold-700 border-gspn-gold-300 dark:bg-gspn-gold-950/30 dark:text-gspn-gold-400 dark:border-gspn-gold-700">
+                            <UserCheck className="size-2.5 mr-0.5" />
+                            {locale === "fr" ? "Inscripteur" : "Enrolled"}
+                          </Badge>
+                        )}
+                      </div>
                       <p className="font-medium">{enrollment.fatherName || "-"}</p>
                     </div>
                     <div>
@@ -629,7 +637,15 @@ export default function EnrollmentDetailPage({
                     {(enrollment.fatherName || enrollment.fatherPhone) && <Separator />}
                     <div className="grid gap-2 sm:grid-cols-3">
                       <div>
-                        <p className="text-sm text-muted-foreground">{locale === "fr" ? "Mère" : "Mother"}</p>
+                        <div className="flex items-center gap-2">
+                          <p className="text-sm text-muted-foreground">{locale === "fr" ? "Mère" : "Mother"}</p>
+                          {enrollment.enrollingPersonType === "mother" && (
+                            <Badge variant="outline" className="text-[10px] px-1.5 py-0 h-4 bg-gspn-gold-50 text-gspn-gold-700 border-gspn-gold-300 dark:bg-gspn-gold-950/30 dark:text-gspn-gold-400 dark:border-gspn-gold-700">
+                              <UserCheck className="size-2.5 mr-0.5" />
+                              {locale === "fr" ? "Inscripteur" : "Enrolled"}
+                            </Badge>
+                          )}
+                        </div>
                         <p className="font-medium">{enrollment.motherName || "-"}</p>
                       </div>
                       <div>
@@ -639,6 +655,33 @@ export default function EnrollmentDetailPage({
                       <div>
                         <p className="text-sm text-muted-foreground">{t.enrollments.email}</p>
                         <p className="font-medium">{enrollment.motherEmail || "-"}</p>
+                      </div>
+                    </div>
+                  </>
+                )}
+
+                {/* Other Guardian (when enrolled by someone other than parents) */}
+                {enrollment.enrollingPersonType === "other" && (
+                  <>
+                    <Separator />
+                    <div className="grid gap-2 sm:grid-cols-3">
+                      <div>
+                        <div className="flex items-center gap-2">
+                          <p className="text-sm text-muted-foreground">{enrollment.enrollingPersonRelation || (locale === "fr" ? "Tuteur" : "Guardian")}</p>
+                          <Badge variant="outline" className="text-[10px] px-1.5 py-0 h-4 bg-gspn-gold-50 text-gspn-gold-700 border-gspn-gold-300 dark:bg-gspn-gold-950/30 dark:text-gspn-gold-400 dark:border-gspn-gold-700">
+                            <UserCheck className="size-2.5 mr-0.5" />
+                            {locale === "fr" ? "Inscripteur" : "Enrolled"}
+                          </Badge>
+                        </div>
+                        <p className="font-medium">{enrollment.enrollingPersonName || "-"}</p>
+                      </div>
+                      <div>
+                        <p className="text-sm text-muted-foreground">{t.enrollments.phone}</p>
+                        <p className="font-medium">{enrollment.enrollingPersonPhone || "-"}</p>
+                      </div>
+                      <div>
+                        <p className="text-sm text-muted-foreground">{t.enrollments.email}</p>
+                        <p className="font-medium">{enrollment.enrollingPersonEmail || "-"}</p>
                       </div>
                     </div>
                   </>
@@ -659,68 +702,6 @@ export default function EnrollmentDetailPage({
                 )}
               </div>
             </div>
-
-            {/* Enrolled By */}
-            {enrollment.enrollingPersonType && (
-              <div className="rounded-2xl border-2 border-gspn-maroon-200 dark:border-gspn-maroon-800 bg-gradient-to-br from-gspn-maroon-50/30 to-transparent dark:from-gspn-maroon-950/20 dark:to-transparent shadow-sm overflow-hidden">
-                <div className="px-6 py-4 bg-gspn-maroon-100 dark:bg-gspn-maroon-900/30 border-b-2 border-gspn-maroon-200 dark:border-gspn-maroon-800">
-                  <h3 className="text-sm font-bold uppercase tracking-wider text-gspn-maroon-700 dark:text-gspn-maroon-300 flex items-center gap-2">
-                    <UserCheck className="size-4" />
-                    {t.enrollments.enrolledBy}
-                  </h3>
-                </div>
-                <div className="p-6">
-                  {enrollment.enrollingPersonType === "father" && (
-                    <div className="flex items-center gap-3">
-                      <div className="h-10 w-10 rounded-full bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center">
-                        <User className="h-5 w-5 text-blue-600 dark:text-blue-400" />
-                      </div>
-                      <div>
-                        <p className="font-medium">{t.enrollments.enrolledByFather}</p>
-                        <p className="text-sm text-muted-foreground">{enrollment.fatherName}</p>
-                      </div>
-                    </div>
-                  )}
-                  {enrollment.enrollingPersonType === "mother" && (
-                    <div className="flex items-center gap-3">
-                      <div className="h-10 w-10 rounded-full bg-pink-100 dark:bg-pink-900/30 flex items-center justify-center">
-                        <User className="h-5 w-5 text-pink-600 dark:text-pink-400" />
-                      </div>
-                      <div>
-                        <p className="font-medium">{t.enrollments.enrolledByMother}</p>
-                        <p className="text-sm text-muted-foreground">{enrollment.motherName}</p>
-                      </div>
-                    </div>
-                  )}
-                  {enrollment.enrollingPersonType === "other" && (
-                    <div className="space-y-4">
-                      <div className="flex items-center gap-3">
-                        <div className="h-10 w-10 rounded-full bg-amber-100 dark:bg-amber-900/30 flex items-center justify-center">
-                          <User className="h-5 w-5 text-amber-600 dark:text-amber-400" />
-                        </div>
-                        <div>
-                          <p className="font-medium">{enrollment.enrollingPersonName}</p>
-                          <p className="text-sm text-muted-foreground">{enrollment.enrollingPersonRelation}</p>
-                        </div>
-                      </div>
-                      <Separator />
-                      <div className="grid gap-2 sm:grid-cols-2">
-                        <div>
-                          <p className="text-sm text-muted-foreground">{t.enrollments.phone}</p>
-                          <p className="font-medium">{enrollment.enrollingPersonPhone || "-"}</p>
-                        </div>
-                        {enrollment.enrollingPersonEmail && (
-                          <div>
-                            <p className="text-sm text-muted-foreground">{t.enrollments.email}</p>
-                            <p className="font-medium">{enrollment.enrollingPersonEmail}</p>
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                  )}
-                </div>
-              </div>
-            )}
 
             {/* Notes */}
             {enrollment.notes.length > 0 && (
