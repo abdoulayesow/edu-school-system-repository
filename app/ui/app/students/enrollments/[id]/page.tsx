@@ -32,6 +32,7 @@ import {
   AlertCircle,
   Trash2,
   UserCheck,
+  Wallet,
 } from "lucide-react"
 import { useI18n } from "@/components/i18n-provider"
 import { PageContainer } from "@/components/layout/PageContainer"
@@ -353,7 +354,7 @@ export default function EnrollmentDetailPage({
                   <Button
                     variant="outline"
                     onClick={() => setShowDeleteDialog(true)}
-                    className="bg-amber-500 hover:bg-amber-600 text-white border-amber-500 hover:border-amber-600 dark:bg-amber-600 dark:hover:bg-amber-700"
+                    className="border-gspn-maroon-300 dark:border-gspn-maroon-700 text-gspn-maroon-600 dark:text-gspn-maroon-400 hover:bg-gspn-maroon-50 dark:hover:bg-gspn-maroon-950/30"
                   >
                     <Trash2 className="h-4 w-4 mr-2" />
                     {t.common.delete}
@@ -364,7 +365,7 @@ export default function EnrollmentDetailPage({
                 <PermissionGuard resource="student_enrollment" action="update" inline>
                   <Button
                     asChild
-                    className="bg-amber-500 hover:bg-amber-600 text-white dark:bg-amber-600 dark:hover:bg-amber-700"
+                    className="bg-gspn-gold-500 hover:bg-gspn-gold-400 text-black shadow-md hover:shadow-lg transition-all"
                   >
                     <Link href={enrollment.status === "draft"
                       ? `/students/enrollments/new?draft=${enrollment.id}&step=${enrollment.currentStep || 1}`
@@ -382,10 +383,10 @@ export default function EnrollmentDetailPage({
 
         {/* Status Comment Alert */}
         {enrollment.statusComment && enrollment.status !== "draft" && (
-          <Card className="mb-6 border-l-4 border-l-amber-500">
+          <Card className="mb-6 border-l-4 border-l-gspn-gold-500">
             <CardContent className="pt-4">
               <div className="flex items-start gap-3">
-                <AlertCircle className="h-5 w-5 text-amber-500 mt-0.5" />
+                <AlertCircle className="h-5 w-5 text-gspn-gold-500 mt-0.5" />
                 <div>
                   <p className="font-medium">
                     {locale === "fr" ? "Commentaire de statut" : "Status Comment"}
@@ -412,9 +413,9 @@ export default function EnrollmentDetailPage({
             enrollment.totalPaid < minimumPayment
 
           return (
-            <Card className="mb-6 border-l-4 border-l-amber-500">
+            <Card className="mb-6 border-l-4 border-l-gspn-gold-500">
               <CardHeader className="pb-2">
-                <CardTitle className="flex items-center gap-2 text-amber-600 dark:text-amber-400">
+                <CardTitle className="flex items-center gap-2 text-gspn-gold-600 dark:text-gspn-gold-400">
                   <AlertCircle className="h-5 w-5" />
                   {hasTuitionAdjustment
                     ? (locale === "fr" ? "Validation requise - Ajustement des frais" : "Review Required - Tuition Adjustment")
@@ -514,7 +515,7 @@ export default function EnrollmentDetailPage({
                   <PermissionGuard resource="student_enrollment" action="approve" inline>
                     <Button
                       onClick={() => setShowApproveDialog(true)}
-                      className="bg-green-600 hover:bg-green-700 text-white"
+                      className="bg-emerald-600 hover:bg-emerald-700 text-white shadow-md"
                     >
                       <CheckCircle className="h-4 w-4 mr-2" />
                       {locale === "fr" ? "Approuver" : "Approve"}
@@ -523,7 +524,7 @@ export default function EnrollmentDetailPage({
                   <PermissionGuard resource="student_enrollment" action="approve" inline>
                     <Button
                       onClick={() => setShowRejectDialog(true)}
-                      className="bg-red-600 hover:bg-red-700 text-white"
+                      className="bg-gspn-maroon-600 hover:bg-gspn-maroon-700 text-white shadow-md"
                     >
                       <XCircle className="h-4 w-4 mr-2" />
                       {locale === "fr" ? "Rejeter" : "Reject"}
@@ -539,14 +540,14 @@ export default function EnrollmentDetailPage({
           {/* Main Content */}
           <div className="lg:col-span-2 space-y-6">
             {/* Student Information */}
-            <Card className="border shadow-sm overflow-hidden">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <div className="h-2 w-2 rounded-full bg-gspn-maroon-500" />
+            <div className="rounded-2xl border-2 border-gspn-maroon-200 dark:border-gspn-maroon-800 bg-gradient-to-br from-gspn-maroon-50/30 to-transparent dark:from-gspn-maroon-950/20 dark:to-transparent shadow-sm overflow-hidden">
+              <div className="px-6 py-4 bg-gspn-maroon-100 dark:bg-gspn-maroon-900/30 border-b-2 border-gspn-maroon-200 dark:border-gspn-maroon-800">
+                <h3 className="text-sm font-bold uppercase tracking-wider text-gspn-maroon-700 dark:text-gspn-maroon-300 flex items-center gap-2">
+                  <User className="size-4" />
                   {t.enrollments.personalInfo}
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="grid gap-4 sm:grid-cols-2">
+                </h3>
+              </div>
+              <div className="p-6 grid gap-4 sm:grid-cols-2">
                 <div>
                   <p className="text-sm text-muted-foreground">{t.enrollments.firstName}</p>
                   <p className="font-medium">{enrollment.firstName}</p>
@@ -592,18 +593,18 @@ export default function EnrollmentDetailPage({
                     </p>
                   </div>
                 )}
-              </CardContent>
-            </Card>
+              </div>
+            </div>
 
             {/* Parents Information */}
-            <Card className="border shadow-sm overflow-hidden">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <div className="h-2 w-2 rounded-full bg-gspn-maroon-500" />
+            <div className="rounded-2xl border-2 border-gspn-maroon-200 dark:border-gspn-maroon-800 bg-gradient-to-br from-gspn-maroon-50/30 to-transparent dark:from-gspn-maroon-950/20 dark:to-transparent shadow-sm overflow-hidden">
+              <div className="px-6 py-4 bg-gspn-maroon-100 dark:bg-gspn-maroon-900/30 border-b-2 border-gspn-maroon-200 dark:border-gspn-maroon-800">
+                <h3 className="text-sm font-bold uppercase tracking-wider text-gspn-maroon-700 dark:text-gspn-maroon-300 flex items-center gap-2">
+                  <Users className="size-4" />
                   {t.enrollments.parents}
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
+                </h3>
+              </div>
+              <div className="p-6 space-y-4">
                 {/* Father */}
                 {(enrollment.fatherName || enrollment.fatherPhone) && (
                   <div className="grid gap-2 sm:grid-cols-3">
@@ -656,19 +657,19 @@ export default function EnrollmentDetailPage({
                     </div>
                   </>
                 )}
-              </CardContent>
-            </Card>
+              </div>
+            </div>
 
             {/* Enrolled By */}
             {enrollment.enrollingPersonType && (
-              <Card className="border shadow-sm overflow-hidden">
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <div className="h-2 w-2 rounded-full bg-gspn-maroon-500" />
+              <div className="rounded-2xl border-2 border-gspn-maroon-200 dark:border-gspn-maroon-800 bg-gradient-to-br from-gspn-maroon-50/30 to-transparent dark:from-gspn-maroon-950/20 dark:to-transparent shadow-sm overflow-hidden">
+                <div className="px-6 py-4 bg-gspn-maroon-100 dark:bg-gspn-maroon-900/30 border-b-2 border-gspn-maroon-200 dark:border-gspn-maroon-800">
+                  <h3 className="text-sm font-bold uppercase tracking-wider text-gspn-maroon-700 dark:text-gspn-maroon-300 flex items-center gap-2">
+                    <UserCheck className="size-4" />
                     {t.enrollments.enrolledBy}
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
+                  </h3>
+                </div>
+                <div className="p-6">
                   {enrollment.enrollingPersonType === "father" && (
                     <div className="flex items-center gap-3">
                       <div className="h-10 w-10 rounded-full bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center">
@@ -717,22 +718,22 @@ export default function EnrollmentDetailPage({
                       </div>
                     </div>
                   )}
-                </CardContent>
-              </Card>
+                </div>
+              </div>
             )}
 
             {/* Payment Schedules */}
-            <Card className="border shadow-sm overflow-hidden">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <div className="h-2 w-2 rounded-full bg-gspn-maroon-500" />
+            <div className="rounded-2xl border-2 border-emerald-200 dark:border-emerald-800 bg-gradient-to-br from-emerald-50/30 to-transparent dark:from-emerald-950/20 dark:to-transparent shadow-sm overflow-hidden">
+              <div className="px-6 py-4 bg-emerald-100 dark:bg-emerald-900/30 border-b-2 border-emerald-200 dark:border-emerald-800">
+                <h3 className="text-sm font-bold uppercase tracking-wider text-emerald-700 dark:text-emerald-300 flex items-center gap-2">
+                  <CreditCard className="size-4" />
                   {locale === "fr" ? "Echeances de paiement" : "Payment Schedules"}
-                </CardTitle>
-                <CardDescription>
+                </h3>
+                <p className="text-xs text-emerald-600 dark:text-emerald-400 mt-1">
                   {locale === "fr" ? "3 echeances pour l'annee scolaire" : "3 payment schedules for the school year"}
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
+                </p>
+              </div>
+              <div className="p-6">
                 <div className="space-y-4">
                   {enrollment.paymentSchedules.map((schedule) => {
                     const paid = enrollment.payments
@@ -758,9 +759,9 @@ export default function EnrollmentDetailPage({
                             </p>
                           </div>
                         </div>
-                        <div className="w-full bg-secondary rounded-full h-2">
+                        <div className="w-full bg-emerald-100 dark:bg-emerald-900/30 rounded-full h-2">
                           <div
-                            className="h-2 rounded-full transition-all bg-amber-500 dark:bg-amber-400"
+                            className="h-2 rounded-full transition-all bg-gradient-to-r from-emerald-500 to-gspn-gold-500"
                             style={{ width: `${percentPaid}%` }}
                           />
                         </div>
@@ -771,46 +772,44 @@ export default function EnrollmentDetailPage({
                     )
                   })}
                 </div>
-              </CardContent>
-            </Card>
+              </div>
+            </div>
 
             {/* Notes */}
             {enrollment.notes.length > 0 && (
-              <Card className="border shadow-sm overflow-hidden">
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <div className="h-2 w-2 rounded-full bg-gspn-maroon-500" />
+              <div className="rounded-2xl border-2 border-gspn-maroon-200 dark:border-gspn-maroon-800 bg-gradient-to-br from-gspn-maroon-50/30 to-transparent dark:from-gspn-maroon-950/20 dark:to-transparent shadow-sm overflow-hidden">
+                <div className="px-6 py-4 bg-gspn-maroon-100 dark:bg-gspn-maroon-900/30 border-b-2 border-gspn-maroon-200 dark:border-gspn-maroon-800">
+                  <h3 className="text-sm font-bold uppercase tracking-wider text-gspn-maroon-700 dark:text-gspn-maroon-300 flex items-center gap-2">
+                    <FileText className="size-4" />
                     {locale === "fr" ? "Notes" : "Notes"}
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-4">
-                    {enrollment.notes.map((note) => (
-                      <div key={note.id} className="border-l-2 border-amber-500 pl-4">
-                        <p className="font-medium">{note.title}</p>
-                        <p className="text-muted-foreground">{note.content}</p>
-                        <p className="text-xs text-muted-foreground mt-1">
-                          {note.author.name} - {formatDate(note.createdAt.toString())}
-                        </p>
-                      </div>
-                    ))}
-                  </div>
-                </CardContent>
-              </Card>
+                  </h3>
+                </div>
+                <div className="p-6 space-y-3">
+                  {enrollment.notes.map((note) => (
+                    <div key={note.id} className="p-3 rounded-lg bg-white dark:bg-slate-900 border-l-4 border-gspn-gold-500 shadow-sm">
+                      <p className="font-medium text-sm">{note.title}</p>
+                      <p className="text-sm text-muted-foreground mt-1">{note.content}</p>
+                      <p className="text-xs text-muted-foreground mt-2">
+                        {note.author.name} - {formatDate(note.createdAt.toString())}
+                      </p>
+                    </div>
+                  ))}
+                </div>
+              </div>
             )}
           </div>
 
           {/* Sidebar */}
           <div className="space-y-6">
             {/* Financial Summary */}
-            <Card className="border shadow-sm overflow-hidden">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <div className="h-2 w-2 rounded-full bg-gspn-maroon-500" />
+            <div className="rounded-2xl border-2 border-emerald-200 dark:border-emerald-800 bg-gradient-to-br from-emerald-50/30 to-transparent dark:from-emerald-950/20 dark:to-transparent shadow-sm overflow-hidden">
+              <div className="px-6 py-4 bg-emerald-100 dark:bg-emerald-900/30 border-b-2 border-emerald-200 dark:border-emerald-800">
+                <h3 className="text-sm font-bold uppercase tracking-wider text-emerald-700 dark:text-emerald-300 flex items-center gap-2">
+                  <Wallet className="size-4" />
                   {locale === "fr" ? "Resume financier" : "Financial Summary"}
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
+                </h3>
+              </div>
+              <div className="p-6 space-y-4">
                 <div className="flex justify-between">
                   <span className="text-muted-foreground">{locale === "fr" ? "Frais de scolarite" : "Tuition Fee"}</span>
                   <span className="font-medium">{formatCurrency(enrollment.tuitionFee)}</span>
@@ -824,36 +823,36 @@ export default function EnrollmentDetailPage({
                 <Separator />
                 <div className="flex justify-between">
                   <span className="text-muted-foreground">{locale === "fr" ? "Total paye" : "Total Paid"}</span>
-                  <span className="font-medium text-green-600">{formatCurrency(enrollment.totalPaid)}</span>
+                  <span className="font-medium text-emerald-600 dark:text-emerald-400">{formatCurrency(enrollment.totalPaid)}</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-muted-foreground">{locale === "fr" ? "Solde restant" : "Remaining Balance"}</span>
-                  <span className="font-medium text-orange-600">{formatCurrency(enrollment.remainingBalance)}</span>
+                  <span className="font-medium text-gspn-maroon-600 dark:text-gspn-maroon-400">{formatCurrency(enrollment.remainingBalance)}</span>
                 </div>
                 <Separator />
-                <div className="w-full bg-secondary rounded-full h-3">
+                <div className="w-full bg-emerald-100 dark:bg-emerald-900/30 rounded-full h-3">
                   <div
-                    className="h-3 rounded-full transition-all bg-amber-500 dark:bg-amber-400"
+                    className="h-3 rounded-full transition-all bg-gradient-to-r from-emerald-500 to-gspn-gold-500"
                     style={{ width: `${Math.min(100, (enrollment.totalPaid / enrollment.tuitionFee) * 100)}%` }}
                   />
                 </div>
                 <p className="text-center text-sm text-muted-foreground">
                   {((enrollment.totalPaid / enrollment.tuitionFee) * 100).toFixed(0)}% {locale === "fr" ? "paye" : "paid"}
                 </p>
-              </CardContent>
-            </Card>
+              </div>
+            </div>
 
             {/* Status Timeline */}
-            <Card className="border shadow-sm overflow-hidden">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <div className="h-2 w-2 rounded-full bg-gspn-maroon-500" />
+            <div className="rounded-2xl border-2 border-gspn-maroon-200 dark:border-gspn-maroon-800 bg-gradient-to-br from-gspn-maroon-50/30 to-transparent dark:from-gspn-maroon-950/20 dark:to-transparent shadow-sm overflow-hidden">
+              <div className="px-6 py-4 bg-gspn-maroon-100 dark:bg-gspn-maroon-900/30 border-b-2 border-gspn-maroon-200 dark:border-gspn-maroon-800">
+                <h3 className="text-sm font-bold uppercase tracking-wider text-gspn-maroon-700 dark:text-gspn-maroon-300 flex items-center gap-2">
+                  <Clock className="size-4" />
                   {locale === "fr" ? "Chronologie" : "Timeline"}
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
+                </h3>
+              </div>
+              <div className="p-6 space-y-4">
                 <div className="flex items-start gap-3">
-                  <div className="w-2 h-2 rounded-full bg-amber-500 mt-2" />
+                  <div className="w-2 h-2 rounded-full bg-gspn-maroon-500 mt-2" />
                   <div>
                     <p className="font-medium">{locale === "fr" ? "Cree" : "Created"}</p>
                     <p className="text-sm text-muted-foreground">{formatDate(enrollment.createdAt)}</p>
@@ -880,7 +879,7 @@ export default function EnrollmentDetailPage({
                 )}
                 {enrollment.approvedAt && (
                   <div className="flex items-start gap-3">
-                    <div className="w-2 h-2 rounded-full bg-green-500 mt-2" />
+                    <div className="w-2 h-2 rounded-full bg-emerald-500 mt-2" />
                     <div>
                       <p className="font-medium">{locale === "fr" ? "Approuve" : "Approved"}</p>
                       <p className="text-sm text-muted-foreground">{formatDate(enrollment.approvedAt)}</p>
@@ -890,19 +889,19 @@ export default function EnrollmentDetailPage({
                     </div>
                   </div>
                 )}
-              </CardContent>
-            </Card>
+              </div>
+            </div>
 
             {/* Recent Payments */}
             {enrollment.payments.length > 0 && (
-              <Card className="border shadow-sm overflow-hidden">
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <div className="h-2 w-2 rounded-full bg-gspn-maroon-500" />
+              <div className="rounded-2xl border-2 border-emerald-200 dark:border-emerald-800 bg-gradient-to-br from-emerald-50/30 to-transparent dark:from-emerald-950/20 dark:to-transparent shadow-sm overflow-hidden">
+                <div className="px-6 py-4 bg-emerald-100 dark:bg-emerald-900/30 border-b-2 border-emerald-200 dark:border-emerald-800">
+                  <h3 className="text-sm font-bold uppercase tracking-wider text-emerald-700 dark:text-emerald-300 flex items-center gap-2">
+                    <CreditCard className="size-4" />
                     {locale === "fr" ? "Paiements recents" : "Recent Payments"}
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
+                  </h3>
+                </div>
+                <div className="p-6">
                   <div className="space-y-3">
                     {enrollment.payments.slice(0, 5).map((payment) => (
                       <div key={payment.id} className="flex justify-between items-center">
@@ -912,15 +911,15 @@ export default function EnrollmentDetailPage({
                         </div>
                         <Badge
                           variant={payment.status === "confirmed" ? "default" : "outline"}
-                          className={payment.status === "confirmed" ? "bg-green-500 text-white hover:bg-green-600 border-transparent" : ""}
+                          className={payment.status === "confirmed" ? "bg-emerald-500 text-white hover:bg-emerald-600 border-transparent" : ""}
                         >
                           {payment.status}
                         </Badge>
                       </div>
                     ))}
                   </div>
-                </CardContent>
-              </Card>
+                </div>
+              </div>
             )}
           </div>
         </div>
