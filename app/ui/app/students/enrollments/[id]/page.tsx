@@ -722,59 +722,6 @@ export default function EnrollmentDetailPage({
               </div>
             )}
 
-            {/* Payment Schedules */}
-            <div className="rounded-2xl border-2 border-emerald-200 dark:border-emerald-800 bg-gradient-to-br from-emerald-50/30 to-transparent dark:from-emerald-950/20 dark:to-transparent shadow-sm overflow-hidden">
-              <div className="px-6 py-4 bg-emerald-100 dark:bg-emerald-900/30 border-b-2 border-emerald-200 dark:border-emerald-800">
-                <h3 className="text-sm font-bold uppercase tracking-wider text-emerald-700 dark:text-emerald-300 flex items-center gap-2">
-                  <CreditCard className="size-4" />
-                  {locale === "fr" ? "Echeances de paiement" : "Payment Schedules"}
-                </h3>
-                <p className="text-xs text-emerald-600 dark:text-emerald-400 mt-1">
-                  {locale === "fr" ? "3 echeances pour l'annee scolaire" : "3 payment schedules for the school year"}
-                </p>
-              </div>
-              <div className="p-6">
-                <div className="space-y-4">
-                  {enrollment.paymentSchedules.map((schedule) => {
-                    const paid = enrollment.payments
-                      .filter((p) => p.paymentScheduleId === schedule.id && p.status === "confirmed")
-                      .reduce((sum, p) => sum + p.amount, 0)
-                    const percentPaid = Math.min(100, (paid / schedule.amount) * 100)
-
-                    return (
-                      <div key={schedule.id} className="border rounded-lg p-4">
-                        <div className="flex justify-between items-start mb-2">
-                          <div>
-                            <p className="font-medium">
-                              {locale === "fr" ? "Echeance" : "Schedule"} {schedule.scheduleNumber}
-                            </p>
-                            <p className="text-sm text-muted-foreground">
-                              {(schedule.months as string[]).join(", ")}
-                            </p>
-                          </div>
-                          <div className="text-right">
-                            <p className="font-medium">{formatCurrency(schedule.amount)}</p>
-                            <p className="text-sm text-muted-foreground">
-                              {locale === "fr" ? "Echeance:" : "Due:"} {formatDate(schedule.dueDate.toString())}
-                            </p>
-                          </div>
-                        </div>
-                        <div className="w-full bg-emerald-100 dark:bg-emerald-900/30 rounded-full h-2">
-                          <div
-                            className="h-2 rounded-full transition-all bg-gradient-to-r from-emerald-500 to-gspn-gold-500"
-                            style={{ width: `${percentPaid}%` }}
-                          />
-                        </div>
-                        <p className="text-xs text-muted-foreground mt-1">
-                          {formatCurrency(paid)} / {formatCurrency(schedule.amount)} ({percentPaid.toFixed(0)}%)
-                        </p>
-                      </div>
-                    )
-                  })}
-                </div>
-              </div>
-            </div>
-
             {/* Notes */}
             {enrollment.notes.length > 0 && (
               <div className="rounded-2xl border-2 border-gspn-maroon-200 dark:border-gspn-maroon-800 bg-gradient-to-br from-gspn-maroon-50/30 to-transparent dark:from-gspn-maroon-950/20 dark:to-transparent shadow-sm overflow-hidden">
@@ -841,6 +788,54 @@ export default function EnrollmentDetailPage({
                 </p>
               </div>
             </div>
+
+            {/* Payment Schedules */}
+            {enrollment.paymentSchedules.length > 0 && (
+              <div className="rounded-2xl border-2 border-emerald-200 dark:border-emerald-800 bg-gradient-to-br from-emerald-50/30 to-transparent dark:from-emerald-950/20 dark:to-transparent shadow-sm overflow-hidden">
+                <div className="px-6 py-4 bg-emerald-100 dark:bg-emerald-900/30 border-b-2 border-emerald-200 dark:border-emerald-800">
+                  <h3 className="text-sm font-bold uppercase tracking-wider text-emerald-700 dark:text-emerald-300 flex items-center gap-2">
+                    <CalendarDays className="size-4" />
+                    {locale === "fr" ? "Echeances" : "Schedules"}
+                  </h3>
+                </div>
+                <div className="p-4 space-y-3">
+                  {enrollment.paymentSchedules.map((schedule) => {
+                    const paid = enrollment.payments
+                      .filter((p) => p.paymentScheduleId === schedule.id && p.status === "confirmed")
+                      .reduce((sum, p) => sum + p.amount, 0)
+                    const percentPaid = Math.min(100, (paid / schedule.amount) * 100)
+                    const isPaidInFull = paid >= schedule.amount
+
+                    return (
+                      <div key={schedule.id} className="p-3 rounded-lg bg-white dark:bg-slate-900 border border-emerald-100 dark:border-emerald-900/50">
+                        <div className="flex justify-between items-center mb-2">
+                          <span className="text-sm font-medium">
+                            {locale === "fr" ? "Ech." : "Sch."} {schedule.scheduleNumber}
+                          </span>
+                          <span className={`text-sm font-bold ${isPaidInFull ? 'text-emerald-600 dark:text-emerald-400' : 'text-muted-foreground'}`}>
+                            {formatCurrency(schedule.amount)}
+                          </span>
+                        </div>
+                        <div className="w-full bg-emerald-100 dark:bg-emerald-900/30 rounded-full h-1.5">
+                          <div
+                            className={`h-1.5 rounded-full transition-all ${isPaidInFull ? 'bg-emerald-500' : 'bg-gradient-to-r from-emerald-500 to-gspn-gold-500'}`}
+                            style={{ width: `${percentPaid}%` }}
+                          />
+                        </div>
+                        <div className="flex justify-between items-center mt-1">
+                          <span className="text-xs text-muted-foreground">
+                            {formatCurrency(paid)} ({percentPaid.toFixed(0)}%)
+                          </span>
+                          {isPaidInFull && (
+                            <CheckCircle className="size-3 text-emerald-500" />
+                          )}
+                        </div>
+                      </div>
+                    )
+                  })}
+                </div>
+              </div>
+            )}
 
             {/* Status Timeline */}
             <div className="rounded-2xl border-2 border-gspn-maroon-200 dark:border-gspn-maroon-800 bg-gradient-to-br from-gspn-maroon-50/30 to-transparent dark:from-gspn-maroon-950/20 dark:to-transparent shadow-sm overflow-hidden">
