@@ -120,17 +120,20 @@ export async function GET(req: NextRequest, { params }: RouteParams) {
       paymentStatus = "late"
     }
 
-    // Calculate schedule progress
-    const scheduleProgress = enrollment.paymentSchedules.map((schedule) => {
-      const paidAmount = enrollment.payments
-        .filter((p) => p.paymentScheduleId === schedule.id && p.status === "confirmed")
-        .reduce((sum, p) => sum + p.amount, 0)
+    // Calculate schedule progress using waterfall allocation
+    // Allocate payments to schedules in order (schedule 1 first, then 2, then 3)
+    const sortedSchedules = [...enrollment.paymentSchedules].sort((a, b) => a.scheduleNumber - b.scheduleNumber)
+    let remainingPayments = totalPaid
+
+    const scheduleProgress = sortedSchedules.map((schedule) => {
+      const allocated = Math.min(remainingPayments, schedule.amount)
+      remainingPayments -= allocated
 
       return {
         ...schedule,
-        paidAmount,
-        isPaid: paidAmount >= schedule.amount,
-        remainingAmount: Math.max(0, schedule.amount - paidAmount),
+        paidAmount: allocated,
+        isPaid: allocated >= schedule.amount,
+        remainingAmount: Math.max(0, schedule.amount - allocated),
       }
     })
 
