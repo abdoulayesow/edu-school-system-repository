@@ -2943,6 +2943,7 @@ export const en: TranslationKeys = {
       closeDay: "Close the day",
       safeRegistryTransfer: "Safe/Registry Transfer",
       recordExpense: "Record an expense",
+      recordPayment: "Record a payment",
       bankTransfer: "Bank transfer",
       verifyCash: "Verify cash",
       alreadyVerified: "Already verified",
@@ -2963,6 +2964,7 @@ export const en: TranslationKeys = {
     // Page
     title: "New Payment",
     description: "Record a tuition payment",
+    loadingStudent: "Loading student information...",
 
     // Step 0 - Payment Type Selection
     selectPaymentType: "Select Payment Type",

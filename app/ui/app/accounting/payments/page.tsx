@@ -215,7 +215,7 @@ export default function PaymentsPage() {
           <ExportButton payments={payments} />
           <Button
             variant="gold"
-            onClick={() => router.push("/payments/new")}
+            onClick={() => router.push("/accounting/payments/new")}
           >
             <Plus className="size-4 mr-2" />
             {t.accounting.recordPayment}
@@ -399,7 +399,7 @@ export default function PaymentsPage() {
                           key={payment.id}
                           status={getPaymentRowStatus(payment.status)}
                           className="cursor-pointer"
-                          onClick={() => router.push(`/payments/${payment.id}`)}
+                          onClick={() => router.push(`/accounting/payments/${payment.id}`)}
                         >
                           <TableCell className="font-mono text-sm">
                             {payment.receiptNumber}

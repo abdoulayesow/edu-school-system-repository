@@ -350,16 +350,18 @@ export default function StudentPaymentsPage() {
                 <p className="text-muted-foreground">Suivi des paiements de l'élève</p>
               </div>
             </div>
+            <Button
+              disabled={remainingBalance <= 0}
+              onClick={() => router.push(`/accounting/payments/new?studentId=${studentId}`)}
+              className="bg-gspn-gold-500 text-black hover:bg-gspn-gold-400"
+            >
+              <Plus className="h-4 w-4 mr-2" />
+              {locale === "fr" ? "Nouveau paiement" : "New payment"}
+            </Button>
         <Dialog open={openRecordPayment} onOpenChange={(open) => {
           setOpenRecordPayment(open)
           if (!open) resetPaymentForm()
         }}>
-          <DialogTrigger asChild>
-            <Button disabled={remainingBalance <= 0} className="bg-amber-500 text-white hover:bg-amber-600 dark:bg-amber-600 dark:hover:bg-amber-700">
-              <Plus className="h-4 w-4 mr-2" />
-              {locale === "fr" ? "Nouveau paiement" : "New payment"}
-            </Button>
-          </DialogTrigger>
           <DialogContent className="max-w-md">
             <DialogHeader>
               <DialogTitle>Enregistrer un paiement</DialogTitle>
@@ -438,7 +440,7 @@ export default function StudentPaymentsPage() {
                     !receiptNumber ||
                     parseFloat(paymentAmount) > remainingBalance
                   }
-                  className="bg-amber-500 text-white hover:bg-amber-600 dark:bg-amber-600 dark:hover:bg-amber-700"
+                  className="bg-gspn-gold-500 text-black hover:bg-gspn-gold-400"
                 >
                   {isSubmittingPayment && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
                   {locale === "fr" ? "Enregistrer" : "Save"}
@@ -453,13 +455,14 @@ export default function StudentPaymentsPage() {
 
       {/* Student Info Card */}
       <Card className="mb-6 border shadow-sm overflow-hidden">
+        <div className="h-1 bg-gspn-maroon-500" />
         <CardContent className="pt-6">
           <div className="flex items-start gap-4">
-            <div className="size-16 rounded-full bg-primary/10 flex items-center justify-center">
+            <div className="size-16 rounded-full bg-gspn-maroon-500/10 flex items-center justify-center ring-2 ring-gspn-maroon-200 dark:ring-gspn-maroon-800">
               {student.photoUrl ? (
                 <img src={student.photoUrl} alt="" className="size-16 rounded-full object-cover" />
               ) : (
-                <User className="size-8 text-primary" />
+                <User className="size-8 text-gspn-maroon-500" />
               )}
             </div>
             <div className="flex-1">
@@ -474,51 +477,89 @@ export default function StudentPaymentsPage() {
               </p>
             </div>
             <div className="text-right">
-              <p className="text-sm text-muted-foreground">Scolarité totale</p>
-              <p className="text-2xl font-bold">{formatAmount(tuitionFee)}</p>
+              <p className="text-sm text-muted-foreground">{locale === "fr" ? "Scolarité totale" : "Total tuition"}</p>
+              <p className="text-2xl font-bold font-mono tabular-nums">{formatAmount(tuitionFee)}</p>
             </div>
           </div>
         </CardContent>
       </Card>
 
-      {/* Payment Progress */}
-      <div className="grid gap-6 md:grid-cols-3 mb-6">
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
-              <CreditCard className="size-4" />
-              Payé
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-2xl font-bold text-success">{formatAmount(totalPaid)}</p>
-            <Progress value={paymentPercentage} className="mt-2 h-2" />
-            <p className="text-xs text-muted-foreground mt-1">{paymentPercentage.toFixed(0)}% payé</p>
+      {/* Payment Progress - GSPN Brand Styled */}
+      <div className="grid gap-4 md:grid-cols-3 mb-6">
+        {/* Total Paid Card */}
+        <Card className="border shadow-sm overflow-hidden transition-all duration-200 hover:shadow-md">
+          <div className="h-1 bg-emerald-500" />
+          <CardContent className="pt-4">
+            <div className="flex items-start justify-between">
+              <div className="space-y-1">
+                <p className="text-sm font-medium text-muted-foreground">
+                  {locale === "fr" ? "Payé" : "Paid"}
+                </p>
+                <p className="text-2xl font-bold font-mono tabular-nums text-emerald-600 dark:text-emerald-400">
+                  {formatAmount(totalPaid)}
+                </p>
+              </div>
+              <div className="p-2.5 bg-emerald-500/10 rounded-xl">
+                <CreditCard className="size-5 text-emerald-500" />
+              </div>
+            </div>
+            <Progress value={paymentPercentage} className="h-2 mt-3 bg-emerald-100 dark:bg-emerald-900/30 [&>div]:bg-emerald-500" />
+            <p className="text-xs text-muted-foreground mt-2">{paymentPercentage.toFixed(0)}% {locale === "fr" ? "payé" : "paid"}</p>
           </CardContent>
         </Card>
-        <Card className={remainingBalance > 0 ? "bg-amber-50/50 dark:bg-amber-950/20" : ""}>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
-              <Wallet className="size-4" />
-              {locale === "fr" ? "Restant" : "Remaining"}
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className={`text-2xl font-bold ${remainingBalance > 0 ? "text-amber-600 dark:text-amber-400" : "text-success"}`}>
-              {formatAmount(remainingBalance)}
+
+        {/* Remaining Balance Card */}
+        <Card className="border shadow-sm overflow-hidden transition-all duration-200 hover:shadow-md">
+          <div className={`h-1 ${remainingBalance === 0 ? 'bg-emerald-500' : 'bg-gspn-maroon-500'}`} />
+          <CardContent className="pt-4">
+            <div className="flex items-start justify-between">
+              <div className="space-y-1">
+                <p className="text-sm font-medium text-muted-foreground">
+                  {locale === "fr" ? "Restant" : "Remaining"}
+                </p>
+                <p className={`text-2xl font-bold font-mono tabular-nums ${
+                  remainingBalance === 0
+                    ? "text-emerald-600 dark:text-emerald-400"
+                    : "text-gspn-maroon-600 dark:text-gspn-maroon-400"
+                }`}>
+                  {formatAmount(remainingBalance)}
+                </p>
+              </div>
+              <div className={`p-2.5 rounded-xl ${
+                remainingBalance === 0
+                  ? 'bg-emerald-500/10'
+                  : 'bg-gspn-maroon-500/10'
+              }`}>
+                <Wallet className={`size-5 ${
+                  remainingBalance === 0
+                    ? 'text-emerald-500'
+                    : 'text-gspn-maroon-500'
+                }`} />
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Payment Count Card */}
+        <Card className="border shadow-sm overflow-hidden transition-all duration-200 hover:shadow-md">
+          <div className="h-1 bg-gspn-gold-500" />
+          <CardContent className="pt-4">
+            <div className="flex items-start justify-between">
+              <div className="space-y-1">
+                <p className="text-sm font-medium text-muted-foreground">
+                  {locale === "fr" ? "Paiements" : "Payments"}
+                </p>
+                <p className="text-2xl font-bold font-mono tabular-nums text-gspn-gold-600 dark:text-gspn-gold-400">
+                  {payments.length}
+                </p>
+              </div>
+              <div className="p-2.5 bg-gspn-gold-500/10 rounded-xl">
+                <Receipt className="size-5 text-gspn-gold-500" />
+              </div>
+            </div>
+            <p className="text-xs text-muted-foreground mt-2">
+              {locale === "fr" ? "transactions enregistrées" : "recorded transactions"}
             </p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
-              <Receipt className="size-4" />
-              Paiements
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-2xl font-bold">{payments.length}</p>
-            <p className="text-xs text-muted-foreground mt-1">transactions enregistrées</p>
           </CardContent>
         </Card>
       </div>

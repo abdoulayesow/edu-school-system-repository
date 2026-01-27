@@ -236,6 +236,25 @@ export function RegistryTab({
           </Button>
         </PermissionGuard>
 
+        <PermissionGuard resource="payment" action="create" loading={<div className="h-16 animate-pulse bg-muted rounded-lg" />}>
+          <Button
+            size="lg"
+            className={cn(
+              "h-16 flex-col gap-2 w-full",
+              treasuryBalance?.registryBalance === 0
+                ? "bg-muted text-muted-foreground"
+                : "text-white bg-emerald-600 hover:bg-emerald-700"
+            )}
+            onClick={() => treasuryBalance?.registryBalance !== 0 && window.location.assign("/accounting/payments/new")}
+            disabled={treasuryBalance?.registryBalance === 0}
+          >
+            <ArrowDownToLine className="h-6 w-6" />
+            <span className="text-sm font-medium">
+              {treasuryBalance?.registryBalance === 0 ? reg.registryClosed : reg.recordPayment}
+            </span>
+          </Button>
+        </PermissionGuard>
+
         <PermissionGuard resource="safe_expense" action="create" loading={<div className="h-16 animate-pulse bg-muted rounded-lg" />}>
           <Button
             size="lg"

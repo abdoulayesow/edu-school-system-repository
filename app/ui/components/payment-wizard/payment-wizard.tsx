@@ -23,7 +23,7 @@ interface PaymentWizardProps {
   onCancel?: () => void
 }
 
-function WizardContent({ onComplete, onCancel }: Omit<PaymentWizardProps, "initialStudentId">) {
+function WizardContent({ initialStudentId, onComplete, onCancel }: PaymentWizardProps) {
   const { t } = useI18n()
   const {
     state,
@@ -33,8 +33,130 @@ function WizardContent({ onComplete, onCancel }: Omit<PaymentWizardProps, "initi
     nextStep,
     prevStep,
     canProceed,
+    loadStudent,
+    goToStep,
+    markStepComplete,
   } = usePaymentWizard()
   const { currentStep, error, isSubmitting, isFullyPaid, data } = state
+  const [isAutoLoading, setIsAutoLoading] = useState(false)
+
+  // Auto-load student when initialStudentId is provided
+  useEffect(() => {
+    async function autoLoadStudent() {
+      if (!initialStudentId || data.enrollmentId) return // Already loaded or no initial ID
+
+      setIsAutoLoading(true)
+      try {
+        // Fetch student balance data
+        const response = await fetch(`/api/students/${initialStudentId}/balance`)
+        if (!response.ok) {
+          console.error("Failed to load student for payment wizard")
+          setIsAutoLoading(false)
+          return
+        }
+
+        const balanceData = await response.json()
+
+        // Map schedule progress - preserve all fields from API
+        const scheduleProgress = (balanceData.scheduleProgress || []).map((s: {
+          id: string
+          scheduleNumber: number
+          amount: number
+          paidAmount: number
+          remainingAmount: number
+          isPaid: boolean
+          dueDate: string
+          months: string[]
+        }) => ({
+          id: s.id,
+          scheduleNumber: s.scheduleNumber,
+          amount: s.amount,
+          paidAmount: s.paidAmount,
+          remainingAmount: s.remainingAmount,
+          isPaid: s.isPaid,
+          dueDate: s.dueDate,
+          months: s.months || [],
+        }))
+
+        // Map previous payments
+        const previousPayments = (balanceData.payments || [])
+          .filter((p: { status: string }) => p.status === "confirmed")
+          .map((p: {
+            id: string
+            amount: number
+            method: "cash" | "orange_money"
+            receiptNumber: string
+            recordedAt: string
+            recorder?: { name: string }
+          }) => ({
+            id: p.id,
+            amount: p.amount,
+            method: p.method,
+            receiptNumber: p.receiptNumber,
+            recordedAt: p.recordedAt,
+            recorderName: p.recorder?.name,
+          }))
+
+        // Prepare enrollment payer info
+        const enrollmentPayerInfo = {
+          fatherName: balanceData.enrollment?.fatherName,
+          fatherPhone: balanceData.enrollment?.fatherPhone,
+          fatherEmail: balanceData.enrollment?.fatherEmail,
+          motherName: balanceData.enrollment?.motherName,
+          motherPhone: balanceData.enrollment?.motherPhone,
+          motherEmail: balanceData.enrollment?.motherEmail,
+          enrollingPersonType: balanceData.enrollment?.enrollingPersonType,
+          enrollingPersonName: balanceData.enrollment?.enrollingPersonName,
+          enrollingPersonRelation: balanceData.enrollment?.enrollingPersonRelation,
+          enrollingPersonPhone: balanceData.enrollment?.enrollingPersonPhone,
+          enrollingPersonEmail: balanceData.enrollment?.enrollingPersonEmail,
+        }
+
+        // Set payment type to tuition
+        updateData({ paymentType: "tuition" })
+
+        // Load student data into wizard
+        loadStudent({
+          studentId: initialStudentId,
+          studentNumber: balanceData.student?.studentNumber,
+          studentFirstName: balanceData.student?.firstName,
+          studentMiddleName: balanceData.student?.middleName,
+          studentLastName: balanceData.student?.lastName,
+          studentPhotoUrl: balanceData.student?.photoUrl,
+          studentDateOfBirth: balanceData.student?.dateOfBirth,
+          studentGender: balanceData.student?.gender,
+          studentPhone: balanceData.student?.phone,
+          studentEmail: balanceData.student?.email,
+          studentAddress: balanceData.enrollment?.address,
+          enrollmentId: balanceData.enrollment?.id,
+          gradeId: balanceData.enrollment?.grade?.id,
+          gradeName: balanceData.enrollment?.grade?.name,
+          schoolYearId: balanceData.enrollment?.schoolYear?.id,
+          schoolYearName: balanceData.enrollment?.schoolYear?.name,
+          tuitionFee: balanceData.balance?.tuitionFee || 0,
+          totalPaid: balanceData.balance?.totalPaid || 0,
+          remainingBalance: balanceData.balance?.remainingBalance || 0,
+          paymentStatus: balanceData.balance?.paymentStatus || "on_time",
+          expectedPaymentPercentage: balanceData.balance?.expectedPaymentPercentage || 0,
+          actualPaymentPercentage: balanceData.balance?.paymentPercentage || 0,
+          scheduleProgress,
+          previousPayments,
+          enrollmentPayerInfo,
+        })
+
+        // Mark steps 0 and 1 as complete and skip to step 2 (Payment Schedule)
+        markStepComplete(0)
+        markStepComplete(1)
+        goToStep(2)
+      } catch (err) {
+        console.error("Failed to auto-load student:", err)
+      } finally {
+        setIsAutoLoading(false)
+      }
+    }
+
+    autoLoadStudent()
+  }, [initialStudentId]) // Only run once when initialStudentId is set
 
   // Submit payment
   const handleSubmit = useCallback(async () => {
@@ -149,6 +271,16 @@ function WizardContent({ onComplete, onCancel }: Omit<PaymentWizardProps, "initi
     return titles[currentStep as keyof typeof titles] || ""
   }
 
+  // Show loading state while auto-loading student
+  if (isAutoLoading) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-[400px] gap-4">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+        <p className="text-muted-foreground">{t?.paymentWizard?.loadingStudent || "Loading student information..."}</p>
+      </div>
+    )
+  }
+
   return (
     <div className="space-y-6">
       {/* Progress Indicator */}
@@ -220,7 +352,7 @@ export function PaymentWizard({ initialStudentId, onComplete, onCancel }: Paymen
 
   return (
     <PaymentWizardProvider initialStudentId={initialStudentId}>
-      <WizardContent onComplete={onComplete} onCancel={onCancel} />
+      <WizardContent initialStudentId={initialStudentId} onComplete={onComplete} onCancel={onCancel} />
     </PaymentWizardProvider>
   )
 }

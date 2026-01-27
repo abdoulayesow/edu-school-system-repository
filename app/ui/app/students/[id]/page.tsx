@@ -385,9 +385,9 @@ export default function StudentDetailPage() {
         <div className="p-6">
           <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-4">
             <div className="flex items-start gap-4">
-              <Avatar className="size-20 ring-2 ring-gspn-maroon-200 dark:ring-gspn-maroon-800">
+              <Avatar className="size-24 ring-4 ring-gspn-maroon-100 dark:ring-gspn-maroon-800 shadow-lg">
                 <AvatarImage src={student.studentProfile?.person?.photoUrl ?? undefined} />
-                <AvatarFallback className="text-xl bg-gspn-maroon-50 dark:bg-gspn-maroon-950/30 text-gspn-maroon-700 dark:text-gspn-maroon-400">
+                <AvatarFallback className="text-2xl font-bold bg-gspn-maroon-500/10 text-gspn-maroon-700 dark:text-gspn-maroon-300">
                   {student.firstName[0]}{student.lastName[0]}
                 </AvatarFallback>
               </Avatar>
@@ -439,12 +439,24 @@ export default function StudentDetailPage() {
 
             {/* Action Buttons */}
             <div className="flex gap-2">
+              <PermissionGuard resource="students" action="update" inline>
+                <Link href={`/students/${student.id}/edit`}>
+                  <Button
+                    variant="outline"
+                    size="lg"
+                    className="gap-2 shadow-md hover:shadow-lg transition-all border-2 border-gspn-maroon-300 dark:border-gspn-maroon-700 hover:bg-gspn-maroon-50 dark:hover:bg-gspn-maroon-950/30"
+                  >
+                    <Edit2 className="size-5" />
+                    {t.students.editInfo}
+                  </Button>
+                </Link>
+              </PermissionGuard>
               <PermissionGuard
                 resource="payments"
                 action="create"
                 loading={<div className="h-11 w-40 animate-pulse bg-muted rounded-md" />}
               >
-                <Link href={`/payments/new?studentId=${student.id}`}>
+                <Link href={`/accounting/payments/new?studentId=${student.id}`}>
                   <Button
                     variant="gold"
                     size="lg"
@@ -461,77 +473,123 @@ export default function StudentDetailPage() {
         </div>
       </div>
 
-        {/* Stats Cards */}
+        {/* Stats Cards - GSPN Brand Styled */}
         <div className="grid gap-4 md:grid-cols-4 mb-6">
-          <Card>
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
-                <Wallet className="size-4" />
-                {t.students.remainingBalanceLabel}
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold text-amber-600 dark:text-amber-400">
-                {student.balanceInfo ? formatCurrency(student.balanceInfo.remainingBalance) : "N/A"}
+          {/* Remaining Balance Card */}
+          <Card className="border shadow-sm overflow-hidden transition-all duration-200 hover:shadow-md">
+            <div className="h-1 bg-gspn-maroon-500" />
+            <CardContent className="pt-4">
+              <div className="flex items-start justify-between">
+                <div className="space-y-1">
+                  <p className="text-sm font-medium text-muted-foreground">
+                    {t.students.remainingBalanceLabel}
+                  </p>
+                  <p className={`text-2xl font-bold font-mono tabular-nums ${
+                    student.balanceInfo?.remainingBalance === 0
+                      ? 'text-emerald-600 dark:text-emerald-400'
+                      : 'text-gspn-maroon-600 dark:text-gspn-maroon-400'
+                  }`}>
+                    {student.balanceInfo ? formatCurrency(student.balanceInfo.remainingBalance) : "N/A"}
+                  </p>
+                </div>
+                <div className="p-2.5 bg-gspn-maroon-500/10 rounded-xl">
+                  <Wallet className="size-5 text-gspn-maroon-500" />
+                </div>
               </div>
               {student.balanceInfo && (
-                <Progress value={student.balanceInfo.paymentPercentage} className="h-2 mt-2 bg-accent/20 dark:bg-accent/10 [&>div]:bg-accent dark:[&>div]:bg-accent" />
+                <Progress
+                  value={student.balanceInfo.paymentPercentage}
+                  className="h-2 mt-3 bg-gspn-maroon-100 dark:bg-gspn-maroon-900/30 [&>div]:bg-gspn-maroon-500"
+                />
               )}
             </CardContent>
           </Card>
 
-          <Card>
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
-                <CreditCard className="size-4" />
-                {t.students.totalPaid}
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold text-success">
-                {student.balanceInfo ? formatCurrency(student.balanceInfo.totalPaid) : "N/A"}
+          {/* Total Paid Card */}
+          <Card className="border shadow-sm overflow-hidden transition-all duration-200 hover:shadow-md">
+            <div className="h-1 bg-emerald-500" />
+            <CardContent className="pt-4">
+              <div className="flex items-start justify-between">
+                <div className="space-y-1">
+                  <p className="text-sm font-medium text-muted-foreground">
+                    {t.students.totalPaid}
+                  </p>
+                  <p className="text-2xl font-bold font-mono tabular-nums text-emerald-600 dark:text-emerald-400">
+                    {student.balanceInfo ? formatCurrency(student.balanceInfo.totalPaid) : "N/A"}
+                  </p>
+                </div>
+                <div className="p-2.5 bg-emerald-500/10 rounded-xl">
+                  <CreditCard className="size-5 text-emerald-500" />
+                </div>
               </div>
-              <p className="text-xs text-muted-foreground mt-1">
+              <p className="text-xs text-muted-foreground mt-2">
                 {t.students.of} {student.balanceInfo ? formatCurrency(student.balanceInfo.tuitionFee) : "N/A"}
               </p>
             </CardContent>
           </Card>
 
-          <Card>
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
-                <CalendarCheck className="size-4" />
-                {t.students.attendanceLabel}
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className={`text-2xl font-bold ${
-                (student.attendanceSummary?.attendanceRate ?? 0) >= 80 ? 'text-success' :
-                (student.attendanceSummary?.attendanceRate ?? 0) >= 60 ? 'text-warning' : 'text-amber-500 dark:text-amber-400'
-              }`}>
-                {student.attendanceSummary?.attendanceRate ?? 0}%
+          {/* Attendance Card */}
+          <Card className="border shadow-sm overflow-hidden transition-all duration-200 hover:shadow-md">
+            <div className={`h-1 ${
+              (student.attendanceSummary?.attendanceRate ?? 0) >= 80 ? 'bg-emerald-500' :
+              (student.attendanceSummary?.attendanceRate ?? 0) >= 60 ? 'bg-gspn-gold-500' : 'bg-gspn-maroon-500'
+            }`} />
+            <CardContent className="pt-4">
+              <div className="flex items-start justify-between">
+                <div className="space-y-1">
+                  <p className="text-sm font-medium text-muted-foreground">
+                    {t.students.attendanceLabel}
+                  </p>
+                  <p className={`text-2xl font-bold font-mono tabular-nums ${
+                    (student.attendanceSummary?.attendanceRate ?? 0) >= 80 ? 'text-emerald-600 dark:text-emerald-400' :
+                    (student.attendanceSummary?.attendanceRate ?? 0) >= 60 ? 'text-gspn-gold-600 dark:text-gspn-gold-400' : 'text-gspn-maroon-600 dark:text-gspn-maroon-400'
+                  }`}>
+                    {student.attendanceSummary?.attendanceRate ?? 0}%
+                  </p>
+                </div>
+                <div className={`p-2.5 rounded-xl ${
+                  (student.attendanceSummary?.attendanceRate ?? 0) >= 80 ? 'bg-emerald-500/10' :
+                  (student.attendanceSummary?.attendanceRate ?? 0) >= 60 ? 'bg-gspn-gold-500/10' : 'bg-gspn-maroon-500/10'
+                }`}>
+                  <CalendarCheck className={`size-5 ${
+                    (student.attendanceSummary?.attendanceRate ?? 0) >= 80 ? 'text-emerald-500' :
+                    (student.attendanceSummary?.attendanceRate ?? 0) >= 60 ? 'text-gspn-gold-500' : 'text-gspn-maroon-500'
+                  }`} />
+                </div>
               </div>
               <Progress
                 value={student.attendanceSummary?.attendanceRate ?? 0}
-                className="h-2 mt-2 bg-accent/20 dark:bg-accent/10 [&>div]:bg-accent dark:[&>div]:bg-accent"
+                className={`h-2 mt-3 ${
+                  (student.attendanceSummary?.attendanceRate ?? 0) >= 80
+                    ? 'bg-emerald-100 dark:bg-emerald-900/30 [&>div]:bg-emerald-500'
+                    : (student.attendanceSummary?.attendanceRate ?? 0) >= 60
+                      ? 'bg-gspn-gold-100 dark:bg-gspn-gold-900/30 [&>div]:bg-gspn-gold-500'
+                      : 'bg-gspn-maroon-100 dark:bg-gspn-maroon-900/30 [&>div]:bg-gspn-maroon-500'
+                }`}
               />
             </CardContent>
           </Card>
 
-          <Card>
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
-                <Receipt className="size-4" />
-                {t.students.paymentProgressLabel}
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold text-amber-600 dark:text-amber-400">
-                {student.balanceInfo?.paymentPercentage ?? 0}%
+          {/* Payment Progress Card */}
+          <Card className="border shadow-sm overflow-hidden transition-all duration-200 hover:shadow-md">
+            <div className="h-1 bg-gspn-gold-500" />
+            <CardContent className="pt-4">
+              <div className="flex items-start justify-between">
+                <div className="space-y-1">
+                  <p className="text-sm font-medium text-muted-foreground">
+                    {t.students.paymentProgressLabel}
+                  </p>
+                  <p className="text-2xl font-bold font-mono tabular-nums text-gspn-gold-600 dark:text-gspn-gold-400">
+                    {student.balanceInfo?.paymentPercentage ?? 0}%
+                  </p>
+                </div>
+                <div className="p-2.5 bg-gspn-gold-500/10 rounded-xl">
+                  <Receipt className="size-5 text-gspn-gold-500" />
+                </div>
               </div>
               <Progress
                 value={student.balanceInfo?.paymentPercentage ?? 0}
-                className="h-2 mt-2 bg-accent/20 dark:bg-accent/10 [&>div]:bg-accent dark:[&>div]:bg-accent"
+                className="h-2 mt-3 bg-gspn-gold-100 dark:bg-gspn-gold-900/30 [&>div]:bg-gspn-gold-500"
               />
             </CardContent>
           </Card>
@@ -551,22 +609,14 @@ export default function StudentDetailPage() {
           <TabsContent value="overview" className="space-y-4">
             <div className="grid gap-4 md:grid-cols-2">
               {/* Personal Info Card */}
-              <Card className="border shadow-sm overflow-hidden">
-                <CardHeader className="flex flex-row items-start justify-between">
-                  <CardTitle className="flex items-center gap-2">
-                    <div className="h-2 w-2 rounded-full bg-gspn-maroon-500" />
+              <div className="rounded-2xl border-2 border-gspn-maroon-200 dark:border-gspn-maroon-800 bg-gradient-to-br from-gspn-maroon-50/30 to-transparent dark:from-gspn-maroon-950/20 dark:to-transparent shadow-sm overflow-hidden">
+                <div className="px-6 py-4 bg-gspn-maroon-100 dark:bg-gspn-maroon-900/30 border-b-2 border-gspn-maroon-200 dark:border-gspn-maroon-800">
+                  <h3 className="text-sm font-bold uppercase tracking-wider text-gspn-maroon-700 dark:text-gspn-maroon-300 flex items-center gap-2">
+                    <User className="size-4" />
                     {t.students.personalInfo}
-                  </CardTitle>
-                  <PermissionGuard resource="students" action="update" inline>
-                    <Link href={`/students/${student.id}/edit`}>
-                      <Button variant="outline" size="sm" className="gap-1 bg-amber-50 text-amber-700 border-amber-200 hover:bg-amber-100 dark:bg-amber-950/30 dark:text-amber-400 dark:border-amber-800 dark:hover:bg-amber-950/50">
-                        <Edit2 className="size-3" />
-                        {t.students.editInfo}
-                      </Button>
-                    </Link>
-                  </PermissionGuard>
-                </CardHeader>
-                <CardContent className="space-y-4">
+                  </h3>
+                </div>
+                <div className="p-6 space-y-4">
                   <div className="grid grid-cols-2 gap-4">
                     <div>
                       <p className="text-sm text-muted-foreground">{t.students.firstName}</p>
@@ -680,19 +730,19 @@ export default function StudentDetailPage() {
                       </div>
                     </div>
                   )}
-                </CardContent>
-              </Card>
+                </div>
+              </div>
 
               {/* Family Information Card */}
               {activeEnrollment && (activeEnrollment.fatherName || activeEnrollment.motherName) && (
-                <Card className="border shadow-sm overflow-hidden">
-                  <CardHeader>
-                    <CardTitle className="flex items-center gap-2">
-                      <div className="h-2 w-2 rounded-full bg-gspn-maroon-500" />
+                <div className="rounded-2xl border-2 border-gspn-maroon-200 dark:border-gspn-maroon-800 bg-gradient-to-br from-gspn-maroon-50/30 to-transparent dark:from-gspn-maroon-950/20 dark:to-transparent shadow-sm overflow-hidden">
+                  <div className="px-6 py-4 bg-gspn-maroon-100 dark:bg-gspn-maroon-900/30 border-b-2 border-gspn-maroon-200 dark:border-gspn-maroon-800">
+                    <h3 className="text-sm font-bold uppercase tracking-wider text-gspn-maroon-700 dark:text-gspn-maroon-300 flex items-center gap-2">
+                      <Users className="size-4" />
                       {t.students.familyInformation}
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent className="space-y-4">
+                    </h3>
+                  </div>
+                  <div className="p-6 space-y-4">
                     {/* Father */}
                     {activeEnrollment.fatherName && (
                       <div>
@@ -732,23 +782,23 @@ export default function StudentDetailPage() {
                         )}
                       </div>
                     )}
-                  </CardContent>
-                </Card>
+                  </div>
+                </div>
               )}
 
               {/* Attendance Summary Card - only show if has data */}
               {student.attendanceSummary && student.attendanceSummary.total > 0 && (
-                <Card className="border shadow-sm overflow-hidden">
-                  <CardHeader>
-                    <CardTitle className="flex items-center gap-2">
-                      <div className="h-2 w-2 rounded-full bg-gspn-maroon-500" />
+                <div className="rounded-2xl border-2 border-gspn-maroon-200 dark:border-gspn-maroon-800 bg-gradient-to-br from-gspn-maroon-50/30 to-transparent dark:from-gspn-maroon-950/20 dark:to-transparent shadow-sm overflow-hidden">
+                  <div className="px-6 py-4 bg-gspn-maroon-100 dark:bg-gspn-maroon-900/30 border-b-2 border-gspn-maroon-200 dark:border-gspn-maroon-800">
+                    <h3 className="text-sm font-bold uppercase tracking-wider text-gspn-maroon-700 dark:text-gspn-maroon-300 flex items-center gap-2">
+                      <CalendarCheck className="size-4" />
                       {t.students.attendanceHistory}
-                    </CardTitle>
-                    <CardDescription>
+                    </h3>
+                    <p className="text-xs text-gspn-maroon-600 dark:text-gspn-maroon-400 mt-1">
                       {student.attendanceSummary.total} {t.students.totalRecords}
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent className="space-y-4">
+                    </p>
+                  </div>
+                  <div className="p-6 space-y-4">
                     <div className="grid grid-cols-2 gap-4">
                       <div className="flex items-center gap-3 p-3 rounded-lg bg-success/10">
                         <CheckCircle className="size-5 text-success" />
@@ -789,24 +839,24 @@ export default function StudentDetailPage() {
                           {student.attendanceSummary.attendanceRate}%
                         </span>
                       </div>
-                      <Progress value={student.attendanceSummary.attendanceRate} className="h-2 mt-2 bg-accent/20 dark:bg-accent/10 [&>div]:bg-accent dark:[&>div]:bg-accent" />
+                      <Progress value={student.attendanceSummary.attendanceRate} className="h-2 mt-2 bg-gspn-maroon-100 dark:bg-gspn-maroon-900/30 [&>div]:bg-gspn-maroon-500" />
                     </div>
-                  </CardContent>
-                </Card>
+                  </div>
+                </div>
               )}
 
               {/* Enrollment Notes Card */}
               {activeEnrollment?.notes && activeEnrollment.notes.length > 0 && (
-                <Card className="border shadow-sm overflow-hidden">
-                  <CardHeader>
-                    <CardTitle className="flex items-center gap-2">
-                      <div className="h-2 w-2 rounded-full bg-gspn-maroon-500" />
+                <div className="rounded-2xl border-2 border-gspn-maroon-200 dark:border-gspn-maroon-800 bg-gradient-to-br from-gspn-maroon-50/30 to-transparent dark:from-gspn-maroon-950/20 dark:to-transparent shadow-sm overflow-hidden">
+                  <div className="px-6 py-4 bg-gspn-maroon-100 dark:bg-gspn-maroon-900/30 border-b-2 border-gspn-maroon-200 dark:border-gspn-maroon-800">
+                    <h3 className="text-sm font-bold uppercase tracking-wider text-gspn-maroon-700 dark:text-gspn-maroon-300 flex items-center gap-2">
+                      <FileText className="size-4" />
                       {t.students.enrollmentNotes}
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent className="space-y-3">
+                    </h3>
+                  </div>
+                  <div className="p-6 space-y-3">
                     {activeEnrollment.notes.map((note) => (
-                      <div key={note.id} className="p-3 rounded-lg bg-muted/50 border-l-2 border-primary">
+                      <div key={note.id} className="p-3 rounded-lg bg-white dark:bg-slate-900 border-l-4 border-gspn-gold-500 shadow-sm">
                         <p className="font-medium text-sm">{note.title}</p>
                         <p className="text-sm text-muted-foreground mt-1">{note.content}</p>
                         <p className="text-xs text-muted-foreground mt-2">
@@ -815,8 +865,8 @@ export default function StudentDetailPage() {
                         </p>
                       </div>
                     ))}
-                  </CardContent>
-                </Card>
+                  </div>
+                </div>
               )}
 
             </div>
@@ -825,9 +875,12 @@ export default function StudentDetailPage() {
           {/* Enrollments Tab */}
           <TabsContent value="enrollments">
             <Card className="border shadow-sm overflow-hidden">
+              <div className="h-1 bg-gspn-maroon-500" />
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
-                  <div className="h-2 w-2 rounded-full bg-gspn-maroon-500" />
+                  <div className="p-2 bg-gspn-maroon-500/10 rounded-lg">
+                    <GraduationCap className="size-5 text-gspn-maroon-500" />
+                  </div>
                   {t.students.enrollmentHistory}
                 </CardTitle>
                 <CardDescription>{student.enrollments.length} {t.students.enrollmentCount}</CardDescription>
@@ -836,7 +889,7 @@ export default function StudentDetailPage() {
                 <div className="rounded-md border">
                   <Table>
                     <TableHeader>
-                      <TableRow>
+                      <TableRow className="bg-gspn-gold-50/50 dark:bg-gspn-gold-950/20">
                         <TableHead>{t.students.enrollmentNumber}</TableHead>
                         <TableHead>{t.students.schoolYear}</TableHead>
                         <TableHead>{t.students.gradeLabel}</TableHead>
@@ -922,10 +975,13 @@ export default function StudentDetailPage() {
             {/* Payment Summary Card */}
             {student.balanceInfo && (
               <Card className="border shadow-sm overflow-hidden">
+                <div className="h-1 bg-emerald-500" />
                 <CardHeader className="flex flex-row items-start justify-between">
                   <div>
                     <CardTitle className="flex items-center gap-2">
-                      <div className="h-2 w-2 rounded-full bg-gspn-maroon-500" />
+                      <div className="p-2 bg-emerald-500/10 rounded-lg">
+                        <Wallet className="size-5 text-emerald-500" />
+                      </div>
                       {t.students.paymentHistory}
                     </CardTitle>
                     <CardDescription>
@@ -933,7 +989,7 @@ export default function StudentDetailPage() {
                     </CardDescription>
                   </div>
                   <Link href={`/students/${student.id}/payments`}>
-                    <Button size="sm" variant="gold" className="gap-1">
+                    <Button size="sm" className="gap-1 bg-gspn-gold-500 text-black hover:bg-gspn-gold-400 shadow-md">
                       <CreditCard className="size-4" />
                       {t.students.managePayments}
                     </Button>
@@ -946,7 +1002,7 @@ export default function StudentDetailPage() {
                         <span>{t.students.paymentProgress}</span>
                         <span className="font-medium">{student.balanceInfo.paymentPercentage}%</span>
                       </div>
-                      <Progress value={student.balanceInfo.paymentPercentage} className="h-3 bg-accent/20 dark:bg-accent/10 [&>div]:bg-accent dark:[&>div]:bg-accent" />
+                      <Progress value={student.balanceInfo.paymentPercentage} className="h-3 bg-emerald-100 dark:bg-emerald-900/30 [&>div]:bg-gradient-to-r [&>div]:from-emerald-500 [&>div]:to-gspn-gold-500" />
                     </div>
 
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-4 pt-4">
@@ -979,9 +1035,12 @@ export default function StudentDetailPage() {
 
             {/* Payment History Table */}
             <Card className="border shadow-sm overflow-hidden">
+              <div className="h-1 bg-gspn-maroon-500" />
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
-                  <div className="h-2 w-2 rounded-full bg-gspn-maroon-500" />
+                  <div className="p-2 bg-gspn-maroon-500/10 rounded-lg">
+                    <Receipt className="size-5 text-gspn-maroon-500" />
+                  </div>
                   {t.students.paymentHistory}
                 </CardTitle>
                 <CardDescription>{allPayments.length} {t.students.paymentCount}</CardDescription>
@@ -990,7 +1049,7 @@ export default function StudentDetailPage() {
                 <div className="rounded-md border">
                   <Table>
                     <TableHeader>
-                      <TableRow>
+                      <TableRow className="bg-gspn-gold-50/50 dark:bg-gspn-gold-950/20">
                         <TableHead>{t.students.date}</TableHead>
                         <TableHead>{t.students.schoolYear}</TableHead>
                         <TableHead className="text-right">{t.students.amount}</TableHead>
@@ -1046,9 +1105,12 @@ export default function StudentDetailPage() {
           {/* Attendance Tab */}
           <TabsContent value="attendance">
             <Card className="border shadow-sm overflow-hidden">
+              <div className="h-1 bg-gspn-maroon-500" />
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
-                  <div className="h-2 w-2 rounded-full bg-gspn-maroon-500" />
+                  <div className="p-2 bg-gspn-maroon-500/10 rounded-lg">
+                    <CalendarCheck className="size-5 text-gspn-maroon-500" />
+                  </div>
                   {t.students.attendanceHistoryTitle}
                 </CardTitle>
                 <CardDescription>
@@ -1105,7 +1167,7 @@ export default function StudentDetailPage() {
                           {student.attendanceSummary.attendanceRate}%
                         </span>
                       </div>
-                      <Progress value={student.attendanceSummary.attendanceRate} className="h-4 bg-accent/20 dark:bg-accent/10 [&>div]:bg-accent dark:[&>div]:bg-accent" />
+                      <Progress value={student.attendanceSummary.attendanceRate} className="h-4 bg-gspn-maroon-100 dark:bg-gspn-maroon-900/30 [&>div]:bg-gradient-to-r [&>div]:from-gspn-maroon-500 [&>div]:to-emerald-500" />
                       <div className="flex justify-between mt-2 text-xs text-muted-foreground">
                         <span>0%</span>
                         <span className="text-warning">60%</span>
@@ -1146,9 +1208,12 @@ export default function StudentDetailPage() {
           {/* Activities Tab */}
           <TabsContent value="activities">
             <Card className="border shadow-sm overflow-hidden">
+              <div className="h-1 bg-purple-500" />
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
-                  <div className="h-2 w-2 rounded-full bg-gspn-maroon-500" />
+                  <div className="p-2 bg-purple-500/10 rounded-lg">
+                    <Sparkles className="size-5 text-purple-500" />
+                  </div>
                   {t.students.enrolledActivities}
                 </CardTitle>
                 <CardDescription>{activities.length} {t.students.activityCount}</CardDescription>
