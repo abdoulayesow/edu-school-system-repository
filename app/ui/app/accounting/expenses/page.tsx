@@ -57,7 +57,6 @@ import { PermissionGuard, usePermissions } from "@/components/permission-guard"
 import { DataPagination } from "@/components/data-pagination"
 import { formatDate as formatDateUtil } from "@/lib/utils"
 import { useExpenses, useUpdateExpenseStatus, useDeleteExpense } from "@/lib/hooks/use-api"
-import { getExpenseRowStatus } from "@/lib/status-helpers"
 import { Empty, EmptyMedia, EmptyTitle, EmptyDescription } from "@/components/ui/empty"
 import { EmptyExpensesIllustration } from "@/components/illustrations"
 import { RegistryStatusIndicator } from "@/components/registry-status-indicator"
@@ -562,9 +561,8 @@ export default function ExpensesPage() {
                     {filteredExpenses.map((expense) => (
                         <TableRow
                           key={expense.id}
-                          status={getExpenseRowStatus(expense.status)}
                           className="cursor-pointer"
-                          onClick={() => router.push(`/expenses/${expense.id}`)}
+                          onClick={() => router.push(`/accounting/expenses/${expense.id}`)}
                         >
                           <TableCell className="text-sm">
                             {formatDate(expense.date)}

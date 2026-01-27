@@ -432,9 +432,9 @@ export default function PaymentDetailsPage() {
             <div className="space-y-8 animate-fade-in-up" style={{ animationDelay: '200ms' }}>
               {/* Student Information Card - Horizontal Layout */}
               {studentInfo && (
-                <div className="rounded-2xl border-2 border-gspn-maroon-200 dark:border-gspn-maroon-800 bg-gradient-to-br from-gspn-maroon-50/30 to-transparent dark:from-gspn-maroon-950/20 dark:to-transparent shadow-sm overflow-hidden">
-                  <div className="px-6 py-4 bg-gspn-maroon-100 dark:bg-gspn-maroon-900/30 border-b-2 border-gspn-maroon-200 dark:border-gspn-maroon-800">
-                    <h3 className="text-sm font-bold uppercase tracking-wider text-gspn-maroon-700 dark:text-gspn-maroon-300 flex items-center gap-2">
+                <div className="rounded-2xl border-2 border-slate-200 dark:border-slate-700 bg-gradient-to-br from-slate-50/50 to-transparent dark:from-slate-900/30 dark:to-transparent shadow-sm overflow-hidden">
+                  <div className="px-6 py-4 bg-slate-100 dark:bg-slate-800 border-b-2 border-slate-200 dark:border-slate-700">
+                    <h3 className="text-sm font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300 flex items-center gap-2">
                       <User className="size-4" />
                       {t.accounting.studentInformation}
                     </h3>
@@ -444,11 +444,11 @@ export default function PaymentDetailsPage() {
                     <div className="flex flex-col md:flex-row gap-6">
                       {/* Avatar and Name */}
                       <div className="flex items-center gap-4 md:min-w-[300px]">
-                        <Avatar className="size-20 ring-4 ring-gspn-maroon-100 dark:ring-gspn-maroon-800 shadow-lg shrink-0">
+                        <Avatar className="size-20 ring-4 ring-slate-200 dark:ring-slate-700 shadow-lg shrink-0">
                           {studentInfo.photoUrl && (
                             <AvatarImage src={studentInfo.photoUrl} alt={`${studentInfo.firstName} ${studentInfo.lastName}`} />
                           )}
-                          <AvatarFallback className="text-2xl font-bold bg-gspn-maroon-500/10 text-gspn-maroon-700 dark:text-gspn-maroon-300">
+                          <AvatarFallback className="text-2xl font-bold bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300">
                             {studentInfo.firstName.charAt(0)}{studentInfo.lastName.charAt(0)}
                           </AvatarFallback>
                         </Avatar>
@@ -521,9 +521,9 @@ export default function PaymentDetailsPage() {
               {/* Timeline and Payment Breakdown - Side by Side */}
               <div className="grid lg:grid-cols-2 gap-6">
                 {/* Timeline with Payer Info Integrated */}
-                <div className="rounded-2xl border-2 border-gspn-maroon-200 dark:border-gspn-maroon-800 bg-gradient-to-br from-gspn-maroon-50/30 to-transparent dark:from-gspn-maroon-950/20 dark:to-transparent shadow-sm overflow-hidden">
-                  <div className="px-6 py-4 bg-gspn-maroon-100 dark:bg-gspn-maroon-900/30 border-b-2 border-gspn-maroon-200 dark:border-gspn-maroon-800">
-                    <h3 className="text-sm font-bold uppercase tracking-wider text-gspn-maroon-700 dark:text-gspn-maroon-300 flex items-center gap-2">
+                <div className="rounded-2xl border-2 border-slate-200 dark:border-slate-700 bg-gradient-to-br from-slate-50/50 to-transparent dark:from-slate-900/30 dark:to-transparent shadow-sm overflow-hidden">
+                  <div className="px-6 py-4 bg-slate-100 dark:bg-slate-800 border-b-2 border-slate-200 dark:border-slate-700">
+                    <h3 className="text-sm font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300 flex items-center gap-2">
                       <Calendar className="size-4" />
                       {t.accounting.timeline}
                     </h3>
@@ -668,9 +668,9 @@ export default function PaymentDetailsPage() {
 
                 {/* Payment Breakdown */}
                 {!isClubPayment && payment.balanceInfo && (
-                  <div className="rounded-2xl border-2 border-gspn-maroon-200 dark:border-gspn-maroon-800 overflow-hidden shadow-sm bg-gradient-to-br from-gspn-maroon-50/30 to-white dark:from-gspn-maroon-950/20 dark:to-transparent">
-                    <div className="px-6 py-4 border-b-2 bg-gspn-maroon-500 border-gspn-maroon-600">
-                      <h3 className="text-sm font-bold uppercase tracking-wider text-white flex items-center gap-2">
+                  <div className="rounded-2xl border-2 border-slate-200 dark:border-slate-700 overflow-hidden shadow-sm bg-gradient-to-br from-slate-50/50 to-transparent dark:from-slate-900/30 dark:to-transparent">
+                    <div className="px-6 py-4 border-b-2 bg-slate-100 dark:bg-slate-800 border-slate-200 dark:border-slate-700">
+                      <h3 className="text-sm font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300 flex items-center gap-2">
                         <BanknoteIcon className="size-4" />
                         {t.accounting.paymentBreakdown}
                       </h3>
@@ -679,13 +679,13 @@ export default function PaymentDetailsPage() {
                     <div className="p-6 space-y-5">
                       {/* Progress bar */}
                       <div className="space-y-2">
-                        <div className="flex justify-between text-xs font-semibold text-gspn-maroon-700 dark:text-gspn-maroon-300">
+                        <div className="flex justify-between text-xs font-semibold text-slate-700 dark:text-slate-300">
                           <span>Payment Progress</span>
                           <span className="tabular-nums">{Math.round((payment.balanceInfo.totalPaid / payment.balanceInfo.tuitionFee) * 100)}%</span>
                         </div>
-                        <div className="h-3 bg-white dark:bg-slate-800 rounded-full overflow-hidden shadow-inner border-2 border-gspn-maroon-200 dark:border-gspn-maroon-800">
+                        <div className="h-3 bg-white dark:bg-slate-800 rounded-full overflow-hidden shadow-inner border-2 border-slate-200 dark:border-slate-700">
                           <div
-                            className="h-full rounded-full transition-all duration-700 shadow-sm bg-gradient-to-r from-gspn-maroon-500 to-emerald-500"
+                            className="h-full rounded-full transition-all duration-700 shadow-sm bg-gradient-to-r from-slate-500 to-emerald-500"
                             style={{
                               width: `${Math.min((payment.balanceInfo.totalPaid / payment.balanceInfo.tuitionFee) * 100, 100)}%`,
                             }}
@@ -693,11 +693,11 @@ export default function PaymentDetailsPage() {
                         </div>
                       </div>
 
-                      <Separator className="bg-gspn-maroon-200 dark:bg-gspn-maroon-800" />
+                      <Separator className="bg-slate-200 dark:bg-slate-700" />
 
                       {/* Breakdown items */}
                       <div className="space-y-3">
-                        <div className="flex justify-between items-center px-4 py-3 rounded-xl bg-white dark:bg-slate-900 border-2 border-gspn-maroon-200 dark:border-gspn-maroon-800 shadow-sm">
+                        <div className="flex justify-between items-center px-4 py-3 rounded-xl bg-slate-100/50 dark:bg-slate-800/50 border-2 border-slate-200 dark:border-slate-700 shadow-sm">
                           <span className="text-sm text-slate-600 dark:text-slate-400">
                             {t.accounting.totalTuitionFee}
                           </span>
@@ -716,17 +716,17 @@ export default function PaymentDetailsPage() {
                           </span>
                         </div>
 
-                        <div className="flex justify-between items-center px-4 py-3 rounded-xl border-2 shadow-sm bg-gspn-gold-100 dark:bg-gspn-gold-950/30 border-gspn-gold-300 dark:border-gspn-gold-700">
-                          <span className="text-sm font-semibold text-gspn-gold-800 dark:text-gspn-gold-200">
+                        <div className="flex justify-between items-center px-4 py-3 rounded-xl border-2 shadow-sm bg-blue-50 dark:bg-blue-950/30 border-blue-200 dark:border-blue-800">
+                          <span className="text-sm font-semibold text-blue-700 dark:text-blue-300">
                             {t.accounting.thisPayment}
                           </span>
-                          <span className="text-sm font-bold font-mono tabular-nums text-gspn-gold-800 dark:text-gspn-gold-200">
+                          <span className="text-sm font-bold font-mono tabular-nums text-blue-700 dark:text-blue-300">
                             {formatCurrency(payment.amount)}
                           </span>
                         </div>
                       </div>
 
-                      <Separator className="bg-gspn-maroon-200 dark:bg-gspn-maroon-800" />
+                      <Separator className="bg-slate-200 dark:bg-slate-700" />
 
                       {/* Remaining balance */}
                       <div className="flex justify-between items-center pt-2">

@@ -540,9 +540,9 @@ export default function EnrollmentDetailPage({
           {/* Main Content */}
           <div className="lg:col-span-2 space-y-6">
             {/* Student Information */}
-            <div className="rounded-2xl border-2 border-gspn-maroon-200 dark:border-gspn-maroon-800 bg-gradient-to-br from-gspn-maroon-50/30 to-transparent dark:from-gspn-maroon-950/20 dark:to-transparent shadow-sm overflow-hidden">
-              <div className="px-6 py-4 bg-gspn-maroon-100 dark:bg-gspn-maroon-900/30 border-b-2 border-gspn-maroon-200 dark:border-gspn-maroon-800">
-                <h3 className="text-sm font-bold uppercase tracking-wider text-gspn-maroon-700 dark:text-gspn-maroon-300 flex items-center gap-2">
+            <div className="rounded-2xl border-2 border-slate-200 dark:border-slate-700 bg-gradient-to-br from-slate-50/50 to-transparent dark:from-slate-900/30 dark:to-transparent shadow-sm overflow-hidden">
+              <div className="px-6 py-4 bg-slate-100 dark:bg-slate-800 border-b-2 border-slate-200 dark:border-slate-700">
+                <h3 className="text-sm font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300 flex items-center gap-2">
                   <User className="size-4" />
                   {t.enrollments.personalInfo}
                 </h3>
@@ -597,9 +597,9 @@ export default function EnrollmentDetailPage({
             </div>
 
             {/* Parents & Guardian Information */}
-            <div className="rounded-2xl border-2 border-gspn-maroon-200 dark:border-gspn-maroon-800 bg-gradient-to-br from-gspn-maroon-50/30 to-transparent dark:from-gspn-maroon-950/20 dark:to-transparent shadow-sm overflow-hidden">
-              <div className="px-6 py-4 bg-gspn-maroon-100 dark:bg-gspn-maroon-900/30 border-b-2 border-gspn-maroon-200 dark:border-gspn-maroon-800">
-                <h3 className="text-sm font-bold uppercase tracking-wider text-gspn-maroon-700 dark:text-gspn-maroon-300 flex items-center gap-2">
+            <div className="rounded-2xl border-2 border-slate-200 dark:border-slate-700 bg-gradient-to-br from-slate-50/50 to-transparent dark:from-slate-900/30 dark:to-transparent shadow-sm overflow-hidden">
+              <div className="px-6 py-4 bg-slate-100 dark:bg-slate-800 border-b-2 border-slate-200 dark:border-slate-700">
+                <h3 className="text-sm font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300 flex items-center gap-2">
                   <Users className="size-4" />
                   {t.enrollments.parents}
                 </h3>
@@ -705,9 +705,9 @@ export default function EnrollmentDetailPage({
 
             {/* Notes */}
             {enrollment.notes.length > 0 && (
-              <div className="rounded-2xl border-2 border-gspn-maroon-200 dark:border-gspn-maroon-800 bg-gradient-to-br from-gspn-maroon-50/30 to-transparent dark:from-gspn-maroon-950/20 dark:to-transparent shadow-sm overflow-hidden">
-                <div className="px-6 py-4 bg-gspn-maroon-100 dark:bg-gspn-maroon-900/30 border-b-2 border-gspn-maroon-200 dark:border-gspn-maroon-800">
-                  <h3 className="text-sm font-bold uppercase tracking-wider text-gspn-maroon-700 dark:text-gspn-maroon-300 flex items-center gap-2">
+              <div className="rounded-2xl border-2 border-slate-200 dark:border-slate-700 bg-gradient-to-br from-slate-50/50 to-transparent dark:from-slate-900/30 dark:to-transparent shadow-sm overflow-hidden">
+                <div className="px-6 py-4 bg-slate-100 dark:bg-slate-800 border-b-2 border-slate-200 dark:border-slate-700">
+                  <h3 className="text-sm font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300 flex items-center gap-2">
                     <FileText className="size-4" />
                     {locale === "fr" ? "Notes" : "Notes"}
                   </h3>
@@ -727,9 +727,9 @@ export default function EnrollmentDetailPage({
             )}
 
             {/* Status Timeline */}
-            <div className="rounded-2xl border-2 border-gspn-maroon-200 dark:border-gspn-maroon-800 bg-gradient-to-br from-gspn-maroon-50/30 to-transparent dark:from-gspn-maroon-950/20 dark:to-transparent shadow-sm overflow-hidden">
-              <div className="px-6 py-4 bg-gspn-maroon-100 dark:bg-gspn-maroon-900/30 border-b-2 border-gspn-maroon-200 dark:border-gspn-maroon-800">
-                <h3 className="text-sm font-bold uppercase tracking-wider text-gspn-maroon-700 dark:text-gspn-maroon-300 flex items-center gap-2">
+            <div className="rounded-2xl border-2 border-slate-200 dark:border-slate-700 bg-gradient-to-br from-slate-50/50 to-transparent dark:from-slate-900/30 dark:to-transparent shadow-sm overflow-hidden">
+              <div className="px-6 py-4 bg-slate-100 dark:bg-slate-800 border-b-2 border-slate-200 dark:border-slate-700">
+                <h3 className="text-sm font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300 flex items-center gap-2">
                   <Clock className="size-4" />
                   {locale === "fr" ? "Chronologie" : "Timeline"}
                 </h3>
@@ -763,9 +763,9 @@ export default function EnrollmentDetailPage({
           {/* Sidebar */}
           <div className="space-y-6">
             {/* Financial Summary */}
-            <div className="rounded-2xl border-2 border-emerald-200 dark:border-emerald-800 bg-gradient-to-br from-emerald-50/30 to-transparent dark:from-emerald-950/20 dark:to-transparent shadow-sm overflow-hidden">
-              <div className="px-6 py-4 bg-emerald-100 dark:bg-emerald-900/30 border-b-2 border-emerald-200 dark:border-emerald-800">
-                <h3 className="text-sm font-bold uppercase tracking-wider text-emerald-700 dark:text-emerald-300 flex items-center gap-2">
+            <div className="rounded-2xl border-2 border-slate-200 dark:border-slate-700 bg-gradient-to-br from-slate-50/50 to-transparent dark:from-slate-900/30 dark:to-transparent shadow-sm overflow-hidden">
+              <div className="px-6 py-4 bg-slate-100 dark:bg-slate-800 border-b-2 border-slate-200 dark:border-slate-700">
+                <h3 className="text-sm font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300 flex items-center gap-2">
                   <Wallet className="size-4" />
                   {locale === "fr" ? "Resume financier" : "Financial Summary"}
                 </h3>
@@ -791,7 +791,7 @@ export default function EnrollmentDetailPage({
                   <span className="font-medium text-gspn-maroon-600 dark:text-gspn-maroon-400">{formatCurrency(enrollment.remainingBalance)}</span>
                 </div>
                 <Separator />
-                <div className="w-full bg-emerald-100 dark:bg-emerald-900/30 rounded-full h-3">
+                <div className="w-full bg-slate-200 dark:bg-slate-700 rounded-full h-3">
                   <div
                     className="h-3 rounded-full transition-all bg-gradient-to-r from-emerald-500 to-gspn-gold-500"
                     style={{ width: `${Math.min(100, (enrollment.totalPaid / enrollment.tuitionFee) * 100)}%` }}
@@ -817,9 +817,9 @@ export default function EnrollmentDetailPage({
               }
 
               return (
-                <div className="rounded-2xl border-2 border-emerald-200 dark:border-emerald-800 bg-gradient-to-br from-emerald-50/30 to-transparent dark:from-emerald-950/20 dark:to-transparent shadow-sm overflow-hidden">
-                  <div className="px-6 py-4 bg-emerald-100 dark:bg-emerald-900/30 border-b-2 border-emerald-200 dark:border-emerald-800">
-                    <h3 className="text-sm font-bold uppercase tracking-wider text-emerald-700 dark:text-emerald-300 flex items-center gap-2">
+                <div className="rounded-2xl border-2 border-slate-200 dark:border-slate-700 bg-gradient-to-br from-slate-50/50 to-transparent dark:from-slate-900/30 dark:to-transparent shadow-sm overflow-hidden">
+                  <div className="px-6 py-4 bg-slate-100 dark:bg-slate-800 border-b-2 border-slate-200 dark:border-slate-700">
+                    <h3 className="text-sm font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300 flex items-center gap-2">
                       <CalendarDays className="size-4" />
                       {locale === "fr" ? "Echeances" : "Schedules"}
                     </h3>
@@ -831,7 +831,7 @@ export default function EnrollmentDetailPage({
                       const isPaidInFull = paid >= schedule.amount
 
                       return (
-                        <div key={schedule.id} className="p-3 rounded-lg bg-white dark:bg-slate-900 border border-emerald-100 dark:border-emerald-900/50">
+                        <div key={schedule.id} className="p-3 rounded-lg bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700">
                           <div className="flex justify-between items-center mb-2">
                             <span className="text-sm font-medium">
                               {locale === "fr" ? "Ech." : "Sch."} {schedule.scheduleNumber}
@@ -840,7 +840,7 @@ export default function EnrollmentDetailPage({
                               {formatCurrency(schedule.amount)}
                             </span>
                           </div>
-                          <div className="w-full bg-emerald-100 dark:bg-emerald-900/30 rounded-full h-1.5">
+                          <div className="w-full bg-slate-200 dark:bg-slate-700 rounded-full h-1.5">
                             <div
                               className={`h-1.5 rounded-full transition-all ${isPaidInFull ? 'bg-emerald-500' : 'bg-gradient-to-r from-emerald-500 to-gspn-gold-500'}`}
                               style={{ width: `${percentPaid}%` }}
@@ -864,9 +864,9 @@ export default function EnrollmentDetailPage({
 
             {/* Recent Payments */}
             {enrollment.payments.length > 0 && (
-              <div className="rounded-2xl border-2 border-emerald-200 dark:border-emerald-800 bg-gradient-to-br from-emerald-50/30 to-transparent dark:from-emerald-950/20 dark:to-transparent shadow-sm overflow-hidden">
-                <div className="px-6 py-4 bg-emerald-100 dark:bg-emerald-900/30 border-b-2 border-emerald-200 dark:border-emerald-800">
-                  <h3 className="text-sm font-bold uppercase tracking-wider text-emerald-700 dark:text-emerald-300 flex items-center gap-2">
+              <div className="rounded-2xl border-2 border-slate-200 dark:border-slate-700 bg-gradient-to-br from-slate-50/50 to-transparent dark:from-slate-900/30 dark:to-transparent shadow-sm overflow-hidden">
+                <div className="px-6 py-4 bg-slate-100 dark:bg-slate-800 border-b-2 border-slate-200 dark:border-slate-700">
+                  <h3 className="text-sm font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300 flex items-center gap-2">
                     <CreditCard className="size-4" />
                     {locale === "fr" ? "Paiements recents" : "Recent Payments"}
                   </h3>
