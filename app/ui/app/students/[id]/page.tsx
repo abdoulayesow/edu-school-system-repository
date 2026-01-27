@@ -952,7 +952,7 @@ export default function StudentDetailPage() {
                                 {getEnrollmentStatusBadge(enrollment.status)}
                               </TableCell>
                               <TableCell className="text-center">
-                                <Link href={`/enrollments/${enrollment.id}`}>
+                                <Link href={`/students/enrollments/${enrollment.id}`}>
                                   <Button variant="ghost" size="sm" className="gap-1 text-amber-600 hover:text-amber-700 hover:bg-amber-50 dark:text-amber-400 dark:hover:bg-amber-950/30">
                                     <ExternalLink className="size-3" />
                                     {t.students.viewEnrollment}

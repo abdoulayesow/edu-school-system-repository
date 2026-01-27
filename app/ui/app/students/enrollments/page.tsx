@@ -387,7 +387,7 @@ export default function EnrollmentsPage() {
                         <TableRow
                           key={enrollment.id}
                           className="cursor-pointer hover:bg-muted/50"
-                          onClick={() => router.push(`/enrollments/${enrollment.id}`)}
+                          onClick={() => router.push(`/students/enrollments/${enrollment.id}`)}
                         >
                           <TableCell>
                             <Avatar className="size-10">
