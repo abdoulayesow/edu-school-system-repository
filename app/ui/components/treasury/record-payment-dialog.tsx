@@ -20,8 +20,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
-import { Loader2, Search, User } from "lucide-react"
+import { Loader2, Search, Banknote, User, CheckCircle2 } from "lucide-react"
 import { useI18n } from "@/components/i18n-provider"
+import { cn } from "@/lib/utils"
 
 interface RecordPaymentDialogProps {
   open: boolean
@@ -164,164 +165,194 @@ export function RecordPaymentDialog({
 
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
-      <DialogContent className="sm:max-w-[500px]">
-        <DialogHeader>
-          <DialogTitle className="flex items-center gap-2">
-            <div className="p-2 rounded-full bg-emerald-100 dark:bg-emerald-900/30">
-              <User className="h-5 w-5 text-emerald-600 dark:text-emerald-400" />
-            </div>
-            {t?.treasury?.recordPayment || "Enregistrer un paiement"}
-          </DialogTitle>
-          <DialogDescription>
-            {t?.treasury?.recordPaymentDesc || "Enregistrer une entrée d'argent dans la caisse"}
-          </DialogDescription>
-        </DialogHeader>
+      <DialogContent className="sm:max-w-[500px] p-0 overflow-hidden">
+        {/* Emerald accent bar for payments */}
+        <div className="h-1 bg-emerald-500" />
 
-        <div className="grid gap-4 py-4">
-          {/* Payment Type */}
-          <div className="space-y-2">
-            <Label>{t?.treasury?.paymentType || "Type de paiement"}</Label>
-            <Select value={paymentType} onValueChange={setPaymentType}>
-              <SelectTrigger>
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                {PAYMENT_TYPES.map((type) => (
-                  <SelectItem key={type.value} value={type.value}>
-                    {t?.treasury?.paymentTypes?.[type.labelKey] || type.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-
-          {/* Student Search (for student payments) */}
-          {paymentType === "student_payment" && (
-            <div className="space-y-2">
-              <Label>{t?.treasury?.selectStudent || "Sélectionner un élève"}</Label>
-              <div className="relative">
-                <Input
-                  placeholder={t?.common?.search || "Rechercher..."}
-                  value={studentSearch}
-                  onChange={(e) => setStudentSearch(e.target.value)}
-                  onKeyDown={(e) => e.key === "Enter" && handleStudentSearch()}
-                />
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="sm"
-                  className="absolute right-1 top-1 h-7"
-                  onClick={handleStudentSearch}
-                  disabled={isSearching}
-                >
-                  {isSearching ? (
-                    <Loader2 className="h-4 w-4 animate-spin" />
-                  ) : (
-                    <Search className="h-4 w-4" />
-                  )}
-                </Button>
+        <div className="p-6">
+          <DialogHeader className="pb-4">
+            <DialogTitle className="flex items-center gap-3">
+              <div className={cn(
+                "p-2.5 rounded-xl",
+                "bg-emerald-100 dark:bg-emerald-900/30",
+                "ring-2 ring-emerald-200 dark:ring-emerald-800"
+              )}>
+                <Banknote className="h-5 w-5 text-emerald-600 dark:text-emerald-400" />
               </div>
-              {searchResults.length > 0 && (
-                <div className="border rounded-md max-h-32 overflow-y-auto">
-                  {searchResults.map((student) => (
-                    <button
-                      key={student.id}
-                      type="button"
-                      className="w-full px-3 py-2 text-left hover:bg-muted text-sm"
-                      onClick={() => selectStudent(student)}
-                    >
-                      {student.firstName} {student.lastName}
-                      {student.studentNumber && (
-                        <span className="text-muted-foreground ml-2">
-                          ({student.studentNumber})
-                        </span>
-                      )}
-                    </button>
+              <span className="text-emerald-700 dark:text-emerald-300">
+                {t?.treasury?.recordPayment || "Enregistrer un paiement"}
+              </span>
+            </DialogTitle>
+            <DialogDescription>
+              {t?.treasury?.recordPaymentDesc || "Enregistrer une entrée d'argent dans la caisse"}
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="space-y-4">
+            {/* Payment Type */}
+            <div className="space-y-2">
+              <Label className="text-sm font-medium">{t?.treasury?.paymentType || "Type de paiement"}</Label>
+              <Select value={paymentType} onValueChange={setPaymentType}>
+                <SelectTrigger className="focus:ring-emerald-500">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {PAYMENT_TYPES.map((type) => (
+                    <SelectItem key={type.value} value={type.value}>
+                      {t?.treasury?.paymentTypes?.[type.labelKey] || type.label}
+                    </SelectItem>
                   ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            {/* Student Search (for student payments) */}
+            {paymentType === "student_payment" && (
+              <div className="space-y-2">
+                <Label className="text-sm font-medium">{t?.treasury?.selectStudent || "Sélectionner un élève"}</Label>
+                <div className="relative">
+                  <Input
+                    placeholder={t?.common?.search || "Rechercher..."}
+                    value={studentSearch}
+                    onChange={(e) => setStudentSearch(e.target.value)}
+                    onKeyDown={(e) => e.key === "Enter" && handleStudentSearch()}
+                    className="pr-10 focus-visible:ring-emerald-500"
+                  />
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    className="absolute right-1 top-1 h-7 hover:bg-emerald-100 dark:hover:bg-emerald-900/30"
+                    onClick={handleStudentSearch}
+                    disabled={isSearching}
+                  >
+                    {isSearching ? (
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                    ) : (
+                      <Search className="h-4 w-4" />
+                    )}
+                  </Button>
                 </div>
-              )}
-              {selectedStudent && (
-                <p className="text-sm text-green-600">
-                  {t?.common?.selected || "Sélectionné"}: {selectedStudent.firstName} {selectedStudent.lastName}
+                {searchResults.length > 0 && (
+                  <div className="border rounded-xl max-h-32 overflow-y-auto">
+                    {searchResults.map((student) => (
+                      <button
+                        key={student.id}
+                        type="button"
+                        className="w-full px-3 py-2 text-left hover:bg-emerald-50 dark:hover:bg-emerald-950/30 text-sm flex items-center gap-2"
+                        onClick={() => selectStudent(student)}
+                      >
+                        <User className="h-4 w-4 text-muted-foreground" />
+                        {student.firstName} {student.lastName}
+                        {student.studentNumber && (
+                          <span className="text-muted-foreground ml-auto">
+                            ({student.studentNumber})
+                          </span>
+                        )}
+                      </button>
+                    ))}
+                  </div>
+                )}
+                {selectedStudent && (
+                  <div className="flex items-center gap-2 p-2 rounded-lg bg-emerald-50 dark:bg-emerald-950/30 border border-emerald-200 dark:border-emerald-800">
+                    <CheckCircle2 className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
+                    <p className="text-sm text-emerald-700 dark:text-emerald-300 font-medium">
+                      {selectedStudent.firstName} {selectedStudent.lastName}
+                    </p>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* Amount */}
+            <div className="space-y-2">
+              <Label className="text-sm font-medium">{t?.common?.amount || "Montant"} (GNF)</Label>
+              <Input
+                type="text"
+                inputMode="numeric"
+                placeholder="0"
+                value={amount}
+                onChange={(e) => {
+                  const raw = e.target.value.replace(/\D/g, "")
+                  setAmount(raw ? formatCurrency(parseInt(raw, 10)) : "")
+                }}
+                className={cn(
+                  "text-2xl font-bold h-14 text-center",
+                  "focus-visible:ring-emerald-500 focus-visible:border-emerald-500"
+                )}
+              />
+              {amountNum > 0 && (
+                <p className="text-sm text-emerald-600 dark:text-emerald-400 font-medium text-center">
+                  {formatCurrency(amountNum)} GNF
                 </p>
               )}
             </div>
-          )}
 
-          {/* Amount */}
-          <div className="space-y-2">
-            <Label>{t?.common?.amount || "Montant"} (GNF)</Label>
-            <Input
-              type="text"
-              inputMode="numeric"
-              placeholder="0"
-              value={amount}
-              onChange={(e) => {
-                // Allow only numbers and format with spaces
-                const raw = e.target.value.replace(/\D/g, "")
-                setAmount(raw ? formatCurrency(parseInt(raw, 10)) : "")
-              }}
-              className="text-2xl font-bold h-14"
-            />
-            {amountNum > 0 && (
-              <p className="text-sm text-muted-foreground">
-                {formatCurrency(amountNum)} GNF
-              </p>
+            {/* Payer Name */}
+            <div className="space-y-2">
+              <Label className="text-sm font-medium">
+                {t?.treasury?.payerName || "Nom du payeur"} <span className="text-red-500">*</span>
+              </Label>
+              <Input
+                placeholder={t?.treasury?.payerNamePlaceholder || "Qui a remis l'argent ?"}
+                value={payerName}
+                onChange={(e) => setPayerName(e.target.value)}
+                className="focus-visible:ring-emerald-500"
+              />
+            </div>
+
+            {/* Description (optional) */}
+            <div className="space-y-2">
+              <Label className="text-sm font-medium">
+                {t?.common?.description || "Description"}{" "}
+                <span className="text-muted-foreground font-normal">({t?.common?.optional || "optionnel"})</span>
+              </Label>
+              <Input
+                placeholder={t?.treasury?.descriptionPlaceholder || "Description du paiement"}
+                value={description}
+                onChange={(e) => setDescription(e.target.value)}
+                className="focus-visible:ring-emerald-500"
+              />
+            </div>
+
+            {/* Notes (optional) */}
+            <div className="space-y-2">
+              <Label className="text-sm font-medium">
+                {t?.common?.notes || "Notes"}{" "}
+                <span className="text-muted-foreground font-normal">({t?.common?.optional || "optionnel"})</span>
+              </Label>
+              <Textarea
+                placeholder={t?.treasury?.notesPlaceholder || "Notes supplémentaires"}
+                value={notes}
+                onChange={(e) => setNotes(e.target.value)}
+                rows={2}
+                className="focus-visible:ring-emerald-500 resize-none"
+              />
+            </div>
+
+            {/* Error Message */}
+            {error && (
+              <div className="text-sm text-red-600 bg-red-50 dark:bg-red-900/20 p-3 rounded-lg border border-red-200 dark:border-red-800">
+                {error}
+              </div>
             )}
           </div>
 
-          {/* Payer Name */}
-          <div className="space-y-2">
-            <Label>{t?.treasury?.payerName || "Nom du payeur"}</Label>
-            <Input
-              placeholder={t?.treasury?.payerNamePlaceholder || "Qui a remis l'argent ?"}
-              value={payerName}
-              onChange={(e) => setPayerName(e.target.value)}
-            />
-          </div>
-
-          {/* Description (optional) */}
-          <div className="space-y-2">
-            <Label>{t?.common?.description || "Description"} ({t?.common?.optional || "optionnel"})</Label>
-            <Input
-              placeholder={t?.treasury?.descriptionPlaceholder || "Description du paiement"}
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
-            />
-          </div>
-
-          {/* Notes (optional) */}
-          <div className="space-y-2">
-            <Label>{t?.common?.notes || "Notes"} ({t?.common?.optional || "optionnel"})</Label>
-            <Textarea
-              placeholder={t?.treasury?.notesPlaceholder || "Notes supplémentaires"}
-              value={notes}
-              onChange={(e) => setNotes(e.target.value)}
-              rows={2}
-            />
-          </div>
-
-          {/* Error Message */}
-          {error && (
-            <div className="text-sm text-red-600 bg-red-50 dark:bg-red-900/20 p-3 rounded-md">
-              {error}
-            </div>
-          )}
+          <DialogFooter className="border-t pt-4 mt-4">
+            <Button variant="outline" onClick={() => handleOpenChange(false)}>
+              {t?.common?.cancel || "Annuler"}
+            </Button>
+            <Button
+              onClick={handleSubmit}
+              disabled={isSubmitting || !amountNum || !payerName.trim()}
+              className="bg-emerald-600 hover:bg-emerald-700 text-white"
+            >
+              {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+              <Banknote className="mr-2 h-4 w-4" />
+              {t?.treasury?.confirmTransaction || "Confirmer"}
+            </Button>
+          </DialogFooter>
         </div>
-
-        <DialogFooter>
-          <Button variant="outline" onClick={() => handleOpenChange(false)}>
-            {t?.common?.cancel || "Annuler"}
-          </Button>
-          <Button
-            onClick={handleSubmit}
-            disabled={isSubmitting || !amountNum || !payerName.trim()}
-            className="bg-emerald-600 hover:bg-emerald-700"
-          >
-            {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-            {t?.treasury?.confirmTransaction || "Confirmer"}
-          </Button>
-        </DialogFooter>
       </DialogContent>
     </Dialog>
   )

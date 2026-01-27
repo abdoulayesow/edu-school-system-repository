@@ -211,6 +211,27 @@ Include:
 - Remaining tasks
 - Resume prompt for next session
 
+## Planned Future Features
+
+### Payment Methods
+Current supported methods:
+- `cash` - Cash payments (stored in safe)
+- `orange_money` - Orange Money mobile payments (tracked separately)
+
+Planned additions:
+- **Check payments** - Rare usage (1-2 people), low priority. Will need:
+  - Add `check` to payment method enum
+  - Check number field
+  - Bank name field
+  - Clearance tracking (pending → cleared → bounced)
+
+### Expense Management
+- **Salary management** - Dedicated salary tracking within expenses:
+  - Monthly salary records per staff member
+  - Salary schedules and payment history
+  - Integration with staff roles
+  - Payroll reports
+
 ## Important Notes
 
 - The UI and DB are separate packages - run commands from the correct directory
