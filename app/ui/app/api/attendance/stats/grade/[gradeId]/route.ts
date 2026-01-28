@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server"
 import { requirePerm } from "@/lib/authz"
 import { prisma } from "@/lib/prisma"
+import { Prisma } from "@prisma/client"
 
 interface RouteParams {
   params: Promise<{ gradeId: string }>
@@ -85,6 +86,13 @@ export async function GET(req: NextRequest, { params }: RouteParams) {
     }
 
     // Get daily breakdown for chart
+    const startDateFilter = startDate
+      ? Prisma.sql`AND s.date >= ${new Date(startDate)}`
+      : Prisma.empty
+    const endDateFilter = endDate
+      ? Prisma.sql`AND s.date <= ${new Date(endDate)}`
+      : Prisma.empty
+
     const dailyStats = await prisma.$queryRaw<
       Array<{
         date: Date
@@ -103,8 +111,8 @@ export async function GET(req: NextRequest, { params }: RouteParams) {
       FROM "AttendanceSession" s
       LEFT JOIN "AttendanceRecord" r ON r."sessionId" = s.id
       WHERE s."gradeId" = ${gradeId}
-        ${startDate ? prisma.$queryRaw`AND s.date >= ${new Date(startDate)}` : prisma.$queryRaw``}
-        ${endDate ? prisma.$queryRaw`AND s.date <= ${new Date(endDate)}` : prisma.$queryRaw``}
+        ${startDateFilter}
+        ${endDateFilter}
       GROUP BY s.date
       ORDER BY s.date DESC
       LIMIT 30

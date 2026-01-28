@@ -1,0 +1,5 @@
+export { DirectorDashboard } from "./director-dashboard"
+export { AccountantDashboard } from "./accountant-dashboard"
+export { SecretaryDashboard } from "./secretary-dashboard"
+export { TeacherDashboard } from "./teacher-dashboard"
+export { DefaultDashboard } from "./default-dashboard"
