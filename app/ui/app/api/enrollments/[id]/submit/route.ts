@@ -148,6 +148,8 @@ export async function POST(req: NextRequest, { params }: RouteParams) {
     )
 
     // Use transaction to update enrollment and create schedules
+    // Increased timeout because this transaction does many operations:
+    // student creation, enrollment update, payment schedules, payment + treasury updates
     const updated = await prisma.$transaction(async (tx) => {
       // Create or update student record if new student
       let studentId = enrollment.studentId
@@ -337,6 +339,9 @@ export async function POST(req: NextRequest, { params }: RouteParams) {
       }
 
       return updatedEnrollment
+    }, {
+      timeout: 30000, // 30 seconds (needed for dev mode with compilation delays)
+      maxWait: 10000, // 10 seconds max wait to acquire connection
     })
 
     // Get the complete enrollment with payment schedules and payments

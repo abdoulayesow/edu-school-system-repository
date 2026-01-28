@@ -186,14 +186,15 @@ export default function PaymentsPage() {
   if (!isMounted) {
     return (
       <PageContainer maxWidth="full">
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
-          <div>
+        <Card className="mb-6 overflow-hidden shadow-sm">
+          <div className="h-1 bg-gspn-maroon-500" />
+          <div className="p-6">
             <h1 className="text-3xl font-bold text-foreground mb-2">{t.accounting.paymentsPageTitle}</h1>
             <p className="text-muted-foreground">{t.accounting.paymentsPageSubtitle}</p>
           </div>
-        </div>
+        </Card>
         <div className="flex items-center justify-center py-8">
-          <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+          <Loader2 className="h-8 w-8 animate-spin text-gspn-maroon-500" />
         </div>
       </PageContainer>
     )
@@ -202,112 +203,133 @@ export default function PaymentsPage() {
   return (
     <PageContainer maxWidth="full">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
-        <div className="flex-1">
-          <h1 className="text-3xl font-bold text-foreground mb-2">{t.accounting.paymentsPageTitle}</h1>
-          <p className="text-muted-foreground">{t.accounting.paymentsPageSubtitle}</p>
-        </div>
+      <Card className="mb-6 overflow-hidden shadow-sm">
+        <div className="h-1 bg-gspn-maroon-500" />
+        <div className="p-6">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+            <div className="flex-1">
+              <h1 className="text-3xl font-bold text-foreground mb-2">{t.accounting.paymentsPageTitle}</h1>
+              <p className="text-muted-foreground">{t.accounting.paymentsPageSubtitle}</p>
+            </div>
 
-        {/* Registry Status Indicator - only shows when closed */}
-        <RegistryStatusIndicator className="sm:order-2" />
+            {/* Registry Status Indicator - only shows when closed */}
+            <RegistryStatusIndicator className="sm:order-2" />
 
-        <div className="flex items-center gap-3 sm:order-3">
-          <ExportButton payments={payments} />
-          <Button
-            variant="gold"
-            onClick={() => router.push("/payments/new")}
-          >
-            <Plus className="size-4 mr-2" />
-            {t.accounting.recordPayment}
-          </Button>
+            <div className="flex items-center gap-3 sm:order-3">
+              <ExportButton payments={payments} />
+              <Button
+                variant="gold"
+                onClick={() => router.push("/accounting/payments/new")}
+              >
+                <Plus className="size-4 mr-2" />
+                {t.accounting.recordPayment}
+              </Button>
+            </div>
+          </div>
         </div>
-      </div>
+      </Card>
 
       {/* Summary Cards */}
       <div className="grid gap-4 md:grid-cols-4 mb-6">
-        <Card className="py-5">
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
-              <BanknoteIcon className="size-4" />
-              {t.accounting.totalAmount}
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            {isLoadingStats ? (
-              <div className="h-8 w-32 animate-pulse bg-muted rounded" />
-            ) : (
-              <>
-                <div className="text-2xl font-bold">{formatAmount(totalAmount)}</div>
-                <p className="text-xs text-muted-foreground mt-1">
-                  {(stats?.byType?.tuition?.count || 0) + (stats?.byType?.club?.count || 0)} {t.accounting.paymentsPlural}
-                </p>
-              </>
-            )}
+        {/* Total Amount - Maroon (primary) */}
+        <Card className="overflow-hidden shadow-sm">
+          <div className="h-1 bg-gspn-maroon-500" />
+          <CardContent className="pt-6">
+            <div className="flex items-start gap-4">
+              <div className="p-2.5 bg-gspn-maroon-500/10 rounded-xl">
+                <BanknoteIcon className="size-5 text-gspn-maroon-600 dark:text-gspn-maroon-400" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-medium text-muted-foreground">{t.accounting.totalAmount}</p>
+                {isLoadingStats ? (
+                  <div className="h-8 w-32 animate-pulse bg-muted rounded mt-1" />
+                ) : (
+                  <>
+                    <div className="text-2xl font-bold text-gspn-maroon-700 dark:text-gspn-maroon-300">{formatAmount(totalAmount)}</div>
+                    <p className="text-xs text-muted-foreground mt-1">
+                      {(stats?.byType?.tuition?.count || 0) + (stats?.byType?.club?.count || 0)} {t.accounting.paymentsPlural}
+                    </p>
+                  </>
+                )}
+              </div>
+            </div>
           </CardContent>
         </Card>
 
-        <Card className="py-5">
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
-              <BanknoteIcon className="size-4" />
-              {t.accounting.tuitionPayments}
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            {isLoadingStats ? (
-              <div className="h-8 w-32 animate-pulse bg-muted rounded" />
-            ) : (
-              <>
-                <div className="text-2xl font-bold text-primary">{formatAmount(tuitionAmount)}</div>
-                <p className="text-xs text-muted-foreground mt-1">
-                  {stats?.byType?.tuition?.count || 0} {t.accounting.paymentsPlural}
-                </p>
-              </>
-            )}
+        {/* Tuition Payments - Emerald (income) */}
+        <Card className="overflow-hidden shadow-sm">
+          <div className="h-1 bg-emerald-500" />
+          <CardContent className="pt-6">
+            <div className="flex items-start gap-4">
+              <div className="p-2.5 bg-emerald-500/10 rounded-xl">
+                <BanknoteIcon className="size-5 text-emerald-600 dark:text-emerald-400" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-medium text-muted-foreground">{t.accounting.tuitionPayments}</p>
+                {isLoadingStats ? (
+                  <div className="h-8 w-32 animate-pulse bg-muted rounded mt-1" />
+                ) : (
+                  <>
+                    <div className="text-2xl font-bold text-emerald-700 dark:text-emerald-300">{formatAmount(tuitionAmount)}</div>
+                    <p className="text-xs text-muted-foreground mt-1">
+                      {stats?.byType?.tuition?.count || 0} {t.accounting.paymentsPlural}
+                    </p>
+                  </>
+                )}
+              </div>
+            </div>
           </CardContent>
         </Card>
 
-        <Card className="py-5">
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
-              <Sparkles className="size-4" />
-              {t.accounting.clubPayments}
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            {isLoadingStats ? (
-              <div className="h-8 w-32 animate-pulse bg-muted rounded" />
-            ) : (
-              <>
-                <div className="text-2xl font-bold text-purple-600 dark:text-purple-400">{formatAmount(clubAmount)}</div>
-                <p className="text-xs text-muted-foreground mt-1">
-                  {stats?.byType?.club?.count || 0} {t.accounting.paymentsPlural}
-                </p>
-              </>
-            )}
+        {/* Club Payments - Purple (clubs) */}
+        <Card className="overflow-hidden shadow-sm">
+          <div className="h-1 bg-purple-500" />
+          <CardContent className="pt-6">
+            <div className="flex items-start gap-4">
+              <div className="p-2.5 bg-purple-500/10 rounded-xl">
+                <Sparkles className="size-5 text-purple-600 dark:text-purple-400" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-medium text-muted-foreground">{t.accounting.clubPayments}</p>
+                {isLoadingStats ? (
+                  <div className="h-8 w-32 animate-pulse bg-muted rounded mt-1" />
+                ) : (
+                  <>
+                    <div className="text-2xl font-bold text-purple-700 dark:text-purple-300">{formatAmount(clubAmount)}</div>
+                    <p className="text-xs text-muted-foreground mt-1">
+                      {stats?.byType?.club?.count || 0} {t.accounting.paymentsPlural}
+                    </p>
+                  </>
+                )}
+              </div>
+            </div>
           </CardContent>
         </Card>
 
-        <Card className="py-5">
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
-              <Smartphone className="size-4" />
-              {t.accounting.orangeMoneyPayments}
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            {isLoadingStats ? (
-              <div className="h-8 w-32 animate-pulse bg-muted rounded" />
-            ) : (
-              <>
-                <div className="text-2xl font-bold text-orange-600 dark:text-orange-400">
-                  {formatAmount(stats?.byMethod?.orange_money?.amount || 0)}
-                </div>
-                <p className="text-xs text-muted-foreground mt-1">
-                  {stats?.byMethod?.orange_money?.count || 0} {t.accounting.paymentsPlural}
-                </p>
-              </>
-            )}
+        {/* Orange Money - Orange (method specific) */}
+        <Card className="overflow-hidden shadow-sm">
+          <div className="h-1 bg-orange-500" />
+          <CardContent className="pt-6">
+            <div className="flex items-start gap-4">
+              <div className="p-2.5 bg-orange-500/10 rounded-xl">
+                <Smartphone className="size-5 text-orange-600 dark:text-orange-400" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-medium text-muted-foreground">{t.accounting.orangeMoneyPayments}</p>
+                {isLoadingStats ? (
+                  <div className="h-8 w-32 animate-pulse bg-muted rounded mt-1" />
+                ) : (
+                  <>
+                    <div className="text-2xl font-bold text-orange-700 dark:text-orange-300">
+                      {formatAmount(stats?.byMethod?.orange_money?.amount || 0)}
+                    </div>
+                    <p className="text-xs text-muted-foreground mt-1">
+                      {stats?.byMethod?.orange_money?.count || 0} {t.accounting.paymentsPlural}
+                    </p>
+                  </>
+                )}
+              </div>
+            </div>
           </CardContent>
         </Card>
       </div>
@@ -324,9 +346,13 @@ export default function PaymentsPage() {
       />
 
       {/* Payments Table */}
-      <Card>
+      <Card className="overflow-hidden shadow-sm">
+        <div className="h-1 bg-gspn-maroon-500" />
         <CardHeader>
-          <CardTitle>{t.accounting.paymentsTable}</CardTitle>
+          <CardTitle className="flex items-center gap-2">
+            <div className="h-2 w-2 rounded-full bg-gspn-maroon-500" />
+            {t.accounting.paymentsTable}
+          </CardTitle>
           <CardDescription>
             {payments.length} {t.accounting.results}
             {pagination && ` / ${pagination.total}`}
@@ -348,8 +374,8 @@ export default function PaymentsPage() {
           {/* Empty State */}
           {!isLoading && !isError && payments.length === 0 && (
             <div className="flex flex-col items-center justify-center py-16 gap-4">
-              <div className="p-4 rounded-full bg-muted">
-                <BanknoteIcon className="size-8 text-muted-foreground" />
+              <div className="p-4 rounded-full bg-gspn-maroon-500/10">
+                <BanknoteIcon className="size-8 text-gspn-maroon-600 dark:text-gspn-maroon-400" />
               </div>
               <div className="text-center">
                 <p className="font-medium text-foreground">{t.accounting.noPaymentsFound}</p>
@@ -366,7 +392,7 @@ export default function PaymentsPage() {
               <div className="rounded-md border">
                 <Table>
                   <TableHeader>
-                    <TableRow>
+                    <TableRow className="bg-gspn-gold-50/50 dark:bg-gspn-gold-950/20">
                       <TableHead>{t.accounting.transactionId}</TableHead>
                       <TableHead>{t.common.student}</TableHead>
                       <TableHead>{t.accounting.filterByType}</TableHead>
@@ -399,7 +425,7 @@ export default function PaymentsPage() {
                           key={payment.id}
                           status={getPaymentRowStatus(payment.status)}
                           className="cursor-pointer"
-                          onClick={() => router.push(`/payments/${payment.id}`)}
+                          onClick={() => router.push(`/accounting/payments/${payment.id}`)}
                         >
                           <TableCell className="font-mono text-sm">
                             {payment.receiptNumber}

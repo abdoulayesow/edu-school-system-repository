@@ -327,45 +327,38 @@ export function ClubEnrollmentWizard() {
   }
 
   return (
-    <div className="min-h-screen relative overflow-hidden py-8">
-      {/* Animated background with decorative elements */}
-      <div className="absolute inset-0 bg-gradient-to-br from-white via-gspn-gold-50/20 to-gspn-gold-100/30" />
+    <div className="min-h-screen relative overflow-hidden py-4">
+      {/* Subtle background */}
+      <div className="absolute inset-0 bg-gradient-to-br from-white via-gray-50/50 to-gspn-gold-50/20" />
 
-      {/* Decorative floating orbs */}
-      <div className="absolute top-20 right-10 w-72 h-72 bg-gspn-gold-200/20 rounded-full blur-3xl animate-pulse"
-           style={{ animationDuration: '4s' }} />
-      <div className="absolute bottom-20 left-10 w-96 h-96 bg-gspn-gold-100/20 rounded-full blur-3xl animate-pulse"
-           style={{ animationDelay: '1s', animationDuration: '5s' }} />
-      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-gspn-gold-50/10 rounded-full blur-3xl animate-pulse"
-           style={{ animationDelay: '2s', animationDuration: '6s' }} />
-
-      <div className="container max-w-6xl mx-auto px-4 relative z-10">
+      <div className="container max-w-5xl mx-auto px-4 relative z-10">
         {/* Header */}
-        <div className="mb-8">
+        <div className="mb-4">
           <Button
             variant="ghost"
             onClick={handleBackToClubs}
-            className="gap-2 mb-4 hover:bg-white/50"
+            className="gap-2 mb-3 hover:bg-white/50"
           >
             <ArrowLeft className={sizing.icon.sm} />
             {t.clubEnrollmentWizard.backToClubs}
           </Button>
 
-          <div className="text-center space-y-3 animate-in fade-in slide-in-from-top-4 duration-700">
+          <div className="text-center space-y-1 animate-in fade-in slide-in-from-top-4 duration-500">
             <h1 className={cn(
               typography.heading.page,
-              "bg-gradient-to-r from-gspn-gold-600 via-gspn-gold-700 to-gspn-gold-600 bg-clip-text text-transparent",
-              "drop-shadow-sm"
+              "text-gspn-maroon-600"
             )}>
               {t.clubEnrollmentWizard.title}
             </h1>
-            <p className="text-gray-600 text-lg">{t.clubEnrollmentWizard.subtitle}</p>
+            <p className="text-muted-foreground">{t.clubEnrollmentWizard.subtitle}</p>
           </div>
         </div>
 
         {/* Wizard Card */}
-        <Card className="shadow-2xl border-2 border-gray-200/50 backdrop-blur-sm bg-white/95 animate-in fade-in slide-in-from-bottom-8 duration-700 delay-150">
-          <CardHeader className="space-y-6 pb-6">
+        <Card className="shadow-lg border border-border overflow-hidden animate-in fade-in slide-in-from-bottom-4 duration-500">
+          {/* Maroon accent bar */}
+          <div className="h-1 bg-gspn-maroon-500" />
+          <CardHeader className="space-y-4 pb-4 pt-5">
             {/* Progress Indicator */}
             <WizardProgress
               currentStep={state.currentStep}
@@ -382,9 +375,9 @@ export function ClubEnrollmentWizard() {
             )}
           </CardHeader>
 
-          <CardContent className="space-y-8">
+          <CardContent className="space-y-4 pt-0">
             {/* Step Content */}
-            <div className="min-h-[400px]">{renderStep()}</div>
+            <div className="min-h-[300px]">{renderStep()}</div>
 
             {/* Navigation (hide on confirmation step) */}
             {state.currentStep < 6 && (

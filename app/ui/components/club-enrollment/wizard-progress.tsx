@@ -62,12 +62,12 @@ export function WizardProgress({
                 {/* Icon Circle */}
                 <div
                   className={cn(
-                    "flex items-center justify-center w-10 h-10 rounded-full border-2 transition-all duration-300",
+                    "flex items-center justify-center w-9 h-9 rounded-full border-2 transition-all duration-300",
                     isActive && "animate-scale-in",
                     isCompleted
-                      ? "bg-nav-highlight border-nav-highlight text-black dark:bg-gspn-gold-500 dark:border-gspn-gold-500 dark:text-gspn-maroon-950"
+                      ? "bg-gspn-maroon-500 border-gspn-maroon-500 text-white"
                       : isActive
-                        ? "border-nav-highlight bg-gspn-gold-50 text-black dark:border-gspn-gold-500 dark:bg-gspn-gold-500/30 dark:text-gspn-gold-200 shadow-md shadow-gspn-gold-500/20"
+                        ? "border-gspn-maroon-500 bg-gspn-maroon-50 text-gspn-maroon-600"
                         : "border-muted-foreground/30 text-muted-foreground/50"
                   )}
                 >
@@ -82,11 +82,9 @@ export function WizardProgress({
                 <span
                   className={cn(
                     "text-xs font-medium text-center max-w-[80px]",
-                    isActive
-                      ? "text-black dark:text-gspn-gold-200"
-                      : isCompleted
-                        ? "text-black dark:text-gspn-gold-200"
-                        : "text-muted-foreground/50"
+                    isActive || isCompleted
+                      ? "text-foreground"
+                      : "text-muted-foreground/50"
                   )}
                 >
                   {step.label}
@@ -99,7 +97,7 @@ export function WizardProgress({
                 className={cn(
                   "flex-1 h-0.5 mx-2 transition-colors duration-500 ease-out",
                   completedSteps.includes(step.number as ClubEnrollmentStep)
-                    ? "bg-nav-highlight dark:bg-gspn-gold-500"
+                    ? "bg-gspn-maroon-500"
                     : "bg-muted-foreground/20"
                 )}
               />
@@ -115,7 +113,7 @@ export function WizardProgress({
           <span className="text-sm font-medium text-muted-foreground">
             {t.clubEnrollmentWizard.step} {currentStep} / {steps.length}
           </span>
-          <span className="text-sm font-medium text-black dark:text-gspn-gold-200">
+          <span className="text-sm font-medium text-foreground">
             {steps.find((s) => s.number === currentStep)?.label}
           </span>
         </div>
@@ -128,18 +126,11 @@ export function WizardProgress({
               <div
                 key={step.number}
                 className={cn(
-                  "flex-1 h-2 rounded-full transition-all duration-300",
-                  "animate-scale-in",
-                  index === 0 && "stagger-1",
-                  index === 1 && "stagger-2",
-                  index === 2 && "stagger-3",
-                  index === 3 && "stagger-4",
-                  index === 4 && "stagger-5",
-                  index === 5 && "stagger-6",
+                  "flex-1 h-1.5 rounded-full transition-all duration-300",
                   isCompleted
-                    ? "bg-nav-highlight dark:bg-gspn-gold-500"
+                    ? "bg-gspn-maroon-500"
                     : isCurrent
-                      ? "bg-nav-highlight/50 dark:bg-gspn-gold-500/50"
+                      ? "bg-gspn-maroon-300"
                       : "bg-muted-foreground/20"
                 )}
               />

@@ -333,13 +333,16 @@ export default function ClassRankingPage() {
   if (isLoading) {
     return (
       <div className="min-h-screen bg-white dark:bg-background flex items-center justify-center">
-        <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+        <Loader2 className="h-8 w-8 animate-spin text-gspn-maroon-500" />
       </div>
     )
   }
 
   return (
     <PageContainer maxWidth="lg">
+      {/* Maroon accent bar */}
+      <div className="h-1 bg-gspn-maroon-500 -mx-4 sm:-mx-6 lg:-mx-8 mb-6" />
+
       {/* Header */}
       <div className="flex items-center gap-4 mb-6">
         <Link href="/students/grades" className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground">
@@ -350,7 +353,9 @@ export default function ClassRankingPage() {
 
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center gap-3">
-          <Trophy className="size-8 text-primary" />
+          <div className="p-2.5 bg-gspn-maroon-500/10 rounded-xl">
+            <Trophy className="size-6 text-gspn-maroon-500" />
+          </div>
           <div>
             <h1 className="text-2xl font-bold">
               {locale === "fr" ? "Classement de la Classe" : "Class Ranking"}
@@ -386,8 +391,14 @@ export default function ClassRankingPage() {
       </div>
 
       {/* Filters */}
-      <Card className="mb-6">
-        <CardContent className="pt-6">
+      <Card className="mb-6 border shadow-sm overflow-hidden">
+        <CardHeader className="pb-2">
+          <CardTitle className="text-lg flex items-center gap-2">
+            <div className="h-2 w-2 rounded-full bg-gspn-maroon-500" />
+            {locale === "fr" ? "Filtres" : "Filters"}
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <label className="text-sm font-medium mb-2 block">
@@ -493,12 +504,13 @@ export default function ClassRankingPage() {
       {/* Ranking Table */}
       {loadingRanking ? (
         <div className="flex items-center justify-center py-12">
-          <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+          <Loader2 className="h-8 w-8 animate-spin text-gspn-maroon-500" />
         </div>
       ) : students.length > 0 ? (
-        <Card>
+        <Card className="border shadow-sm overflow-hidden">
           <CardHeader>
-            <CardTitle>
+            <CardTitle className="flex items-center gap-2">
+              <div className="h-2 w-2 rounded-full bg-gspn-maroon-500" />
               {locale === "fr" ? "Classement des élèves" : "Student Ranking"}
             </CardTitle>
             <CardDescription>

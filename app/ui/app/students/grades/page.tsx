@@ -7,13 +7,6 @@ import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select"
-import {
   Collapsible,
   CollapsibleContent,
   CollapsibleTrigger,
@@ -28,7 +21,7 @@ import {
   ChevronRight,
   UserPlus,
   ArrowRightLeft,
-  Sparkles,
+  GraduationCap,
 } from "lucide-react"
 import { RoomAssignmentDialog, BulkMoveDialog, AutoAssignDialog } from "@/components/room-assignments"
 
@@ -94,8 +87,7 @@ export default function GradesClassesPage() {
     high_school: t.admin.levelHighSchool,
   }
 
-  const [schoolYears, setSchoolYears] = useState<SchoolYear[]>([])
-  const [selectedYearId, setSelectedYearId] = useState<string>("")
+  const [activeSchoolYear, setActiveSchoolYear] = useState<SchoolYear | null>(null)
   const [grades, setGrades] = useState<Grade[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [isMounted, setIsMounted] = useState(false)
@@ -110,27 +102,27 @@ export default function GradesClassesPage() {
 
   useEffect(() => {
     setIsMounted(true)
-    fetchSchoolYears()
+    fetchActiveSchoolYear()
   }, [])
 
   useEffect(() => {
-    if (selectedYearId) {
+    if (activeSchoolYear?.id) {
       fetchGrades()
     }
-  }, [selectedYearId])
+  }, [activeSchoolYear?.id])
 
-  async function fetchSchoolYears() {
+  async function fetchActiveSchoolYear() {
     try {
       const res = await fetch("/api/admin/school-years")
       if (res.ok) {
         const data = await res.json()
-        setSchoolYears(data)
-        // Select the active year by default
+        // Get the active year only
         const activeYear = data.find((sy: SchoolYear) => sy.status === "active")
         if (activeYear) {
-          setSelectedYearId(activeYear.id)
+          setActiveSchoolYear(activeYear)
         } else if (data.length > 0) {
-          setSelectedYearId(data[0].id)
+          // Fallback to most recent if no active
+          setActiveSchoolYear(data[0])
         }
       }
     } catch (err) {
@@ -139,9 +131,10 @@ export default function GradesClassesPage() {
   }
 
   async function fetchGrades() {
+    if (!activeSchoolYear?.id) return
     setIsLoading(true)
     try {
-      const res = await fetch(`/api/admin/grades?schoolYearId=${selectedYearId}`)
+      const res = await fetch(`/api/admin/grades?schoolYearId=${activeSchoolYear.id}`)
       if (res.ok) {
         const data = await res.json()
         setGrades(data)
@@ -215,7 +208,7 @@ export default function GradesClassesPage() {
     return (
       <PageContainer maxWidth="full">
         <div className="flex items-center justify-center h-64">
-          <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+          <Loader2 className="h-8 w-8 animate-spin text-gspn-maroon-500" />
         </div>
       </PageContainer>
     )
@@ -223,25 +216,33 @@ export default function GradesClassesPage() {
 
   return (
     <PageContainer maxWidth="full">
-      {/* Header */}
-      <div className="flex items-center justify-between mb-6">
-        <div>
-          <h1 className="text-3xl font-bold">{t.nav.gradesClasses}</h1>
-          <p className="text-muted-foreground">{t.students.gradesClassesSubtitle}</p>
+      {/* Page Header with Brand Styling */}
+      <div className="relative mb-6 overflow-hidden rounded-2xl border border-border bg-card shadow-sm">
+        <div className="h-1 bg-gspn-maroon-500" />
+        <div className="p-6">
+          <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
+            <div>
+              <div className="flex items-center gap-3 mb-2">
+                <div className="p-2.5 bg-gspn-maroon-500/10 rounded-xl">
+                  <GraduationCap className="h-6 w-6 text-gspn-maroon-500" />
+                </div>
+                <h1 className="text-3xl font-bold text-foreground">{t.nav.gradesClasses}</h1>
+              </div>
+              <p className="text-muted-foreground mt-1">{t.students.gradesClassesSubtitle}</p>
+            </div>
+            {/* Current School Year Indicator */}
+            {activeSchoolYear && (
+              <div className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-gspn-maroon-50 dark:bg-gspn-maroon-950/30 border border-gspn-maroon-200 dark:border-gspn-maroon-800">
+                <span className="text-sm text-gspn-maroon-700 dark:text-gspn-maroon-400">
+                  {locale === "fr" ? "Année scolaire:" : "School Year:"}
+                </span>
+                <span className="text-sm font-semibold text-gspn-maroon-800 dark:text-gspn-maroon-300">
+                  {activeSchoolYear.name}
+                </span>
+              </div>
+            )}
+          </div>
         </div>
-        <Select value={selectedYearId} onValueChange={setSelectedYearId}>
-          <SelectTrigger className="w-[200px]">
-            <SelectValue placeholder={t.admin.selectSchoolYear} />
-          </SelectTrigger>
-          <SelectContent>
-            {schoolYears.map((sy) => (
-              <SelectItem key={sy.id} value={sy.id}>
-                {sy.name}
-                {sy.status === "active" && " (Active)"}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
       </div>
 
       {/* Level Filter */}
@@ -262,7 +263,7 @@ export default function GradesClassesPage() {
       {/* Grades Grid */}
       {isLoading ? (
         <div className="flex items-center justify-center h-64">
-          <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+          <Loader2 className="h-8 w-8 animate-spin text-gspn-maroon-500" />
         </div>
       ) : filteredGrades.length === 0 ? (
         <div className="text-center py-16 text-muted-foreground">
@@ -277,20 +278,23 @@ export default function GradesClassesPage() {
             const activeRooms = grade.rooms.filter((r) => r.isActive)
 
             return (
-              <Card key={grade.id}>
+              <Card key={grade.id} className="border shadow-sm overflow-hidden">
                 <CardHeader className="pb-2">
                   <div className="flex items-start justify-between">
-                    <div>
-                      <CardTitle className="flex items-center gap-2">
-                        {grade.name}
-                        {grade.series && <Badge variant="outline">{grade.series}</Badge>}
-                      </CardTitle>
-                      <CardDescription className="flex items-center gap-2 mt-1">
-                        {getLevelBadge(grade.level)}
-                        {grade.code && (
-                          <span className="text-xs text-muted-foreground">{grade.code}</span>
-                        )}
-                      </CardDescription>
+                    <div className="flex items-center gap-2">
+                      <div className="h-2 w-2 rounded-full bg-gspn-maroon-500" />
+                      <div>
+                        <CardTitle className="flex items-center gap-2">
+                          {grade.name}
+                          {grade.series && <Badge variant="outline">{grade.series}</Badge>}
+                        </CardTitle>
+                        <CardDescription className="flex items-center gap-2 mt-1">
+                          {getLevelBadge(grade.level)}
+                          {grade.code && (
+                            <span className="text-xs text-muted-foreground">{grade.code}</span>
+                          )}
+                        </CardDescription>
+                      </div>
                     </div>
                     {/* Assign button in header - visible when there are unassigned students */}
                     {hasUnassigned && (
@@ -426,7 +430,7 @@ export default function GradesClassesPage() {
           onOpenChange={setAssignDialogOpen}
           gradeId={selectedGrade.id}
           gradeName={selectedGrade.name}
-          schoolYearId={selectedYearId}
+          schoolYearId={activeSchoolYear?.id || ""}
           rooms={selectedGrade.rooms}
           onSuccess={handleDialogSuccess}
         />
@@ -439,7 +443,7 @@ export default function GradesClassesPage() {
           onOpenChange={setBulkMoveDialogOpen}
           gradeId={selectedGrade.id}
           gradeName={selectedGrade.name}
-          schoolYearId={selectedYearId}
+          schoolYearId={activeSchoolYear?.id || ""}
           rooms={selectedGrade.rooms}
           onSuccess={handleDialogSuccess}
         />
@@ -452,7 +456,7 @@ export default function GradesClassesPage() {
           onOpenChange={setAutoAssignDialogOpen}
           gradeId={selectedGrade.id}
           gradeName={selectedGrade.name}
-          schoolYearId={selectedYearId}
+          schoolYearId={activeSchoolYear?.id || ""}
           rooms={selectedGrade.rooms}
           onSuccess={handleDialogSuccess}
         />

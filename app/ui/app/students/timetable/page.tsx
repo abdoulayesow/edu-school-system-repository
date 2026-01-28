@@ -4,11 +4,11 @@ import { useState, useEffect } from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Skeleton } from "@/components/ui/skeleton"
-import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs"
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { BookOpen, User, Clock, GraduationCap, Users, Loader2, Calendar } from "lucide-react"
 import { useI18n } from "@/components/i18n-provider"
 import { PageContainer } from "@/components/layout"
-import { sizing } from "@/lib/design-tokens"
+import { StatCard } from "@/components/students"
 import { TimetableGrid, type DaySchedule, type TimePeriod } from "@/components/timetable/timetable-grid"
 import { SectionSelector, type GradeRoom } from "@/components/timetable/section-selector"
 import { SlotEditorDialog, type ScheduleSlot as DialogScheduleSlot, type GradeSubject, type TeacherProfile } from "@/components/timetable/slot-editor-dialog"
@@ -237,14 +237,8 @@ export default function TimetablePage() {
   if (loading) {
     return (
       <PageContainer maxWidth="full">
-        <div className="mb-6">
-          <Skeleton className="h-9 w-48 mb-2" />
-          <Skeleton className="h-5 w-64" />
-        </div>
-        <div className="grid gap-4 md:grid-cols-3 mb-6">
-          <Skeleton className="h-32" />
-          <Skeleton className="h-32" />
-          <Skeleton className="h-32" />
+        <div className="flex items-center justify-center py-12">
+          <Loader2 className="h-8 w-8 animate-spin text-gspn-maroon-500" />
         </div>
       </PageContainer>
     )
@@ -252,46 +246,40 @@ export default function TimetablePage() {
 
   return (
     <PageContainer maxWidth="full">
-      {/* Header */}
-      <div className="mb-6">
-        <h1 className="text-3xl font-bold text-foreground mb-2">{t.classes.title}</h1>
-        <p className="text-muted-foreground">{t.classes.subtitle}</p>
+      {/* Page Header with Brand Styling */}
+      <div className="relative mb-6 overflow-hidden rounded-2xl border border-border bg-card shadow-sm">
+        <div className="h-1 bg-gspn-maroon-500" />
+        <div className="p-6">
+          <div className="flex items-center gap-3 mb-2">
+            <div className="p-2.5 bg-gspn-maroon-500/10 rounded-xl">
+              <Calendar className="h-6 w-6 text-gspn-maroon-500" />
+            </div>
+            <h1 className="text-3xl font-bold text-foreground">{t.classes.title}</h1>
+          </div>
+          <p className="text-muted-foreground mt-1">{t.classes.subtitle}</p>
+        </div>
       </div>
 
       {/* Summary Cards */}
       <div className="grid gap-4 md:grid-cols-3 mb-6">
-        <Card className="py-5">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">{t.classes.totalClasses}</CardTitle>
-            <GraduationCap className={sizing.icon.lg} />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{grades.length}</div>
-            <p className="text-xs text-muted-foreground">{t.classes.allClasses}</p>
-          </CardContent>
-        </Card>
-
-        <Card className="py-5">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">{t.classes.totalStudents}</CardTitle>
-            <Users className={sizing.icon.lg} />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{totalStudents}</div>
-            <p className="text-xs text-muted-foreground">{t.classes.acrossAllClasses}</p>
-          </CardContent>
-        </Card>
-
-        <Card className="py-5">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">{t.common.subjects}</CardTitle>
-            <BookOpen className={sizing.icon.lg} />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{totalSubjects}</div>
-            <p className="text-xs text-muted-foreground">{t.classes.scheduledToday}</p>
-          </CardContent>
-        </Card>
+        <StatCard
+          title={t.classes.totalClasses}
+          value={grades.length}
+          description={t.classes.allClasses}
+          icon={GraduationCap}
+        />
+        <StatCard
+          title={t.classes.totalStudents}
+          value={totalStudents}
+          description={t.classes.acrossAllClasses}
+          icon={Users}
+        />
+        <StatCard
+          title={t.common.subjects}
+          value={totalSubjects}
+          description={t.classes.scheduledToday}
+          icon={BookOpen}
+        />
       </div>
 
       {/* View Toggle Tabs */}
@@ -312,10 +300,15 @@ export default function TimetablePage() {
       <div className="grid gap-6 lg:grid-cols-7">
         {/* Grade List Sidebar */}
         <div className="lg:col-span-2 space-y-4">
-          <Card>
+          <Card className="border shadow-sm overflow-hidden">
             <CardHeader>
-              <CardTitle className="text-base">{t.classes.classes}</CardTitle>
-              <CardDescription>{t.grades.selectClass}</CardDescription>
+              <div className="flex items-center gap-2">
+                <div className="h-2 w-2 rounded-full bg-gspn-maroon-500" />
+                <div>
+                  <CardTitle className="text-base">{t.classes.classes}</CardTitle>
+                  <CardDescription>{t.grades.selectClass}</CardDescription>
+                </div>
+              </div>
             </CardHeader>
             <CardContent className="space-y-2">
               {grades.length === 0 ? (
@@ -329,7 +322,7 @@ export default function TimetablePage() {
                     onClick={() => setSelectedGradeId(grade.id)}
                     className={`w-full flex items-center justify-between p-3 rounded-lg border transition-colors ${
                       selectedGradeId === grade.id
-                        ? "bg-primary/10 border-primary"
+                        ? "bg-gspn-maroon-50 dark:bg-gspn-maroon-950/30 border-gspn-maroon-300 dark:border-gspn-maroon-700"
                         : "bg-background hover:bg-muted border-border"
                     }`}
                   >
@@ -348,9 +341,12 @@ export default function TimetablePage() {
             </CardContent>
           </Card>
 
-          <Card>
+          <Card className="border shadow-sm overflow-hidden">
             <CardHeader>
-              <CardTitle className="text-base">{t.classes.statistics}</CardTitle>
+              <div className="flex items-center gap-2">
+                <div className="h-2 w-2 rounded-full bg-gspn-maroon-500" />
+                <CardTitle className="text-base">{t.classes.statistics}</CardTitle>
+              </div>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="flex items-center justify-between">
@@ -363,7 +359,7 @@ export default function TimetablePage() {
               </div>
               <div className="flex items-center justify-between">
                 <span className="text-sm text-muted-foreground">{t.common.subjects}</span>
-                <span className="text-xl font-bold text-primary">{totalSubjects}</span>
+                <span className="text-xl font-bold text-gspn-maroon-600">{totalSubjects}</span>
               </div>
             </CardContent>
           </Card>
@@ -373,33 +369,38 @@ export default function TimetablePage() {
         <div className="lg:col-span-5 space-y-4">
           {viewMode === "subjects" ? (
             /* Subjects View */
-            <Card>
+            <Card className="border shadow-sm overflow-hidden">
               <CardHeader>
-                <CardTitle>
-                  {gradeDetail?.name || t.grades.selectClass}
-                </CardTitle>
-                <CardDescription>
-                  {gradeDetail ? (
-                    <>
-                      {gradeDetail.studentCount} {t.common.students}
-                      {gradeDetail.leader && ` • ${gradeDetail.leader}`}
-                      {` • ${totalHours}h/${t.common.week}`}
-                    </>
-                  ) : (
-                    t.grades.selectClass
-                  )}
-                </CardDescription>
+                <div className="flex items-center gap-2">
+                  <div className="h-2 w-2 rounded-full bg-gspn-maroon-500" />
+                  <div>
+                    <CardTitle>
+                      {gradeDetail?.name || t.grades.selectClass}
+                    </CardTitle>
+                    <CardDescription>
+                      {gradeDetail ? (
+                        <>
+                          {gradeDetail.studentCount} {t.common.students}
+                          {gradeDetail.leader && ` • ${gradeDetail.leader}`}
+                          {` • ${totalHours}h/${t.common.week}`}
+                        </>
+                      ) : (
+                        t.grades.selectClass
+                      )}
+                    </CardDescription>
+                  </div>
+                </div>
               </CardHeader>
               <CardContent className="space-y-3">
                 {loadingSubjects ? (
                   <div className="flex items-center justify-center py-12">
-                    <Loader2 className="size-8 animate-spin text-muted-foreground" />
+                    <Loader2 className="size-8 animate-spin text-gspn-maroon-500" />
                   </div>
                 ) : subjects.length > 0 ? (
                   subjects.map((subject) => (
                     <div
                       key={subject.id}
-                      className="flex items-start gap-4 p-4 rounded-lg border border-border hover:border-primary/50 transition-colors"
+                      className="flex items-start gap-4 p-4 rounded-lg border border-border hover:border-gspn-maroon-300 dark:hover:border-gspn-maroon-700 transition-colors"
                     >
                       <div className="flex flex-col items-center justify-center min-w-[60px] p-2 rounded-lg bg-muted">
                         <Clock className="size-4 text-muted-foreground mb-1" />
@@ -409,7 +410,7 @@ export default function TimetablePage() {
                         <div className="flex items-start justify-between">
                           <div>
                             <h3 className="font-semibold text-foreground flex items-center gap-2">
-                              <BookOpen className="size-4 text-primary" />
+                              <BookOpen className="size-4 text-gspn-maroon-500" />
                               {subject.name}
                             </h3>
                             {subject.teacher ? (
@@ -447,14 +448,19 @@ export default function TimetablePage() {
           ) : (
             /* Schedule View */
             <>
-              <Card>
+              <Card className="border shadow-sm overflow-hidden">
                 <CardHeader>
-                  <CardTitle>{locale === 'fr' ? 'Emploi du temps hebdomadaire' : 'Weekly Schedule'}</CardTitle>
-                  <CardDescription>
-                    {locale === 'fr'
-                      ? 'Cliquez sur un créneau pour modifier ou ajouter un cours'
-                      : 'Click a slot to edit or add a class'}
-                  </CardDescription>
+                  <div className="flex items-center gap-2">
+                    <div className="h-2 w-2 rounded-full bg-gspn-maroon-500" />
+                    <div>
+                      <CardTitle>{locale === 'fr' ? 'Emploi du temps hebdomadaire' : 'Weekly Schedule'}</CardTitle>
+                      <CardDescription>
+                        {locale === 'fr'
+                          ? 'Cliquez sur un créneau pour modifier ou ajouter un cours'
+                          : 'Click a slot to edit or add a class'}
+                      </CardDescription>
+                    </div>
+                  </div>
                 </CardHeader>
                 <CardContent className="space-y-4">
                   {/* Section Selector */}
@@ -468,7 +474,7 @@ export default function TimetablePage() {
                   {/* Timetable Grid */}
                   {loadingSchedule ? (
                     <div className="flex items-center justify-center py-12">
-                      <Loader2 className="size-8 animate-spin text-muted-foreground" />
+                      <Loader2 className="size-8 animate-spin text-gspn-maroon-500" />
                     </div>
                   ) : timePeriods.length === 0 ? (
                     <div className="text-center py-12">

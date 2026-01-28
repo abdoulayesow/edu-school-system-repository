@@ -145,13 +145,14 @@ function WizardContent({ onComplete, onCancel }: ExpenseWizardProps) {
 
       {/* Main Content Card */}
       <Card className="border-2 shadow-xl overflow-hidden bg-gradient-to-br from-white to-slate-50/50 dark:from-slate-900 dark:to-slate-800/50">
+        <div className="h-1 bg-gspn-maroon-500" />
         {currentStep < 5 && (
-          <CardHeader className="pb-4 border-b bg-gradient-to-r from-orange-50 to-amber-50 dark:from-orange-950/30 dark:to-amber-950/30">
+          <CardHeader className="pb-4 border-b bg-gradient-to-r from-gspn-maroon-50 to-gspn-gold-50/50 dark:from-gspn-maroon-950/30 dark:to-gspn-gold-950/20">
             <CardTitle className="flex items-center gap-3 text-xl">
-              <div className="p-2 rounded-lg bg-gradient-to-br from-orange-500 to-amber-500 shadow-lg">
-                <Receipt className={`${sizing.icon.md} text-white`} />
+              <div className="p-2.5 rounded-xl bg-gspn-maroon-500/10">
+                <Receipt className={`${sizing.icon.md} text-gspn-maroon-600 dark:text-gspn-maroon-400`} />
               </div>
-              <span className="bg-gradient-to-r from-slate-900 to-slate-700 dark:from-slate-100 dark:to-slate-300 bg-clip-text text-transparent">
+              <span className="text-gspn-maroon-900 dark:text-gspn-maroon-100">
                 {getStepTitle()}
               </span>
             </CardTitle>

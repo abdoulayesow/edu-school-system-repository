@@ -28,6 +28,7 @@ import {
   Search,
   BookOpen,
   ExternalLink,
+  Settings,
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 
@@ -146,8 +147,27 @@ function SizeDemo({
   )
 }
 
+// Helper to check if content matches search
+function matchesSearch(query: string, ...terms: string[]): boolean {
+  if (!query.trim()) return true
+  const lowerQuery = query.toLowerCase()
+  return terms.some(term => term.toLowerCase().includes(lowerQuery))
+}
+
 export default function StyleGuidePage() {
   const [searchQuery, setSearchQuery] = useState("")
+
+  // Filter visibility based on search
+  const showColors = matchesSearch(searchQuery, "color", "brand", "maroon", "gold", "semantic", "chart", "navigation", "nav", "primary", "accent", "success", "warning", "destructive")
+  const showTypography = matchesSearch(searchQuery, "typography", "font", "heading", "body", "stat", "currency", "text", "display", "mono", "sans")
+  const showSizing = matchesSearch(searchQuery, "sizing", "size", "icon", "avatar", "button", "toolbar")
+  const showSpacing = matchesSearch(searchQuery, "spacing", "container", "padding", "gap", "card", "width")
+  const showShadows = matchesSearch(searchQuery, "shadow", "elevation", "glow", "lift", "effect")
+  const showAnimations = matchesSearch(searchQuery, "animation", "timing", "duration", "ease", "spring", "fade", "slide", "scale")
+  const showComponents = matchesSearch(searchQuery, "component", "class", "button", "nav", "tab", "toolbar", "primary", "action")
+
+  // No results state
+  const hasResults = showColors || showTypography || showSizing || showSpacing || showShadows || showAnimations || showComponents
 
   return (
     <PageContainer maxWidth="full">
@@ -184,7 +204,7 @@ export default function StyleGuidePage() {
           </div>
 
           {/* Quick Stats with clean cards */}
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-8 pt-8 border-t border-border">
+          <div className="grid grid-cols-2 md:grid-cols-5 gap-4 mt-8 pt-8 border-t border-border">
             <div className="bg-muted/50 rounded-xl p-4 border border-border">
               <p className="font-mono text-3xl font-bold text-gspn-maroon-600 dark:text-gspn-maroon-400">4</p>
               <p className="text-sm text-muted-foreground mt-1">Font Families</p>
@@ -201,6 +221,10 @@ export default function StyleGuidePage() {
               <p className="font-mono text-3xl font-bold text-gspn-maroon-600 dark:text-gspn-maroon-400">5</p>
               <p className="text-sm text-muted-foreground mt-1">Animations</p>
             </div>
+            <div className="bg-muted/50 rounded-xl p-4 border border-border">
+              <p className="font-mono text-3xl font-bold text-gspn-maroon-600 dark:text-gspn-maroon-400">7</p>
+              <p className="text-sm text-muted-foreground mt-1">Component Classes</p>
+            </div>
           </div>
         </div>
       </div>
@@ -214,34 +238,69 @@ export default function StyleGuidePage() {
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
         />
+        {searchQuery && (
+          <button
+            onClick={() => setSearchQuery("")}
+            className="absolute right-4 top-1/2 -translate-y-1/2 text-xs text-muted-foreground hover:text-foreground px-2 py-1 rounded bg-muted"
+          >
+            Clear
+          </button>
+        )}
       </div>
 
-      <Tabs defaultValue="colors" className="space-y-8">
-        <TabsList className="grid w-full grid-cols-6 lg:w-auto lg:inline-flex h-auto p-1 bg-slate-100 dark:bg-slate-800">
-          <TabsTrigger value="colors" className="gap-2 data-[state=active]:bg-white dark:data-[state=active]:bg-slate-700">
-            <Palette className="h-4 w-4" />
-            <span className="hidden sm:inline">Colors</span>
-          </TabsTrigger>
-          <TabsTrigger value="typography" className="gap-2 data-[state=active]:bg-white dark:data-[state=active]:bg-slate-700">
-            <Type className="h-4 w-4" />
-            <span className="hidden sm:inline">Typography</span>
-          </TabsTrigger>
-          <TabsTrigger value="sizing" className="gap-2 data-[state=active]:bg-white dark:data-[state=active]:bg-slate-700">
-            <Box className="h-4 w-4" />
-            <span className="hidden sm:inline">Sizing</span>
-          </TabsTrigger>
-          <TabsTrigger value="spacing" className="gap-2 data-[state=active]:bg-white dark:data-[state=active]:bg-slate-700">
-            <Grid3X3 className="h-4 w-4" />
-            <span className="hidden sm:inline">Spacing</span>
-          </TabsTrigger>
-          <TabsTrigger value="shadows" className="gap-2 data-[state=active]:bg-white dark:data-[state=active]:bg-slate-700">
-            <Layers className="h-4 w-4" />
-            <span className="hidden sm:inline">Shadows</span>
-          </TabsTrigger>
-          <TabsTrigger value="animations" className="gap-2 data-[state=active]:bg-white dark:data-[state=active]:bg-slate-700">
-            <Sparkles className="h-4 w-4" />
-            <span className="hidden sm:inline">Animation</span>
-          </TabsTrigger>
+      {/* No Results Message */}
+      {!hasResults && searchQuery && (
+        <div className="text-center py-16 border-2 border-dashed rounded-xl bg-muted/30">
+          <Search className="h-12 w-12 mx-auto text-muted-foreground/50 mb-4" />
+          <p className="text-lg font-medium text-muted-foreground">No tokens found for "{searchQuery}"</p>
+          <p className="text-sm text-muted-foreground mt-1">Try searching for "gold", "heading", "shadow", or "animation"</p>
+        </div>
+      )}
+
+      <Tabs defaultValue="colors" className={cn("space-y-8", !hasResults && "hidden")}>
+        <TabsList className="flex flex-wrap w-full lg:w-auto lg:inline-flex h-auto p-1 bg-slate-100 dark:bg-slate-800 gap-1">
+          {showColors && (
+            <TabsTrigger value="colors" className="gap-2 data-[state=active]:bg-white dark:data-[state=active]:bg-slate-700">
+              <Palette className="h-4 w-4" />
+              <span className="hidden sm:inline">Colors</span>
+            </TabsTrigger>
+          )}
+          {showTypography && (
+            <TabsTrigger value="typography" className="gap-2 data-[state=active]:bg-white dark:data-[state=active]:bg-slate-700">
+              <Type className="h-4 w-4" />
+              <span className="hidden sm:inline">Typography</span>
+            </TabsTrigger>
+          )}
+          {showSizing && (
+            <TabsTrigger value="sizing" className="gap-2 data-[state=active]:bg-white dark:data-[state=active]:bg-slate-700">
+              <Box className="h-4 w-4" />
+              <span className="hidden sm:inline">Sizing</span>
+            </TabsTrigger>
+          )}
+          {showSpacing && (
+            <TabsTrigger value="spacing" className="gap-2 data-[state=active]:bg-white dark:data-[state=active]:bg-slate-700">
+              <Grid3X3 className="h-4 w-4" />
+              <span className="hidden sm:inline">Spacing</span>
+            </TabsTrigger>
+          )}
+          {showShadows && (
+            <TabsTrigger value="shadows" className="gap-2 data-[state=active]:bg-white dark:data-[state=active]:bg-slate-700">
+              <Layers className="h-4 w-4" />
+              <span className="hidden sm:inline">Shadows</span>
+            </TabsTrigger>
+          )}
+          {showAnimations && (
+            <TabsTrigger value="animations" className="gap-2 data-[state=active]:bg-white dark:data-[state=active]:bg-slate-700">
+              <Sparkles className="h-4 w-4" />
+              <span className="hidden sm:inline">Animation</span>
+            </TabsTrigger>
+          )}
+          {showComponents && (
+            <TabsTrigger value="components" className="gap-2 data-[state=active]:bg-white dark:data-[state=active]:bg-slate-700">
+              <Layers className="h-4 w-4" />
+              <span className="hidden sm:inline">Components</span>
+            </TabsTrigger>
+          )}
         </TabsList>
 
         {/* COLORS TAB */}
@@ -1028,6 +1087,126 @@ export default function StyleGuidePage() {
                   />
                 ))}
               </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        {/* COMPONENTS TAB */}
+        <TabsContent value="components" className="space-y-6">
+          {/* Component Classes Overview */}
+          <Card className="border shadow-sm overflow-hidden">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <div className="h-2 w-2 rounded-full bg-gspn-maroon-500" />
+                Component Classes
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="pt-6">
+              <p className="text-muted-foreground mb-6">
+                Pre-composed Tailwind class combinations for consistent UI patterns. Import from <code className="bg-muted px-2 py-0.5 rounded text-sm">@/lib/design-tokens</code>
+              </p>
+              <div className="space-y-6">
+                {/* Primary Action Button */}
+                <div className="p-5 border-2 rounded-xl bg-gradient-to-br from-amber-50/50 to-transparent dark:from-amber-900/20">
+                  <div className="flex items-center justify-between mb-3">
+                    <h4 className="font-semibold">primaryActionButton</h4>
+                    <Badge className="bg-gspn-gold-500 text-black text-xs">Most Used</Badge>
+                  </div>
+                  <p className="text-sm text-muted-foreground mb-4">Gold CTA button - the primary call-to-action style used throughout the app</p>
+                  <div className="flex items-center gap-4 mb-4">
+                    <Button className={componentClasses.primaryActionButton}>
+                      Example Button
+                    </Button>
+                  </div>
+                  <code className="text-xs bg-slate-100 dark:bg-slate-800 p-3 rounded-lg block overflow-x-auto">
+                    componentClasses.primaryActionButton
+                  </code>
+                </div>
+
+                {/* Toolbar Icon Button */}
+                <div className="p-5 border-2 rounded-xl bg-gradient-to-br from-blue-50/50 to-transparent dark:from-blue-900/20">
+                  <h4 className="font-semibold mb-2">toolbarIconButton</h4>
+                  <p className="text-sm text-muted-foreground mb-4">Icon-only toolbar buttons with gold/maroon theming</p>
+                  <div className="flex items-center gap-2 mb-4">
+                    <button className={componentClasses.toolbarIconButton}>
+                      <Search className="h-5 w-5" />
+                    </button>
+                    <button className={componentClasses.toolbarIconButton}>
+                      <Settings className="h-5 w-5" />
+                    </button>
+                  </div>
+                  <code className="text-xs bg-slate-100 dark:bg-slate-800 p-3 rounded-lg block overflow-x-auto">
+                    componentClasses.toolbarIconButton
+                  </code>
+                </div>
+
+                {/* Navigation Buttons */}
+                <div className="p-5 border-2 rounded-xl bg-gradient-to-br from-purple-50/50 to-transparent dark:from-purple-900/20">
+                  <h4 className="font-semibold mb-2">Navigation Buttons</h4>
+                  <p className="text-sm text-muted-foreground mb-4">Sidebar navigation button patterns (base + active/inactive states)</p>
+                  <div className="flex items-center gap-2 mb-4 p-3 bg-sidebar rounded-lg">
+                    <button className={cn(componentClasses.navMainButtonBase, componentClasses.navMainButtonActive)}>
+                      Active
+                    </button>
+                    <button className={cn(componentClasses.navMainButtonBase, componentClasses.navMainButtonInactive)}>
+                      Inactive
+                    </button>
+                  </div>
+                  <div className="space-y-2">
+                    <code className="text-xs bg-slate-100 dark:bg-slate-800 p-2 rounded block">navMainButtonBase + navMainButtonActive</code>
+                    <code className="text-xs bg-slate-100 dark:bg-slate-800 p-2 rounded block">navMainButtonBase + navMainButtonInactive</code>
+                  </div>
+                </div>
+
+                {/* Tab Buttons */}
+                <div className="p-5 border-2 rounded-xl bg-gradient-to-br from-emerald-50/50 to-transparent dark:from-emerald-900/20">
+                  <h4 className="font-semibold mb-2">Tab Buttons</h4>
+                  <p className="text-sm text-muted-foreground mb-4">Custom tab navigation with underline style</p>
+                  <div className="mb-4">
+                    <div className={componentClasses.tabListBase}>
+                      <button className={cn(componentClasses.tabButtonBase, componentClasses.tabButtonActive)}>Active</button>
+                      <button className={cn(componentClasses.tabButtonBase, componentClasses.tabButtonInactive)}>Inactive</button>
+                      <button className={cn(componentClasses.tabButtonBase, componentClasses.tabButtonInactive)}>Another</button>
+                    </div>
+                  </div>
+                  <div className="space-y-2">
+                    <code className="text-xs bg-slate-100 dark:bg-slate-800 p-2 rounded block">tabListBase (container)</code>
+                    <code className="text-xs bg-slate-100 dark:bg-slate-800 p-2 rounded block">tabButtonBase + tabButtonActive</code>
+                    <code className="text-xs bg-slate-100 dark:bg-slate-800 p-2 rounded block">tabButtonBase + tabButtonInactive</code>
+                  </div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Usage Example */}
+          <Card className="border shadow-sm overflow-hidden">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <div className="h-2 w-2 rounded-full bg-gspn-maroon-500" />
+                Usage Example
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="pt-6">
+              <pre className="text-sm bg-slate-100 dark:bg-slate-800 p-4 rounded-xl overflow-x-auto border">
+{`import { componentClasses } from "@/lib/design-tokens"
+import { cn } from "@/lib/utils"
+
+// Primary action button
+<Button className={componentClasses.primaryActionButton}>
+  Save Changes
+</Button>
+
+// Navigation with state
+<button className={cn(
+  componentClasses.navMainButtonBase,
+  isActive
+    ? componentClasses.navMainButtonActive
+    : componentClasses.navMainButtonInactive
+)}>
+  Dashboard
+</button>`}
+              </pre>
             </CardContent>
           </Card>
         </TabsContent>

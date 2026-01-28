@@ -264,23 +264,33 @@ export default function StudentsPage() {
 
   return (
     <PageContainer>
-      {/* Header */}
-      <div className="mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
-        <div>
-          <h1 className="text-3xl font-bold text-foreground mb-2">{t.students.title}</h1>
-          <p className="text-muted-foreground">{t.students.subtitle}</p>
-        </div>
-        {/* Current School Year Indicator */}
-        {activeSchoolYear && (
-          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800">
-            <span className="text-sm text-amber-700 dark:text-amber-400">
-              {locale === "fr" ? "Année scolaire:" : "School Year:"}
-            </span>
-            <span className="text-sm font-semibold text-amber-800 dark:text-amber-300">
-              {activeSchoolYear.name}
-            </span>
+      {/* Page Header with Brand Styling */}
+      <div className="relative mb-6 overflow-hidden rounded-2xl border border-border bg-card shadow-sm">
+        <div className="h-1 bg-gspn-maroon-500" />
+        <div className="p-6">
+          <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
+            <div>
+              <div className="flex items-center gap-3 mb-2">
+                <div className="p-2.5 bg-gspn-maroon-500/10 rounded-xl">
+                  <Users className="h-6 w-6 text-gspn-maroon-500" />
+                </div>
+                <h1 className="text-3xl font-bold text-foreground">{t.students.title}</h1>
+              </div>
+              <p className="text-muted-foreground mt-1">{t.students.subtitle}</p>
+            </div>
+            {/* Current School Year Indicator */}
+            {activeSchoolYear && (
+              <div className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-gspn-maroon-50 dark:bg-gspn-maroon-950/30 border border-gspn-maroon-200 dark:border-gspn-maroon-800">
+                <span className="text-sm text-gspn-maroon-700 dark:text-gspn-maroon-400">
+                  {locale === "fr" ? "Année scolaire:" : "School Year:"}
+                </span>
+                <span className="text-sm font-semibold text-gspn-maroon-800 dark:text-gspn-maroon-300">
+                  {activeSchoolYear.name}
+                </span>
+              </div>
+            )}
           </div>
-        )}
+        </div>
       </div>
 
         {/* Summary Cards */}
@@ -343,9 +353,12 @@ export default function StudentsPage() {
         </div>
 
         {/* Filters */}
-        <Card className="mb-6 py-2">
+        <Card className="mb-6 py-2 border shadow-sm overflow-hidden">
           <CardHeader className="pb-1 px-6 pt-3">
-            <CardTitle className="text-sm">{t.students.filterStudents}</CardTitle>
+            <CardTitle className="text-sm flex items-center gap-2">
+              <div className="h-2 w-2 rounded-full bg-gspn-maroon-500" />
+              {t.students.filterStudents}
+            </CardTitle>
           </CardHeader>
           <CardContent className="pt-0 pb-2 px-6">
             <div className="flex flex-col sm:flex-row gap-4">
@@ -434,11 +447,14 @@ export default function StudentsPage() {
         </Card>
 
         {/* Students Table */}
-        <Card>
+        <Card className="border shadow-sm overflow-hidden">
           <CardHeader>
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
               <div>
-                <CardTitle>{t.students.title}</CardTitle>
+                <CardTitle className="flex items-center gap-2">
+                  <div className="h-2 w-2 rounded-full bg-gspn-maroon-500" />
+                  {t.students.title}
+                </CardTitle>
                 <CardDescription>
                   {filteredStudents.length} {t.common.students}
                   {pagination && ` sur ${pagination.total}`}
@@ -449,7 +465,7 @@ export default function StudentsPage() {
           <CardContent>
             {isLoading ? (
               <div className="flex items-center justify-center py-8">
-                <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+                <Loader2 className="h-8 w-8 animate-spin text-gspn-maroon-500" />
               </div>
             ) : error ? (
               <div className="text-center py-8 text-destructive">{error}</div>

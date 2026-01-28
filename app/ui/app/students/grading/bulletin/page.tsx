@@ -287,13 +287,16 @@ export default function BulletinPage() {
   if (isLoading) {
     return (
       <div className="min-h-screen bg-white dark:bg-background flex items-center justify-center">
-        <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+        <Loader2 className="h-8 w-8 animate-spin text-gspn-maroon-500" />
       </div>
     )
   }
 
   return (
     <PageContainer maxWidth="lg">
+      {/* Maroon accent bar */}
+      <div className="h-1 bg-gspn-maroon-500 -mx-4 sm:-mx-6 lg:-mx-8 mb-6" />
+
       {/* Header */}
       <div className="flex items-center gap-4 mb-6">
         <Link href="/students/grades" className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground">
@@ -303,7 +306,9 @@ export default function BulletinPage() {
       </div>
 
       <div className="flex items-center gap-3 mb-6">
-        <FileText className="size-8 text-primary" />
+        <div className="p-2.5 bg-gspn-maroon-500/10 rounded-xl">
+          <FileText className="size-6 text-gspn-maroon-500" />
+        </div>
         <div>
           <h1 className="text-2xl font-bold">
             {locale === "fr" ? "Bulletin de Notes" : "Report Card"}
@@ -317,8 +322,14 @@ export default function BulletinPage() {
       </div>
 
       {/* Filters */}
-      <Card className="mb-6">
-        <CardContent className="pt-6">
+      <Card className="mb-6 border shadow-sm overflow-hidden">
+        <CardHeader className="pb-2">
+          <CardTitle className="text-lg flex items-center gap-2">
+            <div className="h-2 w-2 rounded-full bg-gspn-maroon-500" />
+            {locale === "fr" ? "Sélection" : "Selection"}
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div>
               <label className="text-sm font-medium mb-2 block">
@@ -393,7 +404,7 @@ export default function BulletinPage() {
       {/* Bulletin Content */}
       {loadingBulletin ? (
         <div className="flex items-center justify-center py-12">
-          <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+          <Loader2 className="h-8 w-8 animate-spin text-gspn-maroon-500" />
         </div>
       ) : bulletin ? (
         <div className="space-y-6">
@@ -582,9 +593,12 @@ export default function BulletinPage() {
           )}
 
           {/* Grades Table */}
-          <Card>
+          <Card className="border shadow-sm overflow-hidden">
             <CardHeader>
-              <CardTitle>{locale === "fr" ? "Résultats par matière" : "Subject Results"}</CardTitle>
+              <CardTitle className="flex items-center gap-2">
+                <div className="h-2 w-2 rounded-full bg-gspn-maroon-500" />
+                {locale === "fr" ? "Résultats par matière" : "Subject Results"}
+              </CardTitle>
               <CardDescription>
                 {bulletin.subjects.length} {locale === "fr" ? "matières" : "subjects"} -{" "}
                 {locale === "fr" ? "Coefficient total" : "Total coefficient"}: {bulletin.totalCoefficient}

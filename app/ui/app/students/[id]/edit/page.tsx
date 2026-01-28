@@ -190,7 +190,7 @@ export default function StudentEditPage() {
   if (isLoading) {
     return (
       <div className="min-h-screen bg-white dark:bg-background flex items-center justify-center">
-        <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+        <Loader2 className="h-8 w-8 animate-spin text-gspn-maroon-500" />
       </div>
     )
   }
@@ -209,19 +209,30 @@ export default function StudentEditPage() {
 
   return (
     <PageContainer maxWidth="lg">
-      {/* Back link */}
-      <Link href={`/students/${studentId}`} className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground mb-4">
-        <ArrowLeft className="size-4" />
-        {t.students.backToProfile}
-      </Link>
+      {/* Header */}
+      <div className="relative mb-6 overflow-hidden rounded-2xl border border-border bg-card shadow-sm">
+        <div className="h-1 bg-gspn-maroon-500" />
+        <div className="p-6">
+          {/* Back link */}
+          <Link href={`/students/${studentId}`} className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground mb-4">
+            <ArrowLeft className="size-4" />
+            {t.students.backToProfile}
+          </Link>
 
-      <div className="mb-6">
-        <h1 className="text-2xl font-bold">
-          {t.students.editStudent}
-        </h1>
-        <p className="text-muted-foreground">
-          {student?.firstName} {student?.lastName} • {student?.studentNumber}
-        </p>
+          <div className="flex items-center gap-3">
+            <div className="p-2.5 bg-gspn-maroon-500/10 rounded-xl">
+              <User className="h-6 w-6 text-gspn-maroon-500" />
+            </div>
+            <div>
+              <h1 className="text-2xl font-bold">
+                {t.students.editStudent}
+              </h1>
+              <p className="text-muted-foreground">
+                {student?.firstName} {student?.lastName} • {student?.studentNumber}
+              </p>
+            </div>
+          </div>
+        </div>
       </div>
 
       {error && (
@@ -232,10 +243,10 @@ export default function StudentEditPage() {
 
       <form onSubmit={handleSubmit} className="space-y-6">
         {/* Personal Information */}
-        <Card>
+        <Card className="border shadow-sm overflow-hidden">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              <User className="size-5" />
+              <div className="h-2 w-2 rounded-full bg-gspn-maroon-500" />
               {t.students.personalInfo}
             </CardTitle>
             <CardDescription>
@@ -336,10 +347,10 @@ export default function StudentEditPage() {
         </Card>
 
         {/* Parent Information */}
-        <Card>
+        <Card className="border shadow-sm overflow-hidden">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              <Users className="size-5" />
+              <div className="h-2 w-2 rounded-full bg-gspn-maroon-500" />
               {t.students.parentInformation}
             </CardTitle>
             <CardDescription>

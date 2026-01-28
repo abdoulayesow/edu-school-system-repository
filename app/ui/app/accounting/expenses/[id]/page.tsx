@@ -420,6 +420,7 @@ export default function ExpenseDetailsPage() {
 
         {/* Expense Card */}
         <Card className="print-area overflow-hidden shadow-lg bg-white dark:bg-card relative hover:shadow-xl transition-shadow duration-300">
+          <div className="h-1 bg-gspn-maroon-500" />
           <CardContent className="p-6 md:p-10 space-y-8">
             {/* Enhanced Header - Compact */}
             <div className="text-center space-y-3 animate-in fade-in slide-in-from-top-4 duration-500">
@@ -451,7 +452,7 @@ export default function ExpenseDetailsPage() {
             <div
               className={cn(
                 "text-center py-6 md:py-8 rounded-2xl relative overflow-hidden animate-in fade-in slide-in-from-bottom-4 duration-700 border-2",
-                "bg-gradient-to-br from-orange-50 via-orange-100/50 to-orange-50 dark:from-orange-950/30 dark:via-orange-900/20 dark:to-orange-950/30 border-orange-200/50 dark:border-orange-800/50"
+                "bg-gradient-to-br from-gspn-maroon-50 via-gspn-maroon-100/50 to-gspn-maroon-50 dark:from-gspn-maroon-950/30 dark:via-gspn-maroon-900/20 dark:to-gspn-maroon-950/30 border-gspn-maroon-200/50 dark:border-gspn-maroon-800/50"
               )}
             >
               {/* Animated shimmer overlay */}
@@ -474,7 +475,7 @@ export default function ExpenseDetailsPage() {
                 <div className="text-[11px] font-bold uppercase tracking-[0.25em] text-muted-foreground/80">
                   {t.expenses.expenseAmount || "Expense Amount"}
                 </div>
-                <div className="text-5xl sm:text-6xl md:text-7xl font-bold font-mono tracking-tighter leading-none text-orange-900 dark:text-orange-100">
+                <div className="text-5xl sm:text-6xl md:text-7xl font-bold font-mono tracking-tighter leading-none text-gspn-maroon-900 dark:text-gspn-maroon-100">
                   {formatCurrency(expense.amount)}
                 </div>
 
@@ -487,7 +488,7 @@ export default function ExpenseDetailsPage() {
 
                   <Badge
                     variant="outline"
-                    className="font-semibold shadow-md transition-all hover:scale-105 cursor-default border-orange-400 bg-orange-100 text-orange-800 dark:border-orange-600 dark:bg-orange-950/70 dark:text-orange-200"
+                    className="font-semibold shadow-md transition-all hover:scale-105 cursor-default border-gspn-maroon-400 bg-gspn-maroon-100 text-gspn-maroon-800 dark:border-gspn-maroon-600 dark:bg-gspn-maroon-950/70 dark:text-gspn-maroon-200"
                   >
                     <CategoryIcon className="size-3.5 mr-2" />
                     {getCategoryLabel(expense.category)}
@@ -795,7 +796,7 @@ export default function ExpenseDetailsPage() {
                     onClick={handleDownloadPDF}
                     size="lg"
                     variant="outline"
-                    className="gap-3 shadow-lg hover:shadow-xl transition-all group font-semibold border-2 border-orange-300 dark:border-orange-700 hover:bg-orange-50 dark:hover:bg-orange-950/30"
+                    className="gap-3 shadow-lg hover:shadow-xl transition-all group font-semibold border-2 border-gspn-gold-400 dark:border-gspn-gold-600 hover:bg-gspn-gold-50 dark:hover:bg-gspn-gold-950/30"
                   >
                     <Download className="size-5 group-hover:scale-110 transition-transform" />
                     <span>{t.expenses?.downloadPdf || "Download PDF"}</span>

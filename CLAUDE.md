@@ -166,6 +166,39 @@ export async function GET(req: NextRequest, { params }: RouteParams) {
   - `granted: false` = DENY (removes permission)
 - Effective permissions = `(Role Permissions - Denials) ∪ Grants`
 
+## UI/UX Design Guidelines
+
+When creating or modifying UI components and pages, use the `frontend-design` skill and follow the GSPN brand guidelines documented in:
+- `/brand` - Component showcase with live examples (http://localhost:8000/brand)
+- `/style-guide` - Design tokens reference (http://localhost:8000/style-guide)
+
+### GSPN Brand Colors
+- **Maroon** (`gspn-maroon-500`: #8B2332) - Primary brand color, used for accents and highlights
+- **Gold** (`gspn-gold-500`: #D4AF37) - Secondary brand color, used for CTAs and active states
+- **Black** (#1a1a1a) - Text and contrast
+
+### Key Visual Patterns
+| Pattern | Implementation |
+|---------|---------------|
+| Page header accent | `<div className="h-1 bg-gspn-maroon-500" />` |
+| Section card | `<Card className="border shadow-sm overflow-hidden">` |
+| Card title indicator | `<div className="h-2 w-2 rounded-full bg-gspn-maroon-500" />` |
+| Primary CTA button | `componentClasses.primaryActionButton` (gold background) |
+| Active state | `bg-gspn-gold-500 text-black` |
+| Icon container | `p-2.5 bg-gspn-maroon-500/10 rounded-xl` |
+
+### Design Tokens
+Import from `@/lib/design-tokens`:
+- `sizing` - Icon sizes, avatar sizes, button heights
+- `typography` - Font classes for headings, body, stats
+- `shadows` - Elevation levels
+- `componentClasses` - Pre-composed Tailwind class combinations
+
+### Color Usage Rules
+- **Maroon**: Headers, accents, indicators, hover states
+- **Gold**: Primary actions, active tabs, success highlights
+- **Avoid**: Purple, pink, or other gradients that don't match brand
+
 ## Session Summaries
 
 For complex multi-session work, create summaries in `docs/summaries/` with format:
@@ -177,6 +210,27 @@ Include:
 - Design patterns used
 - Remaining tasks
 - Resume prompt for next session
+
+## Planned Future Features
+
+### Payment Methods
+Current supported methods:
+- `cash` - Cash payments (stored in safe)
+- `orange_money` - Orange Money mobile payments (tracked separately)
+
+Planned additions:
+- **Check payments** - Rare usage (1-2 people), low priority. Will need:
+  - Add `check` to payment method enum
+  - Check number field
+  - Bank name field
+  - Clearance tracking (pending → cleared → bounced)
+
+### Expense Management
+- **Salary management** - Dedicated salary tracking within expenses:
+  - Monthly salary records per staff member
+  - Salary schedules and payment history
+  - Integration with staff roles
+  - Payroll reports
 
 ## Important Notes
 

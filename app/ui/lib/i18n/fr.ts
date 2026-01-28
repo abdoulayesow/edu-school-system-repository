@@ -2941,6 +2941,7 @@ export const fr = {
       closeDay: "Fermer la journée",
       safeRegistryTransfer: "Transfert Coffre/Caisse",
       recordExpense: "Enregistrer une dépense",
+      recordPayment: "Enregistrer un paiement",
       bankTransfer: "Transfert bancaire",
       verifyCash: "Vérifier la caisse",
       alreadyVerified: "Déjà vérifié",
@@ -2961,6 +2962,7 @@ export const fr = {
     // Page
     title: "Nouveau paiement",
     description: "Enregistrer un paiement de scolarité",
+    loadingStudent: "Chargement des informations de l'élève...",
 
     // Step 0 - Payment Type Selection
     selectPaymentType: "Sélectionner le type de paiement",

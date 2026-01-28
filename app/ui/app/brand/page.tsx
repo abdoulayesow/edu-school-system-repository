@@ -17,6 +17,7 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import {
   AlertCircle,
   ArrowRight,
@@ -29,6 +30,7 @@ import {
   CreditCard,
   Download,
   ExternalLink,
+  FileText,
   GraduationCap,
   Home,
   Loader2,
@@ -77,10 +79,8 @@ function DualModePreview({
               <div className="h-2.5 w-2.5 rounded-full bg-amber-400 shadow-sm" />
               <span className="text-xs font-semibold text-amber-900 dark:text-amber-200">Light Mode</span>
             </div>
-            <div className="p-5 bg-white text-gray-900" data-theme="light">
-              <div className="[&_*]:!text-inherit light-mode-preview">
-                {children}
-              </div>
+            <div className="p-5 bg-white text-gray-900 [&_.text-muted-foreground]:text-slate-500 [&_.text-foreground]:text-slate-900" data-theme="light">
+              {children}
             </div>
           </div>
         )}
@@ -229,15 +229,150 @@ export default function BrandPage() {
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-8">
-        <TabsList className="grid w-full grid-cols-7 lg:w-auto lg:inline-flex h-auto p-1 bg-slate-100 dark:bg-slate-800">
+        <TabsList className="grid w-full grid-cols-9 lg:w-auto lg:inline-flex h-auto p-1 bg-slate-100 dark:bg-slate-800">
+          <TabsTrigger value="headers">Headers</TabsTrigger>
           <TabsTrigger value="components">Components</TabsTrigger>
           <TabsTrigger value="cards">Cards</TabsTrigger>
+          <TabsTrigger value="tables">Tables</TabsTrigger>
           <TabsTrigger value="forms">Forms</TabsTrigger>
           <TabsTrigger value="navigation">Navigation</TabsTrigger>
           <TabsTrigger value="status">Status</TabsTrigger>
           <TabsTrigger value="treasury">Treasury</TabsTrigger>
           <TabsTrigger value="loading">Loading</TabsTrigger>
         </TabsList>
+
+        {/* HEADERS TAB */}
+        <TabsContent value="headers" className="space-y-8">
+          {/* Page Header Pattern */}
+          <Card className="border shadow-sm overflow-hidden">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <div className="h-2 w-2 rounded-full bg-gspn-maroon-500" />
+                Page Header Pattern
+              </CardTitle>
+              <CardDescription>
+                Standard page header with maroon accent bar, icon next to title, and optional school year badge
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="pt-6 space-y-6">
+              <DualModePreview title="Standard Page Header" viewMode={viewMode}>
+                <div className="relative overflow-hidden rounded-2xl border border-border bg-card shadow-sm">
+                  <div className="h-1 bg-gspn-maroon-500" />
+                  <div className="p-6">
+                    <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
+                      <div>
+                        <div className="flex items-center gap-3 mb-2">
+                          <div className="p-2.5 bg-gspn-maroon-500/10 rounded-xl">
+                            <FileText className="h-6 w-6 text-gspn-maroon-500" />
+                          </div>
+                          <h1 className="text-3xl font-bold text-foreground">
+                            Enrollments
+                          </h1>
+                        </div>
+                        <p className="text-muted-foreground mt-1">
+                          Manage student enrollments and profiles
+                        </p>
+                      </div>
+                      {/* School Year Badge */}
+                      <div className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-gspn-maroon-50 dark:bg-gspn-maroon-950/30 border border-gspn-maroon-200 dark:border-gspn-maroon-800">
+                        <span className="text-sm text-gspn-maroon-700 dark:text-gspn-maroon-400">
+                          School Year:
+                        </span>
+                        <span className="text-sm font-semibold text-gspn-maroon-800 dark:text-gspn-maroon-300">
+                          2025 - 2026
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </DualModePreview>
+
+              <DualModePreview title="Page Header without Badge" viewMode={viewMode}>
+                <div className="relative overflow-hidden rounded-2xl border border-border bg-card shadow-sm">
+                  <div className="h-1 bg-gspn-maroon-500" />
+                  <div className="p-6">
+                    <div className="flex items-center gap-3 mb-2">
+                      <div className="p-2.5 bg-gspn-maroon-500/10 rounded-xl">
+                        <Users className="h-6 w-6 text-gspn-maroon-500" />
+                      </div>
+                      <h1 className="text-3xl font-bold text-foreground">
+                        Students
+                      </h1>
+                    </div>
+                    <p className="text-muted-foreground mt-1">
+                      View and manage all students
+                    </p>
+                  </div>
+                </div>
+              </DualModePreview>
+
+              <DualModePreview title="Compact Page Header" viewMode={viewMode}>
+                <div className="relative overflow-hidden rounded-2xl border border-border bg-card shadow-sm">
+                  <div className="h-1 bg-gspn-maroon-500" />
+                  <div className="p-4">
+                    <div className="flex items-center gap-3">
+                      <div className="p-2 bg-gspn-maroon-500/10 rounded-lg">
+                        <BookOpen className="h-5 w-5 text-gspn-maroon-500" />
+                      </div>
+                      <div>
+                        <h1 className="text-2xl font-bold text-foreground">
+                          Clubs & Activities
+                        </h1>
+                        <p className="text-sm text-muted-foreground">
+                          Enroll students in extracurricular clubs
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </DualModePreview>
+            </CardContent>
+          </Card>
+
+          {/* Code Reference */}
+          <Card className="border shadow-sm overflow-hidden">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <div className="h-2 w-2 rounded-full bg-gspn-maroon-500" />
+                Code Reference
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="pt-6">
+              <pre className="p-4 bg-slate-100 dark:bg-slate-800 rounded-lg text-sm overflow-x-auto">
+{`{/* Page Header with Brand Styling */}
+<div className="relative mb-6 overflow-hidden rounded-2xl border border-border bg-card shadow-sm">
+  <div className="h-1 bg-gspn-maroon-500" />
+  <div className="p-6">
+    <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
+      <div>
+        <div className="flex items-center gap-3 mb-2">
+          <div className="p-2.5 bg-gspn-maroon-500/10 rounded-xl">
+            <FileText className="h-6 w-6 text-gspn-maroon-500" />
+          </div>
+          <h1 className="text-3xl font-bold text-foreground">
+            Page Title
+          </h1>
+        </div>
+        <p className="text-muted-foreground mt-1">
+          Page description here
+        </p>
+      </div>
+      {/* Optional: School Year Badge */}
+      <div className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-gspn-maroon-50 dark:bg-gspn-maroon-950/30 border border-gspn-maroon-200 dark:border-gspn-maroon-800">
+        <span className="text-sm text-gspn-maroon-700 dark:text-gspn-maroon-400">
+          School Year:
+        </span>
+        <span className="text-sm font-semibold text-gspn-maroon-800 dark:text-gspn-maroon-300">
+          2025 - 2026
+        </span>
+      </div>
+    </div>
+  </div>
+</div>`}
+              </pre>
+            </CardContent>
+          </Card>
+        </TabsContent>
 
         {/* COMPONENTS TAB */}
         <TabsContent value="components" className="space-y-8">
@@ -297,6 +432,22 @@ export default function BrandPage() {
                   <Button className={componentClasses.primaryActionButton} disabled>
                     <Loader2 className="h-4 w-4 mr-2 animate-spin" />
                     Loading
+                  </Button>
+                </div>
+              </DualModePreview>
+
+              <DualModePreview title="Destructive Actions" viewMode={viewMode}>
+                <div className="flex flex-wrap gap-3">
+                  <Button variant="destructive">
+                    <Trash2 className="h-4 w-4 mr-2" />
+                    Delete
+                  </Button>
+                  <Button variant="outline" className="text-destructive border-destructive/50 hover:bg-destructive/10 hover:text-destructive">
+                    <Trash2 className="h-4 w-4 mr-2" />
+                    Remove
+                  </Button>
+                  <Button variant="ghost" className="text-destructive hover:bg-destructive/10 hover:text-destructive">
+                    Cancel Enrollment
                   </Button>
                 </div>
               </DualModePreview>
@@ -674,6 +825,193 @@ export default function BrandPage() {
                   </CardContent>
                 </Card>
               </DualModePreview>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        {/* TABLES TAB */}
+        <TabsContent value="tables" className="space-y-8">
+          {/* Data Table Pattern */}
+          <Card className="border shadow-sm overflow-hidden">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <div className="h-2 w-2 rounded-full bg-gspn-maroon-500" />
+                Data Table Pattern
+              </CardTitle>
+              <CardDescription>
+                Standard table with gold header background and hover states
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="pt-6 space-y-6">
+              <DualModePreview title="Students Table" viewMode={viewMode}>
+                <Card className="border shadow-sm overflow-hidden">
+                  <CardHeader>
+                    <div className="flex items-center gap-2">
+                      <div className="h-2 w-2 rounded-full bg-gspn-maroon-500" />
+                      <div>
+                        <CardTitle>All Students</CardTitle>
+                        <CardDescription>3 students</CardDescription>
+                      </div>
+                    </div>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="rounded-md border">
+                      <Table>
+                        <TableHeader>
+                          <TableRow className="bg-gspn-gold-50/50 dark:bg-gspn-gold-950/20">
+                            <TableHead className="w-[50px]"></TableHead>
+                            <TableHead>Full Name</TableHead>
+                            <TableHead>Student ID</TableHead>
+                            <TableHead>Level</TableHead>
+                            <TableHead>Status</TableHead>
+                            <TableHead className="w-[50px]"></TableHead>
+                          </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                          <TableRow className="cursor-pointer hover:bg-muted/50">
+                            <TableCell>
+                              <Avatar className="h-10 w-10">
+                                <AvatarFallback>MD</AvatarFallback>
+                              </Avatar>
+                            </TableCell>
+                            <TableCell className="font-medium">Mamadou Diallo</TableCell>
+                            <TableCell className="text-muted-foreground">STU-2024-001</TableCell>
+                            <TableCell>CM2</TableCell>
+                            <TableCell>
+                              <Badge className="bg-success/15 text-success">
+                                <CheckCircle className="h-3 w-3 mr-1" />
+                                Active
+                              </Badge>
+                            </TableCell>
+                            <TableCell className="text-right pr-4">
+                              <ChevronRight className="h-4 w-4 text-muted-foreground" />
+                            </TableCell>
+                          </TableRow>
+                          <TableRow className="cursor-pointer hover:bg-muted/50">
+                            <TableCell>
+                              <Avatar className="h-10 w-10">
+                                <AvatarFallback>FB</AvatarFallback>
+                              </Avatar>
+                            </TableCell>
+                            <TableCell className="font-medium">Fatou Barry</TableCell>
+                            <TableCell className="text-muted-foreground">STU-2024-002</TableCell>
+                            <TableCell>CE2</TableCell>
+                            <TableCell>
+                              <Badge className="bg-success/15 text-success">
+                                <CheckCircle className="h-3 w-3 mr-1" />
+                                Active
+                              </Badge>
+                            </TableCell>
+                            <TableCell className="text-right pr-4">
+                              <ChevronRight className="h-4 w-4 text-muted-foreground" />
+                            </TableCell>
+                          </TableRow>
+                          <TableRow className="cursor-pointer hover:bg-muted/50">
+                            <TableCell>
+                              <Avatar className="h-10 w-10">
+                                <AvatarFallback>AS</AvatarFallback>
+                              </Avatar>
+                            </TableCell>
+                            <TableCell className="font-medium">Amadou Sow</TableCell>
+                            <TableCell className="text-muted-foreground">STU-2024-003</TableCell>
+                            <TableCell>6ème</TableCell>
+                            <TableCell>
+                              <Badge className="bg-warning/15 text-warning">
+                                <AlertCircle className="h-3 w-3 mr-1" />
+                                Pending
+                              </Badge>
+                            </TableCell>
+                            <TableCell className="text-right pr-4">
+                              <ChevronRight className="h-4 w-4 text-muted-foreground" />
+                            </TableCell>
+                          </TableRow>
+                        </TableBody>
+                      </Table>
+                    </div>
+                  </CardContent>
+                </Card>
+              </DualModePreview>
+            </CardContent>
+          </Card>
+
+          {/* Table Header Pattern */}
+          <Card className="border shadow-sm overflow-hidden">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <div className="h-2 w-2 rounded-full bg-gspn-maroon-500" />
+                Table Header Styling
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="pt-6">
+              <DualModePreview title="Gold Header Background" viewMode={viewMode}>
+                <div className="rounded-md border">
+                  <Table>
+                    <TableHeader>
+                      <TableRow className="bg-gspn-gold-50/50 dark:bg-gspn-gold-950/20">
+                        <TableHead>Column 1</TableHead>
+                        <TableHead>Column 2</TableHead>
+                        <TableHead>Column 3</TableHead>
+                        <TableHead className="text-right">Actions</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      <TableRow className="hover:bg-muted/50">
+                        <TableCell>Value 1</TableCell>
+                        <TableCell>Value 2</TableCell>
+                        <TableCell>Value 3</TableCell>
+                        <TableCell className="text-right">
+                          <Button variant="ghost" size="sm">Edit</Button>
+                        </TableCell>
+                      </TableRow>
+                    </TableBody>
+                  </Table>
+                </div>
+              </DualModePreview>
+            </CardContent>
+          </Card>
+
+          {/* Code Reference */}
+          <Card className="border shadow-sm overflow-hidden">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <div className="h-2 w-2 rounded-full bg-gspn-maroon-500" />
+                Code Reference
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="pt-6">
+              <pre className="p-4 bg-slate-100 dark:bg-slate-800 rounded-lg text-sm overflow-x-auto">
+{`{/* Table Card with Title Indicator */}
+<Card className="border shadow-sm overflow-hidden">
+  <CardHeader>
+    <div className="flex items-center gap-2">
+      <div className="h-2 w-2 rounded-full bg-gspn-maroon-500" />
+      <div>
+        <CardTitle>All Students</CardTitle>
+        <CardDescription>3 students</CardDescription>
+      </div>
+    </div>
+  </CardHeader>
+  <CardContent>
+    <div className="rounded-md border">
+      <Table>
+        <TableHeader>
+          {/* Gold tinted header row */}
+          <TableRow className="bg-gspn-gold-50/50 dark:bg-gspn-gold-950/20">
+            <TableHead>Column</TableHead>
+            ...
+          </TableRow>
+        </TableHeader>
+        <TableBody>
+          {/* Clickable row with hover */}
+          <TableRow className="cursor-pointer hover:bg-muted/50">
+            <TableCell>...</TableCell>
+          </TableRow>
+        </TableBody>
+      </Table>
+    </div>
+  </CardContent>
+</Card>`}
+              </pre>
             </CardContent>
           </Card>
         </TabsContent>

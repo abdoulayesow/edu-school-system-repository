@@ -32,6 +32,7 @@ import {
   AlertCircle,
   Trash2,
   UserCheck,
+  Wallet,
 } from "lucide-react"
 import { useI18n } from "@/components/i18n-provider"
 import { PageContainer } from "@/components/layout/PageContainer"
@@ -280,7 +281,7 @@ export default function EnrollmentDetailPage({
   if (isLoading) {
     return (
       <div className="min-h-screen bg-white dark:bg-background flex items-center justify-center">
-        <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+        <Loader2 className="h-8 w-8 animate-spin text-gspn-maroon-500" />
       </div>
     )
   }
@@ -310,74 +311,82 @@ export default function EnrollmentDetailPage({
   return (
     <PageContainer maxWidth="full">
       {/* Header */}
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
-          <div className="flex items-center gap-4">
-            <Button variant="ghost" size="icon" asChild>
-              <Link href="/enrollments">
-                <ArrowLeft className="h-5 w-5" />
-              </Link>
-            </Button>
-            <div>
-              <div className="flex items-center gap-2">
-                <h1 className="text-2xl font-bold">
-                  {enrollment.firstName}{enrollment.middleName ? ` ${enrollment.middleName}` : ""} {enrollment.lastName}
-                </h1>
-                <Badge variant={status.variant} className={cn("gap-1", status.className)}>
-                  <StatusIcon className="h-3 w-3" />
-                  {locale === "fr" ? status.labelFr : status.label}
-                </Badge>
+      <div className="relative mb-6 overflow-hidden rounded-2xl border border-border bg-card shadow-sm">
+        <div className="h-1 bg-gspn-maroon-500" />
+        <div className="p-6">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+            <div className="flex items-center gap-4">
+              <Button variant="ghost" size="icon" asChild>
+                <Link href="/students/enrollments">
+                  <ArrowLeft className="h-5 w-5" />
+                </Link>
+              </Button>
+              <div className="p-2.5 bg-gspn-maroon-500/10 rounded-xl">
+                <FileText className="h-6 w-6 text-gspn-maroon-500" />
               </div>
-              <p className="text-muted-foreground">
-                {enrollment.enrollmentNumber || "Draft"} | {enrollment.grade.name} | {enrollment.schoolYear.name}
-              </p>
+              <div>
+                <div className="flex items-center gap-2">
+                  <h1 className="text-2xl font-bold">
+                    {enrollment.firstName}{enrollment.middleName ? ` ${enrollment.middleName}` : ""} {enrollment.lastName}
+                  </h1>
+                  <Badge variant={status.variant} className={cn("gap-1", status.className)}>
+                    <StatusIcon className="h-3 w-3" />
+                    {locale === "fr" ? status.labelFr : status.label}
+                  </Badge>
+                </div>
+                <p className="text-muted-foreground">
+                  {enrollment.enrollmentNumber || "Draft"} | {enrollment.grade.name} | {enrollment.schoolYear.name}
+                </p>
+              </div>
+            </div>
+
+            <div className="flex gap-2">
+              {canCancel && (
+                <PermissionGuard resource="student_enrollment" action="update" inline>
+                  <Button variant="outline" onClick={() => setShowCancelDialog(true)}>
+                    <XCircle className="h-4 w-4 mr-2" />
+                    {locale === "fr" ? "Annuler" : "Cancel"}
+                  </Button>
+                </PermissionGuard>
+              )}
+              {(enrollment.status === "draft" || enrollment.status === "cancelled") && (
+                <PermissionGuard resource="student_enrollment" action="delete" inline>
+                  <Button
+                    variant="outline"
+                    onClick={() => setShowDeleteDialog(true)}
+                    className="border-gspn-maroon-300 dark:border-gspn-maroon-700 text-gspn-maroon-600 dark:text-gspn-maroon-400 hover:bg-gspn-maroon-50 dark:hover:bg-gspn-maroon-950/30"
+                  >
+                    <Trash2 className="h-4 w-4 mr-2" />
+                    {t.common.delete}
+                  </Button>
+                </PermissionGuard>
+              )}
+              {["draft", "submitted", "needs_review"].includes(enrollment.status) && (
+                <PermissionGuard resource="student_enrollment" action="update" inline>
+                  <Button
+                    asChild
+                    className="bg-gspn-gold-500 hover:bg-gspn-gold-400 text-black shadow-md hover:shadow-lg transition-all"
+                  >
+                    <Link href={enrollment.status === "draft"
+                      ? `/students/enrollments/new?draft=${enrollment.id}&step=${enrollment.currentStep || 1}`
+                      : `/students/enrollments/new?draft=${enrollment.id}&step=5`
+                    }>
+                      {enrollment.status === "draft" ? t.enrollments.continueEnrollment : t.common.edit}
+                    </Link>
+                  </Button>
+                </PermissionGuard>
+              )}
             </div>
           </div>
-
-          <div className="flex gap-2">
-            {canCancel && (
-              <PermissionGuard resource="student_enrollment" action="update" inline>
-                <Button variant="outline" onClick={() => setShowCancelDialog(true)}>
-                  <XCircle className="h-4 w-4 mr-2" />
-                  {locale === "fr" ? "Annuler" : "Cancel"}
-                </Button>
-              </PermissionGuard>
-            )}
-            {(enrollment.status === "draft" || enrollment.status === "cancelled") && (
-              <PermissionGuard resource="student_enrollment" action="delete" inline>
-                <Button
-                  variant="outline"
-                  onClick={() => setShowDeleteDialog(true)}
-                  className="bg-amber-500 hover:bg-amber-600 text-white border-amber-500 hover:border-amber-600 dark:bg-amber-600 dark:hover:bg-amber-700"
-                >
-                  <Trash2 className="h-4 w-4 mr-2" />
-                  {t.common.delete}
-                </Button>
-              </PermissionGuard>
-            )}
-            {["draft", "submitted", "needs_review"].includes(enrollment.status) && (
-              <PermissionGuard resource="student_enrollment" action="update" inline>
-                <Button
-                  asChild
-                  className="bg-amber-500 hover:bg-amber-600 text-white dark:bg-amber-600 dark:hover:bg-amber-700"
-                >
-                  <Link href={enrollment.status === "draft"
-                    ? `/enrollments/new?draft=${enrollment.id}&step=${enrollment.currentStep || 1}`
-                    : `/enrollments/new?draft=${enrollment.id}&step=5`
-                  }>
-                    {enrollment.status === "draft" ? t.enrollments.continueEnrollment : t.common.edit}
-                  </Link>
-                </Button>
-              </PermissionGuard>
-            )}
-          </div>
         </div>
+      </div>
 
         {/* Status Comment Alert */}
         {enrollment.statusComment && enrollment.status !== "draft" && (
-          <Card className="mb-6 border-l-4 border-l-amber-500">
+          <Card className="mb-6 border-l-4 border-l-gspn-gold-500">
             <CardContent className="pt-4">
               <div className="flex items-start gap-3">
-                <AlertCircle className="h-5 w-5 text-amber-500 mt-0.5" />
+                <AlertCircle className="h-5 w-5 text-gspn-gold-500 mt-0.5" />
                 <div>
                   <p className="font-medium">
                     {locale === "fr" ? "Commentaire de statut" : "Status Comment"}
@@ -404,9 +413,9 @@ export default function EnrollmentDetailPage({
             enrollment.totalPaid < minimumPayment
 
           return (
-            <Card className="mb-6 border-l-4 border-l-amber-500">
+            <Card className="mb-6 border-l-4 border-l-gspn-gold-500">
               <CardHeader className="pb-2">
-                <CardTitle className="flex items-center gap-2 text-amber-600 dark:text-amber-400">
+                <CardTitle className="flex items-center gap-2 text-gspn-gold-600 dark:text-gspn-gold-400">
                   <AlertCircle className="h-5 w-5" />
                   {hasTuitionAdjustment
                     ? (locale === "fr" ? "Validation requise - Ajustement des frais" : "Review Required - Tuition Adjustment")
@@ -506,7 +515,7 @@ export default function EnrollmentDetailPage({
                   <PermissionGuard resource="student_enrollment" action="approve" inline>
                     <Button
                       onClick={() => setShowApproveDialog(true)}
-                      className="bg-green-600 hover:bg-green-700 text-white"
+                      className="bg-emerald-600 hover:bg-emerald-700 text-white shadow-md"
                     >
                       <CheckCircle className="h-4 w-4 mr-2" />
                       {locale === "fr" ? "Approuver" : "Approve"}
@@ -515,7 +524,7 @@ export default function EnrollmentDetailPage({
                   <PermissionGuard resource="student_enrollment" action="approve" inline>
                     <Button
                       onClick={() => setShowRejectDialog(true)}
-                      className="bg-red-600 hover:bg-red-700 text-white"
+                      className="bg-gspn-maroon-600 hover:bg-gspn-maroon-700 text-white shadow-md"
                     >
                       <XCircle className="h-4 w-4 mr-2" />
                       {locale === "fr" ? "Rejeter" : "Reject"}
@@ -531,14 +540,14 @@ export default function EnrollmentDetailPage({
           {/* Main Content */}
           <div className="lg:col-span-2 space-y-6">
             {/* Student Information */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <User className="h-5 w-5" />
+            <div className="rounded-2xl border-2 border-slate-200 dark:border-slate-700 bg-gradient-to-br from-slate-50/50 to-transparent dark:from-slate-900/30 dark:to-transparent shadow-sm overflow-hidden">
+              <div className="px-6 py-4 bg-slate-100 dark:bg-slate-800 border-b-2 border-slate-200 dark:border-slate-700">
+                <h3 className="text-sm font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300 flex items-center gap-2">
+                  <User className="size-4" />
                   {t.enrollments.personalInfo}
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="grid gap-4 sm:grid-cols-2">
+                </h3>
+              </div>
+              <div className="p-6 grid gap-4 sm:grid-cols-2">
                 <div>
                   <p className="text-sm text-muted-foreground">{t.enrollments.firstName}</p>
                   <p className="font-medium">{enrollment.firstName}</p>
@@ -584,23 +593,31 @@ export default function EnrollmentDetailPage({
                     </p>
                   </div>
                 )}
-              </CardContent>
-            </Card>
+              </div>
+            </div>
 
-            {/* Parents Information */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Users className="h-5 w-5" />
+            {/* Parents & Guardian Information */}
+            <div className="rounded-2xl border-2 border-slate-200 dark:border-slate-700 bg-gradient-to-br from-slate-50/50 to-transparent dark:from-slate-900/30 dark:to-transparent shadow-sm overflow-hidden">
+              <div className="px-6 py-4 bg-slate-100 dark:bg-slate-800 border-b-2 border-slate-200 dark:border-slate-700">
+                <h3 className="text-sm font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300 flex items-center gap-2">
+                  <Users className="size-4" />
                   {t.enrollments.parents}
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
+                </h3>
+              </div>
+              <div className="p-6 space-y-4">
                 {/* Father */}
                 {(enrollment.fatherName || enrollment.fatherPhone) && (
                   <div className="grid gap-2 sm:grid-cols-3">
                     <div>
-                      <p className="text-sm text-muted-foreground">{locale === "fr" ? "Père" : "Father"}</p>
+                      <div className="flex items-center gap-2">
+                        <p className="text-sm text-muted-foreground">{locale === "fr" ? "Père" : "Father"}</p>
+                        {enrollment.enrollingPersonType === "father" && (
+                          <Badge variant="outline" className="text-[10px] px-1.5 py-0 h-4 bg-gspn-gold-50 text-gspn-gold-700 border-gspn-gold-300 dark:bg-gspn-gold-950/30 dark:text-gspn-gold-400 dark:border-gspn-gold-700">
+                            <UserCheck className="size-2.5 mr-0.5" />
+                            {locale === "fr" ? "Inscripteur" : "Enrolled"}
+                          </Badge>
+                        )}
+                      </div>
                       <p className="font-medium">{enrollment.fatherName || "-"}</p>
                     </div>
                     <div>
@@ -620,7 +637,15 @@ export default function EnrollmentDetailPage({
                     {(enrollment.fatherName || enrollment.fatherPhone) && <Separator />}
                     <div className="grid gap-2 sm:grid-cols-3">
                       <div>
-                        <p className="text-sm text-muted-foreground">{locale === "fr" ? "Mère" : "Mother"}</p>
+                        <div className="flex items-center gap-2">
+                          <p className="text-sm text-muted-foreground">{locale === "fr" ? "Mère" : "Mother"}</p>
+                          {enrollment.enrollingPersonType === "mother" && (
+                            <Badge variant="outline" className="text-[10px] px-1.5 py-0 h-4 bg-gspn-gold-50 text-gspn-gold-700 border-gspn-gold-300 dark:bg-gspn-gold-950/30 dark:text-gspn-gold-400 dark:border-gspn-gold-700">
+                              <UserCheck className="size-2.5 mr-0.5" />
+                              {locale === "fr" ? "Inscripteur" : "Enrolled"}
+                            </Badge>
+                          )}
+                        </div>
                         <p className="font-medium">{enrollment.motherName || "-"}</p>
                       </div>
                       <div>
@@ -630,6 +655,33 @@ export default function EnrollmentDetailPage({
                       <div>
                         <p className="text-sm text-muted-foreground">{t.enrollments.email}</p>
                         <p className="font-medium">{enrollment.motherEmail || "-"}</p>
+                      </div>
+                    </div>
+                  </>
+                )}
+
+                {/* Other Guardian (when enrolled by someone other than parents) */}
+                {enrollment.enrollingPersonType === "other" && (
+                  <>
+                    <Separator />
+                    <div className="grid gap-2 sm:grid-cols-3">
+                      <div>
+                        <div className="flex items-center gap-2">
+                          <p className="text-sm text-muted-foreground">{enrollment.enrollingPersonRelation || (locale === "fr" ? "Tuteur" : "Guardian")}</p>
+                          <Badge variant="outline" className="text-[10px] px-1.5 py-0 h-4 bg-gspn-gold-50 text-gspn-gold-700 border-gspn-gold-300 dark:bg-gspn-gold-950/30 dark:text-gspn-gold-400 dark:border-gspn-gold-700">
+                            <UserCheck className="size-2.5 mr-0.5" />
+                            {locale === "fr" ? "Inscripteur" : "Enrolled"}
+                          </Badge>
+                        </div>
+                        <p className="font-medium">{enrollment.enrollingPersonName || "-"}</p>
+                      </div>
+                      <div>
+                        <p className="text-sm text-muted-foreground">{t.enrollments.phone}</p>
+                        <p className="font-medium">{enrollment.enrollingPersonPhone || "-"}</p>
+                      </div>
+                      <div>
+                        <p className="text-sm text-muted-foreground">{t.enrollments.email}</p>
+                        <p className="font-medium">{enrollment.enrollingPersonEmail || "-"}</p>
                       </div>
                     </div>
                   </>
@@ -648,158 +700,77 @@ export default function EnrollmentDetailPage({
                     </div>
                   </>
                 )}
-              </CardContent>
-            </Card>
-
-            {/* Enrolled By */}
-            {enrollment.enrollingPersonType && (
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <UserCheck className="h-5 w-5" />
-                    {t.enrollments.enrolledBy}
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  {enrollment.enrollingPersonType === "father" && (
-                    <div className="flex items-center gap-3">
-                      <div className="h-10 w-10 rounded-full bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center">
-                        <User className="h-5 w-5 text-blue-600 dark:text-blue-400" />
-                      </div>
-                      <div>
-                        <p className="font-medium">{t.enrollments.enrolledByFather}</p>
-                        <p className="text-sm text-muted-foreground">{enrollment.fatherName}</p>
-                      </div>
-                    </div>
-                  )}
-                  {enrollment.enrollingPersonType === "mother" && (
-                    <div className="flex items-center gap-3">
-                      <div className="h-10 w-10 rounded-full bg-pink-100 dark:bg-pink-900/30 flex items-center justify-center">
-                        <User className="h-5 w-5 text-pink-600 dark:text-pink-400" />
-                      </div>
-                      <div>
-                        <p className="font-medium">{t.enrollments.enrolledByMother}</p>
-                        <p className="text-sm text-muted-foreground">{enrollment.motherName}</p>
-                      </div>
-                    </div>
-                  )}
-                  {enrollment.enrollingPersonType === "other" && (
-                    <div className="space-y-4">
-                      <div className="flex items-center gap-3">
-                        <div className="h-10 w-10 rounded-full bg-amber-100 dark:bg-amber-900/30 flex items-center justify-center">
-                          <User className="h-5 w-5 text-amber-600 dark:text-amber-400" />
-                        </div>
-                        <div>
-                          <p className="font-medium">{enrollment.enrollingPersonName}</p>
-                          <p className="text-sm text-muted-foreground">{enrollment.enrollingPersonRelation}</p>
-                        </div>
-                      </div>
-                      <Separator />
-                      <div className="grid gap-2 sm:grid-cols-2">
-                        <div>
-                          <p className="text-sm text-muted-foreground">{t.enrollments.phone}</p>
-                          <p className="font-medium">{enrollment.enrollingPersonPhone || "-"}</p>
-                        </div>
-                        {enrollment.enrollingPersonEmail && (
-                          <div>
-                            <p className="text-sm text-muted-foreground">{t.enrollments.email}</p>
-                            <p className="font-medium">{enrollment.enrollingPersonEmail}</p>
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                  )}
-                </CardContent>
-              </Card>
-            )}
-
-            {/* Payment Schedules */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <CreditCard className="h-5 w-5" />
-                  {locale === "fr" ? "Echeances de paiement" : "Payment Schedules"}
-                </CardTitle>
-                <CardDescription>
-                  {locale === "fr" ? "3 echeances pour l'annee scolaire" : "3 payment schedules for the school year"}
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  {enrollment.paymentSchedules.map((schedule) => {
-                    const paid = enrollment.payments
-                      .filter((p) => p.paymentScheduleId === schedule.id && p.status === "confirmed")
-                      .reduce((sum, p) => sum + p.amount, 0)
-                    const percentPaid = Math.min(100, (paid / schedule.amount) * 100)
-
-                    return (
-                      <div key={schedule.id} className="border rounded-lg p-4">
-                        <div className="flex justify-between items-start mb-2">
-                          <div>
-                            <p className="font-medium">
-                              {locale === "fr" ? "Echeance" : "Schedule"} {schedule.scheduleNumber}
-                            </p>
-                            <p className="text-sm text-muted-foreground">
-                              {(schedule.months as string[]).join(", ")}
-                            </p>
-                          </div>
-                          <div className="text-right">
-                            <p className="font-medium">{formatCurrency(schedule.amount)}</p>
-                            <p className="text-sm text-muted-foreground">
-                              {locale === "fr" ? "Echeance:" : "Due:"} {formatDate(schedule.dueDate.toString())}
-                            </p>
-                          </div>
-                        </div>
-                        <div className="w-full bg-secondary rounded-full h-2">
-                          <div
-                            className="h-2 rounded-full transition-all bg-amber-500 dark:bg-amber-400"
-                            style={{ width: `${percentPaid}%` }}
-                          />
-                        </div>
-                        <p className="text-xs text-muted-foreground mt-1">
-                          {formatCurrency(paid)} / {formatCurrency(schedule.amount)} ({percentPaid.toFixed(0)}%)
-                        </p>
-                      </div>
-                    )
-                  })}
-                </div>
-              </CardContent>
-            </Card>
+              </div>
+            </div>
 
             {/* Notes */}
             {enrollment.notes.length > 0 && (
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <FileText className="h-5 w-5" />
+              <div className="rounded-2xl border-2 border-slate-200 dark:border-slate-700 bg-gradient-to-br from-slate-50/50 to-transparent dark:from-slate-900/30 dark:to-transparent shadow-sm overflow-hidden">
+                <div className="px-6 py-4 bg-slate-100 dark:bg-slate-800 border-b-2 border-slate-200 dark:border-slate-700">
+                  <h3 className="text-sm font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300 flex items-center gap-2">
+                    <FileText className="size-4" />
                     {locale === "fr" ? "Notes" : "Notes"}
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-4">
-                    {enrollment.notes.map((note) => (
-                      <div key={note.id} className="border-l-2 border-amber-500 pl-4">
-                        <p className="font-medium">{note.title}</p>
-                        <p className="text-muted-foreground">{note.content}</p>
-                        <p className="text-xs text-muted-foreground mt-1">
-                          {note.author.name} - {formatDate(note.createdAt.toString())}
-                        </p>
-                      </div>
-                    ))}
-                  </div>
-                </CardContent>
-              </Card>
+                  </h3>
+                </div>
+                <div className="p-6 space-y-3">
+                  {enrollment.notes.map((note) => (
+                    <div key={note.id} className="p-3 rounded-lg bg-white dark:bg-slate-900 border-l-4 border-gspn-gold-500 shadow-sm">
+                      <p className="font-medium text-sm">{note.title}</p>
+                      <p className="text-sm text-muted-foreground mt-1">{note.content}</p>
+                      <p className="text-xs text-muted-foreground mt-2">
+                        {note.author.name} - {formatDate(note.createdAt.toString())}
+                      </p>
+                    </div>
+                  ))}
+                </div>
+              </div>
             )}
+
+            {/* Status Timeline */}
+            <div className="rounded-2xl border-2 border-slate-200 dark:border-slate-700 bg-gradient-to-br from-slate-50/50 to-transparent dark:from-slate-900/30 dark:to-transparent shadow-sm overflow-hidden">
+              <div className="px-6 py-4 bg-slate-100 dark:bg-slate-800 border-b-2 border-slate-200 dark:border-slate-700">
+                <h3 className="text-sm font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300 flex items-center gap-2">
+                  <Clock className="size-4" />
+                  {locale === "fr" ? "Chronologie" : "Timeline"}
+                </h3>
+              </div>
+              <div className="p-6 grid gap-4 sm:grid-cols-2">
+                {enrollment.submittedAt && (
+                  <div>
+                    <p className="text-sm text-muted-foreground">{locale === "fr" ? "Soumis" : "Submitted"}</p>
+                    <p className="font-medium">{formatDate(enrollment.submittedAt)}</p>
+                  </div>
+                )}
+                {enrollment.autoApproveAt && enrollment.status === "submitted" && (
+                  <div>
+                    <p className="text-sm text-muted-foreground">{locale === "fr" ? "Auto-approbation" : "Auto-Approval"}</p>
+                    <p className="font-medium">{formatDate(enrollment.autoApproveAt)}</p>
+                  </div>
+                )}
+                {enrollment.approvedAt && (
+                  <div>
+                    <p className="text-sm text-muted-foreground">{locale === "fr" ? "Approuve" : "Approved"}</p>
+                    <p className="font-medium">{formatDate(enrollment.approvedAt)}</p>
+                    {enrollment.approver && (
+                      <p className="text-xs text-muted-foreground">{locale === "fr" ? "par" : "by"} {enrollment.approver.name}</p>
+                    )}
+                  </div>
+                )}
+              </div>
+            </div>
           </div>
 
           {/* Sidebar */}
           <div className="space-y-6">
             {/* Financial Summary */}
-            <Card>
-              <CardHeader>
-                <CardTitle>{locale === "fr" ? "Resume financier" : "Financial Summary"}</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
+            <div className="rounded-2xl border-2 border-slate-200 dark:border-slate-700 bg-gradient-to-br from-slate-50/50 to-transparent dark:from-slate-900/30 dark:to-transparent shadow-sm overflow-hidden">
+              <div className="px-6 py-4 bg-slate-100 dark:bg-slate-800 border-b-2 border-slate-200 dark:border-slate-700">
+                <h3 className="text-sm font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300 flex items-center gap-2">
+                  <Wallet className="size-4" />
+                  {locale === "fr" ? "Resume financier" : "Financial Summary"}
+                </h3>
+              </div>
+              <div className="p-6 space-y-4">
                 <div className="flex justify-between">
                   <span className="text-muted-foreground">{locale === "fr" ? "Frais de scolarite" : "Tuition Fee"}</span>
                   <span className="font-medium">{formatCurrency(enrollment.tuitionFee)}</span>
@@ -813,79 +784,94 @@ export default function EnrollmentDetailPage({
                 <Separator />
                 <div className="flex justify-between">
                   <span className="text-muted-foreground">{locale === "fr" ? "Total paye" : "Total Paid"}</span>
-                  <span className="font-medium text-green-600">{formatCurrency(enrollment.totalPaid)}</span>
+                  <span className="font-medium text-emerald-600 dark:text-emerald-400">{formatCurrency(enrollment.totalPaid)}</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-muted-foreground">{locale === "fr" ? "Solde restant" : "Remaining Balance"}</span>
-                  <span className="font-medium text-orange-600">{formatCurrency(enrollment.remainingBalance)}</span>
+                  <span className="font-medium text-gspn-maroon-600 dark:text-gspn-maroon-400">{formatCurrency(enrollment.remainingBalance)}</span>
                 </div>
                 <Separator />
-                <div className="w-full bg-secondary rounded-full h-3">
+                <div className="w-full bg-slate-200 dark:bg-slate-700 rounded-full h-3">
                   <div
-                    className="h-3 rounded-full transition-all bg-amber-500 dark:bg-amber-400"
+                    className="h-3 rounded-full transition-all bg-gradient-to-r from-emerald-500 to-gspn-gold-500"
                     style={{ width: `${Math.min(100, (enrollment.totalPaid / enrollment.tuitionFee) * 100)}%` }}
                   />
                 </div>
                 <p className="text-center text-sm text-muted-foreground">
                   {((enrollment.totalPaid / enrollment.tuitionFee) * 100).toFixed(0)}% {locale === "fr" ? "paye" : "paid"}
                 </p>
-              </CardContent>
-            </Card>
+              </div>
+            </div>
 
-            {/* Status Timeline */}
-            <Card>
-              <CardHeader>
-                <CardTitle>{locale === "fr" ? "Chronologie" : "Timeline"}</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="flex items-start gap-3">
-                  <div className="w-2 h-2 rounded-full bg-amber-500 mt-2" />
-                  <div>
-                    <p className="font-medium">{locale === "fr" ? "Cree" : "Created"}</p>
-                    <p className="text-sm text-muted-foreground">{formatDate(enrollment.createdAt)}</p>
-                    <p className="text-xs text-muted-foreground">{locale === "fr" ? "par" : "by"} {enrollment.creator.name}</p>
+            {/* Payment Schedules */}
+            {enrollment.paymentSchedules.length > 0 && (() => {
+              // Calculate waterfall allocation of payments to schedules
+              const sortedSchedules = [...enrollment.paymentSchedules].sort((a, b) => a.scheduleNumber - b.scheduleNumber)
+              let remainingPayments = enrollment.totalPaid
+              const scheduleAllocations = new Map<string, number>()
+
+              for (const schedule of sortedSchedules) {
+                const allocated = Math.min(remainingPayments, schedule.amount)
+                scheduleAllocations.set(schedule.id, allocated)
+                remainingPayments -= allocated
+              }
+
+              return (
+                <div className="rounded-2xl border-2 border-slate-200 dark:border-slate-700 bg-gradient-to-br from-slate-50/50 to-transparent dark:from-slate-900/30 dark:to-transparent shadow-sm overflow-hidden">
+                  <div className="px-6 py-4 bg-slate-100 dark:bg-slate-800 border-b-2 border-slate-200 dark:border-slate-700">
+                    <h3 className="text-sm font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300 flex items-center gap-2">
+                      <CalendarDays className="size-4" />
+                      {locale === "fr" ? "Echeances" : "Schedules"}
+                    </h3>
+                  </div>
+                  <div className="p-4 space-y-3">
+                    {sortedSchedules.map((schedule) => {
+                      const paid = scheduleAllocations.get(schedule.id) ?? 0
+                      const percentPaid = Math.min(100, (paid / schedule.amount) * 100)
+                      const isPaidInFull = paid >= schedule.amount
+
+                      return (
+                        <div key={schedule.id} className="p-3 rounded-lg bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700">
+                          <div className="flex justify-between items-center mb-2">
+                            <span className="text-sm font-medium">
+                              {locale === "fr" ? "Ech." : "Sch."} {schedule.scheduleNumber}
+                            </span>
+                            <span className={`text-sm font-bold ${isPaidInFull ? 'text-emerald-600 dark:text-emerald-400' : 'text-muted-foreground'}`}>
+                              {formatCurrency(schedule.amount)}
+                            </span>
+                          </div>
+                          <div className="w-full bg-slate-200 dark:bg-slate-700 rounded-full h-1.5">
+                            <div
+                              className={`h-1.5 rounded-full transition-all ${isPaidInFull ? 'bg-emerald-500' : 'bg-gradient-to-r from-emerald-500 to-gspn-gold-500'}`}
+                              style={{ width: `${percentPaid}%` }}
+                            />
+                          </div>
+                          <div className="flex justify-between items-center mt-1">
+                            <span className="text-xs text-muted-foreground">
+                              {formatCurrency(paid)} ({percentPaid.toFixed(0)}%)
+                            </span>
+                            {isPaidInFull && (
+                              <CheckCircle className="size-3 text-emerald-500" />
+                            )}
+                          </div>
+                        </div>
+                      )
+                    })}
                   </div>
                 </div>
-                {enrollment.submittedAt && (
-                  <div className="flex items-start gap-3">
-                    <div className="w-2 h-2 rounded-full bg-blue-500 mt-2" />
-                    <div>
-                      <p className="font-medium">{locale === "fr" ? "Soumis" : "Submitted"}</p>
-                      <p className="text-sm text-muted-foreground">{formatDate(enrollment.submittedAt)}</p>
-                    </div>
-                  </div>
-                )}
-                {enrollment.autoApproveAt && enrollment.status === "submitted" && (
-                  <div className="flex items-start gap-3">
-                    <div className="w-2 h-2 rounded-full bg-yellow-500 mt-2" />
-                    <div>
-                      <p className="font-medium">{locale === "fr" ? "Auto-approbation" : "Auto-Approval"}</p>
-                      <p className="text-sm text-muted-foreground">{formatDate(enrollment.autoApproveAt)}</p>
-                    </div>
-                  </div>
-                )}
-                {enrollment.approvedAt && (
-                  <div className="flex items-start gap-3">
-                    <div className="w-2 h-2 rounded-full bg-green-500 mt-2" />
-                    <div>
-                      <p className="font-medium">{locale === "fr" ? "Approuve" : "Approved"}</p>
-                      <p className="text-sm text-muted-foreground">{formatDate(enrollment.approvedAt)}</p>
-                      {enrollment.approver && (
-                        <p className="text-xs text-muted-foreground">{locale === "fr" ? "par" : "by"} {enrollment.approver.name}</p>
-                      )}
-                    </div>
-                  </div>
-                )}
-              </CardContent>
-            </Card>
+              )
+            })()}
 
             {/* Recent Payments */}
             {enrollment.payments.length > 0 && (
-              <Card>
-                <CardHeader>
-                  <CardTitle>{locale === "fr" ? "Paiements recents" : "Recent Payments"}</CardTitle>
-                </CardHeader>
-                <CardContent>
+              <div className="rounded-2xl border-2 border-slate-200 dark:border-slate-700 bg-gradient-to-br from-slate-50/50 to-transparent dark:from-slate-900/30 dark:to-transparent shadow-sm overflow-hidden">
+                <div className="px-6 py-4 bg-slate-100 dark:bg-slate-800 border-b-2 border-slate-200 dark:border-slate-700">
+                  <h3 className="text-sm font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300 flex items-center gap-2">
+                    <CreditCard className="size-4" />
+                    {locale === "fr" ? "Paiements recents" : "Recent Payments"}
+                  </h3>
+                </div>
+                <div className="p-6">
                   <div className="space-y-3">
                     {enrollment.payments.slice(0, 5).map((payment) => (
                       <div key={payment.id} className="flex justify-between items-center">
@@ -895,15 +881,15 @@ export default function EnrollmentDetailPage({
                         </div>
                         <Badge
                           variant={payment.status === "confirmed" ? "default" : "outline"}
-                          className={payment.status === "confirmed" ? "bg-green-500 text-white hover:bg-green-600 border-transparent" : ""}
+                          className={payment.status === "confirmed" ? "bg-emerald-500 text-white hover:bg-emerald-600 border-transparent" : ""}
                         >
                           {payment.status}
                         </Badge>
                       </div>
                     ))}
                   </div>
-                </CardContent>
-              </Card>
+                </div>
+              </div>
             )}
           </div>
         </div>

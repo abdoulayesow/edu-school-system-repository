@@ -128,7 +128,7 @@ export default function NewEnrollmentPage() {
     return (
       <PageContainer maxWidth="full">
         <div className="flex items-center justify-center py-12">
-          <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+          <Loader2 className="h-8 w-8 animate-spin text-gspn-maroon-500" />
         </div>
       </PageContainer>
     )
@@ -137,19 +137,29 @@ export default function NewEnrollmentPage() {
   return (
     <PageContainer maxWidth="full">
       {/* Header */}
-      <div className="mb-6">
-        <Button variant="ghost" asChild className="mb-4">
-          <Link href="/enrollments" className="gap-2">
-            <ArrowLeft className="h-4 w-4" />
-            {t.common.back}
-          </Link>
-        </Button>
-        <h1 className="text-3xl font-bold text-foreground">
-          {t.enrollmentWizard.title}
-        </h1>
-        <p className="text-muted-foreground mt-1">
-          {t.enrollmentWizard.subtitle}
-        </p>
+      <div className="relative mb-6 overflow-hidden rounded-2xl border border-border bg-card shadow-sm">
+        <div className="h-1 bg-gspn-maroon-500" />
+        <div className="p-6">
+          <Button variant="ghost" asChild className="mb-4 -ml-2">
+            <Link href="/students/enrollments" className="gap-2">
+              <ArrowLeft className="h-4 w-4" />
+              {t.common.back}
+            </Link>
+          </Button>
+          <div className="flex items-center gap-3">
+            <div className="p-2.5 bg-gspn-maroon-500/10 rounded-xl">
+              <ArrowLeft className="h-6 w-6 text-gspn-maroon-500 rotate-180" />
+            </div>
+            <div>
+              <h1 className="text-3xl font-bold text-foreground">
+                {t.enrollmentWizard.title}
+              </h1>
+              <p className="text-muted-foreground mt-1">
+                {t.enrollmentWizard.subtitle}
+              </p>
+            </div>
+          </div>
+        </div>
       </div>
 
       {/* Wizard */}

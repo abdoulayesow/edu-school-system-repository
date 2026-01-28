@@ -581,7 +581,7 @@ export default function GradeEntryPage() {
     return (
       <PageContainer maxWidth="full">
         <div className="flex items-center justify-center h-64">
-          <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+          <Loader2 className="h-8 w-8 animate-spin text-gspn-maroon-500" />
         </div>
       </PageContainer>
     )
@@ -605,11 +605,19 @@ export default function GradeEntryPage() {
 
   return (
     <PageContainer maxWidth="full">
+      {/* Maroon accent bar */}
+      <div className="h-1 bg-gspn-maroon-500 -mx-4 sm:-mx-6 lg:-mx-8 mb-6" />
+
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
-        <div>
-          <h1 className="text-3xl font-bold">{t.grading.gradeEntry}</h1>
-          <p className="text-muted-foreground">{t.grading.gradeEntrySubtitle}</p>
+        <div className="flex items-center gap-3">
+          <div className="p-2.5 bg-gspn-maroon-500/10 rounded-xl">
+            <BookOpen className="h-6 w-6 text-gspn-maroon-500" />
+          </div>
+          <div>
+            <h1 className="text-3xl font-bold">{t.grading.gradeEntry}</h1>
+            <p className="text-muted-foreground">{t.grading.gradeEntrySubtitle}</p>
+          </div>
         </div>
         <div className="flex items-center gap-2">
           <Badge variant="outline" className="text-sm py-1 px-3">
@@ -640,9 +648,12 @@ export default function GradeEntryPage() {
       )}
 
       {/* Selection Controls */}
-      <Card className="mb-6">
+      <Card className="mb-6 border shadow-sm overflow-hidden">
         <CardHeader>
-          <CardTitle className="text-lg">{t.grading.enterGrades}</CardTitle>
+          <CardTitle className="text-lg flex items-center gap-2">
+            <div className="h-2 w-2 rounded-full bg-gspn-maroon-500" />
+            {t.grading.enterGrades}
+          </CardTitle>
         </CardHeader>
         <CardContent>
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-5">
@@ -730,10 +741,11 @@ export default function GradeEntryPage() {
 
       {/* Grade Entry Table */}
       {selectedGradeId && selectedSubjectId && (
-        <Card>
+        <Card className="border shadow-sm overflow-hidden">
           <CardHeader className="flex flex-row items-center justify-between">
             <div>
-              <CardTitle>
+              <CardTitle className="flex items-center gap-2">
+                <div className="h-2 w-2 rounded-full bg-gspn-maroon-500" />
                 {selectedSubject && (locale === "fr" ? selectedSubject.subjectNameFr : selectedSubject.subjectNameEn)}
               </CardTitle>
               <CardDescription>
@@ -867,9 +879,12 @@ export default function GradeEntryPage() {
         {/* Manage Evaluations Tab */}
         <TabsContent value="manage">
           {/* Filters */}
-          <Card className="mb-6">
+          <Card className="mb-6 border shadow-sm overflow-hidden">
             <CardHeader>
-              <CardTitle className="text-lg">{t.grading.viewEvaluations}</CardTitle>
+              <CardTitle className="text-lg flex items-center gap-2">
+                <div className="h-2 w-2 rounded-full bg-gspn-maroon-500" />
+                {t.grading.viewEvaluations}
+              </CardTitle>
             </CardHeader>
             <CardContent>
               <div className="grid gap-4 md:grid-cols-3">
@@ -929,10 +944,13 @@ export default function GradeEntryPage() {
           </Card>
 
           {/* Evaluations Table */}
-          <Card>
+          <Card className="border shadow-sm overflow-hidden">
             <CardHeader className="flex flex-row items-center justify-between">
               <div>
-                <CardTitle>{t.grading.evaluations}</CardTitle>
+                <CardTitle className="flex items-center gap-2">
+                  <div className="h-2 w-2 rounded-full bg-gspn-maroon-500" />
+                  {t.grading.evaluations}
+                </CardTitle>
                 <CardDescription>
                   {evaluations.length} {t.grading.evaluations.toLowerCase()}
                 </CardDescription>
@@ -950,7 +968,7 @@ export default function GradeEntryPage() {
             <CardContent>
               {isLoadingEvaluations ? (
                 <div className="flex items-center justify-center h-32">
-                  <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+                  <Loader2 className="h-8 w-8 animate-spin text-gspn-maroon-500" />
                 </div>
               ) : !manageGradeId ? (
                 <div className="text-center py-8 text-muted-foreground">

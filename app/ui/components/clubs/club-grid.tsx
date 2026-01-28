@@ -15,7 +15,7 @@ interface ClubGridProps {
 }
 
 /**
- * Empty state component with category-specific styling
+ * Empty state component with GSPN brand styling
  */
 function EmptyState({
   categoryName,
@@ -29,26 +29,25 @@ function EmptyState({
 
   return (
     <div className="col-span-full flex flex-col items-center justify-center py-16 text-center animate-in fade-in duration-500">
-      {/* Large faded icon */}
+      {/* Large faded icon with maroon background */}
       <div
         className={cn(
           "flex h-24 w-24 items-center justify-center rounded-3xl mb-6",
-          "bg-gradient-to-br opacity-20",
-          config.gradient
+          "bg-gspn-maroon-500/10"
         )}
       >
-        <Icon className="h-12 w-12 text-white" />
+        <Icon className="h-12 w-12 text-gspn-maroon-500/40" />
       </div>
 
-      <h3 className="text-lg font-semibold text-gray-900 mb-2">
+      <h3 className="text-lg font-semibold text-foreground mb-2">
         {clubsT.noClubsInCategory || "Aucun club dans cette catégorie"}
       </h3>
 
-      <p className="text-gray-500 max-w-sm">
+      <p className="text-muted-foreground max-w-sm">
         {categoryName ? (
           <>
             {clubsT.clubsWillAppear || "Les clubs de"}{" "}
-            <span className={cn("font-medium", config.accent)}>
+            <span className="font-medium text-gspn-maroon-600">
               {categoryName.toLowerCase()}
             </span>{" "}
             {clubsT.willBeDisplayed || "seront affichés ici une fois créés."}

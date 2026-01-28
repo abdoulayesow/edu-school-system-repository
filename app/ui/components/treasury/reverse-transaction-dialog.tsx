@@ -6,6 +6,7 @@ import {
   Dialog,
   DialogContent,
   DialogDescription,
+  DialogFooter,
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog"
@@ -20,8 +21,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
-import { AlertTriangle, Info } from "lucide-react"
+import { AlertTriangle, Info, RotateCcw, Loader2 } from "lucide-react"
 import { useI18n, interpolate } from "@/components/i18n-provider"
+import { cn } from "@/lib/utils"
 
 interface ReverseTransactionDialogProps {
   open: boolean
@@ -36,6 +38,15 @@ interface ReverseTransactionDialogProps {
     payerName?: string | null
   } | null
   onSuccess?: () => void
+}
+
+// Format currency for Guinea (GNF)
+function formatCurrency(amount: number): string {
+  return new Intl.NumberFormat("fr-GN", {
+    style: "decimal",
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 0,
+  }).format(amount)
 }
 
 export function ReverseTransactionDialog({
@@ -103,11 +114,7 @@ export function ReverseTransactionDialog({
       }
 
       // Reset form
-      setReason("")
-      setIncludeCorrection(false)
-      setCorrectAmount("")
-      setCorrectMethod("")
-
+      resetForm()
       onOpenChange(false)
       onSuccess?.()
     } catch (err: unknown) {
@@ -118,20 +125,17 @@ export function ReverseTransactionDialog({
     }
   }
 
-  const handleClose = () => {
+  function resetForm() {
     setReason("")
     setIncludeCorrection(false)
     setCorrectAmount("")
     setCorrectMethod("")
     setError(null)
-    onOpenChange(false)
   }
 
-  const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat("fr-GN", {
-      style: "decimal",
-      minimumFractionDigits: 0,
-    }).format(amount) + " GNF"
+  const handleClose = () => {
+    resetForm()
+    onOpenChange(false)
   }
 
   const getTypeLabel = (type: string) => {
@@ -150,137 +154,184 @@ export function ReverseTransactionDialog({
 
   return (
     <Dialog open={open} onOpenChange={handleClose}>
-      <DialogContent className="max-w-md">
-        <DialogHeader>
-          <DialogTitle className="flex items-center gap-2">
-            <AlertTriangle className="h-5 w-5 text-destructive" />
-            {t.treasury.reverseTransaction}
-          </DialogTitle>
-          <DialogDescription>
-            {t.treasury.reversalWarning}
-          </DialogDescription>
-        </DialogHeader>
+      <DialogContent className="sm:max-w-[500px] p-0 overflow-hidden">
+        {/* Red accent bar for reversal */}
+        <div className="h-1 bg-red-500" />
 
-        {transaction && (
-          <div className="space-y-4 py-4">
-            {/* Original transaction details */}
-            <div className="rounded-lg border bg-muted/50 p-4 space-y-2">
-              <div className="flex justify-between text-sm">
-                <span className="text-muted-foreground">Type:</span>
-                <span className="font-medium">{getTypeLabel(transaction.type)}</span>
+        <div className="p-6">
+          <DialogHeader className="pb-4">
+            <DialogTitle className="flex items-center gap-3">
+              <div className={cn(
+                "p-2.5 rounded-xl",
+                "bg-red-100 dark:bg-red-900/30",
+                "ring-2 ring-red-200 dark:ring-red-800"
+              )}>
+                <RotateCcw className="h-5 w-5 text-red-600 dark:text-red-400" />
               </div>
-              <div className="flex justify-between text-sm">
-                <span className="text-muted-foreground">{t.treasury.amount}:</span>
-                <span className="font-medium">{formatCurrency(transaction.amount)}</span>
-              </div>
-              <div className="flex justify-between text-sm">
-                <span className="text-muted-foreground">{t.treasury.direction}:</span>
-                <span className="font-medium">
-                  {transaction.direction === "in" ? t.treasury.incoming : t.treasury.outgoing}
-                </span>
-              </div>
-              {transaction.description && (
-                <div className="text-sm">
-                  <span className="text-muted-foreground">Description:</span>
-                  <p className="mt-1 text-sm">{transaction.description}</p>
+              <span className="text-red-700 dark:text-red-300">
+                {t.treasury.reverseTransaction}
+              </span>
+            </DialogTitle>
+            <DialogDescription>
+              {t.treasury.reversalWarning}
+            </DialogDescription>
+          </DialogHeader>
+
+          {transaction && (
+            <div className="space-y-4">
+              {/* Original transaction details */}
+              <div className={cn(
+                "rounded-xl border p-4 space-y-3",
+                "border-red-200 dark:border-red-800",
+                "bg-gradient-to-br from-red-50/50 to-red-50/30 dark:from-red-950/20 dark:to-red-950/10"
+              )}>
+                <div className="flex items-center gap-2 mb-2">
+                  <AlertTriangle className="h-4 w-4 text-red-600 dark:text-red-400" />
+                  <p className="text-sm font-medium text-red-700 dark:text-red-300">
+                    Transaction à annuler
+                  </p>
                 </div>
-              )}
-            </div>
+                <div className="grid grid-cols-2 gap-2 text-sm">
+                  <div>
+                    <span className="text-muted-foreground">Type:</span>
+                    <p className="font-medium">{getTypeLabel(transaction.type)}</p>
+                  </div>
+                  <div>
+                    <span className="text-muted-foreground">{t.treasury.amount}:</span>
+                    <p className="font-bold text-red-600 dark:text-red-400">
+                      {formatCurrency(transaction.amount)} GNF
+                    </p>
+                  </div>
+                  <div>
+                    <span className="text-muted-foreground">{t.treasury.direction}:</span>
+                    <p className="font-medium">
+                      {transaction.direction === "in" ? t.treasury.incoming : t.treasury.outgoing}
+                    </p>
+                  </div>
+                </div>
+                {transaction.description && (
+                  <div className="text-sm pt-2 border-t border-red-200 dark:border-red-800">
+                    <span className="text-muted-foreground">Description:</span>
+                    <p className="mt-1">{transaction.description}</p>
+                  </div>
+                )}
+              </div>
 
-            {/* Reason input */}
-            <div className="space-y-2">
-              <Label htmlFor="reason">
-                {t.treasury.reversalReason} <span className="text-destructive">*</span>
-              </Label>
-              <Textarea
-                id="reason"
-                placeholder={t.treasury.reversalReasonPlaceholder}
-                value={reason}
-                onChange={(e) => setReason(e.target.value)}
-                rows={3}
-                className="resize-none"
-              />
-              <p className="text-xs text-muted-foreground">
-                {interpolate(t.treasury.minimumCharacters, { count: 10 })}
-              </p>
-            </div>
-
-            {/* Correction section */}
-            <div className="space-y-3 rounded-lg border p-4">
-              <div className="flex items-center space-x-2">
-                <Checkbox
-                  id="includeCorrection"
-                  checked={includeCorrection}
-                  onCheckedChange={(checked) => setIncludeCorrection(checked === true)}
-                />
-                <Label htmlFor="includeCorrection" className="cursor-pointer font-normal">
-                  {t.treasury.includeCorrection}
+              {/* Reason input */}
+              <div className="space-y-2">
+                <Label className="text-sm font-medium">
+                  {t.treasury.reversalReason} <span className="text-red-500">*</span>
                 </Label>
+                <Textarea
+                  placeholder={t.treasury.reversalReasonPlaceholder}
+                  value={reason}
+                  onChange={(e) => setReason(e.target.value)}
+                  rows={3}
+                  className={cn(
+                    "resize-none",
+                    "focus-visible:ring-red-500 focus-visible:border-red-500",
+                    reason.length < 10 && reason.length > 0 && "border-orange-300"
+                  )}
+                />
+                <p className="text-xs text-muted-foreground">
+                  {interpolate(t.treasury.minimumCharacters, { count: 10 })} ({reason.length}/10)
+                </p>
               </div>
 
-              {includeCorrection && (
-                <div className="space-y-3 pl-6 animate-in fade-in slide-in-from-top-2">
-                  <div className="flex items-start gap-2 rounded bg-blue-50 dark:bg-blue-950/30 p-2 text-xs text-blue-700 dark:text-blue-400">
-                    <Info className="h-4 w-4 mt-0.5 flex-shrink-0" />
-                    <span>{t.treasury.correctionExplanation}</span>
-                  </div>
+              {/* Correction section */}
+              <div className={cn(
+                "space-y-3 rounded-xl border p-4",
+                includeCorrection
+                  ? "border-blue-300 dark:border-blue-700 bg-blue-50/50 dark:bg-blue-950/20"
+                  : "border-border"
+              )}>
+                <div className="flex items-center space-x-3">
+                  <Checkbox
+                    id="includeCorrection"
+                    checked={includeCorrection}
+                    onCheckedChange={(checked) => setIncludeCorrection(checked === true)}
+                  />
+                  <Label htmlFor="includeCorrection" className="cursor-pointer font-medium">
+                    {t.treasury.includeCorrection}
+                  </Label>
+                </div>
 
-                  <div className="space-y-2">
-                    <Label htmlFor="correctAmount">{t.treasury.correctAmount}</Label>
-                    <Input
-                      id="correctAmount"
-                      type="text"
-                      placeholder={formatCurrency(transaction.amount)}
-                      value={correctAmount}
-                      onChange={(e) => {
-                        const value = e.target.value.replace(/[^\d]/g, "")
-                        setCorrectAmount(value ? parseInt(value).toLocaleString("fr-GN") : "")
-                      }}
-                    />
-                  </div>
+                {includeCorrection && (
+                  <div className="space-y-3 pl-6 animate-in fade-in slide-in-from-top-2">
+                    <div className="flex items-start gap-2 rounded-lg bg-blue-100 dark:bg-blue-900/40 p-3 text-xs text-blue-700 dark:text-blue-300">
+                      <Info className="h-4 w-4 mt-0.5 flex-shrink-0" />
+                      <span>{t.treasury.correctionExplanation}</span>
+                    </div>
 
-                  <div className="space-y-2">
-                    <Label htmlFor="correctMethod">{t.treasury.correctMethod}</Label>
-                    <Select
-                      value={correctMethod}
-                      onValueChange={(value: "cash" | "orange_money") => setCorrectMethod(value)}
-                    >
-                      <SelectTrigger>
-                        <SelectValue placeholder={t.treasury.keepOriginalMethod} />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="cash">{t.enrollmentWizard.cash}</SelectItem>
-                        <SelectItem value="orange_money">{t.enrollmentWizard.orangeMoney}</SelectItem>
-                      </SelectContent>
-                    </Select>
+                    <div className="space-y-2">
+                      <Label className="text-sm font-medium">{t.treasury.correctAmount} (GNF)</Label>
+                      <Input
+                        type="text"
+                        inputMode="numeric"
+                        placeholder={formatCurrency(transaction.amount)}
+                        value={correctAmount}
+                        onChange={(e) => {
+                          const value = e.target.value.replace(/[^\d]/g, "")
+                          setCorrectAmount(value ? formatCurrency(parseInt(value)) : "")
+                        }}
+                        className="focus-visible:ring-blue-500 h-12 text-center text-lg font-bold"
+                      />
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label className="text-sm font-medium">{t.treasury.correctMethod}</Label>
+                      <Select
+                        value={correctMethod}
+                        onValueChange={(value: "cash" | "orange_money") => setCorrectMethod(value)}
+                      >
+                        <SelectTrigger className="focus:ring-blue-500">
+                          <SelectValue placeholder={t.treasury.keepOriginalMethod} />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="cash">{t.enrollmentWizard.cash}</SelectItem>
+                          <SelectItem value="orange_money">{t.enrollmentWizard.orangeMoney}</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
                   </div>
+                )}
+              </div>
+
+              {/* Error Message */}
+              {error && (
+                <div className="text-sm text-red-600 bg-red-50 dark:bg-red-900/20 p-3 rounded-lg border border-red-200 dark:border-red-800">
+                  {error}
                 </div>
               )}
             </div>
+          )}
 
-            {error && (
-              <div className="rounded-lg bg-destructive/10 p-3 text-sm text-destructive">
-                {error}
-              </div>
-            )}
-          </div>
-        )}
-
-        <div className="flex justify-end gap-3">
-          <Button
-            variant="outline"
-            onClick={handleClose}
-            disabled={isSubmitting}
-          >
-            {t.common.cancel}
-          </Button>
-          <Button
-            variant="destructive"
-            onClick={handleSubmit}
-            disabled={isSubmitting || !transaction}
-          >
-            {isSubmitting ? t.treasury.reversing : t.treasury.confirmReversal}
-          </Button>
+          <DialogFooter className="border-t pt-4 mt-4">
+            <Button
+              variant="outline"
+              onClick={handleClose}
+              disabled={isSubmitting}
+            >
+              {t.common.cancel}
+            </Button>
+            <Button
+              onClick={handleSubmit}
+              disabled={isSubmitting || !transaction || reason.length < 10}
+              className="bg-red-600 hover:bg-red-700 text-white"
+            >
+              {isSubmitting ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  {t.treasury.reversing}
+                </>
+              ) : (
+                <>
+                  <RotateCcw className="mr-2 h-4 w-4" />
+                  {t.treasury.confirmReversal}
+                </>
+              )}
+            </Button>
+          </DialogFooter>
         </div>
       </DialogContent>
     </Dialog>
