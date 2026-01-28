@@ -1,27 +1,27 @@
 "use client"
 
 import { useState, useEffect, useMemo } from "react"
-import dynamic from "next/dynamic"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { ChartContainer, ChartTooltip, ChartTooltipContent, type ChartConfig } from "@/components/ui/chart"
 import { BookOpen, Users, TrendingDown, BarChart3, Calendar, Loader2, AlertTriangle } from "lucide-react"
 import { useI18n } from "@/components/i18n-provider"
 import { PageContainer } from "@/components/layout"
 import { PermissionGuard, NoPermission } from "@/components/permission-guard"
-import { sizing } from "@/lib/design-tokens"
-import { formatDate } from "@/lib/utils"
-
-// Lazy load recharts components
-const LineChart = dynamic(() => import("recharts").then(mod => mod.LineChart) as never, { ssr: false }) as typeof import("recharts").LineChart
-const Line = dynamic(() => import("recharts").then(mod => mod.Line) as never, { ssr: false }) as typeof import("recharts").Line
-const BarChart = dynamic(() => import("recharts").then(mod => mod.BarChart) as never, { ssr: false }) as typeof import("recharts").BarChart
-const Bar = dynamic(() => import("recharts").then(mod => mod.Bar) as never, { ssr: false }) as typeof import("recharts").Bar
-const CartesianGrid = dynamic(() => import("recharts").then(mod => mod.CartesianGrid) as never, { ssr: false }) as typeof import("recharts").CartesianGrid
-const XAxis = dynamic(() => import("recharts").then(mod => mod.XAxis) as never, { ssr: false }) as typeof import("recharts").XAxis
-const YAxis = dynamic(() => import("recharts").then(mod => mod.YAxis) as never, { ssr: false }) as typeof import("recharts").YAxis
+import { sizing, typography } from "@/lib/design-tokens"
+import { cn, formatDate } from "@/lib/utils"
+import {
+  LineChart,
+  Line,
+  BarChart,
+  Bar,
+  CartesianGrid,
+  XAxis,
+  YAxis,
+  ResponsiveContainer,
+  Tooltip,
+} from "recharts"
 
 interface Grade {
   id: string
@@ -175,20 +175,6 @@ export default function ReportsPage() {
       }))
   }, [filteredGrades])
 
-  const chartConfig = {
-    rate: {
-      label: t.reports.ratePercent,
-      color: "hsl(var(--primary))",
-    },
-  } satisfies ChartConfig
-
-  const attendanceChartConfig = {
-    attendance: {
-      label: t.nav.attendance,
-      color: "hsl(var(--success))",
-    },
-  } satisfies ChartConfig
-
   if (loading) {
     return (
       <PageContainer maxWidth="full">
@@ -215,116 +201,170 @@ export default function ReportsPage() {
       }
     >
     <PageContainer maxWidth="full">
-        <div className="mb-6">
-          <h1 className="text-3xl font-bold text-foreground mb-2">{t.reports.title}</h1>
-          <p className="text-muted-foreground">{t.reports.subtitle}</p>
+        {/* Page Header */}
+        <div className="relative overflow-hidden rounded-2xl border border-border bg-card shadow-sm mb-6">
+          <div className="h-1 bg-gspn-maroon-500" />
+          <div className="p-6">
+            <div className="flex items-center gap-4">
+              <div className="p-3 bg-gspn-maroon-500/10 rounded-xl">
+                <BarChart3 className="size-8 text-gspn-maroon-600 dark:text-gspn-maroon-400" />
+              </div>
+              <div>
+                <h1 className={cn(typography.heading.page, "text-foreground")}>
+                  {t.reports.title}
+                </h1>
+                <p className="text-muted-foreground mt-1">{t.reports.subtitle}</p>
+              </div>
+            </div>
+          </div>
         </div>
 
         {/* Summary Cards */}
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4 mb-6">
-          <Card className="py-5">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">{t.reports.totalActivities}</CardTitle>
-              <BookOpen className={sizing.icon.lg} />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{summaryStats.totalGrades}</div>
-              <p className="text-xs text-muted-foreground">
-                {t.common.level}s
-              </p>
+          <Card className="overflow-hidden shadow-sm hover:shadow-md transition-shadow">
+            <div className="h-1 bg-gspn-maroon-500" />
+            <CardContent className="pt-6">
+              <div className="flex items-start gap-4">
+                <div className="p-2.5 bg-gspn-maroon-500/10 rounded-xl">
+                  <BookOpen className="size-5 text-gspn-maroon-600 dark:text-gspn-maroon-400" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-medium text-muted-foreground">{t.reports.totalActivities}</p>
+                  <div className={cn(typography.stat.md, "text-gspn-maroon-700 dark:text-gspn-maroon-300")}>
+                    {summaryStats.totalGrades}
+                  </div>
+                  <p className="text-xs text-muted-foreground mt-1">{t.common.level}s</p>
+                </div>
+              </div>
             </CardContent>
           </Card>
 
-          <Card className="py-5">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">{t.reports.enrolledStudents}</CardTitle>
-              <Users className={sizing.icon.lg} />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{summaryStats.totalStudents}</div>
-              <p className="text-xs text-muted-foreground">{t.reports.totalEnrollments}</p>
+          <Card className="overflow-hidden shadow-sm hover:shadow-md transition-shadow">
+            <div className="h-1 bg-blue-500" />
+            <CardContent className="pt-6">
+              <div className="flex items-start gap-4">
+                <div className="p-2.5 bg-blue-500/10 rounded-xl">
+                  <Users className="size-5 text-blue-600 dark:text-blue-400" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-medium text-muted-foreground">{t.reports.enrolledStudents}</p>
+                  <div className={cn(typography.stat.md, "text-blue-700 dark:text-blue-300")}>
+                    {summaryStats.totalStudents}
+                  </div>
+                  <p className="text-xs text-muted-foreground mt-1">{t.reports.totalEnrollments}</p>
+                </div>
+              </div>
             </CardContent>
           </Card>
 
-          <Card className="py-5">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">{t.reports.averageAttendance}</CardTitle>
-              <BarChart3 className={sizing.icon.lg} />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{summaryStats.avgAttendance}%</div>
-              <p className="text-xs text-muted-foreground">
-                {summaryStats.avgAttendance >= 80 ? t.reports.satisfactoryPerformance : t.reports.needsFollowup}
-              </p>
+          <Card className="overflow-hidden shadow-sm hover:shadow-md transition-shadow">
+            <div className="h-1 bg-emerald-500" />
+            <CardContent className="pt-6">
+              <div className="flex items-start gap-4">
+                <div className="p-2.5 bg-emerald-500/10 rounded-xl">
+                  <BarChart3 className="size-5 text-emerald-600 dark:text-emerald-400" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-medium text-muted-foreground">{t.reports.averageAttendance}</p>
+                  <div className={cn(typography.stat.md, "text-emerald-700 dark:text-emerald-300")}>
+                    {summaryStats.avgAttendance}%
+                  </div>
+                  <p className="text-xs text-muted-foreground mt-1">
+                    {summaryStats.avgAttendance >= 80 ? t.reports.satisfactoryPerformance : t.reports.needsFollowup}
+                  </p>
+                </div>
+              </div>
             </CardContent>
           </Card>
 
-          <Card className="py-5">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">{t.reports.atRiskStudents}</CardTitle>
-              <TrendingDown className={sizing.icon.lg} />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{summaryStats.atRiskCount}</div>
-              <p className="text-xs text-muted-foreground">{t.reports.lowParticipation}</p>
+          <Card className="overflow-hidden shadow-sm hover:shadow-md transition-shadow">
+            <div className="h-1 bg-amber-500" />
+            <CardContent className="pt-6">
+              <div className="flex items-start gap-4">
+                <div className="p-2.5 bg-amber-500/10 rounded-xl">
+                  <TrendingDown className="size-5 text-amber-600 dark:text-amber-400" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-medium text-muted-foreground">{t.reports.atRiskStudents}</p>
+                  <div className={cn(typography.stat.md, "text-amber-700 dark:text-amber-300")}>
+                    {summaryStats.atRiskCount}
+                  </div>
+                  <p className="text-xs text-muted-foreground mt-1">{t.reports.lowParticipation}</p>
+                </div>
+              </div>
             </CardContent>
           </Card>
         </div>
 
         <Tabs defaultValue="overview" className="space-y-6">
-          <TabsList>
-            <TabsTrigger value="overview">{t.reports.tabOverview}</TabsTrigger>
-            <TabsTrigger value="participation">{t.reports.tabParticipation}</TabsTrigger>
+          <TabsList className="bg-muted/50 p-1">
+            <TabsTrigger
+              value="overview"
+              className="data-[state=active]:bg-gspn-gold-500 data-[state=active]:text-black"
+            >
+              {t.reports.tabOverview}
+            </TabsTrigger>
+            <TabsTrigger
+              value="participation"
+              className="data-[state=active]:bg-gspn-gold-500 data-[state=active]:text-black"
+            >
+              {t.reports.tabParticipation}
+            </TabsTrigger>
           </TabsList>
 
           {/* Overview Tab */}
           <TabsContent value="overview" className="space-y-6">
 
             {/* Level Filter */}
-            <Card>
-              <CardContent className="pt-6">
-                <div className="flex flex-col sm:flex-row gap-4">
-                  <div className="flex-1">
-                    <Select value={selectedLevel} onValueChange={setSelectedLevel}>
-                      <SelectTrigger>
-                        <SelectValue placeholder={t.reports.allLevels} />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="all">{t.reports.allLevels}</SelectItem>
-                        <SelectItem value="elementary">Primaire</SelectItem>
-                        <SelectItem value="college">Collège</SelectItem>
-                        <SelectItem value="high_school">Lycée</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
+            <div className="rounded-2xl border-2 border-slate-200 dark:border-slate-700 bg-gradient-to-br from-slate-50/50 to-transparent dark:from-slate-900/30 dark:to-transparent shadow-sm overflow-hidden">
+              <div className="px-6 py-4 bg-slate-100 dark:bg-slate-800 border-b-2 border-slate-200 dark:border-slate-700">
+                <h3 className="text-sm font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300 flex items-center gap-2">
+                  <BookOpen className="size-4" />
+                  {locale === "fr" ? "Filtrer par niveau" : "Filter by Level"}
+                </h3>
+              </div>
+              <div className="p-4">
+                <Select value={selectedLevel} onValueChange={setSelectedLevel}>
+                  <SelectTrigger className="w-full md:w-[300px]">
+                    <SelectValue placeholder={t.reports.allLevels} />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">{t.reports.allLevels}</SelectItem>
+                    <SelectItem value="elementary">Primaire</SelectItem>
+                    <SelectItem value="college">Collège</SelectItem>
+                    <SelectItem value="high_school">Lycée</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
 
             {/* Grades List */}
-            <Card>
-              <CardHeader>
-                <CardTitle>{t.reports.allActivities}</CardTitle>
-                <CardDescription>
+            <div className="rounded-2xl border-2 border-slate-200 dark:border-slate-700 bg-gradient-to-br from-slate-50/50 to-transparent dark:from-slate-900/30 dark:to-transparent shadow-sm overflow-hidden">
+              <div className="px-6 py-4 bg-slate-100 dark:bg-slate-800 border-b-2 border-slate-200 dark:border-slate-700">
+                <h3 className="text-sm font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300 flex items-center gap-2">
+                  <Users className="size-4" />
+                  {t.reports.allActivities}
+                </h3>
+                <p className="text-xs text-muted-foreground mt-1">
                   {filteredGrades.length} {t.reports.activitiesShown}
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
+                </p>
+              </div>
+              <div className="p-4">
                 {filteredGrades.length === 0 ? (
                   <div className="text-center py-8 text-muted-foreground">
-                    <AlertTriangle className="h-8 w-8 mx-auto mb-2 opacity-50" />
+                    <AlertTriangle className={cn(sizing.icon.xl, "mx-auto mb-2 opacity-50")} />
                     <p>Aucune classe trouvée</p>
                   </div>
                 ) : (
-                  <div className="space-y-4">
+                  <div className="space-y-3">
                     {filteredGrades.map((grade) => (
                       <div
                         key={grade.id}
-                        className="flex items-center justify-between p-4 rounded-lg border bg-card hover:bg-muted/50 transition-colors"
+                        className="flex items-center justify-between p-4 rounded-lg bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 hover:border-gspn-gold-400 dark:hover:border-gspn-gold-500 transition-colors"
                       >
                         <div className="flex items-center gap-4">
-                          <div className="p-3 rounded-lg bg-primary/10">
-                            <BookOpen className="h-5 w-5 text-primary" />
+                          <div className="p-2.5 bg-gspn-maroon-500/10 rounded-xl">
+                            <BookOpen className="size-5 text-gspn-maroon-600 dark:text-gspn-maroon-400" />
                           </div>
                           <div>
                             <div className="flex items-center gap-2 mb-1">
@@ -339,17 +379,25 @@ export default function ReportsPage() {
                               <span>•</span>
                               <span>{grade.stats.subjectCount} matières</span>
                               <span>•</span>
-                              <span className={grade.stats.paymentRate && grade.stats.paymentRate >= 70 ? "text-success" : "text-warning"}>
+                              <span className={cn(
+                                grade.stats.paymentRate && grade.stats.paymentRate >= 70
+                                  ? "text-emerald-600 dark:text-emerald-400"
+                                  : "text-amber-600 dark:text-amber-400"
+                              )}>
                                 {grade.stats.paymentRate ?? 0}% paiements
                               </span>
                             </div>
                           </div>
                         </div>
                         <div className="text-right">
-                          <p className={`text-2xl font-bold ${
-                            (grade.stats.attendanceRate ?? 0) >= 80 ? "text-success" :
-                            (grade.stats.attendanceRate ?? 0) >= 60 ? "text-warning" : "text-destructive"
-                          }`}>
+                          <p className={cn(
+                            "text-2xl font-bold",
+                            (grade.stats.attendanceRate ?? 0) >= 80
+                              ? "text-emerald-600 dark:text-emerald-400"
+                              : (grade.stats.attendanceRate ?? 0) >= 60
+                                ? "text-amber-600 dark:text-amber-400"
+                                : "text-red-600 dark:text-red-400"
+                          )}>
                             {grade.stats.attendanceRate ?? "--"}%
                           </p>
                           <p className="text-xs text-muted-foreground">{t.reports.averageAttendanceRate}</p>
@@ -358,18 +406,24 @@ export default function ReportsPage() {
                     ))}
                   </div>
                 )}
-              </CardContent>
-            </Card>
+              </div>
+            </div>
           </TabsContent>
 
           {/* Participation Tab */}
           <TabsContent value="participation" className="space-y-6">
             {/* Grade Selector */}
-            <Card>
-              <CardContent className="pt-6">
+            <div className="rounded-2xl border-2 border-slate-200 dark:border-slate-700 bg-gradient-to-br from-slate-50/50 to-transparent dark:from-slate-900/30 dark:to-transparent shadow-sm overflow-hidden">
+              <div className="px-6 py-4 bg-slate-100 dark:bg-slate-800 border-b-2 border-slate-200 dark:border-slate-700">
+                <h3 className="text-sm font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300 flex items-center gap-2">
+                  <BookOpen className="size-4" />
+                  {locale === "fr" ? "Sélectionner une classe" : "Select a Class"}
+                </h3>
+              </div>
+              <div className="p-4">
                 <Select value={selectedGradeId || ""} onValueChange={setSelectedGradeId}>
                   <SelectTrigger className="w-full md:w-[300px]">
-                    <SelectValue placeholder="Sélectionner une classe" />
+                    <SelectValue placeholder={locale === "fr" ? "Sélectionner une classe" : "Select a class"} />
                   </SelectTrigger>
                   <SelectContent>
                     {grades.map((grade) => (
@@ -379,177 +433,235 @@ export default function ReportsPage() {
                     ))}
                   </SelectContent>
                 </Select>
-              </CardContent>
-            </Card>
+              </div>
+            </div>
 
             {statsLoading ? (
               <div className="flex items-center justify-center py-12">
-                <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+                <Loader2 className={cn(sizing.icon.xl, "animate-spin text-gspn-maroon-500")} />
               </div>
             ) : attendanceStats ? (
               <>
                 {/* Attendance Trend Chart */}
-                <Card>
-                  <CardHeader>
+                <div className="rounded-2xl border-2 border-slate-200 dark:border-slate-700 bg-gradient-to-br from-slate-50/50 to-transparent dark:from-slate-900/30 dark:to-transparent shadow-sm overflow-hidden">
+                  <div className="px-6 py-4 bg-slate-100 dark:bg-slate-800 border-b-2 border-slate-200 dark:border-slate-700">
                     <div className="flex items-center justify-between">
                       <div>
-                        <CardTitle className="flex items-center gap-2">
-                          <Calendar className="h-5 w-5 text-primary" />
+                        <h3 className="text-sm font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300 flex items-center gap-2">
+                          <Calendar className="size-4" />
                           {t.reports.attendanceTrend}
-                        </CardTitle>
-                        <CardDescription>
+                        </h3>
+                        <p className="text-xs text-muted-foreground mt-1">
                           {t.reports.weeklyAttendanceRate} - {attendanceStats.grade.name}
-                        </CardDescription>
+                        </p>
                       </div>
                       <div className="text-right">
-                        <p className="text-2xl font-bold text-primary">{attendanceStats.summary.attendanceRate}%</p>
-                        <p className="text-xs text-muted-foreground">Taux global</p>
+                        <p className={cn(typography.stat.md, "text-gspn-maroon-700 dark:text-gspn-maroon-300")}>
+                          {attendanceStats.summary.attendanceRate}%
+                        </p>
+                        <p className="text-xs text-muted-foreground">{locale === "fr" ? "Taux global" : "Overall rate"}</p>
                       </div>
                     </div>
-                  </CardHeader>
-                  <CardContent>
+                  </div>
+                  <div className="p-4">
                     {attendanceTrendData.length > 0 ? (
-                      <ChartContainer config={chartConfig}>
-                        <LineChart data={attendanceTrendData} accessibilityLayer>
-                          <CartesianGrid strokeDasharray="3 3" vertical={false} />
-                          <XAxis dataKey="date" tickLine={false} tickMargin={10} axisLine={false} />
-                          <YAxis tickLine={false} axisLine={false} domain={[0, 100]} />
-                          <ChartTooltip content={<ChartTooltipContent formatter={(value) => `${value}%`} />} />
-                          <Line
-                            type="monotone"
-                            dataKey="rate"
-                            stroke="var(--color-rate)"
-                            strokeWidth={2}
-                            dot={{ r: 4 }}
-                            activeDot={{ r: 6 }}
-                          />
-                        </LineChart>
-                      </ChartContainer>
+                      <div className="h-[250px] w-full">
+                        <ResponsiveContainer width="100%" height="100%">
+                          <LineChart data={attendanceTrendData}>
+                            <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="hsl(var(--border))" />
+                            <XAxis
+                              dataKey="date"
+                              tickLine={false}
+                              tickMargin={10}
+                              axisLine={false}
+                              tick={{ fontSize: 12, fill: "hsl(var(--muted-foreground))" }}
+                            />
+                            <YAxis
+                              tickLine={false}
+                              axisLine={false}
+                              domain={[0, 100]}
+                              tick={{ fontSize: 12, fill: "hsl(var(--muted-foreground))" }}
+                            />
+                            <Tooltip
+                              contentStyle={{
+                                backgroundColor: "hsl(var(--background))",
+                                border: "1px solid hsl(var(--border))",
+                                borderRadius: "8px",
+                                fontSize: "12px",
+                              }}
+                              labelStyle={{ fontWeight: 600 }}
+                              formatter={(value: number) => [`${value}%`, locale === "fr" ? "Taux" : "Rate"]}
+                            />
+                            <Line
+                              type="monotone"
+                              dataKey="rate"
+                              stroke="#8B2332"
+                              strokeWidth={2}
+                              dot={{ r: 4, fill: "#8B2332" }}
+                              activeDot={{ r: 6, fill: "#D4AF37" }}
+                            />
+                          </LineChart>
+                        </ResponsiveContainer>
+                      </div>
                     ) : (
                       <div className="h-[200px] flex items-center justify-center text-muted-foreground">
-                        Aucune donnée de présence disponible
+                        {locale === "fr" ? "Aucune donnée de présence disponible" : "No attendance data available"}
                       </div>
                     )}
-                  </CardContent>
-                </Card>
+                  </div>
+                </div>
 
                 {/* Session Summary */}
                 <div className="grid gap-4 md:grid-cols-4">
-                  <Card>
-                    <CardHeader className="pb-2">
-                      <CardTitle className="text-sm font-medium text-muted-foreground">Sessions</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                      <div className="text-2xl font-bold">{attendanceStats.sessionsCount}</div>
-                      <p className="text-xs text-muted-foreground">
-                        {attendanceStats.completedSessions} complétées
+                  <Card className="overflow-hidden shadow-sm">
+                    <div className="h-1 bg-gspn-maroon-500" />
+                    <CardContent className="pt-6">
+                      <p className="text-sm font-medium text-muted-foreground">Sessions</p>
+                      <div className={cn(typography.stat.md, "text-gspn-maroon-700 dark:text-gspn-maroon-300")}>
+                        {attendanceStats.sessionsCount}
+                      </div>
+                      <p className="text-xs text-muted-foreground mt-1">
+                        {attendanceStats.completedSessions} {locale === "fr" ? "complétées" : "completed"}
                       </p>
                     </CardContent>
                   </Card>
-                  <Card>
-                    <CardHeader className="pb-2">
-                      <CardTitle className="text-sm font-medium text-success">Présents</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                      <div className="text-2xl font-bold text-success">{attendanceStats.summary.present}</div>
+                  <Card className="overflow-hidden shadow-sm">
+                    <div className="h-1 bg-emerald-500" />
+                    <CardContent className="pt-6">
+                      <p className="text-sm font-medium text-muted-foreground">
+                        {locale === "fr" ? "Présents" : "Present"}
+                      </p>
+                      <div className={cn(typography.stat.md, "text-emerald-700 dark:text-emerald-300")}>
+                        {attendanceStats.summary.present}
+                      </div>
                     </CardContent>
                   </Card>
-                  <Card>
-                    <CardHeader className="pb-2">
-                      <CardTitle className="text-sm font-medium text-destructive">Absents</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                      <div className="text-2xl font-bold text-destructive">{attendanceStats.summary.absent}</div>
+                  <Card className="overflow-hidden shadow-sm">
+                    <div className="h-1 bg-red-500" />
+                    <CardContent className="pt-6">
+                      <p className="text-sm font-medium text-muted-foreground">
+                        {locale === "fr" ? "Absents" : "Absent"}
+                      </p>
+                      <div className={cn(typography.stat.md, "text-red-700 dark:text-red-300")}>
+                        {attendanceStats.summary.absent}
+                      </div>
                     </CardContent>
                   </Card>
-                  <Card>
-                    <CardHeader className="pb-2">
-                      <CardTitle className="text-sm font-medium text-warning">Retards</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                      <div className="text-2xl font-bold text-warning">{attendanceStats.summary.late}</div>
+                  <Card className="overflow-hidden shadow-sm">
+                    <div className="h-1 bg-amber-500" />
+                    <CardContent className="pt-6">
+                      <p className="text-sm font-medium text-muted-foreground">
+                        {locale === "fr" ? "Retards" : "Late"}
+                      </p>
+                      <div className={cn(typography.stat.md, "text-amber-700 dark:text-amber-300")}>
+                        {attendanceStats.summary.late}
+                      </div>
                     </CardContent>
                   </Card>
                 </div>
 
                 {/* Top Absences */}
                 {attendanceStats.topAbsences.length > 0 && (
-                  <Card className="border-warning/50 bg-warning/5">
-                    <CardHeader>
-                      <CardTitle className="flex items-center gap-2">
-                        <TrendingDown className="h-5 w-5 text-warning" />
+                  <div className="rounded-2xl border-2 border-amber-300 dark:border-amber-700 bg-gradient-to-br from-amber-50/50 to-transparent dark:from-amber-900/20 dark:to-transparent shadow-sm overflow-hidden">
+                    <div className="px-6 py-4 bg-amber-100 dark:bg-amber-900/30 border-b-2 border-amber-300 dark:border-amber-700">
+                      <h3 className="text-sm font-bold uppercase tracking-wider text-amber-800 dark:text-amber-300 flex items-center gap-2">
+                        <TrendingDown className="size-4" />
                         {t.reports.lowParticipationStudents}
-                      </CardTitle>
-                      <CardDescription>{t.reports.studentsNeedingFollowup}</CardDescription>
-                    </CardHeader>
-                    <CardContent>
-                      <div className="space-y-3">
-                        {attendanceStats.topAbsences.map((student) => (
-                          <div
-                            key={student.studentProfileId}
-                            className="flex items-center justify-between p-4 rounded-lg border bg-card"
-                          >
-                            <div className="flex-1">
-                              <div className="flex items-center gap-3 mb-2">
-                                <h4 className="font-semibold text-foreground">
-                                  {student.person?.firstName} {student.person?.lastName}
-                                </h4>
-                                {student.studentNumber && (
-                                  <Badge variant="outline">{student.studentNumber}</Badge>
-                                )}
-                              </div>
-                              <div className="text-sm text-warning">
-                                {student.absenceCount} absences enregistrées
-                              </div>
+                      </h3>
+                      <p className="text-xs text-amber-700 dark:text-amber-400 mt-1">
+                        {t.reports.studentsNeedingFollowup}
+                      </p>
+                    </div>
+                    <div className="p-4 space-y-3">
+                      {attendanceStats.topAbsences.map((student) => (
+                        <div
+                          key={student.studentProfileId}
+                          className="flex items-center justify-between p-4 rounded-lg bg-white dark:bg-slate-900 border border-amber-200 dark:border-amber-800"
+                        >
+                          <div className="flex-1">
+                            <div className="flex items-center gap-3 mb-1">
+                              <h4 className="font-semibold text-foreground">
+                                {student.person?.firstName} {student.person?.lastName}
+                              </h4>
+                              {student.studentNumber && (
+                                <Badge variant="outline">{student.studentNumber}</Badge>
+                              )}
                             </div>
-                            <div className="text-right">
-                              <div className="h-8 w-8 rounded-full bg-warning/20 flex items-center justify-center">
-                                <AlertTriangle className="h-4 w-4 text-warning" />
-                              </div>
+                            <div className="text-sm text-amber-600 dark:text-amber-400">
+                              {student.absenceCount} {locale === "fr" ? "absences enregistrées" : "recorded absences"}
                             </div>
                           </div>
-                        ))}
-                      </div>
-                    </CardContent>
-                  </Card>
+                          <div className="p-2 bg-amber-500/10 rounded-xl">
+                            <AlertTriangle className="size-5 text-amber-600 dark:text-amber-400" />
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
                 )}
 
                 {/* Attendance by Grade Chart */}
                 {gradeAttendanceData.length > 0 && (
-                  <Card>
-                    <CardHeader>
-                      <CardTitle className="flex items-center gap-2">
-                        <BarChart3 className="h-5 w-5 text-success" />
+                  <div className="rounded-2xl border-2 border-slate-200 dark:border-slate-700 bg-gradient-to-br from-slate-50/50 to-transparent dark:from-slate-900/30 dark:to-transparent shadow-sm overflow-hidden">
+                    <div className="px-6 py-4 bg-slate-100 dark:bg-slate-800 border-b-2 border-slate-200 dark:border-slate-700">
+                      <h3 className="text-sm font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300 flex items-center gap-2">
+                        <BarChart3 className="size-4" />
                         {t.reports.attendanceByActivity}
-                      </CardTitle>
-                      <CardDescription>{t.reports.attendanceComparison}</CardDescription>
-                    </CardHeader>
-                    <CardContent>
-                      <ChartContainer config={attendanceChartConfig}>
-                        <BarChart data={gradeAttendanceData} accessibilityLayer>
-                          <CartesianGrid strokeDasharray="3 3" vertical={false} />
-                          <XAxis
-                            dataKey="name"
-                            tickLine={false}
-                            tickMargin={10}
-                            axisLine={false}
-                            angle={-45}
-                            textAnchor="end"
-                            height={100}
-                          />
-                          <YAxis tickLine={false} axisLine={false} domain={[0, 100]} />
-                          <ChartTooltip content={<ChartTooltipContent formatter={(value) => `${value}%`} />} />
-                          <Bar dataKey="attendance" fill="var(--color-attendance)" radius={[6, 6, 0, 0]} />
-                        </BarChart>
-                      </ChartContainer>
-                    </CardContent>
-                  </Card>
+                      </h3>
+                      <p className="text-xs text-muted-foreground mt-1">
+                        {t.reports.attendanceComparison}
+                      </p>
+                    </div>
+                    <div className="p-4">
+                      <div className="h-[300px] w-full">
+                        <ResponsiveContainer width="100%" height="100%">
+                          <BarChart data={gradeAttendanceData}>
+                            <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="hsl(var(--border))" />
+                            <XAxis
+                              dataKey="name"
+                              tickLine={false}
+                              tickMargin={10}
+                              axisLine={false}
+                              angle={-45}
+                              textAnchor="end"
+                              height={100}
+                              tick={{ fontSize: 12, fill: "hsl(var(--muted-foreground))" }}
+                            />
+                            <YAxis
+                              tickLine={false}
+                              axisLine={false}
+                              domain={[0, 100]}
+                              tick={{ fontSize: 12, fill: "hsl(var(--muted-foreground))" }}
+                            />
+                            <Tooltip
+                              contentStyle={{
+                                backgroundColor: "hsl(var(--background))",
+                                border: "1px solid hsl(var(--border))",
+                                borderRadius: "8px",
+                                fontSize: "12px",
+                              }}
+                              labelStyle={{ fontWeight: 600 }}
+                              formatter={(value: number) => [`${value}%`, locale === "fr" ? "Présence" : "Attendance"]}
+                            />
+                            <Bar dataKey="attendance" fill="#10B981" radius={[6, 6, 0, 0]} />
+                          </BarChart>
+                        </ResponsiveContainer>
+                      </div>
+                    </div>
+                  </div>
                 )}
               </>
             ) : (
-              <div className="text-center py-12 text-muted-foreground">
-                <BookOpen className="h-12 w-12 mx-auto mb-4 opacity-50" />
-                <p>Sélectionnez une classe pour voir les statistiques de présence</p>
+              <div className="rounded-2xl border-2 border-slate-200 dark:border-slate-700 bg-gradient-to-br from-slate-50/50 to-transparent dark:from-slate-900/30 dark:to-transparent shadow-sm overflow-hidden p-12 text-center">
+                <div className="p-4 bg-gspn-maroon-500/10 rounded-xl w-fit mx-auto mb-4">
+                  <BookOpen className={cn(sizing.icon.xl, "text-gspn-maroon-600 dark:text-gspn-maroon-400")} />
+                </div>
+                <p className="text-muted-foreground">
+                  {locale === "fr"
+                    ? "Sélectionnez une classe pour voir les statistiques de présence"
+                    : "Select a class to view attendance statistics"
+                  }
+                </p>
               </div>
             )}
           </TabsContent>
