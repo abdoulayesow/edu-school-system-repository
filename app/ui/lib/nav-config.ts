@@ -25,6 +25,7 @@ import {
   CalendarRange,
   Sparkles,
   Clock,
+  Shield,
 } from "lucide-react"
 import type { UserRole } from "./nav-links"
 import { isGradingFeaturesEnabled } from "./feature-flags"
@@ -245,6 +246,14 @@ export const navigationConfig: MainNavItem[] = [
         href: "/admin/time-periods",
         icon: Clock,
         roles: ["director", "academic_director"],
+      },
+      {
+        id: "role-permissions",
+        name: "Role Permissions",
+        translationKey: "rolePermissions",
+        href: "/admin/roles",
+        icon: Shield,
+        roles: ["director"],
       },
     ],
   },

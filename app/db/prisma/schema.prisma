@@ -64,6 +64,8 @@ model User {
   // Permission & audit relations
   permissionOverrides        PermissionOverride[]    @relation("UserPermissionOverrides")
   grantedOverrides           PermissionOverride[]    @relation("GrantedPermissionOverrides")
+  createdRolePermissions     RolePermission[]        @relation("RolePermissionCreator")
+  updatedRolePermissions     RolePermission[]        @relation("RolePermissionUpdater")
   auditLogs                  AuditLog[]
 
   // Link to staff profile for teachers
@@ -1563,12 +1565,22 @@ model RolePermission {
   action   PermissionAction
   scope    PermissionScope    @default(all)
 
+  // Tracking fields for audit trail
+  source    String?  @default("seeded") // "seeded" | "manual"
+  createdBy String?
+  updatedBy String?
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
+  // Relations
+  creator User? @relation("RolePermissionCreator", fields: [createdBy], references: [id])
+  updater User? @relation("RolePermissionUpdater", fields: [updatedBy], references: [id])
 
   @@unique([role, resource, action])
   @@index([role])
   @@index([resource])
+  @@index([source])
 }
 
 // Permission overrides for specific users (exceptions to role defaults)

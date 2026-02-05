@@ -599,6 +599,9 @@ export default function AdminClubsPage() {
   return (
     <PageContainer maxWidth="full">
       <div className="space-y-6">
+        {/* Header accent bar */}
+        <div className="h-1 bg-gspn-maroon-500 -mx-6" />
+
         {/* Header */}
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div>
@@ -620,7 +623,7 @@ export default function AdminClubsPage() {
               </SelectContent>
             </Select>
             <PermissionGuard resource="academic_year" action="create" inline>
-              <Button onClick={() => { resetForm(); setIsCreateDialogOpen(true) }}>
+              <Button onClick={() => { resetForm(); setIsCreateDialogOpen(true) }} className={componentClasses.primaryActionButton}>
                 <Plus className="h-4 w-4 mr-2" />
                 {t.clubs?.addClub || "Add Club"}
               </Button>
@@ -795,13 +798,16 @@ export default function AdminClubsPage() {
           <>
             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
               {clubs.map((club) => (
-                <Card key={club.id}>
+                <Card key={club.id} className="border shadow-sm">
                   <CardHeader className="pb-2">
                     <div className="flex items-start justify-between">
                       <div>
-                        <CardTitle className="text-lg">
-                          {locale === "fr" && club.nameFr ? club.nameFr : club.name}
-                        </CardTitle>
+                        <div className="flex items-center gap-2 mb-1">
+                          <div className="h-2 w-2 rounded-full bg-gspn-maroon-500" />
+                          <CardTitle className="text-lg">
+                            {locale === "fr" && club.nameFr ? club.nameFr : club.name}
+                          </CardTitle>
+                        </div>
                         <div className="flex gap-2 mt-1 flex-wrap">
                           <Badge variant="outline">{getCategoryLabel(club)}</Badge>
                           <Badge className={getStatusColor(club.status)}>

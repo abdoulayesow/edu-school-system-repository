@@ -265,6 +265,8 @@ const DEFAULT_PERMISSIONS: PermissionDef[] = [
   { role: StaffRole.comptable, resource: PermissionResource.safe_income, action: PermissionAction.create, scope: PermissionScope.all },
   { role: StaffRole.comptable, resource: PermissionResource.safe_expense, action: PermissionAction.view, scope: PermissionScope.all },
   { role: StaffRole.comptable, resource: PermissionResource.safe_expense, action: PermissionAction.create, scope: PermissionScope.all },
+  { role: StaffRole.comptable, resource: PermissionResource.safe_expense, action: PermissionAction.update, scope: PermissionScope.all },
+  { role: StaffRole.comptable, resource: PermissionResource.safe_expense, action: PermissionAction.delete, scope: PermissionScope.all },
   { role: StaffRole.comptable, resource: PermissionResource.safe_expense, action: PermissionAction.approve, scope: PermissionScope.all },
   { role: StaffRole.comptable, resource: PermissionResource.bank_transfers, action: PermissionAction.view, scope: PermissionScope.all },
   { role: StaffRole.comptable, resource: PermissionResource.bank_transfers, action: PermissionAction.create, scope: PermissionScope.all },

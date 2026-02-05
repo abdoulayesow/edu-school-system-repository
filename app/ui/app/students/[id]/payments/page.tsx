@@ -46,6 +46,8 @@ import { useI18n } from "@/components/i18n-provider"
 import { PageContainer } from "@/components/layout"
 import { formatDate as formatDateUtil } from "@/lib/utils"
 import { CashDepositDialog, PaymentReviewDialog } from "@/components/payments"
+import { DownloadStudentPaymentSummaryButton } from "@/components/payments/download-student-payment-summary-button"
+import { PermissionGuard } from "@/components/permission-guard"
 
 interface Student {
   id: string
@@ -350,14 +352,24 @@ export default function StudentPaymentsPage() {
                 <p className="text-muted-foreground">Suivi des paiements de l'élève</p>
               </div>
             </div>
-            <Button
-              disabled={remainingBalance <= 0}
-              onClick={() => router.push(`/accounting/payments/new?studentId=${studentId}`)}
-              className="bg-gspn-gold-500 text-black hover:bg-gspn-gold-400"
-            >
-              <Plus className="h-4 w-4 mr-2" />
-              {locale === "fr" ? "Nouveau paiement" : "New payment"}
-            </Button>
+            <div className="flex gap-2">
+              <PermissionGuard resource="receipts" action="export" inline>
+                <DownloadStudentPaymentSummaryButton
+                  studentId={studentId}
+                  studentNumber={student.studentNumber}
+                  variant="outline"
+                  showError
+                />
+              </PermissionGuard>
+              <Button
+                disabled={remainingBalance <= 0}
+                onClick={() => router.push(`/accounting/payments/new?studentId=${studentId}`)}
+                className="bg-gspn-gold-500 text-black hover:bg-gspn-gold-400"
+              >
+                <Plus className="h-4 w-4 mr-2" />
+                {locale === "fr" ? "Nouveau paiement" : "New payment"}
+              </Button>
+            </div>
         <Dialog open={openRecordPayment} onOpenChange={(open) => {
           setOpenRecordPayment(open)
           if (!open) resetPaymentForm()

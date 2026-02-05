@@ -10,7 +10,6 @@ import {
   LogOut,
   User,
   ChevronDown,
-  Settings,
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { sizing, componentClasses } from "@/lib/design-tokens"
@@ -202,18 +201,6 @@ export function TopNav() {
                       <User className={sizing.icon.sm} />
                       <span>{t.nav.profile}</span>
                     </Link>
-
-                    {/* Users Link (Director only) */}
-                    {session.user.role === "director" && (
-                      <Link
-                        href="/users"
-                        onClick={() => setDropdownOpen(false)}
-                        className="flex items-center gap-2 px-4 py-2 text-sm text-foreground hover:bg-muted transition-colors"
-                      >
-                        <Settings className={sizing.icon.sm} />
-                        <span>{t.nav.users}</span>
-                      </Link>
-                    )}
 
                     {/* Logout */}
                     <button

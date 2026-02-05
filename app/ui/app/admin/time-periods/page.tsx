@@ -44,6 +44,7 @@ import {
 } from "@/components/ui/table"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Plus, Pencil, Trash2, Clock, AlertTriangle } from "lucide-react"
+import { componentClasses } from "@/lib/design-tokens"
 
 interface TimePeriod {
   id: string
@@ -264,6 +265,9 @@ export default function AdminTimePeriodsPage() {
   return (
     <PageContainer>
       <div className="space-y-6">
+        {/* Header accent bar */}
+        <div className="h-1 bg-gspn-maroon-500 -mx-6" />
+
         {/* Header */}
         <div className="flex items-center justify-between">
           <div>
@@ -277,7 +281,7 @@ export default function AdminTimePeriodsPage() {
             </p>
           </div>
           <PermissionGuard resource="academic_year" action="create" inline>
-            <Button onClick={openCreateDialog}>
+            <Button onClick={openCreateDialog} className={componentClasses.primaryActionButton}>
               <Plus className="mr-2 h-4 w-4" />
               {locale === 'fr' ? 'Nouvelle Période' : 'New Period'}
             </Button>
@@ -311,12 +315,17 @@ export default function AdminTimePeriodsPage() {
         </Card>
 
         {/* Time Periods Table */}
-        <Card>
+        <Card className="border shadow-sm overflow-hidden">
           <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Clock className="h-5 w-5" />
-              {locale === 'fr' ? 'Liste des Périodes' : 'Period List'}
-            </CardTitle>
+            <div className="flex items-center gap-2">
+              <div className="h-2 w-2 rounded-full bg-gspn-maroon-500" />
+              <CardTitle className="flex items-center gap-2">
+                <div className="p-2.5 bg-gspn-maroon-500/10 rounded-xl">
+                  <Clock className="h-5 w-5 text-gspn-maroon-500" />
+                </div>
+                {locale === 'fr' ? 'Liste des Périodes' : 'Period List'}
+              </CardTitle>
+            </div>
           </CardHeader>
           <CardContent>
             {loading ? (
@@ -332,7 +341,7 @@ export default function AdminTimePeriodsPage() {
             ) : (
               <Table>
                 <TableHeader>
-                  <TableRow>
+                  <TableRow className="bg-gspn-gold-50/50 dark:bg-gspn-gold-950/20">
                     <TableHead>{locale === 'fr' ? 'Ordre' : 'Order'}</TableHead>
                     <TableHead>{locale === 'fr' ? 'Nom' : 'Name'}</TableHead>
                     <TableHead>{locale === 'fr' ? 'Horaire' : 'Time'}</TableHead>
@@ -344,7 +353,7 @@ export default function AdminTimePeriodsPage() {
                 </TableHeader>
                 <TableBody>
                   {timePeriods.map((period) => (
-                    <TableRow key={period.id}>
+                    <TableRow key={period.id} className="hover:bg-muted/50 transition-colors">
                       <TableCell className="font-medium">{period.order}</TableCell>
                       <TableCell>
                         <div>

@@ -54,6 +54,7 @@ import {
   Power,
   PowerOff,
 } from "lucide-react"
+import { componentClasses } from "@/lib/design-tokens"
 
 interface SchoolYear {
   id: string
@@ -253,10 +254,10 @@ export default function GradesPage() {
 
   function getLevelBadge(level: Grade["level"]) {
     const colors: Record<Grade["level"], string> = {
-      kindergarten: "bg-pink-500",
-      elementary: "bg-blue-500",
-      college: "bg-green-500",
-      high_school: "bg-purple-500",
+      kindergarten: "bg-gspn-maroon-100 text-gspn-maroon-700 dark:bg-gspn-maroon-900/30 dark:text-gspn-maroon-300",
+      elementary: "bg-gspn-gold-100 text-gspn-gold-700 dark:bg-gspn-gold-900/30 dark:text-gspn-gold-300",
+      college: "bg-gspn-maroon-100 text-gspn-maroon-700 dark:bg-gspn-maroon-900/30 dark:text-gspn-maroon-300",
+      high_school: "bg-gspn-gold-100 text-gspn-gold-700 dark:bg-gspn-gold-900/30 dark:text-gspn-gold-300",
     }
     return <Badge className={colors[level]}>{LEVEL_LABELS[level]}</Badge>
   }
@@ -590,6 +591,9 @@ export default function GradesPage() {
 
   return (
     <PageContainer maxWidth="full">
+      {/* Header accent bar */}
+      <div className="h-1 bg-gspn-maroon-500 -mx-6 mb-6" />
+
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
         <div>
@@ -618,6 +622,7 @@ export default function GradesPage() {
                 setSelectedGrade(null)
                 setIsGradeDialogOpen(true)
               }}
+              className={componentClasses.primaryActionButton}
             >
               <Plus className="h-4 w-4 mr-2" />
               {t.admin.addGrade}
@@ -665,7 +670,7 @@ export default function GradesPage() {
       ) : (
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
           {filteredGrades.map((grade) => (
-            <Card key={grade.id} className={!grade.isEnabled ? "opacity-60" : ""}>
+            <Card key={grade.id} className={`border shadow-sm ${!grade.isEnabled ? "opacity-60" : ""}`}>
               <CardHeader className="pb-2">
                 <div className="flex items-start justify-between">
                   <div>
@@ -693,7 +698,7 @@ export default function GradesPage() {
                         title={grade.isEnabled ? t.admin.disableGrade : t.admin.enableGrade}
                       >
                         {grade.isEnabled ? (
-                          <Power className="h-4 w-4 text-green-500" />
+                          <Power className="h-4 w-4 text-gspn-maroon-500" />
                         ) : (
                           <PowerOff className="h-4 w-4 text-muted-foreground" />
                         )}

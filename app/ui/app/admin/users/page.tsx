@@ -46,6 +46,7 @@ import {
   Copy,
   Shield,
 } from "lucide-react"
+import { componentClasses } from "@/lib/design-tokens"
 
 interface User {
   id: string
@@ -231,14 +232,25 @@ export default function AdminUsersPage() {
 
   return (
     <PageContainer maxWidth="full">
+      {/* GSPN Header Accent */}
+      <div className="h-1 bg-gspn-maroon-500 -mx-8 -mt-8 mb-8" />
+
       {/* Header */}
-      <div className="flex items-center justify-between mb-6">
-        <div>
-          <h1 className="text-3xl font-bold">{t.admin.usersManagement}</h1>
-          <p className="text-muted-foreground">{t.admin.usersPageSubtitle}</p>
+      <div className="flex items-center justify-between mb-8">
+        <div className="flex items-center gap-4">
+          <div className="p-3 bg-gspn-maroon-500/10 rounded-xl">
+            <Users className="w-8 h-8 text-gspn-maroon-500" />
+          </div>
+          <div>
+            <h1 className="text-3xl font-bold text-foreground">{t.admin.usersManagement}</h1>
+            <p className="text-muted-foreground mt-1">{t.admin.usersPageSubtitle}</p>
+          </div>
         </div>
         <PermissionGuard resource="user_accounts" action="create" inline>
-          <Button onClick={() => setIsInviteDialogOpen(true)}>
+          <Button
+            onClick={() => setIsInviteDialogOpen(true)}
+            className={componentClasses.primaryActionButton}
+          >
             <UserPlus className="h-4 w-4 mr-2" />
             {t.admin.inviteUser}
           </Button>
@@ -246,49 +258,57 @@ export default function AdminUsersPage() {
       </div>
 
       {/* Summary Cards */}
-      <div className="grid gap-4 md:grid-cols-4 mb-6">
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">{t.admin.totalUsers}</CardTitle>
-            <Users className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{users.length}</div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">{t.admin.pendingInvitations}</CardTitle>
-            <Clock className="h-4 w-4 text-warning" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">
-              {invitations.filter((i) => i.status === "pending").length}
+      <div className="grid gap-4 md:grid-cols-4 mb-8">
+        <Card className="border shadow-sm animate-in fade-in slide-in-from-bottom-4 duration-500">
+          <CardContent className="pt-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm text-muted-foreground">{t.admin.totalUsers}</p>
+                <p className="text-3xl font-bold text-foreground mt-1">{users.length}</p>
+              </div>
+              <Users className="w-10 h-10 text-gspn-maroon-500/30" />
             </div>
           </CardContent>
         </Card>
 
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">{t.admin.acceptedInvitations}</CardTitle>
-            <CheckCircle2 className="h-4 w-4 text-success" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">
-              {invitations.filter((i) => i.status === "accepted").length}
+        <Card className="border shadow-sm animate-in fade-in slide-in-from-bottom-4 duration-500 delay-75">
+          <CardContent className="pt-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm text-muted-foreground">{t.admin.pendingInvitations}</p>
+                <p className="text-3xl font-bold text-foreground mt-1">
+                  {invitations.filter((i) => i.status === "pending").length}
+                </p>
+              </div>
+              <Clock className="w-10 h-10 text-gspn-gold-500/30" />
             </div>
           </CardContent>
         </Card>
 
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">{t.admin.expiredInvitations}</CardTitle>
-            <XCircle className="h-4 w-4 text-destructive" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">
-              {invitations.filter((i) => i.status === "expired").length}
+        <Card className="border shadow-sm animate-in fade-in slide-in-from-bottom-4 duration-500 delay-150">
+          <CardContent className="pt-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm text-muted-foreground">{t.admin.acceptedInvitations}</p>
+                <p className="text-3xl font-bold text-foreground mt-1">
+                  {invitations.filter((i) => i.status === "accepted").length}
+                </p>
+              </div>
+              <CheckCircle2 className="w-10 h-10 text-emerald-500/30" />
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card className="border shadow-sm animate-in fade-in slide-in-from-bottom-4 duration-500 delay-200">
+          <CardContent className="pt-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm text-muted-foreground">{t.admin.expiredInvitations}</p>
+                <p className="text-3xl font-bold text-foreground mt-1">
+                  {invitations.filter((i) => i.status === "expired").length}
+                </p>
+              </div>
+              <XCircle className="w-10 h-10 text-red-500/30" />
             </div>
           </CardContent>
         </Card>
@@ -309,10 +329,13 @@ export default function AdminUsersPage() {
 
         {/* Invitations Tab */}
         <TabsContent value="invitations">
-          <Card>
+          <Card className="border shadow-sm overflow-hidden">
             <CardHeader>
-              <CardTitle>{t.admin.invitationsTab}</CardTitle>
-              <CardDescription>
+              <div className="flex items-center gap-2">
+                <div className="h-2 w-2 rounded-full bg-gspn-maroon-500" />
+                <CardTitle>{t.admin.invitationsTab}</CardTitle>
+              </div>
+              <CardDescription className="mt-2">
                 {t.admin.manageInvitations}
               </CardDescription>
             </CardHeader>
@@ -329,7 +352,7 @@ export default function AdminUsersPage() {
               ) : (
                 <Table>
                   <TableHeader>
-                    <TableRow>
+                    <TableRow className="bg-gspn-gold-50/50 dark:bg-gspn-gold-950/20">
                       <TableHead>{t.admin.emailColumn}</TableHead>
                       <TableHead>{t.admin.nameColumn}</TableHead>
                       <TableHead>{t.admin.roleColumn}</TableHead>
@@ -341,7 +364,7 @@ export default function AdminUsersPage() {
                   </TableHeader>
                   <TableBody>
                     {invitations.map((invitation) => (
-                      <TableRow key={invitation.id}>
+                      <TableRow key={invitation.id} className="hover:bg-muted/50 transition-colors">
                         <TableCell className="font-medium">{invitation.email}</TableCell>
                         <TableCell>{invitation.name || "-"}</TableCell>
                         <TableCell>{getRoleBadge(invitation.role)}</TableCell>
@@ -396,10 +419,13 @@ export default function AdminUsersPage() {
 
         {/* Users Tab */}
         <TabsContent value="users">
-          <Card>
+          <Card className="border shadow-sm overflow-hidden">
             <CardHeader>
-              <CardTitle>{t.admin.allUsers}</CardTitle>
-              <CardDescription>
+              <div className="flex items-center gap-2">
+                <div className="h-2 w-2 rounded-full bg-gspn-maroon-500" />
+                <CardTitle>{t.admin.allUsers}</CardTitle>
+              </div>
+              <CardDescription className="mt-2">
                 {t.admin.viewAllUsers}
               </CardDescription>
             </CardHeader>
@@ -412,7 +438,7 @@ export default function AdminUsersPage() {
               ) : (
                 <Table>
                   <TableHeader>
-                    <TableRow>
+                    <TableRow className="bg-gspn-gold-50/50 dark:bg-gspn-gold-950/20">
                       <TableHead>{t.admin.nameColumn}</TableHead>
                       <TableHead>{t.admin.emailColumn}</TableHead>
                       <TableHead>{t.admin.roleColumn}</TableHead>
@@ -421,7 +447,7 @@ export default function AdminUsersPage() {
                   </TableHeader>
                   <TableBody>
                     {users.map((user) => (
-                      <TableRow key={user.id}>
+                      <TableRow key={user.id} className="hover:bg-muted/50 transition-colors">
                         <TableCell className="font-medium">{user.name || "-"}</TableCell>
                         <TableCell>{user.email || "-"}</TableCell>
                         <TableCell>{getRoleBadge(user.role)}</TableCell>
@@ -451,7 +477,9 @@ export default function AdminUsersPage() {
           </DialogHeader>
           <div className="grid gap-4 py-4">
             <div className="grid gap-2">
-              <Label htmlFor="email">{t.admin.inviteeEmail}</Label>
+              <Label htmlFor="email">
+                {t.admin.inviteeEmail}
+              </Label>
               <Input
                 id="email"
                 type="email"
@@ -461,7 +489,9 @@ export default function AdminUsersPage() {
               />
             </div>
             <div className="grid gap-2">
-              <Label htmlFor="name">{t.admin.inviteeName}</Label>
+              <Label htmlFor="name">
+                {t.admin.inviteeName}
+              </Label>
               <Input
                 id="name"
                 placeholder={t.admin.namePlaceholder}
@@ -470,7 +500,9 @@ export default function AdminUsersPage() {
               />
             </div>
             <div className="grid gap-2">
-              <Label htmlFor="role">{t.admin.selectRole}</Label>
+              <Label htmlFor="role">
+                {t.admin.selectRole}
+              </Label>
               <Select
                 value={inviteForm.role}
                 onValueChange={(v) => setInviteForm({ ...inviteForm, role: v })}
@@ -480,7 +512,10 @@ export default function AdminUsersPage() {
                 </SelectTrigger>
                 <SelectContent>
                   {ROLE_KEYS.map((role) => (
-                    <SelectItem key={role} value={role}>
+                    <SelectItem
+                      key={role}
+                      value={role}
+                    >
                       {roleLabels[role] || role}
                     </SelectItem>
                   ))}
@@ -492,10 +527,17 @@ export default function AdminUsersPage() {
             </p>
           </div>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setIsInviteDialogOpen(false)}>
+            <Button
+              variant="outline"
+              onClick={() => setIsInviteDialogOpen(false)}
+            >
               {t.common.cancel}
             </Button>
-            <Button onClick={handleInvite} disabled={isSubmitting || !inviteForm.email}>
+            <Button
+              onClick={handleInvite}
+              disabled={isSubmitting || !inviteForm.email}
+              className={componentClasses.primaryActionButton}
+            >
               {isSubmitting && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
               {t.admin.sendInvitation}
             </Button>

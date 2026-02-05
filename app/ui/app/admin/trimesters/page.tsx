@@ -69,6 +69,7 @@ import {
   Users,
   Zap,
 } from "lucide-react"
+import { componentClasses } from "@/lib/design-tokens"
 
 interface SchoolYear {
   id: string
@@ -520,6 +521,9 @@ export default function TrimestersPage() {
 
   return (
     <PageContainer maxWidth="full">
+      {/* Header accent bar */}
+      <div className="h-1 bg-gspn-maroon-500 -mx-6 mb-6" />
+
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
         <div>
@@ -571,6 +575,7 @@ export default function TrimestersPage() {
             <Button
               onClick={openCreateDialog}
               disabled={!selectedSchoolYearId || availableTrimesterNumbers.length === 0}
+              className={componentClasses.primaryActionButton}
             >
               <Plus className="h-4 w-4 mr-2" />
               {t.admin.createTrimester}
@@ -581,10 +586,12 @@ export default function TrimestersPage() {
 
       {/* Summary Cards */}
       <div className="grid gap-4 md:grid-cols-3 mb-6">
-        <Card>
+        <Card className="border shadow-sm animate-in fade-in slide-in-from-bottom-4 duration-500">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">{t.admin.activeTrimester}</CardTitle>
-            <CheckCircle2 className="h-4 w-4 text-success" />
+            <div className="p-2.5 bg-gspn-maroon-500/10 rounded-xl">
+              <CheckCircle2 className="h-4 w-4 text-gspn-maroon-500" />
+            </div>
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
@@ -602,10 +609,12 @@ export default function TrimestersPage() {
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="border shadow-sm animate-in fade-in slide-in-from-bottom-4 duration-500 delay-75">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">{t.admin.totalTrimesters}</CardTitle>
-            <CalendarDays className="h-4 w-4 text-muted-foreground" />
+            <div className="p-2.5 bg-gspn-maroon-500/10 rounded-xl">
+              <CalendarDays className="h-4 w-4 text-gspn-maroon-500" />
+            </div>
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{trimesters.length} / 3</div>
@@ -615,10 +624,12 @@ export default function TrimestersPage() {
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="border shadow-sm animate-in fade-in slide-in-from-bottom-4 duration-500 delay-150">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">{t.admin.evaluationsCount}</CardTitle>
-            <GraduationCap className="h-4 w-4 text-muted-foreground" />
+            <div className="p-2.5 bg-gspn-maroon-500/10 rounded-xl">
+              <GraduationCap className="h-4 w-4 text-gspn-maroon-500" />
+            </div>
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
@@ -632,9 +643,12 @@ export default function TrimestersPage() {
       </div>
 
       {/* Trimesters Table */}
-      <Card>
+      <Card className="border shadow-sm overflow-hidden">
         <CardHeader>
-          <CardTitle>{t.admin.trimesters}</CardTitle>
+          <div className="flex items-center gap-2">
+            <div className="h-2 w-2 rounded-full bg-gspn-maroon-500" />
+            <CardTitle>{t.admin.trimesters}</CardTitle>
+          </div>
           <CardDescription>{t.admin.trimestersSubtitle}</CardDescription>
         </CardHeader>
         <CardContent>
@@ -653,7 +667,7 @@ export default function TrimestersPage() {
           ) : (
             <Table>
               <TableHeader>
-                <TableRow>
+                <TableRow className="bg-gspn-gold-50/50 dark:bg-gspn-gold-950/20">
                   <TableHead>{t.admin.trimester}</TableHead>
                   <TableHead>{t.admin.startDate}</TableHead>
                   <TableHead>{t.admin.endDate}</TableHead>
@@ -666,7 +680,7 @@ export default function TrimestersPage() {
                 {trimesters
                   .sort((a, b) => a.number - b.number)
                   .map((trimester) => (
-                    <TableRow key={trimester.id}>
+                    <TableRow key={trimester.id} className="hover:bg-muted/50 transition-colors">
                       <TableCell className="font-medium">
                         {locale === "fr" ? trimester.nameFr : trimester.nameEn}
                       </TableCell>
