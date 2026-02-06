@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server"
 import { requirePerm } from "@/lib/authz"
 import { prisma } from "@/lib/prisma"
+import { buildNameSearchConditions } from "@/lib/search-utils"
 import { Prisma } from "@prisma/client"
 import { z } from "zod"
 
@@ -89,12 +90,23 @@ export async function GET(req: NextRequest) {
     }
 
     // Search by name or enrollment number
+    // Supports multi-word search: "John Doe" matches firstName="John", lastName="Doe"
     if (search) {
-      where.OR = [
-        { firstName: { contains: search, mode: "insensitive" } },
-        { lastName: { contains: search, mode: "insensitive" } },
-        { enrollmentNumber: { contains: search, mode: "insensitive" } },
-      ]
+      const searchConditions = buildNameSearchConditions(search, {
+        firstName: true,
+        lastName: true,
+        enrollmentNumber: true,
+      })
+      // If draftsOnly is set, we need to AND the search with the draft filter
+      if (draftsOnly && where.OR) {
+        where.AND = [
+          { OR: where.OR },
+          searchConditions,
+        ]
+        delete where.OR
+      } else {
+        Object.assign(where, searchConditions)
+      }
     }
 
     // Date filtering (by createdAt)

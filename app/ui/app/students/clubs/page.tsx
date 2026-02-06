@@ -2,13 +2,12 @@
 
 import { useState, useMemo, useEffect, lazy, Suspense } from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Input } from "@/components/ui/input"
+import { SearchInput } from "@/components/ui/search-input"
 import { Skeleton } from "@/components/ui/skeleton"
 import {
   BookOpen,
   Users,
   UserPlus,
-  Search,
   Loader2,
   Calendar,
 } from "lucide-react"
@@ -200,15 +199,14 @@ export default function ClubsPage() {
         >
           <div className="flex flex-col sm:flex-row gap-4">
             {/* Search Input */}
-            <div className="relative flex-1">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground" />
-              <Input
-                placeholder={t.clubs?.searchPlaceholder || "Search clubs..."}
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-10"
-              />
-            </div>
+            <SearchInput
+              value={searchQuery}
+              onChange={setSearchQuery}
+              placeholder={t.clubs?.searchPlaceholder || "Search clubs..."}
+              debounceMs={300}
+              showClear
+              wrapperClassName="flex-1"
+            />
 
             {/* Category Filter */}
             <HydratedSelect

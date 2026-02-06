@@ -5,10 +5,11 @@ import { useRouter } from "next/navigation"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
+import { SearchInput } from "@/components/ui/search-input"
 import { Badge } from "@/components/ui/badge"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { Plus, Search, ChevronRight, Loader2, FileText, Clock, CheckCircle2, Users } from "lucide-react"
+import { Plus, ChevronRight, Loader2, FileText, Clock, CheckCircle2, Users } from "lucide-react"
 import { useI18n } from "@/components/i18n-provider"
 import { PageContainer } from "@/components/layout"
 import { PermissionGuard } from "@/components/permission-guard"
@@ -262,15 +263,14 @@ export default function EnrollmentsPage() {
       >
         <div className="flex flex-col sm:flex-row gap-4 flex-wrap">
           {/* Search Input */}
-          <div className="relative flex-1 min-w-[200px]">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground" />
-            <Input
-              placeholder={t.enrollments.searchPlaceholder}
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-10"
-            />
-          </div>
+          <SearchInput
+            value={searchQuery}
+            onChange={setSearchQuery}
+            placeholder={t.enrollments.searchPlaceholder}
+            debounceMs={300}
+            showClear
+            wrapperClassName="flex-1 min-w-[200px]"
+          />
 
           {/* Status Filter */}
           <HydratedSelect

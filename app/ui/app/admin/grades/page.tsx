@@ -1,6 +1,8 @@
 "use client"
 
-import { useState, useEffect, useMemo } from "react"
+import { Suspense, useState, useEffect, useMemo } from "react"
+import { useUrlFilters, enumFilter, stringFilter } from "@/hooks/use-url-filters"
+import { SearchInput } from "@/components/ui/search-input"
 import { PageContainer } from "@/components/layout"
 import { Card, CardHeader, CardTitle, CardContent, CardDescription, CardFooter } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
@@ -115,7 +117,7 @@ interface Subject {
 const LEVELS = ["all", "kindergarten", "elementary", "college", "high_school"] as const
 type Level = (typeof LEVELS)[number]
 
-export default function GradesPage() {
+function GradesPageContent() {
   const { t, locale } = useI18n()
 
   const LEVEL_LABELS: Record<Level, string> = {
@@ -125,13 +127,21 @@ export default function GradesPage() {
     college: t.admin.levelCollege,
     high_school: t.admin.levelHighSchool,
   }
+
+  // URL-synced filters
+  const { filters, setFilter } = useUrlFilters({
+    level: enumFilter(LEVELS, "all"),
+    q: stringFilter(),
+  })
+  const selectedLevel = filters.level as Level
+  const searchQuery = filters.q
+
   const [schoolYears, setSchoolYears] = useState<SchoolYear[]>([])
   const [selectedYearId, setSelectedYearId] = useState<string>("")
   const [grades, setGrades] = useState<Grade[]>([])
   const [subjects, setSubjects] = useState<Subject[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [isMounted, setIsMounted] = useState(false)
-  const [selectedLevel, setSelectedLevel] = useState<Level>("all")
   const [expandedGrades, setExpandedGrades] = useState<Set<string>>(new Set())
 
   // Dialog states
@@ -233,9 +243,25 @@ export default function GradesPage() {
   }
 
   const filteredGrades = useMemo(() => {
-    if (selectedLevel === "all") return grades
-    return grades.filter((g) => g.level === selectedLevel)
-  }, [grades, selectedLevel])
+    let result = grades
+
+    // Filter by level
+    if (selectedLevel !== "all") {
+      result = result.filter((g) => g.level === selectedLevel)
+    }
+
+    // Filter by search query
+    if (searchQuery.trim()) {
+      const query = searchQuery.toLowerCase()
+      result = result.filter((g) =>
+        g.name.toLowerCase().includes(query) ||
+        (g.code && g.code.toLowerCase().includes(query)) ||
+        (g.series && g.series.toLowerCase().includes(query))
+      )
+    }
+
+    return result
+  }, [grades, selectedLevel, searchQuery])
 
   const selectedSchoolYear = useMemo(
     () => schoolYears.find((sy) => sy.id === selectedYearId),
@@ -631,16 +657,27 @@ export default function GradesPage() {
         </div>
       </div>
 
-      {/* Level Filter */}
-      <Tabs value={selectedLevel} onValueChange={(v) => setSelectedLevel(v as Level)} className="mb-6">
-        <TabsList>
-          {LEVELS.map((level) => (
-            <TabsTrigger key={level} value={level}>
-              {LEVEL_LABELS[level]}
-            </TabsTrigger>
-          ))}
-        </TabsList>
-      </Tabs>
+      {/* Search and Level Filter */}
+      <div className="flex flex-col sm:flex-row gap-4 mb-6">
+        {/* Search Input */}
+        <SearchInput
+          placeholder={t.admin.searchGrades}
+          value={searchQuery}
+          onChange={(v) => setFilter("q", v)}
+          wrapperClassName="flex-1 max-w-md"
+        />
+
+        {/* Level Filter */}
+        <Tabs value={selectedLevel} onValueChange={(v) => setFilter("level", v as Level)}>
+          <TabsList>
+            {LEVELS.map((level) => (
+              <TabsTrigger key={level} value={level}>
+                {LEVEL_LABELS[level]}
+              </TabsTrigger>
+            ))}
+          </TabsList>
+        </Tabs>
+      </div>
 
       {/* Grades Grid */}
       {isLoading ? (
@@ -669,8 +706,12 @@ export default function GradesPage() {
         </div>
       ) : (
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-          {filteredGrades.map((grade) => (
-            <Card key={grade.id} className={`border shadow-sm ${!grade.isEnabled ? "opacity-60" : ""}`}>
+          {filteredGrades.map((grade, index) => (
+            <Card
+              key={grade.id}
+              className={`border shadow-sm animate-in fade-in slide-in-from-bottom-4 duration-500 ${!grade.isEnabled ? "opacity-60" : ""}`}
+              style={{ animationDelay: `${index * 50}ms` }}
+            >
               <CardHeader className="pb-2">
                 <div className="flex items-start justify-between">
                   <div>
@@ -729,15 +770,24 @@ export default function GradesPage() {
               <CardContent className="space-y-4">
                 {/* Stats */}
                 <div className="grid grid-cols-3 gap-2 text-center">
-                  <div className="bg-muted rounded p-2">
+                  <div className="flex flex-col items-center gap-1">
+                    <div className="p-2.5 bg-gspn-maroon-500/10 rounded-xl">
+                      <Users className="h-4 w-4 text-gspn-maroon-500" />
+                    </div>
                     <div className="text-lg font-semibold">{grade._count.enrollments}</div>
                     <div className="text-xs text-muted-foreground">{t.admin.students}</div>
                   </div>
-                  <div className="bg-muted rounded p-2">
+                  <div className="flex flex-col items-center gap-1">
+                    <div className="p-2.5 bg-gspn-maroon-500/10 rounded-xl">
+                      <DoorOpen className="h-4 w-4 text-gspn-maroon-500" />
+                    </div>
                     <div className="text-lg font-semibold">{grade.rooms.length}</div>
                     <div className="text-xs text-muted-foreground">{t.admin.rooms}</div>
                   </div>
-                  <div className="bg-muted rounded p-2">
+                  <div className="flex flex-col items-center gap-1">
+                    <div className="p-2.5 bg-gspn-maroon-500/10 rounded-xl">
+                      <BookOpen className="h-4 w-4 text-gspn-maroon-500" />
+                    </div>
                     <div className="text-lg font-semibold">{grade.subjects.length}</div>
                     <div className="text-xs text-muted-foreground">{t.admin.subjects}</div>
                   </div>
@@ -1101,7 +1151,7 @@ export default function GradesPage() {
                       onValueChange={(v) => setSubjectForm({ ...subjectForm, subjectId: v })}
                     >
                       <SelectTrigger>
-                        <SelectValue placeholder={t.admin.selectTeacher} />
+                        <SelectValue placeholder={t.admin.selectSubject} />
                       </SelectTrigger>
                       <SelectContent>
                         {subjects
@@ -1258,5 +1308,13 @@ export default function GradesPage() {
       </AlertDialog>
 
       </PageContainer>
+  )
+}
+
+export default function GradesPage() {
+  return (
+    <Suspense fallback={<div className="flex items-center justify-center h-64"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gspn-maroon-500"></div></div>}>
+      <GradesPageContent />
+    </Suspense>
   )
 }

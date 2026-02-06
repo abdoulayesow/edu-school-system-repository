@@ -1,6 +1,8 @@
 "use client"
 
-import { useState, useEffect, useMemo } from "react"
+import { Suspense, useState, useEffect, useMemo } from "react"
+import { useUrlFilters, tabFilter, stringFilter } from "@/hooks/use-url-filters"
+import { SearchInput } from "@/components/ui/search-input"
 import { PageContainer } from "@/components/layout"
 import { Card, CardHeader, CardTitle, CardContent, CardDescription } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
@@ -115,8 +117,20 @@ interface ClassAssignment {
   }
 }
 
-export default function TeachersPage() {
+const TABS = ["by-subject", "by-teacher"] as const
+type TabValue = (typeof TABS)[number]
+
+function TeachersPageContent() {
   const { t, locale } = useI18n()
+
+  // URL-synced filters
+  const { filters, setFilter } = useUrlFilters({
+    tab: tabFilter(TABS, "by-subject"),
+    q: stringFilter(),
+  })
+  const activeTab = filters.tab as TabValue
+  const searchQuery = filters.q
+
   const [schoolYears, setSchoolYears] = useState<SchoolYear[]>([])
   const [selectedYearId, setSelectedYearId] = useState<string>("")
   const [teachers, setTeachers] = useState<Teacher[]>([])
@@ -124,7 +138,6 @@ export default function TeachersPage() {
   const [grades, setGrades] = useState<Grade[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [isMounted, setIsMounted] = useState(false)
-  const [activeTab, setActiveTab] = useState("by-subject")
 
   // Dialog states
   const [isAssignDialogOpen, setIsAssignDialogOpen] = useState(false)
@@ -280,6 +293,20 @@ export default function TeachersPage() {
     return Object.values(grouped).sort((a, b) => a.grade.order - b.grade.order)
   }, [assignments, grades])
 
+  // Filter teachers by search query
+  const filteredTeachers = useMemo(() => {
+    if (!searchQuery.trim()) return teachers
+
+    const query = searchQuery.toLowerCase()
+    return teachers.filter((teacher) =>
+      teacher.person.firstName.toLowerCase().includes(query) ||
+      teacher.person.lastName.toLowerCase().includes(query) ||
+      `${teacher.person.firstName} ${teacher.person.lastName}`.toLowerCase().includes(query) ||
+      (teacher.specialization && teacher.specialization.toLowerCase().includes(query)) ||
+      (teacher.employeeNumber && teacher.employeeNumber.toLowerCase().includes(query))
+    )
+  }, [teachers, searchQuery])
+
   async function handleAssignTeacher() {
     if (!selectedGradeSubject) return
     setIsSubmitting(true)
@@ -434,7 +461,7 @@ export default function TeachersPage() {
       </div>
 
       {/* Main Content */}
-      <Tabs value={activeTab} onValueChange={setActiveTab}>
+      <Tabs value={activeTab} onValueChange={(v) => setFilter("tab", v as TabValue)}>
         <TabsList className="mb-4">
           <TabsTrigger value="by-subject">
             <BookOpen className="h-4 w-4 mr-2" />
@@ -552,18 +579,26 @@ export default function TeachersPage() {
 
         {/* By Teacher Tab */}
         <TabsContent value="by-teacher">
+          {/* Search Input */}
+          <SearchInput
+            placeholder={t.admin.searchTeachers}
+            value={searchQuery}
+            onChange={(v) => setFilter("q", v)}
+            wrapperClassName="max-w-md mb-6"
+          />
+
           {isLoading ? (
             <div className="flex items-center justify-center h-64">
               <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
             </div>
-          ) : teachers.length === 0 ? (
+          ) : filteredTeachers.length === 0 ? (
             <div className="text-center py-16 text-muted-foreground">
               <Users className="h-16 w-16 mx-auto mb-4 opacity-50" />
-              <p>{t.admin.noTeachersFound}</p>
+              <p>{searchQuery ? t.common.noResults : t.admin.noTeachersFound}</p>
             </div>
           ) : (
             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-              {teachers.map((teacher) => (
+              {filteredTeachers.map((teacher) => (
                 <Card key={teacher.id} className="border shadow-sm">
                   <CardHeader>
                     <CardTitle className="flex items-center justify-between">
@@ -625,9 +660,8 @@ export default function TeachersPage() {
                       )}
 
                       <Button
-                        variant="outline"
                         size="sm"
-                        className="w-full mt-2"
+                        className={`w-full mt-2 ${componentClasses.primaryActionButton}`}
                         onClick={() => openScheduleDialog(teacher)}
                       >
                         <Calendar className="h-4 w-4 mr-2" />
@@ -683,6 +717,7 @@ export default function TeachersPage() {
             <Button
               onClick={handleAssignTeacher}
               disabled={isSubmitting || !assignForm.teacherProfileId}
+              className={componentClasses.primaryActionButton}
             >
               {isSubmitting && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
               {t.admin.assignTeacher}
@@ -796,5 +831,13 @@ export default function TeachersPage() {
         </AlertDialogContent>
       </AlertDialog>
     </PageContainer>
+  )
+}
+
+export default function TeachersPage() {
+  return (
+    <Suspense fallback={<div className="flex items-center justify-center h-64"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gspn-maroon-500"></div></div>}>
+      <TeachersPageContent />
+    </Suspense>
   )
 }

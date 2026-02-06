@@ -7,6 +7,7 @@ import { Badge } from "@/components/ui/badge"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Input } from "@/components/ui/input"
+import { SearchInput } from "@/components/ui/search-input"
 import {
   CheckCircle2,
   XCircle,
@@ -19,7 +20,6 @@ import {
   Save,
   ListChecks,
   UserX,
-  Search,
   CalendarCheck,
   TrendingUp,
   CircleAlert
@@ -639,15 +639,13 @@ export default function AttendancePage() {
             )}
 
             {/* Search */}
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground" />
-              <Input
-                placeholder="Rechercher un élève..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-9"
-              />
-            </div>
+            <SearchInput
+              value={searchQuery}
+              onChange={setSearchQuery}
+              placeholder="Rechercher un élève..."
+              debounceMs={300}
+              showClear
+            />
 
             {/* Mode Indicator */}
             <div className="flex items-center justify-center gap-2 text-sm text-muted-foreground">

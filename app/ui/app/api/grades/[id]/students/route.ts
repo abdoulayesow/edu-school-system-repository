@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server"
 import { requirePerm } from "@/lib/authz"
 import { prisma } from "@/lib/prisma"
+import { buildNestedStudentSearchConditions } from "@/lib/search-utils"
 
 interface RouteParams {
   params: Promise<{ id: string }>
@@ -41,14 +42,15 @@ export async function GET(req: NextRequest, { params }: RouteParams) {
       status: "completed",
     }
 
+    // Search by student name or number
+    // Supports multi-word search: "John Doe" matches firstName="John", lastName="Doe"
     if (search) {
-      enrollmentWhere.student = {
-        OR: [
-          { firstName: { contains: search, mode: "insensitive" } },
-          { lastName: { contains: search, mode: "insensitive" } },
-          { studentNumber: { contains: search, mode: "insensitive" } },
-        ],
-      }
+      const searchConditions = buildNestedStudentSearchConditions(search, {
+        firstName: true,
+        lastName: true,
+        studentNumber: true,
+      })
+      Object.assign(enrollmentWhere, searchConditions)
     }
 
     const enrollments = await prisma.enrollment.findMany({
