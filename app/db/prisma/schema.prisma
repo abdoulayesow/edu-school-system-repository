@@ -67,6 +67,7 @@ model User {
   createdRolePermissions     RolePermission[]        @relation("RolePermissionCreator")
   updatedRolePermissions     RolePermission[]        @relation("RolePermissionUpdater")
   auditLogs                  AuditLog[]
+  calculationLogs            CalculationLog[]  @relation("CalculationLogUser")
 
   // Link to staff profile for teachers
   staffProfile TeacherProfile? @relation("UserStaffProfile", fields: [staffProfileId], references: [id])
@@ -986,6 +987,7 @@ model Trimester {
   subjectAverages   SubjectTrimesterAverage[]
   studentTrimesters StudentTrimester[]
   classStats        ClassTrimesterStats[]
+  calculationLogs   CalculationLog[]
 
   @@unique([schoolYearId, number])
   @@index([schoolYearId])
@@ -1639,4 +1641,49 @@ model AuditLog {
   @@index([resource, resourceId])
   @@index([granted, createdAt])
   @@index([createdAt])
+}
+
+// ============================================================================
+// CALCULATION LOG - Track grade calculation runs
+// ============================================================================
+
+model CalculationLog {
+  id          String              @id @default(cuid())
+  trimesterId String
+  userId      String
+  type        CalculationType
+  status      CalculationStatus   @default(running)
+
+  // Metrics
+  studentsProcessed Int       @default(0)
+  averagesCalculated Int      @default(0)
+  summariesCalculated Int     @default(0)
+  durationMs        Int?      // Duration in milliseconds
+
+  // Error tracking
+  errorMessage String?
+
+  // Timestamps
+  startedAt   DateTime  @default(now())
+  completedAt DateTime?
+
+  // Relations
+  trimester Trimester @relation(fields: [trimesterId], references: [id], onDelete: Cascade)
+  user      User      @relation("CalculationLogUser", fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([trimesterId, startedAt])
+  @@index([userId, startedAt])
+  @@index([status])
+}
+
+enum CalculationType {
+  subject_averages
+  student_summaries
+  full_calculation
+}
+
+enum CalculationStatus {
+  running
+  completed
+  failed
 }

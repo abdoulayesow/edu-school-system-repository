@@ -44,13 +44,6 @@ import {
 import { useI18n } from "@/components/i18n-provider"
 import { PermissionGuard } from "@/components/permission-guard"
 import { formatDateLong } from "@/lib/utils"
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
 import { useToast } from "@/components/ui/use-toast"
 import {
   Plus,
@@ -63,11 +56,6 @@ import {
   Loader2,
   Pause,
   GraduationCap,
-  Calculator,
-  ChevronDown,
-  BookOpen,
-  Users,
-  Zap,
 } from "lucide-react"
 import { componentClasses } from "@/lib/design-tokens"
 
@@ -101,10 +89,6 @@ export default function TrimestersPage() {
   const [selectedSchoolYearId, setSelectedSchoolYearId] = useState<string>("")
   const [isLoading, setIsLoading] = useState(true)
   const [isMounted, setIsMounted] = useState(false)
-
-  // Calculation states
-  const [isCalculating, setIsCalculating] = useState(false)
-  const [calculationProgress, setCalculationProgress] = useState<string | null>(null)
 
   // Dialog states
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false)
@@ -354,161 +338,6 @@ export default function TrimestersPage() {
     setIsCreateDialogOpen(true)
   }
 
-  // Calculation handlers
-  async function handleCalculateAverages() {
-    if (!activeTrimester) {
-      toast({
-        title: t.common.error,
-        description: t.admin.noActiveTrimester,
-        variant: "destructive",
-      })
-      return
-    }
-
-    setIsCalculating(true)
-    setCalculationProgress(t.grading.calculatingSubjectAverages)
-
-    try {
-      const res = await fetch("/api/evaluations/calculate-averages", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ trimesterId: activeTrimester.id }),
-      })
-
-      if (res.ok) {
-        const data = await res.json()
-        toast({
-          title: t.common.success,
-          description: `${t.grading.calculationComplete}: ${data.count || 0} ${t.grading.subjectAverage.toLowerCase()}s`,
-        })
-        fetchTrimesters(selectedSchoolYearId)
-      } else {
-        const data = await res.json()
-        toast({
-          title: t.common.error,
-          description: data.message || "Failed to calculate averages",
-          variant: "destructive",
-        })
-      }
-    } catch (err) {
-      console.error("Error calculating averages:", err)
-      toast({
-        title: t.common.error,
-        description: "Failed to calculate averages",
-        variant: "destructive",
-      })
-    } finally {
-      setIsCalculating(false)
-      setCalculationProgress(null)
-    }
-  }
-
-  async function handleCalculateSummaries() {
-    if (!activeTrimester) {
-      toast({
-        title: t.common.error,
-        description: t.admin.noActiveTrimester,
-        variant: "destructive",
-      })
-      return
-    }
-
-    setIsCalculating(true)
-    setCalculationProgress(t.grading.calculatingStudentSummaries)
-
-    try {
-      const res = await fetch("/api/evaluations/student-summary", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ trimesterId: activeTrimester.id }),
-      })
-
-      if (res.ok) {
-        const data = await res.json()
-        toast({
-          title: t.common.success,
-          description: `${t.grading.calculationComplete}: ${data.studentsProcessed || 0} ${t.common.students}`,
-        })
-        fetchTrimesters(selectedSchoolYearId)
-      } else {
-        const data = await res.json()
-        toast({
-          title: t.common.error,
-          description: data.message || "Failed to calculate summaries",
-          variant: "destructive",
-        })
-      }
-    } catch (err) {
-      console.error("Error calculating summaries:", err)
-      toast({
-        title: t.common.error,
-        description: "Failed to calculate summaries",
-        variant: "destructive",
-      })
-    } finally {
-      setIsCalculating(false)
-      setCalculationProgress(null)
-    }
-  }
-
-  async function handleCalculateAll() {
-    if (!activeTrimester) {
-      toast({
-        title: t.common.error,
-        description: t.admin.noActiveTrimester,
-        variant: "destructive",
-      })
-      return
-    }
-
-    setIsCalculating(true)
-
-    // Step 1: Calculate subject averages
-    setCalculationProgress(t.grading.calculatingSubjectAverages)
-    try {
-      const avgRes = await fetch("/api/evaluations/calculate-averages", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ trimesterId: activeTrimester.id }),
-      })
-
-      if (!avgRes.ok) {
-        const data = await avgRes.json()
-        throw new Error(data.message || "Failed to calculate averages")
-      }
-
-      // Step 2: Calculate student summaries
-      setCalculationProgress(t.grading.calculatingStudentSummaries)
-      const summaryRes = await fetch("/api/evaluations/student-summary", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ trimesterId: activeTrimester.id }),
-      })
-
-      if (!summaryRes.ok) {
-        const data = await summaryRes.json()
-        throw new Error(data.message || "Failed to calculate summaries")
-      }
-
-      const summaryData = await summaryRes.json()
-      toast({
-        title: t.common.success,
-        description: `${t.grading.calculationComplete}: ${summaryData.studentsProcessed || 0} ${t.common.students}`,
-      })
-      fetchTrimesters(selectedSchoolYearId)
-    } catch (err) {
-      console.error("Error in bulk calculation:", err)
-      toast({
-        title: t.common.error,
-        description: err instanceof Error ? err.message : "Failed to complete calculations",
-        variant: "destructive",
-      })
-    } finally {
-      setIsCalculating(false)
-      setCalculationProgress(null)
-    }
-  }
-
   if (!isMounted) {
     return (
       <PageContainer maxWidth="full">
@@ -543,34 +372,6 @@ export default function TrimestersPage() {
               ))}
             </SelectContent>
           </Select>
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="outline" disabled={!activeTrimester || isCalculating}>
-                {isCalculating ? (
-                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                ) : (
-                  <Calculator className="h-4 w-4 mr-2" />
-                )}
-                {isCalculating ? calculationProgress : t.grading.calculationsMenu}
-                <ChevronDown className="h-4 w-4 ml-2" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              <DropdownMenuItem onClick={handleCalculateAverages} disabled={isCalculating}>
-                <BookOpen className="h-4 w-4 mr-2" />
-                {t.grading.calculateSubjectAverages}
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={handleCalculateSummaries} disabled={isCalculating}>
-                <Users className="h-4 w-4 mr-2" />
-                {t.grading.calculateStudentSummaries}
-              </DropdownMenuItem>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem onClick={handleCalculateAll} disabled={isCalculating}>
-                <Zap className="h-4 w-4 mr-2" />
-                {t.grading.calculateAllNow}
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
           <PermissionGuard resource="academic_year" action="create" inline>
             <Button
               onClick={openCreateDialog}

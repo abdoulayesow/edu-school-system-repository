@@ -2,7 +2,7 @@
 
 import { Suspense, useState, useEffect, useMemo } from "react"
 import { PageContainer } from "@/components/layout"
-import { Card, CardHeader, CardTitle, CardContent, CardDescription } from "@/components/ui/card"
+import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Skeleton } from "@/components/ui/skeleton"
@@ -34,7 +34,7 @@ import {
   Sparkles,
 } from "lucide-react"
 import Link from "next/link"
-import { componentClasses, typography, shadows, interactive } from "@/lib/design-tokens"
+import { componentClasses, typography, interactive } from "@/lib/design-tokens"
 
 // ============================================================================
 // Types
@@ -98,6 +98,15 @@ interface AcademicStats {
   subjects: Subject[]
   unassignedSubjectsCount: number
   teachersWithoutAssignments: number
+}
+
+// ============================================================================
+// Helpers
+// ============================================================================
+
+function getLocalizedTrimesterName(trimester: Trimester | null, locale: string): string {
+  if (!trimester) return "—"
+  return locale === "fr" ? trimester.nameFr : trimester.nameEn
 }
 
 // ============================================================================
@@ -370,7 +379,7 @@ function AcademicHubContent() {
       if (res.ok) {
         toast({
           title: t.common.success,
-          description: `${locale === "fr" ? nextTrimester.nameFr : nextTrimester.nameEn} ${t.admin.trimesterActivated || "activated"}`,
+          description: `${getLocalizedTrimesterName(nextTrimester, locale)} ${t.admin.trimesterActivated}`,
         })
         fetchAllData()
       } else {
@@ -413,7 +422,7 @@ function AcademicHubContent() {
         const data = await res.json()
         toast({
           title: t.common.success,
-          description: data.message || t.admin.academicHub?.calculationsComplete || "Calculations complete",
+          description: data.message || t.admin.academicHub.calculationsComplete,
         })
       } else {
         const data = await res.json()
@@ -451,6 +460,11 @@ function AcademicHubContent() {
     return stats.teachers.reduce((sum, teacher) => sum + (teacher.workload?.assignmentsCount || 0), 0)
   }, [stats.teachers])
 
+  // Check if all configuration is complete (no warnings)
+  const isConfigurationComplete = useMemo(() => {
+    return stats.unassignedSubjectsCount === 0 && stats.teachersWithoutAssignments === 0
+  }, [stats.unassignedSubjectsCount, stats.teachersWithoutAssignments])
+
   if (isLoading) {
     return <HubSkeleton />
   }
@@ -466,10 +480,10 @@ function AcademicHubContent() {
             </div>
             <div>
               <h1 className={typography.heading.page}>
-                {t.admin.academicHub?.title || "Academic Configuration"}
+                {t.admin.academicHub.title}
               </h1>
               <p className="text-muted-foreground mt-1">
-                {t.admin.academicHub?.subtitle || `Configure your school's academic structure for ${stats.schoolYear?.name || "the current year"}`}
+                {t.admin.academicHub.subtitle}
               </p>
             </div>
           </div>
@@ -496,8 +510,8 @@ function AcademicHubContent() {
             title={t.admin.trimesters}
             icon={CalendarRange}
             href="/admin/trimesters"
-            stat={stats.trimester ? (locale === "fr" ? stats.trimester.nameFr : stats.trimester.nameEn) : "—"}
-            statLabel={t.admin.academicHub?.activeTrimester || t.admin.activeTrimester}
+            stat={getLocalizedTrimesterName(stats.trimester, locale)}
+            statLabel={t.admin.academicHub.activeTrimester}
             description={stats.trimester
               ? `${formatDate(stats.trimester.startDate)} - ${formatDate(stats.trimester.endDate)}`
               : undefined
@@ -515,7 +529,7 @@ function AcademicHubContent() {
             icon={School}
             href="/admin/grades"
             stat={stats.grades.length}
-            statLabel={`${t.admin.academicHub?.gradesLabel || t.admin.grades} • ${totalRooms} ${t.admin.academicHub?.roomsLabel || t.admin.rooms}`}
+            statLabel={`${t.admin.academicHub.gradesLabel} • ${totalRooms} ${t.admin.academicHub.roomsLabel}`}
             delay={150}
           />
 
@@ -525,9 +539,9 @@ function AcademicHubContent() {
             icon={Users}
             href="/admin/teachers"
             stat={stats.teachers.length}
-            statLabel={`${t.admin.academicHub?.teachersLabel || t.admin.teachers} • ${totalAssignments} ${t.admin.academicHub?.assignmentsLabel || "assignments"}`}
+            statLabel={`${t.admin.academicHub.teachersLabel} • ${totalAssignments} ${t.admin.academicHub.assignmentsLabel}`}
             warning={stats.teachersWithoutAssignments > 0
-              ? `${stats.teachersWithoutAssignments} ${t.admin.academicHub?.teachersWithoutAssignments || "teacher(s) without assignments"}`
+              ? `${stats.teachersWithoutAssignments} ${t.admin.academicHub.teachersWithoutAssignments}`
               : undefined
             }
             delay={225}
@@ -535,17 +549,17 @@ function AcademicHubContent() {
 
           {/* Subjects Card */}
           <StatusCard
-            title={t.admin.subjects || t.common.subjects}
+            title={t.admin.subjects}
             icon={BookOpen}
             href="/admin/grades"
             stat={stats.subjects.length}
-            statLabel={t.admin.academicHub?.configuredSubjects || "configured subjects"}
+            statLabel={t.admin.academicHub.configuredSubjects}
             warning={stats.unassignedSubjectsCount > 0
-              ? `${stats.unassignedSubjectsCount} ${t.admin.academicHub?.unassignedToGrades || "subject-grade combinations unassigned"}`
+              ? `${stats.unassignedSubjectsCount} ${t.admin.academicHub.unassignedToGrades}`
               : undefined
             }
             badge={stats.unassignedSubjectsCount === 0 ? {
-              label: t.admin.academicHub?.allConfigured || "All Configured",
+              label: t.admin.academicHub.allConfigured,
               variant: "success"
             } : undefined}
             delay={300}
@@ -556,7 +570,7 @@ function AcademicHubContent() {
         <div className="space-y-4">
           <h2 className={cn(typography.heading.label, "flex items-center gap-2")}>
             <div className="h-2 w-2 rounded-full bg-gspn-maroon-500" />
-            {t.admin.academicHub?.quickActions || "Quick Actions"}
+            {t.admin.academicHub.quickActions}
           </h2>
 
           <div className="flex flex-wrap gap-3">
@@ -572,7 +586,7 @@ function AcademicHubContent() {
                 ) : (
                   <Play className="h-4 w-4 mr-2" />
                 )}
-                {t.admin.academicHub?.activateNextTrimester || "Activate Next Trimester"}
+                {t.admin.academicHub.activateNextTrimester}
               </Button>
             )}
 
@@ -589,7 +603,7 @@ function AcademicHubContent() {
                 ) : (
                   <Calculator className="h-4 w-4 mr-2" />
                 )}
-                {t.admin.academicHub?.recalculateAllGrades || "Recalculate All Grades"}
+                {t.admin.academicHub.recalculateAllGrades}
               </Button>
             )}
           </div>
@@ -602,11 +616,11 @@ function AcademicHubContent() {
               <div className="flex items-center gap-4">
                 <div className={cn(
                   "p-3 rounded-full",
-                  stats.unassignedSubjectsCount === 0 && stats.teachersWithoutAssignments === 0
+                  isConfigurationComplete
                     ? "bg-success/10"
                     : "bg-amber-100 dark:bg-amber-900/30"
                 )}>
-                  {stats.unassignedSubjectsCount === 0 && stats.teachersWithoutAssignments === 0 ? (
+                  {isConfigurationComplete ? (
                     <CheckCircle2 className="h-6 w-6 text-success" />
                   ) : (
                     <AlertTriangle className="h-6 w-6 text-amber-600 dark:text-amber-400" />
@@ -614,15 +628,15 @@ function AcademicHubContent() {
                 </div>
                 <div>
                   <p className="font-medium">
-                    {stats.unassignedSubjectsCount === 0 && stats.teachersWithoutAssignments === 0
-                      ? (t.admin.academicHub?.configurationComplete || "Configuration Complete")
-                      : (t.admin.academicHub?.configurationIncomplete || "Configuration Incomplete")
+                    {isConfigurationComplete
+                      ? t.admin.academicHub.configurationComplete
+                      : t.admin.academicHub.configurationIncomplete
                     }
                   </p>
                   <p className="text-sm text-muted-foreground">
-                    {stats.unassignedSubjectsCount === 0 && stats.teachersWithoutAssignments === 0
-                      ? (t.admin.academicHub?.allAcademicEntitiesConfigured || "All academic entities are properly configured")
-                      : (t.admin.academicHub?.reviewWarningsAbove || "Review the warnings above to complete your setup")
+                    {isConfigurationComplete
+                      ? t.admin.academicHub.allAcademicEntitiesConfigured
+                      : t.admin.academicHub.reviewWarningsAbove
                     }
                   </p>
                 </div>
@@ -637,14 +651,14 @@ function AcademicHubContent() {
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>
-              {t.admin.academicHub?.activateNextTrimester || "Activate Next Trimester"}
+              {t.admin.academicHub.activateNextTrimester}
             </AlertDialogTitle>
             <AlertDialogDescription>
-              {t.admin.academicHub?.activateTrimesterConfirm || "Are you sure you want to activate"}{" "}
+              {t.admin.academicHub.activateTrimesterConfirm}{" "}
               <strong>
-                {nextTrimester && (locale === "fr" ? nextTrimester.nameFr : nextTrimester.nameEn)}
+                {getLocalizedTrimesterName(nextTrimester, locale)}
               </strong>?{" "}
-              {t.admin.academicHub?.currentTrimesterDeactivated || "The current trimester will be deactivated."}
+              {t.admin.academicHub.currentTrimesterDeactivated}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
@@ -670,10 +684,10 @@ function AcademicHubContent() {
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>
-              {t.admin.academicHub?.recalculateAllGrades || "Recalculate All Grades"}
+              {t.admin.academicHub.recalculateAllGrades}
             </AlertDialogTitle>
             <AlertDialogDescription>
-              {t.admin.academicHub?.recalculateConfirm || "This will recalculate all student averages and rankings for the current trimester. This may take a few minutes."}
+              {t.admin.academicHub.recalculateConfirm}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
