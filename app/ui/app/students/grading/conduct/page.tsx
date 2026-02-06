@@ -1,10 +1,9 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useCallback, useMemo } from "react"
 import { PageContainer } from "@/components/layout"
 import { Card, CardHeader, CardTitle, CardContent, CardDescription } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Badge } from "@/components/ui/badge"
 import {
@@ -14,17 +13,11 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table"
 import { useI18n } from "@/components/i18n-provider"
 import { useToast } from "@/components/ui/use-toast"
 import { PermissionGuard } from "@/components/permission-guard"
+import { cn } from "@/lib/utils"
+import { componentClasses } from "@/lib/design-tokens"
 import {
   Save,
   Loader2,
@@ -32,61 +25,90 @@ import {
   AlertCircle,
   ClipboardCheck,
   Users,
+  MessageSquareText,
+  Scale,
 } from "lucide-react"
 
-interface ActiveTrimester {
-  id: string
-  number: number
-  nameFr: string
-  nameEn: string
-  schoolYear: {
-    id: string
-    name: string
-  }
+// Shared types and utilities
+import type {
+  ActiveTrimester,
+  Grade,
+  StudentSummary,
+  ConductEntry,
+  RemarkEntry,
+  DecisionEntry,
+  DecisionType,
+  ConductTabId,
+} from "@/lib/types/grading"
+
+// Extracted table components
+import { ConductTable, RemarksTable, DecisionsTable } from "@/components/grading"
+
+// ============================================================================
+// SUB-COMPONENTS
+// ============================================================================
+
+interface TabButtonProps {
+  id: ConductTabId
+  label: string
+  icon: React.ComponentType<{ className?: string }>
+  isActive: boolean
+  onClick: () => void
 }
 
-interface Grade {
-  id: string
-  name: string
-  code: string
+function TabButton({ label, icon: Icon, isActive, onClick }: TabButtonProps) {
+  return (
+    <button
+      onClick={onClick}
+      className={cn(
+        componentClasses.tabButtonBase,
+        isActive ? componentClasses.tabButtonActive : componentClasses.tabButtonInactive
+      )}
+    >
+      <Icon className="h-4 w-4" />
+      <span>{label}</span>
+    </button>
+  )
 }
 
-interface StudentSummary {
-  id: string
-  studentProfileId: string
-  studentName: string
-  studentNumber: string
-  conduct: number | null
-  absences: number | null
-  lates: number | null
-  generalAverage: number | null
-}
-
-interface ConductEntry {
-  summaryId: string
-  conduct: string
-  absences: string
-  lates: string
-  hasChanges: boolean
-}
+// ============================================================================
+// MAIN COMPONENT
+// ============================================================================
 
 export default function ConductEntryPage() {
   const { t, locale } = useI18n()
   const { toast } = useToast()
 
+  // Data state
   const [activeTrimester, setActiveTrimester] = useState<ActiveTrimester | null>(null)
   const [grades, setGrades] = useState<Grade[]>([])
   const [summaries, setSummaries] = useState<StudentSummary[]>([])
-  const [entries, setEntries] = useState<Map<string, ConductEntry>>(new Map())
+
+  // Entry maps for each tab
+  const [conductEntries, setConductEntries] = useState<Map<string, ConductEntry>>(new Map())
+  const [remarkEntries, setRemarkEntries] = useState<Map<string, RemarkEntry>>(new Map())
+  const [decisionEntries, setDecisionEntries] = useState<Map<string, DecisionEntry>>(new Map())
 
   // Selection state
   const [selectedGradeId, setSelectedGradeId] = useState<string>("")
+  const [activeTab, setActiveTab] = useState<ConductTabId>("conduct")
 
   // UI state
   const [isLoading, setIsLoading] = useState(true)
   const [isLoadingSummaries, setIsLoadingSummaries] = useState(false)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [isMounted, setIsMounted] = useState(false)
+
+  // Tab configuration
+  const tabs: { id: ConductTabId; label: string; icon: React.ComponentType<{ className?: string }> }[] = [
+    { id: "conduct", label: t.nav.conductEntry, icon: ClipboardCheck },
+    { id: "remarks", label: t.grading.generalRemark, icon: MessageSquareText },
+    { id: "decisions", label: t.grading.decision, icon: Scale },
+  ]
+
+  // ============================================================================
+  // DATA FETCHING
+  // ============================================================================
 
   useEffect(() => {
     setIsMounted(true)
@@ -99,7 +121,7 @@ export default function ConductEntryPage() {
       fetchSummaries()
     } else {
       setSummaries([])
-      setEntries(new Map())
+      resetAllEntries()
     }
   }, [activeTrimester, selectedGradeId])
 
@@ -142,7 +164,6 @@ export default function ConductEntryPage() {
       const res = await fetch(`/api/evaluations/student-summary?${params}`)
       if (res.ok) {
         const data = await res.json()
-        // Transform the data
         const transformed: StudentSummary[] = data.map((s: any) => ({
           id: s.id,
           studentProfileId: s.studentProfileId,
@@ -152,21 +173,14 @@ export default function ConductEntryPage() {
           absences: s.absences,
           lates: s.lates,
           generalAverage: s.generalAverage,
+          rank: s.rank,
+          totalStudents: s.totalStudents,
+          decision: s.decision,
+          decisionOverride: s.decisionOverride || false,
+          generalRemark: s.generalRemark,
         }))
         setSummaries(transformed)
-
-        // Initialize entries map with existing values
-        const entriesMap = new Map<string, ConductEntry>()
-        transformed.forEach((s) => {
-          entriesMap.set(s.id, {
-            summaryId: s.id,
-            conduct: s.conduct !== null ? String(s.conduct) : "",
-            absences: s.absences !== null ? String(s.absences) : "",
-            lates: s.lates !== null ? String(s.lates) : "",
-            hasChanges: false,
-          })
-        })
-        setEntries(entriesMap)
+        initializeEntries(transformed)
       }
     } catch (err) {
       console.error("Error fetching summaries:", err)
@@ -175,104 +189,204 @@ export default function ConductEntryPage() {
     }
   }
 
-  function handleConductChange(summaryId: string, value: string) {
-    const numValue = parseFloat(value)
-    if (value !== "" && (isNaN(numValue) || numValue < 0 || numValue > 20)) {
-      return
+  // ============================================================================
+  // ENTRY MANAGEMENT
+  // ============================================================================
+
+  function initializeEntries(studentSummaries: StudentSummary[]) {
+    const newConductEntries = new Map<string, ConductEntry>()
+    const newRemarkEntries = new Map<string, RemarkEntry>()
+    const newDecisionEntries = new Map<string, DecisionEntry>()
+
+    studentSummaries.forEach((s) => {
+      newConductEntries.set(s.id, {
+        conduct: s.conduct !== null ? String(s.conduct) : "",
+        absences: s.absences !== null ? String(s.absences) : "",
+        lates: s.lates !== null ? String(s.lates) : "",
+        hasChanges: false,
+      })
+
+      newRemarkEntries.set(s.id, {
+        remark: s.generalRemark || "",
+        hasChanges: false,
+      })
+
+      newDecisionEntries.set(s.id, {
+        decision: s.decision,
+        hasChanges: false,
+      })
+    })
+
+    setConductEntries(newConductEntries)
+    setRemarkEntries(newRemarkEntries)
+    setDecisionEntries(newDecisionEntries)
+  }
+
+  function resetAllEntries() {
+    setConductEntries(new Map())
+    setRemarkEntries(new Map())
+    setDecisionEntries(new Map())
+  }
+
+  // ============================================================================
+  // CHANGE HANDLERS
+  // ============================================================================
+
+  const handleConductChange = useCallback((summaryId: string, field: "conduct" | "absences" | "lates", value: string) => {
+    if (field === "conduct") {
+      const numValue = parseFloat(value)
+      if (value !== "" && (isNaN(numValue) || numValue < 0 || numValue > 20)) return
+    } else {
+      const numValue = parseInt(value)
+      if (value !== "" && (isNaN(numValue) || numValue < 0)) return
     }
 
-    setEntries((prev) => {
+    setConductEntries((prev) => {
       const newEntries = new Map(prev)
       const entry = newEntries.get(summaryId)
       if (entry) {
-        newEntries.set(summaryId, {
-          ...entry,
-          conduct: value,
-          hasChanges: true,
-        })
+        newEntries.set(summaryId, { ...entry, [field]: value, hasChanges: true })
       }
       return newEntries
     })
-  }
+  }, [])
 
-  function handleAbsencesChange(summaryId: string, value: string) {
-    const numValue = parseInt(value)
-    if (value !== "" && (isNaN(numValue) || numValue < 0)) {
-      return
-    }
-
-    setEntries((prev) => {
+  const handleRemarkChange = useCallback((summaryId: string, value: string) => {
+    setRemarkEntries((prev) => {
       const newEntries = new Map(prev)
       const entry = newEntries.get(summaryId)
       if (entry) {
-        newEntries.set(summaryId, {
-          ...entry,
-          absences: value,
-          hasChanges: true,
-        })
+        newEntries.set(summaryId, { remark: value, hasChanges: true })
       }
       return newEntries
     })
-  }
+  }, [])
 
-  function handleLatesChange(summaryId: string, value: string) {
-    const numValue = parseInt(value)
-    if (value !== "" && (isNaN(numValue) || numValue < 0)) {
-      return
-    }
-
-    setEntries((prev) => {
+  const handleDecisionChange = useCallback((summaryId: string, value: DecisionType) => {
+    setDecisionEntries((prev) => {
       const newEntries = new Map(prev)
-      const entry = newEntries.get(summaryId)
-      if (entry) {
-        newEntries.set(summaryId, {
-          ...entry,
-          lates: value,
-          hasChanges: true,
-        })
-      }
+      newEntries.set(summaryId, { decision: value, hasChanges: true })
       return newEntries
     })
-  }
+  }, [])
 
-  const hasChanges = Array.from(entries.values()).some((e) => e.hasChanges)
-  const changedEntries = Array.from(entries.values()).filter((e) => e.hasChanges)
+  // ============================================================================
+  // COMPUTED VALUES
+  // ============================================================================
+
+  const hasChanges = useMemo(() => {
+    switch (activeTab) {
+      case "conduct":
+        return Array.from(conductEntries.values()).some((e) => e.hasChanges)
+      case "remarks":
+        return Array.from(remarkEntries.values()).some((e) => e.hasChanges)
+      case "decisions":
+        return Array.from(decisionEntries.values()).some((e) => e.hasChanges)
+      default:
+        return false
+    }
+  }, [activeTab, conductEntries, remarkEntries, decisionEntries])
+
+  const changedCount = useMemo(() => {
+    switch (activeTab) {
+      case "conduct":
+        return Array.from(conductEntries.values()).filter((e) => e.hasChanges).length
+      case "remarks":
+        return Array.from(remarkEntries.values()).filter((e) => e.hasChanges).length
+      case "decisions":
+        return Array.from(decisionEntries.values()).filter((e) => e.hasChanges).length
+      default:
+        return 0
+    }
+  }, [activeTab, conductEntries, remarkEntries, decisionEntries])
+
+  // ============================================================================
+  // SAVE HANDLERS
+  // ============================================================================
 
   async function handleSave() {
-    if (changedEntries.length === 0) return
+    if (!hasChanges) return
 
     setIsSubmitting(true)
     try {
-      // Update each changed entry
-      const promises = changedEntries.map(async (entry) => {
-        const res = await fetch(`/api/evaluations/student-summary/${entry.summaryId}`, {
-          method: "PUT",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            conduct: entry.conduct ? parseFloat(entry.conduct) : null,
-            absences: entry.absences ? parseInt(entry.absences) : null,
-            lates: entry.lates ? parseInt(entry.lates) : null,
-          }),
-        })
-        return res.ok
-      })
+      const updatePromises: Promise<boolean>[] = []
 
-      const results = await Promise.all(promises)
+      if (activeTab === "conduct") {
+        conductEntries.forEach((entry, summaryId) => {
+          if (entry.hasChanges) {
+            updatePromises.push(
+              fetch(`/api/evaluations/student-summary/${summaryId}`, {
+                method: "PUT",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                  conduct: entry.conduct ? parseFloat(entry.conduct) : null,
+                  absences: entry.absences ? parseInt(entry.absences) : null,
+                  lates: entry.lates ? parseInt(entry.lates) : null,
+                }),
+              }).then((res) => res.ok)
+            )
+          }
+        })
+      } else if (activeTab === "remarks") {
+        remarkEntries.forEach((entry, summaryId) => {
+          if (entry.hasChanges) {
+            updatePromises.push(
+              fetch(`/api/evaluations/student-summary/${summaryId}`, {
+                method: "PUT",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ generalRemark: entry.remark || null }),
+              }).then((res) => res.ok)
+            )
+          }
+        })
+      } else if (activeTab === "decisions") {
+        decisionEntries.forEach((entry, summaryId) => {
+          if (entry.hasChanges && entry.decision) {
+            updatePromises.push(
+              fetch(`/api/evaluations/student-summary/${summaryId}`, {
+                method: "PUT",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ decision: entry.decision }),
+              }).then((res) => res.ok)
+            )
+          }
+        })
+      }
+
+      const results = await Promise.all(updatePromises)
       const allSuccessful = results.every((r) => r)
 
       if (allSuccessful) {
         toast({
           title: t.common.success,
-          description: t.grading.conductSaved,
+          description: activeTab === "conduct"
+            ? t.grading.conductSaved
+            : activeTab === "remarks"
+            ? t.grading.remarksSaved
+            : t.grading.decisionUpdated,
         })
-        // Mark all entries as not changed
-        setEntries((prev) => {
-          const newEntries = new Map(prev)
-          newEntries.forEach((entry, key) => {
-            newEntries.set(key, { ...entry, hasChanges: false })
+
+        // Mark all entries as not changed for the current tab
+        if (activeTab === "conduct") {
+          setConductEntries((prev) => {
+            const newEntries = new Map(prev)
+            newEntries.forEach((entry, key) => {
+              newEntries.set(key, { ...entry, hasChanges: false })
+            })
+            return newEntries
           })
-          return newEntries
-        })
+        } else if (activeTab === "remarks") {
+          setRemarkEntries((prev) => {
+            const newEntries = new Map(prev)
+            newEntries.forEach((entry, key) => {
+              newEntries.set(key, { ...entry, hasChanges: false })
+            })
+            return newEntries
+          })
+        } else if (activeTab === "decisions") {
+          // Re-fetch to get updated override status
+          fetchSummaries()
+        }
       } else {
         toast({
           title: t.common.error,
@@ -281,10 +395,10 @@ export default function ConductEntryPage() {
         })
       }
     } catch (err) {
-      console.error("Error saving conduct data:", err)
+      console.error("Error saving data:", err)
       toast({
         title: t.common.error,
-        description: "Failed to save conduct data",
+        description: "Failed to save data",
         variant: "destructive",
       })
     } finally {
@@ -292,13 +406,9 @@ export default function ConductEntryPage() {
     }
   }
 
-  function getScoreColor(score: number | null) {
-    if (score === null) return "text-muted-foreground"
-    if (score >= 14) return "text-green-600"
-    if (score >= 10) return "text-blue-600"
-    if (score >= 8) return "text-yellow-600"
-    return "text-red-600"
-  }
+  // ============================================================================
+  // MAIN RENDER
+  // ============================================================================
 
   if (!isMounted) {
     return (
@@ -317,9 +427,7 @@ export default function ConductEntryPage() {
           <AlertCircle className="h-12 w-12 text-muted-foreground" />
           <div className="text-center">
             <h2 className="text-xl font-semibold">{t.admin.noActiveTrimester}</h2>
-            <p className="text-muted-foreground mt-2">
-              {t.admin.configureTrimesters}
-            </p>
+            <p className="text-muted-foreground mt-2">{t.admin.configureTrimesters}</p>
           </div>
         </div>
       </PageContainer>
@@ -353,7 +461,7 @@ export default function ConductEntryPage() {
         </div>
       </div>
 
-      {/* Selection Controls */}
+      {/* Grade Selection */}
       <Card className="mb-6 border shadow-sm overflow-hidden">
         <CardHeader>
           <CardTitle className="text-lg flex items-center gap-2">
@@ -382,19 +490,38 @@ export default function ConductEntryPage() {
         </CardContent>
       </Card>
 
-      {/* Conduct Entry Table */}
+      {/* Content Area */}
       {selectedGradeId && (
         <Card className="border shadow-sm overflow-hidden">
+          {/* Tab Navigation */}
+          <div className="border-b">
+            <div className={cn(componentClasses.tabListBase, "px-4")}>
+              {tabs.map((tab) => (
+                <TabButton
+                  key={tab.id}
+                  id={tab.id}
+                  label={tab.label}
+                  icon={tab.icon}
+                  isActive={activeTab === tab.id}
+                  onClick={() => setActiveTab(tab.id)}
+                />
+              ))}
+            </div>
+          </div>
+
+          {/* Card Header with Save Button */}
           <CardHeader className="flex flex-row items-center justify-between">
             <div>
               <CardTitle className="flex items-center gap-2">
                 <div className="h-2 w-2 rounded-full bg-gspn-maroon-500" />
-                {t.nav.conductEntry}
+                {tabs.find((t) => t.id === activeTab)?.label}
               </CardTitle>
               <CardDescription>
                 {summaries.length} {t.common.students}
                 {hasChanges && (
-                  <span className="ml-2 text-yellow-600">• {t.grading.unsavedChanges}</span>
+                  <span className="ml-2 text-yellow-600 dark:text-yellow-400">
+                    • {changedCount} {t.grading.unsavedChanges}
+                  </span>
                 )}
               </CardDescription>
             </div>
@@ -402,16 +529,22 @@ export default function ConductEntryPage() {
               <Button
                 onClick={handleSave}
                 disabled={!hasChanges || isSubmitting}
+                className={componentClasses.primaryActionButton}
               >
                 {isSubmitting ? (
                   <Loader2 className="h-4 w-4 mr-2 animate-spin" />
                 ) : (
                   <Save className="h-4 w-4 mr-2" />
                 )}
-                {t.grading.saveConductData}
+                {activeTab === "conduct"
+                  ? t.grading.saveConductData
+                  : activeTab === "remarks"
+                  ? t.grading.saveRemarks
+                  : t.grading.updateDecision}
               </Button>
             </PermissionGuard>
           </CardHeader>
+
           <CardContent>
             {isLoadingSummaries ? (
               <div className="flex items-center justify-center h-32">
@@ -423,75 +556,32 @@ export default function ConductEntryPage() {
                 <p>{t.grading.noStudentsFound}</p>
               </div>
             ) : (
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead className="w-12">#</TableHead>
-                    <TableHead>{t.common.student}</TableHead>
-                    <TableHead className="w-24 text-center">{t.grading.generalAverage}</TableHead>
-                    <TableHead className="w-32">{t.grading.conductScore}</TableHead>
-                    <TableHead className="w-28">{t.grading.absencesCount}</TableHead>
-                    <TableHead className="w-28">{t.grading.latesCount}</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {summaries.map((summary, index) => {
-                    const entry = entries.get(summary.id)
-                    return (
-                      <TableRow key={summary.id}>
-                        <TableCell className="text-muted-foreground">
-                          {index + 1}
-                        </TableCell>
-                        <TableCell>
-                          <div>
-                            <div className="font-medium">{summary.studentName}</div>
-                            <div className="text-sm text-muted-foreground">
-                              {summary.studentNumber}
-                            </div>
-                          </div>
-                        </TableCell>
-                        <TableCell className="text-center">
-                          <span className={`font-medium ${getScoreColor(summary.generalAverage)}`}>
-                            {summary.generalAverage !== null ? summary.generalAverage.toFixed(2) : "-"}
-                          </span>
-                        </TableCell>
-                        <TableCell>
-                          <Input
-                            type="number"
-                            min="0"
-                            max="20"
-                            step="0.5"
-                            value={entry?.conduct || ""}
-                            onChange={(e) => handleConductChange(summary.id, e.target.value)}
-                            placeholder="--"
-                            className="w-20"
-                          />
-                        </TableCell>
-                        <TableCell>
-                          <Input
-                            type="number"
-                            min="0"
-                            value={entry?.absences || ""}
-                            onChange={(e) => handleAbsencesChange(summary.id, e.target.value)}
-                            placeholder="0"
-                            className="w-20"
-                          />
-                        </TableCell>
-                        <TableCell>
-                          <Input
-                            type="number"
-                            min="0"
-                            value={entry?.lates || ""}
-                            onChange={(e) => handleLatesChange(summary.id, e.target.value)}
-                            placeholder="0"
-                            className="w-20"
-                          />
-                        </TableCell>
-                      </TableRow>
-                    )
-                  })}
-                </TableBody>
-              </Table>
+              <>
+                {activeTab === "conduct" && (
+                  <ConductTable
+                    summaries={summaries}
+                    conductEntries={conductEntries}
+                    onConductChange={handleConductChange}
+                    t={t}
+                  />
+                )}
+                {activeTab === "remarks" && (
+                  <RemarksTable
+                    summaries={summaries}
+                    remarkEntries={remarkEntries}
+                    onRemarkChange={handleRemarkChange}
+                    t={t}
+                  />
+                )}
+                {activeTab === "decisions" && (
+                  <DecisionsTable
+                    summaries={summaries}
+                    decisionEntries={decisionEntries}
+                    onDecisionChange={handleDecisionChange}
+                    t={t}
+                  />
+                )}
+              </>
             )}
           </CardContent>
         </Card>

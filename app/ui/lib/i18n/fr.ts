@@ -19,6 +19,8 @@ export const fr = {
     next: "Suivant",
     previous: "Précédent",
     close: "Fermer",
+    expand: "Développer",
+    collapse: "Réduire",
     loading: "Chargement...",
     downloading: "Téléchargement...",
     submitting: "Soumission...",
@@ -2683,6 +2685,8 @@ export const fr = {
     overriddenBy: "Modifié par",
     updateDecision: "Mettre à jour la Décision",
     decisionUpdated: "Décision mise à jour avec succès",
+    selectDecision: "Sélectionner la décision",
+    generalRemarkSaved: "Appréciations générales enregistrées avec succès",
 
     // Bulk Operations
     calculateSubjectAverages: "Calculer les Moyennes par Matière",
@@ -2692,6 +2696,38 @@ export const fr = {
     calculatingStudentSummaries: "Calcul des bilans des élèves...",
     calculationComplete: "Calcul terminé",
     calculationsMenu: "Calculs",
+
+    // Calculation Status Banner
+    pendingEvaluations: "évaluations en attente",
+    calculationsUpToDate: "Calculs à jour",
+    neverCalculated: "Jamais calculé",
+    justNow: "À l'instant",
+    minutesAgo: "minutes",
+    hoursAgo: "heures",
+    daysAgo: "jours",
+    subjectAverages: "Moyennes par matière",
+    studentSummaries: "Bilans des élèves",
+
+    // Calculation History
+    calculationHistory: "Historique des Calculs",
+    recentCalculations: "Calculs Récents",
+    calculationType: "Type",
+    typeSubjectAverages: "Moyennes par Matière",
+    typeStudentSummaries: "Bilans des Élèves",
+    typeFullCalculation: "Calcul Complet",
+    triggeredBy: "Déclenché par",
+    duration: "Durée",
+    durationMs: "{ms}ms",
+    durationSeconds: "{seconds}s",
+    studentsProcessed: "Élèves Traités",
+    averagesCalculated: "Moyennes Calculées",
+    summariesCalculated: "Bilans Calculés",
+    calculationRunning: "En cours",
+    calculationCompleted: "Terminé",
+    statusFailed: "Échec",
+    noCalculationHistory: "Aucun historique de calcul",
+    viewHistory: "Voir l'Historique",
+    hideHistory: "Masquer l'Historique",
 
     // Manage Evaluations
     manageEvaluations: "Gérer les Évaluations",
@@ -2745,6 +2781,34 @@ export const fr = {
     entriesCount: "{entered} sur {total} saisis",
     lastUsedSettings: "Paramètres précédents restaurés",
     clearSelections: "Effacer les sélections",
+
+    // Overview Dashboard
+    trimesterOverview: "Aperçu du Trimestre",
+    trackEvaluationProgress: "Suivez la progression des évaluations et des bulletins",
+    classes: "Classes",
+    complete: "Complet",
+    inProgress: "En cours",
+    notStarted: "Non commencé",
+    rankingsReady: "Classements prêts",
+    compositionsEntered: "Compositions saisies",
+    bulletinsReady: "Bulletins prêts",
+    missingCompositions: "Compositions manquantes",
+    missingCompositionsSubtitle: "Ces matières n'ont pas encore de composition",
+    enterGrade: "Saisir",
+    andMore: "Et plus...",
+    quickActions: "Actions rapides",
+    progressByClass: "Progression par classe",
+    clickClassForDetails: "Cliquez sur une classe pour voir les détails",
+    subjects: "Matières",
+    compositions: "Compositions",
+    averages: "Moyennes",
+    rankings: "Classements",
+    calculationFailed: "Échec du calcul",
+    percentComplete: "complet",
+
+    // Conduct Page
+    averageRequired: "Moyenne requise",
+    decisionAutoCalcInfo: "Les décisions sont calculées automatiquement : ≥10 = Admis, 8-10 = Rattrapage, <8 = Redouble. Vous pouvez les modifier manuellement si nécessaire.",
   },
 
   // Treasury / Caisse

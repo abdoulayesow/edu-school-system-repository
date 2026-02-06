@@ -21,6 +21,8 @@ export const en: TranslationKeys = {
     next: "Next",
     previous: "Previous",
     close: "Close",
+    expand: "Expand",
+    collapse: "Collapse",
     loading: "Loading...",
     downloading: "Downloading...",
     submitting: "Submitting...",
@@ -2685,6 +2687,8 @@ export const en: TranslationKeys = {
     overriddenBy: "Overridden by",
     updateDecision: "Update Decision",
     decisionUpdated: "Decision updated successfully",
+    selectDecision: "Select decision",
+    generalRemarkSaved: "General remarks saved successfully",
 
     // Bulk Operations
     calculateSubjectAverages: "Calculate Subject Averages",
@@ -2694,6 +2698,38 @@ export const en: TranslationKeys = {
     calculatingStudentSummaries: "Calculating student summaries...",
     calculationComplete: "Calculation complete",
     calculationsMenu: "Calculations",
+
+    // Calculation Status Banner
+    pendingEvaluations: "evaluations pending",
+    calculationsUpToDate: "Calculations up to date",
+    neverCalculated: "Never calculated",
+    justNow: "Just now",
+    minutesAgo: "minutes ago",
+    hoursAgo: "hours ago",
+    daysAgo: "days ago",
+    subjectAverages: "Subject averages",
+    studentSummaries: "Student summaries",
+
+    // Calculation History
+    calculationHistory: "Calculation History",
+    recentCalculations: "Recent Calculations",
+    calculationType: "Type",
+    typeSubjectAverages: "Subject Averages",
+    typeStudentSummaries: "Student Summaries",
+    typeFullCalculation: "Full Calculation",
+    triggeredBy: "Triggered by",
+    duration: "Duration",
+    durationMs: "{ms}ms",
+    durationSeconds: "{seconds}s",
+    studentsProcessed: "Students Processed",
+    averagesCalculated: "Averages Calculated",
+    summariesCalculated: "Summaries Calculated",
+    calculationRunning: "Running",
+    calculationCompleted: "Completed",
+    statusFailed: "Failed",
+    noCalculationHistory: "No calculation history yet",
+    viewHistory: "View History",
+    hideHistory: "Hide History",
 
     // Manage Evaluations
     manageEvaluations: "Manage Evaluations",
@@ -2747,6 +2783,34 @@ export const en: TranslationKeys = {
     entriesCount: "{entered} of {total} entered",
     lastUsedSettings: "Last used settings restored",
     clearSelections: "Clear selections",
+
+    // Overview Dashboard
+    trimesterOverview: "Trimester Overview",
+    trackEvaluationProgress: "Track evaluation progress and bulletin readiness",
+    classes: "Classes",
+    complete: "Complete",
+    inProgress: "In Progress",
+    notStarted: "Not Started",
+    rankingsReady: "Rankings Ready",
+    compositionsEntered: "Compositions Entered",
+    bulletinsReady: "Bulletins Ready",
+    missingCompositions: "Missing Compositions",
+    missingCompositionsSubtitle: "These subjects don't have a composition yet",
+    enterGrade: "Enter",
+    andMore: "And more...",
+    quickActions: "Quick Actions",
+    progressByClass: "Progress by Class",
+    clickClassForDetails: "Click a class to see details",
+    subjects: "Subjects",
+    compositions: "Compositions",
+    averages: "Averages",
+    rankings: "Rankings",
+    calculationFailed: "Calculation failed",
+    percentComplete: "complete",
+
+    // Conduct Page
+    averageRequired: "Average required",
+    decisionAutoCalcInfo: "Decisions are calculated automatically: ≥10 = Promoted, 8-10 = Remediation, <8 = Repeat Year. You can override them manually if needed.",
   },
 
   // Treasury / Safe
