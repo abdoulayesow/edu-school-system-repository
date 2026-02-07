@@ -15,9 +15,9 @@ import path from "path"
 
 const { Pool } = pg
 
-// Load .env from app/ui if DATABASE_URL not set
+// Load .env from app/db if DATABASE_URL not set
 if (!process.env.DATABASE_URL) {
-  const envPath = path.join(process.cwd(), "app", "ui", ".env")
+  const envPath = path.join(process.cwd(), ".env")
   if (fs.existsSync(envPath)) {
     const envContent = fs.readFileSync(envPath, "utf-8")
     for (const line of envContent.split("\n")) {
@@ -55,6 +55,7 @@ const DEFAULT_PERMISSIONS: PermissionDef[] = [
   { role: StaffRole.proviseur, resource: PermissionResource.student_enrollment, action: PermissionAction.create, scope: PermissionScope.own_level },
   { role: StaffRole.proviseur, resource: PermissionResource.student_enrollment, action: PermissionAction.update, scope: PermissionScope.own_level },
   { role: StaffRole.proviseur, resource: PermissionResource.student_enrollment, action: PermissionAction.approve, scope: PermissionScope.own_level },
+  { role: StaffRole.proviseur, resource: PermissionResource.student_enrollment, action: PermissionAction.export, scope: PermissionScope.own_level },
   { role: StaffRole.proviseur, resource: PermissionResource.student_transfer, action: PermissionAction.view, scope: PermissionScope.own_level },
   { role: StaffRole.proviseur, resource: PermissionResource.student_transfer, action: PermissionAction.approve, scope: PermissionScope.own_level },
   { role: StaffRole.proviseur, resource: PermissionResource.student_documents, action: PermissionAction.view, scope: PermissionScope.own_level },
@@ -107,6 +108,7 @@ const DEFAULT_PERMISSIONS: PermissionDef[] = [
   { role: StaffRole.censeur, resource: PermissionResource.students, action: PermissionAction.view, scope: PermissionScope.own_level },
   { role: StaffRole.censeur, resource: PermissionResource.students, action: PermissionAction.update, scope: PermissionScope.own_level },
   { role: StaffRole.censeur, resource: PermissionResource.student_enrollment, action: PermissionAction.view, scope: PermissionScope.own_level },
+  { role: StaffRole.censeur, resource: PermissionResource.student_enrollment, action: PermissionAction.export, scope: PermissionScope.own_level },
   { role: StaffRole.censeur, resource: PermissionResource.student_transfer, action: PermissionAction.view, scope: PermissionScope.own_level },
 
   { role: StaffRole.censeur, resource: PermissionResource.classes, action: PermissionAction.view, scope: PermissionScope.own_level },
@@ -177,6 +179,7 @@ const DEFAULT_PERMISSIONS: PermissionDef[] = [
   { role: StaffRole.directeur, resource: PermissionResource.student_enrollment, action: PermissionAction.create, scope: PermissionScope.own_level },
   { role: StaffRole.directeur, resource: PermissionResource.student_enrollment, action: PermissionAction.update, scope: PermissionScope.own_level },
   { role: StaffRole.directeur, resource: PermissionResource.student_enrollment, action: PermissionAction.approve, scope: PermissionScope.own_level },
+  { role: StaffRole.directeur, resource: PermissionResource.student_enrollment, action: PermissionAction.export, scope: PermissionScope.own_level },
   { role: StaffRole.directeur, resource: PermissionResource.student_transfer, action: PermissionAction.view, scope: PermissionScope.own_level },
   { role: StaffRole.directeur, resource: PermissionResource.student_transfer, action: PermissionAction.approve, scope: PermissionScope.own_level },
   { role: StaffRole.directeur, resource: PermissionResource.student_documents, action: PermissionAction.view, scope: PermissionScope.own_level },
@@ -233,6 +236,7 @@ const DEFAULT_PERMISSIONS: PermissionDef[] = [
   { role: StaffRole.secretariat, resource: PermissionResource.student_enrollment, action: PermissionAction.view, scope: PermissionScope.all },
   { role: StaffRole.secretariat, resource: PermissionResource.student_enrollment, action: PermissionAction.create, scope: PermissionScope.all },
   { role: StaffRole.secretariat, resource: PermissionResource.student_enrollment, action: PermissionAction.update, scope: PermissionScope.all },
+  { role: StaffRole.secretariat, resource: PermissionResource.student_enrollment, action: PermissionAction.export, scope: PermissionScope.all },
   { role: StaffRole.secretariat, resource: PermissionResource.club_enrollment, action: PermissionAction.view, scope: PermissionScope.all },
   { role: StaffRole.secretariat, resource: PermissionResource.club_enrollment, action: PermissionAction.create, scope: PermissionScope.all },
   { role: StaffRole.secretariat, resource: PermissionResource.club_enrollment, action: PermissionAction.update, scope: PermissionScope.all },
@@ -379,6 +383,7 @@ const DEFAULT_PERMISSIONS: PermissionDef[] = [
   { role: StaffRole.proprietaire, resource: PermissionResource.student_enrollment, action: PermissionAction.update, scope: PermissionScope.all },
   { role: StaffRole.proprietaire, resource: PermissionResource.student_enrollment, action: PermissionAction.delete, scope: PermissionScope.all },
   { role: StaffRole.proprietaire, resource: PermissionResource.student_enrollment, action: PermissionAction.approve, scope: PermissionScope.all },
+  { role: StaffRole.proprietaire, resource: PermissionResource.student_enrollment, action: PermissionAction.export, scope: PermissionScope.all },
   { role: StaffRole.proprietaire, resource: PermissionResource.student_transfer, action: PermissionAction.view, scope: PermissionScope.all },
   { role: StaffRole.proprietaire, resource: PermissionResource.student_transfer, action: PermissionAction.approve, scope: PermissionScope.all },
   { role: StaffRole.proprietaire, resource: PermissionResource.student_documents, action: PermissionAction.view, scope: PermissionScope.all },
@@ -500,6 +505,7 @@ const DEFAULT_PERMISSIONS: PermissionDef[] = [
   { role: StaffRole.admin_systeme, resource: PermissionResource.student_enrollment, action: PermissionAction.update, scope: PermissionScope.all },
   { role: StaffRole.admin_systeme, resource: PermissionResource.student_enrollment, action: PermissionAction.delete, scope: PermissionScope.all },
   { role: StaffRole.admin_systeme, resource: PermissionResource.student_enrollment, action: PermissionAction.approve, scope: PermissionScope.all },
+  { role: StaffRole.admin_systeme, resource: PermissionResource.student_enrollment, action: PermissionAction.export, scope: PermissionScope.all },
   { role: StaffRole.admin_systeme, resource: PermissionResource.student_transfer, action: PermissionAction.view, scope: PermissionScope.all },
   { role: StaffRole.admin_systeme, resource: PermissionResource.student_transfer, action: PermissionAction.approve, scope: PermissionScope.all },
   { role: StaffRole.admin_systeme, resource: PermissionResource.student_documents, action: PermissionAction.view, scope: PermissionScope.all },
