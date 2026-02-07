@@ -21,12 +21,17 @@ import {
   GraduationCap,
   ClipboardCheck,
   Download,
+  FolderArchive,
 } from "lucide-react"
 import { useI18n } from "@/components/i18n-provider"
+import { useToast } from "@/components/ui/use-toast"
 import { PermissionGuard } from "@/components/permission-guard"
 import { PageContainer } from "@/components/layout/PageContainer"
-import { downloadBulletinPDF } from "@/components/bulletin-pdf"
+import { downloadBulletinPDF, BulletinPDFDocument } from "@/components/bulletin-pdf"
+import { pdf } from "@react-pdf/renderer"
+import JSZip from "jszip"
 import Link from "next/link"
+import { componentClasses } from "@/lib/design-tokens"
 
 interface Trimester {
   id: string
@@ -122,10 +127,13 @@ interface BulletinData {
 
 export default function BulletinPage() {
   const { t, locale } = useI18n()
+  const { toast } = useToast()
   const { data: session } = useSession()
 
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const [isDownloadingAll, setIsDownloadingAll] = useState(false)
+  const [downloadProgress, setDownloadProgress] = useState<string | null>(null)
 
   // Selection state
   const [trimesters, setTrimesters] = useState<Trimester[]>([])
@@ -141,7 +149,7 @@ export default function BulletinPage() {
   const [loadingBulletin, setLoadingBulletin] = useState(false)
   const [downloadingPDF, setDownloadingPDF] = useState(false)
 
-  // Handle PDF download
+  // Handle single PDF download
   const handleDownloadPDF = async () => {
     if (!bulletin) return
     try {
@@ -153,6 +161,110 @@ export default function BulletinPage() {
       setDownloadingPDF(false)
     }
   }
+
+  // Handle batch download of all bulletins for a class
+  const handleDownloadAllBulletins = useCallback(async () => {
+    if (!selectedTrimesterId || !selectedGradeId || students.length === 0) {
+      return
+    }
+
+    const selectedTrimester = trimesters.find((t) => t.id === selectedTrimesterId)
+    const selectedGrade = grades.find((g) => g.id === selectedGradeId)
+
+    if (!selectedTrimester || !selectedGrade) {
+      return
+    }
+
+    try {
+      setIsDownloadingAll(true)
+      setDownloadProgress(t.grading.generatingBulletins)
+
+      const zip = new JSZip()
+      let successCount = 0
+      let errorCount = 0
+
+      // Process each student
+      for (let i = 0; i < students.length; i++) {
+        const student = students[i]
+        setDownloadProgress(
+          `${t.grading.generatingBulletins} (${i + 1}/${students.length})`
+        )
+
+        try {
+          // Fetch bulletin data for this student
+          const bulletinRes = await fetch(
+            `/api/evaluations/bulletin?studentProfileId=${student.id}&trimesterId=${selectedTrimesterId}`
+          )
+
+          if (!bulletinRes.ok) {
+            errorCount++
+            continue
+          }
+
+          const bulletinData = await bulletinRes.json()
+
+          // Generate PDF blob
+          const pdfBlob = await pdf(
+            <BulletinPDFDocument data={bulletinData} locale={locale as "fr" | "en"} />
+          ).toBlob()
+
+          // Add to ZIP with sanitized filename
+          const studentName = `${student.lastName} ${student.firstName}`
+          const sanitizedName = studentName.replace(/[^a-zA-Z0-9\s]/g, "").replace(/\s+/g, "_")
+          const filename = `bulletin_${sanitizedName}.pdf`
+          zip.file(filename, pdfBlob)
+          successCount++
+        } catch (err) {
+          console.error(`Error generating bulletin for ${student.lastName} ${student.firstName}:`, err)
+          errorCount++
+        }
+      }
+
+      if (successCount > 0) {
+        // Generate ZIP file
+        setDownloadProgress(locale === "fr" ? "Création de l'archive..." : "Creating archive...")
+        const zipBlob = await zip.generateAsync({ type: "blob" })
+
+        // Trigger download
+        const url = URL.createObjectURL(zipBlob)
+        const link = document.createElement("a")
+        link.href = url
+        const trimesterName = locale === "fr" ? selectedTrimester.nameFr : selectedTrimester.nameEn
+        link.download = `bulletins_${selectedGrade.name}_${trimesterName.replace(/\s+/g, "_")}.zip`
+        document.body.appendChild(link)
+        link.click()
+        document.body.removeChild(link)
+        URL.revokeObjectURL(url)
+
+        toast({
+          title: t.common.success,
+          description: `${t.grading.bulletinsDownloaded} (${successCount}/${students.length})`,
+        })
+      }
+
+      if (errorCount > 0) {
+        toast({
+          title: t.common.error,
+          description: locale === "fr"
+            ? `${errorCount} bulletin(s) n'ont pas pu être générés`
+            : `${errorCount} bulletin(s) could not be generated`,
+          variant: "destructive",
+        })
+      }
+    } catch (err) {
+      console.error("Error downloading bulletins:", err)
+      toast({
+        title: t.common.error,
+        description: locale === "fr"
+          ? "Erreur lors du téléchargement des bulletins"
+          : "Error downloading bulletins",
+        variant: "destructive",
+      })
+    } finally {
+      setIsDownloadingAll(false)
+      setDownloadProgress(null)
+    }
+  }, [selectedTrimesterId, selectedGradeId, students, trimesters, grades, locale, t, toast])
 
   // Fetch initial data
   useEffect(() => {
@@ -398,6 +510,34 @@ export default function BulletinPage() {
               </Select>
             </div>
           </div>
+
+          {/* Batch Download Action */}
+          {selectedGradeId && selectedTrimesterId && students.length > 0 && (
+            <div className="mt-4 pt-4 border-t flex items-center justify-between">
+              <p className="text-sm text-muted-foreground">
+                {students.length} {locale === "fr" ? "élèves dans cette classe" : "students in this class"}
+              </p>
+              <PermissionGuard resource="report_cards" action="export" inline>
+                <Button
+                  onClick={handleDownloadAllBulletins}
+                  disabled={isDownloadingAll}
+                  className={componentClasses.primaryActionButton}
+                >
+                  {isDownloadingAll ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      {downloadProgress}
+                    </>
+                  ) : (
+                    <>
+                      <FolderArchive className="mr-2 h-4 w-4" />
+                      {locale === "fr" ? "Télécharger tous les bulletins" : "Download All Bulletins"}
+                    </>
+                  )}
+                </Button>
+              </PermissionGuard>
+            </div>
+          )}
         </CardContent>
       </Card>
 
