@@ -1,7 +1,7 @@
 import { withAuth, type NextRequestWithAuth } from "next-auth/middleware"
 import { NextResponse } from "next/server"
 
-import { isAllowedPathForRole } from "@/lib/rbac"
+import { isRoleAllowedForRoute } from "@/lib/permissions-v2"
 
 export default withAuth(
   function middleware(req: NextRequestWithAuth) {
@@ -11,7 +11,9 @@ export default withAuth(
     // (Unauthenticated requests are handled by withAuth via `authorized` + signIn page.)
     if (token) {
       const pathname = req.nextUrl.pathname
-      if (!isAllowedPathForRole(pathname, token.role)) {
+
+      // Users without a staffRole cannot access protected routes
+      if (!token.staffRole || !isRoleAllowedForRoute(token.staffRole, pathname)) {
         const url = req.nextUrl.clone()
         url.pathname = "/unauthorized"
         return NextResponse.redirect(url)

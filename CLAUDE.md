@@ -68,7 +68,8 @@ Old routes (e.g., `/enrollments`, `/expenses`, `/grades`) redirect to new locati
 | Shared types | `app/ui/lib/` |
 | Session summaries | `docs/summaries/` |
 | Navigation config | `app/ui/lib/nav-config.ts` |
-| RBAC rules | `app/ui/lib/rbac.ts` |
+| Permission mapping | `app/ui/lib/permissions-v2.ts` |
+| Permission checking | `app/ui/lib/permissions.ts` |
 
 ## Application Routes
 
@@ -159,12 +160,25 @@ export async function GET(req: NextRequest, { params }: RouteParams) {
 - `professeur_principal` - Head Teacher
 - `gardien` - Security Guard
 
-### Permission System
-- **RolePermission** - Base permissions assigned to roles
-- **PermissionOverride** - User-specific grants/denials
-  - `granted: true` = GRANT (adds permission)
-  - `granted: false` = DENY (removes permission)
-- Effective permissions = `(Role Permissions - Denials) ∪ Grants`
+### Permission System (v2 — Code-based with Wall enforcement)
+
+**Design Principle: THE WALL**
+- Academic staff has ZERO access to financial data
+- Financial staff has ZERO access to academic data
+- Only `proprietaire` and `admin_systeme` cross both branches
+
+**Architecture:**
+- Role-to-permissions mapping defined in `app/ui/lib/permissions-v2.ts` (code-based, no DB)
+- `hasPermission()` in `app/ui/lib/permissions.ts` checks: PermissionOverride (DB) → code-based mapping
+- Route protection via `isRoleAllowedForRoute()` in middleware (branch-aware)
+- **PermissionOverride** table for user-specific exceptions (grants/denials)
+- Effective permissions = `(Code-based role mapping - Denials) ∪ Grants`
+
+**Branches:**
+- Transversal: `proprietaire`, `admin_systeme` (wildcard — all permissions)
+- Academic: `proviseur`, `censeur`, `surveillant_general`, `directeur`, `secretariat`, `professeur_principal`, `enseignant`
+- Financial: `coordinateur`, `comptable`
+- None: `agent_recouvrement` (limited), `gardien` (no access)
 
 ## UI/UX Design Guidelines
 
