@@ -82,6 +82,7 @@ const ACADEMIC_SETUP: RolePermissionEntry[] = [
   { resource: PermissionResource.schedule, action: PermissionAction.create, scope: PermissionScope.all },
   { resource: PermissionResource.staff_assignment, action: PermissionAction.update, scope: PermissionScope.all },
   { resource: PermissionResource.club_enrollment, action: PermissionAction.create, scope: PermissionScope.all },
+  { resource: PermissionResource.classes, action: PermissionAction.update, scope: PermissionScope.all },
 ]
 
 const ACADEMIC_REPORTS: RolePermissionEntry[] = [
@@ -95,6 +96,9 @@ const FINANCIAL_CAISSE: RolePermissionEntry[] = [
   { resource: PermissionResource.payment_recording, action: PermissionAction.create, scope: PermissionScope.all },
   { resource: PermissionResource.safe_expense, action: PermissionAction.create, scope: PermissionScope.all },
   { resource: PermissionResource.receipts, action: PermissionAction.export, scope: PermissionScope.all },
+  { resource: PermissionResource.safe_balance, action: PermissionAction.create, scope: PermissionScope.all },
+  { resource: PermissionResource.safe_balance, action: PermissionAction.update, scope: PermissionScope.all },
+  { resource: PermissionResource.daily_verification, action: PermissionAction.create, scope: PermissionScope.all },
 ]
 
 const FINANCIAL_REPORTS: RolePermissionEntry[] = [

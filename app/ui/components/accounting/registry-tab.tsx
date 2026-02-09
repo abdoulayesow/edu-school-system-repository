@@ -236,7 +236,7 @@ export function RegistryTab({
           </Button>
         </PermissionGuard>
 
-        <PermissionGuard resource="payment" action="create" loading={<div className="h-16 animate-pulse bg-muted rounded-lg" />}>
+        <PermissionGuard resource="payment_recording" action="create" loading={<div className="h-16 animate-pulse bg-muted rounded-lg" />}>
           <Button
             size="lg"
             className={cn(

@@ -7,7 +7,7 @@
  * The actual permission checking uses the code-based mapping directly.
  * This seed keeps the DB in sync for admin UI display.
  *
- * Usage: npx tsx app/db/prisma/seeds/seed-permissions.ts
+ * Usage (run from repo root): npx tsx app/db/prisma/seeds/seed-permissions.ts
  */
 
 import { PrismaPg } from "@prisma/adapter-pg"
@@ -15,30 +15,46 @@ import { PrismaClient, StaffRole } from "@prisma/client"
 import pg from "pg"
 import fs from "fs"
 import path from "path"
-import { ROLE_PERMISSIONS } from "../../../ui/lib/permissions-v2"
+import { fileURLToPath } from "url"
 
 const { Pool } = pg
 
-// Load .env from app/db if DATABASE_URL not set
+// Load .env from app/ui if DATABASE_URL not set
 if (!process.env.DATABASE_URL) {
-  const envPath = path.join(process.cwd(), ".env")
-  if (fs.existsSync(envPath)) {
-    const envContent = fs.readFileSync(envPath, "utf-8")
-    for (const line of envContent.split("\n")) {
-      const trimmed = line.trim()
-      if (trimmed && !trimmed.startsWith("#")) {
-        const [key, ...valueParts] = trimmed.split("=")
-        const value = valueParts.join("=").replace(/^["']|["']$/g, "")
-        if (key && !process.env[key]) {
-          process.env[key] = value
+  // Try app/ui/.env first (running from repo root)
+  const candidates = [
+    path.join(process.cwd(), "app", "ui", ".env"),
+    path.join(process.cwd(), "app", "ui", ".env.local"),
+    path.join(process.cwd(), ".env"),
+  ]
+  for (const envPath of candidates) {
+    if (fs.existsSync(envPath)) {
+      const envContent = fs.readFileSync(envPath, "utf-8")
+      for (const line of envContent.split("\n")) {
+        const trimmed = line.trim()
+        if (trimmed && !trimmed.startsWith("#")) {
+          const [key, ...valueParts] = trimmed.split("=")
+          const value = valueParts.join("=").replace(/^["']|["']$/g, "")
+          if (key && !process.env[key]) {
+            process.env[key] = value
+          }
         }
       }
+      break
     }
   }
 }
 
 async function main() {
   console.log("🔐 Syncing role permissions from code-based mapping...")
+
+  // Dynamic import of permissions-v2 to avoid cross-package module resolution issues
+  // Must use pathToFileURL on Windows for ESM dynamic imports
+  const { pathToFileURL } = await import("url")
+  const __filename = fileURLToPath(import.meta.url)
+  const __dirname = path.dirname(__filename)
+  const permissionsPath = path.resolve(__dirname, "../../../ui/lib/permissions-v2.ts")
+  const { ROLE_PERMISSIONS } = await import(pathToFileURL(permissionsPath).href)
 
   const connectionString = process.env.DATABASE_URL
   if (!connectionString) {

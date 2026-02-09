@@ -545,7 +545,7 @@ function AdminUsersPageContent() {
 
 export default function AdminUsersPage() {
   return (
-    <PermissionGuard resource="user_management" action="view">
+    <PermissionGuard resource="user_accounts" action="view">
       <Suspense fallback={
         <PageContainer maxWidth="full">
           <div className="flex items-center justify-center h-64">
