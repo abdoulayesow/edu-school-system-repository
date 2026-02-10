@@ -17,12 +17,13 @@ import {
 import { useI18n } from "@/components/i18n-provider"
 import { useToast } from "@/components/ui/use-toast"
 import { cn } from "@/lib/utils"
-import type {
-  ActiveTrimester,
-  Grade,
-  GradeSubject,
-  Evaluation,
-  EvaluationType,
+import {
+  getEvaluationTypeLabel,
+  type ActiveTrimester,
+  type Grade,
+  type GradeSubject,
+  type Evaluation,
+  type EvaluationType,
 } from "@/lib/types/grading"
 import { BookOpen, Calendar, RefreshCw } from "lucide-react"
 import { EvaluationsTable } from "./evaluations-table"
@@ -153,17 +154,8 @@ export function ManageEvaluationsTab({ activeTrimester, grades }: ManageEvaluati
     }
   }
 
-  const getEvaluationTypeLabel = useCallback(
-    (type: EvaluationType) => {
-      switch (type) {
-        case "interrogation":
-          return t.grading.interrogation
-        case "devoir_surveille":
-          return t.grading.devoirSurveille
-        case "composition":
-          return t.grading.composition
-      }
-    },
+  const getEvalTypeLabel = useCallback(
+    (type: EvaluationType) => getEvaluationTypeLabel(type, t),
     [t]
   )
 
@@ -411,7 +403,7 @@ export function ManageEvaluationsTab({ activeTrimester, grades }: ManageEvaluati
             isLoading={isLoadingEvaluations}
             hasGradeSelected={!!manageGradeId}
             hasSearchQuery={!!evaluationSearch}
-            getEvaluationTypeLabel={getEvaluationTypeLabel}
+            getEvaluationTypeLabel={getEvalTypeLabel}
             onEdit={openEditDialog}
             onDelete={(evaluation) => {
               setSelectedEvaluation(evaluation)

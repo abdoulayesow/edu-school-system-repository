@@ -162,6 +162,23 @@ export interface GradeSubject {
 export type EvaluationType = "interrogation" | "devoir_surveille" | "composition"
 
 /**
+ * Get the localized label for an evaluation type
+ */
+export function getEvaluationTypeLabel(
+  type: EvaluationType,
+  t: { grading: { interrogation: string; devoirSurveille: string; composition: string } }
+): string {
+  switch (type) {
+    case "interrogation":
+      return t.grading.interrogation
+    case "devoir_surveille":
+      return t.grading.devoirSurveille
+    case "composition":
+      return t.grading.composition
+  }
+}
+
+/**
  * Student enrolled in a grade
  */
 export interface GradeStudent {

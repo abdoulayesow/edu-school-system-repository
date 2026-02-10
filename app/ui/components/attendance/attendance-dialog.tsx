@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect, useCallback } from "react"
-import { FormDialog, FormField } from "@/components/ui/form-dialog"
+import { FormDialog, FormField, dialogThemes } from "@/components/ui/form-dialog"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Input } from "@/components/ui/input"
@@ -227,7 +227,7 @@ export function AttendanceDialog({
           <Button
             onClick={handleSave}
             disabled={isSaving || records.size === 0}
-            className="bg-emerald-600 hover:bg-emerald-700 text-white"
+            className={dialogThemes.emerald.submitBg}
           >
             {isSaving && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
             {t.admin.roomAssignments.saveAttendance}
@@ -248,7 +248,7 @@ export function AttendanceDialog({
       {/* Quick actions */}
       <div className="flex items-center gap-2 flex-wrap">
         <span className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
-          Mark all:
+          {t.admin.roomAssignments.markAll}
         </span>
         <Button variant="outline" size="sm" onClick={() => markAllAs("present")}>
           <Check className="h-3 w-3 mr-1" />

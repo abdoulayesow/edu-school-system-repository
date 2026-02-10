@@ -160,12 +160,12 @@ export function ReverseTransactionDialog({
             <div className="flex items-center gap-2 mb-2">
               <AlertTriangle className="h-4 w-4 text-red-600 dark:text-red-400" />
               <p className="text-sm font-medium text-red-700 dark:text-red-300">
-                Transaction à annuler
+                {t.treasury.transactionToReverse}
               </p>
             </div>
             <div className="grid grid-cols-2 gap-2 text-sm">
               <div>
-                <span className="text-muted-foreground">Type:</span>
+                <span className="text-muted-foreground">{t.treasury.type}:</span>
                 <p className="font-medium">{getTypeLabel(transaction.type)}</p>
               </div>
               <div>
@@ -183,7 +183,7 @@ export function ReverseTransactionDialog({
             </div>
             {transaction.description && (
               <div className="text-sm pt-2 border-t border-red-200 dark:border-red-800">
-                <span className="text-muted-foreground">Description:</span>
+                <span className="text-muted-foreground">{t.common.description}:</span>
                 <p className="mt-1">{transaction.description}</p>
               </div>
             )}

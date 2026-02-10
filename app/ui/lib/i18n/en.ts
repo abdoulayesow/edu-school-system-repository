@@ -2408,6 +2408,7 @@ export const en: TranslationKeys = {
       attendanceSaved: "Attendance saved successfully",
       attendanceDate: "Date",
       attendanceError: "Failed to save attendance",
+      markAll: "Mark all:",
 
       // Grade Room View Page
       inlineAssignment: "Inline Assignment",
@@ -2948,6 +2949,8 @@ export const en: TranslationKeys = {
     balanceNotInitialized: "Safe balance is not initialized",
 
     // Transaction reversal
+    transactionToReverse: "Transaction to reverse",
+    type: "Type",
     reverseTransaction: "Reverse Transaction",
     reversalReason: "Reason for reversal",
     reversalReasonPlaceholder: "Explain why this transaction needs to be reversed...",

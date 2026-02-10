@@ -145,10 +145,12 @@ function FormDialog({
               <Icon className={cn("h-5 w-5 shrink-0", theme.iconText)} />
               {title}
             </DialogTitle>
-            {description && (
+            {description ? (
               <DialogDescription className="text-[13px] text-muted-foreground mt-1 pl-[30px]">
                 {description}
               </DialogDescription>
+            ) : (
+              <DialogDescription className="sr-only">{title}</DialogDescription>
             )}
           </DialogHeader>
         </div>
@@ -161,9 +163,8 @@ function FormDialog({
 
           {/* Error banner */}
           {error && (
-            <div className="flex items-start gap-2.5 text-sm text-red-600 dark:text-red-400 bg-red-500/[0.04] dark:bg-red-500/10 p-3 rounded-lg border-l-2 border-l-red-500 mt-4">
-              <AlertTriangle className="h-4 w-4 shrink-0 mt-0.5" />
-              <span>{error}</span>
+            <div className="mt-4">
+              <FormError message={error} />
             </div>
           )}
         </div>
@@ -198,7 +199,7 @@ function FormDialog({
                   ) : SubmitIcon ? (
                     <SubmitIcon className="mr-2 h-4 w-4" />
                   ) : null}
-                  {submitLabel}
+                  {submitLabel ?? t.common.submit}
                 </Button>
               )}
             </DialogFooter>

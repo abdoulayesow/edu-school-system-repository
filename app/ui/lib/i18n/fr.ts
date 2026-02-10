@@ -2406,6 +2406,7 @@ export const fr = {
       attendanceSaved: "Présences enregistrées avec succès",
       attendanceDate: "Date",
       attendanceError: "Échec de l'enregistrement des présences",
+      markAll: "Tout marquer :",
 
       // Grade Room View Page
       inlineAssignment: "Affectation en ligne",
@@ -2946,6 +2947,8 @@ export const fr = {
     balanceNotInitialized: "Le solde de la caisse n'est pas initialisé",
 
     // Transaction reversal
+    transactionToReverse: "Transaction à annuler",
+    type: "Type",
     reverseTransaction: "Annuler la Transaction",
     reversalReason: "Raison de l'annulation",
     reversalReasonPlaceholder: "Expliquez pourquoi cette transaction doit être annulée...",

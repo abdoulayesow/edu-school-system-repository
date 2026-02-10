@@ -23,13 +23,14 @@ import { PermissionGuard } from "@/components/permission-guard"
 import { useI18n } from "@/components/i18n-provider"
 import { useToast } from "@/components/ui/use-toast"
 import { componentClasses } from "@/lib/design-tokens"
-import type {
-  ActiveTrimester,
-  Grade,
-  GradeSubject,
-  GradeStudent,
-  GradeEntry,
-  EvaluationType,
+import {
+  getEvaluationTypeLabel,
+  type ActiveTrimester,
+  type Grade,
+  type GradeSubject,
+  type GradeStudent,
+  type GradeEntry,
+  type EvaluationType,
 } from "@/lib/types/grading"
 import {
   Save,
@@ -397,17 +398,8 @@ export function GradeEntryTab({ activeTrimester, grades }: GradeEntryTabProps) {
     setShowSuccessMessage(false)
   }
 
-  const getEvaluationTypeLabel = useCallback(
-    (type: EvaluationType) => {
-      switch (type) {
-        case "interrogation":
-          return t.grading.interrogation
-        case "devoir_surveille":
-          return t.grading.devoirSurveille
-        case "composition":
-          return t.grading.composition
-      }
-    },
+  const getEvalTypeLabel = useCallback(
+    (type: EvaluationType) => getEvaluationTypeLabel(type, t),
     [t]
   )
 
@@ -487,7 +479,7 @@ export function GradeEntryTab({ activeTrimester, grades }: GradeEntryTabProps) {
           onDismiss={() => setShowSuccessMessage(false)}
           onQuickReentry={handleQuickReentry}
           nextEvaluationType={nextEvaluationType}
-          getEvaluationTypeLabel={getEvaluationTypeLabel}
+          getEvaluationTypeLabel={getEvalTypeLabel}
         />
       )}
 
@@ -599,7 +591,7 @@ export function GradeEntryTab({ activeTrimester, grades }: GradeEntryTabProps) {
                   (locale === "fr" ? selectedSubject.subjectNameFr : selectedSubject.subjectNameEn)}
               </CardTitle>
               <CardDescription>
-                {getEvaluationTypeLabel(selectedType)} - {t.grading.coefficient}: ×
+                {getEvalTypeLabel(selectedType)} - {t.grading.coefficient}: ×
                 {getEvaluationCoefficient(selectedType)}
               </CardDescription>
             </div>
