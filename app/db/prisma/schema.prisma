@@ -67,7 +67,7 @@ model User {
   createdRolePermissions     RolePermission[]        @relation("RolePermissionCreator")
   updatedRolePermissions     RolePermission[]        @relation("RolePermissionUpdater")
   auditLogs                  AuditLog[]
-  calculationLogs            CalculationLog[]  @relation("CalculationLogUser")
+  calculationLogs            CalculationLog[]        @relation("CalculationLogUser")
 
   // Link to staff profile for teachers
   staffProfile TeacherProfile? @relation("UserStaffProfile", fields: [staffProfileId], references: [id])
@@ -695,37 +695,37 @@ model Supplier {
 }
 
 model Expense {
-  id                 String          @id @default(cuid())
-  category           ExpenseCategory
-  description        String
-  amount             Int
-  method             PaymentMethod
-  date               DateTime
-  vendorName         String?         // DEPRECATED: Use supplier relation instead
-  receiptUrl         String?         // DEPRECATED: Use receiptFile instead
-  status             ExpenseStatus   @default(pending)
-  requestedBy        String
-  approvedBy         String?
-  approvedAt         DateTime?
-  rejectionReason    String?
-  paidAt             DateTime?
+  id              String          @id @default(cuid())
+  category        ExpenseCategory
+  description     String
+  amount          Int
+  method          PaymentMethod
+  date            DateTime
+  vendorName      String? // DEPRECATED: Use supplier relation instead
+  receiptUrl      String? // DEPRECATED: Use receiptFile instead
+  status          ExpenseStatus   @default(pending)
+  requestedBy     String
+  approvedBy      String?
+  approvedAt      DateTime?
+  rejectionReason String?
+  paidAt          DateTime?
 
   // NEW FIELDS
   supplierId         String?
-  billingReferenceId String?         // Invoice/receipt number
-  receiptFile        Bytes?          @db.ByteA // Store file content in database
-  receiptFileName    String?         // Original filename
-  receiptFileType    String?         // MIME type (image/png, application/pdf, etc.)
-  initiatedById      String?         // Staff who initiated the expense
+  billingReferenceId String? // Invoice/receipt number
+  receiptFile        Bytes?  @db.ByteA // Store file content in database
+  receiptFileName    String? // Original filename
+  receiptFileType    String? // MIME type (image/png, application/pdf, etc.)
+  initiatedById      String? // Staff who initiated the expense
 
-  syncVersion        Int             @default(0)
-  createdAt          DateTime        @default(now())
-  updatedAt          DateTime        @updatedAt
+  syncVersion Int      @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 
-  supplier           Supplier?       @relation(fields: [supplierId], references: [id])
-  requester          User            @relation("ExpenseRequester", fields: [requestedBy], references: [id])
-  approver           User?           @relation("ExpenseApprover", fields: [approvedBy], references: [id])
-  initiatedBy        User?           @relation("ExpenseInitiator", fields: [initiatedById], references: [id])
+  supplier    Supplier? @relation(fields: [supplierId], references: [id])
+  requester   User      @relation("ExpenseRequester", fields: [requestedBy], references: [id])
+  approver    User?     @relation("ExpenseApprover", fields: [approvedBy], references: [id])
+  initiatedBy User?     @relation("ExpenseInitiator", fields: [initiatedById], references: [id])
 
   @@index([category])
   @@index([date])
@@ -1568,7 +1568,7 @@ model RolePermission {
   scope    PermissionScope    @default(all)
 
   // Tracking fields for audit trail
-  source    String?  @default("seeded") // "seeded" | "manual"
+  source    String? @default("seeded") // "seeded" | "manual"
   createdBy String?
   updatedBy String?
 
@@ -1648,17 +1648,17 @@ model AuditLog {
 // ============================================================================
 
 model CalculationLog {
-  id          String              @id @default(cuid())
+  id          String            @id @default(cuid())
   trimesterId String
   userId      String
   type        CalculationType
-  status      CalculationStatus   @default(running)
+  status      CalculationStatus @default(running)
 
   // Metrics
-  studentsProcessed Int       @default(0)
-  averagesCalculated Int      @default(0)
-  summariesCalculated Int     @default(0)
-  durationMs        Int?      // Duration in milliseconds
+  studentsProcessed   Int  @default(0)
+  averagesCalculated  Int  @default(0)
+  summariesCalculated Int  @default(0)
+  durationMs          Int? // Duration in milliseconds
 
   // Error tracking
   errorMessage String?

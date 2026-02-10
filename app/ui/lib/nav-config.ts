@@ -24,8 +24,6 @@ import {
   MessageSquare,
   CalendarRange,
   Sparkles,
-  Clock,
-  Layers,
 } from "lucide-react"
 import type { UserRole } from "./nav-links"
 import { isGradingFeaturesEnabled } from "./feature-flags"
@@ -192,14 +190,6 @@ export const navigationConfig: MainNavItem[] = [
     roles: ["director", "academic_director"],
     subItems: [
       {
-        id: "academic-hub",
-        name: "Academic Configuration",
-        translationKey: "academicConfig",
-        href: "/admin/academic",
-        icon: Layers,
-        roles: ["director", "academic_director"],
-      },
-      {
         id: "school-years",
         name: "School Years",
         translationKey: "schoolYears",
@@ -245,14 +235,6 @@ export const navigationConfig: MainNavItem[] = [
         translationKey: "trimesters",
         href: "/admin/trimesters",
         icon: CalendarRange,
-        roles: ["director", "academic_director"],
-      },
-      {
-        id: "time-periods",
-        name: "Time Periods",
-        translationKey: "timePeriods",
-        href: "/admin/time-periods",
-        icon: Clock,
         roles: ["director", "academic_director"],
       },
     ],

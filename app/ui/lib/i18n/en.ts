@@ -12,6 +12,7 @@ export const en: TranslationKeys = {
     delete: "Delete",
     view: "View",
     add: "Add",
+    create: "Create",
     manage: "Manage",
     activate: "Activate",
     recalculate: "Recalculate",
@@ -144,6 +145,13 @@ export const en: TranslationKeys = {
     teacherRemarks: "Teacher Remarks",
     conductEntry: "Conduct & Attendance",
     trimesters: "Trimesters",
+    // Administration navigation
+    administrationSection: "Administration",
+    schoolYears: "School Years",
+    gradesAndRooms: "Grades & Rooms",
+    teachersAndClasses: "Teachers & Classes",
+    usersAndPermissions: "Users & Permissions",
+    timePeriods: "Time Periods",
   },
 
   // Homepage
@@ -2153,33 +2161,6 @@ export const en: TranslationKeys = {
     rolePermissionsMainTab: "Role Permissions",
     activitiesManagement: "Activities",
 
-    // Academic Hub
-    academicHub: {
-      title: "Academic Configuration",
-      subtitle: "Configure your school's academic structure",
-      activeTrimester: "Active Trimester",
-      gradesLabel: "grades",
-      roomsLabel: "rooms",
-      teachersLabel: "teachers",
-      assignmentsLabel: "assignments",
-      configuredSubjects: "configured subjects",
-      teachersWithoutAssignments: "teacher(s) without assignments",
-      unassignedToGrades: "subject-grade combinations unassigned",
-      allConfigured: "All Configured",
-      quickActions: "Quick Actions",
-      activateNextTrimester: "Activate Next Trimester",
-      recalculateAllGrades: "Recalculate All Grades",
-      calculationsComplete: "All grades recalculated successfully",
-      activateTrimesterConfirm: "Are you sure you want to activate",
-      currentTrimesterDeactivated: "The current trimester will be deactivated.",
-      recalculateConfirm: "This will recalculate all student averages and rankings for the current trimester. This may take a few minutes.",
-      configurationComplete: "Configuration Complete",
-      configurationIncomplete: "Configuration Incomplete",
-      allAcademicEntitiesConfigured: "All academic entities are properly configured",
-      reviewWarningsAbove: "Review the warnings above to complete your setup",
-    },
-    academicConfig: "Academic Configuration",
-
     // School Years
     schoolYearsTitle: "School Year Management",
     schoolYearsSubtitle: "Manage academic year configurations",
@@ -2537,7 +2518,6 @@ export const en: TranslationKeys = {
     noActiveTrimester: "No active trimester",
     totalTrimesters: "Total Trimesters",
     evaluationsCount: "Evaluations",
-    trimesterActivated: "Trimester activated successfully",
     trimesterDeactivated: "Trimester deactivated successfully",
     deleteTrimesterConfirmation: "Are you sure you want to delete this trimester? This action cannot be undone.",
     cannotDeleteActiveTrimester: "Cannot delete the active trimester",

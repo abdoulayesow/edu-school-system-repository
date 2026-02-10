@@ -10,6 +10,7 @@ export const fr = {
     delete: "Supprimer",
     view: "Voir",
     add: "Ajouter",
+    create: "Créer",
     manage: "Gérer",
     activate: "Activer",
     recalculate: "Recalculer",
@@ -142,6 +143,13 @@ export const fr = {
     teacherRemarks: "Appréciations",
     conductEntry: "Conduite & Assiduité",
     trimesters: "Trimestres",
+    // Administration navigation
+    administrationSection: "Administration",
+    schoolYears: "Années Scolaires",
+    gradesAndRooms: "Niveaux & Salles",
+    teachersAndClasses: "Enseignants & Classes",
+    usersAndPermissions: "Utilisateurs & Permissions",
+    timePeriods: "Périodes",
   },
 
   // Homepage
@@ -2151,33 +2159,6 @@ export const fr = {
     rolePermissionsMainTab: "Permissions des Rôles",
     activitiesManagement: "Activités",
 
-    // Academic Hub
-    academicHub: {
-      title: "Configuration Académique",
-      subtitle: "Configurez la structure académique de votre école",
-      activeTrimester: "Trimestre Actif",
-      gradesLabel: "classes",
-      roomsLabel: "salles",
-      teachersLabel: "enseignants",
-      assignmentsLabel: "affectations",
-      configuredSubjects: "matières configurées",
-      teachersWithoutAssignments: "enseignant(s) sans affectations",
-      unassignedToGrades: "combinaisons matière-classe non attribuées",
-      allConfigured: "Tout Configuré",
-      quickActions: "Actions Rapides",
-      activateNextTrimester: "Activer le Prochain Trimestre",
-      recalculateAllGrades: "Recalculer Toutes les Notes",
-      calculationsComplete: "Toutes les notes ont été recalculées avec succès",
-      activateTrimesterConfirm: "Êtes-vous sûr de vouloir activer",
-      currentTrimesterDeactivated: "Le trimestre actuel sera désactivé.",
-      recalculateConfirm: "Cela recalculera toutes les moyennes et classements des élèves pour le trimestre en cours. Cela peut prendre quelques minutes.",
-      configurationComplete: "Configuration Complète",
-      configurationIncomplete: "Configuration Incomplète",
-      allAcademicEntitiesConfigured: "Toutes les entités académiques sont correctement configurées",
-      reviewWarningsAbove: "Vérifiez les avertissements ci-dessus pour terminer votre configuration",
-    },
-    academicConfig: "Configuration Académique",
-
     // School Years
     schoolYearsTitle: "Gestion des années scolaires",
     schoolYearsSubtitle: "Gérer les configurations des années académiques",
@@ -2535,7 +2516,6 @@ export const fr = {
     noActiveTrimester: "Aucun trimestre actif",
     totalTrimesters: "Total des Trimestres",
     evaluationsCount: "Évaluations",
-    trimesterActivated: "Trimestre activé avec succès",
     trimesterDeactivated: "Trimestre désactivé avec succès",
     deleteTrimesterConfirmation: "Êtes-vous sûr de vouloir supprimer ce trimestre ? Cette action est irréversible.",
     cannotDeleteActiveTrimester: "Impossible de supprimer le trimestre actif",
