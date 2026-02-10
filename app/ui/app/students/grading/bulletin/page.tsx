@@ -22,107 +22,26 @@ import {
   ClipboardCheck,
   Download,
   FolderArchive,
+  AlertCircle,
 } from "lucide-react"
 import { useI18n } from "@/components/i18n-provider"
 import { useToast } from "@/components/ui/use-toast"
 import { PermissionGuard } from "@/components/permission-guard"
 import { PageContainer } from "@/components/layout/PageContainer"
-import { downloadBulletinPDF, BulletinPDFDocument } from "@/components/bulletin-pdf"
-import { pdf } from "@react-pdf/renderer"
-import JSZip from "jszip"
+import { downloadBulletinPDF } from "@/components/bulletin-pdf"
 import Link from "next/link"
 import { componentClasses } from "@/lib/design-tokens"
+import { getScoreColor } from "@/lib/grading-utils"
+import { DecisionBadge } from "@/components/grading"
+import { useBatchBulletinDownload } from "@/hooks/use-batch-bulletin-download"
+import type { Trimester, Grade, BulletinData, DecisionType } from "@/lib/types/grading"
 
-interface Trimester {
-  id: string
-  number: number
-  name: string
-  nameFr: string
-  nameEn: string
-  isActive: boolean
-  schoolYear: {
-    id: string
-    name: string
-  }
-}
-
-interface Grade {
-  id: string
-  name: string
-  level: string
-}
-
-interface Student {
+interface BulletinStudent {
   id: string
   firstName: string
   lastName: string
   studentNumber: string
   currentGrade: Grade | null
-}
-
-interface SubjectEvaluation {
-  id: string
-  score: number
-  maxScore: number
-  date: string
-}
-
-interface Subject {
-  id: string
-  subjectId: string
-  code: string
-  nameFr: string
-  nameEn: string
-  coefficient: number
-  average: number | null
-  teacherRemark: string | null
-  evaluations: {
-    interrogations: SubjectEvaluation[]
-    devoirsSurveilles: SubjectEvaluation[]
-    compositions: SubjectEvaluation[]
-  }
-}
-
-interface BulletinData {
-  student: {
-    id: string
-    firstName: string
-    lastName: string
-    dateOfBirth: string | null
-    photoUrl: string | null
-    studentNumber: string
-    grade: Grade | null
-  }
-  trimester: {
-    id: string
-    number: number
-    name: string
-    nameFr: string
-    nameEn: string
-    schoolYear: { id: string; name: string }
-  }
-  subjects: Subject[]
-  totalCoefficient: number
-  summary: {
-    generalAverage: number | null
-    rank: number | null
-    totalStudents: number | null
-    conduct: number | null
-    decision: string
-    decisionOverride: boolean
-    generalRemark: string | null
-    absences: number | null
-    lates: number | null
-    calculatedAt: string | null
-  } | null
-  classStats: {
-    classAverage: number | null
-    highestAverage: number | null
-    lowestAverage: number | null
-    passCount: number
-    passRate: number | null
-    totalStudents: number
-  } | null
 }
 
 export default function BulletinPage() {
@@ -132,13 +51,12 @@ export default function BulletinPage() {
 
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
-  const [isDownloadingAll, setIsDownloadingAll] = useState(false)
-  const [downloadProgress, setDownloadProgress] = useState<string | null>(null)
+  const { isDownloading: isDownloadingAll, downloadProgress, downloadAllBulletins } = useBatchBulletinDownload()
 
   // Selection state
   const [trimesters, setTrimesters] = useState<Trimester[]>([])
   const [grades, setGrades] = useState<Grade[]>([])
-  const [students, setStudents] = useState<Student[]>([])
+  const [students, setStudents] = useState<BulletinStudent[]>([])
 
   const [selectedTrimesterId, setSelectedTrimesterId] = useState<string>("")
   const [selectedGradeId, setSelectedGradeId] = useState<string>("")
@@ -164,107 +82,36 @@ export default function BulletinPage() {
 
   // Handle batch download of all bulletins for a class
   const handleDownloadAllBulletins = useCallback(async () => {
-    if (!selectedTrimesterId || !selectedGradeId || students.length === 0) {
-      return
-    }
+    if (!selectedTrimesterId || !selectedGradeId || students.length === 0) return
 
-    const selectedTrimester = trimesters.find((t) => t.id === selectedTrimesterId)
+    const selectedTrimester = trimesters.find((tr) => tr.id === selectedTrimesterId)
     const selectedGrade = grades.find((g) => g.id === selectedGradeId)
+    if (!selectedTrimester || !selectedGrade) return
 
-    if (!selectedTrimester || !selectedGrade) {
-      return
+    const { successCount, errorCount } = await downloadAllBulletins({
+      trimesterId: selectedTrimesterId,
+      trimesterName: locale === "fr" ? selectedTrimester.nameFr : selectedTrimester.nameEn,
+      gradeName: selectedGrade.name,
+      students: students.map((s) => ({
+        id: s.id,
+        name: `${s.lastName} ${s.firstName}`,
+      })),
+    })
+
+    if (successCount > 0) {
+      toast({
+        title: t.common.success,
+        description: `${t.grading.bulletinsDownloaded} (${successCount}/${students.length})`,
+      })
     }
-
-    try {
-      setIsDownloadingAll(true)
-      setDownloadProgress(t.grading.generatingBulletins)
-
-      const zip = new JSZip()
-      let successCount = 0
-      let errorCount = 0
-
-      // Process each student
-      for (let i = 0; i < students.length; i++) {
-        const student = students[i]
-        setDownloadProgress(
-          `${t.grading.generatingBulletins} (${i + 1}/${students.length})`
-        )
-
-        try {
-          // Fetch bulletin data for this student
-          const bulletinRes = await fetch(
-            `/api/evaluations/bulletin?studentProfileId=${student.id}&trimesterId=${selectedTrimesterId}`
-          )
-
-          if (!bulletinRes.ok) {
-            errorCount++
-            continue
-          }
-
-          const bulletinData = await bulletinRes.json()
-
-          // Generate PDF blob
-          const pdfBlob = await pdf(
-            <BulletinPDFDocument data={bulletinData} locale={locale as "fr" | "en"} />
-          ).toBlob()
-
-          // Add to ZIP with sanitized filename
-          const studentName = `${student.lastName} ${student.firstName}`
-          const sanitizedName = studentName.replace(/[^a-zA-Z0-9\s]/g, "").replace(/\s+/g, "_")
-          const filename = `bulletin_${sanitizedName}.pdf`
-          zip.file(filename, pdfBlob)
-          successCount++
-        } catch (err) {
-          console.error(`Error generating bulletin for ${student.lastName} ${student.firstName}:`, err)
-          errorCount++
-        }
-      }
-
-      if (successCount > 0) {
-        // Generate ZIP file
-        setDownloadProgress(locale === "fr" ? "Création de l'archive..." : "Creating archive...")
-        const zipBlob = await zip.generateAsync({ type: "blob" })
-
-        // Trigger download
-        const url = URL.createObjectURL(zipBlob)
-        const link = document.createElement("a")
-        link.href = url
-        const trimesterName = locale === "fr" ? selectedTrimester.nameFr : selectedTrimester.nameEn
-        link.download = `bulletins_${selectedGrade.name}_${trimesterName.replace(/\s+/g, "_")}.zip`
-        document.body.appendChild(link)
-        link.click()
-        document.body.removeChild(link)
-        URL.revokeObjectURL(url)
-
-        toast({
-          title: t.common.success,
-          description: `${t.grading.bulletinsDownloaded} (${successCount}/${students.length})`,
-        })
-      }
-
-      if (errorCount > 0) {
-        toast({
-          title: t.common.error,
-          description: locale === "fr"
-            ? `${errorCount} bulletin(s) n'ont pas pu être générés`
-            : `${errorCount} bulletin(s) could not be generated`,
-          variant: "destructive",
-        })
-      }
-    } catch (err) {
-      console.error("Error downloading bulletins:", err)
+    if (errorCount > 0) {
       toast({
         title: t.common.error,
-        description: locale === "fr"
-          ? "Erreur lors du téléchargement des bulletins"
-          : "Error downloading bulletins",
+        description: t.grading.bulletinErrorCount.replace("{count}", String(errorCount)),
         variant: "destructive",
       })
-    } finally {
-      setIsDownloadingAll(false)
-      setDownloadProgress(null)
     }
-  }, [selectedTrimesterId, selectedGradeId, students, trimesters, grades, locale, t, toast])
+  }, [selectedTrimesterId, selectedGradeId, students, trimesters, grades, locale, t, toast, downloadAllBulletins])
 
   // Fetch initial data
   useEffect(() => {
@@ -292,7 +139,7 @@ export default function BulletinPage() {
         }
       } catch (err) {
         console.error("Error fetching initial data:", err)
-        setError("Failed to load data")
+        setError(t.grading.failedToLoadData)
       } finally {
         setIsLoading(false)
       }
@@ -354,46 +201,9 @@ export default function BulletinPage() {
     fetchBulletin()
   }, [fetchBulletin])
 
-  const getDecisionBadge = (decision: string, override: boolean) => {
-    const variants: Record<string, "success" | "warning" | "destructive" | "secondary"> = {
-      admis: "success",
-      rattrapage: "warning",
-      redouble: "destructive",
-      pending: "secondary",
-    }
-
-    const labels: Record<string, string> = {
-      admis: t.grading.admis,
-      rattrapage: t.grading.rattrapage,
-      redouble: t.grading.redouble,
-      pending: t.grading.decisionPending,
-    }
-
-    return (
-      <div className="flex items-center gap-2">
-        <Badge variant={variants[decision] || "secondary"}>
-          {labels[decision] || decision}
-        </Badge>
-        {override && (
-          <Badge variant="outline" className="text-xs">
-            {locale === "fr" ? "Décision modifiée" : "Overridden"}
-          </Badge>
-        )}
-      </div>
-    )
-  }
-
   const formatScore = (score: number | null, maxScore = 20): string => {
     if (score === null) return "-"
     return `${score.toFixed(2)}/${maxScore}`
-  }
-
-  const getScoreColor = (score: number | null): string => {
-    if (score === null) return "text-muted-foreground"
-    if (score >= 14) return "text-success"
-    if (score >= 10) return "text-primary"
-    if (score >= 8) return "text-warning"
-    return "text-destructive"
   }
 
   if (isLoading) {
@@ -404,16 +214,27 @@ export default function BulletinPage() {
     )
   }
 
+  if (error) {
+    return (
+      <PageContainer maxWidth="lg">
+        <div className="flex flex-col items-center justify-center h-64 gap-4">
+          <AlertCircle className="h-12 w-12 text-destructive" />
+          <div className="text-center">
+            <h2 className="text-xl font-semibold">{t.common.error}</h2>
+            <p className="text-muted-foreground mt-2">{error}</p>
+          </div>
+        </div>
+      </PageContainer>
+    )
+  }
+
   return (
     <PageContainer maxWidth="lg">
-      {/* Maroon accent bar */}
-      <div className="h-1 bg-gspn-maroon-500 -mx-4 sm:-mx-6 lg:-mx-8 mb-6" />
-
       {/* Header */}
       <div className="flex items-center gap-4 mb-6">
         <Link href="/students/grades" className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground">
           <ArrowLeft className="size-4" />
-          {locale === "fr" ? "Retour aux classes" : "Back to classes"}
+          {t.grading.backToClasses}
         </Link>
       </div>
 
@@ -423,12 +244,10 @@ export default function BulletinPage() {
         </div>
         <div>
           <h1 className="text-2xl font-bold">
-            {locale === "fr" ? "Bulletin de Notes" : "Report Card"}
+            {t.grading.bulletin}
           </h1>
           <p className="text-muted-foreground">
-            {locale === "fr"
-              ? "Consulter le bulletin trimestriel d'un élève"
-              : "View a student's trimester report card"}
+            {t.grading.bulletinSubtitle}
           </p>
         </div>
       </div>
@@ -438,24 +257,24 @@ export default function BulletinPage() {
         <CardHeader className="pb-2">
           <CardTitle className="text-lg flex items-center gap-2">
             <div className="h-2 w-2 rounded-full bg-gspn-maroon-500" />
-            {locale === "fr" ? "Sélection" : "Selection"}
+            {t.grading.selection}
           </CardTitle>
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div>
               <label className="text-sm font-medium mb-2 block">
-                {locale === "fr" ? "Trimestre" : "Trimester"}
+                {t.trimesters.trimester}
               </label>
               <Select value={selectedTrimesterId} onValueChange={setSelectedTrimesterId}>
                 <SelectTrigger>
-                  <SelectValue placeholder={locale === "fr" ? "Choisir un trimestre" : "Select trimester"} />
+                  <SelectValue placeholder={t.trimesters.selectTrimester} />
                 </SelectTrigger>
                 <SelectContent>
                   {trimesters.map((trimester) => (
                     <SelectItem key={trimester.id} value={trimester.id}>
                       {locale === "fr" ? trimester.nameFr : trimester.nameEn}
-                      {trimester.isActive && ` (${locale === "fr" ? "Actif" : "Active"})`}
+                      {trimester.isActive && ` (${t.common.active})`}
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -464,7 +283,7 @@ export default function BulletinPage() {
 
             <div>
               <label className="text-sm font-medium mb-2 block">
-                {locale === "fr" ? "Classe" : "Class"}
+                {t.grading.class}
               </label>
               <Select value={selectedGradeId} onValueChange={setSelectedGradeId}>
                 <SelectTrigger>
@@ -482,7 +301,7 @@ export default function BulletinPage() {
 
             <div>
               <label className="text-sm font-medium mb-2 block">
-                {locale === "fr" ? "Élève" : "Student"}
+                {t.common.student}
               </label>
               <Select
                 value={selectedStudentId}
@@ -493,9 +312,7 @@ export default function BulletinPage() {
                   <SelectValue
                     placeholder={
                       !selectedGradeId
-                        ? locale === "fr"
-                          ? "Sélectionnez d'abord une classe"
-                          : "Select a class first"
+                        ? t.grading.selectClassFirst
                         : t.grading.selectStudent
                     }
                   />
@@ -515,7 +332,7 @@ export default function BulletinPage() {
           {selectedGradeId && selectedTrimesterId && students.length > 0 && (
             <div className="mt-4 pt-4 border-t flex items-center justify-between">
               <p className="text-sm text-muted-foreground">
-                {students.length} {locale === "fr" ? "élèves dans cette classe" : "students in this class"}
+                {students.length} {t.grading.studentsInClass}
               </p>
               <PermissionGuard resource="report_cards" action="export" inline>
                 <Button
@@ -531,7 +348,7 @@ export default function BulletinPage() {
                   ) : (
                     <>
                       <FolderArchive className="mr-2 h-4 w-4" />
-                      {locale === "fr" ? "Télécharger tous les bulletins" : "Download All Bulletins"}
+                      {t.grading.downloadAllBulletins}
                     </>
                   )}
                 </Button>
@@ -607,7 +424,7 @@ export default function BulletinPage() {
                     ) : (
                       <Download className="mr-2 h-4 w-4" />
                     )}
-                    {locale === "fr" ? "Télécharger PDF" : "Download PDF"}
+                    {t.grading.downloadPDF}
                   </Button>
                 </PermissionGuard>
               </div>
@@ -644,7 +461,7 @@ export default function BulletinPage() {
                     {bulletin.summary.absences ?? "-"}
                   </div>
                   <div className="text-xs text-muted-foreground">
-                    {locale === "fr" ? "Absences" : "Absences"}
+                    {t.grading.absences}
                   </div>
                 </CardContent>
               </Card>
@@ -655,14 +472,14 @@ export default function BulletinPage() {
                     {bulletin.summary.lates ?? "-"}
                   </div>
                   <div className="text-xs text-muted-foreground">
-                    {locale === "fr" ? "Retards" : "Lates"}
+                    {t.grading.lates}
                   </div>
                 </CardContent>
               </Card>
 
               <Card>
                 <CardContent className="pt-4 pb-4 text-center">
-                  {getDecisionBadge(bulletin.summary.decision, bulletin.summary.decisionOverride)}
+                  <DecisionBadge decision={bulletin.summary.decision as DecisionType} isOverride={bulletin.summary.decisionOverride} t={t} />
                   <div className="text-xs text-muted-foreground mt-1">{t.grading.decision}</div>
                 </CardContent>
               </Card>
@@ -675,7 +492,7 @@ export default function BulletinPage() {
               <CardHeader className="pb-2">
                 <CardTitle className="text-sm flex items-center gap-2">
                   <Users className="size-4" />
-                  {locale === "fr" ? "Statistiques de classe" : "Class Statistics"}
+                  {t.grading.classStatistics}
                 </CardTitle>
               </CardHeader>
               <CardContent>
@@ -687,7 +504,7 @@ export default function BulletinPage() {
                     <div>
                       <div className="font-medium">{bulletin.classStats.highestAverage?.toFixed(2) || "-"}</div>
                       <div className="text-xs text-muted-foreground">
-                        {locale === "fr" ? "Meilleure" : "Highest"}
+                        {t.grading.highest}
                       </div>
                     </div>
                   </div>
@@ -709,7 +526,7 @@ export default function BulletinPage() {
                     <div>
                       <div className="font-medium">{bulletin.classStats.lowestAverage?.toFixed(2) || "-"}</div>
                       <div className="text-xs text-muted-foreground">
-                        {locale === "fr" ? "Plus basse" : "Lowest"}
+                        {t.grading.lowest}
                       </div>
                     </div>
                   </div>
@@ -737,20 +554,20 @@ export default function BulletinPage() {
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <div className="h-2 w-2 rounded-full bg-gspn-maroon-500" />
-                {locale === "fr" ? "Résultats par matière" : "Subject Results"}
+                {t.grading.subjectResults}
               </CardTitle>
               <CardDescription>
-                {bulletin.subjects.length} {locale === "fr" ? "matières" : "subjects"} -{" "}
-                {locale === "fr" ? "Coefficient total" : "Total coefficient"}: {bulletin.totalCoefficient}
+                {bulletin.subjects.length} {t.grading.subjects} -{" "}
+                {t.grading.totalCoefficient}: {bulletin.totalCoefficient}
               </CardDescription>
             </CardHeader>
             <CardContent>
               <div className="rounded-md border overflow-x-auto">
                 <Table>
                   <TableHeader>
-                    <TableRow>
+                    <TableRow className={componentClasses.tableHeaderRow}>
                       <TableHead className="min-w-[150px]">
-                        {locale === "fr" ? "Matière" : "Subject"}
+                        {t.grading.subject}
                       </TableHead>
                       <TableHead className="text-center w-16">{t.grading.coefficient}</TableHead>
                       <TableHead className="text-center min-w-[80px]">
@@ -775,7 +592,7 @@ export default function BulletinPage() {
                       </TableRow>
                     ) : (
                       bulletin.subjects.map((subject) => (
-                        <TableRow key={subject.id}>
+                        <TableRow key={subject.id} className={componentClasses.tableRowHover}>
                           <TableCell>
                             <div>
                               <p className="font-medium">
@@ -854,7 +671,7 @@ export default function BulletinPage() {
             <Card>
               <CardHeader>
                 <CardTitle className="text-sm">
-                  {locale === "fr" ? "Appréciation générale" : "General Remark"}
+                  {t.grading.generalRemark}
                 </CardTitle>
               </CardHeader>
               <CardContent>
@@ -866,17 +683,13 @@ export default function BulletinPage() {
       ) : selectedStudentId && selectedTrimesterId ? (
         <Card>
           <CardContent className="py-12 text-center text-muted-foreground">
-            {locale === "fr"
-              ? "Aucune donnée disponible pour cet élève et ce trimestre"
-              : "No data available for this student and trimester"}
+            {t.grading.noDataAvailable}
           </CardContent>
         </Card>
       ) : (
         <Card>
           <CardContent className="py-12 text-center text-muted-foreground">
-            {locale === "fr"
-              ? "Sélectionnez un trimestre, une classe et un élève pour afficher le bulletin"
-              : "Select a trimester, class, and student to view the report card"}
+            {t.grading.selectToView}
           </CardContent>
         </Card>
       )}

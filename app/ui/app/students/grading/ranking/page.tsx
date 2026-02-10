@@ -20,58 +20,17 @@ import {
   Target,
   Download,
 } from "lucide-react"
+import { cn } from "@/lib/utils"
 import { useI18n } from "@/components/i18n-provider"
 import { useToast } from "@/components/ui/use-toast"
 import { PermissionGuard } from "@/components/permission-guard"
 import { PageContainer } from "@/components/layout/PageContainer"
-import { BulletinPDFDocument } from "@/components/bulletin-pdf"
-import { pdf } from "@react-pdf/renderer"
-import JSZip from "jszip"
 import Link from "next/link"
-
-interface Trimester {
-  id: string
-  number: number
-  name: string
-  nameFr: string
-  nameEn: string
-  isActive: boolean
-  schoolYear: {
-    id: string
-    name: string
-  }
-}
-
-interface Grade {
-  id: string
-  name: string
-  level: string
-}
-
-interface RankedStudent {
-  id: string
-  studentProfileId: string
-  studentName: string
-  gradeId: string
-  gradeName: string
-  generalAverage: number | null
-  rank: number | null
-  totalStudents: number | null
-  conduct: number | null
-  decision: string
-  decisionOverride: boolean
-  absences: number | null
-  lates: number | null
-}
-
-interface ClassStats {
-  classAverage: number | null
-  highestAverage: number | null
-  lowestAverage: number | null
-  passCount: number
-  passRate: number | null
-  totalStudents: number
-}
+import { componentClasses } from "@/lib/design-tokens"
+import { getScoreColor } from "@/lib/grading-utils"
+import { DecisionBadge } from "@/components/grading"
+import { useBatchBulletinDownload } from "@/hooks/use-batch-bulletin-download"
+import type { Trimester, Grade, RankedStudent, ClassStats, DecisionType } from "@/lib/types/grading"
 
 export default function ClassRankingPage() {
   const { t, locale } = useI18n()
@@ -87,8 +46,7 @@ export default function ClassRankingPage() {
   const [students, setStudents] = useState<RankedStudent[]>([])
   const [classStats, setClassStats] = useState<ClassStats | null>(null)
   const [loadingRanking, setLoadingRanking] = useState(false)
-  const [isDownloading, setIsDownloading] = useState(false)
-  const [downloadProgress, setDownloadProgress] = useState<string | null>(null)
+  const { isDownloading, downloadProgress, downloadAllBulletins } = useBatchBulletinDownload()
 
   // Fetch initial data
   useEffect(() => {
@@ -179,106 +137,36 @@ export default function ClassRankingPage() {
 
   // Batch download all bulletins as ZIP
   const handleDownloadAllBulletins = useCallback(async () => {
-    if (!selectedTrimesterId || !selectedGradeId || students.length === 0) {
-      return
-    }
+    if (!selectedTrimesterId || !selectedGradeId || students.length === 0) return
 
-    const selectedTrimester = trimesters.find((t) => t.id === selectedTrimesterId)
+    const selectedTrimester = trimesters.find((tr) => tr.id === selectedTrimesterId)
     const selectedGrade = grades.find((g) => g.id === selectedGradeId)
+    if (!selectedTrimester || !selectedGrade) return
 
-    if (!selectedTrimester || !selectedGrade) {
-      return
+    const { successCount, errorCount } = await downloadAllBulletins({
+      trimesterId: selectedTrimesterId,
+      trimesterName: locale === "fr" ? selectedTrimester.nameFr : selectedTrimester.nameEn,
+      gradeName: selectedGrade.name,
+      students: students.map((s) => ({
+        id: s.studentProfileId,
+        name: s.studentName,
+      })),
+    })
+
+    if (successCount > 0) {
+      toast({
+        title: t.common.success,
+        description: `${t.grading.bulletinsDownloaded} (${successCount}/${students.length})`,
+      })
     }
-
-    try {
-      setIsDownloading(true)
-      setDownloadProgress(t.grading.generatingBulletins)
-
-      const zip = new JSZip()
-      let successCount = 0
-      let errorCount = 0
-
-      // Process each student
-      for (let i = 0; i < students.length; i++) {
-        const student = students[i]
-        setDownloadProgress(
-          `${t.grading.generatingBulletins} (${i + 1}/${students.length})`
-        )
-
-        try {
-          // Fetch bulletin data for this student
-          const bulletinRes = await fetch(
-            `/api/evaluations/bulletin?studentProfileId=${student.studentProfileId}&trimesterId=${selectedTrimesterId}`
-          )
-
-          if (!bulletinRes.ok) {
-            errorCount++
-            continue
-          }
-
-          const bulletinData = await bulletinRes.json()
-
-          // Generate PDF blob
-          const pdfBlob = await pdf(
-            <BulletinPDFDocument data={bulletinData} locale={locale as "fr" | "en"} />
-          ).toBlob()
-
-          // Add to ZIP with sanitized filename
-          const sanitizedName = student.studentName.replace(/[^a-zA-Z0-9\s]/g, "").replace(/\s+/g, "_")
-          const filename = `bulletin_${sanitizedName}.pdf`
-          zip.file(filename, pdfBlob)
-          successCount++
-        } catch (err) {
-          console.error(`Error generating bulletin for ${student.studentName}:`, err)
-          errorCount++
-        }
-      }
-
-      if (successCount > 0) {
-        // Generate ZIP file
-        setDownloadProgress(locale === "fr" ? "Création de l'archive..." : "Creating archive...")
-        const zipBlob = await zip.generateAsync({ type: "blob" })
-
-        // Trigger download
-        const url = URL.createObjectURL(zipBlob)
-        const link = document.createElement("a")
-        link.href = url
-        const trimesterName = locale === "fr" ? selectedTrimester.nameFr : selectedTrimester.nameEn
-        link.download = `bulletins_${selectedGrade.name}_${trimesterName.replace(/\s+/g, "_")}.zip`
-        document.body.appendChild(link)
-        link.click()
-        document.body.removeChild(link)
-        URL.revokeObjectURL(url)
-
-        toast({
-          title: t.common.success,
-          description: `${t.grading.bulletinsDownloaded} (${successCount}/${students.length})`,
-        })
-      }
-
-      if (errorCount > 0) {
-        toast({
-          title: t.common.error,
-          description: locale === "fr"
-            ? `${errorCount} bulletin(s) n'ont pas pu être générés`
-            : `${errorCount} bulletin(s) could not be generated`,
-          variant: "destructive",
-        })
-      }
-    } catch (err) {
-      console.error("Error downloading bulletins:", err)
+    if (errorCount > 0) {
       toast({
         title: t.common.error,
-        description: locale === "fr"
-          ? "Erreur lors du téléchargement des bulletins"
-          : "Error downloading bulletins",
+        description: t.grading.bulletinErrorCount.replace("{count}", String(errorCount)),
         variant: "destructive",
       })
-    } finally {
-      setIsDownloading(false)
-      setDownloadProgress(null)
     }
-  }, [selectedTrimesterId, selectedGradeId, students, trimesters, grades, locale, t, toast])
+  }, [selectedTrimesterId, selectedGradeId, students, trimesters, grades, locale, t, toast, downloadAllBulletins])
 
   const getRankIcon = (rank: number | null) => {
     if (rank === 1) return <Trophy className="size-5 text-yellow-500" />
@@ -300,36 +188,6 @@ export default function ClassRankingPage() {
     return <span className="font-medium">{rank}</span>
   }
 
-  const getScoreColor = (score: number | null): string => {
-    if (score === null) return "text-muted-foreground"
-    if (score >= 14) return "text-success"
-    if (score >= 10) return "text-primary"
-    if (score >= 8) return "text-warning"
-    return "text-destructive"
-  }
-
-  const getDecisionBadge = (decision: string) => {
-    const variants: Record<string, "success" | "warning" | "destructive" | "secondary"> = {
-      admis: "success",
-      rattrapage: "warning",
-      redouble: "destructive",
-      pending: "secondary",
-    }
-
-    const labels: Record<string, string> = {
-      admis: t.grading.admis,
-      rattrapage: t.grading.rattrapage,
-      redouble: t.grading.redouble,
-      pending: t.grading.decisionPending,
-    }
-
-    return (
-      <Badge variant={variants[decision] || "secondary"}>
-        {labels[decision] || decision}
-      </Badge>
-    )
-  }
-
   if (isLoading) {
     return (
       <div className="min-h-screen bg-white dark:bg-background flex items-center justify-center">
@@ -340,14 +198,11 @@ export default function ClassRankingPage() {
 
   return (
     <PageContainer maxWidth="lg">
-      {/* Maroon accent bar */}
-      <div className="h-1 bg-gspn-maroon-500 -mx-4 sm:-mx-6 lg:-mx-8 mb-6" />
-
       {/* Header */}
       <div className="flex items-center gap-4 mb-6">
         <Link href="/students/grades" className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground">
           <ArrowLeft className="size-4" />
-          {locale === "fr" ? "Retour aux classes" : "Back to classes"}
+          {t.grading.backToClasses}
         </Link>
       </div>
 
@@ -358,12 +213,10 @@ export default function ClassRankingPage() {
           </div>
           <div>
             <h1 className="text-2xl font-bold">
-              {locale === "fr" ? "Classement de la Classe" : "Class Ranking"}
+              {t.grading.classRanking}
             </h1>
             <p className="text-muted-foreground">
-              {locale === "fr"
-                ? "Voir le classement des élèves par moyenne générale"
-                : "View student rankings by general average"}
+              {t.grading.classRankingSubtitle}
             </p>
           </div>
         </div>
@@ -372,7 +225,7 @@ export default function ClassRankingPage() {
             <Button
               onClick={handleDownloadAllBulletins}
               disabled={isDownloading}
-              variant="outline"
+              className={componentClasses.primaryActionButton}
             >
               {isDownloading ? (
                 <>
@@ -395,24 +248,24 @@ export default function ClassRankingPage() {
         <CardHeader className="pb-2">
           <CardTitle className="text-lg flex items-center gap-2">
             <div className="h-2 w-2 rounded-full bg-gspn-maroon-500" />
-            {locale === "fr" ? "Filtres" : "Filters"}
+            {t.grading.filters}
           </CardTitle>
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <label className="text-sm font-medium mb-2 block">
-                {locale === "fr" ? "Trimestre" : "Trimester"}
+                {t.trimesters.trimester}
               </label>
               <Select value={selectedTrimesterId} onValueChange={setSelectedTrimesterId}>
                 <SelectTrigger>
-                  <SelectValue placeholder={locale === "fr" ? "Choisir un trimestre" : "Select trimester"} />
+                  <SelectValue placeholder={t.trimesters.selectTrimester} />
                 </SelectTrigger>
                 <SelectContent>
                   {trimesters.map((trimester) => (
                     <SelectItem key={trimester.id} value={trimester.id}>
                       {locale === "fr" ? trimester.nameFr : trimester.nameEn}
-                      {trimester.isActive && ` (${locale === "fr" ? "Actif" : "Active"})`}
+                      {trimester.isActive && ` (${t.common.active})`}
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -421,7 +274,7 @@ export default function ClassRankingPage() {
 
             <div>
               <label className="text-sm font-medium mb-2 block">
-                {locale === "fr" ? "Classe" : "Class"}
+                {t.grading.class}
               </label>
               <Select value={selectedGradeId} onValueChange={setSelectedGradeId}>
                 <SelectTrigger>
@@ -448,7 +301,7 @@ export default function ClassRankingPage() {
               <Users className="size-5 mx-auto mb-1 text-muted-foreground" />
               <div className="text-2xl font-bold">{classStats.totalStudents}</div>
               <div className="text-xs text-muted-foreground">
-                {locale === "fr" ? "Élèves" : "Students"}
+                {t.grading.studentsLabel}
               </div>
             </CardContent>
           </Card>
@@ -470,7 +323,7 @@ export default function ClassRankingPage() {
                 {classStats.highestAverage?.toFixed(2) || "-"}
               </div>
               <div className="text-xs text-muted-foreground">
-                {locale === "fr" ? "Meilleure" : "Highest"}
+                {t.grading.highest}
               </div>
             </CardContent>
           </Card>
@@ -482,7 +335,7 @@ export default function ClassRankingPage() {
                 {classStats.lowestAverage?.toFixed(2) || "-"}
               </div>
               <div className="text-xs text-muted-foreground">
-                {locale === "fr" ? "Plus basse" : "Lowest"}
+                {t.grading.lowest}
               </div>
             </CardContent>
           </Card>
@@ -511,22 +364,22 @@ export default function ClassRankingPage() {
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <div className="h-2 w-2 rounded-full bg-gspn-maroon-500" />
-              {locale === "fr" ? "Classement des élèves" : "Student Ranking"}
+              {t.grading.studentRanking}
             </CardTitle>
             <CardDescription>
-              {students.length} {locale === "fr" ? "élèves classés" : "students ranked"}
+              {students.length} {t.grading.studentsRanked}
             </CardDescription>
           </CardHeader>
           <CardContent>
             <div className="rounded-md border">
               <Table>
                 <TableHeader>
-                  <TableRow>
+                  <TableRow className={componentClasses.tableHeaderRow}>
                     <TableHead className="w-16 text-center">{t.grading.rank}</TableHead>
-                    <TableHead>{locale === "fr" ? "Élève" : "Student"}</TableHead>
+                    <TableHead>{t.common.student}</TableHead>
                     <TableHead className="text-center">{t.grading.generalAverage}</TableHead>
                     <TableHead className="text-center w-[200px]">
-                      {locale === "fr" ? "Progression" : "Progress"}
+                      {t.grading.progress}
                     </TableHead>
                     <TableHead className="text-center">{t.grading.conduct}</TableHead>
                     <TableHead className="text-center">{t.grading.decision}</TableHead>
@@ -536,11 +389,10 @@ export default function ClassRankingPage() {
                   {students.map((student, index) => (
                     <TableRow
                       key={student.id}
-                      className={
-                        student.rank && student.rank <= 3
-                          ? "bg-primary/5"
-                          : undefined
-                      }
+                      className={cn(
+                        componentClasses.tableRowHover,
+                        student.rank && student.rank <= 3 && "bg-primary/5"
+                      )}
                     >
                       <TableCell className="text-center">
                         {getRankBadge(student.rank)}
@@ -589,7 +441,7 @@ export default function ClassRankingPage() {
                         </span>
                       </TableCell>
                       <TableCell className="text-center">
-                        {getDecisionBadge(student.decision)}
+                        <DecisionBadge decision={student.decision as DecisionType} t={t} />
                       </TableCell>
                     </TableRow>
                   ))}
@@ -601,17 +453,13 @@ export default function ClassRankingPage() {
       ) : selectedGradeId && selectedTrimesterId ? (
         <Card>
           <CardContent className="py-12 text-center text-muted-foreground">
-            {locale === "fr"
-              ? "Aucun classement disponible pour cette classe et ce trimestre"
-              : "No ranking available for this class and trimester"}
+            {t.grading.noRankingAvailable}
           </CardContent>
         </Card>
       ) : (
         <Card>
           <CardContent className="py-12 text-center text-muted-foreground">
-            {locale === "fr"
-              ? "Sélectionnez un trimestre et une classe pour afficher le classement"
-              : "Select a trimester and class to view the ranking"}
+            {t.grading.selectToViewRanking}
           </CardContent>
         </Card>
       )}

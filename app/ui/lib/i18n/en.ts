@@ -65,6 +65,8 @@ export const en: TranslationKeys = {
     active: "Active",
     inactive: "Inactive",
     saving: "Saving...",
+    clear: "Clear",
+    confirmRemove: "Confirm Removal",
     name: "Name",
     email: "Email",
     pagination: {
@@ -2425,6 +2427,8 @@ export const en: TranslationKeys = {
       bulkMoveSuccess: "Successfully moved {count} student(s)",
       bulkRemoveSuccess: "Successfully removed {count} assignment(s)",
       reassignError: "Failed to reassign student",
+      assignToRoomName: "Assign to {roomName}",
+      confirmRemoveAssignment: "This student will be removed from their current room assignment. They can be reassigned later.",
     },
 
     // Common
@@ -2441,6 +2445,7 @@ export const en: TranslationKeys = {
     withAssignments: "with assignments",
     classAssignments: "Class Assignments",
     acrossGrades: "Across {count} grades",
+    acrossTrimesters: "Across {count} trimesters",
     subjectsNeedTeachers: "Subjects need teachers",
     noClasses: "No classes",
     classes: "Classes",
@@ -2725,6 +2730,8 @@ export const en: TranslationKeys = {
     searchStudentPlaceholder: "Search by name...",
 
     // Teacher Remarks
+    subjectRemarks: "Subject Remarks",
+    subjectRemarksSubtitle: "Add teacher remarks for each student based on their subject averages",
     teacherRemarksSubtitle: "Add subject remarks for student report cards",
     remarksSaved: "Remarks saved successfully",
     saveRemarks: "Save Remarks",
@@ -2791,6 +2798,31 @@ export const en: TranslationKeys = {
     // Conduct Page
     averageRequired: "Average required",
     decisionAutoCalcInfo: "Decisions are calculated automatically: ≥10 = Promoted, 8-10 = Remediation, <8 = Repeat Year. You can override them manually if needed.",
+
+    // Shared UI labels
+    backToClasses: "Back to classes",
+    selection: "Selection",
+    studentsInClass: "students in this class",
+    totalCoefficient: "Total coefficient",
+    creatingArchive: "Creating archive...",
+    class: "Class",
+    selectClassFirst: "Select a class first",
+    studentRanking: "Student Ranking",
+    studentsLabel: "Students",
+    filters: "Filters",
+    subject: "Subject",
+    overridden: "Overridden",
+    bulletinErrorCount: "{count} bulletin(s) could not be generated",
+
+    // Error messages
+    failedToSaveGrades: "Failed to save grades",
+    failedToSaveRemarks: "Failed to save remarks",
+    failedToUpdateEvaluation: "Failed to update evaluation",
+    failedToDeleteEvaluation: "Failed to delete evaluation",
+    failedToRecalculate: "Failed to recalculate",
+    failedToLoadData: "Failed to load data",
+    someUpdatesFailed: "Some updates failed",
+    failedToSaveData: "Failed to save data",
   },
 
   // Treasury / Safe
@@ -2962,6 +2994,22 @@ export const en: TranslationKeys = {
     registryClosedTitle: "Registry Closed",
     registryClosedMessage: "The registry is currently closed. Cash payments and expenses cannot be processed. Please open the registry for the day to begin operations.",
 
+    // Bank deposit dialog
+    deposit: {
+      title: "Record Bank Deposit",
+      description: "Confirm the bank deposit for this cash payment",
+      submitLabel: "Confirm Deposit",
+      fillRequiredFields: "Please fill all required fields",
+      depositorNameRequired: "Please provide the depositor's name",
+      depositFailed: "Failed to record deposit",
+      errorOccurred: "An error occurred",
+      depositDate: "Deposit Date",
+      selectBank: "Select a bank",
+      depositedBy: "Deposited by",
+      myself: "Myself",
+      depositorNamePlaceholder: "Depositor name",
+    },
+
     // Registry (Caisse) - Daily Operations
     registry: {
       // Balance display
@@ -3059,6 +3107,50 @@ export const en: TranslationKeys = {
       recentMovements: "Recent movements",
       noRecentTransactions: "No recent transactions",
       viewAll: "View all",
+    },
+
+    // Payment Review
+    review: {
+      title: "Payment Review",
+      description: "Approve or reject this payment after verification",
+      cash: "Cash",
+      receipt: "Receipt",
+      recordedDate: "Recorded date",
+      transactionRef: "Transaction ref.",
+      bankDepositInfo: "Bank deposit information",
+      reference: "Reference",
+      bank: "Bank",
+      date: "Date",
+      depositedBy: "Deposited by",
+      action: "Action",
+      approve: "Approve",
+      reject: "Reject",
+      rejectionReason: "Rejection reason",
+      notes: "Notes",
+      rejectionPlaceholder: "Explain the reason for rejection...",
+      notesPlaceholder: "Add notes if needed...",
+      confirmApprove: "Confirm approval",
+      confirmReject: "Confirm rejection",
+      selectAction: "Select an action",
+      autoConfirmImminent: "Auto-confirmation imminent",
+      autoConfirmHoursMinutes: "Auto-confirmation in {hours}h {minutes}min",
+      autoConfirmMinutes: "Auto-confirmation in {minutes} minutes",
+      rejectionReasonRequired: "Please provide a reason for rejection",
+      reviewFailed: "Failed to review payment",
+    },
+
+    // Mobile Money Fee Recording
+    mobileMoney: {
+      title: "Record Orange Money Fee",
+      description: "Record Orange Money transaction fees",
+      submitLabel: "Record",
+      orangeMoneyBalance: "Orange Money Balance",
+      feeAmount: "Fee amount (GNF)",
+      feeAmountHint: "Enter the transaction fee amount",
+      newOrangeMoneyBalance: "New Orange Money balance",
+      insufficientOrangeMoney: "Insufficient Orange Money balance",
+      descriptionPlaceholder: "Orange Money transaction fees...",
+      failedToRecordFee: "Failed to record fee",
     },
   },
 
@@ -3619,6 +3711,32 @@ export const en: TranslationKeys = {
       failedToFetch: "Failed to fetch permissions",
       failedToAddOverride: "Failed to add override",
       failedToRemoveOverride: "Failed to remove override",
+    },
+  },
+
+  // Timetable
+  timetable: {
+    slotEditor: {
+      editSlot: "Edit Slot",
+      addSlot: "Add Slot",
+      deleteSlot: "Delete",
+      deleteConfirm: "Delete this slot?",
+      save: "Save",
+      cancel: "Cancel",
+      breakRecess: "Break / Recess",
+      subject: "Subject",
+      teacher: "Teacher",
+      room: "Room",
+      selectSubject: "Select subject",
+      selectTeacher: "Select teacher",
+      none: "None",
+      roomPlaceholder: "Ex: Room 101",
+      notesPlaceholder: "Optional notes",
+      conflictDetected: "Schedule conflict detected",
+      failedToSave: "Failed to save",
+      failedToDelete: "Failed to delete",
+      errorOccurred: "An error occurred",
+      conflictsDetected: "Conflicts detected:",
     },
   },
 } as const;

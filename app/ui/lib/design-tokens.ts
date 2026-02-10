@@ -159,6 +159,8 @@ export const shadows = {
   lg: 'shadow-lg',
   xl: 'shadow-xl',
   '2xl': 'shadow-2xl',
+  // Dialog elevation
+  dialog: 'shadow-[0_25px_60px_-12px_rgba(0,0,0,0.15)] dark:shadow-[0_25px_60px_-12px_rgba(0,0,0,0.4)]',
   // Special effects
   lift: 'shadow-[0_10px_40px_-10px_rgb(0_0_0/0.2)]',
   glowPrimary: 'shadow-[0_0_20px_rgba(139,35,50,0.3)]',

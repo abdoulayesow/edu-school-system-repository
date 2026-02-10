@@ -1,17 +1,11 @@
 "use client"
 
 import { useState } from "react"
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog"
+import { FormDialog, FormField } from "@/components/ui/form-dialog"
 import { Button } from "@/components/ui/button"
 import { Textarea } from "@/components/ui/textarea"
-import { Label } from "@/components/ui/label"
 import { Badge } from "@/components/ui/badge"
+import { DialogFooter } from "@/components/ui/dialog"
 import {
   Loader2,
   CheckCircle2,
@@ -19,11 +13,10 @@ import {
   Clock,
   BanknoteIcon,
   Smartphone,
-  User,
-  Calendar,
   Building2,
 } from "lucide-react"
 import { useI18n } from "@/components/i18n-provider"
+import { formatAmountWithCurrency } from "@/lib/format"
 
 interface Payment {
   id: string
@@ -71,9 +64,7 @@ export function PaymentReviewDialog({
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
-  const formatAmount = (amount: number) => {
-    return new Intl.NumberFormat("fr-GN").format(amount) + " GNF"
-  }
+  const formatAmount = formatAmountWithCurrency
 
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString("fr-FR", {
@@ -90,22 +81,24 @@ export function PaymentReviewDialog({
     const autoConfirm = new Date(payment.autoConfirmAt)
     const diff = autoConfirm.getTime() - now.getTime()
 
-    if (diff <= 0) return "Auto-confirmation imminente"
+    if (diff <= 0) return t.treasury.review.autoConfirmImminent
 
     const hours = Math.floor(diff / (1000 * 60 * 60))
     const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60))
 
     if (hours > 0) {
-      return `Auto-confirmation dans ${hours}h ${minutes}min`
+      return t.treasury.review.autoConfirmHoursMinutes
+        .replace("{hours}", hours.toString())
+        .replace("{minutes}", minutes.toString())
     }
-    return `Auto-confirmation dans ${minutes} minutes`
+    return t.treasury.review.autoConfirmMinutes.replace("{minutes}", minutes.toString())
   }
 
   const handleSubmit = async () => {
     if (!payment || !action) return
 
     if (action === "reject" && !reviewNotes.trim()) {
-      setError("Veuillez indiquer le motif du rejet")
+      setError(t.treasury.review.rejectionReasonRequired)
       return
     }
 
@@ -124,28 +117,27 @@ export function PaymentReviewDialog({
 
       if (!response.ok) {
         const data = await response.json()
-        throw new Error(data.message || "Erreur lors de la révision du paiement")
+        throw new Error(data.message || t.treasury.review.reviewFailed)
       }
 
-      // Reset form
-      setAction(null)
-      setReviewNotes("")
-
+      resetForm()
       onSuccess()
       onOpenChange(false)
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Une erreur est survenue")
+      setError(err instanceof Error ? err.message : t.common.error)
     } finally {
       setIsSubmitting(false)
     }
   }
 
-  const handleOpenChange = (newOpen: boolean) => {
-    if (!newOpen) {
-      setAction(null)
-      setReviewNotes("")
-      setError(null)
-    }
+  function resetForm() {
+    setAction(null)
+    setReviewNotes("")
+    setError(null)
+  }
+
+  function handleOpenChange(newOpen: boolean) {
+    if (!newOpen) resetForm()
     onOpenChange(newOpen)
   }
 
@@ -154,190 +146,179 @@ export function PaymentReviewDialog({
   const autoConfirmCountdown = getAutoConfirmCountdown()
 
   return (
-    <Dialog open={open} onOpenChange={handleOpenChange}>
-      <DialogContent className="max-w-lg">
-        <DialogHeader>
-          <DialogTitle className="flex items-center gap-2">
-            <CheckCircle2 className="h-5 w-5 text-primary" />
-            Révision du paiement
-          </DialogTitle>
-          <DialogDescription>
-            Approuver ou rejeter ce paiement après vérification
-          </DialogDescription>
-        </DialogHeader>
-
-        <div className="space-y-4 py-4">
-          {/* Payment Summary */}
-          <div className="p-4 rounded-lg border bg-muted/30">
-            <div className="flex justify-between items-start mb-3">
-              <div>
-                <p className="font-semibold text-lg">
-                  {payment.enrollment?.student?.firstName ?? "N/A"}{" "}
-                  {payment.enrollment?.student?.lastName ?? ""}
-                </p>
-                <p className="text-sm text-muted-foreground">
-                  {payment.enrollment?.student?.studentNumber} •{" "}
-                  {payment.enrollment?.grade?.name ?? "-"}
-                </p>
-              </div>
-              <Badge
-                variant="outline"
-                className={
-                  payment.method === "cash"
-                    ? "text-green-600 border-green-600"
-                    : "text-orange-500 border-orange-500"
-                }
-              >
-                {payment.method === "cash" ? (
-                  <>
-                    <BanknoteIcon className="h-3 w-3 mr-1" />
-                    Espèces
-                  </>
-                ) : (
-                  <>
-                    <Smartphone className="h-3 w-3 mr-1" />
-                    Orange Money
-                  </>
-                )}
-              </Badge>
-            </div>
-
-            <div className="grid grid-cols-2 gap-3 text-sm">
-              <div>
-                <p className="text-muted-foreground">Montant</p>
-                <p className="font-mono font-bold text-lg">
-                  {formatAmount(payment.amount)}
-                </p>
-              </div>
-              <div>
-                <p className="text-muted-foreground">Reçu</p>
-                <p className="font-mono">{payment.receiptNumber}</p>
-              </div>
-              <div>
-                <p className="text-muted-foreground">Date d'enregistrement</p>
-                <p>{formatDate(payment.recordedAt)}</p>
-              </div>
-              {payment.transactionRef && (
-                <div>
-                  <p className="text-muted-foreground">Réf. transaction</p>
-                  <p className="font-mono">{payment.transactionRef}</p>
-                </div>
-              )}
-            </div>
+    <FormDialog
+      open={open}
+      onOpenChange={handleOpenChange}
+      title={t.treasury.review.title}
+      description={t.treasury.review.description}
+      icon={CheckCircle2}
+      accentColor="amber"
+      maxWidth="sm:max-w-lg"
+      error={error}
+      footer={
+        <DialogFooter>
+          <Button variant="outline" onClick={() => handleOpenChange(false)} disabled={isSubmitting}>
+            {t.common.cancel}
+          </Button>
+          <Button
+            onClick={handleSubmit}
+            disabled={isSubmitting || !action}
+            variant={action === "reject" ? "destructive" : "default"}
+          >
+            {isSubmitting && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
+            {action === "approve" && t.treasury.review.confirmApprove}
+            {action === "reject" && t.treasury.review.confirmReject}
+            {!action && t.treasury.review.selectAction}
+          </Button>
+        </DialogFooter>
+      }
+    >
+      {/* Payment Summary */}
+      <div className="p-4 rounded-lg border bg-muted/30">
+        <div className="flex justify-between items-start mb-3">
+          <div>
+            <p className="font-semibold text-lg">
+              {payment.enrollment?.student?.firstName ?? "N/A"}{" "}
+              {payment.enrollment?.student?.lastName ?? ""}
+            </p>
+            <p className="text-sm text-muted-foreground">
+              {payment.enrollment?.student?.studentNumber} •{" "}
+              {payment.enrollment?.grade?.name ?? "-"}
+            </p>
           </div>
+          <Badge
+            variant="outline"
+            className={
+              payment.method === "cash"
+                ? "text-green-600 border-green-600"
+                : "text-orange-500 border-orange-500"
+            }
+          >
+            {payment.method === "cash" ? (
+              <>
+                <BanknoteIcon className="h-3 w-3 mr-1" />
+                {t.treasury.review.cash}
+              </>
+            ) : (
+              <>
+                <Smartphone className="h-3 w-3 mr-1" />
+                Orange Money
+              </>
+            )}
+          </Badge>
+        </div>
 
-          {/* Auto-confirm countdown for Orange Money */}
-          {payment.method === "orange_money" && autoConfirmCountdown && (
-            <div className="flex items-center gap-2 p-3 rounded-lg bg-orange-50 dark:bg-orange-950/20 border border-orange-200 dark:border-orange-800">
-              <Clock className="h-4 w-4 text-orange-500" />
-              <span className="text-sm text-orange-700 dark:text-orange-300">
-                {autoConfirmCountdown}
-              </span>
-            </div>
-          )}
-
-          {/* Cash Deposit Info */}
-          {payment.method === "cash" && payment.cashDeposit && (
-            <div className="p-3 rounded-lg border bg-blue-50 dark:bg-blue-950/20">
-              <p className="font-medium text-sm mb-2 flex items-center gap-2">
-                <Building2 className="h-4 w-4" />
-                Informations du dépôt bancaire
-              </p>
-              <div className="grid grid-cols-2 gap-2 text-sm">
-                <div>
-                  <p className="text-muted-foreground">Référence</p>
-                  <p className="font-mono">{payment.cashDeposit.bankReference}</p>
-                </div>
-                <div>
-                  <p className="text-muted-foreground">Banque</p>
-                  <p>{payment.cashDeposit.bankName}</p>
-                </div>
-                <div>
-                  <p className="text-muted-foreground">Date</p>
-                  <p>{formatDate(payment.cashDeposit.depositDate)}</p>
-                </div>
-                <div>
-                  <p className="text-muted-foreground">Déposé par</p>
-                  <p>{payment.cashDeposit.depositedByName}</p>
-                </div>
-              </div>
-            </div>
-          )}
-
-          {/* Action Selection */}
-          <div className="space-y-3">
-            <Label>Action</Label>
-            <div className="grid grid-cols-2 gap-3">
-              <Button
-                type="button"
-                variant={action === "approve" ? "default" : "outline"}
-                className={`h-auto py-3 ${
-                  action === "approve"
-                    ? "bg-success hover:bg-success/90 text-success-foreground"
-                    : "bg-transparent"
-                }`}
-                onClick={() => setAction("approve")}
-              >
-                <CheckCircle2 className="h-4 w-4 mr-2" />
-                Approuver
-              </Button>
-              <Button
-                type="button"
-                variant={action === "reject" ? "destructive" : "outline"}
-                className={action !== "reject" ? "bg-transparent" : ""}
-                onClick={() => setAction("reject")}
-              >
-                <XCircle className="h-4 w-4 mr-2" />
-                Rejeter
-              </Button>
-            </div>
+        <div className="grid grid-cols-2 gap-3 text-sm">
+          <div>
+            <p className="text-muted-foreground">{t.treasury.amount}</p>
+            <p className="font-mono font-bold text-lg">
+              {formatAmount(payment.amount)}
+            </p>
           </div>
-
-          {/* Notes (required for rejection) */}
-          {action && (
-            <div className="space-y-2">
-              <Label htmlFor="reviewNotes">
-                {action === "reject" ? "Motif du rejet *" : "Notes (optionnel)"}
-              </Label>
-              <Textarea
-                id="reviewNotes"
-                placeholder={
-                  action === "reject"
-                    ? "Expliquez la raison du rejet..."
-                    : "Ajouter des notes si nécessaire..."
-                }
-                value={reviewNotes}
-                onChange={(e) => setReviewNotes(e.target.value)}
-                rows={3}
-              />
+          <div>
+            <p className="text-muted-foreground">{t.treasury.review.receipt}</p>
+            <p className="font-mono">{payment.receiptNumber}</p>
+          </div>
+          <div>
+            <p className="text-muted-foreground">{t.treasury.review.recordedDate}</p>
+            <p>{formatDate(payment.recordedAt)}</p>
+          </div>
+          {payment.transactionRef && (
+            <div>
+              <p className="text-muted-foreground">{t.treasury.review.transactionRef}</p>
+              <p className="font-mono">{payment.transactionRef}</p>
             </div>
           )}
+        </div>
+      </div>
 
-          {error && <p className="text-sm text-destructive">{error}</p>}
+      {/* Auto-confirm countdown for Orange Money */}
+      {payment.method === "orange_money" && autoConfirmCountdown && (
+        <div className="flex items-center gap-2 p-3 rounded-lg bg-orange-50 dark:bg-orange-950/20 border border-orange-200 dark:border-orange-800">
+          <Clock className="h-4 w-4 text-orange-500" />
+          <span className="text-sm text-orange-700 dark:text-orange-300">
+            {autoConfirmCountdown}
+          </span>
+        </div>
+      )}
 
-          {/* Actions */}
-          <div className="flex justify-end gap-3 pt-4">
-            <Button
-              variant="outline"
-              onClick={() => handleOpenChange(false)}
-              disabled={isSubmitting}
-              className="bg-transparent"
-            >
-              Annuler
-            </Button>
-            <Button
-              onClick={handleSubmit}
-              disabled={isSubmitting || !action}
-              variant={action === "reject" ? "destructive" : "default"}
-            >
-              {isSubmitting && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
-              {action === "approve" && "Confirmer l'approbation"}
-              {action === "reject" && "Confirmer le rejet"}
-              {!action && "Sélectionner une action"}
-            </Button>
+      {/* Cash Deposit Info */}
+      {payment.method === "cash" && payment.cashDeposit && (
+        <div className="p-3 rounded-lg border bg-blue-50 dark:bg-blue-950/20">
+          <p className="font-medium text-sm mb-2 flex items-center gap-2">
+            <Building2 className="h-4 w-4" />
+            {t.treasury.review.bankDepositInfo}
+          </p>
+          <div className="grid grid-cols-2 gap-2 text-sm">
+            <div>
+              <p className="text-muted-foreground">{t.treasury.review.reference}</p>
+              <p className="font-mono">{payment.cashDeposit.bankReference}</p>
+            </div>
+            <div>
+              <p className="text-muted-foreground">{t.treasury.review.bank}</p>
+              <p>{payment.cashDeposit.bankName}</p>
+            </div>
+            <div>
+              <p className="text-muted-foreground">{t.treasury.review.date}</p>
+              <p>{formatDate(payment.cashDeposit.depositDate)}</p>
+            </div>
+            <div>
+              <p className="text-muted-foreground">{t.treasury.review.depositedBy}</p>
+              <p>{payment.cashDeposit.depositedByName}</p>
+            </div>
           </div>
         </div>
-      </DialogContent>
-    </Dialog>
+      )}
+
+      {/* Action Selection */}
+      <div className="space-y-3">
+        <p className="text-sm font-medium">{t.treasury.review.action}</p>
+        <div className="grid grid-cols-2 gap-3">
+          <Button
+            type="button"
+            variant={action === "approve" ? "default" : "outline"}
+            className={`h-auto py-3 ${
+              action === "approve"
+                ? "bg-success hover:bg-success/90 text-success-foreground"
+                : "bg-transparent"
+            }`}
+            onClick={() => setAction("approve")}
+          >
+            <CheckCircle2 className="h-4 w-4 mr-2" />
+            {t.treasury.review.approve}
+          </Button>
+          <Button
+            type="button"
+            variant={action === "reject" ? "destructive" : "outline"}
+            className={action !== "reject" ? "bg-transparent" : ""}
+            onClick={() => setAction("reject")}
+          >
+            <XCircle className="h-4 w-4 mr-2" />
+            {t.treasury.review.reject}
+          </Button>
+        </div>
+      </div>
+
+      {/* Notes (required for rejection) */}
+      {action && (
+        <FormField
+          label={action === "reject" ? t.treasury.review.rejectionReason : t.treasury.review.notes}
+          required={action === "reject"}
+          optional={action === "approve"}
+        >
+          <Textarea
+            placeholder={
+              action === "reject"
+                ? t.treasury.review.rejectionPlaceholder
+                : t.treasury.review.notesPlaceholder
+            }
+            value={reviewNotes}
+            onChange={(e) => setReviewNotes(e.target.value)}
+            rows={3}
+            className="resize-none"
+          />
+        </FormField>
+      )}
+    </FormDialog>
   )
 }

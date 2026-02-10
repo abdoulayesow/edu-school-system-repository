@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect, useCallback } from "react"
+import { useState, useEffect, useCallback, useRef } from "react"
 import { useSearchParams, useRouter, usePathname } from "next/navigation"
 
 /**
@@ -66,11 +66,16 @@ export function useUrlFilters<T extends Record<string, unknown>>(
   const pathname = usePathname()
   const searchParams = useSearchParams()
 
+  // Use a ref so the config identity doesn't cause re-renders
+  const configRef = useRef(config)
+  configRef.current = config
+
   // Initialize state from URL params
   const getInitialState = useCallback((): T => {
+    const cfg = configRef.current
     const result = {} as T
-    for (const key in config) {
-      const { defaultValue, parse } = config[key]
+    for (const key in cfg) {
+      const { defaultValue, parse } = cfg[key]
       const urlValue = searchParams.get(key)
 
       if (parse) {
@@ -84,17 +89,18 @@ export function useUrlFilters<T extends Record<string, unknown>>(
       }
     }
     return result
-  }, [config, searchParams])
+  }, [searchParams])
 
   const [filters, setFiltersState] = useState<T>(getInitialState)
 
   // Update URL when filters change
   const updateUrl = useCallback(
     (newFilters: T) => {
+      const cfg = configRef.current
       const params = new URLSearchParams()
 
-      for (const key in config) {
-        const { defaultValue, serialize } = config[key]
+      for (const key in cfg) {
+        const { defaultValue, serialize } = cfg[key]
         const value = newFilters[key]
 
         let serialized: string | undefined
@@ -114,7 +120,7 @@ export function useUrlFilters<T extends Record<string, unknown>>(
         scroll: false,
       })
     },
-    [config, pathname, router]
+    [pathname, router]
   )
 
   // Sync state to URL on changes
@@ -134,17 +140,18 @@ export function useUrlFilters<T extends Record<string, unknown>>(
 
   // Reset all filters to defaults
   const resetFilters = useCallback(() => {
+    const cfg = configRef.current
     const defaults = {} as T
-    for (const key in config) {
-      defaults[key] = config[key].defaultValue
+    for (const key in cfg) {
+      defaults[key] = cfg[key].defaultValue
     }
     setFiltersState(defaults)
-  }, [config])
+  }, [])
 
   // Check if any filter differs from default
-  const hasActiveFilters = Object.keys(config).some((key) => {
+  const hasActiveFilters = Object.keys(configRef.current).some((key) => {
     const k = key as keyof T
-    return filters[k] !== config[k].defaultValue
+    return filters[k] !== configRef.current[k].defaultValue
   })
 
   return {

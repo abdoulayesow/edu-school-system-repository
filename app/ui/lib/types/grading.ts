@@ -139,3 +139,209 @@ export interface DecisionEntry {
  * Tab identifiers for conduct page
  */
 export type ConductTabId = "conduct" | "remarks" | "decisions"
+
+// ============================================================================
+// ENTRY PAGE TYPES
+// ============================================================================
+
+/**
+ * Subject assignment for a grade with coefficient
+ */
+export interface GradeSubject {
+  id: string
+  subjectId: string
+  subjectCode: string
+  subjectNameFr: string
+  subjectNameEn: string
+  coefficient: number
+}
+
+/**
+ * Evaluation type identifiers
+ */
+export type EvaluationType = "interrogation" | "devoir_surveille" | "composition"
+
+/**
+ * Student enrolled in a grade
+ */
+export interface GradeStudent {
+  id: string
+  studentProfileId: string
+  firstName: string
+  lastName: string
+  studentNumber: string
+}
+
+/**
+ * Score input entry for grade entry form
+ */
+export interface GradeEntry {
+  studentProfileId: string
+  score: string
+  notes: string
+  hasChanges: boolean
+}
+
+/**
+ * Full evaluation record
+ */
+export interface Evaluation {
+  id: string
+  studentProfileId: string
+  studentName: string
+  studentNumber: string
+  gradeSubjectId: string
+  subjectName: string
+  type: EvaluationType
+  score: number
+  maxScore: number
+  date: string
+  notes: string | null
+  trimesterId: string
+  gradeName: string
+}
+
+// ============================================================================
+// REMARKS PAGE TYPES
+// ============================================================================
+
+/**
+ * Student average with teacher remark for a subject
+ */
+export interface SubjectAverage {
+  id: string
+  studentProfileId: string
+  studentName: string
+  studentNumber: string
+  average: number | null
+  teacherRemark: string | null
+}
+
+// ============================================================================
+// BULLETIN PAGE TYPES
+// ============================================================================
+
+/**
+ * Trimester with active status (extends ActiveTrimester)
+ */
+export interface Trimester {
+  id: string
+  number: number
+  name: string
+  nameFr: string
+  nameEn: string
+  isActive: boolean
+  schoolYear: {
+    id: string
+    name: string
+  }
+}
+
+/**
+ * Subject-level evaluation detail for bulletin
+ */
+export interface SubjectEvaluation {
+  id: string
+  score: number
+  maxScore: number
+  date: string
+}
+
+/**
+ * Subject data within a bulletin
+ */
+export interface BulletinSubject {
+  id: string
+  subjectId: string
+  code: string
+  nameFr: string
+  nameEn: string
+  coefficient: number
+  average: number | null
+  teacherRemark: string | null
+  evaluations: {
+    interrogations: SubjectEvaluation[]
+    devoirsSurveilles: SubjectEvaluation[]
+    compositions: SubjectEvaluation[]
+  }
+}
+
+/**
+ * Full bulletin response data
+ */
+export interface BulletinData {
+  student: {
+    id: string
+    firstName: string
+    lastName: string
+    dateOfBirth: string | null
+    photoUrl: string | null
+    studentNumber: string
+    grade: { id: string; name: string; level: string } | null
+  }
+  trimester: {
+    id: string
+    number: number
+    name: string
+    nameFr: string
+    nameEn: string
+    schoolYear: { id: string; name: string }
+  }
+  subjects: BulletinSubject[]
+  totalCoefficient: number
+  summary: {
+    generalAverage: number | null
+    rank: number | null
+    totalStudents: number | null
+    conduct: number | null
+    decision: string
+    decisionOverride: boolean
+    generalRemark: string | null
+    absences: number | null
+    lates: number | null
+    calculatedAt: string | null
+  } | null
+  classStats: {
+    classAverage: number | null
+    highestAverage: number | null
+    lowestAverage: number | null
+    passCount: number
+    passRate: number | null
+    totalStudents: number
+  } | null
+}
+
+// ============================================================================
+// RANKING PAGE TYPES
+// ============================================================================
+
+/**
+ * Student with rank and general average
+ */
+export interface RankedStudent {
+  id: string
+  studentProfileId: string
+  studentName: string
+  gradeId: string
+  gradeName: string
+  generalAverage: number | null
+  rank: number | null
+  totalStudents: number | null
+  conduct: number | null
+  decision: string
+  decisionOverride: boolean
+  absences: number | null
+  lates: number | null
+}
+
+/**
+ * Aggregate class statistics
+ */
+export interface ClassStats {
+  classAverage: number | null
+  highestAverage: number | null
+  lowestAverage: number | null
+  passCount: number
+  passRate: number | null
+  totalStudents: number
+}

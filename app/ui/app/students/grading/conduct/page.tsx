@@ -49,7 +49,6 @@ import { ConductTable, RemarksTable, DecisionsTable } from "@/components/grading
 // ============================================================================
 
 interface TabButtonProps {
-  id: ConductTabId
   label: string
   icon: React.ComponentType<{ className?: string }>
   isActive: boolean
@@ -390,7 +389,7 @@ export default function ConductEntryPage() {
       } else {
         toast({
           title: t.common.error,
-          description: "Some updates failed",
+          description: t.grading.someUpdatesFailed,
           variant: "destructive",
         })
       }
@@ -398,7 +397,7 @@ export default function ConductEntryPage() {
       console.error("Error saving data:", err)
       toast({
         title: t.common.error,
-        description: "Failed to save data",
+        description: t.grading.failedToSaveData,
         variant: "destructive",
       })
     } finally {
@@ -436,9 +435,6 @@ export default function ConductEntryPage() {
 
   return (
     <PageContainer maxWidth="full">
-      {/* Maroon accent bar */}
-      <div className="h-1 bg-gspn-maroon-500 -mx-4 sm:-mx-6 lg:-mx-8 mb-6" />
-
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center gap-3">

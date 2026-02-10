@@ -219,9 +219,6 @@ export default function GradingOverviewPage() {
 
   return (
     <PageContainer maxWidth="full">
-      {/* Maroon accent bar */}
-      <div className="h-1 bg-gspn-maroon-500 -mx-4 sm:-mx-6 lg:-mx-8 mb-6" />
-
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
         <div className="flex items-center gap-3">
@@ -349,7 +346,7 @@ export default function GradingOverviewPage() {
                   </span>
                 </div>
                 <Progress
-                  value={progressData ? (progressData.summary.gradesWithAllCompositions / progressData.summary.totalGrades) * 100 : 0}
+                  value={progressData && progressData.summary.totalGrades > 0 ? (progressData.summary.gradesWithAllCompositions / progressData.summary.totalGrades) * 100 : 0}
                   className="h-2"
                 />
               </div>

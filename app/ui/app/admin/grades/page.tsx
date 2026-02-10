@@ -11,8 +11,9 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import { useI18n } from "@/components/i18n-provider"
-import { School, Clock, Loader2 } from "lucide-react"
+import { School, CalendarRange, Clock, Loader2 } from "lucide-react"
 import { GradesTab } from "./_components/grades-tab"
+import { TrimestersTab } from "./_components/trimesters-tab"
 import { TimePeriodsTab } from "./_components/time-periods-tab"
 
 // ---------------------------------------------------------------------------
@@ -35,7 +36,7 @@ function GradesPageContent() {
 
   const [schoolYears, setSchoolYears] = useState<SchoolYear[]>([])
   const [selectedYearId, setSelectedYearId] = useState<string>("")
-  const [activeTab, setActiveTab] = useState<"grades" | "time-periods">("grades")
+  const [activeTab, setActiveTab] = useState<"grades" | "trimesters" | "time-periods">("grades")
   const [isMounted, setIsMounted] = useState(false)
 
   useEffect(() => {
@@ -101,11 +102,15 @@ function GradesPageContent() {
       </div>
 
       {/* Tab navigation */}
-      <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as "grades" | "time-periods")}>
+      <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as "grades" | "trimesters" | "time-periods")}>
         <TabsList>
           <TabsTrigger value="grades" className="gap-1.5">
             <School className="h-4 w-4" />
             {t.admin.gradesAndRooms}
+          </TabsTrigger>
+          <TabsTrigger value="trimesters" className="gap-1.5">
+            <CalendarRange className="h-4 w-4" />
+            {t.admin.trimesters}
           </TabsTrigger>
           <TabsTrigger value="time-periods" className="gap-1.5">
             <Clock className="h-4 w-4" />
@@ -115,6 +120,10 @@ function GradesPageContent() {
 
         <TabsContent value="grades" className="mt-6">
           <GradesTab selectedYearId={selectedYearId} canEdit={canEdit} />
+        </TabsContent>
+
+        <TabsContent value="trimesters" className="mt-6">
+          <TrimestersTab selectedYearId={selectedYearId} canEdit={canEdit} />
         </TabsContent>
 
         <TabsContent value="time-periods" className="mt-6">

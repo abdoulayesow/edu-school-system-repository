@@ -63,6 +63,8 @@ export const fr = {
     active: "Actif",
     inactive: "Inactif",
     saving: "Enregistrement...",
+    clear: "Effacer",
+    confirmRemove: "Confirmer la suppression",
     name: "Nom",
     email: "Email",
     pagination: {
@@ -2423,6 +2425,8 @@ export const fr = {
       bulkMoveSuccess: "{count} élève(s) déplacé(s) avec succès",
       bulkRemoveSuccess: "{count} affectation(s) supprimée(s) avec succès",
       reassignError: "Échec de la réaffectation de l'élève",
+      assignToRoomName: "Assigner à {roomName}",
+      confirmRemoveAssignment: "Cet élève sera retiré de son affectation de salle actuelle. Il pourra être réaffecté ultérieurement.",
     },
 
     // Common
@@ -2439,6 +2443,7 @@ export const fr = {
     withAssignments: "avec affectations",
     classAssignments: "Affectations de Classes",
     acrossGrades: "Répartis sur {count} niveaux",
+    acrossTrimesters: "Répartis sur {count} trimestres",
     subjectsNeedTeachers: "Matières sans enseignant",
     noClasses: "Aucune classe",
     classes: "Classes",
@@ -2723,6 +2728,8 @@ export const fr = {
     searchStudentPlaceholder: "Rechercher par nom...",
 
     // Teacher Remarks
+    subjectRemarks: "Appréciations par Matière",
+    subjectRemarksSubtitle: "Ajouter des appréciations pour chaque élève selon leurs moyennes",
     teacherRemarksSubtitle: "Ajouter des appréciations par matière pour les bulletins",
     remarksSaved: "Appréciations enregistrées avec succès",
     saveRemarks: "Enregistrer les Appréciations",
@@ -2789,6 +2796,31 @@ export const fr = {
     // Conduct Page
     averageRequired: "Moyenne requise",
     decisionAutoCalcInfo: "Les décisions sont calculées automatiquement : ≥10 = Admis, 8-10 = Rattrapage, <8 = Redouble. Vous pouvez les modifier manuellement si nécessaire.",
+
+    // Shared UI labels
+    backToClasses: "Retour aux classes",
+    selection: "Sélection",
+    studentsInClass: "élèves dans cette classe",
+    totalCoefficient: "Coefficient total",
+    creatingArchive: "Création de l'archive...",
+    class: "Classe",
+    selectClassFirst: "Sélectionnez d'abord une classe",
+    studentRanking: "Classement des élèves",
+    studentsLabel: "Élèves",
+    filters: "Filtres",
+    subject: "Matière",
+    overridden: "Modifiée",
+    bulletinErrorCount: "{count} bulletin(s) n'ont pas pu être générés",
+
+    // Error messages
+    failedToSaveGrades: "Échec de l'enregistrement des notes",
+    failedToSaveRemarks: "Échec de l'enregistrement des remarques",
+    failedToUpdateEvaluation: "Échec de la mise à jour de l'évaluation",
+    failedToDeleteEvaluation: "Échec de la suppression de l'évaluation",
+    failedToRecalculate: "Échec du recalcul",
+    failedToLoadData: "Échec du chargement des données",
+    someUpdatesFailed: "Certaines mises à jour ont échoué",
+    failedToSaveData: "Échec de l'enregistrement des données",
   },
 
   // Treasury / Caisse
@@ -2960,6 +2992,22 @@ export const fr = {
     registryClosedTitle: "Caisse Fermée",
     registryClosedMessage: "La caisse est actuellement fermée. Les paiements et dépenses en espèces ne peuvent pas être traités. Veuillez ouvrir la caisse pour commencer les opérations.",
 
+    // Bank deposit dialog
+    deposit: {
+      title: "Enregistrer le dépôt bancaire",
+      description: "Confirmer le dépôt à la banque pour ce paiement en espèces",
+      submitLabel: "Confirmer le dépôt",
+      fillRequiredFields: "Veuillez remplir tous les champs obligatoires",
+      depositorNameRequired: "Veuillez indiquer le nom du déposant",
+      depositFailed: "Erreur lors de l'enregistrement du dépôt",
+      errorOccurred: "Une erreur est survenue",
+      depositDate: "Date du dépôt",
+      selectBank: "Sélectionner une banque",
+      depositedBy: "Déposé par",
+      myself: "Moi-même",
+      depositorNamePlaceholder: "Nom du déposant",
+    },
+
     // Registry (Caisse) - Daily Operations
     registry: {
       // Balance display
@@ -3057,6 +3105,50 @@ export const fr = {
       recentMovements: "Mouvements récents",
       noRecentTransactions: "Aucune transaction récente",
       viewAll: "Voir tout",
+    },
+
+    // Payment Review
+    review: {
+      title: "Révision du paiement",
+      description: "Approuver ou rejeter ce paiement après vérification",
+      cash: "Espèces",
+      receipt: "Reçu",
+      recordedDate: "Date d'enregistrement",
+      transactionRef: "Réf. transaction",
+      bankDepositInfo: "Informations du dépôt bancaire",
+      reference: "Référence",
+      bank: "Banque",
+      date: "Date",
+      depositedBy: "Déposé par",
+      action: "Action",
+      approve: "Approuver",
+      reject: "Rejeter",
+      rejectionReason: "Motif du rejet",
+      notes: "Notes",
+      rejectionPlaceholder: "Expliquez la raison du rejet...",
+      notesPlaceholder: "Ajouter des notes si nécessaire...",
+      confirmApprove: "Confirmer l'approbation",
+      confirmReject: "Confirmer le rejet",
+      selectAction: "Sélectionner une action",
+      autoConfirmImminent: "Auto-confirmation imminente",
+      autoConfirmHoursMinutes: "Auto-confirmation dans {hours}h {minutes}min",
+      autoConfirmMinutes: "Auto-confirmation dans {minutes} minutes",
+      rejectionReasonRequired: "Veuillez indiquer le motif du rejet",
+      reviewFailed: "Erreur lors de la révision du paiement",
+    },
+
+    // Mobile Money Fee Recording
+    mobileMoney: {
+      title: "Enregistrer Frais Orange Money",
+      description: "Enregistrer les frais de transaction Orange Money",
+      submitLabel: "Enregistrer",
+      orangeMoneyBalance: "Solde Orange Money",
+      feeAmount: "Montant des frais (GNF)",
+      feeAmountHint: "Entrez le montant des frais de transaction",
+      newOrangeMoneyBalance: "Nouveau solde Orange Money",
+      insufficientOrangeMoney: "Solde Orange Money insuffisant",
+      descriptionPlaceholder: "Frais de transaction Orange Money...",
+      failedToRecordFee: "Échec de l'enregistrement des frais",
     },
   },
 
@@ -3617,6 +3709,32 @@ export const fr = {
       failedToFetch: "Échec de la récupération des permissions",
       failedToAddOverride: "Échec de l'ajout de la surcharge",
       failedToRemoveOverride: "Échec de la suppression de la surcharge",
+    },
+  },
+
+  // Emploi du temps
+  timetable: {
+    slotEditor: {
+      editSlot: "Modifier le créneau",
+      addSlot: "Ajouter un créneau",
+      deleteSlot: "Supprimer",
+      deleteConfirm: "Supprimer ce créneau ?",
+      save: "Enregistrer",
+      cancel: "Annuler",
+      breakRecess: "Pause / Récréation",
+      subject: "Matière",
+      teacher: "Enseignant",
+      room: "Salle",
+      selectSubject: "Sélectionner une matière",
+      selectTeacher: "Sélectionner un enseignant",
+      none: "Aucun",
+      roomPlaceholder: "Ex: Salle 101",
+      notesPlaceholder: "Notes optionnelles",
+      conflictDetected: "Conflit de planning détecté",
+      failedToSave: "Échec de l'enregistrement",
+      failedToDelete: "Échec de la suppression",
+      errorOccurred: "Une erreur est survenue",
+      conflictsDetected: "Conflits détectés :",
     },
   },
 } as const;

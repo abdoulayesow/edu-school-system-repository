@@ -22,7 +22,6 @@ import {
   FileText,
   Trophy,
   MessageSquare,
-  CalendarRange,
   Sparkles,
 } from "lucide-react"
 import type { UserRole } from "./nav-links"
@@ -227,14 +226,6 @@ export const navigationConfig: MainNavItem[] = [
         translationKey: "clubsManagement",
         href: "/admin/clubs",
         icon: Sparkles,
-        roles: ["director", "academic_director"],
-      },
-      {
-        id: "trimesters",
-        name: "Trimesters",
-        translationKey: "trimesters",
-        href: "/admin/trimesters",
-        icon: CalendarRange,
         roles: ["director", "academic_director"],
       },
     ],
