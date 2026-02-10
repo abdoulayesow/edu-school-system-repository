@@ -140,6 +140,7 @@ export default function BulletinPage() {
       } catch (err) {
         console.error("Error fetching initial data:", err)
         setError(t.grading.failedToLoadData)
+        toast({ title: t.common.error, description: t.common.errorFetchingData, variant: "destructive" })
       } finally {
         setIsLoading(false)
       }

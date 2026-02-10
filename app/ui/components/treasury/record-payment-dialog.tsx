@@ -32,10 +32,10 @@ interface Student {
 
 type PaymentTypeKey = "scolarite" | "activites" | "autre"
 
-const PAYMENT_TYPES: { value: string; labelKey: PaymentTypeKey; label: string }[] = [
-  { value: "student_payment", labelKey: "scolarite", label: "Scolarité" },
-  { value: "activity_payment", labelKey: "activites", label: "Activités" },
-  { value: "other_income", labelKey: "autre", label: "Autre" },
+const PAYMENT_TYPES: { value: string; labelKey: PaymentTypeKey }[] = [
+  { value: "student_payment", labelKey: "scolarite" },
+  { value: "activity_payment", labelKey: "activites" },
+  { value: "other_income", labelKey: "autre" },
 ]
 
 export function RecordPaymentDialog({
@@ -164,7 +164,7 @@ export function RecordPaymentDialog({
           <SelectContent>
             {PAYMENT_TYPES.map((type) => (
               <SelectItem key={type.value} value={type.value}>
-                {t?.treasury?.paymentTypes?.[type.labelKey] || type.label}
+                {t?.treasury?.paymentTypes?.[type.labelKey] || type.labelKey}
               </SelectItem>
             ))}
           </SelectContent>

@@ -107,10 +107,7 @@ export function EnrollStudentDialog({
       })
 
       // Reset form and close dialog
-      setSelectedStudentProfileId("")
-      setStartMonth(1)
-      setTotalMonths(10)
-      setSearchQuery("")
+      resetForm()
       onOpenChange(false)
       onSuccess?.()
     } catch (err) {
@@ -125,6 +122,18 @@ export function EnrollStudentDialog({
     }
   }
 
+  function resetForm() {
+    setSelectedStudentProfileId("")
+    setStartMonth(1)
+    setTotalMonths(10)
+    setSearchQuery("")
+  }
+
+  function handleOpenChange(newOpen: boolean) {
+    if (!newOpen) resetForm()
+    onOpenChange(newOpen)
+  }
+
   const filteredStudents = students.filter((student) => {
     if (!searchQuery) return true
     const searchLower = searchQuery.toLowerCase()
@@ -137,7 +146,7 @@ export function EnrollStudentDialog({
   return (
     <FormDialog
       open={open}
-      onOpenChange={onOpenChange}
+      onOpenChange={handleOpenChange}
       title={t.clubs?.enrollStudent || "Enroll Student"}
       description={clubName}
       icon={UserPlus}
@@ -147,7 +156,7 @@ export function EnrollStudentDialog({
       submitIcon={UserPlus}
       cancelLabel={t.common?.cancel || "Cancel"}
       onSubmit={handleSubmit}
-      onCancel={() => onOpenChange(false)}
+      onCancel={() => handleOpenChange(false)}
       isSubmitting={isSubmitting}
       isDisabled={!selectedStudentProfileId || students.length === 0}
     >

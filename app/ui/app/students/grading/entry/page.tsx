@@ -5,6 +5,7 @@ import { useUrlFilters, tabFilter } from "@/hooks/use-url-filters"
 import { PageContainer } from "@/components/layout"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { useI18n } from "@/components/i18n-provider"
+import { useToast } from "@/components/ui/use-toast"
 import { Loader2, AlertCircle } from "lucide-react"
 import type { ActiveTrimester, Grade } from "@/lib/types/grading"
 import { GradeEntryTab } from "./_components/grade-entry-tab"
@@ -15,6 +16,7 @@ type EntryTab = (typeof ENTRY_TABS)[number]
 
 function GradeEntryPageContent() {
   const { t } = useI18n()
+  const { toast } = useToast()
 
   const { filters, setFilter } = useUrlFilters({
     tab: tabFilter(ENTRY_TABS, "entry"),
@@ -38,6 +40,7 @@ function GradeEntryPageContent() {
       if (res.ok) setActiveTrimester(await res.json())
     } catch (err) {
       console.error("Error fetching active trimester:", err)
+      toast({ title: t.common.error, description: t.common.errorFetchingData, variant: "destructive" })
     } finally {
       setIsLoading(false)
     }
@@ -49,6 +52,7 @@ function GradeEntryPageContent() {
       if (res.ok) setGrades(await res.json())
     } catch (err) {
       console.error("Error fetching grades:", err)
+      toast({ title: t.common.error, description: t.common.errorFetchingData, variant: "destructive" })
     }
   }
 

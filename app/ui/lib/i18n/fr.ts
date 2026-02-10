@@ -65,6 +65,7 @@ export const fr = {
     saving: "Enregistrement...",
     clear: "Effacer",
     confirmRemove: "Confirmer la suppression",
+    other: "Autre",
     name: "Nom",
     email: "Email",
     pagination: {

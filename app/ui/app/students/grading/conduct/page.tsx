@@ -39,6 +39,7 @@ import type {
   DecisionEntry,
   DecisionType,
   ConductTabId,
+  RawStudentSummaryResponse,
 } from "@/lib/types/grading"
 
 // Extracted table components
@@ -133,6 +134,7 @@ export default function ConductEntryPage() {
       }
     } catch (err) {
       console.error("Error fetching active trimester:", err)
+      toast({ title: t.common.error, description: t.common.errorFetchingData, variant: "destructive" })
     } finally {
       setIsLoading(false)
     }
@@ -147,6 +149,7 @@ export default function ConductEntryPage() {
       }
     } catch (err) {
       console.error("Error fetching grades:", err)
+      toast({ title: t.common.error, description: t.common.errorFetchingData, variant: "destructive" })
     }
   }
 
@@ -163,7 +166,7 @@ export default function ConductEntryPage() {
       const res = await fetch(`/api/evaluations/student-summary?${params}`)
       if (res.ok) {
         const data = await res.json()
-        const transformed: StudentSummary[] = data.map((s: any) => ({
+        const transformed: StudentSummary[] = data.map((s: RawStudentSummaryResponse) => ({
           id: s.id,
           studentProfileId: s.studentProfileId,
           studentName: s.studentName || `${s.studentProfile?.lastName || ""} ${s.studentProfile?.firstName || ""}`.trim(),

@@ -24,6 +24,7 @@ import {
   type GradeSubject,
   type Evaluation,
   type EvaluationType,
+  type RawEvaluationResponse,
 } from "@/lib/types/grading"
 import { BookOpen, Calendar, RefreshCw } from "lucide-react"
 import { EvaluationsTable } from "./evaluations-table"
@@ -129,7 +130,7 @@ export function ManageEvaluationsTab({ activeTrimester, grades }: ManageEvaluati
       const res = await fetch(`/api/evaluations?${params}`)
       if (res.ok) {
         const data = await res.json()
-        const transformed: Evaluation[] = data.map((e: any) => ({
+        const transformed: Evaluation[] = data.map((e: RawEvaluationResponse) => ({
           id: e.id,
           studentProfileId: e.studentProfileId,
           studentName: `${e.studentProfile?.lastName || ""} ${e.studentProfile?.firstName || ""}`.trim(),

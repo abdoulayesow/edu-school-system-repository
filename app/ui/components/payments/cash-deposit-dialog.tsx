@@ -47,7 +47,7 @@ const BANKS = [
   { value: "Ecobank", label: "Ecobank" },
   { value: "Vista Bank", label: "Vista Bank" },
   { value: "Banque Centrale", label: "Banque Centrale" },
-  { value: "other", label: "Autre" },
+  { value: "other", labelKey: "other" as const },
 ]
 
 export function CashDepositDialog({
@@ -88,7 +88,7 @@ export function CashDepositDialog({
         body: JSON.stringify({
           bankReference,
           depositDate: new Date(depositDate).toISOString(),
-          bankName: bankName === "other" ? "Autre" : bankName,
+          bankName: bankName === "other" ? t.common.other : bankName,
           depositedByName: isMe ? t.treasury.deposit.myself : depositorName,
         }),
       })
@@ -186,7 +186,7 @@ export function CashDepositDialog({
           <SelectContent>
             {BANKS.map((bank) => (
               <SelectItem key={bank.value} value={bank.value}>
-                {bank.label}
+                {"label" in bank ? bank.label : t.common.other}
               </SelectItem>
             ))}
           </SelectContent>

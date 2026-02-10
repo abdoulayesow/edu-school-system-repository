@@ -78,6 +78,7 @@ export default function GradingOverviewPage() {
       }
     } catch (err) {
       console.error("Error fetching data:", err)
+      toast({ title: t.common.error, description: t.common.errorFetchingData, variant: "destructive" })
     } finally {
       setIsLoading(false)
     }

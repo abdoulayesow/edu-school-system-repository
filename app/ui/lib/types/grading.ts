@@ -351,6 +351,53 @@ export interface RankedStudent {
   lates: number | null
 }
 
+// ============================================================================
+// RAW API RESPONSE TYPES (for replacing `any` casts in data transforms)
+// ============================================================================
+
+export interface RawStudentSummaryResponse {
+  id: string
+  studentProfileId: string
+  studentName?: string
+  studentNumber?: string
+  studentProfile?: { firstName: string; lastName: string; studentNumber?: string }
+  conduct: number | null
+  absences: number | null
+  lates: number | null
+  generalAverage: number | null
+  rank: number | null
+  totalStudents: number | null
+  decision: DecisionType | null
+  decisionOverride?: boolean
+  generalRemark?: string | null
+}
+
+export interface RawEvaluationResponse {
+  id: string
+  studentProfileId: string
+  studentProfile?: { firstName: string; lastName: string; studentNumber?: string }
+  gradeSubjectId: string
+  gradeSubject?: {
+    subject?: { nameFr: string; nameEn: string }
+    grade?: { name: string }
+  }
+  type: EvaluationType
+  score: number
+  maxScore: number
+  date: string
+  notes: string | null
+  trimesterId: string
+}
+
+export interface RawSubjectAverageResponse {
+  id: string
+  studentProfileId: string
+  studentName?: string
+  studentNumber?: string
+  average: number | null
+  teacherRemark: string | null
+}
+
 /**
  * Aggregate class statistics
  */

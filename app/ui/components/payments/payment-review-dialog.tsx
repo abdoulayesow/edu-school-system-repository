@@ -202,7 +202,7 @@ export function PaymentReviewDialog({
             ) : (
               <>
                 <Smartphone className="h-3 w-3 mr-1" />
-                Orange Money
+                {t.treasury.orangeMoney}
               </>
             )}
           </Badge>

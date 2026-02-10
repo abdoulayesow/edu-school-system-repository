@@ -27,7 +27,7 @@ import { usePaymentWizard } from "../wizard-context"
 import { useI18n } from "@/components/i18n-provider"
 import { useGrades } from "@/lib/hooks/use-api"
 import { cn, formatDateLong } from "@/lib/utils"
-import { formatCurrency } from "@/lib/utils/currency"
+import { formatCurrency } from "@/lib/format"
 import { sizing, typography, gradients, interactive } from "@/lib/design-tokens"
 import { Button } from "@/components/ui/button"
 

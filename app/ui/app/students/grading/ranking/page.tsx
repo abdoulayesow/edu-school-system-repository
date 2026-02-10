@@ -73,6 +73,7 @@ export default function ClassRankingPage() {
         }
       } catch (err) {
         console.error("Error fetching initial data:", err)
+        toast({ title: t.common.error, description: t.common.errorFetchingData, variant: "destructive" })
       } finally {
         setIsLoading(false)
       }

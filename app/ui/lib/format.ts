@@ -1,3 +1,5 @@
+export const DISCREPANCY_THRESHOLD = 50_000
+
 export function formatCurrency(amount: number): string {
   return new Intl.NumberFormat("fr-GN", {
     style: "decimal",

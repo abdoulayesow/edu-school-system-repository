@@ -67,6 +67,7 @@ export const en: TranslationKeys = {
     saving: "Saving...",
     clear: "Clear",
     confirmRemove: "Confirm Removal",
+    other: "Other",
     name: "Name",
     email: "Email",
     pagination: {

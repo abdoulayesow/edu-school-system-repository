@@ -8,7 +8,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert"
 import { AlertTriangle, CheckCircle2, Lock, Sunset, Wallet } from "lucide-react"
 import { useI18n } from "@/components/i18n-provider"
 import { cn } from "@/lib/utils"
-import { formatCurrency } from "@/lib/format"
+import { formatCurrency, DISCREPANCY_THRESHOLD } from "@/lib/format"
 
 interface DailyClosingDialogProps {
   open: boolean
@@ -25,7 +25,6 @@ export function DailyClosingDialog({
   currentRegistryBalance,
   currentSafeBalance,
 }: DailyClosingDialogProps) {
-  const DISCREPANCY_THRESHOLD = 50_000
   const { t } = useI18n()
   const [countedRegistryBalance, setCountedRegistryBalance] = useState("")
   const [notes, setNotes] = useState("")

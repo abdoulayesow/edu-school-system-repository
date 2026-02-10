@@ -10,7 +10,7 @@ import { DialogFooter } from "@/components/ui/dialog"
 import { AlertTriangle, ArrowRight, Loader2, CheckCircle2, Sunrise, Wallet, CreditCard } from "lucide-react"
 import { useI18n } from "@/components/i18n-provider"
 import { cn } from "@/lib/utils"
-import { formatCurrency } from "@/lib/format"
+import { formatCurrency, DISCREPANCY_THRESHOLD } from "@/lib/format"
 
 interface DailyOpeningDialogProps {
   open: boolean
@@ -29,7 +29,6 @@ export function DailyOpeningDialog({
   currentRegistryBalance,
   defaultFloatAmount,
 }: DailyOpeningDialogProps) {
-  const DISCREPANCY_THRESHOLD = 50_000
   const { t } = useI18n()
   const [step, setStep] = useState(1)
   const [countedSafeBalance, setCountedSafeBalance] = useState("")

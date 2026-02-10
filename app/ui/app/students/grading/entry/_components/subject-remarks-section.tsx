@@ -18,7 +18,7 @@ import { useToast } from "@/components/ui/use-toast"
 import { cn } from "@/lib/utils"
 import { componentClasses } from "@/lib/design-tokens"
 import { getScoreColor } from "@/lib/grading-utils"
-import type { ActiveTrimester, SubjectAverage } from "@/lib/types/grading"
+import type { ActiveTrimester, SubjectAverage, RawSubjectAverageResponse } from "@/lib/types/grading"
 import { Save, Loader2, MessageSquare, AlertCircle } from "lucide-react"
 
 interface SubjectRemarksSectionProps {
@@ -55,7 +55,7 @@ export function SubjectRemarksSection({
       const res = await fetch(`/api/evaluations/calculate-averages?${params}`)
       if (res.ok) {
         const data = await res.json()
-        const transformed: SubjectAverage[] = data.map((avg: any) => ({
+        const transformed: SubjectAverage[] = data.map((avg: RawSubjectAverageResponse) => ({
           id: avg.id,
           studentProfileId: avg.studentProfileId,
           studentName: avg.studentName || "",
