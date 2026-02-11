@@ -1,216 +1,149 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useMemo } from "react"
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { useI18n } from "@/components/i18n-provider"
-import { Shield, Users, Loader2 } from "lucide-react"
+import { Shield, Users, Crown } from "lucide-react"
 import { StaffRole } from "@prisma/client"
+import { ROLE_PERMISSIONS, type Branch, type RoleScope } from "@/lib/permissions-v2"
+import { typography } from "@/lib/design-tokens"
 
-interface RoleStats {
-  role: StaffRole
-  permissionCount: number
-  userCount: number
-  seededCount: number
-  manualCount: number
-}
+const STAFF_ROLES = Object.values(StaffRole)
 
-const STAFF_ROLES: StaffRole[] = [
-  "proprietaire",
-  "admin_systeme",
-  "proviseur",
-  "censeur",
-  "surveillant_general",
-  "directeur",
-  "secretariat",
-  "comptable",
-  "agent_recouvrement",
-  "coordinateur",
-  "enseignant",
-  "professeur_principal",
-  "gardien",
-]
-
-// Role name translations
-const getRoleName = (role: StaffRole, locale: string) => {
-  const names: Record<StaffRole, { en: string; fr: string }> = {
-    proprietaire: { en: "Owner", fr: "Proprietaire" },
-    admin_systeme: { en: "System Admin", fr: "Admin Systeme" },
-    proviseur: { en: "Principal", fr: "Proviseur" },
-    censeur: { en: "Vice Principal", fr: "Censeur" },
-    surveillant_general: { en: "General Supervisor", fr: "Surveillant General" },
-    directeur: { en: "Director", fr: "Directeur" },
-    secretariat: { en: "Secretary", fr: "Secretariat" },
-    comptable: { en: "Accountant", fr: "Comptable" },
-    agent_recouvrement: { en: "Collection Agent", fr: "Agent de Recouvrement" },
-    coordinateur: { en: "Coordinator", fr: "Coordinateur" },
-    enseignant: { en: "Teacher", fr: "Enseignant" },
-    professeur_principal: { en: "Head Teacher", fr: "Professeur Principal" },
-    gardien: { en: "Security Guard", fr: "Gardien" },
-  }
-  return locale === "fr" ? names[role].fr : names[role].en
+const BRANCH_STYLES: Record<Branch, string> = {
+  transversal: "bg-gspn-gold-100 text-gspn-gold-800 border-gspn-gold-300 dark:bg-gspn-gold-500/20 dark:text-gspn-gold-400 dark:border-gspn-gold-500/30",
+  academic: "bg-gspn-maroon-50 text-gspn-maroon-700 border-gspn-maroon-200 dark:bg-gspn-maroon-500/20 dark:text-gspn-maroon-300 dark:border-gspn-maroon-500/30",
+  financial: "bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-500/20 dark:text-emerald-400 dark:border-emerald-500/30",
+  none: "bg-muted text-muted-foreground border-border",
 }
 
 export function RolePermissionsTab() {
-  const { locale } = useI18n()
-  const [roleStats, setRoleStats] = useState<RoleStats[]>([])
-  const [isLoading, setIsLoading] = useState(true)
+  const { t } = useI18n()
 
-  useEffect(() => {
-    fetchRoleStats()
+  const roleStats = useMemo(() => {
+    return STAFF_ROLES.map((role) => {
+      const config = ROLE_PERMISSIONS[role]
+      const permissionCount = config.permissions === "*" ? null : config.permissions.length
+      return { role, branch: config.branch, roleScope: config.roleScope, permissionCount }
+    })
   }, [])
 
-  async function fetchRoleStats() {
-    setIsLoading(true)
-    try {
-      // Fetch stats for all roles in parallel
-      const statsPromises = STAFF_ROLES.map(async (role) => {
-        const res = await fetch(`/api/admin/roles/${role}/permissions`)
-        if (res.ok) {
-          const data = await res.json()
-          return {
-            role,
-            permissionCount: data.stats.total,
-            userCount: data.affectedUsers,
-            seededCount: data.stats.seeded,
-            manualCount: data.stats.manual,
-          }
-        }
-        return {
-          role,
-          permissionCount: 0,
-          userCount: 0,
-          seededCount: 0,
-          manualCount: 0,
-        }
-      })
+  const totalExplicitPermissions = useMemo(() => {
+    return roleStats.reduce((sum, s) => sum + (s.permissionCount ?? 0), 0)
+  }, [roleStats])
 
-      const stats = await Promise.all(statsPromises)
-      setRoleStats(stats)
-    } catch (err) {
-      console.error("Error fetching role stats:", err)
-    } finally {
-      setIsLoading(false)
-    }
-  }
+  const wildcardCount = useMemo(() => {
+    return roleStats.filter((s) => s.permissionCount === null).length
+  }, [roleStats])
+
+  const rl = t.rolePermissions.roleList
 
   return (
     <div>
       {/* Stats summary */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
-        <Card className="border shadow-sm animate-in fade-in slide-in-from-bottom-4 duration-500">
+        <Card className="border shadow-sm">
           <CardContent className="pt-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-muted-foreground">
-                  {locale === "fr" ? "Total des Roles" : "Total Roles"}
+                <p className="text-sm text-muted-foreground">{rl.totalRoles}</p>
+                <p className={`${typography.stat.md} text-foreground mt-1`}>
+                  {STAFF_ROLES.length}
                 </p>
-                <p className="text-3xl font-bold text-foreground mt-1">{STAFF_ROLES.length}</p>
               </div>
-              <Users className="w-10 h-10 text-gspn-maroon-500/30" />
+              <div className="p-2.5 bg-gspn-maroon-500/10 rounded-xl">
+                <Users className="h-6 w-6 text-gspn-maroon-500" />
+              </div>
             </div>
           </CardContent>
         </Card>
 
-        <Card className="border shadow-sm animate-in fade-in slide-in-from-bottom-4 duration-500 delay-75">
+        <Card className="border shadow-sm">
           <CardContent className="pt-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-muted-foreground">
-                  {locale === "fr" ? "Total des Permissions" : "Total Permissions"}
-                </p>
-                <p className="text-3xl font-bold text-foreground mt-1">
-                  {roleStats.reduce((sum, r) => sum + r.permissionCount, 0)}
+                <p className="text-sm text-muted-foreground">{rl.totalPermissions}</p>
+                <p className={`${typography.stat.md} text-foreground mt-1`}>
+                  {totalExplicitPermissions}
                 </p>
               </div>
-              <Shield className="w-10 h-10 text-gspn-gold-500/30" />
+              <div className="p-2.5 bg-gspn-gold-500/10 rounded-xl">
+                <Shield className="h-6 w-6 text-gspn-gold-500" />
+              </div>
             </div>
           </CardContent>
         </Card>
 
-        <Card className="border shadow-sm animate-in fade-in slide-in-from-bottom-4 duration-500 delay-150">
+        <Card className="border shadow-sm">
           <CardContent className="pt-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-muted-foreground">
-                  {locale === "fr" ? "Permissions Personnalisees" : "Custom Permissions"}
-                </p>
-                <p className="text-3xl font-bold text-foreground mt-1">
-                  {roleStats.reduce((sum, r) => sum + r.manualCount, 0)}
+                <p className="text-sm text-muted-foreground">{rl.wildcardRoles}</p>
+                <p className={`${typography.stat.md} text-foreground mt-1`}>
+                  {wildcardCount}
                 </p>
               </div>
-              <Shield className="w-10 h-10 text-gspn-gold-500/30" />
+              <div className="p-2.5 bg-gspn-gold-500/10 rounded-xl">
+                <Crown className="h-6 w-6 text-gspn-gold-500" />
+              </div>
             </div>
           </CardContent>
         </Card>
       </div>
 
-      {/* Loading state */}
-      {isLoading ? (
-        <div className="flex items-center justify-center py-12">
-          <Loader2 className="w-8 h-8 text-gspn-maroon-500 animate-spin" />
-        </div>
-      ) : (
-        /* Role cards grid */
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {roleStats.map((stats) => (
-            <Card
-              key={stats.role}
-              className="border shadow-sm"
-            >
-              <CardHeader>
-                <div className="flex items-start justify-between">
-                  <div className="flex-1">
-                    <div className="flex items-center gap-2 mb-2">
-                      <div className="h-2 w-2 rounded-full bg-gspn-maroon-500" />
-                      <CardTitle className="text-lg text-foreground">
-                        {getRoleName(stats.role, locale)}
-                      </CardTitle>
-                    </div>
-                    <p className="text-sm text-muted-foreground font-mono">{stats.role}</p>
+      {/* Role cards grid */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        {roleStats.map((stats) => (
+          <Card key={stats.role} className="border shadow-sm">
+            <CardHeader>
+              <div className="flex items-start justify-between">
+                <div className="flex-1">
+                  <div className="flex items-center gap-2 mb-2">
+                    <div className="h-2 w-2 rounded-full bg-gspn-maroon-500" />
+                    <CardTitle className="text-lg text-foreground">
+                      {t.roleManagement.roles[stats.role]}
+                    </CardTitle>
                   </div>
-                  <Shield className="w-5 h-5 text-muted-foreground" />
+                  <p className="text-sm text-muted-foreground font-mono">{stats.role}</p>
                 </div>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-3">
-                  {/* Permission count */}
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm text-muted-foreground">
-                      {locale === "fr" ? "Permissions" : "Permissions"}
-                    </span>
-                    <Badge variant="outline">
-                      {stats.permissionCount}
-                    </Badge>
-                  </div>
+                <Shield className="w-5 h-5 text-muted-foreground" />
+              </div>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-3">
+                {/* Branch */}
+                <div className="flex items-center justify-between">
+                  <span className="text-sm text-muted-foreground">{rl.branch}</span>
+                  <Badge variant="outline" className={BRANCH_STYLES[stats.branch]}>
+                    {rl.branches[stats.branch]}
+                  </Badge>
+                </div>
 
-                  {/* User count */}
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm text-muted-foreground">
-                      {locale === "fr" ? "Utilisateurs" : "Users"}
-                    </span>
-                    <Badge variant="outline">
-                      {stats.userCount}
+                {/* Permission count */}
+                <div className="flex items-center justify-between">
+                  <span className="text-sm text-muted-foreground">{rl.permissions}</span>
+                  {stats.permissionCount === null ? (
+                    <Badge className="bg-gspn-gold-500 text-black hover:bg-gspn-gold-600 border-0">
+                      {rl.fullAccess}
                     </Badge>
-                  </div>
-
-                  {/* Custom permissions */}
-                  {stats.manualCount > 0 && (
-                    <div className="flex items-center justify-between pt-2 border-t border-border">
-                      <span className="text-sm text-muted-foreground">
-                        {locale === "fr" ? "Personnalisees" : "Custom"}
-                      </span>
-                      <Badge className="bg-gspn-gold-500 text-black hover:bg-gspn-gold-600 border-0">
-                        {stats.manualCount}
-                      </Badge>
-                    </div>
+                  ) : (
+                    <Badge variant="outline">{stats.permissionCount}</Badge>
                   )}
                 </div>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
-      )}
+
+                {/* Scope */}
+                <div className="flex items-center justify-between pt-2 border-t border-border">
+                  <span className="text-sm text-muted-foreground">{rl.scope}</span>
+                  <span className="text-sm font-medium text-foreground">
+                    {rl.scopes[stats.roleScope]}
+                  </span>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        ))}
+      </div>
     </div>
   )
 }

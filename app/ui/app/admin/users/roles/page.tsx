@@ -1,11 +1,12 @@
 "use client"
 
-import { useState, useEffect, useMemo } from "react"
+import { useState, useEffect, useMemo, useCallback } from "react"
 import { useRouter } from "next/navigation"
 import { useI18n } from "@/components/i18n-provider"
 import { StaffRole } from "@prisma/client"
 import { Search, Crown, Shield, Eye, UserCog, AlertCircle, CheckCircle2, Clock, Lock } from "lucide-react"
 import { motion, AnimatePresence } from "framer-motion"
+import { ROLE_PERMISSIONS, type RolePermissionEntry } from "@/lib/permissions-v2"
 import {
   Dialog,
   DialogContent,
@@ -38,12 +39,6 @@ interface User {
   lastLoginAt: string | null
 }
 
-interface Permission {
-  resource: string
-  action: string
-  scope: string
-}
-
 export default function UserRolesPage() {
   const { t } = useI18n()
   const router = useRouter()
@@ -56,8 +51,6 @@ export default function UserRolesPage() {
   const [selectedRole, setSelectedRole] = useState<StaffRole | null>(null)
   const [showRoleDialog, setShowRoleDialog] = useState(false)
   const [showPermissionsDialog, setShowPermissionsDialog] = useState(false)
-  const [permissions, setPermissions] = useState<Permission[]>([])
-  const [loadingPermissions, setLoadingPermissions] = useState(false)
   const [updating, setUpdating] = useState(false)
 
   useEffect(() => {
@@ -79,20 +72,15 @@ export default function UserRolesPage() {
     }
   }
 
-  const fetchRolePermissions = async (role: StaffRole) => {
-    try {
-      setLoadingPermissions(true)
-      const res = await fetch(`/api/admin/roles/${role}/permissions`)
-      if (!res.ok) throw new Error("Failed to fetch permissions")
-      const data = await res.json()
-      setPermissions(data)
-    } catch (error) {
-      toast.error("Failed to fetch permissions")
-      console.error(error)
-    } finally {
-      setLoadingPermissions(false)
-    }
-  }
+  // Read permissions from code-based mapping (no API call needed)
+  const isWildcardRole = selectedRole ? ROLE_PERMISSIONS[selectedRole].permissions === "*" : false
+
+  const rolePermissions = useMemo<RolePermissionEntry[]>(() => {
+    if (!selectedRole) return []
+    const config = ROLE_PERMISSIONS[selectedRole]
+    if (config.permissions === "*") return []
+    return config.permissions
+  }, [selectedRole])
 
   const handleRoleChange = async () => {
     if (!selectedUser || !selectedRole) return
@@ -130,11 +118,10 @@ export default function UserRolesPage() {
     setShowRoleDialog(true)
   }
 
-  const openPermissionsDialog = async (role: StaffRole) => {
+  const openPermissionsDialog = useCallback((role: StaffRole) => {
     setSelectedRole(role)
     setShowPermissionsDialog(true)
-    await fetchRolePermissions(role)
-  }
+  }, [])
 
   const filteredUsers = useMemo(() => {
     return users.filter(user => {
@@ -171,15 +158,15 @@ export default function UserRolesPage() {
   }
 
   const groupedPermissions = useMemo(() => {
-    const groups: Record<string, Permission[]> = {}
-    permissions.forEach(perm => {
+    const groups: Record<string, RolePermissionEntry[]> = {}
+    rolePermissions.forEach(perm => {
       if (!groups[perm.resource]) {
         groups[perm.resource] = []
       }
       groups[perm.resource].push(perm)
     })
     return groups
-  }, [permissions])
+  }, [rolePermissions])
 
   return (
     <PermissionGuard resource="role_assignment" action="view">
@@ -508,9 +495,17 @@ export default function UserRolesPage() {
               </DialogDescription>
             </DialogHeader>
             <div className="flex-1 overflow-y-auto pr-2">
-              {loadingPermissions ? (
-                <div className="flex items-center justify-center py-12">
-                  <div className="w-8 h-8 border-4 border-[#8B2332] border-t-transparent rounded-full animate-spin" />
+              {isWildcardRole ? (
+                <div className="flex flex-col items-center justify-center py-12">
+                  <div className="p-4 rounded-2xl bg-gradient-to-br from-[#D4AF37]/20 to-amber-500/10 mb-4">
+                    <Crown className="w-12 h-12 text-[#D4AF37]" />
+                  </div>
+                  <p className="text-white font-semibold text-lg mb-1">
+                    {t.rolePermissions.roleList.fullAccess}
+                  </p>
+                  <p className="text-slate-400 text-sm text-center max-w-sm">
+                    {t.rolePermissions.roleList.fullAccessDescription}
+                  </p>
                 </div>
               ) : Object.keys(groupedPermissions).length === 0 ? (
                 <div className="flex flex-col items-center justify-center py-12 text-slate-500">
