@@ -16,6 +16,7 @@ import {
 } from "@/components/ui/select"
 import { useI18n } from "@/components/i18n-provider"
 import { useToast } from "@/components/ui/use-toast"
+import { useCalculation } from "@/hooks/use-calculation"
 import { cn } from "@/lib/utils"
 import {
   getEvaluationTypeLabel,
@@ -70,7 +71,11 @@ export function ManageEvaluationsTab({ activeTrimester, grades }: ManageEvaluati
 
   // Recalculation state
   const [showRecalculatePrompt, setShowRecalculatePrompt] = useState(false)
-  const [isRecalculating, setIsRecalculating] = useState(false)
+
+  const { isCalculating: isRecalculating, handleCalculateAll: handleRecalculate } = useCalculation({
+    trimesterId: activeTrimester.id,
+    onSuccess: () => setShowRecalculatePrompt(false),
+  })
 
   // Fetch subjects when grade changes
   useEffect(() => {
@@ -241,37 +246,6 @@ export function ManageEvaluationsTab({ activeTrimester, grades }: ManageEvaluati
       })
     } finally {
       setIsSubmitting(false)
-    }
-  }
-
-  async function handleRecalculate() {
-    setIsRecalculating(true)
-    try {
-      const avgRes = await fetch("/api/evaluations/calculate-averages", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ trimesterId: activeTrimester.id }),
-      })
-      if (!avgRes.ok) throw new Error("Failed to calculate averages")
-
-      const summaryRes = await fetch("/api/evaluations/student-summary", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ trimesterId: activeTrimester.id }),
-      })
-      if (!summaryRes.ok) throw new Error("Failed to calculate summaries")
-
-      toast({ title: t.common.success, description: t.grading.calculationComplete })
-    } catch (err) {
-      console.error("Error recalculating:", err)
-      toast({
-        title: t.common.error,
-        description: t.grading.failedToRecalculate,
-        variant: "destructive",
-      })
-    } finally {
-      setIsRecalculating(false)
-      setShowRecalculatePrompt(false)
     }
   }
 

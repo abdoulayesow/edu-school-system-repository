@@ -85,6 +85,7 @@ Old routes (e.g., `/enrollments`, `/expenses`, `/grades`) redirect to new locati
 - `/accounting/balance` - Financial balance
 - `/accounting/payments` - Payment tracking
 - `/accounting/expenses` - Expense management
+- `/accounting/salaries` - Salary management (hours tracking, payments, advances)
 
 ### Dashboard Section (`/dashboard/*`)
 - `/dashboard/reports` - Analytics and reports
@@ -99,6 +100,7 @@ Old routes (e.g., `/enrollments`, `/expenses`, `/grades`) redirect to new locati
 - `/admin/teachers` - Teacher assignments
 - `/admin/clubs` - Club administration
 - `/admin/time-periods` - Time period configuration
+- `/admin/salary-rates` - Salary rate configuration (hourly/fixed per staff)
 
 ## Coding Conventions
 
@@ -239,12 +241,28 @@ Planned additions:
   - Bank name field
   - Clearance tracking (pending → cleared → bounced)
 
-### Expense Management
-- **Salary management** - Dedicated salary tracking within expenses:
-  - Monthly salary records per staff member
-  - Salary schedules and payment history
-  - Integration with staff roles
-  - Payroll reports
+### Salary Management (In Progress)
+Dedicated salary system — separate from general expenses. See `docs/features/salary-management.md` for full spec.
+
+**Workflow:** Academic directors submit hours worked → Accounting calculates & pays salaries
+**Key concepts:**
+- **Hours tracking** (Part 1): Censeur/Principal/Directeur record monthly hours per teacher (~20th of month)
+- **Salary payments** (Part 2): Comptable/Coordinateur calculate pay from hours × rate, process payment
+- **Salary advances** (Part 3): Advance disbursement with flexible recoupment terms across future payments
+- **Rate management** (Part 4): Admin defines hourly rates or fixed monthly salaries per staff member
+
+**Staff types:**
+- Collège & Lycée teachers → hourly (hours tracking required)
+- Primary teachers & other staff → may be fixed monthly salary (no hours tracking needed)
+
+**Routes:**
+- `/accounting/salaries` - Salary payments, advances, history
+- `/admin/salary-rates` - Rate configuration
+
+**Permission model:**
+- Hours submission: academic directors (censeur, proviseur, directeur) — crosses THE WALL by design
+- Salary payments: financial roles (comptable, coordinateur)
+- Rate management: proprietaire, admin_systeme, coordinateur
 
 ## Important Notes
 

@@ -2803,6 +2803,7 @@ export const en: TranslationKeys = {
 
     // Shared UI labels
     backToClasses: "Back to classes",
+    backToOverview: "Back to overview",
     selection: "Selection",
     studentsInClass: "students in this class",
     totalCoefficient: "Total coefficient",

@@ -24,7 +24,7 @@ import {
 } from "@/components/ui/collapsible"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { getNavigationForRole } from "@/lib/nav-config"
-import type { UserRole } from "@/lib/nav-links"
+import type { UserRole } from "@/lib/nav-config"
 import { useI18n } from "@/components/i18n-provider"
 import { LanguageSwitcher } from "@/components/language-switcher"
 import { useUserInitials } from "@/hooks/use-user-initials"

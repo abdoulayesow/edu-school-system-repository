@@ -3,9 +3,8 @@
 import { usePathname } from "next/navigation"
 import Link from "next/link"
 import { useI18n } from "@/components/i18n-provider"
-import { LayoutDashboard, PenLine, FileText, Trophy, ClipboardCheck, GraduationCap } from "lucide-react"
+import { LayoutDashboard, PenLine, FileText, Trophy, ClipboardCheck } from "lucide-react"
 import { componentClasses } from "@/lib/design-tokens"
-import { Badge } from "@/components/ui/badge"
 import { cn } from "@/lib/utils"
 import { CalculationStatusBanner } from "@/components/grading/calculation-status-banner"
 
@@ -68,23 +67,6 @@ export default function GradingLayout({ children }: { children: React.ReactNode 
 
       <div className="bg-background pt-4">
         <div className="container mx-auto px-4 lg:px-6 max-w-7xl">
-          {/* Page Header */}
-          <div className="flex items-center justify-between mb-6">
-            <div className="flex items-center gap-3">
-              <div className="p-2.5 bg-gspn-maroon-500/10 rounded-xl">
-                <GraduationCap className="h-6 w-6 text-gspn-maroon-500" />
-              </div>
-              <div>
-                <h1 className="text-3xl font-bold">{t.nav.gradingSection}</h1>
-                <p className="text-muted-foreground">{t.grading.gradingSectionSubtitle}</p>
-              </div>
-            </div>
-            <Badge variant="outline" className="text-sm py-1.5 px-3 border-gspn-maroon-500/30 text-gspn-maroon-700 dark:text-gspn-maroon-300">
-              <GraduationCap className="h-3.5 w-3.5 mr-1.5" />
-              {t.nav.gradingSection}
-            </Badge>
-          </div>
-
           {/* Tab Navigation */}
           <div className={componentClasses.tabListBase}>
             {tabs.map((tab) => {

@@ -200,48 +200,43 @@ export default function ClassRankingPage() {
   return (
     <PageContainer maxWidth="lg">
       {/* Header */}
-      <div className="flex items-center gap-4 mb-6">
-        <Link href="/students/grades" className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground">
-          <ArrowLeft className="size-4" />
-          {t.grading.backToClasses}
-        </Link>
-      </div>
-
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center gap-3">
           <div className="p-2.5 bg-gspn-maroon-500/10 rounded-xl">
             <Trophy className="size-6 text-gspn-maroon-500" />
           </div>
           <div>
-            <h1 className="text-2xl font-bold">
-              {t.grading.classRanking}
-            </h1>
-            <p className="text-muted-foreground">
-              {t.grading.classRankingSubtitle}
-            </p>
+            <h1 className="text-3xl font-bold">{t.grading.classRanking}</h1>
+            <p className="text-muted-foreground">{t.grading.classRankingSubtitle}</p>
           </div>
         </div>
-        {students.length > 0 && (
-          <PermissionGuard resource="report_cards" action="export" inline>
-            <Button
-              onClick={handleDownloadAllBulletins}
-              disabled={isDownloading}
-              className={componentClasses.primaryActionButton}
-            >
-              {isDownloading ? (
-                <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  {downloadProgress || t.grading.generatingBulletins}
-                </>
-              ) : (
-                <>
-                  <Download className="mr-2 h-4 w-4" />
-                  {t.grading.downloadAllBulletins}
-                </>
-              )}
-            </Button>
-          </PermissionGuard>
-        )}
+        <div className="flex items-center gap-2">
+          {students.length > 0 && (
+            <PermissionGuard resource="report_cards" action="export" inline>
+              <Button
+                onClick={handleDownloadAllBulletins}
+                disabled={isDownloading}
+                className={componentClasses.primaryActionButton}
+              >
+                {isDownloading ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    {downloadProgress || t.grading.generatingBulletins}
+                  </>
+                ) : (
+                  <>
+                    <Download className="mr-2 h-4 w-4" />
+                    {t.grading.downloadAllBulletins}
+                  </>
+                )}
+              </Button>
+            </PermissionGuard>
+          )}
+          <Link href="/students/grading" className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground">
+            <ArrowLeft className="size-4" />
+            {t.grading.backToOverview}
+          </Link>
+        </div>
       </div>
 
       {/* Filters */}

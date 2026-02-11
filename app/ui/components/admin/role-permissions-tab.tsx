@@ -1,11 +1,10 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { useRouter } from "next/navigation"
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { useI18n } from "@/components/i18n-provider"
-import { Shield, ChevronRight, Users, Loader2 } from "lucide-react"
+import { Shield, Users, Loader2 } from "lucide-react"
 import { StaffRole } from "@prisma/client"
 
 interface RoleStats {
@@ -54,7 +53,6 @@ const getRoleName = (role: StaffRole, locale: string) => {
 
 export function RolePermissionsTab() {
   const { locale } = useI18n()
-  const router = useRouter()
   const [roleStats, setRoleStats] = useState<RoleStats[]>([])
   const [isLoading, setIsLoading] = useState(true)
 
@@ -94,10 +92,6 @@ export function RolePermissionsTab() {
     } finally {
       setIsLoading(false)
     }
-  }
-
-  const handleRoleClick = (role: StaffRole) => {
-    router.push(`/admin/roles/${role}/permissions`)
   }
 
   return (
@@ -162,8 +156,7 @@ export function RolePermissionsTab() {
           {roleStats.map((stats) => (
             <Card
               key={stats.role}
-              className="border shadow-sm hover:border-gspn-maroon-500 transition-colors cursor-pointer group"
-              onClick={() => handleRoleClick(stats.role)}
+              className="border shadow-sm"
             >
               <CardHeader>
                 <div className="flex items-start justify-between">
@@ -176,7 +169,7 @@ export function RolePermissionsTab() {
                     </div>
                     <p className="text-sm text-muted-foreground font-mono">{stats.role}</p>
                   </div>
-                  <ChevronRight className="w-5 h-5 text-muted-foreground group-hover:text-gspn-maroon-500 transition-colors" />
+                  <Shield className="w-5 h-5 text-muted-foreground" />
                 </div>
               </CardHeader>
               <CardContent>

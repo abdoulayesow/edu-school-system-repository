@@ -232,25 +232,20 @@ export default function BulletinPage() {
   return (
     <PageContainer maxWidth="lg">
       {/* Header */}
-      <div className="flex items-center gap-4 mb-6">
-        <Link href="/students/grades" className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground">
+      <div className="flex items-center justify-between mb-6">
+        <div className="flex items-center gap-3">
+          <div className="p-2.5 bg-gspn-maroon-500/10 rounded-xl">
+            <FileText className="size-6 text-gspn-maroon-500" />
+          </div>
+          <div>
+            <h1 className="text-3xl font-bold">{t.grading.bulletin}</h1>
+            <p className="text-muted-foreground">{t.grading.bulletinSubtitle}</p>
+          </div>
+        </div>
+        <Link href="/students/grading" className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground">
           <ArrowLeft className="size-4" />
-          {t.grading.backToClasses}
+          {t.grading.backToOverview}
         </Link>
-      </div>
-
-      <div className="flex items-center gap-3 mb-6">
-        <div className="p-2.5 bg-gspn-maroon-500/10 rounded-xl">
-          <FileText className="size-6 text-gspn-maroon-500" />
-        </div>
-        <div>
-          <h1 className="text-2xl font-bold">
-            {t.grading.bulletin}
-          </h1>
-          <p className="text-muted-foreground">
-            {t.grading.bulletinSubtitle}
-          </p>
-        </div>
       </div>
 
       {/* Filters */}

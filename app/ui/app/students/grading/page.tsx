@@ -14,6 +14,7 @@ import {
 } from "@/components/ui/tooltip"
 import { useI18n } from "@/components/i18n-provider"
 import { useToast } from "@/components/ui/use-toast"
+import { useCalculation } from "@/hooks/use-calculation"
 import {
   LayoutDashboard,
   Calendar,
@@ -49,8 +50,12 @@ export default function GradingOverviewPage() {
   const [progressData, setProgressData] = useState<ProgressData | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const [isRefreshing, setIsRefreshing] = useState(false)
-  const [isCalculating, setIsCalculating] = useState(false)
   const [expandedGrade, setExpandedGrade] = useState<string | null>(null)
+
+  const { isCalculating, handleCalculateAll } = useCalculation({
+    trimesterId: activeTrimester?.id,
+    onSuccess: fetchData,
+  })
 
   useEffect(() => {
     fetchData()
@@ -88,48 +93,6 @@ export default function GradingOverviewPage() {
     setIsRefreshing(true)
     await fetchData()
     setIsRefreshing(false)
-  }
-
-  async function handleCalculateAll() {
-    if (!activeTrimester) return
-
-    setIsCalculating(true)
-    try {
-      // Calculate subject averages
-      const avgRes = await fetch("/api/evaluations/calculate-averages", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ trimesterId: activeTrimester.id }),
-      })
-
-      if (!avgRes.ok) throw new Error("Failed to calculate averages")
-
-      // Calculate student summaries
-      const summaryRes = await fetch("/api/evaluations/student-summary", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ trimesterId: activeTrimester.id }),
-      })
-
-      if (!summaryRes.ok) throw new Error("Failed to calculate summaries")
-
-      toast({
-        title: t.common.success,
-        description: t.grading.calculationComplete,
-      })
-
-      // Refresh data
-      await fetchData()
-    } catch (err) {
-      console.error("Error calculating:", err)
-      toast({
-        title: t.common.error,
-        description: t.grading.calculationFailed,
-        variant: "destructive",
-      })
-    } finally {
-      setIsCalculating(false)
-    }
   }
 
   // Categorize grades by completion status

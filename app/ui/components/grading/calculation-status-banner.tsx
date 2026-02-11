@@ -19,8 +19,8 @@ import {
   XCircle,
 } from "lucide-react"
 import { cn } from "@/lib/utils"
-import { toast } from "@/hooks/use-toast"
 import { componentClasses, typography } from "@/lib/design-tokens"
+import { useCalculation } from "@/hooks/use-calculation"
 
 // Constants
 const STATUS_REFRESH_INTERVAL_MS = 30000
@@ -59,8 +59,6 @@ export function CalculationStatusBanner() {
   ])
   const [status, setStatus] = useState<CalculationStatus | null>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const [isCalculating, setIsCalculating] = useState(false)
-  const [calculationProgress, setCalculationProgress] = useState<string | null>(null)
   const [isExpanded, setIsExpanded] = useState(false)
   const [history, setHistory] = useState<CalculationHistoryItem[]>([])
   const [isLoadingHistory, setIsLoadingHistory] = useState(false)
@@ -110,61 +108,18 @@ export function CalculationStatusBanner() {
     }
   }, [showHistory, history.length, fetchHistory])
 
-  const handleCalculateAll = async () => {
-    if (!status?.activeTrimesterId) return
-
-    setIsCalculating(true)
-
-    try {
-      // Step 1: Calculate subject averages
-      setCalculationProgress(t.grading.calculatingSubjectAverages)
-      const avgRes = await fetch("/api/evaluations/calculate-averages", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ trimesterId: status.activeTrimesterId }),
-      })
-
-      if (!avgRes.ok) {
-        const data = await avgRes.json()
-        throw new Error(data.message || "Failed to calculate averages")
-      }
-
-      // Step 2: Calculate student summaries
-      setCalculationProgress(t.grading.calculatingStudentSummaries)
-      const summaryRes = await fetch("/api/evaluations/student-summary", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ trimesterId: status.activeTrimesterId }),
-      })
-
-      if (!summaryRes.ok) {
-        const data = await summaryRes.json()
-        throw new Error(data.message || "Failed to calculate summaries")
-      }
-
-      const summaryData = await summaryRes.json()
-      toast({
-        title: t.common.success,
-        description: `${t.grading.calculationComplete}: ${summaryData.studentsProcessed || 0} ${t.common.students}`,
-      })
-
-      // Refresh status and history
-      await fetchStatus()
-      if (showHistory) {
-        await fetchHistory()
-      }
-    } catch (err) {
-      console.error("Error in bulk calculation:", err)
-      toast({
-        title: t.common.error,
-        description: err instanceof Error ? err.message : "Failed to complete calculations",
-        variant: "destructive",
-      })
-    } finally {
-      setIsCalculating(false)
-      setCalculationProgress(null)
+  const handleCalcSuccess = useCallback(async () => {
+    await fetchStatus()
+    if (showHistory) {
+      await fetchHistory()
     }
-  }
+  }, [fetchStatus, fetchHistory, showHistory])
+
+  const { isCalculating, calculationProgress, handleCalculateAll } = useCalculation({
+    trimesterId: status?.activeTrimesterId,
+    onSuccess: handleCalcSuccess,
+    showProgress: true,
+  })
 
   // Format relative time
   const formatRelativeTime = (dateString: string | null) => {

@@ -24,8 +24,19 @@ import {
   MessageSquare,
   Sparkles,
 } from "lucide-react"
-import type { UserRole } from "./nav-links"
 import { isGradingFeaturesEnabled } from "./feature-flags"
+
+// Legacy role type used for navigation visibility.
+// These map to simplified role categories, not the Prisma StaffRole enum.
+export type UserRole =
+  | "user"
+  | "director"
+  | "academic_director"
+  | "secretary"
+  | "accountant"
+  | "teacher"
+  | "parent"
+  | "student"
 
 export interface SubNavItem {
   id: string

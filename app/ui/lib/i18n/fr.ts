@@ -2801,6 +2801,7 @@ export const fr = {
 
     // Shared UI labels
     backToClasses: "Retour aux classes",
+    backToOverview: "Retour au tableau de bord",
     selection: "Sélection",
     studentsInClass: "élèves dans cette classe",
     totalCoefficient: "Coefficient total",

@@ -186,6 +186,7 @@ export default function ConductEntryPage() {
       }
     } catch (err) {
       console.error("Error fetching summaries:", err)
+      toast({ title: t.common.error, description: t.common.errorFetchingData, variant: "destructive" })
     } finally {
       setIsLoadingSummaries(false)
     }
