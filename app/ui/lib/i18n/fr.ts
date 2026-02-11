@@ -257,7 +257,14 @@ export const fr = {
     extraActivities: "Activités Extra",
     canteen: "Cantine",
     transport: "Transport",
-    
+
+    // Error messages
+    errors: {
+      fetchFailed: "Échec du chargement des données du tableau de bord. Veuillez actualiser.",
+      gradesUnavailable: "Les données de classe ne sont pas disponibles actuellement",
+      financialDataUnavailable: "Les données financières ne sont pas disponibles actuellement",
+    },
+
     reasons: {
       familySituation: "Situation familiale difficile - demande 20% réduction",
       schoolTransfer: "Transfert d'une autre école - documents en règle",
@@ -1078,7 +1085,9 @@ export const fr = {
     // Status labels
     statusPresent: "Présent",
     statusAbsent: "Absent",
+    statusLate: "En retard",
     statusExcused: "Excusé",
+    notRecorded: "Non marqué",
 
     // Summary cards
     totalSessions: "Total des sessions",
@@ -1107,6 +1116,43 @@ export const fr = {
     instruction2: "Présent (vert) → Absent (rouge) → Excusé (orange) → Présent",
     instruction3: "Les élèves avec paiements en retard sont marqués d'un badge",
     instruction4: "Cliquez sur \"Soumettre\" pour enregistrer la présence",
+
+    // New keys for Phase 1 refactoring
+    students: "élèves",
+    back: "Retour",
+    save: "Sauvegarder",
+    loading: "Chargement...",
+    loadingClasses: "Chargement des classes...",
+    allGrades: "Toutes les classes",
+    entryMode: "Mode d'entrée",
+    existingSession: "Session existante",
+    attendanceCompleted: "Présence complétée",
+    attendanceInProgress: "Présence en cours",
+    continueAttendance: "Continuer la présence",
+    startAttendance: "Commencer la présence",
+    lateCount: "Retards",
+    searchStudent: "Rechercher un élève...",
+    checklistModeDescription: "Tous les élèves sont présents par défaut. Tapez pour changer le statut.",
+    absencesModeDescription: "Marquez uniquement les absents et retards. Les non-marqués sont présents.",
+    checklistModeIndicator: "Mode liste complète - Tapez pour changer le statut",
+    absencesModeIndicator: "Mode absences - Marquez les absents/retards",
+    searchTip: "Utilisez la recherche pour trouver un élève rapidement",
+    saveTip: "Sauvegardez régulièrement pour éviter la perte de données",
+    cycleInstructions: "Présent → Absent → Retard → Excusé → Présent",
+    preview: "Aperçu",
+    failedToLoadGrades: "Échec du chargement des classes",
+    failedToLoadAttendance: "Échec du chargement de la présence",
+    failedToSave: "Échec de l'enregistrement",
+    noStudentsFound: "Aucun élève trouvé correspondant à votre recherche",
+    noStudents: "Aucun élève dans cette classe",
+
+    // Confirmation dialogs
+    confirmSubmitTitle: "Soumettre la présence ?",
+    confirmSubmitDescription: "Cela marquera la présence comme complète. Vous pourrez toujours effectuer des modifications ultérieurement si nécessaire.",
+    confirmNavigateAwayTitle: "Modifications non enregistrées",
+    confirmNavigateAwayDescription: "Vous avez des modifications non enregistrées. Êtes-vous sûr de vouloir partir ? Vos modifications seront perdues.",
+    confirm: "Confirmer",
+    cancel: "Annuler",
   },
 
   // Reports
@@ -1132,6 +1178,13 @@ export const fr = {
     // Filters
     allTeachers: "Tous les enseignants",
     allLevels: "Tous les niveaux",
+
+    // Level names
+    levels: {
+      elementary: "Primaire",
+      college: "Collège",
+      lycee: "Lycée",
+    },
 
     // Activities list
     allActivities: "Toutes les activités",
@@ -3121,6 +3174,7 @@ export const fr = {
       title: "Révision du paiement",
       description: "Approuver ou rejeter ce paiement après vérification",
       cash: "Espèces",
+      orangeMoney: "Orange Money",
       receipt: "Reçu",
       recordedDate: "Date d'enregistrement",
       transactionRef: "Réf. transaction",
@@ -3864,6 +3918,13 @@ export const fr = {
       thisMonthRecoupments: "Recoupements du mois",
     },
 
+    // Messages de validation
+    validation: {
+      invalidHours: "Veuillez saisir un nombre d'heures valide",
+      invalidAmount: "Veuillez saisir un montant valide",
+      reasonRequired: "Veuillez fournir un motif",
+    },
+
     // Champs communs
     staffName: "Nom du personnel",
     role: "Rôle",
@@ -3901,6 +3962,13 @@ export const fr = {
       failedToDelete: "Échec de la suppression",
       errorOccurred: "Une erreur est survenue",
       conflictsDetected: "Conflits détectés :",
+      successCreated: "Cours ajouté à l'emploi du temps",
+      successUpdated: "Cours modifié avec succès",
+      successDeleted: "Cours retiré de l'emploi du temps",
+      errorCreate: "Échec de l'ajout du cours",
+      errorUpdate: "Échec de la modification du cours",
+      errorDelete: "Échec de la suppression du cours",
+      errorFetch: "Échec du chargement de l'emploi du temps",
     },
   },
 } as const;

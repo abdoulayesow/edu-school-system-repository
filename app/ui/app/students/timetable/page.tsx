@@ -1,49 +1,36 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useMemo, useCallback } from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Skeleton } from "@/components/ui/skeleton"
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { BookOpen, User, Clock, GraduationCap, Users, Loader2, Calendar } from "lucide-react"
 import { useI18n } from "@/components/i18n-provider"
+import { useToast } from "@/hooks/use-toast"
+import { usePermission } from "@/components/permission-guard"
 import { PageContainer } from "@/components/layout"
 import { StatCard } from "@/components/students"
-import { TimetableGrid, type DaySchedule, type TimePeriod } from "@/components/timetable/timetable-grid"
-import { SectionSelector, type GradeRoom } from "@/components/timetable/section-selector"
-import { SlotEditorDialog, type ScheduleSlot as DialogScheduleSlot, type GradeSubject, type TeacherProfile } from "@/components/timetable/slot-editor-dialog"
-
-interface Grade {
-  id: string
-  name: string
-  level: string
-  studentCount: number
-  subjectCount: number
-}
-
-interface Subject {
-  id: string
-  subjectId: string
-  name: string
-  code: string | null
-  coefficient: number
-  hoursPerWeek: number
-  teacher: {
-    id: string
-    name: string
-  } | null
-}
-
-interface GradeDetail {
-  id: string
-  name: string
-  level: string
-  studentCount: number
-  leader: string | null
-}
+import { TimetableGrid } from "@/components/timetable/timetable-grid"
+import { SectionSelector } from "@/components/timetable/section-selector"
+import { SlotEditorDialog } from "@/components/timetable/slot-editor-dialog"
+import { cn } from "@/lib/utils"
+import type {
+  Grade,
+  GradeDetail,
+  Subject,
+  DaySchedule,
+  TimePeriod,
+  GradeRoom,
+  ScheduleSlotFull,
+  GradeSubject,
+  TeacherProfile,
+} from "@/lib/types/timetable"
 
 export default function TimetablePage() {
   const { t, locale } = useI18n()
+  const { toast } = useToast()
+  const { granted: canCreateSlots, loading: loadingPermissions } = usePermission("schedule", "create")
   const [grades, setGrades] = useState<Grade[]>([])
   const [selectedGradeId, setSelectedGradeId] = useState<string | null>(null)
   const [gradeDetail, setGradeDetail] = useState<GradeDetail | null>(null)
@@ -63,7 +50,7 @@ export default function TimetablePage() {
   const [isSlotEditorOpen, setIsSlotEditorOpen] = useState(false)
   const [editorDay, setEditorDay] = useState<string>("")
   const [editorTimePeriodId, setEditorTimePeriodId] = useState<string>("")
-  const [editorSlot, setEditorSlot] = useState<DialogScheduleSlot | null>(null)
+  const [editorSlot, setEditorSlot] = useState<ScheduleSlotFull | null>(null)
   const [gradeSubjects, setGradeSubjects] = useState<GradeSubject[]>([])
   const [teachers, setTeachers] = useState<TeacherProfile[]>([])
 
@@ -82,45 +69,29 @@ export default function TimetablePage() {
           if (data.grades?.length > 0) {
             setSelectedGradeId(data.grades[0].id)
           }
+        } else {
+          toast({
+            title: t.common.error,
+            description: t.timetable.slotEditor.errorFetch,
+            variant: "destructive",
+          })
         }
       } catch (err) {
         console.error("Failed to fetch grades:", err)
+        toast({
+          title: t.common.error,
+          description: t.timetable.slotEditor.errorFetch,
+          variant: "destructive",
+        })
       } finally {
         setLoading(false)
       }
     }
     fetchGrades()
-  }, [])
-
-  // Fetch subjects when grade changes
-  useEffect(() => {
-    if (!selectedGradeId) return
-
-    async function fetchSubjects() {
-      setLoadingSubjects(true)
-      try {
-        const res = await fetch(`/api/timetable?gradeId=${selectedGradeId}`)
-        if (res.ok) {
-          const data = await res.json()
-          setGradeDetail(data.grade)
-          setSubjects(data.subjects || [])
-          setTotalHours(data.totalHours || 0)
-        }
-      } catch (err) {
-        console.error("Failed to fetch subjects:", err)
-      } finally {
-        setLoadingSubjects(false)
-      }
-    }
-    fetchSubjects()
-
-    // Also fetch grade rooms and grade subjects for the selected grade
-    fetchGradeRooms()
-    fetchGradeSubjects()
-  }, [selectedGradeId])
+  }, [t, toast])
 
   // Fetch grade rooms for section selector
-  async function fetchGradeRooms() {
+  const fetchGradeRooms = useCallback(async () => {
     if (!selectedGradeId) return
     try {
       const res = await fetch(`/api/grade-rooms?gradeId=${selectedGradeId}`)
@@ -131,35 +102,72 @@ export default function TimetablePage() {
         if (data.length > 0 && !selectedGradeRoomId) {
           setSelectedGradeRoomId(data[0].id)
         }
+      } else {
+        toast({
+          title: t.common.error,
+          description: t.timetable.slotEditor.errorFetch,
+          variant: "destructive",
+        })
       }
     } catch (err) {
       console.error("Failed to fetch grade rooms:", err)
+      toast({
+        title: t.common.error,
+        description: t.timetable.slotEditor.errorFetch,
+        variant: "destructive",
+      })
     }
-  }
+  }, [selectedGradeId, selectedGradeRoomId, t, toast])
 
-  // Fetch grade subjects for slot editor
-  async function fetchGradeSubjects() {
+  // Fetch subjects when grade changes (consolidated - single API call for both display and editor)
+  useEffect(() => {
     if (!selectedGradeId) return
-    try {
-      const res = await fetch(`/api/timetable?gradeId=${selectedGradeId}`)
-      if (res.ok) {
-        const data = await res.json()
-        // Transform subjects data to GradeSubject format
-        const formattedSubjects: GradeSubject[] = data.subjects?.map((s: Subject) => ({
-          id: s.id,
-          subject: {
-            id: s.subjectId,
-            name: s.name,
-            nameFr: s.name,
-            code: s.code || "",
-          },
-        })) || []
-        setGradeSubjects(formattedSubjects)
+
+    async function fetchGradeData() {
+      setLoadingSubjects(true)
+      try {
+        const res = await fetch(`/api/timetable?gradeId=${selectedGradeId}`)
+        if (res.ok) {
+          const data = await res.json()
+
+          // Set display data
+          setGradeDetail(data.grade)
+          setSubjects(data.subjects || [])
+          setTotalHours(data.totalHours || 0)
+
+          // Transform for slot editor (single fetch instead of duplicate!)
+          const formattedSubjects: GradeSubject[] = data.subjects?.map((s: Subject) => ({
+            id: s.id,
+            subject: {
+              id: s.subjectId,
+              name: s.name,
+              nameFr: s.name,
+              code: s.code || "",
+            },
+          })) || []
+          setGradeSubjects(formattedSubjects)
+        } else {
+          toast({
+            title: t.common.error,
+            description: t.timetable.slotEditor.errorFetch,
+            variant: "destructive",
+          })
+        }
+      } catch (err) {
+        console.error("Failed to fetch grade data:", err)
+        toast({
+          title: t.common.error,
+          description: t.timetable.slotEditor.errorFetch,
+          variant: "destructive",
+        })
+      } finally {
+        setLoadingSubjects(false)
       }
-    } catch (err) {
-      console.error("Failed to fetch grade subjects:", err)
     }
-  }
+
+    fetchGradeData()
+    fetchGradeRooms()
+  }, [selectedGradeId, fetchGradeRooms, t, toast])
 
   // Fetch teachers
   useEffect(() => {
@@ -169,13 +177,24 @@ export default function TimetablePage() {
         if (res.ok) {
           const data = await res.json()
           setTeachers(data)
+        } else {
+          toast({
+            title: t.common.error,
+            description: t.timetable.slotEditor.errorFetch,
+            variant: "destructive",
+          })
         }
       } catch (err) {
         console.error("Failed to fetch teachers:", err)
+        toast({
+          title: t.common.error,
+          description: t.timetable.slotEditor.errorFetch,
+          variant: "destructive",
+        })
       }
     }
     fetchTeachers()
-  }, [])
+  }, [t, toast])
 
   // Fetch weekly schedule when grade room changes
   useEffect(() => {
@@ -189,32 +208,53 @@ export default function TimetablePage() {
           const data = await res.json()
           setWeeklySchedule(data.weeklySchedule || [])
           setTimePeriods(data.timePeriods || [])
+        } else {
+          toast({
+            title: t.common.error,
+            description: t.timetable.slotEditor.errorFetch,
+            variant: "destructive",
+          })
         }
       } catch (err) {
         console.error("Failed to fetch weekly schedule:", err)
+        toast({
+          title: t.common.error,
+          description: t.timetable.slotEditor.errorFetch,
+          variant: "destructive",
+        })
       } finally {
         setLoadingSchedule(false)
       }
     }
     fetchWeeklySchedule()
-  }, [selectedGradeRoomId])
+  }, [selectedGradeRoomId, t, toast])
 
-  // Slot editor handlers
-  const handleSlotClick = (day: string, timePeriodId: string, slot: any) => {
+  // Slot editor handlers (optimized with useCallback)
+  const handleSlotClick = useCallback((day: string, timePeriodId: string, slot: any) => {
     setEditorDay(day)
     setEditorTimePeriodId(timePeriodId)
     setEditorSlot(slot)
     setIsSlotEditorOpen(true)
-  }
+  }, [])
 
-  const handleAddSlot = (day: string, timePeriodId: string) => {
+  const handleAddSlot = useCallback((day: string, timePeriodId: string) => {
+    // Check permission before opening dialog
+    if (!canCreateSlots) {
+      toast({
+        title: "Permission Denied",
+        description: "You don't have permission to add schedule slots.",
+        variant: "destructive",
+      })
+      return
+    }
+
     setEditorDay(day)
     setEditorTimePeriodId(timePeriodId)
     setEditorSlot(null)
     setIsSlotEditorOpen(true)
-  }
+  }, [canCreateSlots, toast])
 
-  const handleSlotEditorSuccess = () => {
+  const handleSlotEditorSuccess = useCallback(() => {
     // Refresh the schedule
     if (selectedGradeRoomId) {
       const url = `/api/timetable?gradeRoomId=${selectedGradeRoomId}`
@@ -226,13 +266,25 @@ export default function TimetablePage() {
         })
         .catch((err) => {
           console.error("Failed to refresh schedule:", err)
+          toast({
+            title: t.common.error,
+            description: t.timetable.slotEditor.errorFetch,
+            variant: "destructive",
+          })
         })
     }
-  }
+  }, [selectedGradeRoomId, t, toast])
 
-  // Calculate stats
-  const totalStudents = grades.reduce((sum, g) => sum + g.studentCount, 0)
-  const totalSubjects = grades.reduce((sum, g) => sum + g.subjectCount, 0)
+  // Calculate stats (optimized with useMemo)
+  const totalStudents = useMemo(
+    () => grades.reduce((sum, g) => sum + g.studentCount, 0),
+    [grades]
+  )
+
+  const totalSubjects = useMemo(
+    () => grades.reduce((sum, g) => sum + g.subjectCount, 0),
+    [grades]
+  )
 
   if (loading) {
     return (
@@ -285,11 +337,27 @@ export default function TimetablePage() {
       {/* View Toggle Tabs */}
       <Tabs value={viewMode} onValueChange={(v) => setViewMode(v as "subjects" | "schedule")} className="mb-6">
         <TabsList className="grid w-full max-w-md grid-cols-2">
-          <TabsTrigger value="subjects" className="flex items-center gap-2">
+          <TabsTrigger
+            value="subjects"
+            className={cn(
+              "flex items-center gap-2",
+              viewMode === "subjects"
+                ? "bg-gspn-gold-500 text-black dark:bg-gspn-gold-500 dark:text-black"
+                : "hover:bg-gspn-maroon-50 dark:hover:bg-gspn-maroon-900"
+            )}
+          >
             <BookOpen className="h-4 w-4" />
             {locale === 'fr' ? 'Matières' : 'Subjects'}
           </TabsTrigger>
-          <TabsTrigger value="schedule" className="flex items-center gap-2">
+          <TabsTrigger
+            value="schedule"
+            className={cn(
+              "flex items-center gap-2",
+              viewMode === "schedule"
+                ? "bg-gspn-gold-500 text-black dark:bg-gspn-gold-500 dark:text-black"
+                : "hover:bg-gspn-maroon-50 dark:hover:bg-gspn-maroon-900"
+            )}
+          >
             <Calendar className="h-4 w-4" />
             {locale === 'fr' ? 'Emploi du temps' : 'Schedule'}
           </TabsTrigger>
@@ -332,7 +400,7 @@ export default function TimetablePage() {
                         {grade.subjectCount} {t.common.subjects.toLowerCase()}
                       </p>
                     </div>
-                    <Badge variant="secondary" className="text-xs">
+                    <Badge className="text-xs bg-gspn-gold-50 border-gspn-gold-200 text-gspn-gold-700 dark:bg-gspn-gold-950/50 dark:border-gspn-gold-800 dark:text-gspn-gold-300">
                       {grade.studentCount}
                     </Badge>
                   </button>
@@ -400,10 +468,10 @@ export default function TimetablePage() {
                   subjects.map((subject) => (
                     <div
                       key={subject.id}
-                      className="flex items-start gap-4 p-4 rounded-lg border border-border hover:border-gspn-maroon-300 dark:hover:border-gspn-maroon-700 transition-colors"
+                      className="flex items-start gap-4 p-4 rounded-lg border border-border hover:border-gspn-maroon-300 hover:shadow-md hover:shadow-gspn-gold-500/10 dark:hover:border-gspn-maroon-700 transition-all duration-200"
                     >
                       <div className="flex flex-col items-center justify-center min-w-[60px] p-2 rounded-lg bg-muted">
-                        <Clock className="size-4 text-muted-foreground mb-1" />
+                        <Clock className="size-4 text-gspn-maroon-500 dark:text-gspn-maroon-400 mb-1" />
                         <span className="text-sm font-medium">{subject.hoursPerWeek}h</span>
                       </div>
                       <div className="flex-1 space-y-1">
@@ -425,7 +493,7 @@ export default function TimetablePage() {
                               </p>
                             )}
                           </div>
-                          <Badge variant="outline" className="text-xs">
+                          <Badge className="text-xs bg-gspn-maroon-50 border-gspn-maroon-200 text-gspn-maroon-700 dark:bg-gspn-maroon-950/50 dark:border-gspn-maroon-800 dark:text-gspn-maroon-300">
                             Coef. {subject.coefficient}
                           </Badge>
                         </div>
@@ -434,12 +502,12 @@ export default function TimetablePage() {
                   ))
                 ) : selectedGradeId ? (
                   <div className="text-center py-12">
-                    <BookOpen className="size-12 text-muted-foreground mx-auto mb-4" />
+                    <BookOpen className="size-12 text-gspn-maroon-300 dark:text-gspn-maroon-700 mx-auto mb-4" />
                     <p className="text-muted-foreground">{t.common.noData}</p>
                   </div>
                 ) : (
                   <div className="text-center py-12">
-                    <GraduationCap className="size-12 text-muted-foreground mx-auto mb-4" />
+                    <GraduationCap className="size-12 text-gspn-maroon-300 dark:text-gspn-maroon-700 mx-auto mb-4" />
                     <p className="text-muted-foreground">{t.grades.selectClass}</p>
                   </div>
                 )}
@@ -478,7 +546,7 @@ export default function TimetablePage() {
                     </div>
                   ) : timePeriods.length === 0 ? (
                     <div className="text-center py-12">
-                      <Clock className="size-12 text-muted-foreground mx-auto mb-4" />
+                      <Clock className="size-12 text-gspn-maroon-300 dark:text-gspn-maroon-700 mx-auto mb-4" />
                       <p className="text-muted-foreground">
                         {locale === 'fr'
                           ? 'Aucune période définie. Veuillez créer des périodes dans les paramètres.'
@@ -490,8 +558,9 @@ export default function TimetablePage() {
                       weeklySchedule={weeklySchedule}
                       timePeriods={timePeriods}
                       onSlotClick={handleSlotClick}
-                      onAddSlot={handleAddSlot}
+                      onAddSlot={canCreateSlots ? handleAddSlot : undefined}
                       locale={locale}
+                      canEdit={canCreateSlots}
                     />
                   )}
                 </CardContent>

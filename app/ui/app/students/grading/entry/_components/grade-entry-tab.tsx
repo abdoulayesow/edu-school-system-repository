@@ -203,7 +203,7 @@ export function GradeEntryTab({ activeTrimester, grades }: GradeEntryTabProps) {
   }, [selectedSubjectId, evaluationDate, entriesWithScores])
 
   // Ctrl+S keyboard shortcut — use ref to avoid stale closure
-  const handleSubmitRef = useRef<() => void>()
+  const handleSubmitRef = useRef<(() => void) | undefined>(undefined)
   handleSubmitRef.current = handleSubmit
 
   useEffect(() => {
@@ -226,6 +226,7 @@ export function GradeEntryTab({ activeTrimester, grades }: GradeEntryTabProps) {
       if (res.ok) setSubjects(await res.json())
     } catch (err) {
       console.error("Error fetching subjects:", err)
+      toast({ title: t.common.error, description: t.common.errorFetchingData, variant: "destructive" })
     }
   }
 
@@ -248,6 +249,7 @@ export function GradeEntryTab({ activeTrimester, grades }: GradeEntryTabProps) {
       }
     } catch (err) {
       console.error("Error fetching students:", err)
+      toast({ title: t.common.error, description: t.common.errorFetchingData, variant: "destructive" })
     }
   }
 

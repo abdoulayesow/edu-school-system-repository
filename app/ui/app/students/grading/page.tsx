@@ -7,11 +7,6 @@ import { Card, CardHeader, CardTitle, CardContent, CardDescription } from "@/com
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Progress } from "@/components/ui/progress"
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from "@/components/ui/tooltip"
 import { useI18n } from "@/components/i18n-provider"
 import { useToast } from "@/components/ui/use-toast"
 import { useCalculation } from "@/hooks/use-calculation"
@@ -20,21 +15,19 @@ import {
   Calendar,
   Loader2,
   AlertCircle,
-  CheckCircle2,
   AlertTriangle,
   ArrowRight,
   RefreshCw,
-  BookOpen,
   Users,
   Trophy,
   FileText,
   PenLine,
   Sparkles,
-  Clock,
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { componentClasses } from "@/lib/design-tokens"
-import { getProgressColor } from "@/lib/grading-utils"
+import { SummaryStatsSection } from "./_components/summary-stats-section"
+import { ClassProgressAccordion } from "./_components/class-progress-accordion"
 import type {
   ActiveTrimester,
   GradeProgress,
@@ -132,31 +125,6 @@ export default function GradingOverviewPage() {
     return missing.slice(0, 10) // Limit to 10 for display
   }, [progressData])
 
-  const getStatusBadge = (grade: GradeProgress) => {
-    if (grade.completionProgress === 100 && grade.rankingsCalculated) {
-      return (
-        <Badge className="bg-emerald-500/10 text-emerald-600 border-emerald-500/30">
-          <CheckCircle2 className="h-3 w-3 mr-1" />
-          {t.grading.complete}
-        </Badge>
-      )
-    }
-    if (grade.compositionProgress > 0 || grade.subjectsWithComposition > 0) {
-      return (
-        <Badge className="bg-amber-500/10 text-amber-600 border-amber-500/30">
-          <Clock className="h-3 w-3 mr-1" />
-          {t.grading.inProgress}
-        </Badge>
-      )
-    }
-    return (
-      <Badge variant="outline" className="text-muted-foreground">
-        <AlertCircle className="h-3 w-3 mr-1" />
-        {t.grading.notStarted}
-      </Badge>
-    )
-  }
-
   if (isLoading) {
     return (
       <PageContainer maxWidth="full">
@@ -215,67 +183,12 @@ export default function GradingOverviewPage() {
       </div>
 
       {/* Summary Cards */}
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4 mb-6">
-        <Card className="border shadow-sm overflow-hidden">
-          <div className="h-1 bg-gspn-maroon-500" />
-          <CardContent className="pt-5">
-            <div className="flex items-center gap-3">
-              <div className="p-2 bg-gspn-maroon-500/10 rounded-lg">
-                <BookOpen className="h-5 w-5 text-gspn-maroon-500" />
-              </div>
-              <div>
-                <p className="text-sm text-muted-foreground">{t.grading.classes}</p>
-                <p className="text-2xl font-bold">{progressData?.summary.totalGrades || 0}</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card className="border shadow-sm overflow-hidden">
-          <div className="h-1 bg-emerald-500" />
-          <CardContent className="pt-5">
-            <div className="flex items-center gap-3">
-              <div className="p-2 bg-emerald-500/10 rounded-lg">
-                <CheckCircle2 className="h-5 w-5 text-emerald-500" />
-              </div>
-              <div>
-                <p className="text-sm text-muted-foreground">{t.grading.complete}</p>
-                <p className="text-2xl font-bold">{complete.length}</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card className="border shadow-sm overflow-hidden">
-          <div className="h-1 bg-amber-500" />
-          <CardContent className="pt-5">
-            <div className="flex items-center gap-3">
-              <div className="p-2 bg-amber-500/10 rounded-lg">
-                <Clock className="h-5 w-5 text-amber-500" />
-              </div>
-              <div>
-                <p className="text-sm text-muted-foreground">{t.grading.inProgress}</p>
-                <p className="text-2xl font-bold">{inProgress.length}</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card className="border shadow-sm overflow-hidden">
-          <div className="h-1 bg-gspn-gold-500" />
-          <CardContent className="pt-5">
-            <div className="flex items-center gap-3">
-              <div className="p-2 bg-gspn-gold-500/10 rounded-lg">
-                <Trophy className="h-5 w-5 text-gspn-gold-500" />
-              </div>
-              <div>
-                <p className="text-sm text-muted-foreground">{t.grading.rankingsReady}</p>
-                <p className="text-2xl font-bold">{progressData?.summary.gradesWithRankings || 0}</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
+      <SummaryStatsSection
+        totalGrades={progressData?.summary.totalGrades || 0}
+        completeCount={complete.length}
+        inProgressCount={inProgress.length}
+        rankingsReady={progressData?.summary.gradesWithRankings || 0}
+      />
 
       {/* Overall Progress */}
       <Card className="mb-6 border shadow-sm overflow-hidden">
@@ -442,122 +355,11 @@ export default function GradingOverviewPage() {
           <CardDescription>{t.grading.clickClassForDetails}</CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="space-y-2">
-            {progressData?.grades.map((grade) => (
-              <div key={grade.id}>
-                <button
-                  onClick={() => setExpandedGrade(expandedGrade === grade.id ? null : grade.id)}
-                  className={cn(
-                    "w-full p-3 rounded-lg border transition-all text-left",
-                    "hover:border-gspn-maroon-500/50 hover:bg-muted/30",
-                    expandedGrade === grade.id && "border-gspn-maroon-500 bg-muted/50"
-                  )}
-                >
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                      <div className="font-semibold">{grade.name}</div>
-                      <Badge variant="outline" className="text-xs">
-                        {grade.studentCount} {t.common.students}
-                      </Badge>
-                      {getStatusBadge(grade)}
-                    </div>
-                    <div className="flex items-center gap-4">
-                      <Tooltip>
-                        <TooltipTrigger asChild>
-                          <div className="w-32">
-                            <Progress
-                              value={grade.completionProgress}
-                              className={cn("h-2", getProgressColor(grade.completionProgress))}
-                            />
-                          </div>
-                        </TooltipTrigger>
-                        <TooltipContent>
-                          {grade.completionProgress}% {t.grading.percentComplete}
-                        </TooltipContent>
-                      </Tooltip>
-                      <span className="text-sm text-muted-foreground w-12 text-right">
-                        {grade.completionProgress}%
-                      </span>
-                    </div>
-                  </div>
-                </button>
-
-                {/* Expanded Details */}
-                {expandedGrade === grade.id && (
-                  <div className="mt-2 ml-4 p-4 rounded-lg bg-muted/30 border animate-in fade-in slide-in-from-top-2 duration-200">
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
-                      <div>
-                        <p className="text-xs text-muted-foreground">{t.grading.subjects}</p>
-                        <p className="font-semibold">{grade.totalSubjects}</p>
-                      </div>
-                      <div>
-                        <p className="text-xs text-muted-foreground">{t.grading.compositions}</p>
-                        <p className="font-semibold">
-                          {grade.subjectsWithComposition}/{grade.totalSubjects}
-                        </p>
-                      </div>
-                      <div>
-                        <p className="text-xs text-muted-foreground">{t.grading.averages}</p>
-                        <p className="font-semibold">
-                          {grade.subjects.filter((s) => s.hasAverages).length}/{grade.totalSubjects}
-                        </p>
-                      </div>
-                      <div>
-                        <p className="text-xs text-muted-foreground">{t.grading.rankings}</p>
-                        <p className="font-semibold">
-                          {grade.studentsWithRankings}/{grade.studentCount}
-                        </p>
-                      </div>
-                    </div>
-
-                    {/* Subject Details */}
-                    <div className="space-y-1">
-                      {grade.subjects.map((subject) => (
-                        <div
-                          key={subject.id}
-                          className="flex items-center justify-between py-1.5 px-2 rounded hover:bg-background text-sm"
-                        >
-                          <div className="flex items-center gap-2">
-                            {subject.hasComposition ? (
-                              <CheckCircle2 className="h-3.5 w-3.5 text-emerald-500" />
-                            ) : (
-                              <AlertCircle className="h-3.5 w-3.5 text-amber-500" />
-                            )}
-                            <span>{locale === "fr" ? subject.nameFr : subject.nameEn}</span>
-                            <span className="text-xs text-muted-foreground">
-                              ({t.grading.coefficient}×{subject.coefficient})
-                            </span>
-                          </div>
-                          <div className="flex items-center gap-4 text-xs text-muted-foreground">
-                            <span>I: {subject.interrogations}</span>
-                            <span>DS: {subject.devoirsSurveilles}</span>
-                            <span className={subject.hasComposition ? "text-emerald-600 font-medium" : "text-amber-600"}>
-                              C: {subject.compositions}
-                            </span>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-
-                    <div className="mt-3 pt-3 border-t flex justify-end gap-2">
-                      <Link href={`/students/grading/entry`}>
-                        <Button variant="outline" size="sm">
-                          <PenLine className="h-3.5 w-3.5 mr-1" />
-                          {t.grading.gradeEntry}
-                        </Button>
-                      </Link>
-                      <Link href={`/students/grading/ranking`}>
-                        <Button variant="outline" size="sm">
-                          <Trophy className="h-3.5 w-3.5 mr-1" />
-                          {t.grading.classRanking}
-                        </Button>
-                      </Link>
-                    </div>
-                  </div>
-                )}
-              </div>
-            ))}
-          </div>
+          <ClassProgressAccordion
+            grades={progressData?.grades || []}
+            expandedGrade={expandedGrade}
+            onToggleGrade={(id) => setExpandedGrade(expandedGrade === id ? null : id)}
+          />
         </CardContent>
       </Card>
     </PageContainer>

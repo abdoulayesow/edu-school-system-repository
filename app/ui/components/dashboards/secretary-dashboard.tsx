@@ -1,11 +1,12 @@
 "use client"
 
-import { useMemo } from "react"
+import { useMemo, useEffect } from "react"
 import Link from "next/link"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Progress } from "@/components/ui/progress"
+import { useToast } from "@/components/ui/use-toast"
 import {
   FileText,
   Users,
@@ -31,10 +32,22 @@ interface SecretaryDashboardProps {
 
 export function SecretaryDashboard({ userName }: SecretaryDashboardProps) {
   const { t, locale } = useI18n()
+  const { toast } = useToast()
 
   // Fetch enrollments with different statuses
-  const { data: allEnrollmentsData, isLoading: enrollmentsLoading } = useEnrollments({ limit: 100 })
-  const { data: gradesData, isLoading: gradesLoading } = useGrades()
+  const { data: allEnrollmentsData, isLoading: enrollmentsLoading, error: enrollmentsError } = useEnrollments({ limit: 100 })
+  const { data: gradesData, isLoading: gradesLoading, error: gradesError } = useGrades()
+
+  // Show error toast notifications
+  useEffect(() => {
+    if (enrollmentsError || gradesError) {
+      toast({
+        variant: "destructive",
+        title: t.common.error,
+        description: t.dashboard.errors.fetchFailed,
+      })
+    }
+  }, [enrollmentsError, gradesError, toast, t])
 
   const loading = enrollmentsLoading || gradesLoading
 
@@ -83,6 +96,29 @@ export function SecretaryDashboard({ userName }: SecretaryDashboardProps) {
         <div className="text-center space-y-4">
           <Loader2 className={cn(sizing.icon.xl, "animate-spin text-gspn-maroon-500 mx-auto")} />
           <p className="text-muted-foreground">{locale === "fr" ? "Chargement..." : "Loading..."}</p>
+        </div>
+      </div>
+    )
+  }
+
+  // Show error state if critical data failed to load
+  const hasCriticalError = enrollmentsError && gradesError
+  if (hasCriticalError) {
+    return (
+      <div className="flex items-center justify-center min-h-[60vh]">
+        <div className="text-center space-y-4 max-w-md">
+          <div className="p-3 bg-destructive/10 rounded-full w-fit mx-auto">
+            <AlertCircle className={cn(sizing.icon.xl, "text-destructive")} />
+          </div>
+          <h3 className={cn(typography.heading.section, "text-foreground")}>
+            {locale === "fr" ? "Erreur de chargement" : "Loading Error"}
+          </h3>
+          <p className="text-muted-foreground">
+            {t.dashboard.errors.fetchFailed}
+          </p>
+          <Button onClick={() => window.location.reload()}>
+            {locale === "fr" ? "Actualiser la page" : "Refresh Page"}
+          </Button>
         </div>
       </div>
     )

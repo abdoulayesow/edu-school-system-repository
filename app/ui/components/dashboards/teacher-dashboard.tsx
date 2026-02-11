@@ -1,11 +1,12 @@
 "use client"
 
-import { useMemo } from "react"
+import { useMemo, useEffect } from "react"
 import Link from "next/link"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Progress } from "@/components/ui/progress"
+import { useToast } from "@/components/ui/use-toast"
 import {
   Users,
   BookOpen,
@@ -18,6 +19,7 @@ import {
   ClipboardCheck,
   FileText,
   BarChart,
+  AlertCircle,
 } from "lucide-react"
 import { useI18n } from "@/components/i18n-provider"
 import { sizing, typography, componentClasses } from "@/lib/design-tokens"
@@ -30,9 +32,21 @@ interface TeacherDashboardProps {
 
 export function TeacherDashboard({ userName }: TeacherDashboardProps) {
   const { t, locale } = useI18n()
+  const { toast } = useToast()
 
   // Fetch grades data (which includes attendance rates)
-  const { data: gradesData, isLoading: gradesLoading } = useGrades()
+  const { data: gradesData, isLoading: gradesLoading, error: gradesError } = useGrades()
+
+  // Show error toast notification
+  useEffect(() => {
+    if (gradesError) {
+      toast({
+        variant: "destructive",
+        title: t.common.error,
+        description: t.dashboard.errors.gradesUnavailable,
+      })
+    }
+  }, [gradesError, toast, t])
 
   const loading = gradesLoading
 
@@ -62,6 +76,28 @@ export function TeacherDashboard({ userName }: TeacherDashboardProps) {
         <div className="text-center space-y-4">
           <Loader2 className={cn(sizing.icon.xl, "animate-spin text-gspn-maroon-500 mx-auto")} />
           <p className="text-muted-foreground">{locale === "fr" ? "Chargement..." : "Loading..."}</p>
+        </div>
+      </div>
+    )
+  }
+
+  // Show error state if data failed to load
+  if (gradesError) {
+    return (
+      <div className="flex items-center justify-center min-h-[60vh]">
+        <div className="text-center space-y-4 max-w-md">
+          <div className="p-3 bg-destructive/10 rounded-full w-fit mx-auto">
+            <AlertCircle className={cn(sizing.icon.xl, "text-destructive")} />
+          </div>
+          <h3 className={cn(typography.heading.section, "text-foreground")}>
+            {locale === "fr" ? "Erreur de chargement" : "Loading Error"}
+          </h3>
+          <p className="text-muted-foreground">
+            {t.dashboard.errors.gradesUnavailable}
+          </p>
+          <Button onClick={() => window.location.reload()}>
+            {locale === "fr" ? "Actualiser la page" : "Refresh Page"}
+          </Button>
         </div>
       </div>
     )

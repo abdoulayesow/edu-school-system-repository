@@ -49,7 +49,10 @@ function GradeEntryPageContent() {
   async function fetchGrades() {
     try {
       const res = await fetch("/api/grades")
-      if (res.ok) setGrades(await res.json())
+      if (res.ok) {
+        const data = await res.json()
+        setGrades(data.grades || data)
+      }
     } catch (err) {
       console.error("Error fetching grades:", err)
       toast({ title: t.common.error, description: t.common.errorFetchingData, variant: "destructive" })

@@ -234,6 +234,17 @@ export interface SubjectAverage {
   teacherRemark: string | null
 }
 
+/**
+ * Student entry for bulletin selection dropdown
+ */
+export interface BulletinStudent {
+  id: string
+  firstName: string
+  lastName: string
+  studentNumber: string
+  currentGrade: Grade | null
+}
+
 // ============================================================================
 // BULLETIN PAGE TYPES
 // ============================================================================

@@ -7,8 +7,10 @@ import { Badge } from "@/components/ui/badge"
 import { Input } from "@/components/ui/input"
 import { DialogFooter } from "@/components/ui/dialog"
 import { useI18n } from "@/components/i18n-provider"
-import { Loader2, Check, X, Clock, FileQuestion, ClipboardCheck } from "lucide-react"
+import { Loader2, ClipboardCheck } from "lucide-react"
 import { cn } from "@/lib/utils"
+import { sizing } from "@/lib/design-tokens"
+import { ATTENDANCE_STATUS_CONFIG } from "@/lib/config/attendance-status"
 
 interface Room {
   id: string
@@ -216,7 +218,7 @@ export function AttendanceDialog({
       title={t.admin.roomAssignments.attendanceForRoom.replace("{roomName}", room.displayName || room.name)}
       description={`${room.students.length} ${t.common.students}`}
       icon={ClipboardCheck}
-      accentColor="emerald"
+      accentColor="maroon"
       maxWidth="sm:max-w-2xl"
       error={error}
       footer={
@@ -227,9 +229,9 @@ export function AttendanceDialog({
           <Button
             onClick={handleSave}
             disabled={isSaving || records.size === 0}
-            className={dialogThemes.emerald.submitBg}
+            className={dialogThemes.maroon.submitBg}
           >
-            {isSaving && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
+            {isSaving && <Loader2 className={cn(sizing.icon.sm, "mr-2 animate-spin")} />}
             {t.admin.roomAssignments.saveAttendance}
           </Button>
         </DialogFooter>
@@ -251,40 +253,40 @@ export function AttendanceDialog({
           {t.admin.roomAssignments.markAll}
         </span>
         <Button variant="outline" size="sm" onClick={() => markAllAs("present")}>
-          <Check className="h-3 w-3 mr-1" />
+          <ATTENDANCE_STATUS_CONFIG.present.icon className={cn(sizing.icon.xs, "mr-1")} />
           {t.admin.roomAssignments.markPresent}
         </Button>
         <Button variant="outline" size="sm" onClick={() => markAllAs("absent")}>
-          <X className="h-3 w-3 mr-1" />
+          <ATTENDANCE_STATUS_CONFIG.absent.icon className={cn(sizing.icon.xs, "mr-1")} />
           {t.admin.roomAssignments.markAbsent}
         </Button>
       </div>
 
-      {/* Stats */}
+      {/* Stats - Using GSPN brand status configuration */}
       <div className="flex items-center gap-2">
-        <Badge variant="default" className="bg-emerald-600">
-          <Check className="h-3 w-3 mr-1" />
+        <Badge variant="default" className={ATTENDANCE_STATUS_CONFIG.present.className}>
+          <ATTENDANCE_STATUS_CONFIG.present.icon className={cn(sizing.icon.xs, "mr-1")} />
           {counts.present}
         </Badge>
-        <Badge variant="destructive">
-          <X className="h-3 w-3 mr-1" />
+        <Badge variant="default" className={ATTENDANCE_STATUS_CONFIG.absent.className}>
+          <ATTENDANCE_STATUS_CONFIG.absent.icon className={cn(sizing.icon.xs, "mr-1")} />
           {counts.absent}
         </Badge>
-        <Badge variant="secondary" className="bg-yellow-500 text-white">
-          <Clock className="h-3 w-3 mr-1" />
+        <Badge variant="default" className={ATTENDANCE_STATUS_CONFIG.late.className}>
+          <ATTENDANCE_STATUS_CONFIG.late.icon className={cn(sizing.icon.xs, "mr-1")} />
           {counts.late}
         </Badge>
-        <Badge variant="outline">
-          <FileQuestion className="h-3 w-3 mr-1" />
+        <Badge variant="default" className={ATTENDANCE_STATUS_CONFIG.excused.className}>
+          <ATTENDANCE_STATUS_CONFIG.excused.icon className={cn(sizing.icon.xs, "mr-1")} />
           {counts.excused}
         </Badge>
       </div>
 
-      {/* Student list */}
+      {/* Student list - Using GSPN brand status configuration */}
       <div className="border rounded-lg p-2 max-h-[350px] overflow-y-auto space-y-1">
         {isLoading ? (
           <div className="flex items-center justify-center py-8">
-            <Loader2 className="h-6 w-6 animate-spin" />
+            <Loader2 className={cn(sizing.icon.lg, "animate-spin")} />
           </div>
         ) : (
           room.students.map(student => {
@@ -308,48 +310,27 @@ export function AttendanceDialog({
                 </div>
 
                 <div className="flex items-center gap-1">
-                  <Button
-                    size="sm"
-                    variant={status === "present" ? "default" : "outline"}
-                    className={cn(
-                      "h-8 w-8 p-0",
-                      status === "present" && "bg-emerald-600 hover:bg-emerald-700"
-                    )}
-                    onClick={() => handleStatusChange(student.id, "present")}
-                    title={t.admin.roomAssignments.markPresent}
-                  >
-                    <Check className="h-4 w-4" />
-                  </Button>
-                  <Button
-                    size="sm"
-                    variant={status === "absent" ? "destructive" : "outline"}
-                    className="h-8 w-8 p-0"
-                    onClick={() => handleStatusChange(student.id, "absent")}
-                    title={t.admin.roomAssignments.markAbsent}
-                  >
-                    <X className="h-4 w-4" />
-                  </Button>
-                  <Button
-                    size="sm"
-                    variant={status === "late" ? "default" : "outline"}
-                    className={cn(
-                      "h-8 w-8 p-0",
-                      status === "late" && "bg-yellow-500 hover:bg-yellow-600"
-                    )}
-                    onClick={() => handleStatusChange(student.id, "late")}
-                    title={t.admin.roomAssignments.markLate}
-                  >
-                    <Clock className="h-4 w-4" />
-                  </Button>
-                  <Button
-                    size="sm"
-                    variant={status === "excused" ? "secondary" : "outline"}
-                    className="h-8 w-8 p-0"
-                    onClick={() => handleStatusChange(student.id, "excused")}
-                    title={t.admin.roomAssignments.markExcused}
-                  >
-                    <FileQuestion className="h-4 w-4" />
-                  </Button>
+                  {(['present', 'absent', 'late', 'excused'] as const).map((btnStatus) => {
+                    const statusConfig = ATTENDANCE_STATUS_CONFIG[btnStatus]
+                    const Icon = statusConfig.icon
+                    const isActive = status === btnStatus
+
+                    return (
+                      <Button
+                        key={btnStatus}
+                        size="sm"
+                        variant={isActive ? "default" : "outline"}
+                        className={cn(
+                          "h-8 w-8 p-0",
+                          isActive && statusConfig.className.replace(/\/10/g, '')
+                        )}
+                        onClick={() => handleStatusChange(student.id, btnStatus)}
+                        title={t.admin.roomAssignments[`mark${btnStatus.charAt(0).toUpperCase() + btnStatus.slice(1)}` as keyof typeof t.admin.roomAssignments] as string}
+                      >
+                        <Icon className={sizing.icon.sm} />
+                      </Button>
+                    )
+                  })}
                 </div>
               </div>
             )
@@ -357,14 +338,14 @@ export function AttendanceDialog({
         )}
       </div>
 
-      {/* Success Message */}
+      {/* Success Message - Using GSPN maroon branding */}
       {success && (
         <div className={cn(
           "p-3 rounded-xl border",
-          "bg-gradient-to-br from-emerald-50 to-emerald-50/50 dark:from-emerald-950/30 dark:to-emerald-950/10",
-          "border-emerald-300 dark:border-emerald-700"
+          "bg-gradient-to-br from-gspn-maroon-50 to-gspn-maroon-50/50 dark:from-gspn-maroon-950/30 dark:to-gspn-maroon-950/10",
+          "border-gspn-maroon-300 dark:border-gspn-maroon-700"
         )}>
-          <p className="text-sm font-medium text-emerald-700 dark:text-emerald-300">
+          <p className="text-sm font-medium text-gspn-maroon-700 dark:text-gspn-maroon-300">
             {success}
           </p>
         </div>

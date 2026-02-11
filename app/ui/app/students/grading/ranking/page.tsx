@@ -30,57 +30,23 @@ import { componentClasses } from "@/lib/design-tokens"
 import { getScoreColor } from "@/lib/grading-utils"
 import { DecisionBadge } from "@/components/grading"
 import { useBatchBulletinDownload } from "@/hooks/use-batch-bulletin-download"
-import type { Trimester, Grade, RankedStudent, ClassStats, DecisionType } from "@/lib/types/grading"
+import { useGradingFilters } from "@/hooks/use-grading-filters"
+import type { RankedStudent, ClassStats, DecisionType } from "@/lib/types/grading"
 
 export default function ClassRankingPage() {
   const { t, locale } = useI18n()
   const { toast } = useToast()
 
-  const [isLoading, setIsLoading] = useState(true)
-  const [trimesters, setTrimesters] = useState<Trimester[]>([])
-  const [grades, setGrades] = useState<Grade[]>([])
-
-  const [selectedTrimesterId, setSelectedTrimesterId] = useState<string>("")
-  const [selectedGradeId, setSelectedGradeId] = useState<string>("")
+  const {
+    trimesters, selectedTrimesterId, setSelectedTrimesterId,
+    grades, selectedGradeId, setSelectedGradeId,
+    isLoading,
+  } = useGradingFilters({ fetchTrimesters: true, fetchGrades: true })
 
   const [students, setStudents] = useState<RankedStudent[]>([])
   const [classStats, setClassStats] = useState<ClassStats | null>(null)
   const [loadingRanking, setLoadingRanking] = useState(false)
   const { isDownloading, downloadProgress, downloadAllBulletins } = useBatchBulletinDownload()
-
-  // Fetch initial data
-  useEffect(() => {
-    async function fetchInitialData() {
-      try {
-        setIsLoading(true)
-        const [trimRes, gradeRes] = await Promise.all([
-          fetch("/api/admin/trimesters"),
-          fetch("/api/grades"),
-        ])
-
-        if (trimRes.ok) {
-          const trimData = await trimRes.json()
-          setTrimesters(trimData)
-          const active = trimData.find((t: Trimester) => t.isActive)
-          if (active) {
-            setSelectedTrimesterId(active.id)
-          }
-        }
-
-        if (gradeRes.ok) {
-          const gradeData = await gradeRes.json()
-          setGrades(gradeData)
-        }
-      } catch (err) {
-        console.error("Error fetching initial data:", err)
-        toast({ title: t.common.error, description: t.common.errorFetchingData, variant: "destructive" })
-      } finally {
-        setIsLoading(false)
-      }
-    }
-
-    fetchInitialData()
-  }, [])
 
   // Fetch ranking when grade and trimester are selected
   const fetchRanking = useCallback(async () => {
@@ -127,6 +93,7 @@ export default function ClassRankingPage() {
       }
     } catch (err) {
       console.error("Error fetching ranking:", err)
+      toast({ title: t.common.error, description: t.common.errorFetchingData, variant: "destructive" })
     } finally {
       setLoadingRanking(false)
     }
@@ -251,11 +218,11 @@ export default function ClassRankingPage() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <label className="text-sm font-medium mb-2 block">
-                {t.trimesters.trimester}
+                {t.admin.trimester}
               </label>
               <Select value={selectedTrimesterId} onValueChange={setSelectedTrimesterId}>
                 <SelectTrigger>
-                  <SelectValue placeholder={t.trimesters.selectTrimester} />
+                  <SelectValue placeholder={t.admin.selectTrimester} />
                 </SelectTrigger>
                 <SelectContent>
                   {trimesters.map((trimester) => (

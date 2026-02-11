@@ -16,73 +16,17 @@ import { Checkbox } from "@/components/ui/checkbox"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { DialogFooter } from "@/components/ui/dialog"
 import { useI18n } from "@/components/i18n-provider"
+import { useToast } from "@/hooks/use-toast"
 import { Loader2, AlertTriangle, Calendar } from "lucide-react"
-
-export interface ScheduleSlot {
-  id: string
-  gradeSubjectId: string | null
-  teacherProfileId: string | null
-  roomLocation: string | null
-  isBreak: boolean
-  notes: string | null
-}
-
-export interface GradeSubject {
-  id: string
-  subject: {
-    id: string
-    name: string
-    nameFr: string
-    code: string
-  }
-}
-
-export interface TeacherProfile {
-  id: string
-  person: {
-    id: string
-    firstName: string
-    lastName: string
-  }
-}
-
-export interface ConflictCheck {
-  type: 'teacher' | 'room' | 'section'
-  dayOfWeek: string
-  timePeriodId: string
-  details: string
-}
-
-interface SlotEditorDialogProps {
-  open: boolean
-  onOpenChange: (open: boolean) => void
-  gradeRoomId: string
-  timePeriodId: string
-  dayOfWeek: string
-  slot: ScheduleSlot | null
-  gradeSubjects: GradeSubject[]
-  teachers: TeacherProfile[]
-  onSuccess: () => void
-}
-
-const dayLabels = {
-  en: {
-    monday: 'Monday',
-    tuesday: 'Tuesday',
-    wednesday: 'Wednesday',
-    thursday: 'Thursday',
-    friday: 'Friday',
-    saturday: 'Saturday',
-  },
-  fr: {
-    monday: 'Lundi',
-    tuesday: 'Mardi',
-    wednesday: 'Mercredi',
-    thursday: 'Jeudi',
-    friday: 'Vendredi',
-    saturday: 'Samedi',
-  },
-}
+import type {
+  ScheduleSlotFull,
+  GradeSubject,
+  TeacherProfile,
+  ConflictCheck,
+  SlotEditorDialogProps,
+  DayKey,
+} from '@/lib/types/timetable'
+import { DAY_LABELS } from '@/lib/types/timetable'
 
 export function SlotEditorDialog({
   open,
@@ -97,6 +41,7 @@ export function SlotEditorDialog({
 }: SlotEditorDialogProps) {
   const { t, locale } = useI18n()
   const s = t.timetable.slotEditor
+  const { toast } = useToast()
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [conflicts, setConflicts] = useState<ConflictCheck[]>([])
@@ -171,14 +116,30 @@ export function SlotEditorDialog({
         } else {
           setError(data.message || s.failedToSave)
         }
+        toast({
+          title: slot ? s.errorUpdate : s.errorCreate,
+          description: data.message || s.errorOccurred,
+          variant: "destructive",
+        })
         return
       }
+
+      // Success toast
+      toast({
+        title: slot ? s.successUpdated : s.successCreated,
+        variant: "default",
+      })
 
       onSuccess()
       onOpenChange(false)
     } catch (err) {
       console.error("Error saving schedule slot:", err)
       setError(s.errorOccurred)
+      toast({
+        title: slot ? s.errorUpdate : s.errorCreate,
+        description: s.errorOccurred,
+        variant: "destructive",
+      })
     } finally {
       setIsSubmitting(false)
     }
@@ -202,14 +163,30 @@ export function SlotEditorDialog({
       if (!response.ok) {
         const data = await response.json()
         setError(data.message || s.failedToDelete)
+        toast({
+          title: s.errorDelete,
+          description: data.message || s.errorOccurred,
+          variant: "destructive",
+        })
         return
       }
+
+      // Success toast
+      toast({
+        title: s.successDeleted,
+        variant: "default",
+      })
 
       onSuccess()
       onOpenChange(false)
     } catch (err) {
       console.error("Error deleting schedule slot:", err)
       setError(s.errorOccurred)
+      toast({
+        title: s.errorDelete,
+        description: s.errorOccurred,
+        variant: "destructive",
+      })
     } finally {
       setIsSubmitting(false)
     }
@@ -220,9 +197,9 @@ export function SlotEditorDialog({
       open={open}
       onOpenChange={onOpenChange}
       title={slot ? s.editSlot : s.addSlot}
-      description={dayLabels[locale as 'en' | 'fr'][dayOfWeek as keyof typeof dayLabels.en]}
+      description={DAY_LABELS[locale as 'en' | 'fr'][dayOfWeek as DayKey]}
       icon={Calendar}
-      accentColor="blue"
+      accentColor="maroon"
       maxWidth="sm:max-w-2xl"
       error={error}
       footer={

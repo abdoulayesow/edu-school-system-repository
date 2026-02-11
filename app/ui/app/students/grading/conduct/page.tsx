@@ -1,6 +1,7 @@
 "use client"
 
 import { useState, useEffect, useCallback, useMemo } from "react"
+import { useGradingFilters } from "@/hooks/use-grading-filters"
 import { PageContainer } from "@/components/layout"
 import { Card, CardHeader, CardTitle, CardContent, CardDescription } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
@@ -32,7 +33,6 @@ import {
 // Shared types and utilities
 import type {
   ActiveTrimester,
-  Grade,
   StudentSummary,
   ConductEntry,
   RemarkEntry,
@@ -79,9 +79,15 @@ export default function ConductEntryPage() {
   const { t, locale } = useI18n()
   const { toast } = useToast()
 
+  // Shared filter hook — fetch grades from API
+  const {
+    grades,
+    selectedGradeId, setSelectedGradeId,
+    isLoading: isLoadingGrades,
+  } = useGradingFilters({ fetchGrades: true })
+
   // Data state
   const [activeTrimester, setActiveTrimester] = useState<ActiveTrimester | null>(null)
-  const [grades, setGrades] = useState<Grade[]>([])
   const [summaries, setSummaries] = useState<StudentSummary[]>([])
 
   // Entry maps for each tab
@@ -90,7 +96,6 @@ export default function ConductEntryPage() {
   const [decisionEntries, setDecisionEntries] = useState<Map<string, DecisionEntry>>(new Map())
 
   // Selection state
-  const [selectedGradeId, setSelectedGradeId] = useState<string>("")
   const [activeTab, setActiveTab] = useState<ConductTabId>("conduct")
 
   // UI state
@@ -113,7 +118,6 @@ export default function ConductEntryPage() {
   useEffect(() => {
     setIsMounted(true)
     fetchActiveTrimester()
-    fetchGrades()
   }, [])
 
   useEffect(() => {
@@ -137,19 +141,6 @@ export default function ConductEntryPage() {
       toast({ title: t.common.error, description: t.common.errorFetchingData, variant: "destructive" })
     } finally {
       setIsLoading(false)
-    }
-  }
-
-  async function fetchGrades() {
-    try {
-      const res = await fetch("/api/grades")
-      if (res.ok) {
-        const data = await res.json()
-        setGrades(data)
-      }
-    } catch (err) {
-      console.error("Error fetching grades:", err)
-      toast({ title: t.common.error, description: t.common.errorFetchingData, variant: "destructive" })
     }
   }
 
@@ -499,7 +490,6 @@ export default function ConductEntryPage() {
               {tabs.map((tab) => (
                 <TabButton
                   key={tab.id}
-                  id={tab.id}
                   label={tab.label}
                   icon={tab.icon}
                   isActive={activeTab === tab.id}

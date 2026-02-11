@@ -203,7 +203,7 @@ export const en: TranslationKeys = {
     title: "Director's Dashboard",
     greeting: "Hello",
     greetingWithName: "Hello, {name}",
-    
+
     // Summary cards
     totalEnrollment: "Total Enrollment",
     vsLastMonth: "vs last month",
@@ -259,7 +259,14 @@ export const en: TranslationKeys = {
     extraActivities: "Extra Activities",
     canteen: "Canteen",
     transport: "Transport",
-    
+
+    // Error messages
+    errors: {
+      fetchFailed: "Failed to load dashboard data. Please refresh.",
+      gradesUnavailable: "Grade data is currently unavailable",
+      financialDataUnavailable: "Financial data is currently unavailable",
+    },
+
     reasons: {
       familySituation: "Difficult family situation - 20% discount requested",
       schoolTransfer: "Transfer from another school - documents in order",
@@ -1080,7 +1087,9 @@ export const en: TranslationKeys = {
     // Status labels
     statusPresent: "Present",
     statusAbsent: "Absent",
+    statusLate: "Late",
     statusExcused: "Excused",
+    notRecorded: "Not recorded",
 
     // Summary cards
     totalSessions: "Total Sessions",
@@ -1109,6 +1118,43 @@ export const en: TranslationKeys = {
     instruction2: "Present (green) → Absent (red) → Excused (orange) → Present",
     instruction3: "Students with overdue payments are marked with a badge",
     instruction4: "Click \"Submit\" to save attendance",
+
+    // New keys for Phase 1 refactoring
+    students: "students",
+    back: "Back",
+    save: "Save",
+    loading: "Loading...",
+    loadingClasses: "Loading grades...",
+    allGrades: "All grades",
+    entryMode: "Entry mode",
+    existingSession: "Existing session",
+    attendanceCompleted: "Attendance completed",
+    attendanceInProgress: "Attendance in progress",
+    continueAttendance: "Continue attendance",
+    startAttendance: "Start attendance",
+    lateCount: "Late",
+    searchStudent: "Search for a student...",
+    checklistModeDescription: "All students are present by default. Tap to change status.",
+    absencesModeDescription: "Mark only absences and late arrivals. Unmarked students are present.",
+    checklistModeIndicator: "Full list mode - Tap to change status",
+    absencesModeIndicator: "Absences mode - Mark absences/late",
+    searchTip: "Use search to find a student quickly",
+    saveTip: "Save regularly to avoid data loss",
+    cycleInstructions: "Present → Absent → Late → Excused → Present",
+    preview: "Preview",
+    failedToLoadGrades: "Failed to load grades",
+    failedToLoadAttendance: "Failed to load attendance",
+    failedToSave: "Failed to save",
+    noStudentsFound: "No students found matching your search",
+    noStudents: "No students in this grade",
+
+    // Confirmation dialogs
+    confirmSubmitTitle: "Submit Attendance?",
+    confirmSubmitDescription: "This will mark the attendance as complete. You can still make changes later if needed.",
+    confirmNavigateAwayTitle: "Unsaved Changes",
+    confirmNavigateAwayDescription: "You have unsaved changes. Are you sure you want to leave? Your changes will be lost.",
+    confirm: "Confirm",
+    cancel: "Cancel",
   },
 
   // Reports
@@ -1134,6 +1180,13 @@ export const en: TranslationKeys = {
     // Filters
     allTeachers: "All teachers",
     allLevels: "All levels",
+
+    // Level names
+    levels: {
+      elementary: "Elementary",
+      college: "Middle School",
+      lycee: "High School",
+    },
 
     // Activities list
     allActivities: "All Activities",
@@ -3123,6 +3176,7 @@ export const en: TranslationKeys = {
       title: "Payment Review",
       description: "Approve or reject this payment after verification",
       cash: "Cash",
+      orangeMoney: "Orange Money",
       receipt: "Receipt",
       recordedDate: "Recorded date",
       transactionRef: "Transaction ref.",
@@ -3866,6 +3920,13 @@ export const en: TranslationKeys = {
       thisMonthRecoupments: "This Month's Recoupments",
     },
 
+    // Validation messages
+    validation: {
+      invalidHours: "Please enter a valid number of hours",
+      invalidAmount: "Please enter a valid amount",
+      reasonRequired: "Please provide a reason",
+    },
+
     // Common fields
     staffName: "Staff Name",
     role: "Role",
@@ -3903,6 +3964,13 @@ export const en: TranslationKeys = {
       failedToDelete: "Failed to delete",
       errorOccurred: "An error occurred",
       conflictsDetected: "Conflicts detected:",
+      successCreated: "Class added to schedule",
+      successUpdated: "Class updated successfully",
+      successDeleted: "Class removed from schedule",
+      errorCreate: "Failed to add class",
+      errorUpdate: "Failed to update class",
+      errorDelete: "Failed to delete class",
+      errorFetch: "Failed to load schedule",
     },
   },
 } as const;

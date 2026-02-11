@@ -1,6 +1,7 @@
 "use client"
 
 import { useState, useEffect, useMemo, useCallback } from "react"
+import { useGradingFilters } from "@/hooks/use-grading-filters"
 import { useUrlFilters, stringFilter } from "@/hooks/use-url-filters"
 import { SearchInput } from "@/components/ui/search-input"
 import { Card, CardHeader, CardTitle, CardContent, CardDescription } from "@/components/ui/card"
@@ -22,7 +23,6 @@ import {
   getEvaluationTypeLabel,
   type ActiveTrimester,
   type Grade,
-  type GradeSubject,
   type Evaluation,
   type EvaluationType,
   type RawEvaluationResponse,
@@ -48,13 +48,17 @@ export function ManageEvaluationsTab({ activeTrimester, grades }: ManageEvaluati
   })
   const evaluationSearch = filters.q
 
+  // Shared filter hook — cascade fetch subjects on grade change
+  const {
+    subjects: manageSubjects,
+    selectedGradeId: manageGradeId, setSelectedGradeId: setManageGradeId,
+    selectedSubjectId: manageSubjectId, setSelectedSubjectId: setManageSubjectId,
+  } = useGradingFilters({ fetchSubjects: true, grades })
+
   // Filter state
-  const [manageGradeId, setManageGradeId] = useState<string>("")
-  const [manageSubjectId, setManageSubjectId] = useState<string>("")
   const [manageTypeFilter, setManageTypeFilter] = useState<string>("all")
 
   // Data state
-  const [manageSubjects, setManageSubjects] = useState<GradeSubject[]>([])
   const [evaluations, setEvaluations] = useState<Evaluation[]>([])
   const [isLoadingEvaluations, setIsLoadingEvaluations] = useState(false)
 
@@ -77,16 +81,6 @@ export function ManageEvaluationsTab({ activeTrimester, grades }: ManageEvaluati
     onSuccess: () => setShowRecalculatePrompt(false),
   })
 
-  // Fetch subjects when grade changes
-  useEffect(() => {
-    if (manageGradeId) {
-      fetchManageSubjects(manageGradeId)
-    } else {
-      setManageSubjects([])
-      setManageSubjectId("")
-    }
-  }, [manageGradeId])
-
   // Fetch evaluations when filters change
   useEffect(() => {
     if (manageGradeId) {
@@ -107,15 +101,6 @@ export function ManageEvaluationsTab({ activeTrimester, grades }: ManageEvaluati
   }, [evaluations, evaluationSearch])
 
   // Data fetching
-  async function fetchManageSubjects(gradeId: string) {
-    try {
-      const res = await fetch(`/api/grades/${gradeId}/subjects`)
-      if (res.ok) setManageSubjects(await res.json())
-    } catch (err) {
-      console.error("Error fetching subjects:", err)
-    }
-  }
-
   async function fetchEvaluations() {
     if (!manageGradeId) return
 
@@ -155,6 +140,7 @@ export function ManageEvaluationsTab({ activeTrimester, grades }: ManageEvaluati
       }
     } catch (err) {
       console.error("Error fetching evaluations:", err)
+      toast({ title: t.common.error, description: t.common.errorFetchingData, variant: "destructive" })
     } finally {
       setIsLoadingEvaluations(false)
     }

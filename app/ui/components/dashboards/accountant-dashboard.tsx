@@ -1,11 +1,12 @@
 "use client"
 
-import { useMemo } from "react"
+import { useMemo, useEffect } from "react"
 import Link from "next/link"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Progress } from "@/components/ui/progress"
+import { useToast } from "@/components/ui/use-toast"
 import {
   DollarSign,
   Wallet,
@@ -57,13 +58,25 @@ interface AccountantDashboardProps {
 
 export function AccountantDashboard({ userName }: AccountantDashboardProps) {
   const { t, locale } = useI18n()
+  const { toast } = useToast()
 
   // Fetch data
-  const { data: balanceData, isLoading: balanceLoading } = useAccountingBalance()
-  const { data: cashToDepositData, isLoading: cashLoading } = useCashNeedingDeposit()
-  const { data: depositsData, isLoading: depositsLoading } = useUnreconciledDeposits()
-  const { data: statsData, isLoading: statsLoading } = usePaymentStats()
-  const { data: recentPaymentsData, isLoading: paymentsLoading } = usePayments({ limit: 5 })
+  const { data: balanceData, isLoading: balanceLoading, error: balanceError } = useAccountingBalance()
+  const { data: cashToDepositData, isLoading: cashLoading, error: cashError } = useCashNeedingDeposit()
+  const { data: depositsData, isLoading: depositsLoading, error: depositsError } = useUnreconciledDeposits()
+  const { data: statsData, isLoading: statsLoading, error: statsError } = usePaymentStats()
+  const { data: recentPaymentsData, isLoading: paymentsLoading, error: paymentsError } = usePayments({ limit: 5 })
+
+  // Show error toast notifications
+  useEffect(() => {
+    if (balanceError || cashError || depositsError || statsError || paymentsError) {
+      toast({
+        variant: "destructive",
+        title: t.common.error,
+        description: t.dashboard.errors.financialDataUnavailable,
+      })
+    }
+  }, [balanceError, cashError, depositsError, statsError, paymentsError, toast, t])
 
   const loading = balanceLoading || cashLoading || depositsLoading || statsLoading || paymentsLoading
 
@@ -91,6 +104,29 @@ export function AccountantDashboard({ userName }: AccountantDashboardProps) {
         <div className="text-center space-y-4">
           <Loader2 className={cn(sizing.icon.xl, "animate-spin text-gspn-maroon-500 mx-auto")} />
           <p className="text-muted-foreground">{locale === "fr" ? "Chargement..." : "Loading..."}</p>
+        </div>
+      </div>
+    )
+  }
+
+  // Show error state if critical data failed to load
+  const hasCriticalError = balanceError && statsError
+  if (hasCriticalError) {
+    return (
+      <div className="flex items-center justify-center min-h-[60vh]">
+        <div className="text-center space-y-4 max-w-md">
+          <div className="p-3 bg-destructive/10 rounded-full w-fit mx-auto">
+            <AlertCircle className={cn(sizing.icon.xl, "text-destructive")} />
+          </div>
+          <h3 className={cn(typography.heading.section, "text-foreground")}>
+            {locale === "fr" ? "Erreur de chargement" : "Loading Error"}
+          </h3>
+          <p className="text-muted-foreground">
+            {t.dashboard.errors.fetchFailed}
+          </p>
+          <Button onClick={() => window.location.reload()}>
+            {locale === "fr" ? "Actualiser la page" : "Refresh Page"}
+          </Button>
         </div>
       </div>
     )

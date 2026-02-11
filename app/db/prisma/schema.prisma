@@ -61,6 +61,19 @@ model User {
   discrepancyReviews         DailyVerification[]     @relation("DiscrepancyReviewer")
   reconciliationsPerformed   ReconciliationEvent[]   @relation("ReconciliationPerformer")
   reconciliationsReviewed    ReconciliationEvent[]   @relation("ReconciliationReviewer")
+  // Salary relations
+  salaryRates                SalaryRate[]            @relation("UserSalaryRates")
+  hoursRecords               HoursRecord[]           @relation("UserHoursRecords")
+  submittedHoursRecords      HoursRecord[]           @relation("HoursRecordSubmitter")
+  reviewedHoursRecords       HoursRecord[]           @relation("HoursRecordReviewer")
+  salaryPayments             SalaryPayment[]         @relation("UserSalaryPayments")
+  approvedSalaryPayments     SalaryPayment[]         @relation("SalaryPaymentApprover")
+  paidSalaryPayments         SalaryPayment[]         @relation("SalaryPaymentPayer")
+  cancelledSalaryPayments    SalaryPayment[]         @relation("SalaryPaymentCanceller")
+  salaryAdvances             SalaryAdvance[]         @relation("UserSalaryAdvances")
+  disbursedAdvances          SalaryAdvance[]         @relation("SalaryAdvanceDisburser")
+  cancelledAdvances          SalaryAdvance[]         @relation("SalaryAdvanceCanceller")
+
   // Permission & audit relations
   permissionOverrides        PermissionOverride[]    @relation("UserPermissionOverrides")
   grantedOverrides           PermissionOverride[]    @relation("GrantedPermissionOverrides")
@@ -157,6 +170,8 @@ model SchoolYear {
   clubs                  Club[]
   timePeriods            TimePeriod[]
   trimesters             Trimester[]
+  hoursRecords           HoursRecord[]
+  salaryPayments         SalaryPayment[]
 
   @@index([isActive])
   @@index([startDate])
@@ -1406,6 +1421,8 @@ enum SafeTransactionType {
   safe_to_registry
   registry_to_safe
   registry_adjustment
+  salary_payment
+  salary_advance
 }
 
 enum CashDirection {
@@ -1531,6 +1548,12 @@ enum PermissionResource {
   attendance_reports
   financial_analytics
   data_export
+
+  // Salary Management
+  salary_hours
+  salary_payments
+  salary_advances
+  salary_rates
 
   // System Settings
   school_settings
@@ -1686,4 +1709,184 @@ enum CalculationStatus {
   running
   completed
   failed
+}
+
+// ============================================================================
+// SALARY MANAGEMENT
+// ============================================================================
+
+enum SalaryType {
+  hourly
+  fixed
+}
+
+enum HoursRecordStatus {
+  draft
+  submitted
+  approved
+  rejected
+}
+
+enum SalaryPaymentStatus {
+  pending
+  approved
+  paid
+  cancelled
+}
+
+enum SalaryAdvanceStatus {
+  active
+  fully_recouped
+  cancelled
+}
+
+enum RecoupmentStrategy {
+  full
+  spread
+  custom
+}
+
+model SalaryRate {
+  id            String     @id @default(cuid())
+  userId        String
+  salaryType    SalaryType
+  hourlyRate    Int?       // GNF per hour (for hourly staff)
+  fixedMonthly  Int?       // GNF per month (for fixed staff)
+  effectiveFrom DateTime
+  effectiveTo   DateTime?  // null = currently active
+  createdAt     DateTime   @default(now())
+  updatedAt     DateTime   @updatedAt
+
+  user           User            @relation("UserSalaryRates", fields: [userId], references: [id], onDelete: Cascade)
+  salaryPayments SalaryPayment[]
+
+  @@index([userId])
+  @@index([effectiveFrom])
+  @@index([effectiveTo])
+}
+
+model HoursRecord {
+  id            String            @id @default(cuid())
+  userId        String
+  schoolYearId  String
+  month         Int               // 1-12
+  year          Int               // e.g. 2026
+  totalHours    Float
+  notes         String?
+  status        HoursRecordStatus @default(draft)
+  submittedBy   String?
+  submittedAt   DateTime?
+  reviewedBy    String?
+  reviewedAt    DateTime?
+  rejectionNote String?
+  createdAt     DateTime          @default(now())
+  updatedAt     DateTime          @updatedAt
+
+  user          User           @relation("UserHoursRecords", fields: [userId], references: [id], onDelete: Cascade)
+  schoolYear    SchoolYear     @relation(fields: [schoolYearId], references: [id], onDelete: Cascade)
+  submitter     User?          @relation("HoursRecordSubmitter", fields: [submittedBy], references: [id])
+  reviewer      User?          @relation("HoursRecordReviewer", fields: [reviewedBy], references: [id])
+  salaryPayment SalaryPayment? // one payment per hours record
+
+  @@unique([userId, schoolYearId, month, year])
+  @@index([userId])
+  @@index([schoolYearId])
+  @@index([status])
+  @@index([submittedBy])
+  @@index([reviewedBy])
+  @@index([month, year])
+}
+
+model SalaryPayment {
+  id               String              @id @default(cuid())
+  userId           String
+  schoolYearId     String
+  month            Int                 // 1-12
+  year             Int                 // e.g. 2026
+  salaryType       SalaryType
+  hoursRecordId    String?             @unique // one payment per hours record
+  salaryRateId     String
+  hoursWorked      Float?              // from HoursRecord (for hourly)
+  hourlyRate       Int?                // snapshot from SalaryRate
+  fixedMonthly     Int?                // snapshot from SalaryRate
+  grossAmount      Int
+  advanceDeduction Int                 @default(0)
+  otherDeductions  Int                 @default(0)
+  netAmount        Int
+  method           PaymentMethod
+  status           SalaryPaymentStatus @default(pending)
+  approvedBy       String?
+  approvedAt       DateTime?
+  paidBy           String?
+  paidAt           DateTime?
+  cancelledBy      String?
+  cancelledAt      DateTime?
+  cancellationNote String?
+  notes            String?
+  createdAt        DateTime            @default(now())
+  updatedAt        DateTime            @updatedAt
+
+  user          User                @relation("UserSalaryPayments", fields: [userId], references: [id], onDelete: Cascade)
+  schoolYear    SchoolYear          @relation(fields: [schoolYearId], references: [id], onDelete: Cascade)
+  hoursRecord   HoursRecord?        @relation(fields: [hoursRecordId], references: [id])
+  salaryRate    SalaryRate          @relation(fields: [salaryRateId], references: [id])
+  approver      User?               @relation("SalaryPaymentApprover", fields: [approvedBy], references: [id])
+  payer         User?               @relation("SalaryPaymentPayer", fields: [paidBy], references: [id])
+  canceller     User?               @relation("SalaryPaymentCanceller", fields: [cancelledBy], references: [id])
+  recoupments   AdvanceRecoupment[]
+
+  @@unique([userId, schoolYearId, month, year])
+  @@index([userId])
+  @@index([schoolYearId])
+  @@index([status])
+  @@index([month, year])
+  @@index([approvedBy])
+  @@index([paidBy])
+  @@index([salaryRateId])
+}
+
+model SalaryAdvance {
+  id                   String              @id @default(cuid())
+  userId               String
+  amount               Int
+  method               PaymentMethod
+  reason               String
+  strategy             RecoupmentStrategy
+  numberOfInstallments Int?                // for 'spread' strategy
+  totalRecouped        Int                 @default(0)
+  remainingBalance     Int
+  status               SalaryAdvanceStatus @default(active)
+  disbursedBy          String
+  disbursedAt          DateTime            @default(now())
+  cancelledBy          String?
+  cancelledAt          DateTime?
+  cancellationNote     String?
+  notes                String?
+  createdAt            DateTime            @default(now())
+  updatedAt            DateTime            @updatedAt
+
+  user        User                @relation("UserSalaryAdvances", fields: [userId], references: [id], onDelete: Cascade)
+  disburser   User                @relation("SalaryAdvanceDisburser", fields: [disbursedBy], references: [id])
+  canceller   User?               @relation("SalaryAdvanceCanceller", fields: [cancelledBy], references: [id])
+  recoupments AdvanceRecoupment[]
+
+  @@index([userId])
+  @@index([status])
+  @@index([disbursedBy])
+}
+
+model AdvanceRecoupment {
+  id                String   @id @default(cuid())
+  salaryAdvanceId   String
+  salaryPaymentId   String
+  amount            Int
+  installmentNumber Int?     // for spread strategy
+  createdAt         DateTime @default(now())
+
+  salaryAdvance  SalaryAdvance @relation(fields: [salaryAdvanceId], references: [id], onDelete: Cascade)
+  salaryPayment  SalaryPayment @relation(fields: [salaryPaymentId], references: [id], onDelete: Cascade)
+
+  @@unique([salaryAdvanceId, salaryPaymentId])
+  @@index([salaryAdvanceId])
+  @@index([salaryPaymentId])
 }

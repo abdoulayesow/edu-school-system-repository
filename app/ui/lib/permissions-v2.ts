@@ -105,6 +105,34 @@ const FINANCIAL_REPORTS: RolePermissionEntry[] = [
   { resource: PermissionResource.financial_reports, action: PermissionAction.view, scope: PermissionScope.all },
 ]
 
+// --- SALARY ---
+
+const SALARY_HOURS_SUBMIT: RolePermissionEntry[] = [
+  { resource: PermissionResource.salary_hours, action: PermissionAction.view, scope: PermissionScope.all },
+  { resource: PermissionResource.salary_hours, action: PermissionAction.create, scope: PermissionScope.all },
+  { resource: PermissionResource.salary_hours, action: PermissionAction.update, scope: PermissionScope.all },
+]
+
+const FINANCIAL_SALARY: RolePermissionEntry[] = [
+  { resource: PermissionResource.salary_hours, action: PermissionAction.view, scope: PermissionScope.all },
+  { resource: PermissionResource.salary_hours, action: PermissionAction.approve, scope: PermissionScope.all },
+  { resource: PermissionResource.salary_payments, action: PermissionAction.view, scope: PermissionScope.all },
+  { resource: PermissionResource.salary_payments, action: PermissionAction.create, scope: PermissionScope.all },
+  { resource: PermissionResource.salary_payments, action: PermissionAction.update, scope: PermissionScope.all },
+  { resource: PermissionResource.salary_payments, action: PermissionAction.approve, scope: PermissionScope.all },
+  { resource: PermissionResource.salary_advances, action: PermissionAction.view, scope: PermissionScope.all },
+  { resource: PermissionResource.salary_advances, action: PermissionAction.create, scope: PermissionScope.all },
+  { resource: PermissionResource.salary_advances, action: PermissionAction.update, scope: PermissionScope.all },
+  { resource: PermissionResource.salary_rates, action: PermissionAction.view, scope: PermissionScope.all },
+]
+
+const SALARY_RATES_ADMIN: RolePermissionEntry[] = [
+  { resource: PermissionResource.salary_rates, action: PermissionAction.view, scope: PermissionScope.all },
+  { resource: PermissionResource.salary_rates, action: PermissionAction.create, scope: PermissionScope.all },
+  { resource: PermissionResource.salary_rates, action: PermissionAction.update, scope: PermissionScope.all },
+  { resource: PermissionResource.salary_rates, action: PermissionAction.delete, scope: PermissionScope.all },
+]
+
 // --- ADMIN ---
 
 const ADMIN_OPS: RolePermissionEntry[] = [
@@ -139,6 +167,7 @@ export const ROLE_PERMISSIONS: Record<StaffRole, RoleConfig> = {
       ...ATTENDANCE_MANAGE,
       ...ACADEMIC_SETUP,
       ...ACADEMIC_REPORTS,
+      ...SALARY_HOURS_SUBMIT,
     ],
   },
 
@@ -149,6 +178,7 @@ export const ROLE_PERMISSIONS: Record<StaffRole, RoleConfig> = {
     permissions: [
       ...STUDENT_VIEW,
       ...GRADE_MANAGE,
+      ...SALARY_HOURS_SUBMIT,
       { resource: PermissionResource.schedule, action: PermissionAction.view, scope: PermissionScope.all },
       { resource: PermissionResource.schedule, action: PermissionAction.create, scope: PermissionScope.all },
       { resource: PermissionResource.teachers_assignment, action: PermissionAction.create, scope: PermissionScope.all },
@@ -179,6 +209,7 @@ export const ROLE_PERMISSIONS: Record<StaffRole, RoleConfig> = {
       ...ATTENDANCE_MANAGE,
       ...ACADEMIC_SETUP,
       ...ACADEMIC_REPORTS,
+      ...SALARY_HOURS_SUBMIT,
     ],
   },
 
@@ -240,6 +271,8 @@ export const ROLE_PERMISSIONS: Record<StaffRole, RoleConfig> = {
     permissions: [
       ...FINANCIAL_CAISSE,
       ...FINANCIAL_REPORTS,
+      ...FINANCIAL_SALARY,
+      ...SALARY_RATES_ADMIN,
       { resource: PermissionResource.bank_transfers, action: PermissionAction.view, scope: PermissionScope.all },
       { resource: PermissionResource.bank_transfers, action: PermissionAction.create, scope: PermissionScope.all },
       { resource: PermissionResource.audit_logs, action: PermissionAction.view, scope: PermissionScope.all },
@@ -255,6 +288,7 @@ export const ROLE_PERMISSIONS: Record<StaffRole, RoleConfig> = {
     permissions: [
       ...FINANCIAL_CAISSE,
       ...FINANCIAL_REPORTS,
+      ...FINANCIAL_SALARY,
       // Needs student balance view for payment context
       { resource: PermissionResource.student_balance, action: PermissionAction.view, scope: PermissionScope.all },
       // NO bank_transfers — only DG + Coordinateur
@@ -357,6 +391,11 @@ export function isRoleAllowedForRoute(role: StaffRole, pathname: string): boolea
 
   // THE WALL: Financial routes blocked for academic roles
   if (isAccountingRoute) {
+    // Special: academic directors can access salary hours submission (wall-crossing)
+    if (pathname.startsWith("/accounting/salaries") && config.branch === "academic") {
+      const salaryAcademicRoles: StaffRole[] = [StaffRole.proviseur, StaffRole.censeur, StaffRole.directeur]
+      return salaryAcademicRoles.includes(role)
+    }
     return config.branch === "financial"
   }
 
@@ -370,6 +409,10 @@ export function isRoleAllowedForRoute(role: StaffRole, pathname: string): boolea
     if (pathname.startsWith("/admin/users")) {
       // User management: transversal only (already handled above)
       return false
+    }
+    // Salary rates: coordinateur can access
+    if (pathname.startsWith("/admin/salary-rates")) {
+      return role === StaffRole.coordinateur
     }
     // School config: proviseur, censeur, directeur
     if (config.branch === "academic") {

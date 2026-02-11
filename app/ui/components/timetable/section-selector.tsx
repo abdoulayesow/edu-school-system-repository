@@ -10,25 +10,7 @@ import {
 } from '@/components/ui/select'
 import { Label } from '@/components/ui/label'
 import { useI18n } from '@/components/i18n-provider'
-
-export interface GradeRoom {
-  id: string
-  displayName: string
-  grade: {
-    id: string
-    name: string
-  }
-}
-
-export interface SectionSelectorProps {
-  gradeRooms: GradeRoom[]
-  value: string
-  onValueChange: (gradeRoomId: string) => void
-  label?: string
-  placeholder?: string
-  className?: string
-  disabled?: boolean
-}
+import type { GradeRoom, SectionSelectorProps } from '@/lib/types/timetable'
 
 export function SectionSelector({
   gradeRooms,

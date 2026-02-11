@@ -1,26 +1,15 @@
 "use client"
 
 import { useState, useEffect, useCallback } from "react"
-import { useSession } from "next-auth/react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { Separator } from "@/components/ui/separator"
 import {
   Loader2,
   ArrowLeft,
   FileText,
-  Award,
-  TrendingUp,
-  TrendingDown,
-  Users,
-  Calendar,
-  GraduationCap,
-  ClipboardCheck,
-  Download,
   FolderArchive,
   AlertCircle,
 } from "lucide-react"
@@ -32,34 +21,27 @@ import { downloadBulletinPDF } from "@/components/bulletin-pdf"
 import Link from "next/link"
 import { componentClasses } from "@/lib/design-tokens"
 import { getScoreColor } from "@/lib/grading-utils"
-import { DecisionBadge } from "@/components/grading"
 import { useBatchBulletinDownload } from "@/hooks/use-batch-bulletin-download"
-import type { Trimester, Grade, BulletinData, DecisionType } from "@/lib/types/grading"
+import { useGradingFilters } from "@/hooks/use-grading-filters"
+import { StudentBulletinHeader } from "./_components/student-bulletin-header"
+import { BulletinSummaryStats } from "./_components/bulletin-summary-stats"
+import { ClassComparisonStats } from "./_components/class-comparison-stats"
+import type { BulletinData, BulletinStudent } from "@/lib/types/grading"
 
-interface BulletinStudent {
-  id: string
-  firstName: string
-  lastName: string
-  studentNumber: string
-  currentGrade: Grade | null
-}
 
 export default function BulletinPage() {
   const { t, locale } = useI18n()
   const { toast } = useToast()
-  const { data: session } = useSession()
 
-  const [isLoading, setIsLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
+  const {
+    trimesters, selectedTrimesterId, setSelectedTrimesterId,
+    grades, selectedGradeId, setSelectedGradeId,
+    isLoading, error,
+  } = useGradingFilters({ fetchTrimesters: true, fetchGrades: true })
+
   const { isDownloading: isDownloadingAll, downloadProgress, downloadAllBulletins } = useBatchBulletinDownload()
 
-  // Selection state
-  const [trimesters, setTrimesters] = useState<Trimester[]>([])
-  const [grades, setGrades] = useState<Grade[]>([])
   const [students, setStudents] = useState<BulletinStudent[]>([])
-
-  const [selectedTrimesterId, setSelectedTrimesterId] = useState<string>("")
-  const [selectedGradeId, setSelectedGradeId] = useState<string>("")
   const [selectedStudentId, setSelectedStudentId] = useState<string>("")
 
   // Bulletin data
@@ -75,6 +57,7 @@ export default function BulletinPage() {
       await downloadBulletinPDF(bulletin, locale as "fr" | "en")
     } catch (err) {
       console.error("Error downloading PDF:", err)
+      toast({ title: t.common.error, description: t.grading.failedToDownloadPDF, variant: "destructive" })
     } finally {
       setDownloadingPDF(false)
     }
@@ -113,42 +96,6 @@ export default function BulletinPage() {
     }
   }, [selectedTrimesterId, selectedGradeId, students, trimesters, grades, locale, t, toast, downloadAllBulletins])
 
-  // Fetch initial data
-  useEffect(() => {
-    async function fetchInitialData() {
-      try {
-        setIsLoading(true)
-        const [trimRes, gradeRes] = await Promise.all([
-          fetch("/api/admin/trimesters"),
-          fetch("/api/grades"),
-        ])
-
-        if (trimRes.ok) {
-          const trimData = await trimRes.json()
-          setTrimesters(trimData)
-          // Select active trimester by default
-          const active = trimData.find((t: Trimester) => t.isActive)
-          if (active) {
-            setSelectedTrimesterId(active.id)
-          }
-        }
-
-        if (gradeRes.ok) {
-          const gradeData = await gradeRes.json()
-          setGrades(gradeData.grades || [])
-        }
-      } catch (err) {
-        console.error("Error fetching initial data:", err)
-        setError(t.grading.failedToLoadData)
-        toast({ title: t.common.error, description: t.common.errorFetchingData, variant: "destructive" })
-      } finally {
-        setIsLoading(false)
-      }
-    }
-
-    fetchInitialData()
-  }, [])
-
   // Fetch students when grade changes
   useEffect(() => {
     async function fetchStudents() {
@@ -166,6 +113,7 @@ export default function BulletinPage() {
         }
       } catch (err) {
         console.error("Error fetching students:", err)
+        toast({ title: t.common.error, description: t.common.errorFetchingData, variant: "destructive" })
       }
     }
 
@@ -192,6 +140,7 @@ export default function BulletinPage() {
       }
     } catch (err) {
       console.error("Error fetching bulletin:", err)
+      toast({ title: t.common.error, description: t.common.errorFetchingData, variant: "destructive" })
       setBulletin(null)
     } finally {
       setLoadingBulletin(false)
@@ -201,11 +150,6 @@ export default function BulletinPage() {
   useEffect(() => {
     fetchBulletin()
   }, [fetchBulletin])
-
-  const formatScore = (score: number | null, maxScore = 20): string => {
-    if (score === null) return "-"
-    return `${score.toFixed(2)}/${maxScore}`
-  }
 
   if (isLoading) {
     return (
@@ -260,11 +204,11 @@ export default function BulletinPage() {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div>
               <label className="text-sm font-medium mb-2 block">
-                {t.trimesters.trimester}
+                {t.admin.trimester}
               </label>
               <Select value={selectedTrimesterId} onValueChange={setSelectedTrimesterId}>
                 <SelectTrigger>
-                  <SelectValue placeholder={t.trimesters.selectTrimester} />
+                  <SelectValue placeholder={t.admin.selectTrimester} />
                 </SelectTrigger>
                 <SelectContent>
                   {trimesters.map((trimester) => (
@@ -362,187 +306,21 @@ export default function BulletinPage() {
       ) : bulletin ? (
         <div className="space-y-6">
           {/* Student Info Header */}
-          <Card>
-            <CardContent className="pt-6">
-              <div className="flex flex-col md:flex-row md:items-start gap-6">
-                <Avatar className="size-20">
-                  <AvatarImage src={bulletin.student.photoUrl || undefined} />
-                  <AvatarFallback className="text-xl">
-                    {bulletin.student.firstName[0]}
-                    {bulletin.student.lastName[0]}
-                  </AvatarFallback>
-                </Avatar>
-
-                <div className="flex-1">
-                  <h2 className="text-2xl font-bold mb-1">
-                    {bulletin.student.lastName.toUpperCase()} {bulletin.student.firstName}
-                  </h2>
-                  <div className="flex flex-wrap gap-4 text-sm text-muted-foreground">
-                    <span className="flex items-center gap-1">
-                      <GraduationCap className="size-4" />
-                      {bulletin.student.grade?.name}
-                    </span>
-                    <span className="flex items-center gap-1">
-                      <ClipboardCheck className="size-4" />
-                      {bulletin.student.studentNumber}
-                    </span>
-                    <span className="flex items-center gap-1">
-                      <Calendar className="size-4" />
-                      {locale === "fr" ? bulletin.trimester.nameFr : bulletin.trimester.nameEn} -{" "}
-                      {bulletin.trimester.schoolYear.name}
-                    </span>
-                  </div>
-                </div>
-
-                {bulletin.summary && (
-                  <div className="text-right">
-                    <div className="text-4xl font-bold mb-1 text-primary">
-                      {bulletin.summary.generalAverage?.toFixed(2) || "-"}
-                      <span className="text-lg text-muted-foreground">/20</span>
-                    </div>
-                    <div className="text-sm text-muted-foreground">
-                      {t.grading.generalAverage}
-                    </div>
-                  </div>
-                )}
-              </div>
-
-              {/* PDF Download Button */}
-              <div className="mt-4 pt-4 border-t flex justify-end">
-                <PermissionGuard resource="report_cards" action="export" inline>
-                  <Button
-                    onClick={handleDownloadPDF}
-                    disabled={downloadingPDF}
-                    variant="outline"
-                  >
-                    {downloadingPDF ? (
-                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    ) : (
-                      <Download className="mr-2 h-4 w-4" />
-                    )}
-                    {t.grading.downloadPDF}
-                  </Button>
-                </PermissionGuard>
-              </div>
-            </CardContent>
-          </Card>
+          <StudentBulletinHeader
+            bulletin={bulletin}
+            locale={locale}
+            downloadingPDF={downloadingPDF}
+            onDownloadPDF={handleDownloadPDF}
+          />
 
           {/* Summary Stats */}
           {bulletin.summary && (
-            <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
-              <Card>
-                <CardContent className="pt-4 pb-4 text-center">
-                  <div className="text-2xl font-bold text-primary">
-                    {bulletin.summary.rank || "-"}
-                    <span className="text-sm text-muted-foreground">
-                      /{bulletin.summary.totalStudents || "-"}
-                    </span>
-                  </div>
-                  <div className="text-xs text-muted-foreground">{t.grading.classRank}</div>
-                </CardContent>
-              </Card>
-
-              <Card>
-                <CardContent className="pt-4 pb-4 text-center">
-                  <div className={`text-2xl font-bold ${getScoreColor(bulletin.summary.conduct)}`}>
-                    {bulletin.summary.conduct?.toFixed(1) || "-"}
-                  </div>
-                  <div className="text-xs text-muted-foreground">{t.grading.conduct}</div>
-                </CardContent>
-              </Card>
-
-              <Card>
-                <CardContent className="pt-4 pb-4 text-center">
-                  <div className="text-2xl font-bold">
-                    {bulletin.summary.absences ?? "-"}
-                  </div>
-                  <div className="text-xs text-muted-foreground">
-                    {t.grading.absences}
-                  </div>
-                </CardContent>
-              </Card>
-
-              <Card>
-                <CardContent className="pt-4 pb-4 text-center">
-                  <div className="text-2xl font-bold">
-                    {bulletin.summary.lates ?? "-"}
-                  </div>
-                  <div className="text-xs text-muted-foreground">
-                    {t.grading.lates}
-                  </div>
-                </CardContent>
-              </Card>
-
-              <Card>
-                <CardContent className="pt-4 pb-4 text-center">
-                  <DecisionBadge decision={bulletin.summary.decision as DecisionType} isOverride={bulletin.summary.decisionOverride} t={t} />
-                  <div className="text-xs text-muted-foreground mt-1">{t.grading.decision}</div>
-                </CardContent>
-              </Card>
-            </div>
+            <BulletinSummaryStats summary={bulletin.summary} />
           )}
 
           {/* Class Comparison */}
           {bulletin.classStats && (
-            <Card>
-              <CardHeader className="pb-2">
-                <CardTitle className="text-sm flex items-center gap-2">
-                  <Users className="size-4" />
-                  {t.grading.classStatistics}
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
-                  <div className="flex items-center gap-2">
-                    <div className="size-8 rounded bg-primary/10 flex items-center justify-center">
-                      <TrendingUp className="size-4 text-primary" />
-                    </div>
-                    <div>
-                      <div className="font-medium">{bulletin.classStats.highestAverage?.toFixed(2) || "-"}</div>
-                      <div className="text-xs text-muted-foreground">
-                        {t.grading.highest}
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="flex items-center gap-2">
-                    <div className="size-8 rounded bg-muted flex items-center justify-center">
-                      <Award className="size-4 text-muted-foreground" />
-                    </div>
-                    <div>
-                      <div className="font-medium">{bulletin.classStats.classAverage?.toFixed(2) || "-"}</div>
-                      <div className="text-xs text-muted-foreground">{t.grading.classAverage}</div>
-                    </div>
-                  </div>
-
-                  <div className="flex items-center gap-2">
-                    <div className="size-8 rounded bg-destructive/10 flex items-center justify-center">
-                      <TrendingDown className="size-4 text-destructive" />
-                    </div>
-                    <div>
-                      <div className="font-medium">{bulletin.classStats.lowestAverage?.toFixed(2) || "-"}</div>
-                      <div className="text-xs text-muted-foreground">
-                        {t.grading.lowest}
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="flex items-center gap-2">
-                    <div className="size-8 rounded bg-success/10 flex items-center justify-center">
-                      <Users className="size-4 text-success" />
-                    </div>
-                    <div>
-                      <div className="font-medium">
-                        {bulletin.classStats.passCount}/{bulletin.classStats.totalStudents}
-                      </div>
-                      <div className="text-xs text-muted-foreground">
-                        {t.grading.passRate} ({bulletin.classStats.passRate?.toFixed(1) || 0}%)
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
+            <ClassComparisonStats classStats={bulletin.classStats} />
           )}
 
           {/* Grades Table */}
