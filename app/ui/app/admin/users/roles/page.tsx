@@ -253,7 +253,7 @@ export default function UserRolesPage() {
             <div className="bg-gradient-to-br from-slate-900/80 to-slate-900/40 backdrop-blur-xl border border-slate-800/50 rounded-2xl p-6 shadow-xl">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-slate-400 text-sm font-medium uppercase tracking-wide">Active Users</p>
+                  <p className="text-slate-400 text-sm font-medium uppercase tracking-wide">{t.roleManagement.activeUsers}</p>
                   <p className="text-4xl font-bold text-white mt-2">
                     {filteredUsers.filter(u => u.status === "active").length}
                   </p>
@@ -264,7 +264,7 @@ export default function UserRolesPage() {
             <div className="bg-gradient-to-br from-slate-900/80 to-slate-900/40 backdrop-blur-xl border border-slate-800/50 rounded-2xl p-6 shadow-xl">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-slate-400 text-sm font-medium uppercase tracking-wide">Unique Roles</p>
+                  <p className="text-slate-400 text-sm font-medium uppercase tracking-wide">{t.roleManagement.uniqueRoles}</p>
                   <p className="text-4xl font-bold text-white mt-2">
                     {new Set(filteredUsers.map(u => u.staffRole)).size}
                   </p>
@@ -288,7 +288,7 @@ export default function UserRolesPage() {
             ) : filteredUsers.length === 0 ? (
               <div className="flex flex-col items-center justify-center py-24 text-slate-500">
                 <AlertCircle className="w-16 h-16 mb-4" />
-                <p className="text-lg">No users found</p>
+                <p className="text-lg">{t.roleManagement.noUsersFound}</p>
               </div>
             ) : (
               <div className="overflow-x-auto">
@@ -400,22 +400,22 @@ export default function UserRolesPage() {
           <DialogContent className="bg-slate-900 border-slate-800 text-white max-w-lg">
             <DialogHeader>
               <DialogTitle className="text-2xl font-bold">
-                Change User Role
+                {t.roleManagement.changeUserRole}
               </DialogTitle>
               <DialogDescription className="text-slate-400">
-                Update the role for this user and apply system-wide permission changes
+                {t.roleManagement.changeRoleDescription}
               </DialogDescription>
             </DialogHeader>
             {selectedUser && (
               <div className="space-y-6">
                 <div className="bg-slate-800/50 rounded-lg p-4 border border-slate-700">
-                  <p className="text-slate-400 text-sm mb-1">Selected User</p>
+                  <p className="text-slate-400 text-sm mb-1">{t.roleManagement.selectedUser}</p>
                   <p className="text-white font-semibold text-lg">{selectedUser.name}</p>
                   <p className="text-slate-500 text-sm">{selectedUser.email}</p>
                 </div>
                 <div>
                   <label className="text-slate-400 text-sm mb-2 block">
-                    Select New Role
+                    {t.roleManagement.selectNewRole}
                   </label>
                   <Select value={selectedRole || undefined} onValueChange={(value) => setSelectedRole(value as StaffRole)}>
                     <SelectTrigger className="w-full h-12 bg-slate-800 border-slate-700 text-white focus:border-[#D4AF37] focus:ring-[#D4AF37]/20">
@@ -444,10 +444,10 @@ export default function UserRolesPage() {
                       <AlertCircle className="w-5 h-5 text-amber-500 flex-shrink-0 mt-0.5" />
                       <div>
                         <p className="text-amber-500 font-semibold text-sm">
-                          Important Change
+                          {t.roleManagement.importantChange}
                         </p>
                         <p className="text-amber-500/80 text-sm mt-1">
-                          This will change the user's permissions system-wide
+                          {t.roleManagement.importantChangeDescription}
                         </p>
                       </div>
                     </div>
@@ -460,7 +460,7 @@ export default function UserRolesPage() {
                     className="border-slate-700 text-slate-300 hover:bg-slate-800 hover:text-white"
                     disabled={updating}
                   >
-                    Cancel
+                    {t.common.cancel}
                   </Button>
                   <Button
                     onClick={handleRoleChange}
@@ -470,10 +470,10 @@ export default function UserRolesPage() {
                     {updating ? (
                       <>
                         <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2" />
-                        Updating...
+                        {t.common.updating}
                       </>
                     ) : (
-                      "Confirm Change"
+                      t.roleManagement.confirmChange
                     )}
                   </Button>
                 </div>
@@ -550,7 +550,7 @@ export default function UserRolesPage() {
                 onClick={() => setShowPermissionsDialog(false)}
                 className="bg-slate-800 hover:bg-slate-700 text-white"
               >
-                Close
+                {t.common.close}
               </Button>
             </div>
           </DialogContent>
