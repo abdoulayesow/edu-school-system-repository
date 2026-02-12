@@ -241,8 +241,8 @@ export default function TimetablePage() {
     // Check permission before opening dialog
     if (!canCreateSlots) {
       toast({
-        title: "Permission Denied",
-        description: "You don't have permission to add schedule slots.",
+        title: t.permissions.accessDenied,
+        description: t.permissions.noSchedulePermission,
         variant: "destructive",
       })
       return
@@ -347,7 +347,7 @@ export default function TimetablePage() {
             )}
           >
             <BookOpen className="h-4 w-4" />
-            {locale === 'fr' ? 'Matières' : 'Subjects'}
+            {t.classes.subjects}
           </TabsTrigger>
           <TabsTrigger
             value="schedule"
@@ -359,7 +359,7 @@ export default function TimetablePage() {
             )}
           >
             <Calendar className="h-4 w-4" />
-            {locale === 'fr' ? 'Emploi du temps' : 'Schedule'}
+            {t.classes.schedule}
           </TabsTrigger>
         </TabsList>
       </Tabs>
@@ -521,7 +521,7 @@ export default function TimetablePage() {
                   <div className="flex items-center gap-2">
                     <div className="h-2 w-2 rounded-full bg-gspn-maroon-500" />
                     <div>
-                      <CardTitle>{locale === 'fr' ? 'Emploi du temps hebdomadaire' : 'Weekly Schedule'}</CardTitle>
+                      <CardTitle>{t.classes.weeklySchedule}</CardTitle>
                       <CardDescription>
                         {locale === 'fr'
                           ? 'Cliquez sur un créneau pour modifier ou ajouter un cours'
@@ -536,7 +536,7 @@ export default function TimetablePage() {
                     gradeRooms={gradeRooms}
                     value={selectedGradeRoomId}
                     onValueChange={setSelectedGradeRoomId}
-                    label={locale === 'fr' ? 'Section' : 'Section'}
+                    label={t.classes.section}
                   />
 
                   {/* Timetable Grid */}
@@ -548,9 +548,7 @@ export default function TimetablePage() {
                     <div className="text-center py-12">
                       <Clock className="size-12 text-gspn-maroon-300 dark:text-gspn-maroon-700 mx-auto mb-4" />
                       <p className="text-muted-foreground">
-                        {locale === 'fr'
-                          ? 'Aucune période définie. Veuillez créer des périodes dans les paramètres.'
-                          : 'No time periods defined. Please create periods in settings.'}
+                        {t.classes.noPeriodsDefinedSchedule}
                       </p>
                     </div>
                   ) : (

@@ -215,7 +215,7 @@ export default function EnrollmentsPage() {
             {activeSchoolYear && (
               <div className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-gspn-maroon-50 dark:bg-gspn-maroon-950/30 border border-gspn-maroon-200 dark:border-gspn-maroon-800">
                 <span className="text-sm text-gspn-maroon-700 dark:text-gspn-maroon-400">
-                  {locale === "fr" ? "Année scolaire:" : "School Year:"}
+                  {t.students.schoolYear}:
                 </span>
                 <span className="text-sm font-semibold text-gspn-maroon-800 dark:text-gspn-maroon-300">
                   {activeSchoolYear.name}
@@ -259,7 +259,7 @@ export default function EnrollmentsPage() {
         title={t.enrollments.filterEnrollments}
         showClear={hasActiveFilters}
         onClearFilters={clearFilters}
-        clearLabel={locale === "fr" ? "Effacer les filtres" : "Clear filters"}
+        clearLabel={t.common.clearFilters}
       >
         <div className="flex flex-col sm:flex-row gap-4 flex-wrap">
           {/* Search Input */}
@@ -296,7 +296,7 @@ export default function EnrollmentsPage() {
             value={startDate}
             onChange={(e) => setStartDate(e.target.value)}
             className="w-full sm:w-[160px]"
-            placeholder={locale === "fr" ? "Date début" : "Start date"}
+            placeholder={t.common.startDatePlaceholder}
           />
 
           {/* End Date Filter */}
@@ -305,7 +305,7 @@ export default function EnrollmentsPage() {
             value={endDate}
             onChange={(e) => setEndDate(e.target.value)}
             className="w-full sm:w-[160px]"
-            placeholder={locale === "fr" ? "Date fin" : "End date"}
+            placeholder={t.common.endDatePlaceholder}
           />
         </div>
       </FilterCard>

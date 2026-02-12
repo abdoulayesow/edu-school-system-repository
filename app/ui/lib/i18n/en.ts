@@ -67,6 +67,9 @@ export const en: TranslationKeys = {
     inactive: "Inactive",
     saving: "Saving...",
     clear: "Clear",
+    clearFilters: "Clear filters",
+    startDatePlaceholder: "Start date",
+    endDatePlaceholder: "End date",
     confirmRemove: "Confirm Removal",
     other: "Other",
     name: "Name",
@@ -104,6 +107,7 @@ export const en: TranslationKeys = {
     noReportsPermission: "You don't have permission to view reports. Please contact your administrator if you need access.",
     noActivitiesPermission: "You don't have permission to view activities. Please contact your administrator if you need access.",
     noExpensePermission: "You don't have permission to create expenses. Please contact your administrator if you need access.",
+    noSchedulePermission: "You don't have permission to add schedule slots. Please contact your administrator if you need access.",
   },
 
   // Navigation

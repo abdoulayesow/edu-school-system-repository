@@ -65,6 +65,9 @@ export const fr = {
     inactive: "Inactif",
     saving: "Enregistrement...",
     clear: "Effacer",
+    clearFilters: "Effacer les filtres",
+    startDatePlaceholder: "Date début",
+    endDatePlaceholder: "Date fin",
     confirmRemove: "Confirmer la suppression",
     other: "Autre",
     name: "Nom",
@@ -102,6 +105,7 @@ export const fr = {
     noReportsPermission: "Vous n'avez pas la permission de voir les rapports. Veuillez contacter votre administrateur si vous avez besoin d'accès.",
     noActivitiesPermission: "Vous n'avez pas la permission de voir les activités. Veuillez contacter votre administrateur si vous avez besoin d'accès.",
     noExpensePermission: "Vous n'avez pas la permission de créer des dépenses. Veuillez contacter votre administrateur si vous avez besoin d'accès.",
+    noSchedulePermission: "Vous n'avez pas la permission d'ajouter des créneaux à l'emploi du temps. Veuillez contacter votre administrateur si vous avez besoin d'accès.",
   },
 
   // Navigation
