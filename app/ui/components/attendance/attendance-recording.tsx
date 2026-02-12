@@ -9,7 +9,7 @@ import { useI18n } from "@/components/i18n-provider"
 import { PermissionGuard } from "@/components/permission-guard"
 import { formatDateWithDay } from "@/lib/utils"
 import { AttendanceSummaryGrid } from "./attendance-summary-grid"
-import { StudentAttendanceCard } from "./student-attendance-card"
+import { VirtualStudentList } from "./virtual-student-list"
 import type { AttendanceStatus } from "@/lib/config/attendance-status"
 import type { Student, AttendanceSummary, EntryMode } from "@/hooks/use-attendance-state"
 
@@ -130,22 +130,17 @@ export function AttendanceRecording({
       {/* Student List */}
       <Card>
         <CardContent className="pt-4 pb-2">
-          <div className="space-y-2">
-            {filteredStudents.length === 0 ? (
-              <div className="text-center py-8 text-muted-foreground">
-                {searchQuery ? t.attendance.noStudentsFound : t.attendance.noStudents}
-              </div>
-            ) : (
-              filteredStudents.map((student) => (
-                <StudentAttendanceCard
-                  key={student.studentProfileId}
-                  student={student}
-                  status={localAttendance[student.studentProfileId]}
-                  onToggleStatus={onToggleStatus}
-                />
-              ))
-            )}
-          </div>
+          {filteredStudents.length === 0 ? (
+            <div className="text-center py-8 text-muted-foreground">
+              {searchQuery ? t.attendance.noStudentsFound : t.attendance.noStudents}
+            </div>
+          ) : (
+            <VirtualStudentList
+              students={filteredStudents}
+              localAttendance={localAttendance}
+              onToggleStatus={onToggleStatus}
+            />
+          )}
         </CardContent>
       </Card>
 

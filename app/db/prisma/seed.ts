@@ -82,8 +82,6 @@ const LAST_NAMES = [
 // Elementary (1-6): 800,000 - 900,000 GNF
 // College (7-10): 1,000,000 - 1,100,000 GNF
 // High School (11-Terminal): 1,200,000 - 1,300,000 GNF
-type SchoolLevel = "kindergarten" | "elementary" | "college" | "high_school"
-
 interface GradeConfig {
   name: string
   level: SchoolLevel
@@ -353,7 +351,7 @@ const SALARY_PAYMENT_CONFIGS: SalaryPaymentConfig[] = [
   { userIndex: 1, month: 10, year: 2025, salaryType: SalaryType.hourly, status: SalaryPaymentStatus.approved, method: PaymentMethod.cash, advanceDeduction: 0 },
   { userIndex: 1, month: 11, year: 2025, salaryType: SalaryType.hourly, status: SalaryPaymentStatus.pending, method: PaymentMethod.cash, advanceDeduction: 0 },
   { userIndex: 3, month: 10, year: 2025, salaryType: SalaryType.hourly, status: SalaryPaymentStatus.paid, method: PaymentMethod.orange_money, advanceDeduction: 0 },
-  { userIndex: 6, month: 10, year: 2025, salaryType: SalaryType.fixed, status: SalaryPaymentStatus.paid, method: PaymentMethod.cash, advanceDeduction: 0 },
+  { userIndex: 6, month: 10, year: 2025, salaryType: SalaryType.fixed, status: SalaryPaymentStatus.paid, method: PaymentMethod.cash, advanceDeduction: 500000 },
   { userIndex: 7, month: 10, year: 2025, salaryType: SalaryType.fixed, status: SalaryPaymentStatus.approved, method: PaymentMethod.cash, advanceDeduction: 0 },
   { userIndex: "comptable", month: 10, year: 2025, salaryType: SalaryType.fixed, status: SalaryPaymentStatus.pending, method: PaymentMethod.cash, advanceDeduction: 0 },
 ]
@@ -1048,6 +1046,7 @@ async function main() {
       const tp = teacherProfiles[i]
       const person = await prisma.person.findUnique({ where: { id: tp.personId } })
       if (!person) continue
+      if (!person.email) continue
 
       const teacherEmail = person.email
       let user = await prisma.user.findUnique({ where: { email: teacherEmail } })
@@ -1245,7 +1244,6 @@ async function main() {
       // Check if StudentProfile already exists first
       let studentProfile = await prisma.studentProfile.findFirst({
         where: { studentId: student.id },
-        include: { person: true },
       })
 
       if (studentProfile) {

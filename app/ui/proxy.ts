@@ -3,8 +3,8 @@ import { NextResponse } from "next/server"
 
 import { isRoleAllowedForRoute } from "@/lib/permissions-v2"
 
-export default withAuth(
-  function middleware(req: NextRequestWithAuth) {
+export const proxy = withAuth(
+  function handler(req: NextRequestWithAuth) {
     const token = req.nextauth.token
 
     // If authenticated but not authorized, redirect to /unauthorized.

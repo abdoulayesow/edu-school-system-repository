@@ -1295,7 +1295,11 @@ enum PaymentType {
 }
 
 enum PaymentStatus {
+  pending_deposit
+  deposited
+  pending_review
   confirmed
+  rejected
   reversed
   failed
 }
