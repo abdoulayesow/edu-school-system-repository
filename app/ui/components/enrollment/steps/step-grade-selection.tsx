@@ -9,7 +9,7 @@ import { useEnrollmentWizard } from "../wizard-context"
 import { useI18n } from "@/components/i18n-provider"
 import { Users, Check, AlertTriangle, Lock } from "lucide-react"
 import { cn, formatDate } from "@/lib/utils"
-import { formatCurrency } from "@/lib/utils/currency"
+import { formatCurrency } from "@/lib/format"
 import type { SchoolLevel } from "@/lib/enrollment/types"
 import { sizing } from "@/lib/design-tokens"
 

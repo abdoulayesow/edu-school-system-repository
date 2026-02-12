@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server"
 import { requirePerm } from "@/lib/authz"
 import { createUser } from "@api/users/createUser"
-import { VALID_ROLES, type AppRole } from "@/lib/rbac"
+import { Role } from "@prisma/client"
 import { prisma } from "@/lib/prisma"
 
 /**
@@ -52,15 +52,16 @@ export async function POST(req: Request) {
   }
 
   // Validate role if provided
-  let validatedRole: AppRole | undefined
+  const validRoles = Object.values(Role)
+  let validatedRole: Role | undefined
   if (body.role && typeof body.role === "string") {
-    if (!VALID_ROLES.includes(body.role as AppRole)) {
+    if (!validRoles.includes(body.role as Role)) {
       return NextResponse.json(
-        { message: `Invalid role. Must be one of: ${VALID_ROLES.join(", ")}` },
+        { message: `Invalid role. Must be one of: ${validRoles.join(", ")}` },
         { status: 400 }
       )
     }
-    validatedRole = body.role as AppRole
+    validatedRole = body.role as Role
   }
 
   const result = await createUser({

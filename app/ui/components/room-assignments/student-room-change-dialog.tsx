@@ -1,15 +1,7 @@
 "use client"
 
 import { useState, useEffect, useMemo } from "react"
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogFooter,
-} from "@/components/ui/dialog"
-import { Button } from "@/components/ui/button"
+import { FormDialog, FormField } from "@/components/ui/form-dialog"
 import { Badge } from "@/components/ui/badge"
 import {
   Select,
@@ -19,7 +11,7 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import { useI18n } from "@/components/i18n-provider"
-import { Loader2, Users, AlertTriangle, CheckCircle2 } from "lucide-react"
+import { Loader2, Users, CheckCircle2 } from "lucide-react"
 
 interface Room {
   id: string
@@ -164,130 +156,108 @@ export function StudentRoomChangeDialog({
   }
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-md">
-        <DialogHeader>
-          <DialogTitle className="flex items-center gap-2">
-            <Users className="h-5 w-5 text-primary" />
-            {t.students.changeRoom}
-          </DialogTitle>
-          <DialogDescription>
-            {studentName} - {gradeName}
-          </DialogDescription>
-        </DialogHeader>
-
-        <div className="space-y-4 py-4">
-          {/* Current Room */}
-          {currentRoomName && (
-            <div className="space-y-2">
-              <label className="text-sm font-medium text-muted-foreground">
-                {t.admin.roomAssignments.currentRoom || "Current Room"}
-              </label>
-              <div className="p-3 bg-muted rounded-lg">
-                <span className="font-medium">{currentRoomName}</span>
-              </div>
-            </div>
-          )}
-
-          {/* New Room Selection */}
-          <div className="space-y-2">
-            <label className="text-sm font-medium">
-              {t.admin.roomAssignments.newRoom || "New Room"}
-            </label>
-            {isLoading ? (
-              <div className="flex items-center justify-center py-4">
-                <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
-              </div>
-            ) : (
-              <Select value={selectedRoomId} onValueChange={setSelectedRoomId}>
-                <SelectTrigger>
-                  <SelectValue placeholder={t.admin.roomAssignments.selectRoom} />
-                </SelectTrigger>
-                <SelectContent>
-                  {availableRooms.length === 0 ? (
-                    <div className="p-2 text-sm text-muted-foreground text-center">
-                      {t.admin.roomAssignments.noRoomsAvailable}
-                    </div>
-                  ) : (
-                    availableRooms.map((room) => {
-                      const status = getRoomStatus(room)
-                      return (
-                        <SelectItem
-                          key={room.id}
-                          value={room.id}
-                          disabled={status === "full"}
-                        >
-                          <div className="flex items-center gap-2">
-                            <span>{room.displayName}</span>
-                            <span className="text-muted-foreground">
-                              ({room._count.studentAssignments}/{room.capacity})
-                            </span>
-                            {status === "full" && (
-                              <Badge variant="destructive" className="text-xs">
-                                {t.admin.roomAssignments.roomFull}
-                              </Badge>
-                            )}
-                            {status === "near" && (
-                              <Badge variant="secondary" className="text-xs">
-                                {t.admin.roomAssignments.roomNearCapacity}
-                              </Badge>
-                            )}
-                          </div>
-                        </SelectItem>
-                      )
-                    })
-                  )}
-                </SelectContent>
-              </Select>
-            )}
+    <FormDialog
+      open={open}
+      onOpenChange={onOpenChange}
+      title={t.students.changeRoom}
+      description={`${studentName} - ${gradeName}`}
+      icon={Users}
+      accentColor="maroon"
+      maxWidth="max-w-md"
+      submitLabel={isSubmitting ? t.common.loading : t.common.save}
+      cancelLabel={t.common.cancel}
+      onSubmit={handleSubmit}
+      onCancel={() => onOpenChange(false)}
+      isSubmitting={isSubmitting}
+      isDisabled={!selectedRoomId || availableCapacity <= 0}
+      error={error}
+    >
+      {/* Current Room */}
+      {currentRoomName && (
+        <div className="space-y-2">
+          <p className="text-sm font-medium text-muted-foreground">
+            {t.admin.roomAssignments.currentRoom || "Current Room"}
+          </p>
+          <div className="p-3 bg-muted rounded-lg">
+            <span className="font-medium">{currentRoomName}</span>
           </div>
+        </div>
+      )}
 
-          {/* Selected Room Capacity Info */}
-          {selectedRoom && (
-            <div className="flex items-center gap-2 p-2 rounded-lg bg-muted">
-              <Users className="h-4 w-4 text-muted-foreground" />
-              <span className="text-sm">
-                {t.admin.roomAssignments.roomCapacity
-                  .replace("{current}", String(selectedRoom._count.studentAssignments))
-                  .replace("{capacity}", String(selectedRoom.capacity))}
-              </span>
-              {availableCapacity > 0 && (
-                <span className="text-sm text-muted-foreground">
-                  ({availableCapacity} {t.admin.available})
-                </span>
+      {/* New Room Selection */}
+      <FormField label={t.admin.roomAssignments.newRoom || "New Room"}>
+        {isLoading ? (
+          <div className="flex items-center justify-center py-4">
+            <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+          </div>
+        ) : (
+          <Select value={selectedRoomId} onValueChange={setSelectedRoomId}>
+            <SelectTrigger>
+              <SelectValue placeholder={t.admin.roomAssignments.selectRoom} />
+            </SelectTrigger>
+            <SelectContent>
+              {availableRooms.length === 0 ? (
+                <div className="p-2 text-sm text-muted-foreground text-center">
+                  {t.admin.roomAssignments.noRoomsAvailable}
+                </div>
+              ) : (
+                availableRooms.map((room) => {
+                  const status = getRoomStatus(room)
+                  return (
+                    <SelectItem
+                      key={room.id}
+                      value={room.id}
+                      disabled={status === "full"}
+                    >
+                      <div className="flex items-center gap-2">
+                        <span>{room.displayName}</span>
+                        <span className="text-muted-foreground">
+                          ({room._count.studentAssignments}/{room.capacity})
+                        </span>
+                        {status === "full" && (
+                          <Badge variant="destructive" className="text-xs">
+                            {t.admin.roomAssignments.roomFull}
+                          </Badge>
+                        )}
+                        {status === "near" && (
+                          <Badge variant="secondary" className="text-xs">
+                            {t.admin.roomAssignments.roomNearCapacity}
+                          </Badge>
+                        )}
+                      </div>
+                    </SelectItem>
+                  )
+                })
               )}
-            </div>
-          )}
+            </SelectContent>
+          </Select>
+        )}
+      </FormField>
 
-          {/* Error/Success Messages */}
-          {error && (
-            <div className="flex items-center gap-2 p-3 rounded-lg bg-destructive/10 text-destructive">
-              <AlertTriangle className="h-4 w-4" />
-              <span className="text-sm">{error}</span>
-            </div>
-          )}
-
-          {successMessage && (
-            <div className="flex items-center gap-2 p-3 rounded-lg bg-green-500/10 text-green-600">
-              <CheckCircle2 className="h-4 w-4" />
-              <span className="text-sm">{successMessage}</span>
-            </div>
+      {/* Selected Room Capacity Info */}
+      {selectedRoom && (
+        <div className="flex items-center gap-2 p-2 rounded-lg bg-muted">
+          <Users className="h-4 w-4 text-muted-foreground" />
+          <span className="text-sm">
+            {t.admin.roomAssignments.roomCapacity
+              .replace("{current}", String(selectedRoom._count.studentAssignments))
+              .replace("{capacity}", String(selectedRoom.capacity))}
+          </span>
+          {availableCapacity > 0 && (
+            <span className="text-sm text-muted-foreground">
+              ({availableCapacity} {t.admin.available})
+            </span>
           )}
         </div>
+      )}
 
-        <DialogFooter>
-          <Button variant="outline" onClick={() => onOpenChange(false)}>
-            {t.common.cancel}
-          </Button>
-          <Button
-            onClick={handleSubmit}
-            disabled={isSubmitting || !selectedRoomId || availableCapacity <= 0}
-          >
-            {isSubmitting && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
-            {isSubmitting ? t.common.loading : t.common.save}
-          </Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
+      {/* Success Message */}
+      {successMessage && (
+        <div className="flex items-center gap-2 p-3 rounded-lg bg-green-500/10 text-green-600">
+          <CheckCircle2 className="h-4 w-4" />
+          <span className="text-sm">{successMessage}</span>
+        </div>
+      )}
+    </FormDialog>
   )
 }

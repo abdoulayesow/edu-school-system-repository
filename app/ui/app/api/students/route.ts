@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server"
 import { requirePerm } from "@/lib/authz"
 import { prisma } from "@/lib/prisma"
+import { buildNameSearchConditions } from "@/lib/search-utils"
 
 /**
  * GET /api/students
@@ -37,19 +38,15 @@ export async function GET(req: NextRequest) {
     }
 
     // Search filter (firstName, middleName, lastName, studentNumber)
+    // Supports multi-word search: "John Doe" matches firstName="John", lastName="Doe"
     if (search) {
-      where.OR = [
-        { firstName: { contains: search, mode: "insensitive" } },
-        { lastName: { contains: search, mode: "insensitive" } },
-        { studentNumber: { contains: search, mode: "insensitive" } },
-        {
-          enrollments: {
-            some: {
-              middleName: { contains: search, mode: "insensitive" },
-            },
-          },
-        },
-      ]
+      const searchConditions = buildNameSearchConditions(search, {
+        firstName: true,
+        lastName: true,
+        middleName: true,
+        studentNumber: true,
+      })
+      Object.assign(where, searchConditions)
     }
 
     // Grade filter through enrollment

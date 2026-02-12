@@ -120,7 +120,7 @@ export function DefaultDashboard({ userName, userRole }: DefaultDashboardProps) 
             }
           </p>
           <Button variant="outline" asChild>
-            <Link href="/dashboard/profile">
+            <Link href="/profile">
               {locale === "fr" ? "Mon profil" : "My Profile"}
             </Link>
           </Button>

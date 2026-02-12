@@ -49,6 +49,22 @@ export const queryKeys = {
     filters ? (["payments", filters] as const) : (["payments"] as const),
   paymentStats: (filters?: PaymentStatsFilters) =>
     filters ? (["payments", "stats", filters] as const) : (["payments", "stats"] as const),
+
+  // Salary Rates
+  salaryRates: (filters?: SalaryRateFilters) =>
+    filters ? (["salary-rates", filters] as const) : (["salary-rates"] as const),
+
+  // Salary Hours
+  salaryHours: (filters?: SalaryHoursFilters) =>
+    filters ? (["salary-hours", filters] as const) : (["salary-hours"] as const),
+
+  // Salary Payments
+  salaryPayments: (filters?: SalaryPaymentFilters) =>
+    filters ? (["salary-payments", filters] as const) : (["salary-payments"] as const),
+
+  // Salary Advances
+  salaryAdvances: (filters?: SalaryAdvanceFilters) =>
+    filters ? (["salary-advances", filters] as const) : (["salary-advances"] as const),
 } as const
 
 // Filter types
@@ -108,6 +124,50 @@ interface PaymentFilters {
 interface PaymentStatsFilters {
   startDate?: string
   endDate?: string
+}
+
+interface SalaryRateFilters {
+  userId?: string
+  salaryType?: string
+  active?: boolean
+  search?: string
+  limit?: number
+  offset?: number
+}
+
+interface SalaryHoursFilters {
+  schoolYearId?: string
+  month?: number
+  year?: number
+  status?: string
+  userId?: string
+  search?: string
+  limit?: number
+  offset?: number
+}
+
+interface SalaryPaymentFilters {
+  schoolYearId?: string
+  month?: number
+  year?: number
+  status?: string
+  salaryType?: string
+  userId?: string
+  search?: string
+  limit?: number
+  offset?: number
+}
+
+interface SalaryAdvanceFilters {
+  userId?: string
+  status?: string
+  strategy?: string
+  search?: string
+  schoolYearId?: string
+  month?: number
+  year?: number
+  limit?: number
+  offset?: number
 }
 
 // Pagination response type
@@ -284,6 +344,10 @@ export function useInvalidateQueries() {
     payments: () => queryClient.invalidateQueries({ queryKey: ["payments"] }),
     accounting: () =>
       queryClient.invalidateQueries({ queryKey: ["accounting"] }),
+    salaryRates: () => queryClient.invalidateQueries({ queryKey: ["salary-rates"] }),
+    salaryHours: () => queryClient.invalidateQueries({ queryKey: ["salary-hours"] }),
+    salaryPayments: () => queryClient.invalidateQueries({ queryKey: ["salary-payments"] }),
+    salaryAdvances: () => queryClient.invalidateQueries({ queryKey: ["salary-advances"] }),
     all: () => queryClient.invalidateQueries(),
   }
 }
@@ -410,21 +474,11 @@ interface PaymentsResponse {
  * These are confirmed payments where method=cash and no cashDeposit record exists
  */
 export function useCashNeedingDeposit() {
+  const url = buildUrl("/api/payments", { method: "cash", needsDeposit: "true" })
+
   return useQuery({
     queryKey: ["payments", { method: "cash", needsDeposit: true }],
-    queryFn: async () => {
-      const response = await fetchApi<PaymentsResponse>("/api/payments?method=cash")
-      // Filter to only cash payments without a deposit
-      const needingDeposit = response.payments.filter(p => !p.cashDeposit)
-      return {
-        ...response,
-        payments: needingDeposit,
-        pagination: {
-          ...response.pagination,
-          total: needingDeposit.length,
-        },
-      }
-    },
+    queryFn: () => fetchApi<PaymentsResponse>(url),
     staleTime: 30 * 1000, // 30 seconds - action items
   })
 }
@@ -1569,6 +1623,391 @@ export function useReviewPayment() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["payments"] })
       queryClient.invalidateQueries({ queryKey: ["accounting"] }) // Refresh balance
+    },
+  })
+}
+
+// ============================================
+// Salary Rates Hooks
+// ============================================
+
+import type {
+  SalaryRatesResponse,
+  CreateSalaryRateData,
+  UpdateSalaryRateData,
+  HoursRecordsResponse,
+  CreateHoursRecordData,
+  BulkHoursEntryData,
+  ReviewHoursData,
+  SalaryPaymentsResponse,
+  GenerateSalariesData,
+  ApproveSalaryData,
+  PaySalaryData,
+  SalaryAdvancesResponse,
+  CreateAdvanceData,
+  UpdateAdvanceData,
+} from "@/lib/types/salary"
+
+/**
+ * Hook: Fetch salary rates with optional filters
+ */
+export function useSalaryRates(filters?: SalaryRateFilters) {
+  const url = buildUrl("/api/salary-rates", { ...filters })
+
+  return useQuery({
+    queryKey: queryKeys.salaryRates(filters),
+    queryFn: () => fetchApi<SalaryRatesResponse>(url),
+    staleTime: 5 * 60 * 1000, // 5 minutes - rates change infrequently
+  })
+}
+
+/**
+ * Hook: Create a new salary rate
+ */
+export function useCreateSalaryRate() {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: async (data: CreateSalaryRateData) => {
+      const res = await fetch("/api/salary-rates", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data),
+      })
+      if (!res.ok) {
+        const error = await res.json().catch(() => ({ message: res.statusText }))
+        throw new Error(error.message || `API error: ${res.status}`)
+      }
+      return res.json()
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["salary-rates"] })
+    },
+  })
+}
+
+/**
+ * Hook: Update a salary rate
+ */
+export function useUpdateSalaryRate() {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: async ({ id, ...data }: UpdateSalaryRateData) => {
+      const res = await fetch(`/api/salary-rates/${id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data),
+      })
+      if (!res.ok) {
+        const error = await res.json().catch(() => ({ message: res.statusText }))
+        throw new Error(error.message || `API error: ${res.status}`)
+      }
+      return res.json()
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["salary-rates"] })
+    },
+  })
+}
+
+/**
+ * Hook: Delete a salary rate
+ */
+export function useDeleteSalaryRate() {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: async (rateId: string) => {
+      const res = await fetch(`/api/salary-rates/${rateId}`, {
+        method: "DELETE",
+      })
+      if (!res.ok) {
+        const error = await res.json().catch(() => ({ message: res.statusText }))
+        throw new Error(error.message || `API error: ${res.status}`)
+      }
+      return res.json()
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["salary-rates"] })
+    },
+  })
+}
+
+// ============================================
+// Salary Hours Hooks
+// ============================================
+
+/**
+ * Hook: Fetch hours records with optional filters
+ */
+export function useSalaryHours(filters?: SalaryHoursFilters) {
+  const url = buildUrl("/api/salary-hours", { ...filters })
+
+  return useQuery({
+    queryKey: queryKeys.salaryHours(filters),
+    queryFn: () => fetchApi<HoursRecordsResponse>(url),
+    staleTime: 30 * 1000, // 30 seconds - hours change during entry
+  })
+}
+
+/**
+ * Hook: Create a single hours record
+ */
+export function useCreateHoursRecord() {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: async (data: CreateHoursRecordData) => {
+      const res = await fetch("/api/salary-hours", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data),
+      })
+      if (!res.ok) {
+        const error = await res.json().catch(() => ({ message: res.statusText }))
+        throw new Error(error.message || `API error: ${res.status}`)
+      }
+      return res.json()
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["salary-hours"] })
+    },
+  })
+}
+
+/**
+ * Hook: Bulk create hours records for all teachers in a month
+ */
+export function useBulkCreateHours() {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: async (data: BulkHoursEntryData) => {
+      const res = await fetch("/api/salary-hours/bulk", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data),
+      })
+      if (!res.ok) {
+        const error = await res.json().catch(() => ({ message: res.statusText }))
+        throw new Error(error.message || `API error: ${res.status}`)
+      }
+      return res.json()
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["salary-hours"] })
+    },
+  })
+}
+
+/**
+ * Hook: Submit hours record for review (draft → submitted)
+ */
+export function useSubmitHours() {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: async (hoursId: string) => {
+      const res = await fetch(`/api/salary-hours/${hoursId}/submit`, {
+        method: "POST",
+      })
+      if (!res.ok) {
+        const error = await res.json().catch(() => ({ message: res.statusText }))
+        throw new Error(error.message || `API error: ${res.status}`)
+      }
+      return res.json()
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["salary-hours"] })
+    },
+  })
+}
+
+/**
+ * Hook: Review hours record (submitted → approved/rejected)
+ */
+export function useReviewHours() {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: async ({ id, ...data }: ReviewHoursData & { id: string }) => {
+      const res = await fetch(`/api/salary-hours/${id}/review`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data),
+      })
+      if (!res.ok) {
+        const error = await res.json().catch(() => ({ message: res.statusText }))
+        throw new Error(error.message || `API error: ${res.status}`)
+      }
+      return res.json()
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["salary-hours"] })
+    },
+  })
+}
+
+// ============================================
+// Salary Payments Hooks
+// ============================================
+
+/**
+ * Hook: Fetch salary payments with optional filters
+ */
+export function useSalaryPayments(filters?: SalaryPaymentFilters) {
+  const url = buildUrl("/api/salaries", { ...filters })
+
+  return useQuery({
+    queryKey: queryKeys.salaryPayments(filters),
+    queryFn: () => fetchApi<SalaryPaymentsResponse>(url),
+    staleTime: 30 * 1000, // 30 seconds - financial data needs freshness
+  })
+}
+
+/**
+ * Hook: Generate salary payments for all staff in a month
+ */
+export function useGenerateSalaries() {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: async (data: GenerateSalariesData) => {
+      const res = await fetch("/api/salaries/generate", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data),
+      })
+      if (!res.ok) {
+        const error = await res.json().catch(() => ({ message: res.statusText }))
+        throw new Error(error.message || `API error: ${res.status}`)
+      }
+      return res.json()
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["salary-payments"] })
+      queryClient.invalidateQueries({ queryKey: ["salary-hours"] })
+    },
+  })
+}
+
+/**
+ * Hook: Approve or cancel a salary payment
+ */
+export function useApproveSalary() {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: async ({ id, ...data }: ApproveSalaryData & { id: string }) => {
+      const res = await fetch(`/api/salaries/${id}/approve`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data),
+      })
+      if (!res.ok) {
+        const error = await res.json().catch(() => ({ message: res.statusText }))
+        throw new Error(error.message || `API error: ${res.status}`)
+      }
+      return res.json()
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["salary-payments"] })
+    },
+  })
+}
+
+/**
+ * Hook: Pay an approved salary (disburse funds)
+ */
+export function usePaySalary() {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: async ({ id, ...data }: PaySalaryData & { id: string }) => {
+      const res = await fetch(`/api/salaries/${id}/pay`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data),
+      })
+      if (!res.ok) {
+        const error = await res.json().catch(() => ({ message: res.statusText }))
+        throw new Error(error.message || `API error: ${res.status}`)
+      }
+      return res.json()
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["salary-payments"] })
+      queryClient.invalidateQueries({ queryKey: ["salary-advances"] }) // Recoupment may change
+      queryClient.invalidateQueries({ queryKey: ["accounting"] }) // Treasury balance
+    },
+  })
+}
+
+// ============================================
+// Salary Advances Hooks
+// ============================================
+
+/**
+ * Hook: Fetch salary advances with optional filters
+ */
+export function useSalaryAdvances(filters?: SalaryAdvanceFilters) {
+  const url = buildUrl("/api/salary-advances", { ...filters })
+
+  return useQuery({
+    queryKey: queryKeys.salaryAdvances(filters),
+    queryFn: () => fetchApi<SalaryAdvancesResponse>(url),
+    staleTime: 30 * 1000,
+  })
+}
+
+/**
+ * Hook: Create a new salary advance (disburse)
+ */
+export function useCreateAdvance() {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: async (data: CreateAdvanceData) => {
+      const res = await fetch("/api/salary-advances", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data),
+      })
+      if (!res.ok) {
+        const error = await res.json().catch(() => ({ message: res.statusText }))
+        throw new Error(error.message || `API error: ${res.status}`)
+      }
+      return res.json()
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["salary-advances"] })
+      queryClient.invalidateQueries({ queryKey: ["accounting"] }) // Treasury balance
+    },
+  })
+}
+
+/**
+ * Hook: Update a salary advance (change strategy or cancel)
+ */
+export function useUpdateAdvance() {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: async ({ id, ...data }: UpdateAdvanceData) => {
+      const res = await fetch(`/api/salary-advances/${id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data),
+      })
+      if (!res.ok) {
+        const error = await res.json().catch(() => ({ message: res.statusText }))
+        throw new Error(error.message || `API error: ${res.status}`)
+      }
+      return res.json()
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["salary-advances"] })
     },
   })
 }

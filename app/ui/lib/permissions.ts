@@ -1,8 +1,14 @@
 /**
  * Permissions System - Core Utilities
  *
- * Provides functions for checking user permissions based on the Staff Roles & Permissions System.
- * This replaces the legacy rbac.ts system with a more comprehensive, database-driven approach.
+ * Code-based permission checking with database overrides.
+ * Role permissions are defined in permissions-v2.ts (code-based mapping).
+ * PermissionOverride table is still checked first for user-specific exceptions.
+ *
+ * Design Principle: THE WALL
+ * Academic staff has ZERO access to financial data.
+ * Financial staff has ZERO access to academic data.
+ * Only DG (proprietaire) and admin_systeme cross both branches.
  *
  * Key Concepts:
  * - StaffRole: The user's role (proviseur, comptable, enseignant, etc.)
@@ -20,9 +26,9 @@ import {
   PermissionScope,
   SchoolLevel,
   type User,
-  type RolePermission,
   type PermissionOverride,
 } from "@prisma/client"
+import { getRolePermissionFromMap } from "./permissions-v2"
 
 // ============================================================================
 // TYPES
@@ -101,8 +107,8 @@ export async function hasPermission(
     }
   }
 
-  // 3. Check role-based permissions (default permissions)
-  const rolePermission = await getRolePermission(context.staffRole, resource, action)
+  // 3. Check role-based permissions (code-based mapping)
+  const rolePermission = getRolePermission(context.staffRole, resource, action)
   if (!rolePermission) {
     return {
       granted: false,
@@ -155,21 +161,14 @@ async function getPermissionOverride(
 
 /**
  * Get role permission for a specific role, resource, and action.
+ * Uses the code-based mapping from permissions-v2.ts (no DB query).
  */
-async function getRolePermission(
+function getRolePermission(
   role: StaffRole,
   resource: PermissionResource,
   action: PermissionAction
-): Promise<RolePermission | null> {
-  return await prisma.rolePermission.findUnique({
-    where: {
-      role_resource_action: {
-        role,
-        resource,
-        action,
-      },
-    },
-  })
+): { scope: PermissionScope } | null {
+  return getRolePermissionFromMap(role, resource, action)
 }
 
 /**

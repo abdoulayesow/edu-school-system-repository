@@ -25,8 +25,11 @@ const TYPE_COEFFICIENTS: Record<string, number> = {
  * Average = Sum(score × typeCoefficient) / Sum(typeCoefficient)
  */
 export async function POST(req: NextRequest) {
-  const { error } = await requirePerm("grades", "update")
+  const { session, error } = await requirePerm("grades", "update")
   if (error) return error
+
+  const startTime = Date.now()
+  let calculationLog: { id: string } | null = null
 
   try {
     const body = await req.json()
@@ -43,6 +46,16 @@ export async function POST(req: NextRequest) {
         { status: 404 }
       )
     }
+
+    // Create calculation log entry
+    calculationLog = await prisma.calculationLog.create({
+      data: {
+        trimesterId: validated.trimesterId,
+        userId: session!.user.id,
+        type: "subject_averages",
+        status: "running",
+      },
+    })
 
     // Build filter for evaluations
     const evaluationFilter: {
@@ -148,11 +161,37 @@ export async function POST(req: NextRequest) {
       )
     )
 
+    // Complete calculation log
+    if (calculationLog) {
+      await prisma.calculationLog.update({
+        where: { id: calculationLog.id },
+        data: {
+          status: "completed",
+          averagesCalculated: results.length,
+          durationMs: Date.now() - startTime,
+          completedAt: new Date(),
+        },
+      })
+    }
+
     return NextResponse.json({
       message: `Calculated ${results.length} subject averages`,
       count: results.length,
     })
   } catch (err) {
+    // Log calculation failure
+    if (calculationLog) {
+      await prisma.calculationLog.update({
+        where: { id: calculationLog.id },
+        data: {
+          status: "failed",
+          errorMessage: err instanceof Error ? err.message : "Unknown error",
+          durationMs: Date.now() - startTime,
+          completedAt: new Date(),
+        },
+      }).catch(console.error)
+    }
+
     if (err instanceof z.ZodError) {
       return NextResponse.json(
         { message: "Validation error", errors: err.errors },

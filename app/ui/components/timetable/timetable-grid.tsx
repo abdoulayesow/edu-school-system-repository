@@ -6,68 +6,13 @@ import { Card } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Plus } from 'lucide-react'
-
-export interface TimePeriod {
-  id: string
-  name: string
-  nameFr: string | null
-  startTime: string
-  endTime: string
-  order: number
-}
-
-export interface ScheduleSlot {
-  id: string
-  subject: {
-    id: string
-    name: string
-    code: string
-  } | null
-  teacher: {
-    id: string
-    name: string
-  } | null
-  roomLocation: string | null
-  isBreak: boolean
-  notes: string | null
-}
-
-export interface DaySchedule {
-  day: 'monday' | 'tuesday' | 'wednesday' | 'thursday' | 'friday' | 'saturday'
-  periods: {
-    timePeriodId: string
-    timePeriod: TimePeriod
-    slot: ScheduleSlot | null
-  }[]
-}
-
-export interface TimetableGridProps {
-  weeklySchedule: DaySchedule[]
-  timePeriods: TimePeriod[]
-  onSlotClick?: (day: string, timePeriodId: string, slot: ScheduleSlot | null) => void
-  onAddSlot?: (day: string, timePeriodId: string) => void
-  className?: string
-  locale?: 'en' | 'fr'
-}
-
-const dayLabels = {
-  en: {
-    monday: 'Mon',
-    tuesday: 'Tue',
-    wednesday: 'Wed',
-    thursday: 'Thu',
-    friday: 'Fri',
-    saturday: 'Sat',
-  },
-  fr: {
-    monday: 'Lun',
-    tuesday: 'Mar',
-    wednesday: 'Mer',
-    thursday: 'Jeu',
-    friday: 'Ven',
-    saturday: 'Sam',
-  },
-}
+import {
+  type TimetableGridProps,
+  type DaySchedule,
+  type TimePeriod,
+  type ScheduleSlot,
+  DAY_LABELS_SHORT,
+} from '@/lib/types/timetable'
 
 export function TimetableGrid({
   weeklySchedule,
@@ -76,6 +21,7 @@ export function TimetableGrid({
   onAddSlot,
   className,
   locale = 'fr',
+  canEdit = true,
 }: TimetableGridProps) {
   return (
     <div className={cn('w-full overflow-x-auto', className)}>
@@ -93,7 +39,7 @@ export function TimetableGrid({
               key={day}
               className="font-semibold text-sm text-center px-2 py-2 bg-muted/50 rounded-lg"
             >
-              {dayLabels[locale][day]}
+              {DAY_LABELS_SHORT[locale][day]}
             </div>
           ))}
         </div>
@@ -130,7 +76,7 @@ export function TimetableGrid({
                       >
                         {slot.isBreak ? (
                           <div className="flex items-center justify-center h-full">
-                            <Badge variant="outline" className="text-xs">
+                            <Badge className="text-xs bg-gspn-maroon-50 border-gspn-maroon-200 text-gspn-maroon-700 dark:bg-gspn-maroon-950/50 dark:border-gspn-maroon-800 dark:text-gspn-maroon-300">
                               {locale === 'fr' ? 'Pause' : 'Break'}
                             </Badge>
                           </div>
@@ -147,7 +93,7 @@ export function TimetableGrid({
                               </div>
                             )}
                             {slot.roomLocation && (
-                              <Badge variant="secondary" className="text-xs w-fit">
+                              <Badge className="text-xs w-fit bg-gspn-gold-50 border-gspn-gold-200 text-gspn-gold-700 dark:bg-gspn-gold-950/50 dark:border-gspn-gold-800 dark:text-gspn-gold-300">
                                 {slot.roomLocation}
                               </Badge>
                             )}
@@ -159,7 +105,7 @@ export function TimetableGrid({
                           </div>
                         )}
                       </Card>
-                    ) : (
+                    ) : canEdit ? (
                       <button
                         onClick={() => onAddSlot?.(day, period.id)}
                         className={cn(
@@ -171,6 +117,8 @@ export function TimetableGrid({
                       >
                         <Plus className="h-5 w-5 text-muted-foreground/40 group-hover:text-primary/60" />
                       </button>
+                    ) : (
+                      <div className="w-full h-full min-h-[80px] border border-dashed border-muted-foreground/10 rounded-lg" />
                     )}
                   </div>
                 )

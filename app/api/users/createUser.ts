@@ -1,7 +1,7 @@
 import bcrypt from "bcrypt"
 
 import { prisma } from "@db/prisma"
-import { normalizeRole, type AppRole } from "@/lib/rbac"
+import { Role } from "@prisma/client"
 import { createPasswordResetToken } from "@/lib/auth/tokens"
 
 // Password strength validation
@@ -25,14 +25,17 @@ export type CreateUserInput = {
   email: string
   name?: string
   password?: string
-  role?: AppRole | string
+  role?: Role | string
   status?: "invited" | "active" | "inactive"
 }
+
+const VALID_ROLES = Object.values(Role)
 
 export async function createUser(input: CreateUserInput) {
   const email = input.email.trim().toLowerCase()
   const name = input.name
-  const role = normalizeRole(typeof input.role === "string" ? input.role : (input.role ?? "user"))
+  const rawRole = typeof input.role === "string" ? input.role : (input.role ?? "user")
+  const role = VALID_ROLES.includes(rawRole as Role) ? (rawRole as Role) : Role.user
   const status = input.status ?? (input.password ? "active" : "invited")
 
   // Validate password strength if password is provided

@@ -2,13 +2,12 @@
 
 import { useState, useMemo, useEffect, lazy, Suspense } from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Input } from "@/components/ui/input"
+import { SearchInput } from "@/components/ui/search-input"
 import { Skeleton } from "@/components/ui/skeleton"
 import {
   BookOpen,
   Users,
   UserPlus,
-  Search,
   Loader2,
   Calendar,
 } from "lucide-react"
@@ -90,7 +89,7 @@ export default function ClubsPage() {
 
   // Get category name
   const getCategoryName = (club: ApiClub) => {
-    if (!club.category) return t.clubs?.uncategorized || "Uncategorized"
+    if (!club.category) return t.clubs.uncategorized
     return locale === "fr" ? club.category.nameFr : club.category.name
   }
 
@@ -118,7 +117,7 @@ export default function ClubsPage() {
 
   // Build category options for HydratedSelect
   const categoryOptions: SelectOption[] = [
-    { value: "all", label: t.clubs?.allCategories || "All Categories" },
+    { value: "all", label: t.clubs.allCategories },
     ...categories.map(cat => ({
       value: cat.id,
       label: locale === "fr" ? cat.nameFr : cat.name,
@@ -134,8 +133,8 @@ export default function ClubsPage() {
       fallback={
         <PageContainer>
           <NoPermission
-            title={t.permissions?.accessDenied || "Access Denied"}
-            description={t.clubs?.noPermission || "You don't have permission to view clubs."}
+            title={t.permissions.accessDenied}
+            description={t.clubs.noPermission}
           />
         </PageContainer>
       }
@@ -152,11 +151,11 @@ export default function ClubsPage() {
                     <BookOpen className="h-6 w-6 text-gspn-maroon-500" />
                   </div>
                   <h1 className="text-3xl font-bold text-foreground">
-                    {t.clubs?.title || "Clubs & Activities"}
+                    {t.clubs.title}
                   </h1>
                 </div>
                 <p className="text-muted-foreground mt-1">
-                  {t.clubs?.subtitle || "Enroll students in extracurricular clubs"}
+                  {t.clubs.subtitle}
                 </p>
               </div>
             </div>
@@ -166,19 +165,19 @@ export default function ClubsPage() {
         {/* Summary Cards */}
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4 mb-6">
           <StatCard
-            title={t.clubs?.totalClubs || "Total Clubs"}
+            title={t.clubs.totalClubs}
             value={stats.total}
             description={`${stats.activeClubs} ${locale === "fr" ? "avec inscriptions" : "with enrollments"}`}
             icon={BookOpen}
           />
           <StatCard
-            title={t.clubs?.enrolledStudents || "Students Enrolled"}
+            title={t.clubs.enrolledStudents}
             value={stats.enrolledStudents}
             description={locale === "fr" ? "Inscriptions actives" : "Active enrollments"}
             icon={Users}
           />
           <StatCard
-            title={t.clubs?.availableSpots || "Available Spots"}
+            title={t.clubs.availableSpots}
             value={stats.availableSpots}
             description={locale === "fr" ? "Places restantes" : "Remaining capacity"}
             icon={UserPlus}
@@ -193,28 +192,27 @@ export default function ClubsPage() {
 
         {/* Filters */}
         <FilterCard
-          title={t.clubs?.filterClubs || "Filter Clubs"}
+          title={t.clubs.filterClubs}
           showClear={hasActiveFilters}
           onClearFilters={clearFilters}
-          clearLabel={locale === "fr" ? "Effacer les filtres" : "Clear filters"}
+          clearLabel={t.common.clearFilters}
         >
           <div className="flex flex-col sm:flex-row gap-4">
             {/* Search Input */}
-            <div className="relative flex-1">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground" />
-              <Input
-                placeholder={t.clubs?.searchPlaceholder || "Search clubs..."}
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-10"
-              />
-            </div>
+            <SearchInput
+              value={searchQuery}
+              onChange={setSearchQuery}
+              placeholder={t.clubs.searchPlaceholder}
+              debounceMs={300}
+              showClear
+              wrapperClassName="flex-1"
+            />
 
             {/* Category Filter */}
             <HydratedSelect
               value={categoryFilter}
               onValueChange={setCategoryFilter}
-              placeholder={t.clubs?.allCategories || "All Categories"}
+              placeholder={t.clubs.allCategories}
               options={categoryOptions}
               width="w-full sm:w-[200px]"
             />
@@ -228,7 +226,7 @@ export default function ClubsPage() {
               <div className="flex items-center gap-2">
                 <div className="h-2 w-2 rounded-full bg-gspn-maroon-500" />
                 <div>
-                  <CardTitle>{t.clubs?.title || "Clubs"}</CardTitle>
+                  <CardTitle>{t.clubs.title}</CardTitle>
                   <CardDescription>
                     {filteredClubs.length} {locale === "fr" ? "clubs" : "clubs"}
                     {pagination && ` ${locale === "fr" ? "sur" : "of"} ${pagination.total}`}

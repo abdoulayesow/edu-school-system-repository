@@ -46,7 +46,7 @@ export default function DashboardPage() {
 
   // Get user info
   const userName = session?.user?.name || undefined
-  const userRole = (session?.user?.role as string)?.toLowerCase() || "user"
+  const userRole = session?.user?.role ? String(session.user.role).toLowerCase() : "user"
 
   // Render appropriate dashboard based on role
   const renderDashboard = () => {

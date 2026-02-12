@@ -3,9 +3,11 @@
 import { useState, useEffect, useMemo } from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
+import { Button } from "@/components/ui/button"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { BookOpen, Users, TrendingDown, BarChart3, Calendar, Loader2, AlertTriangle } from "lucide-react"
+import { useToast } from "@/components/ui/use-toast"
+import { BookOpen, Users, TrendingDown, BarChart3, Calendar, Loader2, AlertTriangle, AlertCircle } from "lucide-react"
 import { useI18n } from "@/components/i18n-provider"
 import { PageContainer } from "@/components/layout"
 import { PermissionGuard, NoPermission } from "@/components/permission-guard"
@@ -77,12 +79,14 @@ interface AttendanceStats {
 
 export default function ReportsPage() {
   const { t, locale } = useI18n()
+  const { toast } = useToast()
   const [grades, setGrades] = useState<Grade[]>([])
   const [selectedGradeId, setSelectedGradeId] = useState<string | null>(null)
   const [attendanceStats, setAttendanceStats] = useState<AttendanceStats | null>(null)
   const [loading, setLoading] = useState(true)
   const [statsLoading, setStatsLoading] = useState(false)
   const [selectedLevel, setSelectedLevel] = useState<string>("all")
+  const [error, setError] = useState<string | null>(null)
 
   // Fetch grades on mount
   useEffect(() => {
@@ -96,15 +100,29 @@ export default function ReportsPage() {
           if (data.grades?.length > 0) {
             setSelectedGradeId(data.grades[0].id)
           }
+          setError(null)
+        } else {
+          setError(t.dashboard.errors.gradesUnavailable)
+          toast({
+            variant: "destructive",
+            title: t.common.error,
+            description: t.dashboard.errors.gradesUnavailable,
+          })
         }
       } catch (err) {
         console.error("Error fetching grades:", err)
+        setError(t.dashboard.errors.fetchFailed)
+        toast({
+          variant: "destructive",
+          title: t.common.error,
+          description: t.dashboard.errors.fetchFailed,
+        })
       } finally {
         setLoading(false)
       }
     }
     fetchGrades()
-  }, [])
+  }, [t, toast])
 
   // Fetch attendance stats when grade changes
   useEffect(() => {
@@ -117,15 +135,26 @@ export default function ReportsPage() {
         if (res.ok) {
           const data = await res.json()
           setAttendanceStats(data)
+        } else {
+          toast({
+            variant: "destructive",
+            title: t.common.error,
+            description: locale === "fr" ? "Impossible de charger les statistiques de présence" : "Failed to load attendance statistics",
+          })
         }
       } catch (err) {
         console.error("Error fetching attendance stats:", err)
+        toast({
+          variant: "destructive",
+          title: t.common.error,
+          description: locale === "fr" ? "Impossible de charger les statistiques de présence" : "Failed to load attendance statistics",
+        })
       } finally {
         setStatsLoading(false)
       }
     }
     fetchAttendanceStats()
-  }, [selectedGradeId])
+  }, [selectedGradeId, toast, t, locale])
 
   // Filter grades by level
   const filteredGrades = useMemo(() => {
@@ -180,6 +209,27 @@ export default function ReportsPage() {
       <PageContainer maxWidth="full">
         <div className="flex items-center justify-center min-h-[50vh]">
           <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+        </div>
+      </PageContainer>
+    )
+  }
+
+  if (error) {
+    return (
+      <PageContainer maxWidth="full">
+        <div className="flex items-center justify-center min-h-[50vh]">
+          <div className="text-center space-y-4 max-w-md">
+            <div className="p-3 bg-destructive/10 rounded-full w-fit mx-auto">
+              <AlertCircle className={cn(sizing.icon.xl, "text-destructive")} />
+            </div>
+            <h3 className={cn(typography.heading.section, "text-foreground")}>
+              {locale === "fr" ? "Erreur de chargement" : "Loading Error"}
+            </h3>
+            <p className="text-muted-foreground">{error}</p>
+            <Button onClick={() => window.location.reload()}>
+              {locale === "fr" ? "Actualiser la page" : "Refresh Page"}
+            </Button>
+          </div>
         </div>
       </PageContainer>
     )
@@ -330,9 +380,9 @@ export default function ReportsPage() {
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="all">{t.reports.allLevels}</SelectItem>
-                    <SelectItem value="elementary">Primaire</SelectItem>
-                    <SelectItem value="college">Collège</SelectItem>
-                    <SelectItem value="high_school">Lycée</SelectItem>
+                    <SelectItem value="elementary">{t.reports.levels.elementary}</SelectItem>
+                    <SelectItem value="college">{t.reports.levels.college}</SelectItem>
+                    <SelectItem value="high_school">{t.reports.levels.lycee}</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -370,8 +420,8 @@ export default function ReportsPage() {
                             <div className="flex items-center gap-2 mb-1">
                               <h3 className="font-semibold text-foreground">{grade.name}</h3>
                               <Badge variant="outline" className="text-xs">
-                                {grade.level === "elementary" ? "Primaire" :
-                                 grade.level === "college" ? "Collège" : "Lycée"}
+                                {grade.level === "elementary" ? t.reports.levels.elementary :
+                                 grade.level === "college" ? t.reports.levels.college : t.reports.levels.lycee}
                               </Badge>
                             </div>
                             <div className="flex items-center gap-4 text-sm text-muted-foreground">

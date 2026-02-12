@@ -22,12 +22,23 @@ import {
   FileText,
   Trophy,
   MessageSquare,
-  CalendarRange,
   Sparkles,
-  Clock,
+  Banknote,
+  Calculator,
 } from "lucide-react"
-import type { UserRole } from "./nav-links"
 import { isGradingFeaturesEnabled } from "./feature-flags"
+
+// Legacy role type used for navigation visibility.
+// These map to simplified role categories, not the Prisma StaffRole enum.
+export type UserRole =
+  | "user"
+  | "director"
+  | "academic_director"
+  | "secretary"
+  | "accountant"
+  | "teacher"
+  | "parent"
+  | "student"
 
 export interface SubNavItem {
   id: string
@@ -155,7 +166,7 @@ export const navigationConfig: MainNavItem[] = [
     name: "Accounting",
     translationKey: "accountingSection",
     icon: Wallet,
-    roles: ["director", "accountant"],
+    roles: ["director", "accountant", "academic_director"],
     subItems: [
       {
         id: "balance",
@@ -180,6 +191,14 @@ export const navigationConfig: MainNavItem[] = [
         href: "/accounting/expenses",
         icon: Wallet,
         roles: ["director", "accountant"],
+      },
+      {
+        id: "salaries",
+        name: "Salaries",
+        translationKey: "salaries",
+        href: "/accounting/salaries",
+        icon: Banknote,
+        roles: ["director", "accountant", "academic_director"],
       },
     ],
   },
@@ -215,9 +234,9 @@ export const navigationConfig: MainNavItem[] = [
         roles: ["director", "academic_director"],
       },
       {
-        id: "users-config",
-        name: "Users",
-        translationKey: "usersManagement",
+        id: "users-permissions",
+        name: "Users & Permissions",
+        translationKey: "usersAndPermissions",
         href: "/admin/users",
         icon: UserCog,
         roles: ["director"],
@@ -231,20 +250,12 @@ export const navigationConfig: MainNavItem[] = [
         roles: ["director", "academic_director"],
       },
       {
-        id: "trimesters",
-        name: "Trimesters",
-        translationKey: "trimesters",
-        href: "/admin/trimesters",
-        icon: CalendarRange,
-        roles: ["director", "academic_director"],
-      },
-      {
-        id: "time-periods",
-        name: "Time Periods",
-        translationKey: "timePeriods",
-        href: "/admin/time-periods",
-        icon: Clock,
-        roles: ["director", "academic_director"],
+        id: "salary-rates",
+        name: "Salary Rates",
+        translationKey: "salaryRates",
+        href: "/admin/salary-rates",
+        icon: Calculator,
+        roles: ["director"],
       },
     ],
   },

@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, Suspense } from "react"
 import { PageContainer } from "@/components/layout"
 import { Card, CardHeader, CardTitle, CardContent, CardDescription } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
@@ -33,6 +33,9 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { useI18n } from "@/components/i18n-provider"
 import { PermissionGuard } from "@/components/permission-guard"
+import { RolePermissionsTab } from "@/components/admin/role-permissions-tab"
+import { StatsCard } from "@/components/admin/stats-card"
+import { useTabUrlSync } from "@/lib/hooks/use-tab-url-sync"
 import { formatDateLong } from "@/lib/utils"
 import {
   UserPlus,
@@ -45,7 +48,9 @@ import {
   RefreshCw,
   Copy,
   Shield,
+  UserCog,
 } from "lucide-react"
+import { componentClasses } from "@/lib/design-tokens"
 
 interface User {
   id: string
@@ -72,13 +77,17 @@ interface Invitation {
 
 const ROLE_KEYS = ["director", "academic_director", "secretary", "accountant", "teacher"] as const
 
-export default function AdminUsersPage() {
+function AdminUsersPageContent() {
   const { t, locale } = useI18n()
+
   const [users, setUsers] = useState<User[]>([])
   const [invitations, setInvitations] = useState<Invitation[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const [isMounted, setIsMounted] = useState(false)
-  const [activeTab, setActiveTab] = useState("invitations")
+
+  // Main tab state (users/roles) - synced with URL query param
+  const [mainTab, setMainTab] = useTabUrlSync("tab", "users")
+  // Sub tab state for users section (invitations/users)
+  const [subTab, setSubTab] = useState("invitations")
 
   // Dialog states
   const [isInviteDialogOpen, setIsInviteDialogOpen] = useState(false)
@@ -92,7 +101,6 @@ export default function AdminUsersPage() {
   })
 
   useEffect(() => {
-    setIsMounted(true)
     fetchInvitations()
     fetchUsers()
   }, [])
@@ -219,224 +227,237 @@ export default function AdminUsersPage() {
     return formatDateLong(dateStr, locale)
   }
 
-  if (!isMounted) {
-    return (
-      <PageContainer maxWidth="full">
-        <div className="flex items-center justify-center h-64">
-          <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
-        </div>
-      </PageContainer>
-    )
-  }
-
   return (
     <PageContainer maxWidth="full">
+      {/* GSPN Header Accent */}
+      <div className="h-1 bg-gspn-maroon-500 -mx-8 -mt-8 mb-8" />
+
       {/* Header */}
-      <div className="flex items-center justify-between mb-6">
-        <div>
-          <h1 className="text-3xl font-bold">{t.admin.usersManagement}</h1>
-          <p className="text-muted-foreground">{t.admin.usersPageSubtitle}</p>
+      <div className="flex items-center justify-between mb-8">
+        <div className="flex items-center gap-4">
+          <div className="p-3 bg-gspn-maroon-500/10 rounded-xl">
+            <UserCog className="w-8 h-8 text-gspn-maroon-500" />
+          </div>
+          <div>
+            <h1 className="text-3xl font-bold text-foreground">{t.admin.usersAndPermissions}</h1>
+            <p className="text-muted-foreground mt-1">{t.admin.usersPageSubtitle}</p>
+          </div>
         </div>
-        <PermissionGuard resource="user_accounts" action="create" inline>
-          <Button onClick={() => setIsInviteDialogOpen(true)}>
-            <UserPlus className="h-4 w-4 mr-2" />
-            {t.admin.inviteUser}
-          </Button>
-        </PermissionGuard>
+        {mainTab === 'users' && (
+          <PermissionGuard resource="user_accounts" action="create" inline>
+            <Button
+              onClick={() => setIsInviteDialogOpen(true)}
+              className={componentClasses.primaryActionButton}
+            >
+              <UserPlus className="h-4 w-4 mr-2" />
+              {t.admin.inviteUser}
+            </Button>
+          </PermissionGuard>
+        )}
       </div>
 
-      {/* Summary Cards */}
-      <div className="grid gap-4 md:grid-cols-4 mb-6">
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">{t.admin.totalUsers}</CardTitle>
-            <Users className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{users.length}</div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">{t.admin.pendingInvitations}</CardTitle>
-            <Clock className="h-4 w-4 text-warning" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">
-              {invitations.filter((i) => i.status === "pending").length}
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">{t.admin.acceptedInvitations}</CardTitle>
-            <CheckCircle2 className="h-4 w-4 text-success" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">
-              {invitations.filter((i) => i.status === "accepted").length}
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">{t.admin.expiredInvitations}</CardTitle>
-            <XCircle className="h-4 w-4 text-destructive" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">
-              {invitations.filter((i) => i.status === "expired").length}
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* Main Content */}
-      <Tabs value={activeTab} onValueChange={setActiveTab}>
-        <TabsList className="mb-4">
-          <TabsTrigger value="invitations">
-            <Mail className="h-4 w-4 mr-2" />
-            {t.admin.invitationsTab}
+      {/* Main Tabs - Outer level (Users | Role Permissions) */}
+      <Tabs value={mainTab} onValueChange={setMainTab} className="space-y-6">
+        <TabsList className="mb-2">
+          <TabsTrigger value="users" className="gap-2">
+            <Users className="h-4 w-4" />
+            {t.admin.usersMainTab}
           </TabsTrigger>
-          <TabsTrigger value="users">
-            <Users className="h-4 w-4 mr-2" />
-            {t.admin.usersTab}
+          <TabsTrigger value="roles" className="gap-2">
+            <Shield className="h-4 w-4" />
+            {t.admin.rolePermissionsMainTab}
           </TabsTrigger>
         </TabsList>
 
-        {/* Invitations Tab */}
-        <TabsContent value="invitations">
-          <Card>
-            <CardHeader>
-              <CardTitle>{t.admin.invitationsTab}</CardTitle>
-              <CardDescription>
-                {t.admin.manageInvitations}
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              {isLoading ? (
-                <div className="flex items-center justify-center h-32">
-                  <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
-                </div>
-              ) : invitations.length === 0 ? (
-                <div className="text-center py-8 text-muted-foreground">
-                  <Mail className="h-12 w-12 mx-auto mb-4 opacity-50" />
-                  <p>{t.admin.noPendingInvitations}</p>
-                </div>
-              ) : (
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>{t.admin.emailColumn}</TableHead>
-                      <TableHead>{t.admin.nameColumn}</TableHead>
-                      <TableHead>{t.admin.roleColumn}</TableHead>
-                      <TableHead>{t.admin.statusColumn}</TableHead>
-                      <TableHead>{t.admin.expiresColumn}</TableHead>
-                      <TableHead>{t.admin.invitedByColumn}</TableHead>
-                      <TableHead className="text-right">{t.admin.actionsColumn}</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {invitations.map((invitation) => (
-                      <TableRow key={invitation.id}>
-                        <TableCell className="font-medium">{invitation.email}</TableCell>
-                        <TableCell>{invitation.name || "-"}</TableCell>
-                        <TableCell>{getRoleBadge(invitation.role)}</TableCell>
-                        <TableCell>{getStatusBadge(invitation.status)}</TableCell>
-                        <TableCell>{formatDisplayDate(invitation.expiresAt)}</TableCell>
-                        <TableCell>{invitation.inviter.name || t.admin.unknown}</TableCell>
-                        <TableCell className="text-right">
-                          {invitation.status === "pending" && (
-                            <div className="flex justify-end gap-2">
-                              <PermissionGuard resource="user_accounts" action="create" inline>
-                                <Button
-                                  variant="outline"
-                                  size="sm"
-                                  onClick={() => handleResendInvitation(invitation.id)}
-                                  title={t.admin.resendInvitation}
-                                >
-                                  <RefreshCw className="h-4 w-4" />
-                                </Button>
-                              </PermissionGuard>
-                              <Button
-                                variant="outline"
-                                size="sm"
-                                onClick={() => copyInvitationLink(invitation.token)}
-                                title={t.admin.copyInvitationLink}
-                              >
-                                <Copy className="h-4 w-4" />
-                              </Button>
-                            </div>
-                          )}
-                          {invitation.status === "expired" && (
-                            <PermissionGuard resource="user_accounts" action="create" inline>
-                              <Button
-                                variant="outline"
-                                size="sm"
-                                onClick={() => handleResendInvitation(invitation.id)}
-                                title={t.admin.resendInvitation}
-                              >
-                                <RefreshCw className="h-4 w-4 mr-1" />
-                                {t.admin.resend}
-                              </Button>
-                            </PermissionGuard>
-                          )}
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              )}
-            </CardContent>
-          </Card>
+        {/* Users Tab Content */}
+        <TabsContent value="users" className="space-y-6">
+          {/* Summary Cards */}
+          <div className="grid gap-4 md:grid-cols-4">
+            <StatsCard
+              label={t.admin.totalUsers}
+              value={users.length}
+              icon={Users}
+              iconColor="text-gspn-maroon-500/30"
+            />
+            <StatsCard
+              label={t.admin.pendingInvitations}
+              value={invitations.filter((i) => i.status === "pending").length}
+              icon={Clock}
+              iconColor="text-gspn-gold-500/30"
+              delay={75}
+            />
+            <StatsCard
+              label={t.admin.acceptedInvitations}
+              value={invitations.filter((i) => i.status === "accepted").length}
+              icon={CheckCircle2}
+              iconColor="text-emerald-500/30"
+              delay={150}
+            />
+            <StatsCard
+              label={t.admin.expiredInvitations}
+              value={invitations.filter((i) => i.status === "expired").length}
+              icon={XCircle}
+              iconColor="text-red-500/30"
+              delay={200}
+            />
+          </div>
+
+          {/* Inner Tabs - Invitations | Users */}
+          <Tabs value={subTab} onValueChange={setSubTab}>
+            <TabsList className="mb-4">
+              <TabsTrigger value="invitations" className="gap-2">
+                <Mail className="h-4 w-4" />
+                {t.admin.invitationsTab}
+              </TabsTrigger>
+              <TabsTrigger value="users" className="gap-2">
+                <Users className="h-4 w-4" />
+                {t.admin.usersTab}
+              </TabsTrigger>
+            </TabsList>
+
+            {/* Invitations Tab */}
+            <TabsContent value="invitations">
+              <Card className="border shadow-sm overflow-hidden">
+                <CardHeader>
+                  <div className="flex items-center gap-2">
+                    <div className="h-2 w-2 rounded-full bg-gspn-maroon-500" />
+                    <CardTitle>{t.admin.invitationsTab}</CardTitle>
+                  </div>
+                  <CardDescription className="mt-2">
+                    {t.admin.manageInvitations}
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  {isLoading ? (
+                    <div className="flex items-center justify-center h-32">
+                      <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+                    </div>
+                  ) : invitations.length === 0 ? (
+                    <div className="text-center py-8 text-muted-foreground">
+                      <Mail className="h-12 w-12 mx-auto mb-4 opacity-50" />
+                      <p>{t.admin.noPendingInvitations}</p>
+                    </div>
+                  ) : (
+                    <Table>
+                      <TableHeader>
+                        <TableRow className="bg-gspn-gold-50/50 dark:bg-gspn-gold-950/20">
+                          <TableHead>{t.admin.emailColumn}</TableHead>
+                          <TableHead>{t.admin.nameColumn}</TableHead>
+                          <TableHead>{t.admin.roleColumn}</TableHead>
+                          <TableHead>{t.admin.statusColumn}</TableHead>
+                          <TableHead>{t.admin.expiresColumn}</TableHead>
+                          <TableHead>{t.admin.invitedByColumn}</TableHead>
+                          <TableHead className="text-right">{t.admin.actionsColumn}</TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {invitations.map((invitation) => (
+                          <TableRow key={invitation.id} className="hover:bg-muted/50 transition-colors">
+                            <TableCell className="font-medium">{invitation.email}</TableCell>
+                            <TableCell>{invitation.name || "-"}</TableCell>
+                            <TableCell>{getRoleBadge(invitation.role)}</TableCell>
+                            <TableCell>{getStatusBadge(invitation.status)}</TableCell>
+                            <TableCell>{formatDisplayDate(invitation.expiresAt)}</TableCell>
+                            <TableCell>{invitation.inviter.name || t.admin.unknown}</TableCell>
+                            <TableCell className="text-right">
+                              {invitation.status === "pending" && (
+                                <div className="flex justify-end gap-2">
+                                  <PermissionGuard resource="user_accounts" action="create" inline>
+                                    <Button
+                                      variant="outline"
+                                      size="sm"
+                                      onClick={() => handleResendInvitation(invitation.id)}
+                                      title={t.admin.resendInvitation}
+                                    >
+                                      <RefreshCw className="h-4 w-4" />
+                                    </Button>
+                                  </PermissionGuard>
+                                  <Button
+                                    variant="outline"
+                                    size="sm"
+                                    onClick={() => copyInvitationLink(invitation.token)}
+                                    title={t.admin.copyInvitationLink}
+                                  >
+                                    <Copy className="h-4 w-4" />
+                                  </Button>
+                                </div>
+                              )}
+                              {invitation.status === "expired" && (
+                                <PermissionGuard resource="user_accounts" action="create" inline>
+                                  <Button
+                                    variant="outline"
+                                    size="sm"
+                                    onClick={() => handleResendInvitation(invitation.id)}
+                                    title={t.admin.resendInvitation}
+                                  >
+                                    <RefreshCw className="h-4 w-4 mr-1" />
+                                    {t.admin.resend}
+                                  </Button>
+                                </PermissionGuard>
+                              )}
+                            </TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
+                  )}
+                </CardContent>
+              </Card>
+            </TabsContent>
+
+            {/* Users Tab */}
+            <TabsContent value="users">
+              <Card className="border shadow-sm overflow-hidden">
+                <CardHeader>
+                  <div className="flex items-center gap-2">
+                    <div className="h-2 w-2 rounded-full bg-gspn-maroon-500" />
+                    <CardTitle>{t.admin.allUsers}</CardTitle>
+                  </div>
+                  <CardDescription className="mt-2">
+                    {t.admin.viewAllUsers}
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  {users.length === 0 ? (
+                    <div className="text-center py-8 text-muted-foreground">
+                      <Users className="h-12 w-12 mx-auto mb-4 opacity-50" />
+                      <p>{t.admin.noUsersFound}</p>
+                    </div>
+                  ) : (
+                    <Table>
+                      <TableHeader>
+                        <TableRow className="bg-gspn-gold-50/50 dark:bg-gspn-gold-950/20">
+                          <TableHead>{t.admin.nameColumn}</TableHead>
+                          <TableHead>{t.admin.emailColumn}</TableHead>
+                          <TableHead>{t.admin.roleColumn}</TableHead>
+                          <TableHead>{t.admin.statusColumn}</TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {users.map((user) => (
+                          <TableRow key={user.id} className="hover:bg-muted/50 transition-colors">
+                            <TableCell className="font-medium">{user.name || "-"}</TableCell>
+                            <TableCell>{user.email || "-"}</TableCell>
+                            <TableCell>{getRoleBadge(user.role)}</TableCell>
+                            <TableCell>
+                              <Badge variant={user.status === "active" ? "default" : "secondary"}>
+                                {user.status}
+                              </Badge>
+                            </TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
+                  )}
+                </CardContent>
+              </Card>
+            </TabsContent>
+          </Tabs>
         </TabsContent>
 
-        {/* Users Tab */}
-        <TabsContent value="users">
-          <Card>
-            <CardHeader>
-              <CardTitle>{t.admin.allUsers}</CardTitle>
-              <CardDescription>
-                {t.admin.viewAllUsers}
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              {users.length === 0 ? (
-                <div className="text-center py-8 text-muted-foreground">
-                  <Users className="h-12 w-12 mx-auto mb-4 opacity-50" />
-                  <p>{t.admin.noUsersFound}</p>
-                </div>
-              ) : (
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>{t.admin.nameColumn}</TableHead>
-                      <TableHead>{t.admin.emailColumn}</TableHead>
-                      <TableHead>{t.admin.roleColumn}</TableHead>
-                      <TableHead>{t.admin.statusColumn}</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {users.map((user) => (
-                      <TableRow key={user.id}>
-                        <TableCell className="font-medium">{user.name || "-"}</TableCell>
-                        <TableCell>{user.email || "-"}</TableCell>
-                        <TableCell>{getRoleBadge(user.role)}</TableCell>
-                        <TableCell>
-                          <Badge variant={user.status === "active" ? "default" : "secondary"}>
-                            {user.status}
-                          </Badge>
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              )}
-            </CardContent>
-          </Card>
+        {/* Role Permissions Tab Content */}
+        <TabsContent value="roles">
+          <RolePermissionsTab />
         </TabsContent>
       </Tabs>
 
@@ -451,7 +472,9 @@ export default function AdminUsersPage() {
           </DialogHeader>
           <div className="grid gap-4 py-4">
             <div className="grid gap-2">
-              <Label htmlFor="email">{t.admin.inviteeEmail}</Label>
+              <Label htmlFor="email">
+                {t.admin.inviteeEmail}
+              </Label>
               <Input
                 id="email"
                 type="email"
@@ -461,7 +484,9 @@ export default function AdminUsersPage() {
               />
             </div>
             <div className="grid gap-2">
-              <Label htmlFor="name">{t.admin.inviteeName}</Label>
+              <Label htmlFor="name">
+                {t.admin.inviteeName}
+              </Label>
               <Input
                 id="name"
                 placeholder={t.admin.namePlaceholder}
@@ -470,7 +495,9 @@ export default function AdminUsersPage() {
               />
             </div>
             <div className="grid gap-2">
-              <Label htmlFor="role">{t.admin.selectRole}</Label>
+              <Label htmlFor="role">
+                {t.admin.selectRole}
+              </Label>
               <Select
                 value={inviteForm.role}
                 onValueChange={(v) => setInviteForm({ ...inviteForm, role: v })}
@@ -480,7 +507,10 @@ export default function AdminUsersPage() {
                 </SelectTrigger>
                 <SelectContent>
                   {ROLE_KEYS.map((role) => (
-                    <SelectItem key={role} value={role}>
+                    <SelectItem
+                      key={role}
+                      value={role}
+                    >
                       {roleLabels[role] || role}
                     </SelectItem>
                   ))}
@@ -492,10 +522,17 @@ export default function AdminUsersPage() {
             </p>
           </div>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setIsInviteDialogOpen(false)}>
+            <Button
+              variant="outline"
+              onClick={() => setIsInviteDialogOpen(false)}
+            >
               {t.common.cancel}
             </Button>
-            <Button onClick={handleInvite} disabled={isSubmitting || !inviteForm.email}>
+            <Button
+              onClick={handleInvite}
+              disabled={isSubmitting || !inviteForm.email}
+              className={componentClasses.primaryActionButton}
+            >
               {isSubmitting && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
               {t.admin.sendInvitation}
             </Button>
@@ -503,5 +540,21 @@ export default function AdminUsersPage() {
         </DialogContent>
       </Dialog>
     </PageContainer>
+  )
+}
+
+export default function AdminUsersPage() {
+  return (
+    <PermissionGuard resource="user_accounts" action="view">
+      <Suspense fallback={
+        <PageContainer maxWidth="full">
+          <div className="flex items-center justify-center h-64">
+            <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+          </div>
+        </PageContainer>
+      }>
+        <AdminUsersPageContent />
+      </Suspense>
+    </PermissionGuard>
   )
 }

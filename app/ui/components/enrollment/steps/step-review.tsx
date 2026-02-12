@@ -7,7 +7,7 @@ import { Separator } from "@/components/ui/separator"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { useEnrollmentWizard } from "../wizard-context"
 import { useI18n } from "@/components/i18n-provider"
-import { formatCurrency } from "@/lib/utils/currency"
+import { formatCurrency } from "@/lib/format"
 import { formatDate } from "@/lib/utils"
 import {
   BookOpen,

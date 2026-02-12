@@ -62,7 +62,8 @@ export async function GET(req: NextRequest, { params }: RouteParams) {
         action: true,
         scope: true,
         granted: true,
-        createdAt: true,
+        reason: true,
+        grantedAt: true,
         grantor: {
           select: {
             id: true,

@@ -65,13 +65,14 @@ interface Override {
   resource: string
   action: string
   scope: string
-  effect: "grant" | "deny"
-  createdAt: string
-  createdBy: {
+  granted: boolean
+  reason: string | null
+  grantor: {
     id: string
-    name: string
-    email: string
+    name: string | null
+    email: string | null
   }
+  grantedAt: string
 }
 
 interface PermissionsData {
@@ -275,8 +276,8 @@ export default function UserPermissionsPage() {
     return {
       total: data.effectivePermissions.length,
       role: data.rolePermissions.length,
-      grants: data.overrides.filter(o => o.effect === "grant").length,
-      denials: data.overrides.filter(o => o.effect === "deny").length,
+      grants: data.overrides.filter(o => o.granted === true).length,
+      denials: data.overrides.filter(o => o.granted === false).length,
     }
   }, [data])
 
@@ -547,7 +548,7 @@ export default function UserPermissionsPage() {
                                   </span>
                                 )}
                               </Badge>
-                              {override && override.effect === "deny" && (
+                              {override && override.granted === false && (
                                 <Badge className="bg-red-500/20 text-red-400 border-red-500/30">
                                   <XCircle className="w-3 h-3 mr-1" />
                                   Denied
@@ -566,7 +567,7 @@ export default function UserPermissionsPage() {
                                   Deny
                                 </Button>
                               )}
-                              {override && override.effect === "deny" && (
+                              {override && override.granted === false && (
                                 <Button
                                   size="sm"
                                   variant="ghost"
@@ -631,7 +632,7 @@ export default function UserPermissionsPage() {
                               </Badge>
                             </div>
                             <PermissionGuard resource="permission_overrides" action="delete" fallback={null}>
-                              {override && override.effect === "grant" && (
+                              {override && override.granted === true && (
                                 <Button
                                   size="sm"
                                   variant="ghost"
@@ -813,7 +814,7 @@ export default function UserPermissionsPage() {
                   {selectedOverride.resource} : {selectedOverride.action} ({selectedOverride.scope})
                 </p>
                 <p className="text-slate-400 text-xs">
-                  {selectedOverride.effect === "grant" ? "Grant" : "Denial"} by {selectedOverride.createdBy.name}
+                  {selectedOverride.granted ? "Grant" : "Denial"} by {selectedOverride.grantor.name}
                 </p>
               </div>
             )}

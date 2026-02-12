@@ -23,7 +23,8 @@ import {
   ArrowRightLeft,
   GraduationCap,
 } from "lucide-react"
-import { RoomAssignmentDialog, BulkMoveDialog, AutoAssignDialog } from "@/components/room-assignments"
+import { RoomAssignmentDialog, BulkMoveDialog } from "@/components/room-assignments"
+import { PermissionGuard } from "@/components/permission-guard"
 
 interface SchoolYear {
   id: string
@@ -96,7 +97,6 @@ export default function GradesClassesPage() {
 
   // Dialog states
   const [assignDialogOpen, setAssignDialogOpen] = useState(false)
-  const [autoAssignDialogOpen, setAutoAssignDialogOpen] = useState(false)
   const [bulkMoveDialogOpen, setBulkMoveDialogOpen] = useState(false)
   const [selectedGrade, setSelectedGrade] = useState<Grade | null>(null)
 
@@ -156,10 +156,10 @@ export default function GradesClassesPage() {
 
   function getLevelBadge(level: Grade["level"]) {
     const colors: Record<Grade["level"], string> = {
-      kindergarten: "bg-pink-500",
-      elementary: "bg-blue-500",
-      college: "bg-green-500",
-      high_school: "bg-purple-500",
+      kindergarten: "bg-gspn-maroon-100 text-gspn-maroon-700 dark:bg-gspn-maroon-900/30 dark:text-gspn-maroon-300",
+      elementary: "bg-gspn-gold-100 text-gspn-gold-700 dark:bg-gspn-gold-900/30 dark:text-gspn-gold-300",
+      college: "bg-gspn-maroon-100 text-gspn-maroon-700 dark:bg-gspn-maroon-900/30 dark:text-gspn-maroon-300",
+      high_school: "bg-gspn-gold-100 text-gspn-gold-700 dark:bg-gspn-gold-900/30 dark:text-gspn-gold-300",
     }
     return <Badge className={colors[level]}>{LEVEL_LABELS[level]}</Badge>
   }
@@ -177,11 +177,6 @@ export default function GradesClassesPage() {
   function openAssignDialog(grade: Grade) {
     setSelectedGrade(grade)
     setAssignDialogOpen(true)
-  }
-
-  function openAutoAssignDialog(grade: Grade) {
-    setSelectedGrade(grade)
-    setAutoAssignDialogOpen(true)
   }
 
   function openBulkMoveDialog(grade: Grade) {
@@ -234,7 +229,7 @@ export default function GradesClassesPage() {
             {activeSchoolYear && (
               <div className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-gspn-maroon-50 dark:bg-gspn-maroon-950/30 border border-gspn-maroon-200 dark:border-gspn-maroon-800">
                 <span className="text-sm text-gspn-maroon-700 dark:text-gspn-maroon-400">
-                  {locale === "fr" ? "Année scolaire:" : "School Year:"}
+                  {t.students.schoolYear}:
                 </span>
                 <span className="text-sm font-semibold text-gspn-maroon-800 dark:text-gspn-maroon-300">
                   {activeSchoolYear.name}
@@ -298,16 +293,18 @@ export default function GradesClassesPage() {
                     </div>
                     {/* Assign button in header - visible when there are unassigned students */}
                     {hasUnassigned && (
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        disabled={activeRooms.length === 0}
-                        onClick={() => openAssignDialog(grade)}
-                        title={activeRooms.length === 0 ? t.students.noRoomsConfigured : undefined}
-                      >
-                        <UserPlus className="h-4 w-4 mr-2" />
-                        {t.admin.assignStudents}
-                      </Button>
+                      <PermissionGuard resource="schedule" action="create" inline>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          disabled={activeRooms.length === 0}
+                          onClick={() => openAssignDialog(grade)}
+                          title={activeRooms.length === 0 ? t.students.noRoomsConfigured : undefined}
+                        >
+                          <UserPlus className="h-4 w-4 mr-2" />
+                          {t.admin.assignStudents}
+                        </Button>
+                      </PermissionGuard>
                     )}
                   </div>
                 </CardHeader>
@@ -390,17 +387,19 @@ export default function GradesClassesPage() {
 
                       {/* Move Students Button - only shown when there are assigned students and multiple rooms */}
                       {totalAssigned > 0 && activeRooms.length > 1 && (
-                        <div className="flex gap-2 pt-2">
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            className="flex-1"
-                            onClick={() => openBulkMoveDialog(grade)}
-                          >
-                            <ArrowRightLeft className="h-3 w-3 mr-1" />
-                            {t.admin.moveStudents}
-                          </Button>
-                        </div>
+                        <PermissionGuard resource="schedule" action="create" inline>
+                          <div className="flex gap-2 pt-2">
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              className="flex-1"
+                              onClick={() => openBulkMoveDialog(grade)}
+                            >
+                              <ArrowRightLeft className="h-3 w-3 mr-1" />
+                              {t.admin.moveStudents}
+                            </Button>
+                          </div>
+                        </PermissionGuard>
                       )}
                     </CollapsibleContent>
                   </Collapsible>
@@ -449,18 +448,6 @@ export default function GradesClassesPage() {
         />
       )}
 
-      {/* Auto-Assign Dialog */}
-      {selectedGrade && (
-        <AutoAssignDialog
-          open={autoAssignDialogOpen}
-          onOpenChange={setAutoAssignDialogOpen}
-          gradeId={selectedGrade.id}
-          gradeName={selectedGrade.name}
-          schoolYearId={activeSchoolYear?.id || ""}
-          rooms={selectedGrade.rooms}
-          onSuccess={handleDialogSuccess}
-        />
-      )}
     </PageContainer>
   )
 }

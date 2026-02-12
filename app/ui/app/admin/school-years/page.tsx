@@ -58,6 +58,7 @@ import {
   GraduationCap,
   Users,
 } from "lucide-react"
+import { componentClasses } from "@/lib/design-tokens"
 
 interface SchoolYear {
   id: string
@@ -301,6 +302,9 @@ export default function SchoolYearsPage() {
 
   return (
     <PageContainer maxWidth="full">
+      {/* Header accent bar */}
+      <div className="h-1 bg-gspn-maroon-500 -mx-6 mb-6" />
+
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
         <div>
@@ -310,7 +314,7 @@ export default function SchoolYearsPage() {
         <PermissionGuard resource="academic_year" action="create" inline>
           <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
             <DialogTrigger asChild>
-              <Button disabled={!!newYear}>
+              <Button disabled={!!newYear} className={componentClasses.primaryActionButton}>
                 <Plus className="h-4 w-4 mr-2" />
                 {t.admin.createSchoolYear}
               </Button>
@@ -389,10 +393,12 @@ export default function SchoolYearsPage() {
 
       {/* Summary Cards */}
       <div className="grid gap-4 md:grid-cols-3 mb-6">
-        <Card>
+        <Card className="border shadow-sm animate-in fade-in slide-in-from-bottom-4 duration-500">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">{t.admin.activeYear}</CardTitle>
-            <CheckCircle2 className="h-4 w-4 text-success" />
+            <div className="p-2.5 bg-gspn-maroon-500/10 rounded-xl">
+              <CheckCircle2 className="h-4 w-4 text-gspn-maroon-500" />
+            </div>
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
@@ -406,10 +412,12 @@ export default function SchoolYearsPage() {
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="border shadow-sm animate-in fade-in slide-in-from-bottom-4 duration-500 delay-75">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">{t.admin.newYear}</CardTitle>
-            <Clock className="h-4 w-4 text-nav-highlight dark:text-gspn-gold-400" />
+            <div className="p-2.5 bg-gspn-gold-500/10 rounded-xl">
+              <Clock className="h-4 w-4 text-gspn-gold-500" />
+            </div>
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
@@ -423,10 +431,12 @@ export default function SchoolYearsPage() {
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="border shadow-sm animate-in fade-in slide-in-from-bottom-4 duration-500 delay-150">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">{t.admin.totalYears}</CardTitle>
-            <CalendarDays className="h-4 w-4 text-muted-foreground" />
+            <div className="p-2.5 bg-gspn-maroon-500/10 rounded-xl">
+              <CalendarDays className="h-4 w-4 text-gspn-maroon-500" />
+            </div>
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{schoolYears.length}</div>
@@ -438,9 +448,12 @@ export default function SchoolYearsPage() {
       </div>
 
       {/* School Years Table */}
-      <Card>
+      <Card className="border shadow-sm overflow-hidden">
         <CardHeader>
-          <CardTitle>{t.admin.schoolYears}</CardTitle>
+          <div className="flex items-center gap-2">
+            <div className="h-2 w-2 rounded-full bg-gspn-maroon-500" />
+            <CardTitle>{t.admin.schoolYears}</CardTitle>
+          </div>
           <CardDescription>{t.admin.schoolYearsSubtitle}</CardDescription>
         </CardHeader>
         <CardContent>
@@ -455,7 +468,7 @@ export default function SchoolYearsPage() {
           ) : (
             <Table>
               <TableHeader>
-                <TableRow>
+                <TableRow className="bg-gspn-gold-50/50 dark:bg-gspn-gold-950/20">
                   <TableHead>{t.admin.schoolYearName}</TableHead>
                   <TableHead>{t.admin.startDate}</TableHead>
                   <TableHead>{t.admin.endDate}</TableHead>
@@ -473,7 +486,7 @@ export default function SchoolYearsPage() {
               </TableHeader>
               <TableBody>
                 {schoolYears.map((year) => (
-                  <TableRow key={year.id}>
+                  <TableRow key={year.id} className="hover:bg-muted/50 transition-colors">
                     <TableCell className="font-medium">{year.name}</TableCell>
                     <TableCell>{formatDisplayDate(year.startDate)}</TableCell>
                     <TableCell>{formatDisplayDate(year.endDate)}</TableCell>

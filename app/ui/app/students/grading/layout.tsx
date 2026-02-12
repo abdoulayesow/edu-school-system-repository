@@ -3,9 +3,10 @@
 import { usePathname } from "next/navigation"
 import Link from "next/link"
 import { useI18n } from "@/components/i18n-provider"
-import { PenLine, FileText, Trophy, MessageSquare, ClipboardCheck } from "lucide-react"
+import { LayoutDashboard, PenLine, FileText, Trophy, ClipboardCheck } from "lucide-react"
 import { componentClasses } from "@/lib/design-tokens"
 import { cn } from "@/lib/utils"
+import { CalculationStatusBanner } from "@/components/grading/calculation-status-banner"
 
 export default function GradingLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname()
@@ -13,17 +14,23 @@ export default function GradingLayout({ children }: { children: React.ReactNode 
 
   // Determine active tab from pathname
   const getActiveTab = () => {
+    if (pathname === "/students/grading" || pathname.startsWith("/students/grading/overview")) return "overview"
     if (pathname.startsWith("/students/grading/entry")) return "entry"
     if (pathname.startsWith("/students/grading/bulletin")) return "bulletin"
     if (pathname.startsWith("/students/grading/ranking")) return "ranking"
-    if (pathname.startsWith("/students/grading/remarks")) return "remarks"
     if (pathname.startsWith("/students/grading/conduct")) return "conduct"
-    return "entry"
+    return "overview"
   }
 
   const activeTab = getActiveTab()
 
   const tabs = [
+    {
+      id: "overview",
+      label: t.nav.overview,
+      href: "/students/grading",
+      icon: LayoutDashboard,
+    },
     {
       id: "entry",
       label: t.grading.gradeEntry,
@@ -43,12 +50,6 @@ export default function GradingLayout({ children }: { children: React.ReactNode 
       icon: Trophy,
     },
     {
-      id: "remarks",
-      label: t.nav.teacherRemarks,
-      href: "/students/grading/remarks",
-      icon: MessageSquare,
-    },
-    {
       id: "conduct",
       label: t.nav.conductEntry,
       href: "/students/grading/conduct",
@@ -58,14 +59,14 @@ export default function GradingLayout({ children }: { children: React.ReactNode 
 
   return (
     <div className="min-h-screen bg-background">
+      {/* Maroon accent bar */}
+      <div className="h-1 bg-gspn-maroon-500" />
+
+      {/* Calculation Status Banner */}
+      <CalculationStatusBanner />
+
       <div className="bg-background pt-4">
         <div className="container mx-auto px-4 lg:px-6 max-w-7xl">
-          {/* Page Header */}
-          <div className="mb-6">
-            <h1 className="text-3xl font-bold">{t.nav.gradingSection}</h1>
-            <p className="text-muted-foreground">{t.grading.gradingSectionSubtitle}</p>
-          </div>
-
           {/* Tab Navigation */}
           <div className={componentClasses.tabListBase}>
             {tabs.map((tab) => {

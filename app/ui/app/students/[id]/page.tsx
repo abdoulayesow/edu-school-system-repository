@@ -408,7 +408,7 @@ export default function StudentDetailPage() {
                       {student.studentProfile.currentGrade.name}
                     </Badge>
                   )}
-                  <PermissionGuard resource="room_assignments" action="update" inline>
+                  <PermissionGuard resource="classes" action="update" inline>
                     {currentRoomName ? (
                       <Button
                         variant="outline"
@@ -452,7 +452,7 @@ export default function StudentDetailPage() {
                 </Link>
               </PermissionGuard>
               <PermissionGuard
-                resource="payments"
+                resource="payment_recording"
                 action="create"
                 loading={<div className="h-11 w-40 animate-pulse bg-muted rounded-md" />}
               >

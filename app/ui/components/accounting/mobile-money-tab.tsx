@@ -106,7 +106,7 @@ export function MobileMoneyTab({
       {/* Quick Fee Action */}
       <div className="flex justify-center">
         <PermissionGuard
-          resource="mobile_money"
+          resource="payment_recording"
           action="create"
           loading={<div className="h-16 w-72 animate-pulse bg-muted rounded-lg" />}
         >

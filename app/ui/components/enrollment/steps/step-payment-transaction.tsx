@@ -13,7 +13,7 @@ import { useI18n } from "@/components/i18n-provider"
 import { calculatePaymentSchedules } from "@/lib/enrollment/calculations"
 import { Banknote, Smartphone, Upload, Check, SkipForward, Info, Loader2 } from "lucide-react"
 import { cn } from "@/lib/utils"
-import { formatCurrency } from "@/lib/utils/currency"
+import { formatCurrency } from "@/lib/format"
 import { sizing } from "@/lib/design-tokens"
 
 export function StepPaymentTransaction() {

@@ -5,10 +5,11 @@ import { useRouter } from "next/navigation"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
+import { SearchInput } from "@/components/ui/search-input"
 import { Badge } from "@/components/ui/badge"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { Plus, Search, ChevronRight, Loader2, FileText, Clock, CheckCircle2, Users } from "lucide-react"
+import { Plus, ChevronRight, Loader2, FileText, Clock, CheckCircle2, Users } from "lucide-react"
 import { useI18n } from "@/components/i18n-provider"
 import { PageContainer } from "@/components/layout"
 import { PermissionGuard } from "@/components/permission-guard"
@@ -214,7 +215,7 @@ export default function EnrollmentsPage() {
             {activeSchoolYear && (
               <div className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-gspn-maroon-50 dark:bg-gspn-maroon-950/30 border border-gspn-maroon-200 dark:border-gspn-maroon-800">
                 <span className="text-sm text-gspn-maroon-700 dark:text-gspn-maroon-400">
-                  {locale === "fr" ? "Année scolaire:" : "School Year:"}
+                  {t.students.schoolYear}:
                 </span>
                 <span className="text-sm font-semibold text-gspn-maroon-800 dark:text-gspn-maroon-300">
                   {activeSchoolYear.name}
@@ -258,19 +259,18 @@ export default function EnrollmentsPage() {
         title={t.enrollments.filterEnrollments}
         showClear={hasActiveFilters}
         onClearFilters={clearFilters}
-        clearLabel={locale === "fr" ? "Effacer les filtres" : "Clear filters"}
+        clearLabel={t.common.clearFilters}
       >
         <div className="flex flex-col sm:flex-row gap-4 flex-wrap">
           {/* Search Input */}
-          <div className="relative flex-1 min-w-[200px]">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground" />
-            <Input
-              placeholder={t.enrollments.searchPlaceholder}
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-10"
-            />
-          </div>
+          <SearchInput
+            value={searchQuery}
+            onChange={setSearchQuery}
+            placeholder={t.enrollments.searchPlaceholder}
+            debounceMs={300}
+            showClear
+            wrapperClassName="flex-1 min-w-[200px]"
+          />
 
           {/* Status Filter */}
           <HydratedSelect
@@ -296,7 +296,7 @@ export default function EnrollmentsPage() {
             value={startDate}
             onChange={(e) => setStartDate(e.target.value)}
             className="w-full sm:w-[160px]"
-            placeholder={locale === "fr" ? "Date début" : "Start date"}
+            placeholder={t.common.startDatePlaceholder}
           />
 
           {/* End Date Filter */}
@@ -305,7 +305,7 @@ export default function EnrollmentsPage() {
             value={endDate}
             onChange={(e) => setEndDate(e.target.value)}
             className="w-full sm:w-[160px]"
-            placeholder={locale === "fr" ? "Date fin" : "End date"}
+            placeholder={t.common.endDatePlaceholder}
           />
         </div>
       </FilterCard>

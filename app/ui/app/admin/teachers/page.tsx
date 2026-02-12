@@ -1,6 +1,8 @@
 "use client"
 
-import { useState, useEffect, useMemo } from "react"
+import { Suspense, useState, useEffect, useMemo } from "react"
+import { useUrlFilters, tabFilter, stringFilter } from "@/hooks/use-url-filters"
+import { SearchInput } from "@/components/ui/search-input"
 import { PageContainer } from "@/components/layout"
 import { Card, CardHeader, CardTitle, CardContent, CardDescription } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
@@ -52,6 +54,7 @@ import {
   GraduationCap,
   AlertCircle,
 } from "lucide-react"
+import { componentClasses } from "@/lib/design-tokens"
 
 interface SchoolYear {
   id: string
@@ -114,8 +117,20 @@ interface ClassAssignment {
   }
 }
 
-export default function TeachersPage() {
+const TABS = ["by-subject", "by-teacher"] as const
+type TabValue = (typeof TABS)[number]
+
+function TeachersPageContent() {
   const { t, locale } = useI18n()
+
+  // URL-synced filters
+  const { filters, setFilter } = useUrlFilters({
+    tab: tabFilter(TABS, "by-subject"),
+    q: stringFilter(),
+  })
+  const activeTab = filters.tab as TabValue
+  const searchQuery = filters.q
+
   const [schoolYears, setSchoolYears] = useState<SchoolYear[]>([])
   const [selectedYearId, setSelectedYearId] = useState<string>("")
   const [teachers, setTeachers] = useState<Teacher[]>([])
@@ -123,7 +138,6 @@ export default function TeachersPage() {
   const [grades, setGrades] = useState<Grade[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [isMounted, setIsMounted] = useState(false)
-  const [activeTab, setActiveTab] = useState("by-subject")
 
   // Dialog states
   const [isAssignDialogOpen, setIsAssignDialogOpen] = useState(false)
@@ -279,6 +293,20 @@ export default function TeachersPage() {
     return Object.values(grouped).sort((a, b) => a.grade.order - b.grade.order)
   }, [assignments, grades])
 
+  // Filter teachers by search query
+  const filteredTeachers = useMemo(() => {
+    if (!searchQuery.trim()) return teachers
+
+    const query = searchQuery.toLowerCase()
+    return teachers.filter((teacher) =>
+      teacher.person.firstName.toLowerCase().includes(query) ||
+      teacher.person.lastName.toLowerCase().includes(query) ||
+      `${teacher.person.firstName} ${teacher.person.lastName}`.toLowerCase().includes(query) ||
+      (teacher.specialization && teacher.specialization.toLowerCase().includes(query)) ||
+      (teacher.employeeNumber && teacher.employeeNumber.toLowerCase().includes(query))
+    )
+  }, [teachers, searchQuery])
+
   async function handleAssignTeacher() {
     if (!selectedGradeSubject) return
     setIsSubmitting(true)
@@ -358,6 +386,9 @@ export default function TeachersPage() {
 
   return (
     <PageContainer maxWidth="full">
+      {/* Header accent bar */}
+      <div className="h-1 bg-gspn-maroon-500 -mx-6 mb-6" />
+
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
         <div>
@@ -381,10 +412,12 @@ export default function TeachersPage() {
 
       {/* Summary Cards */}
       <div className="grid gap-4 md:grid-cols-3 mb-6">
-        <Card>
+        <Card className="border shadow-sm animate-in fade-in slide-in-from-bottom-4 duration-500">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">{t.admin.teachers}</CardTitle>
-            <Users className="h-4 w-4 text-muted-foreground" />
+            <div className="p-2.5 bg-gspn-maroon-500/10 rounded-xl">
+              <Users className="h-4 w-4 text-gspn-maroon-500" />
+            </div>
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{teachers.length}</div>
@@ -394,10 +427,12 @@ export default function TeachersPage() {
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="border shadow-sm animate-in fade-in slide-in-from-bottom-4 duration-500 delay-75">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">{t.admin.classAssignments}</CardTitle>
-            <BookOpen className="h-4 w-4 text-muted-foreground" />
+            <div className="p-2.5 bg-gspn-maroon-500/10 rounded-xl">
+              <BookOpen className="h-4 w-4 text-gspn-maroon-500" />
+            </div>
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{assignments.length}</div>
@@ -407,10 +442,12 @@ export default function TeachersPage() {
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="border shadow-sm animate-in fade-in slide-in-from-bottom-4 duration-500 delay-150">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">{t.admin.unassigned}</CardTitle>
-            <AlertCircle className="h-4 w-4 text-orange-500" />
+            <div className="p-2.5 bg-gspn-gold-500/10 rounded-xl">
+              <AlertCircle className="h-4 w-4 text-gspn-gold-500" />
+            </div>
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
@@ -424,7 +461,7 @@ export default function TeachersPage() {
       </div>
 
       {/* Main Content */}
-      <Tabs value={activeTab} onValueChange={setActiveTab}>
+      <Tabs value={activeTab} onValueChange={(v) => setFilter("tab", v as TabValue)}>
         <TabsList className="mb-4">
           <TabsTrigger value="by-subject">
             <BookOpen className="h-4 w-4 mr-2" />
@@ -450,17 +487,20 @@ export default function TeachersPage() {
           ) : (
             <div className="space-y-6">
               {assignmentsByGrade.map(({ grade, subjects }) => (
-                <Card key={grade.id}>
+                <Card key={grade.id} className="border shadow-sm overflow-hidden">
                   <CardHeader className="pb-2">
-                    <CardTitle className="flex items-center gap-2">
-                      <GraduationCap className="h-5 w-5" />
-                      {grade.name}
-                    </CardTitle>
+                    <div className="flex items-center gap-2">
+                      <div className="h-2 w-2 rounded-full bg-gspn-maroon-500" />
+                      <CardTitle className="flex items-center gap-2">
+                        <GraduationCap className="h-5 w-5" />
+                        {grade.name}
+                      </CardTitle>
+                    </div>
                   </CardHeader>
                   <CardContent>
                     <Table>
                       <TableHeader>
-                        <TableRow>
+                        <TableRow className="bg-gspn-gold-50/50 dark:bg-gspn-gold-950/20">
                           <TableHead>{t.admin.subjects}</TableHead>
                           <TableHead className="text-center">{t.admin.coefficient}</TableHead>
                           <TableHead className="text-center">{t.admin.hoursWeek}</TableHead>
@@ -470,7 +510,7 @@ export default function TeachersPage() {
                       </TableHeader>
                       <TableBody>
                         {subjects.map(({ gradeSubject, assignment }) => (
-                          <TableRow key={gradeSubject.id}>
+                          <TableRow key={gradeSubject.id} className="hover:bg-muted/50 transition-colors">
                             <TableCell>
                               <span className="font-medium">
                                 {locale === "fr" ? gradeSubject.subject.nameFr : gradeSubject.subject.nameEn}
@@ -539,19 +579,27 @@ export default function TeachersPage() {
 
         {/* By Teacher Tab */}
         <TabsContent value="by-teacher">
+          {/* Search Input */}
+          <SearchInput
+            placeholder={t.admin.searchTeachers}
+            value={searchQuery}
+            onChange={(v) => setFilter("q", v)}
+            wrapperClassName="max-w-md mb-6"
+          />
+
           {isLoading ? (
             <div className="flex items-center justify-center h-64">
               <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
             </div>
-          ) : teachers.length === 0 ? (
+          ) : filteredTeachers.length === 0 ? (
             <div className="text-center py-16 text-muted-foreground">
               <Users className="h-16 w-16 mx-auto mb-4 opacity-50" />
-              <p>{t.admin.noTeachersFound}</p>
+              <p>{searchQuery ? t.common.noResults : t.admin.noTeachersFound}</p>
             </div>
           ) : (
             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-              {teachers.map((teacher) => (
-                <Card key={teacher.id}>
+              {filteredTeachers.map((teacher) => (
+                <Card key={teacher.id} className="border shadow-sm">
                   <CardHeader>
                     <CardTitle className="flex items-center justify-between">
                       <span>
@@ -612,9 +660,8 @@ export default function TeachersPage() {
                       )}
 
                       <Button
-                        variant="outline"
                         size="sm"
-                        className="w-full mt-2"
+                        className={`w-full mt-2 ${componentClasses.primaryActionButton}`}
                         onClick={() => openScheduleDialog(teacher)}
                       >
                         <Calendar className="h-4 w-4 mr-2" />
@@ -670,6 +717,7 @@ export default function TeachersPage() {
             <Button
               onClick={handleAssignTeacher}
               disabled={isSubmitting || !assignForm.teacherProfileId}
+              className={componentClasses.primaryActionButton}
             >
               {isSubmitting && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
               {t.admin.assignTeacher}
@@ -717,7 +765,7 @@ export default function TeachersPage() {
                 ) : (
                   <Table>
                     <TableHeader>
-                      <TableRow>
+                      <TableRow className="bg-gspn-gold-50/50 dark:bg-gspn-gold-950/20">
                         <TableHead>{t.admin.grades}</TableHead>
                         <TableHead>{t.admin.subjects}</TableHead>
                         <TableHead className="text-center">{t.admin.coefficientShort}</TableHead>
@@ -727,7 +775,7 @@ export default function TeachersPage() {
                     <TableBody>
                       {teacherSchedule.assignmentsByGrade.map(({ grade, subjects }) =>
                         subjects.map((s, idx) => (
-                          <TableRow key={`${grade.id}-${s.subject.id}`}>
+                          <TableRow key={`${grade.id}-${s.subject.id}`} className="hover:bg-muted/50 transition-colors">
                             {idx === 0 && (
                               <TableCell rowSpan={subjects.length} className="font-medium">
                                 {grade.name}
@@ -783,5 +831,13 @@ export default function TeachersPage() {
         </AlertDialogContent>
       </AlertDialog>
     </PageContainer>
+  )
+}
+
+export default function TeachersPage() {
+  return (
+    <Suspense fallback={<div className="flex items-center justify-center h-64"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gspn-maroon-500"></div></div>}>
+      <TeachersPageContent />
+    </Suspense>
   )
 }

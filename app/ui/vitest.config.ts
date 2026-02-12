@@ -8,6 +8,14 @@ export default defineConfig({
     globals: true,
     environment: 'happy-dom',
     setupFiles: ['./vitest.setup.tsx'],
+    environmentOptions: {
+      happyDOM: {
+        settings: {
+          disableJavaScriptFileLoading: true,
+          disableCSSFileLoading: true,
+        },
+      },
+    },
     coverage: {
       provider: 'v8',
       reporter: ['text', 'json', 'html', 'lcov'],

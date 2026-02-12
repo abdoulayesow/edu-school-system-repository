@@ -49,6 +49,7 @@ export async function GET(req: NextRequest) {
   const startDate = searchParams.get("startDate")
   const endDate = searchParams.get("endDate")
   const balanceStatus = searchParams.get("balanceStatus") // "outstanding" or "paid_up"
+  const needsDeposit = searchParams.get("needsDeposit") // "true" for cash payments without deposit
   const limit = parseInt(searchParams.get("limit") || "100")
   const offset = parseInt(searchParams.get("offset") || "0")
 
@@ -85,6 +86,10 @@ export async function GET(req: NextRequest) {
       if (endDate) {
         (where.recordedAt as Record<string, Date>).lte = new Date(endDate)
       }
+    }
+    // Filter for cash payments without deposits (needs deposit)
+    if (needsDeposit === "true") {
+      where.cashDeposit = { is: null }
     }
 
     // If filtering by balance status, we need to get enrollments first

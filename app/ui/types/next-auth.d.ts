@@ -1,13 +1,12 @@
 import "next-auth"
 
-import type { AppRole } from "@/lib/rbac"
-import type { StaffRole, SchoolLevel } from "@prisma/client"
+import type { Role, StaffRole, SchoolLevel } from "@prisma/client"
 
 declare module "next-auth" {
   interface Session {
     user: {
       id: string
-      role: AppRole
+      role: Role
       name?: string | null
       email?: string | null
       image?: string | null
@@ -20,14 +19,14 @@ declare module "next-auth" {
 
   interface User {
     id: string
-    role: AppRole
+    role: Role
   }
 }
 
 declare module "next-auth/jwt" {
   interface JWT {
     id?: string
-    role?: AppRole
+    role?: Role
     // Permission system fields
     staffRole?: StaffRole | null
     schoolLevel?: SchoolLevel | null

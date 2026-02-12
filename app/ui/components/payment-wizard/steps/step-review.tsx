@@ -23,7 +23,7 @@ import {
 import { usePaymentWizard } from "../wizard-context"
 import { useI18n } from "@/components/i18n-provider"
 import { cn } from "@/lib/utils"
-import { formatCurrency } from "@/lib/utils/currency"
+import { formatCurrency } from "@/lib/format"
 import { sizing, typography, interactive, gradients } from "@/lib/design-tokens"
 
 export function StepReview() {

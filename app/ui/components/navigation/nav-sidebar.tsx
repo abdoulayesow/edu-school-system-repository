@@ -15,7 +15,7 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip"
 import { navigationConfig } from "@/lib/nav-config"
-import type { UserRole } from "@/lib/nav-links"
+import type { UserRole } from "@/lib/nav-config"
 import { useI18n } from "@/components/i18n-provider"
 import { useNavigation } from "./navigation-context"
 import { useMediaQuery } from "@/hooks/use-media-query"

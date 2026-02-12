@@ -1,7 +1,9 @@
 "use client"
 
-import { useMemo } from "react"
+import { useMemo, useEffect } from "react"
 import { Card, CardContent } from "@/components/ui/card"
+import { Button } from "@/components/ui/button"
+import { useToast } from "@/components/ui/use-toast"
 import {
   PieChart,
   Pie,
@@ -24,6 +26,7 @@ import {
   Loader2,
   Wallet,
   GraduationCap,
+  AlertCircle,
 } from "lucide-react"
 import { useI18n } from "@/components/i18n-provider"
 import { PageContainer } from "@/components/layout"
@@ -65,11 +68,33 @@ function formatGNF(amount: number): string {
 
 export default function ChartsPage() {
   const { t, locale } = useI18n()
+  const { toast } = useToast()
 
   // Fetch data
-  const { data: gradesData, isLoading: gradesLoading } = useGrades()
-  const { data: balanceData, isLoading: balanceLoading } = useAccountingBalance()
-  const { data: expensesData, isLoading: expensesLoading } = useExpenses({ status: "approved" })
+  const { data: gradesData, isLoading: gradesLoading, error: gradesError } = useGrades()
+  const { data: balanceData, isLoading: balanceLoading, error: balanceError } = useAccountingBalance()
+  const { data: expensesData, isLoading: expensesLoading, error: expensesError } = useExpenses({ status: "approved" })
+
+  // Show error toast notifications
+  useEffect(() => {
+    if (gradesError) {
+      toast({
+        variant: "destructive",
+        title: t.common.error,
+        description: t.dashboard.errors.gradesUnavailable,
+      })
+    }
+  }, [gradesError, toast, t])
+
+  useEffect(() => {
+    if (balanceError || expensesError) {
+      toast({
+        variant: "destructive",
+        title: t.common.error,
+        description: t.dashboard.errors.financialDataUnavailable,
+      })
+    }
+  }, [balanceError, expensesError, toast, t])
 
   const grades = gradesData?.grades ?? []
   const balance = balanceData ?? null
@@ -165,6 +190,31 @@ export default function ChartsPage() {
             <p className="text-muted-foreground">
               {locale === "fr" ? "Chargement des graphiques..." : "Loading charts..."}
             </p>
+          </div>
+        </div>
+      </PageContainer>
+    )
+  }
+
+  // Show error state if critical data failed to load
+  const hasCriticalError = gradesError && balanceError
+  if (hasCriticalError) {
+    return (
+      <PageContainer maxWidth="full">
+        <div className="flex items-center justify-center min-h-[50vh]">
+          <div className="text-center space-y-4 max-w-md">
+            <div className="p-3 bg-destructive/10 rounded-full w-fit mx-auto">
+              <AlertCircle className={cn(sizing.icon.xl, "text-destructive")} />
+            </div>
+            <h3 className={cn(typography.heading.section, "text-foreground")}>
+              {locale === "fr" ? "Erreur de chargement" : "Loading Error"}
+            </h3>
+            <p className="text-muted-foreground">
+              {t.dashboard.errors.fetchFailed}
+            </p>
+            <Button onClick={() => window.location.reload()}>
+              {locale === "fr" ? "Actualiser la page" : "Refresh Page"}
+            </Button>
           </div>
         </div>
       </PageContainer>

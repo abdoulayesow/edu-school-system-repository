@@ -10,14 +10,13 @@ import {
   LogOut,
   User,
   ChevronDown,
-  Settings,
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { sizing, componentClasses } from "@/lib/design-tokens"
 import { Button } from "@/components/ui/button"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { getNavigationForRole } from "@/lib/nav-config"
-import type { UserRole } from "@/lib/nav-links"
+import type { UserRole } from "@/lib/nav-config"
 import { useI18n } from "@/components/i18n-provider"
 import { LanguageSwitcher } from "@/components/language-switcher"
 import { useNavigation } from "./navigation-context"
@@ -202,18 +201,6 @@ export function TopNav() {
                       <User className={sizing.icon.sm} />
                       <span>{t.nav.profile}</span>
                     </Link>
-
-                    {/* Users Link (Director only) */}
-                    {session.user.role === "director" && (
-                      <Link
-                        href="/users"
-                        onClick={() => setDropdownOpen(false)}
-                        className="flex items-center gap-2 px-4 py-2 text-sm text-foreground hover:bg-muted transition-colors"
-                      >
-                        <Settings className={sizing.icon.sm} />
-                        <span>{t.nav.users}</span>
-                      </Link>
-                    )}
 
                     {/* Logout */}
                     <button

@@ -15,7 +15,7 @@ import { useI18n } from "@/components/i18n-provider"
 import { calculatePaymentSchedules } from "@/lib/enrollment/calculations"
 import { AlertTriangle, Calendar, Check, Percent } from "lucide-react"
 import { cn, formatDateLong } from "@/lib/utils"
-import { formatCurrency } from "@/lib/utils/currency"
+import { formatCurrency } from "@/lib/format"
 import { sizing } from "@/lib/design-tokens"
 
 // Percentage presets for quick selection
