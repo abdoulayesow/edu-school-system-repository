@@ -3,20 +3,14 @@
 import { useState, useEffect } from "react"
 import { Sparkles, Loader2 } from "lucide-react"
 import { useI18n } from "@/components/i18n-provider"
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog"
+import { FormDialog, FormField } from "@/components/ui/form-dialog"
 import { Button } from "@/components/ui/button"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Label } from "@/components/ui/label"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Badge } from "@/components/ui/badge"
 import { Separator } from "@/components/ui/separator"
+import { cn } from "@/lib/utils"
 
 // ============================================================================
 // Types
@@ -215,250 +209,228 @@ export function AutoAssignDialog({
   }
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
-        <DialogHeader>
-          <DialogTitle>{t.admin.roomAssignments.autoAssignDialogTitle}</DialogTitle>
-          <DialogDescription>
-            {t.admin.roomAssignments.autoAssignDialogDescription}
-          </DialogDescription>
-        </DialogHeader>
-
-        {isLoading ? (
-          <div className="flex items-center justify-center py-8">
-            <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
-          </div>
-        ) : (
-          <div className="space-y-6">
-            {/* Room Selection */}
-            <div className="space-y-3">
-              <div className="flex items-center justify-between">
-                <Label className="text-base font-semibold">
-                  {t.admin.roomAssignments.selectRoomsToAutoAssign}
-                </Label>
-                <div className="flex gap-2">
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={selectAllRooms}
-                    disabled={rooms.length === 0}
-                  >
-                    {t.admin.roomAssignments.selectAllRooms}
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={deselectAllRooms}
-                    disabled={selectedRoomIds.size === 0}
-                  >
-                    {t.admin.roomAssignments.deselectAllRooms}
-                  </Button>
-                </div>
-              </div>
-
-              <div className="space-y-2">
-                {rooms.map(room => {
-                  const currentCount = room._count.studentAssignments
-                  const availableSlots = room.capacity - currentCount
-                  return (
-                    <div
-                      key={room.id}
-                      className="flex items-center space-x-3 p-3 rounded-lg border hover:bg-accent/50 transition-colors"
-                    >
-                      <Checkbox
-                        id={`room-${room.id}`}
-                        checked={selectedRoomIds.has(room.id)}
-                        onCheckedChange={() => toggleRoom(room.id)}
-                      />
-                      <Label
-                        htmlFor={`room-${room.id}`}
-                        className="flex-1 cursor-pointer font-normal"
-                      >
-                        <div className="flex items-center justify-between">
-                          <span className="font-medium">{room.displayName}</span>
-                          <span className="text-sm text-muted-foreground">
-                            {currentCount}/{room.capacity}
-                            {availableSlots > 0 && (
-                              <Badge variant="secondary" className="ml-2">
-                                {availableSlots}
-                              </Badge>
-                            )}
-                            {availableSlots === 0 && (
-                              <Badge variant="destructive" className="ml-2">
-                                {t.admin.roomAssignments.roomFull}
-                              </Badge>
-                            )}
-                          </span>
-                        </div>
-                      </Label>
-                    </div>
-                  )
-                })}
-
-                {rooms.length === 0 && (
-                  <Alert>
-                    <AlertDescription>
-                      {t.admin.roomAssignments.noRoomsAvailable}
-                    </AlertDescription>
-                  </Alert>
-                )}
+    <FormDialog
+      open={open}
+      onOpenChange={onOpenChange}
+      title={t.admin.roomAssignments.autoAssignDialogTitle}
+      description={t.admin.roomAssignments.autoAssignDialogDescription}
+      icon={Sparkles}
+      accentColor="gold"
+      maxWidth="sm:max-w-2xl"
+      submitLabel={isAssigning
+        ? t.admin.roomAssignments.autoAssigning
+        : t.admin.roomAssignments.autoAssignButton.replace('{count}', eligibleStudents.length.toString())
+      }
+      submitIcon={Sparkles}
+      onSubmit={handleAutoAssign}
+      onCancel={() => onOpenChange(false)}
+      isSubmitting={isAssigning}
+      isDisabled={
+        isLoading ||
+        selectedRoomIds.size === 0 ||
+        eligibleStudents.length === 0
+      }
+      error={error}
+    >
+      {isLoading ? (
+        <div className="flex items-center justify-center py-8">
+          <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+        </div>
+      ) : (
+        <div className="space-y-5">
+          {/* Room Selection */}
+          <div className="space-y-3">
+            <div className="flex items-center justify-between">
+              <Label className="text-sm font-semibold">
+                {t.admin.roomAssignments.selectRoomsToAutoAssign}
+              </Label>
+              <div className="flex gap-2">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={selectAllRooms}
+                  disabled={rooms.length === 0}
+                >
+                  {t.admin.roomAssignments.selectAllRooms}
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={deselectAllRooms}
+                  disabled={selectedRoomIds.size === 0}
+                >
+                  {t.admin.roomAssignments.deselectAllRooms}
+                </Button>
               </div>
             </div>
 
-            <Separator />
-
-            {/* Preview */}
-            {!balanceReport && (
-              <div className="space-y-3">
-                <Label className="text-base font-semibold">
-                  {t.admin.roomAssignments.previewTitle}
-                </Label>
-
-                <div className="p-4 rounded-lg bg-muted/50 space-y-2 text-sm">
-                  <div className="flex items-center justify-between">
-                    <span className="text-muted-foreground">
-                      {t.admin.roomAssignments.studentsToAssign.replace('{count}', eligibleStudents.length.toString())}
-                    </span>
+            <div className="space-y-2">
+              {rooms.map(room => {
+                const currentCount = room._count.studentAssignments
+                const availableSlots = room.capacity - currentCount
+                return (
+                  <div
+                    key={room.id}
+                    className="flex items-center space-x-3 p-3 rounded-lg border hover:bg-accent/50 transition-colors"
+                  >
+                    <Checkbox
+                      id={`room-${room.id}`}
+                      checked={selectedRoomIds.has(room.id)}
+                      onCheckedChange={() => toggleRoom(room.id)}
+                    />
+                    <Label
+                      htmlFor={`room-${room.id}`}
+                      className="flex-1 cursor-pointer font-normal"
+                    >
+                      <div className="flex items-center justify-between">
+                        <span className="font-medium">{room.displayName}</span>
+                        <span className="text-sm text-muted-foreground">
+                          {currentCount}/{room.capacity}
+                          {availableSlots > 0 && (
+                            <Badge variant="secondary" className="ml-2">
+                              {availableSlots}
+                            </Badge>
+                          )}
+                          {availableSlots === 0 && (
+                            <Badge variant="destructive" className="ml-2">
+                              {t.admin.roomAssignments.roomFull}
+                            </Badge>
+                          )}
+                        </span>
+                      </div>
+                    </Label>
                   </div>
+                )
+              })}
 
-                  <div className="flex items-center justify-between">
-                    <span className="text-muted-foreground">
-                      {t.admin.roomAssignments.roomsSelected.replace('{count}', selectedRoomIds.size.toString())}
-                    </span>
-                  </div>
-
-                  {selectedRoomIds.size > 0 && eligibleStudents.length > 0 && (
-                    <div className="flex items-center justify-between">
-                      <span className="text-muted-foreground">
-                        {t.admin.roomAssignments.studentsPerRoom
-                          .replace('{min}', minPerRoom.toString())
-                          .replace('{max}', maxPerRoom.toString())}
-                      </span>
-                    </div>
-                  )}
-
-                  {totalWithGender > 0 && (
-                    <div className="flex items-center justify-between">
-                      <span className="text-muted-foreground">
-                        {t.admin.roomAssignments.genderRatio
-                          .replace('{male}', malePercentage.toString())
-                          .replace('{female}', femalePercentage.toString())}
-                      </span>
-                    </div>
-                  )}
-
-                  {lockedCount > 0 && (
-                    <div className="flex items-center justify-between">
-                      <span className="text-amber-600 dark:text-amber-500">
-                        {t.admin.roomAssignments.lockedStudentsExcluded.replace('{count}', lockedCount.toString())}
-                      </span>
-                    </div>
-                  )}
-
-                  {lockedCount === 0 && unassignedStudents.length > 0 && (
-                    <div className="flex items-center justify-between">
-                      <span className="text-muted-foreground">
-                        {t.admin.roomAssignments.noLockedStudents}
-                      </span>
-                    </div>
-                  )}
-                </div>
-              </div>
-            )}
-
-            {/* Balance Report (after assignment) */}
-            {balanceReport && (
-              <div className="space-y-3">
-                <Label className="text-base font-semibold">
-                  {t.admin.roomAssignments.distributionSummary}
-                </Label>
-
-                <div className="p-4 rounded-lg bg-green-50 dark:bg-green-950/20 border border-green-200 dark:border-green-800 space-y-3">
-                  <div className="flex items-center justify-between">
-                    <span className="font-medium text-green-900 dark:text-green-100">
-                      {t.admin.roomAssignments.balanceScore
-                        .replace('{score}', balanceReport.balanceScore.toString())}
-                    </span>
-                  </div>
-
-                  <Separator className="bg-green-200 dark:bg-green-800" />
-
-                  <div className="space-y-2 text-sm">
-                    {balanceReport.roomDistributions
-                      .filter(d => d.totalAssigned > 0)
-                      .map(dist => (
-                        <div key={dist.roomId} className="flex items-center justify-between">
-                          <span className="font-medium">{dist.roomName}</span>
-                          <div className="flex items-center gap-2 text-muted-foreground">
-                            <span>
-                              {dist.totalAssigned}
-                            </span>
-                            <span className="text-xs">
-                              ({dist.maleCount} ♂, {dist.femaleCount} ♀)
-                            </span>
-                            {dist.averageAge && (
-                              <span className="text-xs">
-                                {dist.averageAge}
-                              </span>
-                            )}
-                          </div>
-                        </div>
-                      ))}
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {/* Error Message */}
-            {error && (
-              <Alert variant="destructive">
-                <AlertDescription>{error}</AlertDescription>
-              </Alert>
-            )}
-
-            {/* Success Message */}
-            {successMessage && (
-              <Alert className="border-green-200 bg-green-50 text-green-900 dark:border-green-800 dark:bg-green-950/20 dark:text-green-100">
-                <AlertDescription>{successMessage}</AlertDescription>
-              </Alert>
-            )}
+              {rooms.length === 0 && (
+                <Alert>
+                  <AlertDescription>
+                    {t.admin.roomAssignments.noRoomsAvailable}
+                  </AlertDescription>
+                </Alert>
+              )}
+            </div>
           </div>
-        )}
 
-        <DialogFooter>
-          <Button
-            variant="outline"
-            onClick={() => onOpenChange(false)}
-            disabled={isAssigning}
-          >
-            {t.common.cancel}
-          </Button>
-          <Button
-            onClick={handleAutoAssign}
-            disabled={
-              isLoading ||
-              isAssigning ||
-              selectedRoomIds.size === 0 ||
-              eligibleStudents.length === 0
-            }
-          >
-            {isAssigning ? (
-              <>
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                {t.admin.roomAssignments.autoAssigning}
-              </>
-            ) : (
-              <>
-                <Sparkles className="mr-2 h-4 w-4" />
-                {t.admin.roomAssignments.autoAssignButton.replace(
-                  '{count}',
-                  eligibleStudents.length.toString()
+          <Separator />
+
+          {/* Preview */}
+          {!balanceReport && (
+            <div className="space-y-3">
+              <Label className="text-sm font-semibold">
+                {t.admin.roomAssignments.previewTitle}
+              </Label>
+
+              <div className="p-4 rounded-xl bg-muted/50 space-y-2 text-sm">
+                <div className="flex items-center justify-between">
+                  <span className="text-muted-foreground">
+                    {t.admin.roomAssignments.studentsToAssign.replace('{count}', eligibleStudents.length.toString())}
+                  </span>
+                </div>
+
+                <div className="flex items-center justify-between">
+                  <span className="text-muted-foreground">
+                    {t.admin.roomAssignments.roomsSelected.replace('{count}', selectedRoomIds.size.toString())}
+                  </span>
+                </div>
+
+                {selectedRoomIds.size > 0 && eligibleStudents.length > 0 && (
+                  <div className="flex items-center justify-between">
+                    <span className="text-muted-foreground">
+                      {t.admin.roomAssignments.studentsPerRoom
+                        .replace('{min}', minPerRoom.toString())
+                        .replace('{max}', maxPerRoom.toString())}
+                    </span>
+                  </div>
                 )}
-              </>
-            )}
-          </Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
+
+                {totalWithGender > 0 && (
+                  <div className="flex items-center justify-between">
+                    <span className="text-muted-foreground">
+                      {t.admin.roomAssignments.genderRatio
+                        .replace('{male}', malePercentage.toString())
+                        .replace('{female}', femalePercentage.toString())}
+                    </span>
+                  </div>
+                )}
+
+                {lockedCount > 0 && (
+                  <div className="flex items-center justify-between">
+                    <span className="text-amber-600 dark:text-amber-500">
+                      {t.admin.roomAssignments.lockedStudentsExcluded.replace('{count}', lockedCount.toString())}
+                    </span>
+                  </div>
+                )}
+
+                {lockedCount === 0 && unassignedStudents.length > 0 && (
+                  <div className="flex items-center justify-between">
+                    <span className="text-muted-foreground">
+                      {t.admin.roomAssignments.noLockedStudents}
+                    </span>
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+
+          {/* Balance Report (after assignment) */}
+          {balanceReport && (
+            <div className="space-y-3">
+              <Label className="text-sm font-semibold">
+                {t.admin.roomAssignments.distributionSummary}
+              </Label>
+
+              <div className="p-4 rounded-xl bg-emerald-50 dark:bg-emerald-950/20 border border-emerald-200 dark:border-emerald-800 space-y-3">
+                <div className="flex items-center justify-between">
+                  <span className="font-medium text-emerald-900 dark:text-emerald-100">
+                    {t.admin.roomAssignments.balanceScore
+                      .replace('{score}', balanceReport.balanceScore.toString())}
+                  </span>
+                </div>
+
+                <Separator className="bg-emerald-200 dark:bg-emerald-800" />
+
+                <div className="space-y-2 text-sm">
+                  {balanceReport.roomDistributions
+                    .filter(d => d.totalAssigned > 0)
+                    .map(dist => (
+                      <div key={dist.roomId} className="flex items-center justify-between">
+                        <span className="font-medium">{dist.roomName}</span>
+                        <div className="flex items-center gap-2 text-muted-foreground">
+                          <span>
+                            {dist.totalAssigned}
+                          </span>
+                          <span className="text-xs">
+                            ({dist.maleCount} ♂, {dist.femaleCount} ♀)
+                          </span>
+                          {dist.averageAge && (
+                            <span className="text-xs">
+                              {dist.averageAge}
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                    ))}
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Success Message */}
+          {successMessage && (
+            <div className={cn(
+              "p-4 rounded-xl border",
+              "bg-gradient-to-br from-emerald-50 to-emerald-50/50 dark:from-emerald-950/30 dark:to-emerald-950/10",
+              "border-emerald-300 dark:border-emerald-700"
+            )}>
+              <p className="text-sm font-medium text-emerald-700 dark:text-emerald-300">
+                {successMessage}
+              </p>
+            </div>
+          )}
+        </div>
+      )}
+    </FormDialog>
   )
 }

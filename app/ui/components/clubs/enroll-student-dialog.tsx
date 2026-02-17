@@ -1,10 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
-import { Button } from "@/components/ui/button"
-import { Label } from "@/components/ui/label"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { FormDialog, FormField } from "@/components/ui/form-dialog"
 import { Input } from "@/components/ui/input"
 import { useI18n } from "@/components/i18n-provider"
 import { useToast } from "@/hooks/use-toast"
@@ -77,9 +74,7 @@ export function EnrollStudentDialog({
     }
   }
 
-  async function handleSubmit(e: React.FormEvent) {
-    e.preventDefault()
-
+  async function handleSubmit() {
     if (!selectedStudentProfileId) {
       toast({
         title: t.common?.error || "Error",
@@ -112,22 +107,31 @@ export function EnrollStudentDialog({
       })
 
       // Reset form and close dialog
-      setSelectedStudentProfileId("")
-      setStartMonth(1)
-      setTotalMonths(10)
-      setSearchQuery("")
+      resetForm()
       onOpenChange(false)
       onSuccess?.()
-    } catch (error: any) {
-      console.error("Error enrolling student:", error)
+    } catch (err) {
+      console.error("Error enrolling student:", err)
       toast({
         title: t.common?.error || "Error",
-        description: error.message || "Failed to enroll student",
+        description: err instanceof Error ? err.message : "Failed to enroll student",
         variant: "destructive",
       })
     } finally {
       setIsSubmitting(false)
     }
+  }
+
+  function resetForm() {
+    setSelectedStudentProfileId("")
+    setStartMonth(1)
+    setTotalMonths(10)
+    setSearchQuery("")
+  }
+
+  function handleOpenChange(newOpen: boolean) {
+    if (!newOpen) resetForm()
+    onOpenChange(newOpen)
   }
 
   const filteredStudents = students.filter((student) => {
@@ -140,185 +144,151 @@ export function EnrollStudentDialog({
   const selectedStudent = students.find((s) => s.id === selectedStudentProfileId)
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[600px]">
-        <DialogHeader>
-          <DialogTitle className="flex items-center gap-2">
-            <UserPlus className="h-5 w-5" />
-            {t.clubs?.enrollStudent || "Enroll Student"}
-          </DialogTitle>
-          <p className="text-sm text-muted-foreground">
-            {clubName}
-          </p>
-        </DialogHeader>
+    <FormDialog
+      open={open}
+      onOpenChange={handleOpenChange}
+      title={t.clubs?.enrollStudent || "Enroll Student"}
+      description={clubName}
+      icon={UserPlus}
+      accentColor="gold"
+      maxWidth="sm:max-w-[600px]"
+      submitLabel={t.clubs?.enrollStudent || "Enroll Student"}
+      submitIcon={UserPlus}
+      cancelLabel={t.common?.cancel || "Cancel"}
+      onSubmit={handleSubmit}
+      onCancel={() => handleOpenChange(false)}
+      isSubmitting={isSubmitting}
+      isDisabled={!selectedStudentProfileId || students.length === 0}
+    >
+      {/* Student Selection */}
+      <div className="space-y-2">
+        <p className="text-sm font-medium">
+          {t.clubs?.selectStudent || "Select Student"} <span className="text-red-500">*</span>
+        </p>
 
-        <form onSubmit={handleSubmit} className="space-y-6">
-          {/* Student Selection */}
-          <div className="space-y-2">
-            <Label htmlFor="student">
-              {t.clubs?.selectStudent || "Select Student"} *
-            </Label>
+        {isLoadingStudents ? (
+          <div className="flex items-center justify-center py-8">
+            <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+          </div>
+        ) : students.length === 0 ? (
+          <div className="rounded-lg border border-dashed p-8 text-center">
+            <p className="text-sm text-muted-foreground">
+              {t.clubs?.noEligibleStudents || "No eligible students available"}
+            </p>
+          </div>
+        ) : (
+          <>
+            {/* Search Input */}
+            <Input
+              type="text"
+              placeholder={t.common?.search || "Search..."}
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="mb-2"
+            />
 
-            {isLoadingStudents ? (
-              <div className="flex items-center justify-center py-8">
-                <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
-              </div>
-            ) : students.length === 0 ? (
-              <div className="rounded-lg border border-dashed p-8 text-center">
-                <p className="text-sm text-muted-foreground">
-                  {t.clubs?.noEligibleStudents || "No eligible students available"}
-                </p>
-              </div>
-            ) : (
-              <>
-                {/* Search Input */}
-                <Input
-                  type="text"
-                  placeholder={t.common?.search || "Search..."}
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="mb-2"
-                />
-
-                {/* Student List */}
-                <div className="max-h-[300px] overflow-y-auto border rounded-lg">
-                  {filteredStudents.length === 0 ? (
-                    <div className="p-4 text-center text-sm text-muted-foreground">
-                      {t.common?.noResults || "No results found"}
-                    </div>
-                  ) : (
-                    <div className="divide-y">
-                      {filteredStudents.map((student) => {
-                        const isSelected = selectedStudentProfileId === student.id
-                        const gradeName = locale === "fr" && student.grade.nameFr
-                          ? student.grade.nameFr
-                          : student.grade.name
-
-                        return (
-                          <button
-                            key={student.id}
-                            type="button"
-                            onClick={() => setSelectedStudentProfileId(student.id)}
-                            className={cn(
-                              "w-full flex items-center gap-3 p-3 text-left transition-colors hover:bg-muted/50",
-                              isSelected && "bg-violet-50 dark:bg-violet-900/20"
-                            )}
-                          >
-                            <Avatar className="h-10 w-10">
-                              <AvatarImage src={student.person.photoUrl || undefined} />
-                              <AvatarFallback>
-                                {student.person.firstName[0]}
-                                {student.person.lastName[0]}
-                              </AvatarFallback>
-                            </Avatar>
-                            <div className="flex-1 min-w-0">
-                              <p className="font-medium text-sm">
-                                {student.person.firstName} {student.person.lastName}
-                              </p>
-                              <p className="text-xs text-muted-foreground">
-                                {gradeName}
-                              </p>
-                            </div>
-                            {isSelected && (
-                              <div className="flex-shrink-0 h-5 w-5 rounded-full bg-violet-600 dark:bg-violet-500 flex items-center justify-center">
-                                <svg
-                                  className="h-3 w-3 text-white"
-                                  fill="none"
-                                  viewBox="0 0 24 24"
-                                  stroke="currentColor"
-                                >
-                                  <path
-                                    strokeLinecap="round"
-                                    strokeLinejoin="round"
-                                    strokeWidth={2}
-                                    d="M5 13l4 4L19 7"
-                                  />
-                                </svg>
-                              </div>
-                            )}
-                          </button>
-                        )
-                      })}
-                    </div>
-                  )}
+            {/* Student List */}
+            <div className="max-h-[300px] overflow-y-auto border rounded-lg">
+              {filteredStudents.length === 0 ? (
+                <div className="p-4 text-center text-sm text-muted-foreground">
+                  {t.common?.noResults || "No results found"}
                 </div>
-              </>
-            )}
-          </div>
-
-          {/* Selected Student Summary */}
-          {selectedStudent && (
-            <div className="rounded-lg bg-muted p-4">
-              <p className="text-sm font-medium mb-1">
-                {t.clubs?.selectedStudent || "Selected Student"}:
-              </p>
-              <p className="text-sm">
-                {selectedStudent.person.firstName} {selectedStudent.person.lastName} -{" "}
-                {locale === "fr" && selectedStudent.grade.nameFr
-                  ? selectedStudent.grade.nameFr
-                  : selectedStudent.grade.name}
-              </p>
-            </div>
-          )}
-
-          {/* Enrollment Details */}
-          <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="startMonth">
-                {t.clubs?.startMonth || "Start Month"} *
-              </Label>
-              <Input
-                id="startMonth"
-                type="number"
-                min={1}
-                max={12}
-                value={startMonth}
-                onChange={(e) => setStartMonth(parseInt(e.target.value) || 1)}
-                required
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="totalMonths">
-                {t.clubs?.totalMonths || "Total Months"} *
-              </Label>
-              <Input
-                id="totalMonths"
-                type="number"
-                min={1}
-                max={12}
-                value={totalMonths}
-                onChange={(e) => setTotalMonths(parseInt(e.target.value) || 1)}
-                required
-              />
-            </div>
-          </div>
-
-          {/* Actions */}
-          <div className="flex justify-end gap-3">
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() => onOpenChange(false)}
-              disabled={isSubmitting}
-            >
-              {t.common?.cancel || "Cancel"}
-            </Button>
-            <Button
-              type="submit"
-              disabled={!selectedStudentProfileId || isSubmitting || students.length === 0}
-            >
-              {isSubmitting ? (
-                <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  {t.common?.saving || "Saving..."}
-                </>
               ) : (
-                t.clubs?.enrollStudent || "Enroll Student"
+                <div className="divide-y">
+                  {filteredStudents.map((student) => {
+                    const isSelected = selectedStudentProfileId === student.id
+                    const gradeName = locale === "fr" && student.grade.nameFr
+                      ? student.grade.nameFr
+                      : student.grade.name
+
+                    return (
+                      <button
+                        key={student.id}
+                        type="button"
+                        onClick={() => setSelectedStudentProfileId(student.id)}
+                        className={cn(
+                          "w-full flex items-center gap-3 p-3 text-left transition-colors hover:bg-muted/50",
+                          isSelected && "bg-gspn-gold-500/10 dark:bg-gspn-gold-500/20"
+                        )}
+                      >
+                        <Avatar className="h-10 w-10">
+                          <AvatarImage src={student.person.photoUrl || undefined} />
+                          <AvatarFallback>
+                            {student.person.firstName[0]}
+                            {student.person.lastName[0]}
+                          </AvatarFallback>
+                        </Avatar>
+                        <div className="flex-1 min-w-0">
+                          <p className="font-medium text-sm">
+                            {student.person.firstName} {student.person.lastName}
+                          </p>
+                          <p className="text-xs text-muted-foreground">
+                            {gradeName}
+                          </p>
+                        </div>
+                        {isSelected && (
+                          <div className="flex-shrink-0 h-5 w-5 rounded-full bg-gspn-gold-500 flex items-center justify-center">
+                            <svg
+                              className="h-3 w-3 text-black"
+                              fill="none"
+                              viewBox="0 0 24 24"
+                              stroke="currentColor"
+                            >
+                              <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth={2}
+                                d="M5 13l4 4L19 7"
+                              />
+                            </svg>
+                          </div>
+                        )}
+                      </button>
+                    )
+                  })}
+                </div>
               )}
-            </Button>
-          </div>
-        </form>
-      </DialogContent>
-    </Dialog>
+            </div>
+          </>
+        )}
+      </div>
+
+      {/* Selected Student Summary */}
+      {selectedStudent && (
+        <div className="rounded-lg bg-muted p-4">
+          <p className="text-sm font-medium mb-1">
+            {t.clubs?.selectedStudent || "Selected Student"}:
+          </p>
+          <p className="text-sm">
+            {selectedStudent.person.firstName} {selectedStudent.person.lastName} -{" "}
+            {locale === "fr" && selectedStudent.grade.nameFr
+              ? selectedStudent.grade.nameFr
+              : selectedStudent.grade.name}
+          </p>
+        </div>
+      )}
+
+      {/* Enrollment Details */}
+      <div className="grid grid-cols-2 gap-4">
+        <FormField label={t.clubs?.startMonth || "Start Month"} required>
+          <Input
+            type="number"
+            min={1}
+            max={12}
+            value={startMonth}
+            onChange={(e) => setStartMonth(parseInt(e.target.value) || 1)}
+          />
+        </FormField>
+        <FormField label={t.clubs?.totalMonths || "Total Months"} required>
+          <Input
+            type="number"
+            min={1}
+            max={12}
+            value={totalMonths}
+            onChange={(e) => setTotalMonths(parseInt(e.target.value) || 1)}
+          />
+        </FormField>
+      </div>
+    </FormDialog>
   )
 }

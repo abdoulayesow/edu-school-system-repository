@@ -2,19 +2,9 @@ import { useState, useEffect } from "react"
 import { CheckCircle2, XCircle, AlertTriangle } from "lucide-react"
 
 // =============================================================================
-// CURRENCY FORMATTING
+// CURRENCY FORMATTING (canonical source: @/lib/format)
 // =============================================================================
-export function formatCurrency(amount: number): string {
-  return new Intl.NumberFormat("fr-GN", {
-    style: "decimal",
-    minimumFractionDigits: 0,
-    maximumFractionDigits: 0,
-  }).format(amount)
-}
-
-export function formatAmount(amount: number): string {
-  return formatCurrency(amount) + " GNF"
-}
+export { formatCurrency, formatAmountWithCurrency as formatAmount } from "@/lib/format"
 
 // =============================================================================
 // TRANSACTION TYPE LABELS

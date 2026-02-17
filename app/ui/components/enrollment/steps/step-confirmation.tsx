@@ -1,6 +1,5 @@
 "use client"
 
-import { useState } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
@@ -9,26 +8,23 @@ import { useEnrollmentWizard } from "../wizard-context"
 import { useI18n } from "@/components/i18n-provider"
 import {
   CheckCircle2,
-  Download,
   Printer,
   Clock,
   AlertTriangle,
   ArrowRight,
   Home,
-  Loader2,
   Eye,
 } from "lucide-react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { sizing } from "@/lib/design-tokens"
+import { DownloadEnrollmentPdfButton } from "../download-enrollment-pdf-button"
 
 export function StepConfirmation() {
-  const { t, locale } = useI18n()
+  const { t } = useI18n()
   const { state, reset } = useEnrollmentWizard()
   const router = useRouter()
   const { data, enrollmentId } = state
-  const [isDownloading, setIsDownloading] = useState(false)
-  const [downloadError, setDownloadError] = useState<string | null>(null)
 
   // Use actual status from API response
   const status = data.enrollmentStatus || "submitted"
@@ -37,38 +33,6 @@ export function StepConfirmation() {
 
   // Calculate days until auto-approval (3 days from submission)
   const daysUntilApproval = needsReview ? null : 3
-
-  // Handle PDF download
-  const handleDownloadPdf = async () => {
-    if (!enrollmentId) return
-
-    setIsDownloading(true)
-    setDownloadError(null)
-
-    try {
-      const lang = locale === "fr" ? "fr" : "en"
-      const response = await fetch(`/api/enrollments/${enrollmentId}/pdf?lang=${lang}`)
-
-      if (!response.ok) {
-        throw new Error("Failed to generate PDF")
-      }
-
-      const blob = await response.blob()
-      const url = window.URL.createObjectURL(blob)
-      const a = document.createElement("a")
-      a.href = url
-      a.download = `inscription-${data.enrollmentNumber || enrollmentId}.pdf`
-      document.body.appendChild(a)
-      a.click()
-      window.URL.revokeObjectURL(url)
-      document.body.removeChild(a)
-    } catch (error) {
-      console.error("Failed to download PDF:", error)
-      setDownloadError(t.enrollmentWizard.pdfDownloadError || "Failed to download PDF")
-    } finally {
-      setIsDownloading(false)
-    }
-  }
 
   // Handle print
   const handlePrint = () => {
@@ -219,14 +183,6 @@ export function StepConfirmation() {
         </CardContent>
       </Card>
 
-      {/* Download Error */}
-      {downloadError && (
-        <Alert variant="destructive">
-          <AlertTriangle className={sizing.icon.sm} />
-          <AlertDescription>{downloadError}</AlertDescription>
-        </Alert>
-      )}
-
       {/* Actions */}
       <div className="flex flex-col sm:flex-row gap-3 justify-center">
         <Button
@@ -238,19 +194,14 @@ export function StepConfirmation() {
             {t.enrollmentWizard.viewEnrollment}
           </Link>
         </Button>
-        <Button
-          onClick={handleDownloadPdf}
-          disabled={isDownloading}
-          variant="outline"
-          className="gap-2 bg-transparent"
-        >
-          {isDownloading ? (
-            <Loader2 className={sizing.icon.sm + " animate-spin"} />
-          ) : (
-            <Download className={sizing.icon.sm} />
-          )}
-          {isDownloading ? t.common.loading || "Loading..." : t.enrollmentWizard.downloadPdf}
-        </Button>
+        {enrollmentId && (
+          <DownloadEnrollmentPdfButton
+            enrollmentId={enrollmentId}
+            enrollmentNumber={data.enrollmentNumber}
+            variant="outline"
+            showError
+          />
+        )}
         <Button variant="outline" onClick={handlePrint} className="gap-2 bg-transparent">
           <Printer className={sizing.icon.sm} />
           {t.enrollmentWizard.printDocument}

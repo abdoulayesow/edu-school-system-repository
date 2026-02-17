@@ -1,14 +1,7 @@
 "use client"
 
 import { useState, useEffect, useMemo } from "react"
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogFooter,
-} from "@/components/ui/dialog"
+import { FormDialog, FormField } from "@/components/ui/form-dialog"
 import { Button } from "@/components/ui/button"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Badge } from "@/components/ui/badge"
@@ -27,6 +20,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table"
+import { DialogFooter } from "@/components/ui/dialog"
 import { useI18n } from "@/components/i18n-provider"
 import { Loader2, Users, AlertTriangle, ArrowRight } from "lucide-react"
 
@@ -216,183 +210,16 @@ export function BulkMoveDialog({
   const canSubmit = targetRoomId && selectedStudentIds.size > 0 && !isSubmitting
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-2xl max-h-[90vh] flex flex-col">
-        <DialogHeader>
-          <DialogTitle>{t.admin.moveStudentsTitle}</DialogTitle>
-          <DialogDescription>
-            {gradeName}
-          </DialogDescription>
-        </DialogHeader>
-
-        <div className="space-y-4 flex-1 overflow-hidden flex flex-col">
-          {/* Room selectors */}
-          <div className="grid grid-cols-[1fr,auto,1fr] gap-4 items-end">
-            <div className="space-y-2">
-              <label className="text-sm font-medium">{t.admin.sourceRoom}</label>
-              <Select value={sourceRoomId} onValueChange={setSourceRoomId}>
-                <SelectTrigger>
-                  <SelectValue placeholder={t.admin.roomAssignments.selectRoom} />
-                </SelectTrigger>
-                <SelectContent>
-                  {activeRooms.map((room) => (
-                    <SelectItem key={room.id} value={room.id}>
-                      <div className="flex items-center justify-between gap-2">
-                        <span>{room.displayName}</span>
-                        <Badge variant="outline" className="ml-2">
-                          {room._count.studentAssignments}/{room.capacity}
-                        </Badge>
-                      </div>
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-
-            <ArrowRight className="size-5 text-muted-foreground mb-2" />
-
-            <div className="space-y-2">
-              <label className="text-sm font-medium">{t.admin.targetRoom}</label>
-              <Select
-                value={targetRoomId}
-                onValueChange={setTargetRoomId}
-                disabled={!sourceRoomId}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder={t.admin.roomAssignments.selectRoom} />
-                </SelectTrigger>
-                <SelectContent>
-                  {targetRoomOptions.map((room) => {
-                    const isFull = room._count.studentAssignments >= room.capacity
-                    return (
-                      <SelectItem
-                        key={room.id}
-                        value={room.id}
-                        disabled={isFull}
-                      >
-                        <div className="flex items-center justify-between gap-2">
-                          <span>{room.displayName}</span>
-                          <Badge
-                            variant={isFull ? "destructive" : "outline"}
-                            className="ml-2"
-                          >
-                            {room._count.studentAssignments}/{room.capacity}
-                          </Badge>
-                        </div>
-                      </SelectItem>
-                    )
-                  })}
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
-
-          {/* Capacity warning */}
-          {targetRoom && availableCapacity < 5 && availableCapacity > 0 && (
-            <div className="flex items-center gap-2 text-warning text-sm">
-              <AlertTriangle className="size-4" />
-              <span>
-                {t.admin.roomAssignments.roomNearCapacity} ({availableCapacity} {t.common.students} available)
-              </span>
-            </div>
-          )}
-
-          {/* Students list */}
-          <div className="flex-1 overflow-hidden flex flex-col">
-            <div className="flex items-center justify-between mb-2">
-              <label className="text-sm font-medium">
-                {t.admin.selectStudentsToMove}
-              </label>
-              {sourceRoomId && targetRoomId && studentsInRoom.length > 0 && (
-                <div className="flex gap-2">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={selectAll}
-                    disabled={!targetRoom || availableCapacity === 0}
-                  >
-                    {t.admin.roomAssignments.selectAll}
-                  </Button>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={deselectAll}
-                    disabled={selectedStudentIds.size === 0}
-                  >
-                    {t.admin.roomAssignments.deselectAll}
-                  </Button>
-                </div>
-              )}
-            </div>
-
-            <div className="border rounded-md flex-1 overflow-auto">
-              {isLoading ? (
-                <div className="flex items-center justify-center py-8">
-                  <Loader2 className="size-6 animate-spin text-muted-foreground" />
-                </div>
-              ) : !sourceRoomId ? (
-                <div className="flex flex-col items-center justify-center py-8 text-muted-foreground">
-                  <Users className="size-8 mb-2" />
-                  <p className="text-sm">{t.admin.sourceRoom}</p>
-                </div>
-              ) : studentsInRoom.length === 0 ? (
-                <div className="flex flex-col items-center justify-center py-8 text-muted-foreground">
-                  <Users className="size-8 mb-2" />
-                  <p className="text-sm">{t.admin.noStudentsInRoom}</p>
-                </div>
-              ) : (
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead className="w-12"></TableHead>
-                      <TableHead>{t.common.student}</TableHead>
-                      <TableHead>ID</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {studentsInRoom.map((assignment) => {
-                      const student = assignment.studentProfile
-                      const isSelected = selectedStudentIds.has(student.id)
-                      const isDisabled =
-                        !targetRoomId ||
-                        (!isSelected && selectedStudentIds.size >= availableCapacity)
-
-                      return (
-                        <TableRow
-                          key={student.id}
-                          className={isDisabled && !isSelected ? "opacity-50" : ""}
-                        >
-                          <TableCell>
-                            <Checkbox
-                              checked={isSelected}
-                              onCheckedChange={() => toggleStudent(student.id)}
-                              disabled={isDisabled && !isSelected}
-                            />
-                          </TableCell>
-                          <TableCell>
-                            {student.person.firstName} {student.person.lastName}
-                          </TableCell>
-                          <TableCell className="text-muted-foreground">
-                            {student.studentNumber || "-"}
-                          </TableCell>
-                        </TableRow>
-                      )
-                    })}
-                  </TableBody>
-                </Table>
-              )}
-            </div>
-          </div>
-
-          {/* Error message */}
-          {error && (
-            <div className="flex items-center gap-2 text-destructive text-sm">
-              <AlertTriangle className="size-4" />
-              <span>{error}</span>
-            </div>
-          )}
-        </div>
-
+    <FormDialog
+      open={open}
+      onOpenChange={onOpenChange}
+      title={t.admin.moveStudentsTitle}
+      description={gradeName}
+      icon={ArrowRight}
+      accentColor="blue"
+      maxWidth="sm:max-w-2xl"
+      error={error}
+      footer={
         <DialogFooter className="flex items-center justify-between sm:justify-between">
           <div className="text-sm text-muted-foreground">
             {selectedStudentIds.size} {t.admin.studentsSelected}
@@ -401,13 +228,173 @@ export function BulkMoveDialog({
             <Button variant="outline" onClick={() => onOpenChange(false)}>
               {t.common.cancel}
             </Button>
-            <Button onClick={handleSubmit} disabled={!canSubmit}>
+            <Button
+              onClick={handleSubmit}
+              disabled={!canSubmit}
+              className="bg-blue-600 hover:bg-blue-700 text-white"
+            >
               {isSubmitting && <Loader2 className="size-4 mr-2 animate-spin" />}
               {t.admin.moveSelected}
             </Button>
           </div>
         </DialogFooter>
-      </DialogContent>
-    </Dialog>
+      }
+    >
+      {/* Room selectors */}
+      <div className="grid grid-cols-[1fr,auto,1fr] gap-4 items-end">
+        <FormField label={t.admin.sourceRoom}>
+          <Select value={sourceRoomId} onValueChange={setSourceRoomId}>
+            <SelectTrigger>
+              <SelectValue placeholder={t.admin.roomAssignments.selectRoom} />
+            </SelectTrigger>
+            <SelectContent>
+              {activeRooms.map((room) => (
+                <SelectItem key={room.id} value={room.id}>
+                  <div className="flex items-center justify-between gap-2">
+                    <span>{room.displayName}</span>
+                    <Badge variant="outline" className="ml-2">
+                      {room._count.studentAssignments}/{room.capacity}
+                    </Badge>
+                  </div>
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </FormField>
+
+        <ArrowRight className="size-5 text-muted-foreground mb-2" />
+
+        <FormField label={t.admin.targetRoom}>
+          <Select
+            value={targetRoomId}
+            onValueChange={setTargetRoomId}
+            disabled={!sourceRoomId}
+          >
+            <SelectTrigger>
+              <SelectValue placeholder={t.admin.roomAssignments.selectRoom} />
+            </SelectTrigger>
+            <SelectContent>
+              {targetRoomOptions.map((room) => {
+                const isFull = room._count.studentAssignments >= room.capacity
+                return (
+                  <SelectItem
+                    key={room.id}
+                    value={room.id}
+                    disabled={isFull}
+                  >
+                    <div className="flex items-center justify-between gap-2">
+                      <span>{room.displayName}</span>
+                      <Badge
+                        variant={isFull ? "destructive" : "outline"}
+                        className="ml-2"
+                      >
+                        {room._count.studentAssignments}/{room.capacity}
+                      </Badge>
+                    </div>
+                  </SelectItem>
+                )
+              })}
+            </SelectContent>
+          </Select>
+        </FormField>
+      </div>
+
+      {/* Capacity warning */}
+      {targetRoom && availableCapacity < 5 && availableCapacity > 0 && (
+        <div className="flex items-center gap-2 text-amber-600 dark:text-amber-500 text-sm p-3 rounded-lg bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-800">
+          <AlertTriangle className="size-4 shrink-0" />
+          <span>
+            {t.admin.roomAssignments.roomNearCapacity} ({availableCapacity} {t.common.students})
+          </span>
+        </div>
+      )}
+
+      {/* Students list */}
+      <div className="space-y-2">
+        <div className="flex items-center justify-between">
+          <label className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
+            {t.admin.selectStudentsToMove}
+          </label>
+          {sourceRoomId && targetRoomId && studentsInRoom.length > 0 && (
+            <div className="flex gap-2">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={selectAll}
+                disabled={!targetRoom || availableCapacity === 0}
+              >
+                {t.admin.roomAssignments.selectAll}
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={deselectAll}
+                disabled={selectedStudentIds.size === 0}
+              >
+                {t.admin.roomAssignments.deselectAll}
+              </Button>
+            </div>
+          )}
+        </div>
+
+        <div className="border rounded-lg overflow-auto max-h-[300px]">
+          {isLoading ? (
+            <div className="flex items-center justify-center py-8">
+              <Loader2 className="size-6 animate-spin text-muted-foreground" />
+            </div>
+          ) : !sourceRoomId ? (
+            <div className="flex flex-col items-center justify-center py-8 text-muted-foreground">
+              <Users className="size-8 mb-2" />
+              <p className="text-sm">{t.admin.sourceRoom}</p>
+            </div>
+          ) : studentsInRoom.length === 0 ? (
+            <div className="flex flex-col items-center justify-center py-8 text-muted-foreground">
+              <Users className="size-8 mb-2" />
+              <p className="text-sm">{t.admin.noStudentsInRoom}</p>
+            </div>
+          ) : (
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead className="w-12"></TableHead>
+                  <TableHead>{t.common.student}</TableHead>
+                  <TableHead>ID</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {studentsInRoom.map((assignment) => {
+                  const student = assignment.studentProfile
+                  const isSelected = selectedStudentIds.has(student.id)
+                  const isDisabled =
+                    !targetRoomId ||
+                    (!isSelected && selectedStudentIds.size >= availableCapacity)
+
+                  return (
+                    <TableRow
+                      key={student.id}
+                      className={isDisabled && !isSelected ? "opacity-50" : ""}
+                    >
+                      <TableCell>
+                        <Checkbox
+                          checked={isSelected}
+                          onCheckedChange={() => toggleStudent(student.id)}
+                          disabled={isDisabled && !isSelected}
+                        />
+                      </TableCell>
+                      <TableCell>
+                        {student.person.firstName} {student.person.lastName}
+                      </TableCell>
+                      <TableCell className="text-muted-foreground">
+                        {student.studentNumber || "-"}
+                      </TableCell>
+                    </TableRow>
+                  )
+                })}
+              </TableBody>
+            </Table>
+          )}
+        </div>
+      </div>
+    </FormDialog>
   )
 }

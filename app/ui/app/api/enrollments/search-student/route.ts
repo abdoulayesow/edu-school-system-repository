@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server"
 import { requirePerm } from "@/lib/authz"
 import { prisma } from "@/lib/prisma"
+import { buildNameSearchConditions } from "@/lib/search-utils"
 
 /**
  * GET /api/enrollments/search-student
@@ -19,22 +20,38 @@ export async function GET(req: NextRequest) {
   }
 
   try {
-    // Build search conditions
+    // Build search conditions with multi-word support
+    // "John Doe" matches firstName="John", lastName="Doe"
+    // Also searches middleName from enrollments
+    const nameSearchConditions = buildNameSearchConditions(query, {
+      firstName: true,
+      lastName: true,
+      middleName: true,
+      studentNumber: true,
+    })
+
+    // Build final where clause: name search OR email match
+    const where: Record<string, unknown> = {
+      status: { in: ["active", "inactive"] },
+    }
+
+    // Add email as additional OR condition (full query, not split)
+    if (nameSearchConditions.OR) {
+      // Single term search - add email to existing OR
+      where.OR = [
+        ...nameSearchConditions.OR as Record<string, unknown>[],
+        { email: { contains: query, mode: "insensitive" } },
+      ]
+    } else if (nameSearchConditions.AND) {
+      // Multi-term search - name conditions AND'd, email as separate OR option
+      where.OR = [
+        nameSearchConditions,
+        { email: { contains: query, mode: "insensitive" } },
+      ]
+    }
+
     const students = await prisma.student.findMany({
-      where: {
-        OR: [
-          // Search by student number (exact or partial match)
-          { studentNumber: { contains: query, mode: "insensitive" } },
-          // Search by first name
-          { firstName: { contains: query, mode: "insensitive" } },
-          // Search by last name
-          { lastName: { contains: query, mode: "insensitive" } },
-          // Search by email
-          { email: { contains: query, mode: "insensitive" } },
-        ],
-        // Only search active students
-        status: { in: ["active", "inactive"] },
-      },
+      where,
       include: {
         enrollments: {
           include: {

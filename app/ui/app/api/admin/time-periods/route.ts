@@ -50,7 +50,7 @@ export async function GET(req: NextRequest) {
  * Body: { name, nameFr?, startTime, endTime, order, schoolYearId, isActive? }
  */
 export async function POST(req: NextRequest) {
-  const { error } = await requirePerm("schedule", "view")
+  const { error } = await requirePerm("schedule", "create")
   if (error) return error
 
   try {

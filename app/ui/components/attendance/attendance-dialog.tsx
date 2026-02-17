@@ -1,21 +1,16 @@
 "use client"
 
 import { useState, useEffect, useCallback } from "react"
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogFooter,
-} from "@/components/ui/dialog"
+import { FormDialog, FormField, dialogThemes } from "@/components/ui/form-dialog"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
+import { DialogFooter } from "@/components/ui/dialog"
 import { useI18n } from "@/components/i18n-provider"
-import { Loader2, Check, X, Clock, FileQuestion } from "lucide-react"
+import { Loader2, ClipboardCheck } from "lucide-react"
 import { cn } from "@/lib/utils"
+import { sizing } from "@/lib/design-tokens"
+import { ATTENDANCE_STATUS_CONFIG } from "@/lib/config/attendance-status"
 
 interface Room {
   id: string
@@ -217,159 +212,144 @@ export function AttendanceDialog({
   if (!room) return null
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-2xl max-h-[85vh] flex flex-col">
-        <DialogHeader>
-          <DialogTitle className="flex items-center gap-2">
-            {t.admin.roomAssignments.attendanceForRoom.replace("{roomName}", room.displayName || room.name)}
-          </DialogTitle>
-          <DialogDescription>
-            {room.students.length} {t.common.students}
-          </DialogDescription>
-        </DialogHeader>
-
-        <div className="flex-1 overflow-hidden flex flex-col space-y-4">
-          {/* Date picker */}
-          <div className="space-y-2">
-            <Label htmlFor="attendance-date">{t.admin.roomAssignments.attendanceDate}</Label>
-            <Input
-              id="attendance-date"
-              type="date"
-              value={date}
-              onChange={e => setDate(e.target.value)}
-              className="w-[200px]"
-            />
-          </div>
-
-          {/* Quick actions */}
-          <div className="flex items-center gap-2 flex-wrap">
-            <span className="text-sm text-muted-foreground">Mark all:</span>
-            <Button variant="outline" size="sm" onClick={() => markAllAs("present")}>
-              <Check className="h-3 w-3 mr-1" />
-              {t.admin.roomAssignments.markPresent}
-            </Button>
-            <Button variant="outline" size="sm" onClick={() => markAllAs("absent")}>
-              <X className="h-3 w-3 mr-1" />
-              {t.admin.roomAssignments.markAbsent}
-            </Button>
-          </div>
-
-          {/* Stats */}
-          <div className="flex items-center gap-2">
-            <Badge variant="default" className="bg-green-600">
-              <Check className="h-3 w-3 mr-1" />
-              {counts.present}
-            </Badge>
-            <Badge variant="destructive">
-              <X className="h-3 w-3 mr-1" />
-              {counts.absent}
-            </Badge>
-            <Badge variant="secondary" className="bg-yellow-500 text-white">
-              <Clock className="h-3 w-3 mr-1" />
-              {counts.late}
-            </Badge>
-            <Badge variant="outline">
-              <FileQuestion className="h-3 w-3 mr-1" />
-              {counts.excused}
-            </Badge>
-          </div>
-
-          {/* Student list */}
-          <div className="flex-1 overflow-y-auto space-y-2 border rounded-lg p-2">
-            {isLoading ? (
-              <div className="flex items-center justify-center py-8">
-                <Loader2 className="h-6 w-6 animate-spin" />
-              </div>
-            ) : (
-              room.students.map(student => {
-                const record = records.get(student.id)
-                const status = record?.status || "present"
-
-                return (
-                  <div
-                    key={student.id}
-                    className="flex items-center justify-between p-2 rounded hover:bg-muted/50"
-                  >
-                    <div className="flex-1">
-                      <div className="font-medium">
-                        {student.firstName} {student.lastName}
-                      </div>
-                      {student.studentNumber && (
-                        <div className="text-sm text-muted-foreground">
-                          {student.studentNumber}
-                        </div>
-                      )}
-                    </div>
-
-                    <div className="flex items-center gap-1">
-                      <Button
-                        size="sm"
-                        variant={status === "present" ? "default" : "outline"}
-                        className={cn(
-                          "h-8 w-8 p-0",
-                          status === "present" && "bg-green-600 hover:bg-green-700"
-                        )}
-                        onClick={() => handleStatusChange(student.id, "present")}
-                        title={t.admin.roomAssignments.markPresent}
-                      >
-                        <Check className="h-4 w-4" />
-                      </Button>
-                      <Button
-                        size="sm"
-                        variant={status === "absent" ? "destructive" : "outline"}
-                        className="h-8 w-8 p-0"
-                        onClick={() => handleStatusChange(student.id, "absent")}
-                        title={t.admin.roomAssignments.markAbsent}
-                      >
-                        <X className="h-4 w-4" />
-                      </Button>
-                      <Button
-                        size="sm"
-                        variant={status === "late" ? "default" : "outline"}
-                        className={cn(
-                          "h-8 w-8 p-0",
-                          status === "late" && "bg-yellow-500 hover:bg-yellow-600"
-                        )}
-                        onClick={() => handleStatusChange(student.id, "late")}
-                        title={t.admin.roomAssignments.markLate}
-                      >
-                        <Clock className="h-4 w-4" />
-                      </Button>
-                      <Button
-                        size="sm"
-                        variant={status === "excused" ? "secondary" : "outline"}
-                        className="h-8 w-8 p-0"
-                        onClick={() => handleStatusChange(student.id, "excused")}
-                        title={t.admin.roomAssignments.markExcused}
-                      >
-                        <FileQuestion className="h-4 w-4" />
-                      </Button>
-                    </div>
-                  </div>
-                )
-              })
-            )}
-          </div>
-
-          {/* Error/Success Messages */}
-          {error && (
-            <div className="text-sm text-destructive">{error}</div>
-          )}
-          {success && (
-            <div className="text-sm text-green-600">{success}</div>
-          )}
-        </div>
-
+    <FormDialog
+      open={open}
+      onOpenChange={onOpenChange}
+      title={t.admin.roomAssignments.attendanceForRoom.replace("{roomName}", room.displayName || room.name)}
+      description={`${room.students.length} ${t.common.students}`}
+      icon={ClipboardCheck}
+      accentColor="maroon"
+      maxWidth="sm:max-w-2xl"
+      error={error}
+      footer={
         <DialogFooter>
           <Button variant="outline" onClick={() => onOpenChange(false)}>
             {t.common.cancel}
           </Button>
-          <Button onClick={handleSave} disabled={isSaving || records.size === 0}>
-            {isSaving && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
+          <Button
+            onClick={handleSave}
+            disabled={isSaving || records.size === 0}
+            className={dialogThemes.maroon.submitBg}
+          >
+            {isSaving && <Loader2 className={cn(sizing.icon.sm, "mr-2 animate-spin")} />}
             {t.admin.roomAssignments.saveAttendance}
           </Button>
         </DialogFooter>
-      </DialogContent>
-    </Dialog>
+      }
+    >
+      {/* Date picker */}
+      <FormField label={t.admin.roomAssignments.attendanceDate}>
+        <Input
+          type="date"
+          value={date}
+          onChange={e => setDate(e.target.value)}
+          className="w-[200px]"
+        />
+      </FormField>
+
+      {/* Quick actions */}
+      <div className="flex items-center gap-2 flex-wrap">
+        <span className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
+          {t.admin.roomAssignments.markAll}
+        </span>
+        <Button variant="outline" size="sm" onClick={() => markAllAs("present")}>
+          <ATTENDANCE_STATUS_CONFIG.present.icon className={cn(sizing.icon.xs, "mr-1")} />
+          {t.admin.roomAssignments.markPresent}
+        </Button>
+        <Button variant="outline" size="sm" onClick={() => markAllAs("absent")}>
+          <ATTENDANCE_STATUS_CONFIG.absent.icon className={cn(sizing.icon.xs, "mr-1")} />
+          {t.admin.roomAssignments.markAbsent}
+        </Button>
+      </div>
+
+      {/* Stats - Using GSPN brand status configuration */}
+      <div className="flex items-center gap-2">
+        <Badge variant="default" className={ATTENDANCE_STATUS_CONFIG.present.className}>
+          <ATTENDANCE_STATUS_CONFIG.present.icon className={cn(sizing.icon.xs, "mr-1")} />
+          {counts.present}
+        </Badge>
+        <Badge variant="default" className={ATTENDANCE_STATUS_CONFIG.absent.className}>
+          <ATTENDANCE_STATUS_CONFIG.absent.icon className={cn(sizing.icon.xs, "mr-1")} />
+          {counts.absent}
+        </Badge>
+        <Badge variant="default" className={ATTENDANCE_STATUS_CONFIG.late.className}>
+          <ATTENDANCE_STATUS_CONFIG.late.icon className={cn(sizing.icon.xs, "mr-1")} />
+          {counts.late}
+        </Badge>
+        <Badge variant="default" className={ATTENDANCE_STATUS_CONFIG.excused.className}>
+          <ATTENDANCE_STATUS_CONFIG.excused.icon className={cn(sizing.icon.xs, "mr-1")} />
+          {counts.excused}
+        </Badge>
+      </div>
+
+      {/* Student list - Using GSPN brand status configuration */}
+      <div className="border rounded-lg p-2 max-h-[350px] overflow-y-auto space-y-1">
+        {isLoading ? (
+          <div className="flex items-center justify-center py-8">
+            <Loader2 className={cn(sizing.icon.lg, "animate-spin")} />
+          </div>
+        ) : (
+          room.students.map(student => {
+            const record = records.get(student.id)
+            const status = record?.status || "present"
+
+            return (
+              <div
+                key={student.id}
+                className="flex items-center justify-between p-2 rounded-lg hover:bg-muted/50 transition-colors"
+              >
+                <div className="flex-1">
+                  <div className="font-medium text-sm">
+                    {student.firstName} {student.lastName}
+                  </div>
+                  {student.studentNumber && (
+                    <div className="text-xs text-muted-foreground">
+                      {student.studentNumber}
+                    </div>
+                  )}
+                </div>
+
+                <div className="flex items-center gap-1">
+                  {(['present', 'absent', 'late', 'excused'] as const).map((btnStatus) => {
+                    const statusConfig = ATTENDANCE_STATUS_CONFIG[btnStatus]
+                    const Icon = statusConfig.icon
+                    const isActive = status === btnStatus
+
+                    return (
+                      <Button
+                        key={btnStatus}
+                        size="sm"
+                        variant={isActive ? "default" : "outline"}
+                        className={cn(
+                          "h-8 w-8 p-0",
+                          isActive && statusConfig.className.replace(/\/10/g, '')
+                        )}
+                        onClick={() => handleStatusChange(student.id, btnStatus)}
+                        title={t.admin.roomAssignments[`mark${btnStatus.charAt(0).toUpperCase() + btnStatus.slice(1)}` as keyof typeof t.admin.roomAssignments] as string}
+                      >
+                        <Icon className={sizing.icon.sm} />
+                      </Button>
+                    )
+                  })}
+                </div>
+              </div>
+            )
+          })
+        )}
+      </div>
+
+      {/* Success Message - Using GSPN maroon branding */}
+      {success && (
+        <div className={cn(
+          "p-3 rounded-xl border",
+          "bg-gradient-to-br from-gspn-maroon-50 to-gspn-maroon-50/50 dark:from-gspn-maroon-950/30 dark:to-gspn-maroon-950/10",
+          "border-gspn-maroon-300 dark:border-gspn-maroon-700"
+        )}>
+          <p className="text-sm font-medium text-gspn-maroon-700 dark:text-gspn-maroon-300">
+            {success}
+          </p>
+        </div>
+      )}
+    </FormDialog>
   )
 }

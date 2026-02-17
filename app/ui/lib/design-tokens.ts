@@ -159,6 +159,8 @@ export const shadows = {
   lg: 'shadow-lg',
   xl: 'shadow-xl',
   '2xl': 'shadow-2xl',
+  // Dialog elevation
+  dialog: 'shadow-[0_25px_60px_-12px_rgba(0,0,0,0.15)] dark:shadow-[0_25px_60px_-12px_rgba(0,0,0,0.4)]',
   // Special effects
   lift: 'shadow-[0_10px_40px_-10px_rgb(0_0_0/0.2)]',
   glowPrimary: 'shadow-[0_0_20px_rgba(139,35,50,0.3)]',
@@ -314,6 +316,17 @@ export const componentClasses = {
     'bg-nav-highlight hover:bg-nav-highlight/90 text-black',
     'dark:bg-gspn-gold-500 dark:hover:bg-gspn-gold-400 dark:text-nav-dark-text',
   ].join(' '),
+
+  // Table header row with gold accent - GSPN brand
+  tableHeaderRow: 'bg-gspn-gold-50/50 dark:bg-gspn-gold-950/20',
+
+  // Table row hover state
+  tableRowHover: 'hover:bg-muted/50 transition-colors',
+
+  // Search input wrapper
+  searchInputWrapper: 'relative',
+  searchInputIcon: 'absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground',
+  searchInput: 'pl-9 bg-muted/50',
 } as const
 
 // ============================================================================

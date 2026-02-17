@@ -17,6 +17,7 @@ const acceptInvitationSchema = z.object({
 const ROLE_TO_STAFF_ROLE: Record<string, StaffRole> = {
   director: StaffRole.proviseur,
   academic_director: StaffRole.censeur,
+  directeur: StaffRole.directeur,
   secretary: StaffRole.secretariat,
   accountant: StaffRole.comptable,
   teacher: StaffRole.enseignant,

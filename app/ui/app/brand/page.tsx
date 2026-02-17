@@ -4,10 +4,11 @@ import { useState, useEffect } from "react"
 import { PageContainer } from "@/components/layout"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
+import { type DialogAccentColor } from "@/components/ui/form-dialog"
 import { Badge } from "@/components/ui/badge"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { Progress } from "@/components/ui/progress"
 import {
   Select,
@@ -20,6 +21,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import {
   AlertCircle,
+  AlertTriangle,
   ArrowRight,
   Bell,
   BookOpen,
@@ -51,6 +53,156 @@ import {
 } from "lucide-react"
 import { componentClasses, shadows, gradients } from "@/lib/design-tokens"
 import { cn } from "@/lib/utils"
+
+// ============================================================================
+// FORM DIALOG SHOWCASE — REFINED DESIGN PREVIEW
+// ============================================================================
+
+const DIALOG_DEMOS: Array<{
+  color: DialogAccentColor
+  icon: React.ComponentType<{ className?: string }>
+  title: string
+  description: string
+  submitLabel: string
+}> = [
+  { color: "emerald", icon: CheckCircle, title: "Verify Cash", description: "Confirm cash count matches records", submitLabel: "Verify" },
+  { color: "blue", icon: CreditCard, title: "Bank Transfer", description: "Transfer funds to bank account", submitLabel: "Transfer" },
+  { color: "amber", icon: AlertCircle, title: "Daily Closing", description: "Close the register for today", submitLabel: "Close Day" },
+  { color: "orange", icon: Wallet, title: "Mobile Money Fee", description: "Record mobile money fee", submitLabel: "Record" },
+  { color: "maroon", icon: GraduationCap, title: "Enroll Student", description: "Register a student in a club", submitLabel: "Enroll" },
+  { color: "red", icon: Trash2, title: "Reverse Transaction", description: "This action cannot be undone", submitLabel: "Reverse" },
+  { color: "gold", icon: Star, title: "Record Payment", description: "Enter tuition payment details", submitLabel: "Record" },
+]
+
+/** Refined theme tokens — tinted zones + surgical color (2 accent points only) */
+const REFINED_THEMES: Record<DialogAccentColor, {
+  headerBg: string
+  iconText: string
+  submitBg: string
+  dot: string
+}> = {
+  emerald: {
+    headerBg: "bg-emerald-50/80 dark:bg-emerald-950/30",
+    iconText: "text-emerald-600 dark:text-emerald-400",
+    submitBg: "bg-emerald-600 hover:bg-emerald-700 text-white",
+    dot: "bg-emerald-500",
+  },
+  blue: {
+    headerBg: "bg-blue-50/80 dark:bg-blue-950/30",
+    iconText: "text-blue-600 dark:text-blue-400",
+    submitBg: "bg-blue-600 hover:bg-blue-700 text-white",
+    dot: "bg-blue-500",
+  },
+  amber: {
+    headerBg: "bg-amber-50/80 dark:bg-amber-950/30",
+    iconText: "text-amber-600 dark:text-amber-400",
+    submitBg: "bg-amber-600 hover:bg-amber-700 text-white",
+    dot: "bg-amber-500",
+  },
+  orange: {
+    headerBg: "bg-orange-50/80 dark:bg-orange-950/30",
+    iconText: "text-orange-600 dark:text-orange-400",
+    submitBg: "bg-orange-600 hover:bg-orange-700 text-white",
+    dot: "bg-orange-500",
+  },
+  maroon: {
+    headerBg: "bg-gspn-maroon-50/80 dark:bg-gspn-maroon-950/30",
+    iconText: "text-gspn-maroon-500 dark:text-gspn-maroon-400",
+    submitBg: "bg-gspn-maroon-500 hover:bg-gspn-maroon-600 text-white",
+    dot: "bg-gspn-maroon-500",
+  },
+  red: {
+    headerBg: "bg-red-50/80 dark:bg-red-950/30",
+    iconText: "text-red-600 dark:text-red-400",
+    submitBg: "bg-red-600 hover:bg-red-700 text-white",
+    dot: "bg-red-500",
+  },
+  gold: {
+    headerBg: "bg-gspn-gold-50/80 dark:bg-gspn-gold-950/30",
+    iconText: "text-gspn-gold-600 dark:text-gspn-gold-400",
+    submitBg: "bg-gspn-gold-500 hover:bg-gspn-gold-600 text-black",
+    dot: "bg-gspn-gold-500",
+  },
+}
+
+/** Static dialog preview — tinted header zone, bare icon, neutral title, tinted footer */
+function StaticDialogPreview({
+  color,
+  icon: Icon,
+  title,
+  description,
+  children,
+  footer,
+}: {
+  color: DialogAccentColor
+  icon: React.ComponentType<{ className?: string }>
+  title: string
+  description?: string
+  children: React.ReactNode
+  footer: React.ReactNode
+}) {
+  const theme = REFINED_THEMES[color]
+  return (
+    <div className="rounded-xl overflow-hidden max-w-sm mx-auto bg-background shadow-[0_25px_60px_-12px_rgba(0,0,0,0.15)] dark:shadow-[0_25px_60px_-12px_rgba(0,0,0,0.4)] ring-1 ring-black/[0.08] dark:ring-white/[0.08]">
+      <div className={cn("px-5 pt-5 pb-4", theme.headerBg)}>
+        <div className="flex items-center gap-2.5">
+          <Icon className={cn("h-5 w-5 shrink-0", theme.iconText)} />
+          <h3 className="font-display font-semibold tracking-tight text-foreground">{title}</h3>
+        </div>
+        {description && (
+          <p className="text-[13px] text-muted-foreground mt-1 pl-[30px]">{description}</p>
+        )}
+      </div>
+      <div className="px-5 py-4">
+        <div className="space-y-4">{children}</div>
+      </div>
+      <div className="px-5 py-3.5 bg-muted/40 dark:bg-muted/20">{footer}</div>
+    </div>
+  )
+}
+
+/** Refined form field — uppercase label, themed dot indicator, tighter spacing */
+function RefinedFormField({
+  label,
+  required,
+  optional,
+  hint,
+  children,
+  color = "emerald",
+}: {
+  label: string
+  required?: boolean
+  optional?: boolean
+  hint?: string
+  children: React.ReactNode
+  color?: DialogAccentColor
+}) {
+  return (
+    <div className="space-y-1.5">
+      <label className="flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
+        {label}
+        {required && <div className={cn("h-1.5 w-1.5 rounded-full", REFINED_THEMES[color].dot)} />}
+        {optional && (
+          <span className="font-normal normal-case tracking-normal text-muted-foreground/60">
+            (optionnel)
+          </span>
+        )}
+      </label>
+      {children}
+      {hint && <p className="text-[11px] text-muted-foreground/70">{hint}</p>}
+    </div>
+  )
+}
+
+/** Refined error — left-border accent, near-invisible background */
+function RefinedFormError({ message }: { message: string }) {
+  return (
+    <div className="flex items-start gap-2.5 text-sm text-red-600 dark:text-red-400 bg-red-500/[0.04] dark:bg-red-500/10 p-3 rounded-lg border-l-2 border-l-red-500 mt-2">
+      <AlertTriangle className="h-4 w-4 shrink-0 mt-0.5" />
+      <span>{message}</span>
+    </div>
+  )
+}
 
 // Wrapper that shows component in both light and dark mode side by side
 function DualModePreview({
@@ -229,12 +381,13 @@ export default function BrandPage() {
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-8">
-        <TabsList className="grid w-full grid-cols-9 lg:w-auto lg:inline-flex h-auto p-1 bg-slate-100 dark:bg-slate-800">
+        <TabsList className="grid w-full grid-cols-5 sm:grid-cols-10 lg:w-auto lg:inline-flex h-auto p-1 bg-slate-100 dark:bg-slate-800">
           <TabsTrigger value="headers">Headers</TabsTrigger>
           <TabsTrigger value="components">Components</TabsTrigger>
           <TabsTrigger value="cards">Cards</TabsTrigger>
           <TabsTrigger value="tables">Tables</TabsTrigger>
           <TabsTrigger value="forms">Forms</TabsTrigger>
+          <TabsTrigger value="dialogs">Dialogs</TabsTrigger>
           <TabsTrigger value="navigation">Navigation</TabsTrigger>
           <TabsTrigger value="status">Status</TabsTrigger>
           <TabsTrigger value="treasury">Treasury</TabsTrigger>
@@ -526,15 +679,12 @@ export default function BrandPage() {
               <DualModePreview title="Avatar Sizes" viewMode={viewMode}>
                 <div className="flex items-center gap-4">
                   <Avatar className="h-8 w-8">
-                    <AvatarImage src="/avatars/01.png" />
                     <AvatarFallback>JD</AvatarFallback>
                   </Avatar>
                   <Avatar className="h-10 w-10">
-                    <AvatarImage src="/avatars/02.png" />
                     <AvatarFallback>AB</AvatarFallback>
                   </Avatar>
                   <Avatar className="h-12 w-12">
-                    <AvatarImage src="/avatars/03.png" />
                     <AvatarFallback>CD</AvatarFallback>
                   </Avatar>
                   <Avatar className="h-16 w-16">
@@ -1132,6 +1282,263 @@ export default function BrandPage() {
                   </CardContent>
                 </Card>
               </DualModePreview>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        {/* DIALOGS TAB */}
+        <TabsContent value="dialogs" className="space-y-8">
+          {/* Dialog Anatomy */}
+          <Card className="border shadow-sm overflow-hidden">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <div className="h-2 w-2 rounded-full bg-gspn-maroon-500" />
+                Dialog Anatomy — Refined Design
+              </CardTitle>
+              <CardDescription>
+                Tinted header zone, bare themed icon, neutral title, surgical color usage (header tint + submit button only)
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="pt-6 space-y-6">
+              <DualModePreview title="Standard Form Dialog" viewMode={viewMode}>
+                <StaticDialogPreview
+                  color="emerald"
+                  icon={CheckCircle}
+                  title="Verify Cash"
+                  description="Confirm cash count matches records"
+                  footer={
+                    <div className="flex justify-end gap-2">
+                      <Button variant="outline" size="sm">Annuler</Button>
+                      <Button size="sm" className={REFINED_THEMES.emerald.submitBg}>
+                        <Check className="h-4 w-4 mr-1.5" />
+                        Verify
+                      </Button>
+                    </div>
+                  }
+                >
+                  <RefinedFormField label="Amount" required color="emerald">
+                    <Input placeholder="Enter amount" />
+                  </RefinedFormField>
+                  <RefinedFormField label="Notes" optional color="emerald" hint="Add any relevant details">
+                    <Input placeholder="Optional notes" />
+                  </RefinedFormField>
+                </StaticDialogPreview>
+              </DualModePreview>
+
+              <DualModePreview title="With Error State" viewMode={viewMode}>
+                <StaticDialogPreview
+                  color="blue"
+                  icon={CreditCard}
+                  title="Bank Transfer"
+                  footer={
+                    <div className="flex justify-end gap-2">
+                      <Button variant="outline" size="sm">Annuler</Button>
+                      <Button size="sm" className={REFINED_THEMES.blue.submitBg} disabled>Transfer</Button>
+                    </div>
+                  }
+                >
+                  <RefinedFormField label="Amount" required color="blue">
+                    <Input value="1,000,000 GNF" readOnly className="bg-muted" />
+                  </RefinedFormField>
+                  <RefinedFormError message="Insufficient funds: safe balance is below the transfer amount." />
+                </StaticDialogPreview>
+              </DualModePreview>
+
+              <DualModePreview title="Loading / Submitting State" viewMode={viewMode}>
+                <StaticDialogPreview
+                  color="gold"
+                  icon={Star}
+                  title="Record Payment"
+                  description="Enter tuition payment details"
+                  footer={
+                    <div className="flex justify-end gap-2">
+                      <Button variant="outline" size="sm" disabled>Annuler</Button>
+                      <Button size="sm" className={REFINED_THEMES.gold.submitBg} disabled>
+                        <Loader2 className="h-4 w-4 mr-1.5 animate-spin" />
+                        Recording...
+                      </Button>
+                    </div>
+                  }
+                >
+                  <RefinedFormField label="Student" required color="gold">
+                    <Input value="Mamadou Diallo" readOnly className="bg-muted" />
+                  </RefinedFormField>
+                  <RefinedFormField label="Amount" required color="gold">
+                    <Input value="750,000 GNF" readOnly className="bg-muted" />
+                  </RefinedFormField>
+                </StaticDialogPreview>
+              </DualModePreview>
+            </CardContent>
+          </Card>
+
+          {/* Color Themes */}
+          <Card className="border shadow-sm overflow-hidden">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <div className="h-2 w-2 rounded-full bg-gspn-maroon-500" />
+                Color Themes
+              </CardTitle>
+              <CardDescription>
+                7 accent colors — each uses a tinted header zone and themed submit button as the only two color points
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="pt-6">
+              <DualModePreview title="All 7 Themes" viewMode={viewMode}>
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                  {DIALOG_DEMOS.map((demo) => {
+                    const theme = REFINED_THEMES[demo.color]
+                    const Icon = demo.icon
+                    return (
+                      <div
+                        key={demo.color}
+                        className="rounded-xl overflow-hidden ring-1 ring-black/[0.08] dark:ring-white/[0.08] shadow-sm bg-background"
+                      >
+                        <div className={cn("px-3 pt-3 pb-2", theme.headerBg)}>
+                          <div className="flex items-center gap-2">
+                            <Icon className={cn("h-3.5 w-3.5", theme.iconText)} />
+                            <span className="text-xs font-semibold text-foreground capitalize">{demo.color}</span>
+                          </div>
+                        </div>
+                        <div className="px-3 pb-2.5 pt-1.5">
+                          <p className="text-[11px] text-muted-foreground leading-tight">{demo.title}</p>
+                        </div>
+                      </div>
+                    )
+                  })}
+                </div>
+              </DualModePreview>
+            </CardContent>
+          </Card>
+
+          {/* Footer Modes */}
+          <Card className="border shadow-sm overflow-hidden">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <div className="h-2 w-2 rounded-full bg-gspn-maroon-500" />
+                Footer Modes
+              </CardTitle>
+              <CardDescription>
+                Tinted footer zone (bg-muted/40) replaces hard border-t — standard or fully custom layout
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="pt-6 space-y-6">
+              <DualModePreview title="Standard Footer (Cancel + Submit)" viewMode={viewMode}>
+                <div className="rounded-xl overflow-hidden ring-1 ring-black/[0.08] dark:ring-white/[0.08] shadow-sm bg-background max-w-sm mx-auto">
+                  <div className="px-5 py-4">
+                    <p className="text-xs text-muted-foreground text-center">... form fields above ...</p>
+                  </div>
+                  <div className="px-5 py-3.5 bg-muted/40 dark:bg-muted/20">
+                    <div className="flex justify-end gap-2">
+                      <Button variant="outline" size="sm">Annuler</Button>
+                      <Button size="sm" className={REFINED_THEMES.emerald.submitBg}>
+                        <Check className="h-4 w-4 mr-1.5" />
+                        Confirm
+                      </Button>
+                    </div>
+                  </div>
+                </div>
+              </DualModePreview>
+
+              <DualModePreview title="Custom Footer (Approve / Reject)" viewMode={viewMode}>
+                <StaticDialogPreview
+                  color="blue"
+                  icon={FileText}
+                  title="Review Payment"
+                  description="Approve or reject this pending payment"
+                  footer={
+                    <div className="flex justify-between">
+                      <Button variant="outline" size="sm">Cancel</Button>
+                      <div className="flex gap-2">
+                        <Button variant="outline" size="sm" className="text-red-600 border-red-200 hover:bg-red-50 dark:border-red-800 dark:hover:bg-red-950">
+                          <XCircle className="h-4 w-4 mr-1.5" />
+                          Reject
+                        </Button>
+                        <Button size="sm" className="bg-emerald-600 hover:bg-emerald-700 text-white">
+                          <CheckCircle className="h-4 w-4 mr-1.5" />
+                          Approve
+                        </Button>
+                      </div>
+                    </div>
+                  }
+                >
+                  <div className="rounded-lg border p-4 space-y-2.5">
+                    <div className="flex justify-between text-sm">
+                      <span className="text-muted-foreground">Student</span>
+                      <span className="font-medium">Mamadou Diallo</span>
+                    </div>
+                    <div className="flex justify-between text-sm">
+                      <span className="text-muted-foreground">Amount</span>
+                      <span className="font-mono font-semibold">750,000 GNF</span>
+                    </div>
+                    <div className="flex justify-between text-sm">
+                      <span className="text-muted-foreground">Method</span>
+                      <span>Cash</span>
+                    </div>
+                  </div>
+                </StaticDialogPreview>
+              </DualModePreview>
+            </CardContent>
+          </Card>
+
+          {/* FormField — Refined Style */}
+          <Card className="border shadow-sm overflow-hidden">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <div className="h-2 w-2 rounded-full bg-gspn-maroon-500" />
+                FormField — Refined Style
+              </CardTitle>
+              <CardDescription>
+                Uppercase tracking-wider labels, themed dot required indicator, tighter spacing
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="pt-6">
+              <DualModePreview title="Field Variants" viewMode={viewMode}>
+                <div className="space-y-4 max-w-sm">
+                  <RefinedFormField label="Full Name" required color="maroon">
+                    <Input placeholder="Enter full name" />
+                  </RefinedFormField>
+                  <RefinedFormField label="Phone Number" optional color="maroon">
+                    <Input placeholder="+224 XXX XX XX XX" />
+                  </RefinedFormField>
+                  <RefinedFormField label="Transfer Amount" required color="gold" hint="Minimum: 100,000 GNF">
+                    <Input placeholder="0 GNF" />
+                  </RefinedFormField>
+                </div>
+              </DualModePreview>
+            </CardContent>
+          </Card>
+
+          {/* Design Decisions */}
+          <Card className="border shadow-sm overflow-hidden">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <div className="h-2 w-2 rounded-full bg-gspn-maroon-500" />
+                Design Decisions
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="pt-6">
+              <div className="space-y-3 text-sm">
+                <div className="grid grid-cols-[120px_1fr] gap-x-4 gap-y-2.5">
+                  <span className="font-semibold text-muted-foreground">Accent bar</span>
+                  <span>Removed — replaced by tinted header zone</span>
+                  <span className="font-semibold text-muted-foreground">Icon</span>
+                  <span>Bare 20px icon, no container or ring — color tinted only</span>
+                  <span className="font-semibold text-muted-foreground">Title</span>
+                  <span>Neutral <code className="text-xs bg-muted px-1 rounded">text-foreground</code> — not colored</span>
+                  <span className="font-semibold text-muted-foreground">Color budget</span>
+                  <span>2 points only: header tint + submit button</span>
+                  <span className="font-semibold text-muted-foreground">Footer</span>
+                  <span>Tinted <code className="text-xs bg-muted px-1 rounded">bg-muted/40</code> zone, no hard border</span>
+                  <span className="font-semibold text-muted-foreground">Labels</span>
+                  <span>11px uppercase, tracking-wider, muted — Stripe-style</span>
+                  <span className="font-semibold text-muted-foreground">Required</span>
+                  <span>Theme-colored dot replaces red asterisk</span>
+                  <span className="font-semibold text-muted-foreground">Error</span>
+                  <span>Left-border accent, near-invisible background</span>
+                  <span className="font-semibold text-muted-foreground">Shadow</span>
+                  <span>Elevated <code className="text-xs bg-muted px-1 rounded">shadow-[0_25px_60px]</code> + subtle ring</span>
+                </div>
+              </div>
             </CardContent>
           </Card>
         </TabsContent>

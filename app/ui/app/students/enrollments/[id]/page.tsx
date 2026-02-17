@@ -37,6 +37,7 @@ import {
 import { useI18n } from "@/components/i18n-provider"
 import { PageContainer } from "@/components/layout/PageContainer"
 import { PermissionGuard } from "@/components/permission-guard"
+import { DownloadEnrollmentPdfButton } from "@/components/enrollment/download-enrollment-pdf-button"
 import Link from "next/link"
 import { cn } from "@/lib/utils"
 import type { EnrollmentStatus, PaymentSchedule, Payment, EnrollmentNote } from "@/lib/enrollment/types"
@@ -341,6 +342,17 @@ export default function EnrollmentDetailPage({
             </div>
 
             <div className="flex gap-2">
+              {/* PDF Download - Show for submitted, needs_review, and completed enrollments */}
+              {["submitted", "needs_review", "completed"].includes(enrollment.status) && (
+                <PermissionGuard resource="student_enrollment" action="export" inline>
+                  <DownloadEnrollmentPdfButton
+                    enrollmentId={enrollment.id}
+                    enrollmentNumber={enrollment.enrollmentNumber}
+                    variant="outline"
+                  />
+                </PermissionGuard>
+              )}
+
               {canCancel && (
                 <PermissionGuard resource="student_enrollment" action="update" inline>
                   <Button variant="outline" onClick={() => setShowCancelDialog(true)}>

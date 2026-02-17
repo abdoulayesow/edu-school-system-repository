@@ -68,7 +68,8 @@ Old routes (e.g., `/enrollments`, `/expenses`, `/grades`) redirect to new locati
 | Shared types | `app/ui/lib/` |
 | Session summaries | `docs/summaries/` |
 | Navigation config | `app/ui/lib/nav-config.ts` |
-| RBAC rules | `app/ui/lib/rbac.ts` |
+| Permission mapping | `app/ui/lib/permissions-v2.ts` |
+| Permission checking | `app/ui/lib/permissions.ts` |
 
 ## Application Routes
 
@@ -84,6 +85,7 @@ Old routes (e.g., `/enrollments`, `/expenses`, `/grades`) redirect to new locati
 - `/accounting/balance` - Financial balance
 - `/accounting/payments` - Payment tracking
 - `/accounting/expenses` - Expense management
+- `/accounting/salaries` - Salary management (hours tracking, payments, advances)
 
 ### Dashboard Section (`/dashboard/*`)
 - `/dashboard/reports` - Analytics and reports
@@ -98,6 +100,7 @@ Old routes (e.g., `/enrollments`, `/expenses`, `/grades`) redirect to new locati
 - `/admin/teachers` - Teacher assignments
 - `/admin/clubs` - Club administration
 - `/admin/time-periods` - Time period configuration
+- `/admin/salary-rates` - Salary rate configuration (hourly/fixed per staff)
 
 ## Coding Conventions
 
@@ -159,12 +162,25 @@ export async function GET(req: NextRequest, { params }: RouteParams) {
 - `professeur_principal` - Head Teacher
 - `gardien` - Security Guard
 
-### Permission System
-- **RolePermission** - Base permissions assigned to roles
-- **PermissionOverride** - User-specific grants/denials
-  - `granted: true` = GRANT (adds permission)
-  - `granted: false` = DENY (removes permission)
-- Effective permissions = `(Role Permissions - Denials) ∪ Grants`
+### Permission System (v2 — Code-based with Wall enforcement)
+
+**Design Principle: THE WALL**
+- Academic staff has ZERO access to financial data
+- Financial staff has ZERO access to academic data
+- Only `proprietaire` and `admin_systeme` cross both branches
+
+**Architecture:**
+- Role-to-permissions mapping defined in `app/ui/lib/permissions-v2.ts` (code-based, no DB)
+- `hasPermission()` in `app/ui/lib/permissions.ts` checks: PermissionOverride (DB) → code-based mapping
+- Route protection via `isRoleAllowedForRoute()` in middleware (branch-aware)
+- **PermissionOverride** table for user-specific exceptions (grants/denials)
+- Effective permissions = `(Code-based role mapping - Denials) ∪ Grants`
+
+**Branches:**
+- Transversal: `proprietaire`, `admin_systeme` (wildcard — all permissions)
+- Academic: `proviseur`, `censeur`, `surveillant_general`, `directeur`, `secretariat`, `professeur_principal`, `enseignant`
+- Financial: `coordinateur`, `comptable`
+- None: `agent_recouvrement` (limited), `gardien` (no access)
 
 ## UI/UX Design Guidelines
 
@@ -225,12 +241,28 @@ Planned additions:
   - Bank name field
   - Clearance tracking (pending → cleared → bounced)
 
-### Expense Management
-- **Salary management** - Dedicated salary tracking within expenses:
-  - Monthly salary records per staff member
-  - Salary schedules and payment history
-  - Integration with staff roles
-  - Payroll reports
+### Salary Management (In Progress)
+Dedicated salary system — separate from general expenses. See `docs/features/salary-management.md` for full spec.
+
+**Workflow:** Academic directors submit hours worked → Accounting calculates & pays salaries
+**Key concepts:**
+- **Hours tracking** (Part 1): Censeur/Principal/Directeur record monthly hours per teacher (~20th of month)
+- **Salary payments** (Part 2): Comptable/Coordinateur calculate pay from hours × rate, process payment
+- **Salary advances** (Part 3): Advance disbursement with flexible recoupment terms across future payments
+- **Rate management** (Part 4): Admin defines hourly rates or fixed monthly salaries per staff member
+
+**Staff types:**
+- Collège & Lycée teachers → hourly (hours tracking required)
+- Primary teachers & other staff → may be fixed monthly salary (no hours tracking needed)
+
+**Routes:**
+- `/accounting/salaries` - Salary payments, advances, history
+- `/admin/salary-rates` - Rate configuration
+
+**Permission model:**
+- Hours submission: academic directors (censeur, proviseur, directeur) — crosses THE WALL by design
+- Salary payments: financial roles (comptable, coordinateur)
+- Rate management: proprietaire, admin_systeme, coordinateur
 
 ## Important Notes
 

@@ -19,7 +19,7 @@ import {
 import { usePaymentWizard } from "../wizard-context"
 import { useI18n } from "@/components/i18n-provider"
 import { cn } from "@/lib/utils"
-import { formatCurrency } from "@/lib/utils/currency"
+import { formatCurrency } from "@/lib/format"
 import { formatDate } from "@/lib/utils"
 import { sizing, typography, gradients, interactive } from "@/lib/design-tokens"
 import Link from "next/link"

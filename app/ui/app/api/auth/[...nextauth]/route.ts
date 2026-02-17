@@ -5,7 +5,7 @@ import GoogleProvider from "next-auth/providers/google"
 import CredentialsProvider from "next-auth/providers/credentials"
 import bcrypt from "bcrypt"
 import { prisma } from "@/lib/prisma"
-import { normalizeRole } from "@/lib/rbac"
+import { Role } from "@prisma/client"
 
 const ADMIN_EMAILS = (process.env.ADMIN_EMAILS ?? "")
   .split(",")
@@ -114,7 +114,7 @@ export const authOptions: NextAuthOptions = {
           name: user.name,
           email: user.email,
           image: user.image,
-          role: normalizeRole(String(user.role)),
+          role: (user.role as Role) ?? Role.user,
         }
       },
     }),
@@ -200,7 +200,7 @@ export const authOptions: NextAuthOptions = {
         if (freshUser) {
           token.name = freshUser.name
           token.picture = freshUser.image
-          token.role = normalizeRole(freshUser.role ?? null)
+          token.role = (freshUser.role as Role) ?? Role.user
           // Permission system fields
           token.staffRole = freshUser.staffRole
           token.schoolLevel = freshUser.schoolLevel
@@ -208,7 +208,7 @@ export const authOptions: NextAuthOptions = {
         } else {
           // Fallback to user object if DB fetch fails
           const role = (user as { role?: string | null }).role
-          token.role = normalizeRole(role ?? null)
+          token.role = (role as Role) ?? Role.user
         }
       }
       return token
@@ -216,7 +216,7 @@ export const authOptions: NextAuthOptions = {
     async session({ session, token }) {
       if (session.user) {
         session.user.id = token.id as string
-        session.user.role = token.role ?? "user"
+        session.user.role = token.role ?? Role.user
         // Pass synced name and image from token (fetched from DB in jwt callback)
         if (token.name) {
           session.user.name = token.name as string

@@ -12,7 +12,7 @@
  *   <StudentsList />
  * </PermissionGuard>
  *
- * <PermissionGuard resource="payments" action="create" fallback={<NoAccess />}>
+ * <PermissionGuard resource="payment_recording" action="create" fallback={<NoAccess />}>
  *   <CreatePaymentButton />
  * </PermissionGuard>
  *
@@ -27,7 +27,7 @@
  * </PermissionGuard>
  *
  * // Inline mode for wrapping buttons/actions
- * <PermissionGuard resource="payments" action="create" inline>
+ * <PermissionGuard resource="payment_recording" action="create" inline>
  *   <Button>Record Payment</Button>
  * </PermissionGuard>
  * ```

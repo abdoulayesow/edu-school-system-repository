@@ -12,13 +12,22 @@ export const en: TranslationKeys = {
     delete: "Delete",
     view: "View",
     add: "Add",
+    create: "Create",
+    manage: "Manage",
+    activate: "Activate",
+    recalculate: "Recalculate",
+    errorOccurred: "An error occurred",
+    errorFetchingData: "Failed to fetch data",
     back: "Back",
     next: "Next",
     previous: "Previous",
     close: "Close",
+    expand: "Expand",
+    collapse: "Collapse",
     loading: "Loading...",
     downloading: "Downloading...",
     submitting: "Submitting...",
+    updating: "Updating...",
     error: "Error",
     success: "Success",
     required: "Required",
@@ -57,6 +66,12 @@ export const en: TranslationKeys = {
     active: "Active",
     inactive: "Inactive",
     saving: "Saving...",
+    clear: "Clear",
+    clearFilters: "Clear filters",
+    startDatePlaceholder: "Start date",
+    endDatePlaceholder: "End date",
+    confirmRemove: "Confirm Removal",
+    other: "Other",
     name: "Name",
     email: "Email",
     pagination: {
@@ -92,6 +107,7 @@ export const en: TranslationKeys = {
     noReportsPermission: "You don't have permission to view reports. Please contact your administrator if you need access.",
     noActivitiesPermission: "You don't have permission to view activities. Please contact your administrator if you need access.",
     noExpensePermission: "You don't have permission to create expenses. Please contact your administrator if you need access.",
+    noSchedulePermission: "You don't have permission to add schedule slots. Please contact your administrator if you need access.",
   },
 
   // Navigation
@@ -137,6 +153,15 @@ export const en: TranslationKeys = {
     teacherRemarks: "Teacher Remarks",
     conductEntry: "Conduct & Attendance",
     trimesters: "Trimesters",
+    // Administration navigation
+    administrationSection: "Administration",
+    schoolYears: "School Years",
+    gradesAndRooms: "Grades & Rooms",
+    teachersAndClasses: "Teachers & Classes",
+    usersAndPermissions: "Users & Permissions",
+    timePeriods: "Time Periods",
+    salaries: "Salaries",
+    salaryRates: "Salary Rates",
   },
 
   // Homepage
@@ -182,7 +207,7 @@ export const en: TranslationKeys = {
     title: "Director's Dashboard",
     greeting: "Hello",
     greetingWithName: "Hello, {name}",
-    
+
     // Summary cards
     totalEnrollment: "Total Enrollment",
     vsLastMonth: "vs last month",
@@ -238,7 +263,14 @@ export const en: TranslationKeys = {
     extraActivities: "Extra Activities",
     canteen: "Canteen",
     transport: "Transport",
-    
+
+    // Error messages
+    errors: {
+      fetchFailed: "Failed to load dashboard data. Please refresh.",
+      gradesUnavailable: "Grade data is currently unavailable",
+      financialDataUnavailable: "Financial data is currently unavailable",
+    },
+
     reasons: {
       familySituation: "Difficult family situation - 20% discount requested",
       schoolTransfer: "Transfer from another school - documents in order",
@@ -782,6 +814,8 @@ export const en: TranslationKeys = {
     clubPayments: "Club",
     noPaymentsFound: "No payments found",
     deposit: "Deposit",
+    downloadPaymentSummary: "Download Payment Summary",
+    downloadPaymentSummaryError: "Failed to download payment summary",
 
     // Payments section
     paymentTransactions: "Payment Transactions",
@@ -1057,7 +1091,9 @@ export const en: TranslationKeys = {
     // Status labels
     statusPresent: "Present",
     statusAbsent: "Absent",
+    statusLate: "Late",
     statusExcused: "Excused",
+    notRecorded: "Not recorded",
 
     // Summary cards
     totalSessions: "Total Sessions",
@@ -1086,6 +1122,43 @@ export const en: TranslationKeys = {
     instruction2: "Present (green) → Absent (red) → Excused (orange) → Present",
     instruction3: "Students with overdue payments are marked with a badge",
     instruction4: "Click \"Submit\" to save attendance",
+
+    // New keys for Phase 1 refactoring
+    students: "students",
+    back: "Back",
+    save: "Save",
+    loading: "Loading...",
+    loadingClasses: "Loading grades...",
+    allGrades: "All grades",
+    entryMode: "Entry mode",
+    existingSession: "Existing session",
+    attendanceCompleted: "Attendance completed",
+    attendanceInProgress: "Attendance in progress",
+    continueAttendance: "Continue attendance",
+    startAttendance: "Start attendance",
+    lateCount: "Late",
+    searchStudent: "Search for a student...",
+    checklistModeDescription: "All students are present by default. Tap to change status.",
+    absencesModeDescription: "Mark only absences and late arrivals. Unmarked students are present.",
+    checklistModeIndicator: "Full list mode - Tap to change status",
+    absencesModeIndicator: "Absences mode - Mark absences/late",
+    searchTip: "Use search to find a student quickly",
+    saveTip: "Save regularly to avoid data loss",
+    cycleInstructions: "Present → Absent → Late → Excused → Present",
+    preview: "Preview",
+    failedToLoadGrades: "Failed to load grades",
+    failedToLoadAttendance: "Failed to load attendance",
+    failedToSave: "Failed to save",
+    noStudentsFound: "No students found matching your search",
+    noStudents: "No students in this grade",
+
+    // Confirmation dialogs
+    confirmSubmitTitle: "Submit Attendance?",
+    confirmSubmitDescription: "This will mark the attendance as complete. You can still make changes later if needed.",
+    confirmNavigateAwayTitle: "Unsaved Changes",
+    confirmNavigateAwayDescription: "You have unsaved changes. Are you sure you want to leave? Your changes will be lost.",
+    confirm: "Confirm",
+    cancel: "Cancel",
   },
 
   // Reports
@@ -1111,6 +1184,13 @@ export const en: TranslationKeys = {
     // Filters
     allTeachers: "All teachers",
     allLevels: "All levels",
+
+    // Level names
+    levels: {
+      elementary: "Elementary",
+      college: "Middle School",
+      lycee: "High School",
+    },
 
     // Activities list
     allActivities: "All Activities",
@@ -2138,6 +2218,10 @@ export const en: TranslationKeys = {
     gradesAndRooms: "Grades & Rooms",
     teachersAndClasses: "Teachers & Classes",
     usersManagement: "User Management",
+    rolePermissions: "Role Permissions",
+    usersAndPermissions: "Users & Permissions",
+    usersMainTab: "Users",
+    rolePermissionsMainTab: "Role Permissions",
     activitiesManagement: "Activities",
 
     // School Years
@@ -2175,6 +2259,8 @@ export const en: TranslationKeys = {
     gradesRoomsTitle: "Grades & Rooms Management",
     gradesRoomsSubtitle: "Configure grades and sections for each school year",
     selectSchoolYear: "Select School Year",
+    searchGrades: "Search grades...",
+    searchTeachers: "Search teachers...",
     addGrade: "Add Grade",
     editGrade: "Edit Grade",
     deleteGrade: "Delete Grade",
@@ -2383,6 +2469,7 @@ export const en: TranslationKeys = {
       attendanceSaved: "Attendance saved successfully",
       attendanceDate: "Date",
       attendanceError: "Failed to save attendance",
+      markAll: "Mark all:",
 
       // Grade Room View Page
       inlineAssignment: "Inline Assignment",
@@ -2402,6 +2489,8 @@ export const en: TranslationKeys = {
       bulkMoveSuccess: "Successfully moved {count} student(s)",
       bulkRemoveSuccess: "Successfully removed {count} assignment(s)",
       reassignError: "Failed to reassign student",
+      assignToRoomName: "Assign to {roomName}",
+      confirmRemoveAssignment: "This student will be removed from their current room assignment. They can be reassigned later.",
     },
 
     // Common
@@ -2418,10 +2507,12 @@ export const en: TranslationKeys = {
     withAssignments: "with assignments",
     classAssignments: "Class Assignments",
     acrossGrades: "Across {count} grades",
+    acrossTrimesters: "Across {count} trimesters",
     subjectsNeedTeachers: "Subjects need teachers",
     noClasses: "No classes",
     classes: "Classes",
     selectTeacher: "Select a teacher",
+    selectSubject: "Select a subject",
     grades: "Grades",
     noAssignmentsForYear: "No assignments for this school year",
     removeAssignmentConfirm: "Are you sure you want to remove this teacher assignment? This action cannot be undone.",
@@ -2494,7 +2585,6 @@ export const en: TranslationKeys = {
     noActiveTrimester: "No active trimester",
     totalTrimesters: "Total Trimesters",
     evaluationsCount: "Evaluations",
-    trimesterActivated: "Trimester activated successfully",
     trimesterDeactivated: "Trimester deactivated successfully",
     deleteTrimesterConfirmation: "Are you sure you want to delete this trimester? This action cannot be undone.",
     cannotDeleteActiveTrimester: "Cannot delete the active trimester",
@@ -2644,6 +2734,8 @@ export const en: TranslationKeys = {
     overriddenBy: "Overridden by",
     updateDecision: "Update Decision",
     decisionUpdated: "Decision updated successfully",
+    selectDecision: "Select decision",
+    generalRemarkSaved: "General remarks saved successfully",
 
     // Bulk Operations
     calculateSubjectAverages: "Calculate Subject Averages",
@@ -2653,6 +2745,38 @@ export const en: TranslationKeys = {
     calculatingStudentSummaries: "Calculating student summaries...",
     calculationComplete: "Calculation complete",
     calculationsMenu: "Calculations",
+
+    // Calculation Status Banner
+    pendingEvaluations: "evaluations pending",
+    calculationsUpToDate: "Calculations up to date",
+    neverCalculated: "Never calculated",
+    justNow: "Just now",
+    minutesAgo: "minutes ago",
+    hoursAgo: "hours ago",
+    daysAgo: "days ago",
+    subjectAverages: "Subject averages",
+    studentSummaries: "Student summaries",
+
+    // Calculation History
+    calculationHistory: "Calculation History",
+    recentCalculations: "Recent Calculations",
+    calculationType: "Type",
+    typeSubjectAverages: "Subject Averages",
+    typeStudentSummaries: "Student Summaries",
+    typeFullCalculation: "Full Calculation",
+    triggeredBy: "Triggered by",
+    duration: "Duration",
+    durationMs: "{ms}ms",
+    durationSeconds: "{seconds}s",
+    studentsProcessed: "Students Processed",
+    averagesCalculated: "Averages Calculated",
+    summariesCalculated: "Summaries Calculated",
+    calculationRunning: "Running",
+    calculationCompleted: "Completed",
+    statusFailed: "Failed",
+    noCalculationHistory: "No calculation history yet",
+    viewHistory: "View History",
+    hideHistory: "Hide History",
 
     // Manage Evaluations
     manageEvaluations: "Manage Evaluations",
@@ -2664,8 +2788,12 @@ export const en: TranslationKeys = {
     evaluationUpdated: "Evaluation updated successfully",
     evaluationDeleted: "Evaluation deleted successfully",
     noEvaluationsFound: "No evaluations found",
+    searchStudent: "Search Student",
+    searchStudentPlaceholder: "Search by name...",
 
     // Teacher Remarks
+    subjectRemarks: "Subject Remarks",
+    subjectRemarksSubtitle: "Add teacher remarks for each student based on their subject averages",
     teacherRemarksSubtitle: "Add subject remarks for student report cards",
     remarksSaved: "Remarks saved successfully",
     saveRemarks: "Save Remarks",
@@ -2685,6 +2813,80 @@ export const en: TranslationKeys = {
     generatingBulletins: "Generating bulletins...",
     bulletinsDownloaded: "All bulletins downloaded",
     generatingPdfFor: "Generating PDF for {name}...",
+
+    // Quick Entry UX (Phase 3)
+    quickReentry: "Enter More Grades",
+    quickReentryTooltip: "Continue entering grades for this class",
+    nextEvaluationType: "Next: {type}",
+    draftSaved: "Draft saved",
+    draftRestored: "Draft restored",
+    discardDraft: "Discard Draft",
+    restoreDraft: "Restore Draft",
+    draftAvailable: "You have an unsaved draft for this class",
+    keyboardShortcuts: "Keyboard Shortcuts",
+    shortcutSave: "Save all grades",
+    shortcutNextStudent: "Next student",
+    shortcutPrevStudent: "Previous student",
+    shortcutNextField: "Next field",
+    autoSaving: "Auto-saving...",
+    entriesCount: "{entered} of {total} entered",
+    lastUsedSettings: "Last used settings restored",
+    clearSelections: "Clear selections",
+
+    // Overview Dashboard
+    trimesterOverview: "Trimester Overview",
+    trackEvaluationProgress: "Track evaluation progress and bulletin readiness",
+    classes: "Classes",
+    complete: "Complete",
+    inProgress: "In Progress",
+    notStarted: "Not Started",
+    rankingsReady: "Rankings Ready",
+    compositionsEntered: "Compositions Entered",
+    bulletinsReady: "Bulletins Ready",
+    missingCompositions: "Missing Compositions",
+    missingCompositionsSubtitle: "These subjects don't have a composition yet",
+    enterGrade: "Enter",
+    andMore: "And more...",
+    quickActions: "Quick Actions",
+    progressByClass: "Progress by Class",
+    clickClassForDetails: "Click a class to see details",
+    subjects: "Subjects",
+    compositions: "Compositions",
+    averages: "Averages",
+    rankings: "Rankings",
+    calculationFailed: "Calculation failed",
+    percentComplete: "complete",
+
+    // Conduct Page
+    averageRequired: "Average required",
+    decisionAutoCalcInfo: "Decisions are calculated automatically: ≥10 = Promoted, 8-10 = Remediation, <8 = Repeat Year. You can override them manually if needed.",
+
+    // Shared UI labels
+    backToClasses: "Back to classes",
+    backToOverview: "Back to overview",
+    selection: "Selection",
+    studentsInClass: "students in this class",
+    totalCoefficient: "Total coefficient",
+    creatingArchive: "Creating archive...",
+    class: "Class",
+    selectClassFirst: "Select a class first",
+    studentRanking: "Student Ranking",
+    studentsLabel: "Students",
+    filters: "Filters",
+    subject: "Subject",
+    overridden: "Overridden",
+    bulletinErrorCount: "{count} bulletin(s) could not be generated",
+
+    // Error messages
+    failedToSaveGrades: "Failed to save grades",
+    failedToSaveRemarks: "Failed to save remarks",
+    failedToUpdateEvaluation: "Failed to update evaluation",
+    failedToDeleteEvaluation: "Failed to delete evaluation",
+    failedToRecalculate: "Failed to recalculate",
+    failedToLoadData: "Failed to load data",
+    failedToDownloadPDF: "Failed to download PDF",
+    someUpdatesFailed: "Some updates failed",
+    failedToSaveData: "Failed to save data",
   },
 
   // Treasury / Safe
@@ -2810,6 +3012,8 @@ export const en: TranslationKeys = {
     balanceNotInitialized: "Safe balance is not initialized",
 
     // Transaction reversal
+    transactionToReverse: "Transaction to reverse",
+    type: "Type",
     reverseTransaction: "Reverse Transaction",
     reversalReason: "Reason for reversal",
     reversalReasonPlaceholder: "Explain why this transaction needs to be reversed...",
@@ -2855,6 +3059,22 @@ export const en: TranslationKeys = {
     // Registry status warnings
     registryClosedTitle: "Registry Closed",
     registryClosedMessage: "The registry is currently closed. Cash payments and expenses cannot be processed. Please open the registry for the day to begin operations.",
+
+    // Bank deposit dialog
+    deposit: {
+      title: "Record Bank Deposit",
+      description: "Confirm the bank deposit for this cash payment",
+      submitLabel: "Confirm Deposit",
+      fillRequiredFields: "Please fill all required fields",
+      depositorNameRequired: "Please provide the depositor's name",
+      depositFailed: "Failed to record deposit",
+      errorOccurred: "An error occurred",
+      depositDate: "Deposit Date",
+      selectBank: "Select a bank",
+      depositedBy: "Deposited by",
+      myself: "Myself",
+      depositorNamePlaceholder: "Depositor name",
+    },
 
     // Registry (Caisse) - Daily Operations
     registry: {
@@ -2953,6 +3173,51 @@ export const en: TranslationKeys = {
       recentMovements: "Recent movements",
       noRecentTransactions: "No recent transactions",
       viewAll: "View all",
+    },
+
+    // Payment Review
+    review: {
+      title: "Payment Review",
+      description: "Approve or reject this payment after verification",
+      cash: "Cash",
+      orangeMoney: "Orange Money",
+      receipt: "Receipt",
+      recordedDate: "Recorded date",
+      transactionRef: "Transaction ref.",
+      bankDepositInfo: "Bank deposit information",
+      reference: "Reference",
+      bank: "Bank",
+      date: "Date",
+      depositedBy: "Deposited by",
+      action: "Action",
+      approve: "Approve",
+      reject: "Reject",
+      rejectionReason: "Rejection reason",
+      notes: "Notes",
+      rejectionPlaceholder: "Explain the reason for rejection...",
+      notesPlaceholder: "Add notes if needed...",
+      confirmApprove: "Confirm approval",
+      confirmReject: "Confirm rejection",
+      selectAction: "Select an action",
+      autoConfirmImminent: "Auto-confirmation imminent",
+      autoConfirmHoursMinutes: "Auto-confirmation in {hours}h {minutes}min",
+      autoConfirmMinutes: "Auto-confirmation in {minutes} minutes",
+      rejectionReasonRequired: "Please provide a reason for rejection",
+      reviewFailed: "Failed to review payment",
+    },
+
+    // Mobile Money Fee Recording
+    mobileMoney: {
+      title: "Record Orange Money Fee",
+      description: "Record Orange Money transaction fees",
+      submitLabel: "Record",
+      orangeMoneyBalance: "Orange Money Balance",
+      feeAmount: "Fee amount (GNF)",
+      feeAmountHint: "Enter the transaction fee amount",
+      newOrangeMoneyBalance: "New Orange Money balance",
+      insufficientOrangeMoney: "Insufficient Orange Money balance",
+      descriptionPlaceholder: "Orange Money transaction fees...",
+      failedToRecordFee: "Failed to record fee",
     },
   },
 
@@ -3276,6 +3541,15 @@ export const en: TranslationKeys = {
     neverLoggedIn: "Never logged in",
     active: "Active",
     inactive: "Inactive",
+    activeUsers: "Active Users",
+    uniqueRoles: "Unique Roles",
+    noUsersFound: "No users found",
+    changeUserRole: "Change User Role",
+    changeRoleDescription: "Update the role for this user and apply system-wide permission changes",
+    selectedUser: "Selected User",
+    importantChange: "Important Change",
+    importantChangeDescription: "This will change the user's permissions system-wide",
+    confirmChange: "Confirm Change",
 
     // Role names
     roles: {
@@ -3376,6 +3650,60 @@ export const en: TranslationKeys = {
       none: "None",
     },
   },
+  rolePermissions: {
+    title: "Role Permissions",
+    description: "Manage base permissions for 13 staff roles",
+    roleList: {
+      title: "Role Permissions",
+      description: "Manage base permissions for 13 staff roles",
+      totalRoles: "Total Roles",
+      totalPermissions: "Total Permissions",
+      wildcardRoles: "Wildcard Roles",
+      permissions: "Permissions",
+      branch: "Branch",
+      scope: "Scope",
+      fullAccess: "Full Access",
+      fullAccessDescription: "This role has unrestricted access to all system permissions",
+      branches: {
+        transversal: "Transversal",
+        academic: "Academic",
+        financial: "Financial",
+        none: "None",
+      },
+      scopes: {
+        all: "All Levels",
+        all_secondary: "Secondary",
+        all_primary: "Primary",
+        own_classes: "Own Classes",
+        limited: "Limited",
+        none: "None",
+      },
+    },
+    roles: {
+      proprietaire: "Owner",
+      admin_systeme: "System Admin",
+      proviseur: "Principal",
+      censeur: "Vice Principal",
+      surveillant_general: "General Supervisor",
+      directeur: "Director",
+      secretariat: "Secretary",
+      comptable: "Accountant",
+      agent_recouvrement: "Collection Agent",
+      coordinateur: "Coordinator",
+      enseignant: "Teacher",
+      professeur_principal: "Head Teacher",
+      gardien: "Security Guard",
+    },
+    errors: {
+      fetchFailed: "Failed to fetch role permissions",
+      createFailed: "Failed to create permission",
+      updateFailed: "Failed to update permission",
+      deleteFailed: "Failed to delete permission",
+      copyFailed: "Failed to copy permissions",
+      invalidRole: "Invalid staff role",
+      permissionExists: "Permission already exists for this role",
+    },
+  },
   permissionOverrides: {
     title: "Permission Overrides",
     description: "Manage custom permission grants and denials for this user",
@@ -3425,6 +3753,234 @@ export const en: TranslationKeys = {
       failedToFetch: "Failed to fetch permissions",
       failedToAddOverride: "Failed to add override",
       failedToRemoveOverride: "Failed to remove override",
+    },
+  },
+
+  // Salary Management
+  salaries: {
+    // Page titles
+    title: "Salary Management",
+    ratesTitle: "Salary Rates",
+    hoursTitle: "Hours Tracking",
+    paymentsTitle: "Salary Payments",
+    advancesTitle: "Salary Advances",
+
+    // Tabs
+    tabs: {
+      payments: "Payments",
+      hours: "Hours",
+      advances: "Advances",
+    },
+
+    // Status labels
+    status: {
+      draft: "Draft",
+      submitted: "Submitted",
+      approved: "Approved",
+      rejected: "Rejected",
+      pending: "Pending",
+      paid: "Paid",
+      cancelled: "Cancelled",
+      active: "Active",
+      fully_recouped: "Fully Recouped",
+    },
+
+    // Salary types
+    types: {
+      hourly: "Hourly",
+      fixed: "Fixed",
+    },
+
+    // Recoupment strategies
+    strategies: {
+      full: "Full Deduction",
+      fullDesc: "Deduct entire balance from next salary",
+      spread: "Spread",
+      spreadDesc: "Spread across multiple installments",
+      custom: "Custom",
+      customDesc: "Set manual amount at payment time",
+    },
+
+    // Rate management
+    rates: {
+      title: "Salary Rates",
+      subtitle: "Manage hourly and fixed salary rates for all staff",
+      setRate: "Set Rate",
+      updateRate: "Update Rate",
+      deleteRate: "Delete Rate",
+      rateHistory: "Rate History",
+      currentRate: "Current Rate",
+      noRateSet: "No rate set",
+      hourlyRate: "Hourly Rate",
+      fixedMonthly: "Fixed Monthly",
+      effectiveFrom: "Effective From",
+      effectiveTo: "Effective To",
+      salaryType: "Salary Type",
+      selectStaff: "Select Staff",
+      rateAmount: "Rate Amount",
+      staffMember: "Staff Member",
+      perHour: "/hour",
+      perMonth: "/month",
+      deleteConfirm: "Are you sure you want to delete this rate? This action cannot be undone.",
+      deleteError: "Cannot delete rate that is referenced by salary payments.",
+      createSuccess: "Salary rate created successfully",
+      updateSuccess: "Salary rate updated successfully",
+      deleteSuccess: "Salary rate deleted successfully",
+      createError: "Failed to create salary rate",
+      updateError: "Failed to update salary rate",
+    },
+
+    // Hours tracking
+    hours: {
+      title: "Hours Worked",
+      subtitle: "Record and submit monthly hours for teaching staff",
+      monthYear: "Month / Year",
+      totalHours: "Total Hours",
+      enterHours: "Enter Hours",
+      bulkEntry: "Bulk Entry",
+      submitAll: "Submit All",
+      submitHours: "Submit Hours",
+      reviewHours: "Review Hours",
+      approve: "Approve",
+      reject: "Reject",
+      rejectionNote: "Rejection Note",
+      hoursWorked: "Hours Worked",
+      submittedBy: "Submitted By",
+      reviewedBy: "Reviewed By",
+      submitConfirm: "Submit these hours for review? Once submitted, they cannot be edited.",
+      bulkSubmitConfirm: "Submit all draft hours for this month? This will submit hours for all teachers listed.",
+      approveConfirm: "Approve these hours? This will allow salary calculation.",
+      noHoursRecords: "No hours records found for this period",
+      createSuccess: "Hours record created successfully",
+      updateSuccess: "Hours record updated successfully",
+      submitSuccess: "Hours submitted for review",
+      approveSuccess: "Hours approved successfully",
+      rejectSuccess: "Hours rejected",
+      bulkCreateSuccess: "Hours records created for all teachers",
+      showAllStaff: "Show all staff",
+      showTeachersOnly: "Teaching staff only",
+      showingTeachingStaff: "Showing teaching staff",
+      showingAllStaff: "Showing all staff",
+      periodContext: "Recording hours for",
+      hoursPlaceholder: "e.g. 40",
+    },
+
+    // Payments
+    payments: {
+      title: "Salary Payments",
+      subtitle: "Process and track salary payments for all staff",
+      generate: "Generate Salaries",
+      generateForMonth: "Generate salaries for this month",
+      approve: "Approve",
+      pay: "Pay",
+      cancel: "Cancel Payment",
+      grossAmount: "Gross Amount",
+      advanceDeduction: "Advance Deduction",
+      otherDeductions: "Other Deductions",
+      netAmount: "Net Amount",
+      hoursWorked: "Hours",
+      method: "Method",
+      approvedBy: "Approved By",
+      paidBy: "Paid By",
+      paidAt: "Paid At",
+      paymentMethod: "Payment Method",
+      cancelConfirm: "Are you sure you want to cancel this salary payment?",
+      cancellationNote: "Cancellation Note",
+      generateConfirm: "Generate salary payments for all staff for this month?",
+      payConfirm: "Process this salary payment? This will deduct from the treasury.",
+      insufficientFunds: "Insufficient funds in treasury",
+      generateSuccess: "Salary payments generated successfully",
+      approveSuccess: "Salary payment approved",
+      paySuccess: "Salary payment processed successfully",
+      cancelSuccess: "Salary payment cancelled",
+    },
+
+    // Advances
+    advances: {
+      title: "Salary Advances",
+      subtitle: "Manage advance disbursements and recoupment",
+      newAdvance: "New Advance",
+      amount: "Amount",
+      reason: "Reason",
+      strategy: "Recoupment Strategy",
+      installments: "Installments",
+      numberOfInstallments: "Number of Installments",
+      totalRecouped: "Total Recouped",
+      remainingBalance: "Remaining Balance",
+      recoupmentHistory: "Recoupment History",
+      installmentNumber: "Installment #",
+      disbursedBy: "Disbursed By",
+      disbursedAt: "Disbursed At",
+      cancelAdvance: "Cancel Advance",
+      cancelConfirm: "Are you sure you want to cancel this advance? This cannot be undone if recoupments have already been applied.",
+      cancellationNote: "Cancellation Note",
+      createSuccess: "Salary advance disbursed successfully",
+      updateSuccess: "Salary advance updated successfully",
+      cancelSuccess: "Salary advance cancelled",
+    },
+
+    // Stats
+    stats: {
+      totalPayroll: "Total Payroll",
+      pendingPayments: "Pending",
+      approvedPayments: "Approved",
+      paidPayments: "Paid",
+      activeAdvances: "Active Advances",
+      totalOutstanding: "Total Outstanding",
+      thisMonthRecoupments: "This Month's Recoupments",
+    },
+
+    // Validation messages
+    validation: {
+      invalidHours: "Please enter a valid number of hours",
+      invalidAmount: "Please enter a valid amount",
+      reasonRequired: "Please provide a reason",
+    },
+
+    // Common fields
+    staffName: "Staff Name",
+    role: "Role",
+    month: "Month",
+    year: "Year",
+    schoolYear: "School Year",
+    filterByStatus: "Filter by Status",
+    filterByMonth: "Filter by Month",
+    searchStaff: "Search staff...",
+    noRecords: "No records found",
+    cash: "Cash",
+    orangeMoney: "Orange Money",
+  },
+
+  // Timetable
+  timetable: {
+    slotEditor: {
+      editSlot: "Edit Slot",
+      addSlot: "Add Slot",
+      deleteSlot: "Delete",
+      deleteConfirm: "Delete this slot?",
+      save: "Save",
+      cancel: "Cancel",
+      breakRecess: "Break / Recess",
+      subject: "Subject",
+      teacher: "Teacher",
+      room: "Room",
+      selectSubject: "Select subject",
+      selectTeacher: "Select teacher",
+      none: "None",
+      roomPlaceholder: "Ex: Room 101",
+      notesPlaceholder: "Optional notes",
+      conflictDetected: "Schedule conflict detected",
+      failedToSave: "Failed to save",
+      failedToDelete: "Failed to delete",
+      errorOccurred: "An error occurred",
+      conflictsDetected: "Conflicts detected:",
+      successCreated: "Class added to schedule",
+      successUpdated: "Class updated successfully",
+      successDeleted: "Class removed from schedule",
+      errorCreate: "Failed to add class",
+      errorUpdate: "Failed to update class",
+      errorDelete: "Failed to delete class",
+      errorFetch: "Failed to load schedule",
     },
   },
 } as const;

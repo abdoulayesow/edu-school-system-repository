@@ -62,7 +62,13 @@
       "Bash(git diff:*)",
       "Bash(git -C c:/workspace/sources/edu-school-system-repository log --oneline -10)",
       "Bash(git -C c:/workspace/sources/edu-school-system-repository status --short)",
-      "Bash(git -C c:/workspace/sources/edu-school-system-repository diff --stat)"
+      "Bash(git -C c:/workspace/sources/edu-school-system-repository diff --stat)",
+      "Bash(git restore:*)",
+      "mcp__ide__getDiagnostics",
+      "Bash(npx next lint:*)",
+      "Bash(npx eslint:*)",
+      "Bash(npm run test:run:*)",
+      "Bash(npm ls:*)"
     ],
     "additionalDirectories": [
       "c:\\workspace\\sources\\edu-school-system-repository"

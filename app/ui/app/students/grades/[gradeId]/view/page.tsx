@@ -21,7 +21,20 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog"
 import { Skeleton } from "@/components/ui/skeleton"
+import { useToast } from "@/components/ui/use-toast"
+import { PermissionGuard } from "@/components/permission-guard"
+import { PageContainer } from "@/components/layout"
 import {
   ArrowLeft,
   Users,
@@ -60,7 +73,7 @@ interface GradeData {
   grade: {
     id: string
     name: string
-    level: string
+    level: "kindergarten" | "elementary" | "college" | "high_school"
     capacity: number
   }
   rooms: Room[]
@@ -74,6 +87,13 @@ interface GradeData {
   }
 }
 
+const LEVEL_BADGE_COLORS: Record<string, string> = {
+  kindergarten: "bg-gspn-maroon-100 text-gspn-maroon-700 dark:bg-gspn-maroon-900/30 dark:text-gspn-maroon-300",
+  elementary: "bg-gspn-gold-100 text-gspn-gold-700 dark:bg-gspn-gold-900/30 dark:text-gspn-gold-300",
+  college: "bg-gspn-maroon-100 text-gspn-maroon-700 dark:bg-gspn-maroon-900/30 dark:text-gspn-maroon-300",
+  high_school: "bg-gspn-gold-100 text-gspn-gold-700 dark:bg-gspn-gold-900/30 dark:text-gspn-gold-300",
+}
+
 export default function GradeViewPage() {
   const { t } = useI18n()
   const router = useRouter()
@@ -81,6 +101,14 @@ export default function GradeViewPage() {
   const searchParams = useSearchParams()
   const schoolYearId = searchParams.get("schoolYearId") || ""
   const gradeId = params.gradeId as string
+  const { toast } = useToast()
+
+  const LEVEL_LABELS: Record<string, string> = {
+    kindergarten: t.admin.levelKindergarten,
+    elementary: t.admin.levelElementary,
+    college: t.admin.levelCollege,
+    high_school: t.admin.levelHighSchool,
+  }
 
   const [data, setData] = useState<GradeData | null>(null)
   const [isLoading, setIsLoading] = useState(true)
@@ -91,6 +119,7 @@ export default function GradeViewPage() {
   const [attendanceDialogOpen, setAttendanceDialogOpen] = useState(false)
   const [selectedRoomForAttendance, setSelectedRoomForAttendance] = useState<Room | null>(null)
   const [draggedStudent, setDraggedStudent] = useState<Student | null>(null)
+  const [studentToRemove, setStudentToRemove] = useState<string | null>(null)
 
   const fetchData = useCallback(async () => {
     if (!schoolYearId) return
@@ -105,15 +134,15 @@ export default function GradeViewPage() {
         setData(result)
         setError(null)
       } else {
-        setError("Failed to load grade data")
+        setError(t.admin.roomAssignments.fetchError)
       }
     } catch {
-      setError("Failed to load grade data")
+      setError(t.admin.roomAssignments.fetchError)
     } finally {
       setIsLoading(false)
       setIsRefreshing(false)
     }
-  }, [gradeId, schoolYearId])
+  }, [gradeId, schoolYearId, t.admin.roomAssignments.fetchError])
 
   useEffect(() => {
     fetchData()
@@ -160,11 +189,14 @@ export default function GradeViewPage() {
       })
 
       if (res.ok) {
+        toast({ title: t.admin.roomAssignments.bulkMoveSuccess.replace("{count}", "1") })
         fetchData()
         setSelectedStudents(new Set())
+      } else {
+        toast({ variant: "destructive", title: t.common.error, description: t.admin.roomAssignments.reassignError })
       }
-    } catch (err) {
-      console.error("Failed to move student:", err)
+    } catch {
+      toast({ variant: "destructive", title: t.common.error, description: t.admin.roomAssignments.reassignError })
     }
   }
 
@@ -183,11 +215,14 @@ export default function GradeViewPage() {
       })
 
       if (res.ok) {
+        toast({ title: t.admin.roomAssignments.bulkMoveSuccess.replace("{count}", String(selectedStudents.size)) })
         fetchData()
         setSelectedStudents(new Set())
+      } else {
+        toast({ variant: "destructive", title: t.common.error, description: t.admin.roomAssignments.reassignError })
       }
-    } catch (err) {
-      console.error("Failed to bulk move:", err)
+    } catch {
+      toast({ variant: "destructive", title: t.common.error, description: t.admin.roomAssignments.reassignError })
     }
   }
 
@@ -208,10 +243,13 @@ export default function GradeViewPage() {
       })
 
       if (res.ok) {
+        toast({ title: t.admin.roomAssignments.assignmentSuccess.replace("{count}", "1") })
         fetchData()
+      } else {
+        toast({ variant: "destructive", title: t.common.error, description: t.admin.roomAssignments.assignmentError })
       }
-    } catch (err) {
-      console.error("Failed to assign student:", err)
+    } catch {
+      toast({ variant: "destructive", title: t.common.error, description: t.admin.roomAssignments.assignmentError })
     }
   }
 
@@ -233,15 +271,18 @@ export default function GradeViewPage() {
       })
 
       if (res.ok) {
+        toast({ title: t.admin.roomAssignments.bulkRemoveSuccess.replace("{count}", "1") })
         fetchData()
         setSelectedStudents(prev => {
           const next = new Set(prev)
           next.delete(studentId)
           return next
         })
+      } else {
+        toast({ variant: "destructive", title: t.common.error, description: t.admin.roomAssignments.reassignError })
       }
-    } catch (err) {
-      console.error("Failed to remove assignment:", err)
+    } catch {
+      toast({ variant: "destructive", title: t.common.error, description: t.admin.roomAssignments.reassignError })
     }
   }
 
@@ -279,39 +320,41 @@ export default function GradeViewPage() {
 
   if (!schoolYearId) {
     return (
-      <div className="container mx-auto py-6">
+      <PageContainer maxWidth="full">
         <div className="text-center text-muted-foreground">
-          School year ID is required
+          {t.admin.roomAssignments.fetchError}
         </div>
-      </div>
+      </PageContainer>
     )
   }
 
   if (isLoading) {
     return (
-      <div className="container mx-auto py-6 space-y-6">
-        <Skeleton className="h-8 w-64" />
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          <div className="lg:col-span-2 space-y-4">
-            <Skeleton className="h-48" />
-            <Skeleton className="h-48" />
+      <PageContainer maxWidth="full">
+        <div className="space-y-6">
+          <Skeleton className="h-8 w-64" />
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <div className="lg:col-span-2 space-y-4">
+              <Skeleton className="h-48" />
+              <Skeleton className="h-48" />
+            </div>
+            <Skeleton className="h-96" />
           </div>
-          <Skeleton className="h-96" />
         </div>
-      </div>
+      </PageContainer>
     )
   }
 
   if (error || !data) {
     return (
-      <div className="container mx-auto py-6">
-        <div className="text-center text-destructive">{error || "Failed to load data"}</div>
-      </div>
+      <PageContainer maxWidth="full">
+        <div className="text-center text-destructive">{error || t.admin.roomAssignments.fetchError}</div>
+      </PageContainer>
     )
   }
 
   return (
-    <div className="container mx-auto py-6 space-y-6">
+    <PageContainer maxWidth="full">
       {/* Header */}
       <div className="relative mb-6 overflow-hidden rounded-2xl border border-border bg-card shadow-sm">
         <div className="h-1 bg-gspn-maroon-500" />
@@ -329,7 +372,9 @@ export default function GradeViewPage() {
               <div>
                 <h1 className="text-2xl font-bold flex items-center gap-2">
                   {data.grade.name}
-                  <Badge variant="outline">{data.grade.level}</Badge>
+                  <Badge className={LEVEL_BADGE_COLORS[data.grade.level] || ""}>
+                    {LEVEL_LABELS[data.grade.level] || data.grade.level}
+                  </Badge>
                 </h1>
                 <p className="text-muted-foreground">
                   {t.admin.roomAssignments.viewGrade}
@@ -345,7 +390,7 @@ export default function GradeViewPage() {
                 disabled={isRefreshing}
               >
                 <RefreshCw className={`h-4 w-4 mr-2 ${isRefreshing ? "animate-spin" : ""}`} />
-                {isRefreshing ? t.common.loading : "Refresh"}
+                {isRefreshing ? t.common.loading : t.common.refresh}
               </Button>
             </div>
           </div>
@@ -356,25 +401,25 @@ export default function GradeViewPage() {
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         <Card className="border shadow-sm overflow-hidden">
           <CardContent className="pt-4">
-            <div className="text-2xl font-bold">{data.stats.totalEnrolled}</div>
+            <div className="text-2xl font-bold font-mono tabular-nums">{data.stats.totalEnrolled}</div>
             <div className="text-sm text-muted-foreground">{t.admin.students}</div>
           </CardContent>
         </Card>
         <Card className="border shadow-sm overflow-hidden">
           <CardContent className="pt-4">
-            <div className="text-2xl font-bold text-green-600">{data.stats.totalAssigned}</div>
-            <div className="text-sm text-muted-foreground">Assigned</div>
+            <div className="text-2xl font-bold font-mono tabular-nums text-emerald-600 dark:text-emerald-400">{data.stats.totalAssigned}</div>
+            <div className="text-sm text-muted-foreground">{t.students.assigned}</div>
           </CardContent>
         </Card>
         <Card className="border shadow-sm overflow-hidden">
           <CardContent className="pt-4">
-            <div className="text-2xl font-bold text-orange-600">{data.stats.totalUnassigned}</div>
-            <div className="text-sm text-muted-foreground">Unassigned</div>
+            <div className="text-2xl font-bold font-mono tabular-nums text-amber-600 dark:text-amber-400">{data.stats.totalUnassigned}</div>
+            <div className="text-sm text-muted-foreground">{t.students.unassigned}</div>
           </CardContent>
         </Card>
         <Card className="border shadow-sm overflow-hidden">
           <CardContent className="pt-4">
-            <div className="text-2xl font-bold">{data.stats.roomUtilization}%</div>
+            <div className="text-2xl font-bold font-mono tabular-nums">{data.stats.roomUtilization}%</div>
             <div className="text-sm text-muted-foreground">{t.admin.roomAssignments.roomUtilization}</div>
           </CardContent>
         </Card>
@@ -398,31 +443,33 @@ export default function GradeViewPage() {
 
         {selectedStudents.size > 0 && (
           <div className="flex items-center gap-2">
-            <Badge variant="secondary">{selectedStudents.size} selected</Badge>
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="outline" size="sm">
-                  {t.admin.roomAssignments.moveToRoom}
-                  <ChevronDown className="h-4 w-4 ml-2" />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent>
-                {data.rooms.map(room => (
-                  <DropdownMenuItem
-                    key={room.id}
-                    onClick={() => handleBulkMove(room.id)}
-                  >
-                    {room.displayName || room.name}
-                  </DropdownMenuItem>
-                ))}
-              </DropdownMenuContent>
-            </DropdownMenu>
+            <Badge variant="secondary">{t.admin.roomAssignments.selectedCount.replace("{count}", String(selectedStudents.size))}</Badge>
+            <PermissionGuard resource="schedule" action="create" inline>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="outline" size="sm">
+                    {t.admin.roomAssignments.moveToRoom}
+                    <ChevronDown className="h-4 w-4 ml-2" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent>
+                  {data.rooms.map(room => (
+                    <DropdownMenuItem
+                      key={room.id}
+                      onClick={() => handleBulkMove(room.id)}
+                    >
+                      {room.displayName || room.name}
+                    </DropdownMenuItem>
+                  ))}
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </PermissionGuard>
             <Button
               variant="ghost"
               size="sm"
               onClick={() => setSelectedStudents(new Set())}
             >
-              Clear
+              {t.common.clear}
             </Button>
           </div>
         )}
@@ -449,14 +496,16 @@ export default function GradeViewPage() {
                     </Badge>
                   </CardTitle>
                   <div className="flex items-center gap-2">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => openAttendanceDialog(room)}
-                    >
-                      <ClipboardCheck className="h-4 w-4 mr-2" />
-                      {t.admin.roomAssignments.takeAttendance}
-                    </Button>
+                    <PermissionGuard resource="attendance" action="create" inline>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => openAttendanceDialog(room)}
+                      >
+                        <ClipboardCheck className="h-4 w-4 mr-2" />
+                        {t.admin.roomAssignments.takeAttendance}
+                      </Button>
+                    </PermissionGuard>
                     <Button
                       variant="ghost"
                       size="sm"
@@ -503,31 +552,33 @@ export default function GradeViewPage() {
                         </div>
 
                         <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                          <DropdownMenu>
-                            <DropdownMenuTrigger asChild>
-                              <Button variant="ghost" size="icon">
-                                <MoreVertical className="h-4 w-4" />
-                              </Button>
-                            </DropdownMenuTrigger>
-                            <DropdownMenuContent align="end">
-                              <DropdownMenuItem
-                                onClick={() => {
-                                  // Show room selection for move
-                                  setSelectedStudents(new Set([student.id]))
-                                }}
-                              >
-                                <ArrowRightLeft className="h-4 w-4 mr-2" />
-                                {t.admin.roomAssignments.moveStudent}
-                              </DropdownMenuItem>
-                              <DropdownMenuItem
-                                className="text-destructive"
-                                onClick={() => handleRemoveAssignment(student.id)}
-                              >
-                                <UserMinus className="h-4 w-4 mr-2" />
-                                {t.admin.roomAssignments.removeStudent}
-                              </DropdownMenuItem>
-                            </DropdownMenuContent>
-                          </DropdownMenu>
+                          <PermissionGuard resource="schedule" action="create" inline>
+                            <DropdownMenu>
+                              <DropdownMenuTrigger asChild>
+                                <Button variant="ghost" size="icon">
+                                  <MoreVertical className="h-4 w-4" />
+                                </Button>
+                              </DropdownMenuTrigger>
+                              <DropdownMenuContent align="end">
+                                <DropdownMenuItem
+                                  onClick={() => {
+                                    // Show room selection for move
+                                    setSelectedStudents(new Set([student.id]))
+                                  }}
+                                >
+                                  <ArrowRightLeft className="h-4 w-4 mr-2" />
+                                  {t.admin.roomAssignments.moveStudent}
+                                </DropdownMenuItem>
+                                <DropdownMenuItem
+                                  className="text-destructive"
+                                  onClick={() => setStudentToRemove(student.id)}
+                                >
+                                  <UserMinus className="h-4 w-4 mr-2" />
+                                  {t.admin.roomAssignments.removeStudent}
+                                </DropdownMenuItem>
+                              </DropdownMenuContent>
+                            </DropdownMenu>
+                          </PermissionGuard>
                         </div>
                       </div>
                     ))}
@@ -577,24 +628,26 @@ export default function GradeViewPage() {
                         </div>
                       </div>
 
-                      <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                          <Button variant="ghost" size="icon">
-                            <MoreVertical className="h-4 w-4" />
-                          </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end">
-                          {data.rooms.map(room => (
-                            <DropdownMenuItem
-                              key={room.id}
-                              onClick={() => handleAssignStudent(student.id, room.id)}
-                              disabled={room.students.length >= room.capacity}
-                            >
-                              Assign to {room.displayName || room.name}
-                            </DropdownMenuItem>
-                          ))}
-                        </DropdownMenuContent>
-                      </DropdownMenu>
+                      <PermissionGuard resource="schedule" action="create" inline>
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button variant="ghost" size="icon">
+                              <MoreVertical className="h-4 w-4" />
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end">
+                            {data.rooms.map(room => (
+                              <DropdownMenuItem
+                                key={room.id}
+                                onClick={() => handleAssignStudent(student.id, room.id)}
+                                disabled={room.students.length >= room.capacity}
+                              >
+                                {t.admin.roomAssignments.assignToRoomName.replace("{roomName}", room.displayName || room.name)}
+                              </DropdownMenuItem>
+                            ))}
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+                      </PermissionGuard>
                     </div>
                   ))}
                 </div>
@@ -603,6 +656,22 @@ export default function GradeViewPage() {
           </Card>
         </div>
       </div>
+
+      {/* Remove Assignment Confirmation */}
+      <AlertDialog open={!!studentToRemove} onOpenChange={(open) => !open && setStudentToRemove(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>{t.common.confirmRemove}</AlertDialogTitle>
+            <AlertDialogDescription>{t.admin.roomAssignments.confirmRemoveAssignment}</AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>{t.common.cancel}</AlertDialogCancel>
+            <AlertDialogAction onClick={() => { if (studentToRemove) { handleRemoveAssignment(studentToRemove); setStudentToRemove(null) } }}>
+              {t.admin.roomAssignments.removeStudent}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
 
       {/* Attendance Dialog */}
       <AttendanceDialog
@@ -613,6 +682,6 @@ export default function GradeViewPage() {
         schoolYearId={schoolYearId}
         onSuccess={fetchData}
       />
-    </div>
+    </PageContainer>
   )
 }

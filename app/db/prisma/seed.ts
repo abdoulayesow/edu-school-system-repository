@@ -12,7 +12,7 @@
  */
 
 import { PrismaPg } from "@prisma/adapter-pg"
-import { PrismaClient, PaymentMethod, PaymentStatus, EnrollmentStatus, AttendanceStatus, AttendanceEntryMode, ExpenseStatus, ExpenseCategory, Gender, PersonStatus, StudentStatus } from "@prisma/client"
+import { PrismaClient, PaymentMethod, PaymentStatus, EnrollmentStatus, AttendanceStatus, AttendanceEntryMode, ExpenseStatus, ExpenseCategory, Gender, PersonStatus, StudentStatus, SalaryType, HoursRecordStatus, SalaryPaymentStatus, SalaryAdvanceStatus, RecoupmentStrategy, StaffRole, Role, SchoolLevel } from "@prisma/client"
 import pg from "pg"
 import fs from "fs"
 import path from "path"
@@ -82,8 +82,6 @@ const LAST_NAMES = [
 // Elementary (1-6): 800,000 - 900,000 GNF
 // College (7-10): 1,000,000 - 1,100,000 GNF
 // High School (11-Terminal): 1,200,000 - 1,300,000 GNF
-type SchoolLevel = "kindergarten" | "elementary" | "college" | "high_school"
-
 interface GradeConfig {
   name: string
   level: SchoolLevel
@@ -269,6 +267,112 @@ const EXPENSE_SAMPLES = [
   { category: ExpenseCategory.communication, description: "Recharge internet mensuelle", amount: 100000 },
   { category: ExpenseCategory.other, description: "Décoration fête de fin d'année", amount: 200000 },
   { category: ExpenseCategory.other, description: "Équipement sportif", amount: 450000 },
+]
+
+// ========================================================================
+// SALARY MANAGEMENT CONFIGS
+// ========================================================================
+
+interface StaffUserConfig {
+  name: string
+  email: string
+  staffRole: StaffRole
+  legacyRole: Role
+  schoolLevel?: SchoolLevel
+  salaryType: "hourly" | "fixed"
+  isTeacher: boolean
+}
+
+const NON_TEACHER_STAFF_CONFIGS: StaffUserConfig[] = [
+  { name: "Amadou Camara", email: "amadou.camara@gspn.edu.gn", staffRole: StaffRole.comptable, legacyRole: Role.accountant, salaryType: "fixed", isTeacher: false },
+  { name: "Fatoumata Keita", email: "fatoumata.keita@gspn.edu.gn", staffRole: StaffRole.coordinateur, legacyRole: Role.accountant, salaryType: "fixed", isTeacher: false },
+  { name: "Ibrahima Barry", email: "ibrahima.barry@gspn.edu.gn", staffRole: StaffRole.censeur, legacyRole: Role.academic_director, schoolLevel: SchoolLevel.college, salaryType: "fixed", isTeacher: false },
+]
+
+interface SalaryRateConfig {
+  userIndex: number | "comptable" | "coordinateur"
+  salaryType: SalaryType
+  hourlyRate?: number
+  fixedMonthly?: number
+}
+
+const SALARY_RATE_CONFIGS: SalaryRateConfig[] = [
+  // Hourly college/lycee teachers
+  { userIndex: 0, salaryType: SalaryType.hourly, hourlyRate: 75000 },
+  { userIndex: 1, salaryType: SalaryType.hourly, hourlyRate: 80000 },
+  { userIndex: 2, salaryType: SalaryType.hourly, hourlyRate: 65000 },
+  { userIndex: 3, salaryType: SalaryType.hourly, hourlyRate: 90000 },
+  { userIndex: 4, salaryType: SalaryType.hourly, hourlyRate: 50000 },
+  { userIndex: 5, salaryType: SalaryType.hourly, hourlyRate: 100000 },
+  // Fixed primary teachers
+  { userIndex: 6, salaryType: SalaryType.fixed, fixedMonthly: 2500000 },
+  { userIndex: 7, salaryType: SalaryType.fixed, fixedMonthly: 3000000 },
+  { userIndex: 8, salaryType: SalaryType.fixed, fixedMonthly: 2000000 },
+  { userIndex: 9, salaryType: SalaryType.fixed, fixedMonthly: 3500000 },
+  // Non-teacher staff
+  { userIndex: "comptable", salaryType: SalaryType.fixed, fixedMonthly: 3000000 },
+  { userIndex: "coordinateur", salaryType: SalaryType.fixed, fixedMonthly: 2500000 },
+]
+
+interface HoursRecordConfig {
+  userIndex: number
+  month: number
+  year: number
+  totalHours: number
+  status: HoursRecordStatus
+  hasSubmitter: boolean
+  hasReviewer: boolean
+}
+
+const HOURS_RECORD_CONFIGS: HoursRecordConfig[] = [
+  { userIndex: 0, month: 10, year: 2025, totalHours: 48, status: HoursRecordStatus.approved, hasSubmitter: true, hasReviewer: true },
+  { userIndex: 0, month: 11, year: 2025, totalHours: 52, status: HoursRecordStatus.approved, hasSubmitter: true, hasReviewer: true },
+  { userIndex: 1, month: 10, year: 2025, totalHours: 40, status: HoursRecordStatus.approved, hasSubmitter: true, hasReviewer: true },
+  { userIndex: 1, month: 11, year: 2025, totalHours: 44, status: HoursRecordStatus.approved, hasSubmitter: true, hasReviewer: true },
+  { userIndex: 2, month: 10, year: 2025, totalHours: 36, status: HoursRecordStatus.submitted, hasSubmitter: true, hasReviewer: false },
+  { userIndex: 2, month: 11, year: 2025, totalHours: 42, status: HoursRecordStatus.submitted, hasSubmitter: true, hasReviewer: false },
+  { userIndex: 3, month: 10, year: 2025, totalHours: 56, status: HoursRecordStatus.approved, hasSubmitter: true, hasReviewer: true },
+  { userIndex: 4, month: 10, year: 2025, totalHours: 30, status: HoursRecordStatus.draft, hasSubmitter: false, hasReviewer: false },
+]
+
+interface SalaryPaymentConfig {
+  userIndex: number | "comptable"
+  month: number
+  year: number
+  salaryType: SalaryType
+  status: SalaryPaymentStatus
+  method: PaymentMethod
+  advanceDeduction: number
+}
+
+const SALARY_PAYMENT_CONFIGS: SalaryPaymentConfig[] = [
+  { userIndex: 0, month: 10, year: 2025, salaryType: SalaryType.hourly, status: SalaryPaymentStatus.paid, method: PaymentMethod.cash, advanceDeduction: 0 },
+  { userIndex: 0, month: 11, year: 2025, salaryType: SalaryType.hourly, status: SalaryPaymentStatus.paid, method: PaymentMethod.cash, advanceDeduction: 500000 },
+  { userIndex: 1, month: 10, year: 2025, salaryType: SalaryType.hourly, status: SalaryPaymentStatus.approved, method: PaymentMethod.cash, advanceDeduction: 0 },
+  { userIndex: 1, month: 11, year: 2025, salaryType: SalaryType.hourly, status: SalaryPaymentStatus.pending, method: PaymentMethod.cash, advanceDeduction: 0 },
+  { userIndex: 3, month: 10, year: 2025, salaryType: SalaryType.hourly, status: SalaryPaymentStatus.paid, method: PaymentMethod.orange_money, advanceDeduction: 0 },
+  { userIndex: 6, month: 10, year: 2025, salaryType: SalaryType.fixed, status: SalaryPaymentStatus.paid, method: PaymentMethod.cash, advanceDeduction: 500000 },
+  { userIndex: 7, month: 10, year: 2025, salaryType: SalaryType.fixed, status: SalaryPaymentStatus.approved, method: PaymentMethod.cash, advanceDeduction: 0 },
+  { userIndex: "comptable", month: 10, year: 2025, salaryType: SalaryType.fixed, status: SalaryPaymentStatus.pending, method: PaymentMethod.cash, advanceDeduction: 0 },
+]
+
+interface SalaryAdvanceConfig {
+  userIndex: number
+  amount: number
+  method: PaymentMethod
+  reason: string
+  strategy: RecoupmentStrategy
+  numberOfInstallments?: number
+  totalRecouped: number
+  remainingBalance: number
+  status: SalaryAdvanceStatus
+  disbursedDate: string
+}
+
+const SALARY_ADVANCE_CONFIGS: SalaryAdvanceConfig[] = [
+  { userIndex: 0, amount: 1000000, method: PaymentMethod.cash, reason: "Frais médicaux urgents", strategy: RecoupmentStrategy.full, totalRecouped: 500000, remainingBalance: 500000, status: SalaryAdvanceStatus.active, disbursedDate: "2025-10-15" },
+  { userIndex: 3, amount: 2000000, method: PaymentMethod.cash, reason: "Avance sur salaire - rentrée scolaire", strategy: RecoupmentStrategy.spread, numberOfInstallments: 4, totalRecouped: 0, remainingBalance: 2000000, status: SalaryAdvanceStatus.active, disbursedDate: "2025-11-01" },
+  { userIndex: 6, amount: 500000, method: PaymentMethod.orange_money, reason: "Avance pour déménagement", strategy: RecoupmentStrategy.full, totalRecouped: 500000, remainingBalance: 0, status: SalaryAdvanceStatus.fully_recouped, disbursedDate: "2025-10-01" },
 ]
 
 // Helper to generate random date of birth for students
@@ -932,6 +1036,98 @@ async function main() {
     console.log(`   ✓ Created ${teacherCounter} teachers`)
 
     // ========================================================================
+    // Create Staff Users (for salary management)
+    // ========================================================================
+    console.log("\n👤 Creating staff users for salary management...")
+
+    // A. Create User records for the first 10 teachers
+    const staffUsers: { id: string; salaryType: "hourly" | "fixed" }[] = []
+    for (let i = 0; i < Math.min(10, teacherProfiles.length); i++) {
+      const tp = teacherProfiles[i]
+      const person = await prisma.person.findUnique({ where: { id: tp.personId } })
+      if (!person) continue
+      if (!person.email) continue
+
+      const teacherEmail = person.email
+      let user = await prisma.user.findUnique({ where: { email: teacherEmail } })
+      if (!user) {
+        user = await prisma.user.create({
+          data: {
+            name: `${person.firstName} ${person.lastName}`,
+            email: teacherEmail,
+            role: Role.teacher,
+            staffRole: StaffRole.enseignant,
+            staffProfileId: tp.id,
+            schoolLevel: i < 6 ? SchoolLevel.college : SchoolLevel.elementary,
+          },
+        })
+      }
+      staffUsers.push({ id: user.id, salaryType: i < 6 ? "hourly" : "fixed" })
+    }
+    console.log(`   ✓ Created ${staffUsers.length} teacher user accounts`)
+
+    // B. Create Non-Teacher Staff (Person + User)
+    let comptableUser: { id: string } | null = null
+    let coordinateurUser: { id: string } | null = null
+    let censeurUser: { id: string } | null = null
+
+    for (const staffConfig of NON_TEACHER_STAFF_CONFIGS) {
+      let user = await prisma.user.findUnique({ where: { email: staffConfig.email } })
+      if (!user) {
+        // Create a Person record for this staff member
+        const [firstName, lastName] = staffConfig.name.split(" ", 2)
+        let person = await prisma.person.findUnique({ where: { email: staffConfig.email } })
+        if (!person) {
+          person = await prisma.person.create({
+            data: {
+              firstName: firstName || staffConfig.name,
+              lastName: lastName || "",
+              email: staffConfig.email,
+              phone: randomPhone(),
+              gender: staffConfig.name.startsWith("Fatoumata") ? Gender.female : Gender.male,
+              status: PersonStatus.active,
+            },
+          })
+        }
+
+        user = await prisma.user.create({
+          data: {
+            name: staffConfig.name,
+            email: staffConfig.email,
+            role: staffConfig.legacyRole,
+            staffRole: staffConfig.staffRole,
+            schoolLevel: staffConfig.schoolLevel,
+          },
+        })
+      }
+
+      if (staffConfig.staffRole === StaffRole.comptable) comptableUser = { id: user.id }
+      if (staffConfig.staffRole === StaffRole.coordinateur) coordinateurUser = { id: user.id }
+      if (staffConfig.staffRole === StaffRole.censeur) censeurUser = { id: user.id }
+    }
+    console.log(`   ✓ Created non-teacher staff: comptable, coordinateur, censeur`)
+
+    // ========================================================================
+    // Initialize TreasuryBalance
+    // ========================================================================
+    const existingTreasury = await prisma.treasuryBalance.findFirst()
+    if (!existingTreasury) {
+      await prisma.treasuryBalance.create({
+        data: {
+          registryBalance: 15000000,
+          safeBalance: 25000000,
+          bankBalance: 50000000,
+          mobileMoneyBalance: 5000000,
+          lastVerifiedBy: director.id,
+          lastVerifiedAt: new Date(),
+        },
+      })
+      console.log("   ✓ Initialized TreasuryBalance (95M GNF total)")
+    } else {
+      console.log("   ⏭ TreasuryBalance already exists")
+    }
+
+    // ========================================================================
     // Create GradeSubjects and ClassAssignments
     // ========================================================================
     console.log("\n📖 Creating grade-subject mappings and teacher assignments...")
@@ -1048,7 +1244,6 @@ async function main() {
       // Check if StudentProfile already exists first
       let studentProfile = await prisma.studentProfile.findFirst({
         where: { studentId: student.id },
-        include: { person: true },
       })
 
       if (studentProfile) {
@@ -1256,6 +1451,282 @@ async function main() {
       console.log(`   ✓ Created ${expenseCount} sample expenses`)
     }
 
+    // ========================================================================
+    // Create Salary Data
+    // ========================================================================
+    console.log("\n💵 Creating salary data...")
+
+    // Helper to resolve userIndex to userId
+    function resolveUserId(userIndex: number | "comptable" | "coordinateur"): string | null {
+      if (userIndex === "comptable") return comptableUser?.id ?? null
+      if (userIndex === "coordinateur") return coordinateurUser?.id ?? null
+      return staffUsers[userIndex]?.id ?? null
+    }
+
+    // A. Salary Rates
+    let salaryRateCount = 0
+    const salaryRateMap = new Map<string, { id: string; salaryType: SalaryType; hourlyRate: number | null; fixedMonthly: number | null }>()
+
+    for (const rateConfig of SALARY_RATE_CONFIGS) {
+      const userId = resolveUserId(rateConfig.userIndex)
+      if (!userId) continue
+
+      const existingRate = await prisma.salaryRate.findFirst({
+        where: { userId, effectiveTo: null },
+      })
+
+      if (existingRate) {
+        salaryRateMap.set(userId, {
+          id: existingRate.id,
+          salaryType: existingRate.salaryType,
+          hourlyRate: existingRate.hourlyRate,
+          fixedMonthly: existingRate.fixedMonthly,
+        })
+        continue
+      }
+
+      const rate = await prisma.salaryRate.create({
+        data: {
+          userId,
+          salaryType: rateConfig.salaryType,
+          hourlyRate: rateConfig.hourlyRate ?? null,
+          fixedMonthly: rateConfig.fixedMonthly ?? null,
+          effectiveFrom: new Date("2025-09-01"),
+        },
+      })
+      salaryRateMap.set(userId, {
+        id: rate.id,
+        salaryType: rate.salaryType,
+        hourlyRate: rate.hourlyRate,
+        fixedMonthly: rate.fixedMonthly,
+      })
+      salaryRateCount++
+    }
+    console.log(`   ✓ Created ${salaryRateCount} salary rates`)
+
+    // B. Hours Records
+    let hoursRecordCount = 0
+    const hoursRecordMap = new Map<string, { id: string; totalHours: number }>()
+
+    for (const hrConfig of HOURS_RECORD_CONFIGS) {
+      const userId = staffUsers[hrConfig.userIndex]?.id
+      if (!userId) continue
+
+      const existingRecord = await prisma.hoursRecord.findUnique({
+        where: {
+          userId_schoolYearId_month_year: {
+            userId,
+            schoolYearId: currentSchoolYear.id,
+            month: hrConfig.month,
+            year: hrConfig.year,
+          },
+        },
+      })
+
+      if (existingRecord) {
+        if (existingRecord.status === HoursRecordStatus.approved) {
+          hoursRecordMap.set(`${userId}-${hrConfig.month}-${hrConfig.year}`, {
+            id: existingRecord.id,
+            totalHours: existingRecord.totalHours,
+          })
+        }
+        continue
+      }
+
+      const submittedAt = hrConfig.hasSubmitter ? new Date(hrConfig.year, hrConfig.month - 1, 20) : null
+      const reviewedAt = hrConfig.hasReviewer ? new Date(hrConfig.year, hrConfig.month - 1, 22) : null
+
+      const record = await prisma.hoursRecord.create({
+        data: {
+          userId,
+          schoolYearId: currentSchoolYear.id,
+          month: hrConfig.month,
+          year: hrConfig.year,
+          totalHours: hrConfig.totalHours,
+          status: hrConfig.status,
+          submittedBy: hrConfig.hasSubmitter ? (censeurUser?.id ?? director.id) : null,
+          submittedAt,
+          reviewedBy: hrConfig.hasReviewer ? director.id : null,
+          reviewedAt,
+        },
+      })
+
+      if (hrConfig.status === HoursRecordStatus.approved) {
+        hoursRecordMap.set(`${userId}-${hrConfig.month}-${hrConfig.year}`, {
+          id: record.id,
+          totalHours: record.totalHours,
+        })
+      }
+      hoursRecordCount++
+    }
+    console.log(`   ✓ Created ${hoursRecordCount} hours records`)
+
+    // C. Salary Payments
+    let salaryPaymentCount = 0
+    const salaryPaymentMap = new Map<string, { id: string }>()
+
+    for (const payConfig of SALARY_PAYMENT_CONFIGS) {
+      const userId = resolveUserId(payConfig.userIndex)
+      if (!userId) continue
+
+      const existingPayment = await prisma.salaryPayment.findUnique({
+        where: {
+          userId_schoolYearId_month_year: {
+            userId,
+            schoolYearId: currentSchoolYear.id,
+            month: payConfig.month,
+            year: payConfig.year,
+          },
+        },
+      })
+
+      if (existingPayment) {
+        salaryPaymentMap.set(`${userId}-${payConfig.month}-${payConfig.year}`, { id: existingPayment.id })
+        continue
+      }
+
+      const rateInfo = salaryRateMap.get(userId)
+      if (!rateInfo) continue
+
+      // Calculate gross amount
+      let grossAmount = 0
+      let hoursWorked: number | null = null
+      let hoursRecordId: string | null = null
+
+      if (payConfig.salaryType === SalaryType.hourly) {
+        const hrKey = `${userId}-${payConfig.month}-${payConfig.year}`
+        const hr = hoursRecordMap.get(hrKey)
+        if (!hr) continue // Need approved hours for hourly payments
+        hoursWorked = hr.totalHours
+        hoursRecordId = hr.id
+        grossAmount = hoursWorked * (rateInfo.hourlyRate ?? 0)
+      } else {
+        grossAmount = rateInfo.fixedMonthly ?? 0
+      }
+
+      const netAmount = grossAmount - payConfig.advanceDeduction
+
+      // Set timestamps based on status
+      const baseDate = new Date(payConfig.year, payConfig.month - 1, 25)
+      const approvedAt = payConfig.status === SalaryPaymentStatus.approved || payConfig.status === SalaryPaymentStatus.paid
+        ? new Date(baseDate.getTime() + 2 * 24 * 60 * 60 * 1000)
+        : null
+      const paidAt = payConfig.status === SalaryPaymentStatus.paid
+        ? new Date(baseDate.getTime() + 5 * 24 * 60 * 60 * 1000)
+        : null
+
+      const payment = await prisma.salaryPayment.create({
+        data: {
+          userId,
+          schoolYearId: currentSchoolYear.id,
+          month: payConfig.month,
+          year: payConfig.year,
+          salaryType: payConfig.salaryType,
+          hoursRecordId,
+          salaryRateId: rateInfo.id,
+          hoursWorked,
+          hourlyRate: payConfig.salaryType === SalaryType.hourly ? rateInfo.hourlyRate : null,
+          fixedMonthly: payConfig.salaryType === SalaryType.fixed ? rateInfo.fixedMonthly : null,
+          grossAmount,
+          advanceDeduction: payConfig.advanceDeduction,
+          netAmount,
+          method: payConfig.method,
+          status: payConfig.status,
+          approvedBy: approvedAt ? (comptableUser?.id ?? director.id) : null,
+          approvedAt,
+          paidBy: paidAt ? (comptableUser?.id ?? director.id) : null,
+          paidAt,
+        },
+      })
+
+      salaryPaymentMap.set(`${userId}-${payConfig.month}-${payConfig.year}`, { id: payment.id })
+      salaryPaymentCount++
+    }
+    console.log(`   ✓ Created ${salaryPaymentCount} salary payments`)
+
+    // D. Salary Advances
+    let salaryAdvanceCount = 0
+    const createdAdvances: { id: string; userIndex: number }[] = []
+
+    for (const advConfig of SALARY_ADVANCE_CONFIGS) {
+      const userId = staffUsers[advConfig.userIndex]?.id
+      if (!userId) continue
+
+      const existingCount = await prisma.salaryAdvance.count({ where: { userId } })
+      if (existingCount > 0) continue
+
+      const advance = await prisma.salaryAdvance.create({
+        data: {
+          userId,
+          amount: advConfig.amount,
+          method: advConfig.method,
+          reason: advConfig.reason,
+          strategy: advConfig.strategy,
+          numberOfInstallments: advConfig.numberOfInstallments ?? null,
+          totalRecouped: advConfig.totalRecouped,
+          remainingBalance: advConfig.remainingBalance,
+          status: advConfig.status,
+          disbursedBy: comptableUser?.id ?? director.id,
+          disbursedAt: new Date(advConfig.disbursedDate),
+        },
+      })
+      createdAdvances.push({ id: advance.id, userIndex: advConfig.userIndex })
+      salaryAdvanceCount++
+    }
+    console.log(`   ✓ Created ${salaryAdvanceCount} salary advances`)
+
+    // E. Advance Recoupments
+    let recoupmentCount = 0
+
+    // Link advance #0 (staffUsers[0]) → payment staffUsers[0] Nov 2025 = 500k
+    if (createdAdvances.length > 0) {
+      const advance0 = createdAdvances.find(a => a.userIndex === 0)
+      const userId0 = staffUsers[0]?.id
+      if (advance0 && userId0) {
+        const paymentKey0 = `${userId0}-11-2025`
+        const payment0 = salaryPaymentMap.get(paymentKey0)
+        if (payment0) {
+          const existingRecoupment = await prisma.advanceRecoupment.findFirst({
+            where: { salaryAdvanceId: advance0.id, salaryPaymentId: payment0.id },
+          })
+          if (!existingRecoupment) {
+            await prisma.advanceRecoupment.create({
+              data: {
+                salaryAdvanceId: advance0.id,
+                salaryPaymentId: payment0.id,
+                amount: 500000,
+              },
+            })
+            recoupmentCount++
+          }
+        }
+      }
+
+      // Link advance #2 (staffUsers[6]) → payment staffUsers[6] Oct 2025 = 500k
+      const advance2 = createdAdvances.find(a => a.userIndex === 6)
+      const userId6 = staffUsers[6]?.id
+      if (advance2 && userId6) {
+        const paymentKey6 = `${userId6}-10-2025`
+        const payment6 = salaryPaymentMap.get(paymentKey6)
+        if (payment6) {
+          const existingRecoupment = await prisma.advanceRecoupment.findFirst({
+            where: { salaryAdvanceId: advance2.id, salaryPaymentId: payment6.id },
+          })
+          if (!existingRecoupment) {
+            await prisma.advanceRecoupment.create({
+              data: {
+                salaryAdvanceId: advance2.id,
+                salaryPaymentId: payment6.id,
+                amount: 500000,
+              },
+            })
+            recoupmentCount++
+          }
+        }
+      }
+    }
+    console.log(`   ✓ Created ${recoupmentCount} advance recoupments`)
+
     // Summary
     const gradeCount = await prisma.grade.count({
       where: { schoolYearId: currentSchoolYear.id },
@@ -1271,6 +1742,11 @@ async function main() {
     const attendanceSessionCount = await prisma.attendanceSession.count()
     const attendanceRecordCount = await prisma.attendanceRecord.count()
     const expenseCountDb = await prisma.expense.count()
+    const salaryRateCountDb = await prisma.salaryRate.count()
+    const hoursRecordCountDb = await prisma.hoursRecord.count()
+    const salaryPaymentCountDb = await prisma.salaryPayment.count()
+    const salaryAdvanceCountDb = await prisma.salaryAdvance.count()
+    const treasuryExists = await prisma.treasuryBalance.findFirst()
 
     console.log("\n" + "=".repeat(60))
     console.log("✅ Seed completed!")
@@ -1290,6 +1766,11 @@ async function main() {
     console.log(`   Attendance Sessions: ${attendanceSessionCount}`)
     console.log(`   Attendance Records: ${attendanceRecordCount}`)
     console.log(`   Expenses: ${expenseCountDb}`)
+    console.log(`\n   Salary Rates: ${salaryRateCountDb}`)
+    console.log(`   Hours Records: ${hoursRecordCountDb}`)
+    console.log(`   Salary Payments: ${salaryPaymentCountDb}`)
+    console.log(`   Salary Advances: ${salaryAdvanceCountDb}`)
+    console.log(`   Treasury Balance: ${treasuryExists ? "Initialized" : "Not initialized"}`)
     console.log("=".repeat(60))
   } catch (error) {
     console.error("❌ Failed to seed data:", error)
