@@ -11,3 +11,7 @@ node_modules
 
 # Turbopack cache for faster builds
 .turbo
+
+# Auto-generated files — never commit
+next-env.d.ts
+*.tsbuildinfo
