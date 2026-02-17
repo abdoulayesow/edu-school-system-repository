@@ -41,24 +41,19 @@ import {
   Send,
   CheckCircle,
   XCircle,
-  Pencil,
-  Trash2,
   UserCircle,
-  FileText,
 } from "lucide-react"
 import { useI18n } from "@/components/i18n-provider"
 import { useToast } from "@/hooks/use-toast"
 import { componentClasses, typography } from "@/lib/design-tokens"
 import {
   useSalaryHours,
-  useCreateHoursRecord,
   useSubmitHours,
   useReviewHours,
 } from "@/lib/hooks/use-api"
 import type { HoursRecordWithRelations, ReviewHoursData } from "@/lib/types/salary"
-import type { HoursRecordStatus } from "@prisma/client"
-import { useActiveStaffList } from "@/hooks/use-active-staff"
-import { StatCard, getRoleLabel, StaffMemberSelect, HOURS_STATUS_STYLES } from "./shared"
+import { StatCard, getRoleLabel, HOURS_STATUS_STYLES } from "./shared"
+import { HoursEntrySheet } from "./hours-entry-sheet"
 
 // ---------------------------------------------------------------------------
 // Props
@@ -84,7 +79,6 @@ export function HoursTab({ schoolYearId, month, year }: HoursTabProps) {
       ? { schoolYearId, month, year }
       : undefined
   )
-  const createRecord = useCreateHoursRecord()
   const submitHours = useSubmitHours()
   const reviewHours = useReviewHours()
 
@@ -92,19 +86,12 @@ export function HoursTab({ schoolYearId, month, year }: HoursTabProps) {
   const [search, setSearch] = useState("")
   const [statusFilter, setStatusFilter] = useState<string>("all")
 
-  // Dialog state
-  const [isCreateOpen, setIsCreateOpen] = useState(false)
+  // Dialog / Sheet state
+  const [isSheetOpen, setIsSheetOpen] = useState(false)
   const [submitConfirmId, setSubmitConfirmId] = useState<string | null>(null)
   const [reviewingRecord, setReviewingRecord] = useState<HoursRecordWithRelations | null>(null)
   const [reviewAction, setReviewAction] = useState<"approve" | "reject">("approve")
   const [rejectionNote, setRejectionNote] = useState("")
-
-  // Create form state
-  const [formUserId, setFormUserId] = useState("")
-  const [formHours, setFormHours] = useState("")
-  const [formNotes, setFormNotes] = useState("")
-  const [formError, setFormError] = useState<string | null>(null)
-  const { staffList, isLoading: staffLoading, loadStaff } = useActiveStaffList()
 
   // Filter records
   const filteredRecords = useMemo(() => {
@@ -141,56 +128,6 @@ export function HoursTab({ schoolYearId, month, year }: HoursTabProps) {
       { draft: 0, submitted: 0, approved: 0, rejected: 0, totalHours: 0 }
     )
   }, [data?.records])
-
-  // Load staff list for create dialog
-  const openCreateDialog = useCallback(async () => {
-    setFormUserId("")
-    setFormHours("")
-    setFormNotes("")
-    setFormError(null)
-    setIsCreateOpen(true)
-    loadStaff()
-  }, [loadStaff])
-
-  // Handle create
-  const handleCreate = useCallback(async () => {
-    setFormError(null)
-
-    if (!formUserId) {
-      setFormError(t.salaries.rates.selectStaff)
-      return
-    }
-    if (!schoolYearId) {
-      setFormError(t.salaries.schoolYear)
-      return
-    }
-
-    const hours = parseFloat(formHours)
-    if (isNaN(hours) || hours <= 0) {
-      setFormError(t.salaries.validation.invalidHours)
-      return
-    }
-
-    try {
-      await createRecord.mutateAsync({
-        userId: formUserId,
-        schoolYearId,
-        month,
-        year,
-        totalHours: hours,
-        notes: formNotes || undefined,
-      })
-      setIsCreateOpen(false)
-      toast({
-        title: t.common.success,
-        description: t.salaries.hours.createSuccess,
-      })
-    } catch (err) {
-      setFormError(
-        err instanceof Error ? err.message : t.common.errorOccurred
-      )
-    }
-  }, [formUserId, formHours, formNotes, schoolYearId, month, year, createRecord, toast, t])
 
   // Handle submit (draft → submitted)
   const handleSubmit = useCallback(async (recordId: string) => {
@@ -319,7 +256,7 @@ export function HoursTab({ schoolYearId, month, year }: HoursTabProps) {
         <PermissionGuard resource="salary_hours" action="create" inline>
           <Button
             className={componentClasses.primaryActionButton}
-            onClick={openCreateDialog}
+            onClick={() => setIsSheetOpen(true)}
           >
             <Clock className="mr-2 h-4 w-4" />
             {t.salaries.hours.enterHours}
@@ -486,53 +423,15 @@ export function HoursTab({ schoolYearId, month, year }: HoursTabProps) {
       </Card>
 
       {/* ================================================================ */}
-      {/* Create Hours Record Dialog                                        */}
+      {/* Hours Entry Sheet                                                 */}
       {/* ================================================================ */}
-      <FormDialog
-        open={isCreateOpen}
-        onOpenChange={setIsCreateOpen}
-        title={t.salaries.hours.enterHours}
-        description={t.salaries.hours.subtitle}
-        icon={Clock}
-        accentColor="blue"
-        onSubmit={handleCreate}
-        isSubmitting={createRecord.isPending}
-        submitLabel={t.common.save}
-        error={formError}
-      >
-        <FormField label={t.salaries.rates.staffMember} required>
-          <StaffMemberSelect
-            value={formUserId}
-            onValueChange={setFormUserId}
-            staffList={staffList}
-            isLoading={staffLoading}
-            placeholder={t.salaries.rates.selectStaff}
-            loadingLabel={t.common.loading}
-            roleTranslations={t.roleManagement.roles}
-          />
-        </FormField>
-
-        <FormField label={t.salaries.hours.totalHours} required hint="h">
-          <Input
-            type="number"
-            min={0}
-            step={0.5}
-            value={formHours}
-            onChange={(e) => setFormHours(e.target.value)}
-            placeholder="40"
-            className="font-mono tabular-nums text-center text-lg"
-          />
-        </FormField>
-
-        <FormField label={t.common.notes} optional>
-          <Textarea
-            value={formNotes}
-            onChange={(e) => setFormNotes(e.target.value)}
-            placeholder="..."
-            rows={2}
-          />
-        </FormField>
-      </FormDialog>
+      <HoursEntrySheet
+        open={isSheetOpen}
+        onOpenChange={setIsSheetOpen}
+        schoolYearId={schoolYearId}
+        month={month}
+        year={year}
+      />
 
       {/* ================================================================ */}
       {/* Submit Confirmation Dialog                                        */}

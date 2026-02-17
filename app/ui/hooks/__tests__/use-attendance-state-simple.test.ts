@@ -32,7 +32,7 @@ describe('useAttendanceState - Status cycling logic', () => {
 describe('useAttendanceState - Helper functions', () => {
   describe('fetchAttendance validation', () => {
     it('should not fetch when gradeId is "all"', () => {
-      const gradeId = 'all';
+      const gradeId: string = 'all';
       const date = '2026-02-11';
 
       // The hook returns early when gradeId is "all"
@@ -40,21 +40,21 @@ describe('useAttendanceState - Helper functions', () => {
     });
 
     it('should not fetch when gradeId is empty', () => {
-      const gradeId = '';
+      const gradeId: string = '';
       const date = '2026-02-11';
 
       expect(gradeId === 'all' || !gradeId || !date).toBe(true);
     });
 
     it('should not fetch when date is empty', () => {
-      const gradeId = 'grade1';
+      const gradeId: string = 'grade1';
       const date = '';
 
       expect(gradeId === 'all' || !gradeId || !date).toBe(true);
     });
 
     it('should allow fetch when both gradeId and date are valid', () => {
-      const gradeId = 'grade1';
+      const gradeId: string = 'grade1';
       const date = '2026-02-11';
 
       expect(gradeId === 'all' || !gradeId || !date).toBe(false);
@@ -63,15 +63,19 @@ describe('useAttendanceState - Helper functions', () => {
 
   describe('initializeAttendance logic', () => {
     it('should initialize with "present" for checklist mode', () => {
-      const entryMode = 'checklist';
+      const entryMode: 'checklist' | 'absences_only' = 'checklist';
       const defaultStatus: AttendanceStatus = entryMode === 'checklist' ? 'present' : null;
 
       expect(defaultStatus).toBe('present');
     });
 
     it('should initialize with null for absences_only mode', () => {
-      const entryMode = 'absences_only';
-      const defaultStatus: AttendanceStatus = entryMode === 'checklist' ? 'present' : null;
+      // Test the logic directly: absences_only mode should result in null
+      const getDefaultStatus = (mode: 'checklist' | 'absences_only'): AttendanceStatus => {
+        return mode === 'checklist' ? 'present' : null;
+      };
+      
+      const defaultStatus = getDefaultStatus('absences_only');
 
       expect(defaultStatus).toBeNull();
     });

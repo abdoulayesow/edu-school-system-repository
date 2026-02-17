@@ -3857,6 +3857,12 @@ export const en: TranslationKeys = {
       approveSuccess: "Hours approved successfully",
       rejectSuccess: "Hours rejected",
       bulkCreateSuccess: "Hours records created for all teachers",
+      showAllStaff: "Show all staff",
+      showTeachersOnly: "Teaching staff only",
+      showingTeachingStaff: "Showing teaching staff",
+      showingAllStaff: "Showing all staff",
+      periodContext: "Recording hours for",
+      hoursPlaceholder: "e.g. 40",
     },
 
     // Payments

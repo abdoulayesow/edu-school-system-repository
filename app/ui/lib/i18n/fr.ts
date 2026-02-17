@@ -3855,6 +3855,12 @@ export const fr = {
       approveSuccess: "Heures approuvées avec succès",
       rejectSuccess: "Heures rejetées",
       bulkCreateSuccess: "Heures créées pour tous les enseignants",
+      showAllStaff: "Afficher tout le personnel",
+      showTeachersOnly: "Enseignants uniquement",
+      showingTeachingStaff: "Personnel enseignant affiché",
+      showingAllStaff: "Tout le personnel affiché",
+      periodContext: "Saisie des heures pour",
+      hoursPlaceholder: "ex. 40",
     },
 
     // Paiements

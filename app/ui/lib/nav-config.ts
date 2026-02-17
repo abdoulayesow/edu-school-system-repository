@@ -34,6 +34,7 @@ export type UserRole =
   | "user"
   | "director"
   | "academic_director"
+  | "directeur"
   | "secretary"
   | "accountant"
   | "teacher"
@@ -68,7 +69,7 @@ export const navigationConfig: MainNavItem[] = [
     name: "Dashboard",
     translationKey: "dashboard",
     icon: LayoutDashboard,
-    roles: ["director", "academic_director", "secretary", "accountant", "teacher"],
+    roles: ["director", "academic_director", "directeur", "secretary", "accountant", "teacher"],
     subItems: [
       {
         id: "overview",
@@ -76,7 +77,7 @@ export const navigationConfig: MainNavItem[] = [
         translationKey: "overview",
         href: "/dashboard",
         icon: LayoutDashboard,
-        roles: ["director", "academic_director", "secretary", "accountant"],
+        roles: ["director", "academic_director", "directeur", "secretary", "accountant"],
       },
       {
         id: "reports",
@@ -101,7 +102,7 @@ export const navigationConfig: MainNavItem[] = [
     name: "Students",
     translationKey: "studentsSection",
     icon: GraduationCap,
-    roles: ["director", "academic_director", "secretary", "teacher"],
+    roles: ["director", "academic_director", "directeur", "secretary", "teacher"],
     subItems: [
       {
         id: "students-list",
@@ -109,7 +110,7 @@ export const navigationConfig: MainNavItem[] = [
         translationKey: "students",
         href: "/students",
         icon: Users,
-        roles: ["director", "academic_director", "secretary", "teacher"],
+        roles: ["director", "academic_director", "directeur", "secretary", "teacher"],
       },
       {
         id: "grades-classes",
@@ -117,7 +118,7 @@ export const navigationConfig: MainNavItem[] = [
         translationKey: "gradesClasses",
         href: "/students/grades",
         icon: School,
-        roles: ["director", "academic_director", "secretary"],
+        roles: ["director", "academic_director", "directeur", "secretary"],
       },
       {
         id: "enrollments",
@@ -125,7 +126,7 @@ export const navigationConfig: MainNavItem[] = [
         translationKey: "enrollments",
         href: "/students/enrollments",
         icon: UserPlus,
-        roles: ["director", "secretary", "academic_director"],
+        roles: ["director", "secretary", "academic_director", "directeur"],
       },
       {
         id: "timetable",
@@ -133,7 +134,7 @@ export const navigationConfig: MainNavItem[] = [
         translationKey: "timetable",
         href: "/students/timetable",
         icon: Calendar,
-        roles: ["director", "academic_director"],
+        roles: ["director", "academic_director", "directeur"],
       },
       {
         id: "clubs",
@@ -141,7 +142,7 @@ export const navigationConfig: MainNavItem[] = [
         translationKey: "clubs",
         href: "/students/clubs",
         icon: Sparkles,
-        roles: ["director", "academic_director", "teacher"],
+        roles: ["director", "academic_director", "directeur", "teacher"],
       },
       {
         id: "attendance",
@@ -149,7 +150,7 @@ export const navigationConfig: MainNavItem[] = [
         translationKey: "attendance",
         href: "/students/attendance",
         icon: ClipboardCheck,
-        roles: ["director", "teacher", "academic_director"],
+        roles: ["director", "teacher", "academic_director", "directeur"],
       },
       {
         id: "grading",
@@ -157,7 +158,7 @@ export const navigationConfig: MainNavItem[] = [
         translationKey: "gradingSection",
         href: "/students/grading",
         icon: PenLine,
-        roles: ["director", "academic_director", "teacher"],
+        roles: ["director", "academic_director", "directeur", "teacher"],
       },
     ],
   },
@@ -166,7 +167,7 @@ export const navigationConfig: MainNavItem[] = [
     name: "Accounting",
     translationKey: "accountingSection",
     icon: Wallet,
-    roles: ["director", "accountant", "academic_director"],
+    roles: ["director", "accountant", "academic_director", "directeur"],
     subItems: [
       {
         id: "balance",
@@ -198,7 +199,7 @@ export const navigationConfig: MainNavItem[] = [
         translationKey: "salaries",
         href: "/accounting/salaries",
         icon: Banknote,
-        roles: ["director", "accountant", "academic_director"],
+        roles: ["director", "accountant", "academic_director", "directeur"],
       },
     ],
   },
@@ -207,7 +208,7 @@ export const navigationConfig: MainNavItem[] = [
     name: "Administration",
     translationKey: "administrationSection",
     icon: Settings,
-    roles: ["director", "academic_director"],
+    roles: ["director", "academic_director", "directeur"],
     subItems: [
       {
         id: "school-years",
@@ -215,7 +216,7 @@ export const navigationConfig: MainNavItem[] = [
         translationKey: "schoolYears",
         href: "/admin/school-years",
         icon: CalendarDays,
-        roles: ["director", "academic_director"],
+        roles: ["director", "academic_director", "directeur"],
       },
       {
         id: "grades-config",
@@ -223,7 +224,7 @@ export const navigationConfig: MainNavItem[] = [
         translationKey: "gradesAndRooms",
         href: "/admin/grades",
         icon: School,
-        roles: ["director", "academic_director"],
+        roles: ["director", "academic_director", "directeur"],
       },
       {
         id: "teachers-classes",

@@ -1255,6 +1255,7 @@ enum Role {
   user
   director
   academic_director
+  directeur
   secretary
   accountant
   teacher

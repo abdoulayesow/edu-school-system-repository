@@ -2,6 +2,7 @@
 
 import { useState, useCallback } from "react"
 import { useToast } from "@/hooks/use-toast"
+import { useI18n } from "@/components/i18n-provider"
 
 export interface StaffMember {
   id: string
@@ -16,6 +17,7 @@ export interface StaffMember {
  */
 export function useActiveStaffList() {
   const { toast } = useToast()
+  const { t } = useI18n()
   const [staffList, setStaffList] = useState<StaffMember[]>([])
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -26,25 +28,21 @@ export function useActiveStaffList() {
     setIsLoading(true)
     setError(null)
     try {
-      const res = await fetch("/api/admin/users/roles")
+      const res = await fetch("/api/salary-hours/staff")
       if (res.ok) {
         const users = await res.json()
-        setStaffList(
-          users.filter((u: { status: string }) => u.status === "active")
-        )
+        setStaffList(users)
       } else {
-        const errMsg = "Failed to load staff list"
-        setError(errMsg)
-        toast({ title: "Error", description: errMsg, variant: "destructive" })
+        setError(t.common.errorFetchingData)
+        toast({ title: t.common.error, description: t.common.errorFetchingData, variant: "destructive" })
       }
     } catch {
-      const errMsg = "Failed to load staff list"
-      setError(errMsg)
-      toast({ title: "Error", description: errMsg, variant: "destructive" })
+      setError(t.common.errorFetchingData)
+      toast({ title: t.common.error, description: t.common.errorFetchingData, variant: "destructive" })
     } finally {
       setIsLoading(false)
     }
-  }, [staffList.length, toast])
+  }, [staffList.length, toast, t])
 
   return { staffList, isLoading, error, loadStaff }
 }
