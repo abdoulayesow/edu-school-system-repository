@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server"
-import { requirePerm } from "@/lib/authz"
+import { checkPerm } from "@/lib/authz"
 import { prisma } from "@/lib/prisma"
 import { z } from "zod"
 
@@ -15,16 +15,25 @@ const approveSchema = z.object({
 /**
  * POST /api/salaries/[id]/approve
  * Approve or cancel a salary payment
+ * - approve requires salary_payments.approve permission
+ * - cancel requires salary_payments.update permission
  */
 export async function POST(req: NextRequest, { params }: RouteParams) {
-  const { session, error } = await requirePerm("salary_payments", "approve")
-  if (error) return error
-
   const { id } = await params
 
   try {
     const body = await req.json()
     const validated = approveSchema.parse(body)
+
+    // Permission check depends on action
+    const permAction = validated.action === "approve" ? "approve" : "update"
+    const { session, granted, reason } = await checkPerm("salary_payments", permAction)
+    if (!granted || !session) {
+      return NextResponse.json(
+        { message: reason || "Permission denied", code: "PERMISSION_DENIED" },
+        { status: 403 }
+      )
+    }
 
     const existing = await prisma.salaryPayment.findUnique({
       where: { id },

@@ -82,32 +82,43 @@ export async function GET(req: NextRequest) {
       prisma.salaryPayment.count({ where }),
     ])
 
-    // Compute stats from all payments matching filter (no pagination)
-    const statsWhere = { ...where }
-    const allPayments = await prisma.salaryPayment.findMany({
-      where: statsWhere,
-      select: { status: true, grossAmount: true, netAmount: true },
-    })
+    // Aggregate stats via SQL for efficiency
+    const [pendingAgg, approvedAgg, paidAgg, cancelledAgg] = await Promise.all([
+      prisma.salaryPayment.aggregate({
+        where: { ...where, status: "pending" },
+        _count: true,
+        _sum: { netAmount: true },
+      }),
+      prisma.salaryPayment.aggregate({
+        where: { ...where, status: "approved" },
+        _count: true,
+        _sum: { netAmount: true },
+      }),
+      prisma.salaryPayment.aggregate({
+        where: { ...where, status: "paid" },
+        _count: true,
+        _sum: { netAmount: true },
+      }),
+      prisma.salaryPayment.aggregate({
+        where: { ...where, status: "cancelled" },
+        _count: true,
+        _sum: { netAmount: true },
+      }),
+    ])
 
-    const stats = allPayments.reduce(
-      (acc, p) => {
-        acc.totalPayroll += p.grossAmount
-        const key = p.status as keyof typeof acc
-        if (key in acc && typeof acc[key] === "object") {
-          const bucket = acc[key] as { count: number; amount: number }
-          bucket.count++
-          bucket.amount += p.netAmount
-        }
-        return acc
-      },
-      {
-        totalPayroll: 0,
-        pending: { count: 0, amount: 0 },
-        approved: { count: 0, amount: 0 },
-        paid: { count: 0, amount: 0 },
-        cancelled: { count: 0, amount: 0 },
-      }
-    )
+    // totalPayroll = pending + approved + paid (not cancelled)
+    const totalPayroll =
+      (pendingAgg._sum.netAmount ?? 0) +
+      (approvedAgg._sum.netAmount ?? 0) +
+      (paidAgg._sum.netAmount ?? 0)
+
+    const stats = {
+      totalPayroll,
+      pending: { count: pendingAgg._count, amount: pendingAgg._sum.netAmount ?? 0 },
+      approved: { count: approvedAgg._count, amount: approvedAgg._sum.netAmount ?? 0 },
+      paid: { count: paidAgg._count, amount: paidAgg._sum.netAmount ?? 0 },
+      cancelled: { count: cancelledAgg._count, amount: cancelledAgg._sum.netAmount ?? 0 },
+    }
 
     return NextResponse.json({
       payments,

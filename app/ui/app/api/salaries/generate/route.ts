@@ -14,7 +14,7 @@ const generateSchema = z.object({
  * Bulk-generate salary payments for all staff with active rates
  */
 export async function POST(req: NextRequest) {
-  const { session, error } = await requirePerm("salary_payments", "create")
+  const { error } = await requirePerm("salary_payments", "create")
   if (error) return error
 
   try {
@@ -51,24 +51,7 @@ export async function POST(req: NextRequest) {
     })
     const hoursMap = new Map(approvedHours.map((h) => [h.userId, h]))
 
-    const toCreate: Array<{
-      userId: string
-      schoolYearId: string
-      month: number
-      year: number
-      salaryType: "hourly" | "fixed"
-      hoursRecordId: string | null
-      salaryRateId: string
-      hoursWorked: number | null
-      hourlyRate: number | null
-      fixedMonthly: number | null
-      grossAmount: number
-      advanceDeduction: number
-      otherDeductions: number
-      netAmount: number
-      method: "cash" | "orange_money"
-      status: "pending"
-    }> = []
+    const toCreate: Parameters<typeof prisma.salaryPayment.create>[0]["data"][] = []
 
     const skipped: Array<{ userId: string; name: string | null; reason: string }> = []
 
