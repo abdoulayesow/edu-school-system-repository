@@ -70,6 +70,7 @@ export async function POST(req: NextRequest, { params }: RouteParams) {
         amount: number
         newRemainingBalance: number
         shouldClose: boolean
+        installmentCount: number
       }> = []
 
       for (const advance of activeAdvances) {
@@ -77,16 +78,20 @@ export async function POST(req: NextRequest, { params }: RouteParams) {
 
         const available = existing.grossAmount - totalDeduction
         let deductionAmount = 0
+        let priorRecoupmentCount = 0
 
         if (advance.strategy === "full") {
           deductionAmount = Math.min(advance.remainingBalance, available)
+          priorRecoupmentCount = await tx.advanceRecoupment.count({
+            where: { salaryAdvanceId: advance.id },
+          })
         } else if (advance.strategy === "spread" && advance.numberOfInstallments) {
-          const existingRecoupments = await tx.advanceRecoupment.count({
+          priorRecoupmentCount = await tx.advanceRecoupment.count({
             where: { salaryAdvanceId: advance.id },
           })
           const installmentsLeft = Math.max(
             1,
-            advance.numberOfInstallments - existingRecoupments
+            advance.numberOfInstallments - priorRecoupmentCount
           )
           deductionAmount = Math.min(
             Math.ceil(advance.remainingBalance / installmentsLeft),
@@ -107,6 +112,7 @@ export async function POST(req: NextRequest, { params }: RouteParams) {
           amount: deductionAmount,
           newRemainingBalance: newRemaining,
           shouldClose: newRemaining <= 0,
+          installmentCount: priorRecoupmentCount,
         })
         totalDeduction += deductionAmount
       }
@@ -154,16 +160,12 @@ export async function POST(req: NextRequest, { params }: RouteParams) {
 
       // 5. Create recoupment records and update advances
       for (const d of deductions) {
-        const existingCount = await tx.advanceRecoupment.count({
-          where: { salaryAdvanceId: d.advanceId },
-        })
-
         await tx.advanceRecoupment.create({
           data: {
             salaryAdvanceId: d.advanceId,
             salaryPaymentId: id,
             amount: d.amount,
-            installmentNumber: existingCount + 1,
+            installmentNumber: d.installmentCount + 1,
           },
         })
 
